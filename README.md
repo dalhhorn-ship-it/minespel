@@ -4,7 +4,7 @@ Dino Blokwereld is a free 3D block world for kids, played in Dutch on an iPad. W
 
 ## How to play
 
-The game works now in milestone 1 (M1). You can explore and build. Dinos and school questions come in later milestones.
+The game works now in milestone 2 (M2). You can explore, build and answer school questions. Dinos and eggs can already be in the world. Buying eggs comes in M3.
 
 * **Walk:** use your left thumb on the left side of the screen.
 * **Look around:** use your right thumb on the right half of the screen.
@@ -15,6 +15,33 @@ The game works now in milestone 1 (M1). You can explore and build. Dinos and sch
 * **Alle blokken:** opens a grid with all 16 blocks. Tap one to put it in the slot you picked.
 * You can reach blocks up to 6 steps away.
 * Your world is saved. The blocks you built or broke, where you stand, your hotbar and whether you are on Hakken or Bouwen are all there when you open the game again.
+
+### Leerpauze: the learning break
+
+* At the top of the screen a countdown runs. It starts at 5 minutes. In the last 30 seconds it grows and pulses.
+* When the countdown reaches 0, Dino Juf asks 5 questions on Taal and Rekenen.
+* Before a new topic, a lesson page shows first. Swipe or tap to read on.
+* Tap your answer. Some questions need the keyboard or the number pad on the screen.
+* Points:
+  * Right on the first try: +2 points.
+  * Right on the second try: +1 point.
+  * When it is hard, **Zo zit het** shows the right answer and explains it. After that you lose 1 point.
+  * All 5 right on the first try: +3 bonus points.
+  * Your points never go below 0.
+* At the end you see a summary. Then you go back to your world.
+* If you close the app during a break, the break is still there when you open it again.
+
+### Pauze: the pause menu
+
+* Tap **Pauze** at the top of the screen. The countdown stops while the menu is open.
+* The menu shows your points.
+* **Terug naar de wereld:** go back to your world.
+* **Ik zit vast:** go back to the start spot. Your world stays the way it is. Dinos that follow you come along.
+* **Dinowinkel**, **Lesboek** and **Extra oefenen** show "Komt nog" (coming soon) for now.
+
+### Dinos and eggs
+
+Dinos and eggs can already be in the world. Buying eggs in the Dinowinkel comes in M3.
 
 ## How to run
 

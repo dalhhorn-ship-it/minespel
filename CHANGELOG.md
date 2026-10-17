@@ -4,6 +4,20 @@ Written so kids can read it too.
 
 ## Unreleased
 
+### M2: learning breaks
+
+* A countdown runs at the top of the screen. When it hits 0, your break starts. In the last 30 seconds the numbers grow and pulse.
+* Right on the first try gives you 2 points. Right on the second try gives you 1 point.
+* Some questions are hard. Then Dino Juf shows "Zo zit het" with the answer and an explanation. That costs 1 point. You never go below 0 points.
+* Get all 5 questions right on the first try and you get 3 bonus points.
+* Before a new topic, you can read a lesson page first.
+* Tap the Pauze button at the top to open the pause menu. The countdown waits while you are in it.
+* "Ik zit vast" takes you back to the start. Your world stays just as you left it.
+* Dinos and eggs can now be in the world. Buying eggs comes later.
+* Dinowinkel, Lesboek and Extra oefenen say "Komt nog" for now. They are coming soon.
+* Rekenen (sums) is in the game too, with lesson pages and questions for each level.
+* A checker now looks at the Taal questions. It finds doubled questions and questions without an answer, and a few were fixed.
+
 ### M1: the block world
 
 * You can walk around the 3D world. Move with your left thumb and look around with your right. Tapping a button never turns the camera by accident.
