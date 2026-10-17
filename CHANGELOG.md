@@ -4,6 +4,17 @@ Written so kids can read it too.
 
 ## Unreleased
 
+### M3: dinos and the Dinowinkel
+
+* Buy dino eggs in the Dinowinkel with your points. Tap Kopen, then Ja.
+* Eggs cost 20 points for Compy, 40 for Triceratops and Stegosaurus, and 80 for Brachiosaurus.
+* An egg hatches after 5 seconds of play. The baby dino grows bigger.
+* Tap a dino to open its menu. Let it follow you or stay put, give it a name, or give it a hug with hearts.
+* You can have up to 12 dinos from the shop.
+* Lesboek in the pause menu lets you read the lesson pages again.
+* Extra oefenen in the pause menu lets you practise any time. You can't lose points there. Up to 10 points a day count.
+* The Dinowinkel, Lesboek and Extra oefenen are open now. They don't say "Komt nog" anymore.
+
 ### M2: learning breaks
 
 * A countdown runs at the top of the screen. When it hits 0, your break starts. In the last 30 seconds the numbers grow and pulse.

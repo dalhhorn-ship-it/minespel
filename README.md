@@ -1,10 +1,10 @@
 # Dino Blokwereld
 
-Dino Blokwereld is a free 3D block world for kids, played in Dutch on an iPad. Walk around a world made of blocks, dig out what you need and build what you like. Later, dinos will join you, hatch from spotted eggs and follow you around. Between play times, a friendly dino will ask a few questions on school subjects. The plan has no ads, no accounts and no tracking. Your saves stay on your iPad.
+Dino Blokwereld is a free 3D block world for kids, played in Dutch on an iPad. Walk around a world made of blocks, dig out what you need and build what you like. Dinos join you too. They hatch from spotted eggs, follow you around and get a name from you. Between play times, a friendly dino will ask a few questions on school subjects. The plan has no ads, no accounts and no tracking. Your saves stay on your iPad.
 
 ## How to play
 
-The game works now in milestone 2 (M2). You can explore, build and answer school questions. Dinos and eggs can already be in the world. Buying eggs comes in M3.
+The game now has milestone 3 (M3). You can explore, build, answer school questions, buy dino eggs and look after your dinos.
 
 * **Walk:** use your left thumb on the left side of the screen.
 * **Look around:** use your right thumb on the right half of the screen.
@@ -37,11 +37,42 @@ The game works now in milestone 2 (M2). You can explore, build and answer school
 * The menu shows your points.
 * **Terug naar de wereld:** go back to your world.
 * **Ik zit vast:** go back to the start spot. Your world stays the way it is. Dinos that follow you come along.
-* **Dinowinkel**, **Lesboek** and **Extra oefenen** show "Komt nog" (coming soon) for now.
+* **Dinowinkel:** buy dino eggs with your points. See below.
+* **Lesboek:** read the lesson pages again. Reading does not change your points or your countdown.
+* **Extra oefenen:** practise questions any time. See below.
 
 ### Dinos and eggs
 
-Dinos and eggs can already be in the world. Buying eggs in the Dinowinkel comes in M3.
+* Buy an egg in the Dinowinkel. The egg appears next to you in the world.
+* An egg hatches after 5 seconds of play. Breaks and menus do not count. The baby dino starts small and grows to full size in 2 seconds.
+* Tap a dino to open its menu:
+  * **Volg mij:** the dino follows you.
+  * **Blijf hier:** the dino stays where it is.
+  * **Naam geven:** type a name with the keyboard on the screen. A name can be up to 12 letters.
+  * **Knuffel:** give your dino a hug. Hearts float up.
+* You can have up to 12 dinos from the shop.
+
+### Dinowinkel: buy eggs
+
+The Dinowinkel uses points only. No real money is spent. There are no links.
+
+| Egg | Price |
+|---|---|
+| Compy | 20 punten |
+| Triceratops | 40 punten |
+| Stegosaurus | 40 punten |
+| Brachiosaurus | 80 punten |
+
+* Tap **Kopen** on a card. Then tap **Ja** to buy it, or **Nee** to stop.
+* A card is grey when you cannot buy it yet. The shop shows how many points you still need, for example "Nog 10 punten nodig".
+* When you have 12 dinos, the shop says so and you cannot buy more eggs.
+
+### Extra oefenen: practise any time
+
+* Open it from the pause menu. Pick a module and answer a round of questions.
+* Right answers give points, like in a break. But there is no minus point when you read **Zo zit het**, and no 3 bonus points.
+* Up to 10 points a day count. After that you get no more points that day. The game then says: "Genoeg geoefend voor vandaag, ga lekker bouwen!" (Enough practice for today, go and build!)
+* The next day, the 10 points start again.
 
 ## How to run
 

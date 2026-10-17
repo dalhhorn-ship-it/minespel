@@ -1,7 +1,7 @@
 # Status
 
-**Phase:** build. M1 and M2 code is done. The M2 milestone review is running.
-**Next step:** M3 (Dinowinkel, eggs, dino menu, Lesboek, Extra oefenen). Tasks T45, T46 and T47.
+**Phase:** build. M1, M2 and M3 code is done. The M3 milestone review is running.
+**Next step:** M4 (parent gate, Instellingen, Inhoud kiezen, and exams with the golden egg). Still to do: T39, T48a, T48b, T49, T50, T51a, T51b and T55.
 **Blockers:** T32 (the speed spike on the founder's iPad) waits for the founder to add the repo secrets `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`. Without them there is no test deploy. M1 is not fully done until T32 is.
 
 ## Done
@@ -23,11 +23,15 @@
   * Rules: T6 clock and timers, T12 answer checks and number parsing, T13 spaced repetition, T15 economy and dino kinds, T38 question selection, T31 break state machine, T67 session and log stores.
   * Screens: T11 sound effects, T28 kid question views, T29 kid keyboard and number pad, T30 lesson view and teach moment, T36 break screen, T41 screens, timers and the Leerpauze countdown, T43 break flow with saves and resume, T44 pause menu with "Ik zit vast".
   * T42 dinos and eggs in the world are done too. It is an M3 task that was built early.
+* M3 code is done (9 tasks):
+  * T25 dino AI and eggs, T26 dino models, T42 dinos and eggs in the world.
+  * T45 dino menu and naming, T47 Dinowinkel with egg purchase, T46 Lesboek and Extra oefenen.
+  * T38b saved sums by age, T43b app wiring, T43c one save per break step.
 
 ## Notes
 * Biggest risk is 3D performance in iPad Safari. The T32 speed spike decides whether the plan holds.
 * The Playwright WebKit browser cannot download in the cloud sandbox. GitHub CI runs the e2e tests.
 * The Taal content still needs a human spelling check by the founder or a teacher (AC124).
-* The Rekenen lesson texts need a read by the founder or a teacher. Check the wording and the examples for the age group.
+* The lesson and Taal texts still need a read by the founder or a teacher. Check the wording and the examples for the age group.
 * Content was written before the architect existed. The JSON module format may be adapted at /architect.
 * Safari can clear the saves of a site not opened for a while. Tell the founder to play from the home screen app.
