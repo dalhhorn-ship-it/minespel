@@ -13,3 +13,4 @@ __pycache__/
 .claude/settings.local.json
 .wrangler/
 .dev.vars
+dist-e2e/

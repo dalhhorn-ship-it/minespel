@@ -5,6 +5,12 @@ One fun paragraph about what this is. (The scribe fills this in.)
 ## How to play
 
 ## How to run
+```
+npm install
+npm run dev      # Vite on the local network, open the shown address on the iPad
+npm run build    # production build into dist/
+npm run preview  # build, then wrangler dev
+```
 
 ## How to test
 ```

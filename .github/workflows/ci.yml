@@ -16,7 +16,7 @@ jobs:
       - name: Install Playwright browsers if used
         run: |
           if [ -f package.json ] && grep -q '"@playwright/test"' package.json; then
-            npm install --no-audit --no-fund && npx playwright install --with-deps webkit chromium
+            npm install --no-audit --no-fund && npx playwright install --with-deps webkit
           fi
       - name: Check
         run: ./scripts/check.sh
