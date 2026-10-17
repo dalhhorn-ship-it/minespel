@@ -14,6 +14,10 @@ import { createSaveQueue, type SaveQueue } from './storage/save-queue';
 import { el } from './ui/dom';
 import { createScreens } from './app/screens';
 import { startPlayTimer, type PlayTimer } from './app/timer-driver';
+import { setupPauseMenu } from './ui/pause-menu';
+import { openShop } from './app/shop-flow';
+import { openPractice } from './app/practice-flow';
+import { openLesboek } from './ui/learn/lesboek';
 
 installLockdown();
 const guard = startScreenGuard();
@@ -89,6 +93,26 @@ const booted = game
   : Promise.resolve('not-saving');
 const screens = createScreens();
 let playTimer: PlayTimer | null = null;
+if (game) {
+  const g = game;
+  setupPauseMenu({
+    hud: g.hud,
+    screens,
+    getPoints: async () => (await records?.get('economy'))?.points ?? 0,
+    pauseWorld: () => {
+      userPaused = true;
+      g.pause();
+    },
+    resumeWorld: () => {
+      userPaused = false;
+      if (restored) g.resume();
+    },
+    teleportHome: () => g.teleportHome(),
+    openShop: () => openShop(screens),
+    openLesboek: () => openLesboek(screens),
+    openPractice: () => openPractice(screens),
+  });
+}
 void booted.finally(() => {
   restored = true;
   // The play timer starts when the saved time is known. It stays off if the 3D world could not start.
