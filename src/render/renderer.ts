@@ -3,7 +3,7 @@
 
 import {
   BoxGeometry, Color, Fog, Group, Mesh, MeshBasicMaterial, PerspectiveCamera, Scene, WebGLRenderer,
-  type BufferGeometry,
+  type BufferGeometry, type Object3D,
 } from 'three';
 import { registerHook } from '../dev/e2e-hooks';
 import { SPIKE_DINO_COUNT, type SpikeDino } from '../dev/spike-load';
@@ -38,6 +38,8 @@ export interface GameRenderer {
   setQuality(quality: Quality): void;
   /** Shows these placeholder dinos (the speed spike), or none with null. Transforms are read every frame. */
   setSpikeDinos(dinos: readonly SpikeDino[] | null): void;
+  /** Shows this group of dinos and eggs (the game moves it), or nothing with null. */
+  setDinoLayer(layer: Object3D | null): void;
   render(): void;
   dispose(): void;
 }
@@ -77,6 +79,7 @@ const createPlainWebGlRenderer: RendererFactory = ({ canvas, quality = DEFAULT_Q
   const spikeMaterials = new Map<number, MeshBasicMaterial>();
   let spikeDinos: readonly SpikeDino[] = [];
   let spikeGroups: Group[] = [];
+  let dinoLayer: Object3D | null = null;
 
   function rebuildChunk(cx: number, cz: number): void {
     if (!world) return;
@@ -155,6 +158,11 @@ const createPlainWebGlRenderer: RendererFactory = ({ canvas, quality = DEFAULT_Q
         return g;
       });
     },
+    setDinoLayer(layer) {
+      if (dinoLayer) scene.remove(dinoLayer);
+      dinoLayer = layer;
+      if (layer) scene.add(layer);
+    },
     render() {
       spikeDinos.forEach((d, i) => {
         const g = spikeGroups[i];
@@ -168,6 +176,7 @@ const createPlainWebGlRenderer: RendererFactory = ({ canvas, quality = DEFAULT_Q
       for (const m of chunks.values()) m.geometry.dispose();
       chunks.clear();
       clearSpike();
+      if (dinoLayer) scene.remove(dinoLayer);
       spikeGeometry.dispose();
       for (const m of spikeMaterials.values()) m.dispose();
       material.map?.dispose();
@@ -186,6 +195,7 @@ export const createNullRenderer: RendererFactory = ({ canvas }) => ({
   resize() {},
   setQuality() {},
   setSpikeDinos() {},
+  setDinoLayer() {},
   render() {},
   dispose() {},
 });
@@ -212,6 +222,7 @@ export function withContextRecovery(inner: RendererFactory): RendererFactory {
     let pose: CameraPose | null = null;
     let size: { w: number; h: number; dpr: number } | null = null;
     let dinos: readonly SpikeDino[] | null = null;
+    let dinoLayer: Object3D | null = null;
     let lost = false;
     let disposed = false;
     let generation = 0;
@@ -227,6 +238,7 @@ export function withContextRecovery(inner: RendererFactory): RendererFactory {
       if (size) core.resize(size.w, size.h, size.dpr);
       if (world) core.setWorld(world);
       if (dinos) core.setSpikeDinos(dinos);
+      if (dinoLayer) core.setDinoLayer(dinoLayer);
       if (pose) core.setCamera(pose);
     };
 
@@ -326,6 +338,10 @@ export function withContextRecovery(inner: RendererFactory): RendererFactory {
       setSpikeDinos(d) {
         dinos = d;
         if (!lost) core.setSpikeDinos(d);
+      },
+      setDinoLayer(layer) {
+        dinoLayer = layer;
+        if (!lost) core.setDinoLayer(layer);
       },
       render() {
         if (!lost) core.render();

@@ -16,6 +16,11 @@ import type { GameRenderer, RendererFactory } from '../render/renderer';
 import { createHud, type Hud } from '../ui/hud';
 import { el } from '../ui/dom';
 import { World } from '../world/world';
+import { createDinoRender } from '../render/dino-render';
+import { createDinoStore, setActiveDinoStore, type DinoStore } from '../dinos/dino-store';
+import { createDinoMenu } from '../ui/dino-menu';
+import { createDinoSystem, type DinoSystem } from './dino-system';
+import { registerHook } from '../dev/e2e-hooks';
 import { createLoop } from './loop';
 import { createPlayerController, type PlayerController } from './player-controller';
 
@@ -40,6 +45,10 @@ export interface Game {
   readonly player: PlayerController;
   readonly renderer: GameRenderer;
   readonly hud: Hud;
+  /** Dinos and eggs: the store, hit tests and stepping. */
+  readonly dinos: DinoSystem;
+  /** Opens the dino menu for a dino (the tap does this by itself). */
+  openDinoMenu(id: number): void;
   /** Stops the world: no steps, no drawing. Safe to call twice. */
   pause(): void;
   resume(): void;
@@ -101,6 +110,18 @@ export function createGame(options: GameOptions): Game {
     for (const l of [...listeners.changed]) l({ kind });
   };
   const player = createPlayerController({ world, stick, look });
+  const dinoStore: DinoStore = createDinoStore();
+  setActiveDinoStore(dinoStore);
+  const dinoRender = createDinoRender(doc);
+  renderer.setDinoLayer(dinoRender.layer);
+  const dinos = createDinoSystem({
+    world,
+    store: dinoStore,
+    player: () => player.player,
+    onEvent: (e) => dinoRender.burst(e.type, e.x, e.y, e.z),
+  });
+  let menuOpen = false;
+  let updateLoop = () => {};
   const hud = createHud({
     router,
     onJump: () => player.jump(),
@@ -121,6 +142,13 @@ export function createGame(options: GameOptions): Game {
     sound,
     viewport: () => ({ width: win.innerWidth, height: win.innerHeight }),
     canAct: () => loopRunning(),
+    isOccupied: (box) => dinos.isOccupied(box),
+    tapFirst: (aim) => {
+      const hit = dinos.hitTest(aim);
+      if (!hit) return false;
+      if (hit.kind === 'dino') openDinoMenu(hit.id);
+      return true;
+    },
   });
   tapWorld.fn = (x, y) => build.tap(x, y);
   const initial = build.getState();
@@ -152,10 +180,30 @@ export function createGame(options: GameOptions): Game {
   };
   options.container.append(hud.root, stick.element, grid.root);
 
-  let dinos: SpikeDino[] | null = null;
+  let spike: SpikeDino[] | null = null;
   if (isSpikeEnabled(search)) {
-    dinos = createSpikeDinos(world);
-    renderer.setSpikeDinos(dinos);
+    spike = createSpikeDinos(world);
+    renderer.setSpikeDinos(spike);
+  }
+  const dinoMenu = createDinoMenu({
+    container: options.container,
+    router,
+    onMode: (id, mode) => dinoStore.setMode(id, mode),
+    onClose: () => {
+      menuOpen = false;
+      updateLoop();
+    },
+  });
+  function openDinoMenu(id: number): void {
+    const d = dinoStore.findDino(id);
+    if (!d) return;
+    menuOpen = true;
+    dinoMenu.open({ id: d.id, kind: d.state.kind, name: d.name, mode: d.state.mode });
+    updateLoop();
+  }
+  if (__E2E__) {
+    registerHook('dinoMenuOpen', () => dinoMenu.isOpen());
+    registerHook('closeDinoMenu', () => dinoMenu.close());
   }
   const fps: FpsCounter = createFpsCounter(search, doc.body);
 
@@ -163,7 +211,9 @@ export function createGame(options: GameOptions): Game {
   const loop = createLoop({
     frame(dt, now) {
       player.update(dt);
-      if (dinos) stepSpikeDinos(world, dinos, dt);
+      if (spike) stepSpikeDinos(world, spike, dt);
+      dinos.step(dt);
+      dinoRender.sync(dinoStore.dinos, dinoStore.eggs, dt);
       renderer.setCamera(player.pose());
       renderer.render();
       fps.frame(now, dt);
@@ -181,9 +231,10 @@ export function createGame(options: GameOptions): Game {
   let guardBlocks = false;
   const update = () => {
     const hidden = doc.visibilityState === 'hidden';
-    if (manualPause || guardBlocks || hidden) loop.stop();
+    if (manualPause || menuOpen || guardBlocks || hidden) loop.stop();
     else loop.start();
   };
+  updateLoop = update;
   loopRunning = () => loop.running;
   const unsubscribe = options.guard.subscribe((s) => {
     guardBlocks = s.portrait || s.tooSmall;
@@ -196,6 +247,7 @@ export function createGame(options: GameOptions): Game {
   function teleportHome() {
     player.reset();
     const p = player.player;
+    dinos.teleported();
     for (const l of [...listeners.teleported]) l({ x: p.x, y: p.y, z: p.z });
   }
 
@@ -204,6 +256,8 @@ export function createGame(options: GameOptions): Game {
     player,
     renderer,
     hud,
+    dinos,
+    openDinoMenu,
     pause() {
       manualPause = true;
       update();
@@ -241,6 +295,10 @@ export function createGame(options: GameOptions): Game {
       hud.destroy();
       hotbar.destroy();
       grid.destroy();
+      dinoMenu.destroy();
+      renderer.setDinoLayer(null);
+      dinoRender.dispose();
+      setActiveDinoStore(null);
       effects.dispose();
       stick.element.remove();
       fps.dispose();

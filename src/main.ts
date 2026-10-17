@@ -7,6 +7,7 @@ import { startScreenGuard } from './platform/screen-guard';
 import { createGame, type Game } from './game/game';
 import { createNullRenderer, createWebGlRenderer, type RendererFactory } from './render/renderer';
 import { bootSave, createWorldSave } from './game/world-save';
+import { createDinoSave } from './game/dino-system';
 import { openDb } from './storage/db';
 import { createRecords, type Records } from './storage/records';
 import { createSaveQueue, type SaveQueue } from './storage/save-queue';
@@ -63,7 +64,26 @@ const booted = game
         queue = q;
         const r = createRecords(db);
         records = r;
-        return createWorldSave({ game: game as Game, queue: q, records: r });
+        const worldSave = createWorldSave({ game: game as Game, queue: q, records: r });
+        const dinoSave = createDinoSave({ store: (game as Game).dinos.store, queue: q, records: r });
+        return {
+          restore: async () => {
+            await worldSave.restore();
+            await dinoSave.restore();
+          },
+          start: () => {
+            const stopWorld = worldSave.start();
+            const stopDinos = dinoSave.start();
+            return () => {
+              stopWorld();
+              stopDinos();
+            };
+          },
+          cancel: () => {
+            worldSave.cancel();
+            dinoSave.cancel();
+          },
+        };
       },
     })
   : Promise.resolve('not-saving');

@@ -187,3 +187,38 @@ describe('build controller', () => {
     expect(c.getState().selected).toBe(5);
   });
 });
+
+describe('build controller with dinos', () => {
+  function withDinos(extra: { tapFirst?: () => boolean; isOccupied?: () => boolean }) {
+    const world = flatWorld();
+    const p = createPlayer(20.5, 5, 20.5);
+    const ctrl = { player: p, yaw: 0, pitch: -0.5, pose: () => ({ x: p.x, y: p.y + EYE_HEIGHT, z: p.z, yaw: 0, pitch: -0.5 }) };
+    const onBlockChanged = vi.fn();
+    const c = createBuildController({
+      world, player: ctrl as never, onBlockChanged, effects: { pop: vi.fn() }, sound: { play: vi.fn() },
+      viewport: () => ({ width: 1000, height: 700 }), ...extra,
+    });
+    return { world, c, onBlockChanged };
+  }
+
+  it('a tap taken by a dino mines nothing (AC104)', () => {
+    const tapFirst = vi.fn(() => true);
+    const s = withDinos({ tapFirst });
+    s.c.tap(500, 350);
+    expect(tapFirst).toHaveBeenCalledTimes(1);
+    expect(s.onBlockChanged).not.toHaveBeenCalled();
+  });
+
+  it('a tap no dino wants still mines', () => {
+    const s = withDinos({ tapFirst: () => false });
+    s.c.tap(500, 350);
+    expect(s.onBlockChanged).toHaveBeenCalledTimes(1);
+  });
+
+  it('building where a dino or egg is does nothing (AC6)', () => {
+    const s = withDinos({ isOccupied: () => true });
+    s.c.setMode('bouwen');
+    s.c.tap(500, 350);
+    expect(s.onBlockChanged).not.toHaveBeenCalled();
+  });
+});

@@ -52,8 +52,10 @@ export interface BuildControllerOptions {
   effects: Pick<Effects, 'pop'>;
   sound: Pick<Sound, 'play'>;
   viewport: () => { width: number; height: number };
-  /** Asks if a dino or egg is in a box. Dinos come later. */
+  /** Asks if a dino or egg is in a box (AC6). */
   isOccupied?: IsOccupied;
+  /** Runs before any block logic. Return true when a dino or egg took the tap (AC104). */
+  tapFirst?: (aim: Aim, x: number, y: number) => boolean;
   /** False while the world is stopped: taps then do nothing. */
   canAct?: () => boolean;
 }
@@ -80,6 +82,7 @@ export function createBuildController(options: BuildControllerOptions): BuildCon
       if (options.canAct && !options.canAct()) return;
       const { width, height } = options.viewport();
       const aim = aimFromScreen(options.player.pose(), width, height, x, y);
+      if (options.tapFirst?.(aim, x, y)) return;
       if (mode === 'hakken') {
         const r = mineBlock(options.world, aim);
         if (!r.ok) return;
