@@ -251,13 +251,21 @@ export function factIds(topic: RekenenTopicId, level: RekenenLevel): readonly st
   return ids;
 }
 
-function idsOfSkills(topic: RekenenTopicId, level: RekenenLevel, skills: readonly string[] | undefined): string[] {
+const poolCache = new Map<string, readonly string[]>();
+
+/** Fact ids of the given skills (all when none given). Cached: filtering rebuilds every item once. */
+function idsOfSkills(topic: RekenenTopicId, level: RekenenLevel, skills: readonly string[] | undefined): readonly string[] {
   const all = factIds(topic, level);
-  if (!skills) return [...all];
-  return all.filter((id) => {
+  if (!skills) return all;
+  const key = `${topic}/${level}/${[...skills].sort().join(',')}`;
+  const cached = poolCache.get(key);
+  if (cached) return cached;
+  const pool = all.filter((id) => {
     const item = itemFromId(id, level);
     return item !== null && skills.includes(item.skill);
   });
+  poolCache.set(key, pool);
+  return pool;
 }
 
 // ---------- open sets: optellen and aftrekken ----------
