@@ -11,6 +11,11 @@ export interface ProgressRecord {
   topic: string;
   skill: string;
   seen: number;
+  /**
+   * When the record was first saved, in ms since 1970 (a plain number sorts and compares cheaply and
+   * needs no time zone). Set once, never changed by later updates. Missing means oldest (AC126).
+   */
+  added?: number;
 }
 
 export const progressKey = (moduleId: string, itemId: string): string => `${moduleId}|${itemId}`;
@@ -39,9 +44,17 @@ export function createProgressStore(db: IDBDatabase): ProgressStore {
         request<ProgressRecord | undefined>(tx.objectStore('progress').get(progressKey(moduleId, itemId))),
       ),
     async put(record) {
-      await transact(db, 'progress', 'readwrite', (tx) =>
-        request(tx.objectStore('progress').put(record, progressKey(record.moduleId, record.itemId))),
-      );
+      await transact(db, 'progress', 'readwrite', async (tx) => {
+        const store = tx.objectStore('progress');
+        const key = progressKey(record.moduleId, record.itemId);
+        const old = await request<ProgressRecord | undefined>(store.get(key));
+        const next: ProgressRecord = { ...record };
+        if (old) {
+          if (old.added === undefined) delete next.added;
+          else next.added = old.added;
+        }
+        await request(store.put(next, key));
+      });
     },
     async delete(moduleId, itemId) {
       await transact(db, 'progress', 'readwrite', (tx) => request(tx.objectStore('progress').delete(progressKey(moduleId, itemId))));

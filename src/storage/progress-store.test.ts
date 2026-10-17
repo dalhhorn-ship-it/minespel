@@ -76,4 +76,16 @@ describe('progress store', () => {
     expect((await store.list('taal')).map((r) => r.itemId)).toEqual(['b']);
     db.close();
   });
+
+  it('AC126: added is set on the first save and never changed by later puts', async () => {
+    const db = await fresh();
+    const store = createProgressStore(db);
+    await store.put({ ...rec('rekenen', 'a'), added: 100 });
+    await store.put({ ...rec('rekenen', 'a', 't1', 3), added: 999 });
+    expect(await store.get('rekenen', 'a')).toMatchObject({ box: 3, added: 100 });
+    await store.put(rec('rekenen', 'legacy'));
+    await store.put({ ...rec('rekenen', 'legacy', 't1', 2), added: 999 });
+    expect((await store.get('rekenen', 'legacy'))?.added).toBeUndefined();
+    db.close();
+  });
 });

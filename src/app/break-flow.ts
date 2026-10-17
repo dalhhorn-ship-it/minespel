@@ -11,7 +11,7 @@ import type { Item, Lesson } from '../content/format';
 import { rotationWeights, type Switches } from '../content/switches';
 import { dayKey, systemClock, type Clock } from '../core/clock';
 import { createRng, type Rng } from '../core/rng';
-import { GENERATED_CAP, sumsToForget } from '../learning/generated-items';
+import { sumsToForget } from '../learning/generated-items';
 import { pickModule, hasSeenLesson, markLessonSeen, type RotationState } from '../learning/rotation';
 import { selectQuestions } from '../learning/selection';
 import {
@@ -376,13 +376,12 @@ export function createBreakFlow(options: BreakFlowOptions): BreakFlow {
       topic,
       skill: entry.item.skill,
       seen: (old?.seen ?? 0) + 1,
+      added: r.clock.now(), // the store keeps an older value
     });
     if (open) {
-      // The sum just saved always stays. Age is the due day, and a new wrong sum is due today, so it would
-      // otherwise count as the oldest when the others are in far away boxes.
-      const others = (await stores.progress.list(moduleId)).filter((p) => p.itemId !== itemId);
-      for (const old of sumsToForget(others, moduleId, topic, GENERATED_CAP - 1)) {
-        await stores.progress.delete(old.moduleId, old.itemId);
+      const all = await stores.progress.list(moduleId);
+      for (const gone of sumsToForget(all, moduleId, topic)) {
+        await stores.progress.delete(gone.moduleId, gone.itemId);
       }
     }
   }

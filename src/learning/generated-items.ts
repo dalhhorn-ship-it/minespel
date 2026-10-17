@@ -8,12 +8,12 @@ import type { ProgressRecord } from '../storage/progress-store';
 /** At most this many saved sums per open topic. */
 export const GENERATED_CAP = 200;
 
-/** Saved sums of one open topic, oldest first. Age is the due day, ties keep the given order. */
+/** Saved sums of one open topic, oldest first. Age is when the sum was first saved (`added`). No `added` counts as oldest. Ties keep the given order. */
 export function savedSums(records: readonly ProgressRecord[], moduleId: string, topicId: string): ProgressRecord[] {
   return records
     .map((r, i) => ({ r, i }))
     .filter(({ r }) => r.moduleId === moduleId && r.topic === topicId)
-    .sort((a, b) => (a.r.due < b.r.due ? -1 : a.r.due > b.r.due ? 1 : a.i - b.i))
+    .sort((a, b) => (a.r.added ?? -1) - (b.r.added ?? -1) || a.i - b.i)
     .map(({ r }) => r);
 }
 

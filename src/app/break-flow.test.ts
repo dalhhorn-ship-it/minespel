@@ -269,7 +269,11 @@ describe('break flow', () => {
     const r = await rig();
     const progress = createProgressStore(r.db);
     for (let i = 1; i <= 200; i++) {
-      await progress.put({ moduleId: REKENEN, itemId: `optellen:1+${i}`, box: 2, due: '2020-01-01', level: 'M6', topic: 'optellen', skill: 's', seen: 1 });
+      // Mixed boxes and due days. The oldest saved sums (small i) sit in high boxes with far away due days,
+      // the newest sit in box 1 and are due soon. Due day order is the reverse of added order.
+      const box = 1 + (i % 5);
+      const due = `2030-${String(1 + (i % 12)).padStart(2, '0')}-${String(1 + (i % 28)).padStart(2, '0')}`;
+      await progress.put({ moduleId: REKENEN, itemId: `optellen:1+${i}`, box, due: i > 100 ? '2020-01-01' : due, level: 'M6', topic: 'optellen', skill: 's', seen: 1, added: 1000 + i });
     }
     await r.records.put('rotation', { weights: {}, topicPointers: {}, lessonsSeen: [`${REKENEN}/optellen`] });
     r.flow.start();
@@ -280,6 +284,9 @@ describe('break flow', () => {
     const saved = (await progress.list(REKENEN)).filter((p) => p.topic === 'optellen');
     expect(saved).toHaveLength(200);
     expect(saved.filter((p) => p.due === '2026-10-17').length).toBe(5);
+    // the 5 oldest by added (1..5) are gone, even though they are in high boxes
+    for (let i = 1; i <= 5; i++) expect(saved.some((p) => p.itemId === `optellen:1+${i}`)).toBe(false);
+    for (let i = 6; i <= 200; i++) expect(saved.some((p) => p.itemId === `optellen:1+${i}`)).toBe(true);
     r.flow.end();
   });
 
