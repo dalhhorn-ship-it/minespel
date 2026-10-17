@@ -45,6 +45,7 @@ python3 docs/modules/validate.py docs/modules/<module-id>
 
 * `levels`: the levels this module uses, easiest first. Cito and IEP style levels are used here: M6 (midden groep 6), E6 (eind groep 6), M7, E7.
 * `topics`: topic file names without `.json`, in teaching order.
+* `generator`: optional, for example `"rekenen-basis"`. Only built in code modules use it. Such a module has no topic files, and its items come from code. `validate.py` is for folder modules and does not check these.
 * `exams`: fixed blueprints. An exam picks `questionCount` questions from the listed `levels`. `mix` gives each topic a weight, so a topic with weight 2 gets twice as many questions as one with weight 1. `timeLimitMinutes` may be `null` for no time limit.
 
 ## Topic file
@@ -72,6 +73,24 @@ python3 docs/modules/validate.py docs/modules/<module-id>
 
 * `groups`: the school years (groep) the topic is for.
 * `lesson.pages`: short pages the kid reads one by one. Each page has a `title`, a `text`, one or more `examples` (`good` is required, `bad` and `why` are optional) and an optional `tip`.
+* `lesson.pages[].skill`: optional. It names the skill (the same text as the item `skill`) that the page teaches. The teach moment shows the page whose `skill` matches the item, else the first page. When present it must not be empty.
+
+### Module bundle
+
+In the app, a module is one object, also used as the export file:
+
+```json
+{
+  "app": "Dino Blokwereld",
+  "kind": "module",
+  "formatVersion": 1,
+  "createdAt": "2026-10-17T10:00:00.000Z",
+  "module": { "id": "...", "title": "...", "subject": "taal", "version": 1, "language": "nl", "levels": ["M6"], "topics": ["komma"], "exams": [] },
+  "topics": [ { "id": "komma", "title": "...", "groups": [6], "lesson": { "pages": [] }, "items": [] } ]
+}
+```
+
+`module` is the `module.json` content. `topics` holds every topic file, in `module.topics` order. The built in Taal module is built from exactly the folder `docs/modules/cito-taalverzorging/`.
 
 ## Items (questions)
 
@@ -137,10 +156,21 @@ Every item has these fields:
 
 Gap `i` is the space right after `words[i]`. `answer` lists every gap that needs the mark, and may be empty when no mark is needed. The kid must tap all the right gaps and no wrong ones. `mark` is `,` for this module. Other marks may be added later.
 
+## What `validate.py` checks
+
+Besides the fields and types above, it fails on:
+
+* two equal options in a `choice` item;
+* two items in the module with the same `prompt` and the same sentence (`sentence`, else `words`, else `options`), also across topics;
+* a `type` item without an accepted answer;
+* a sentence over 15 words at M6 or E6, or over 20 words at M7 or E7;
+* an empty lesson page `skill`;
+* too few items per level, an exam that asks for more items than exist, duplicate ids.
+
 ## Rules for writing content
 
 * Write original sentences. Copy the style and the skills of Cito and IEP tests, never their actual questions.
 * Dinos, blocks, nature, school and family make good sentences. Nothing scary, nothing violent, no real people's names other than common first names.
 * Follow the official Dutch spelling (Groene Boekje, woordenlijst.org).
-* Keep sentences short: at most 15 words for groep 6, 20 for groep 7.
+* Keep sentences short: at most 15 words at M6 and E6, 20 at M7 and E7. The validator counts the `sentence`, the `words`, or each option when the options are the sentences.
 * Every `explain` names the rule, not only the answer.

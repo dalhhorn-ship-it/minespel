@@ -12,6 +12,8 @@ from pathlib import Path
 ITEM_TYPES = {"choice", "find-error", "type", "punctuate"}
 COMMON = ["id", "type", "level", "skill", "prompt", "explain"]
 MIN_ITEMS_PER_LEVEL = 6
+# AC123: longest sentence in words, per level.
+MAX_WORDS = {"M6": 15, "E6": 15, "M7": 20, "E7": 20}
 
 errors = []
 
@@ -24,6 +26,35 @@ def is_text(v):
     return isinstance(v, str) and v.strip() != ""
 
 
+def sentence_of(it):
+    """The sentence an item shows: 'sentence', else the 'words' joined."""
+    if is_text(it.get("sentence")):
+        return " ".join(it["sentence"].split())
+    w = it.get("words")
+    if isinstance(w, list) and all(isinstance(x, str) for x in w):
+        return " ".join(w)
+    return ""
+
+
+def texts_of(it):
+    """Every sentence an item shows: 'sentence', 'words', or each option when
+    the options are the sentences (a choice without 'sentence')."""
+    if is_text(it.get("sentence")):
+        return [sentence_of(it)]
+    w = it.get("words")
+    if isinstance(w, list) and w and all(isinstance(x, str) for x in w):
+        return [" ".join(w)]
+    o = it.get("options")
+    if isinstance(o, list) and all(isinstance(x, str) for x in o):
+        return [" ".join(x.split()) for x in o]
+    return []
+
+
+def identity_of(it):
+    """What makes a question the same question: sentence, words or options."""
+    return " | ".join(sorted(texts_of(it)))
+
+
 def check_item(where, it, levels):
     for key in COMMON:
         if not is_text(it.get(key)):
@@ -34,14 +65,18 @@ def check_item(where, it, levels):
         return
     if it.get("level") not in levels:
         err(where, f"level {it.get('level')!r} is not one of the module levels")
+    limit = MAX_WORDS.get(it.get("level"))
+    n_words = max((len(t.split()) for t in texts_of(it)), default=0)
+    if limit and n_words > limit:
+        err(where, f"sentence has {n_words} words, at level {it.get('level')} the limit is {limit}")
 
     if t == "choice":
         opts = it.get("options")
         if not (isinstance(opts, list) and 2 <= len(opts) <= 4 and all(is_text(o) for o in opts)):
             err(where, "options must be 2 to 4 non empty strings")
             return
-        if len(set(opts)) != len(opts):
-            err(where, "options contain duplicates")
+        if len(set(o.strip() for o in opts)) != len(opts):
+            err(where, "two options are equal")
         a = it.get("answer")
         if not (isinstance(a, int) and 0 <= a < len(opts)):
             err(where, "answer must be an index into options")
@@ -64,7 +99,7 @@ def check_item(where, it, levels):
     elif t == "type":
         a = it.get("answer")
         if not (isinstance(a, list) and a and all(is_text(x) for x in a)):
-            err(where, "answer must be a non empty list of strings")
+            err(where, "type item needs an accepted answer: a non empty list of strings")
     elif t == "punctuate":
         words = it.get("words")
         if not (isinstance(words, list) and len(words) >= 2 and all(is_text(w) and " " not in w for w in words)):
@@ -97,6 +132,8 @@ def check_lesson(where, lesson):
         ex = p.get("examples")
         if not (isinstance(ex, list) and ex and all(is_text(e.get("good")) for e in ex)):
             err(w, "needs at least one example with 'good'")
+        if "skill" in p and not is_text(p.get("skill")):
+            err(w, "'skill' must be a non empty string when present")
 
 
 def main(folder):
@@ -108,6 +145,7 @@ def main(folder):
             err("module.json", f"missing '{key}'")
 
     ids = Counter()
+    module_seen = {}  # (prompt, sentence) -> where it first appeared
     pool = {}  # topic -> list of items
     for topic in mod.get("topics", []):
         path = folder / f"{topic}.json"
@@ -134,6 +172,13 @@ def main(folder):
             if q in seen_q:
                 err(where, "same question appears twice in this topic")
             seen_q.add(q)
+            sentence = identity_of(it)
+            if sentence:
+                key = (it.get("prompt"), sentence)
+                if key in module_seen:
+                    err(where, f"same prompt and sentence as {module_seen[key]}")
+                else:
+                    module_seen[key] = it.get("id", n)
         per_level = Counter(it.get("level") for it in items)
         for lv in levels:
             if per_level[lv] < MIN_ITEMS_PER_LEVEL:
