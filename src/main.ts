@@ -14,6 +14,10 @@ import { createSaveQueue, type SaveQueue } from './storage/save-queue';
 import { el } from './ui/dom';
 import { createScreens } from './app/screens';
 import { startPlayTimer, type PlayTimer } from './app/timer-driver';
+import { setBreakEnv } from './app/break-flow';
+import { resumeRunningSession } from './app/resume';
+import { createSessionStore } from './storage/session-store';
+import { createLogStore } from './storage/log-store';
 import { setupPauseMenu } from './ui/pause-menu';
 import { openShop } from './app/shop-flow';
 import { openPractice } from './app/practice-flow';
@@ -27,6 +31,7 @@ const app = document.getElementById('app');
 let game: Game | null = null;
 let queue: SaveQueue | null = null;
 let records: Records | null = null;
+let database: IDBDatabase | null = null;
 let teleported = 0;
 let rendererFactoryIsReal = true;
 if (app) {
@@ -64,6 +69,7 @@ const booted = game
       wantsPause: () => userPaused,
       create: async () => {
         const db = await openDb();
+        database = db;
         const q = createSaveQueue({ db });
         queue = q;
         const r = createRecords(db);
@@ -116,7 +122,15 @@ if (game) {
 void booted.finally(() => {
   restored = true;
   // The play timer starts when the saved time is known. It stays off if the 3D world could not start.
-  if (game) void startPlayTimer({ game, screens, guard, audio, records, queue, wantsPause: () => userPaused }).then((t) => { playTimer = t; });
+  if (game) {
+    // The break needs the save to open a saved break, pick questions and write its logs.
+    setBreakEnv({ db: database, records, queue, audio });
+    void startPlayTimer({ game, screens, guard, audio, records, queue, wantsPause: () => userPaused }).then((t) => {
+      playTimer = t;
+      // A break that was open when the app closed comes back on the same question (AC37).
+      void resumeRunningSession(database ? createSessionStore(database) : null, t.breakFlow);
+    });
+  }
 });
 
 const openedScreens: Array<() => void> = [];
@@ -172,6 +186,19 @@ if (__E2E__) {
     registerHook('closeScreen', (id: number) => openedScreens[id]?.());
     registerHook('breakActive', () => playTimer?.breakFlow.isActive() ?? false);
     registerHook('endBreak', () => playTimer?.breakFlow.end());
+    registerHook('parentEndBreak', () => playTimer?.breakFlow.parentEnd());
+    // Resolves when the break has written everything it queued (a test can then kill the app).
+    registerHook('breakSaved', () => playTimer?.breakFlow.settled());
+    // Starts a break now, like the timer reaching 0.
+    registerHook('startBreak', () => playTimer?.breakFlow.start());
+    registerHook('savedSession', async () => (database ? createSessionStore(database).load() : null));
+    registerHook('logCounts', async () => {
+      if (!database) return null;
+      const logs = createLogStore(database);
+      const [answers, breaks, ledger] = await Promise.all([logs.listAnswers(), logs.listBreaks(), logs.listLedger()]);
+      return { answers: answers.length, breaks: breaks.length, ledger: ledger.map((l) => l.delta) };
+    });
+    registerHook('points', async () => (await records?.get('economy'))?.points ?? 0);
     registerHook('usesRealRenderer', () => rendererFactoryIsReal);
   }
 }

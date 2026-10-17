@@ -23,6 +23,8 @@ function moduleRange(moduleId: string): IDBKeyRange {
 export interface ProgressStore {
   get(moduleId: string, itemId: string): Promise<ProgressRecord | undefined>;
   put(record: ProgressRecord): Promise<void>;
+  /** Removes one record. Nothing happens when it does not exist. */
+  delete(moduleId: string, itemId: string): Promise<void>;
   /** All records of one module, or of every module when omitted. */
   list(moduleId?: string): Promise<ProgressRecord[]>;
   /** Returns how many records were removed. */
@@ -40,6 +42,9 @@ export function createProgressStore(db: IDBDatabase): ProgressStore {
       await transact(db, 'progress', 'readwrite', (tx) =>
         request(tx.objectStore('progress').put(record, progressKey(record.moduleId, record.itemId))),
       );
+    },
+    async delete(moduleId, itemId) {
+      await transact(db, 'progress', 'readwrite', (tx) => request(tx.objectStore('progress').delete(progressKey(moduleId, itemId))));
     },
     list: (moduleId) =>
       transact(db, 'progress', 'readonly', (tx) =>

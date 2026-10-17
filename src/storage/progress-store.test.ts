@@ -65,4 +65,15 @@ describe('progress store', () => {
     expect(await store.list('rek')).toHaveLength(1);
     db.close();
   });
+
+  it('deletes one record and ignores a missing one', async () => {
+    const db = await fresh();
+    const store = createProgressStore(db);
+    await store.put(rec('taal', 'a'));
+    await store.put(rec('taal', 'b'));
+    await store.delete('taal', 'a');
+    await store.delete('taal', 'nope');
+    expect((await store.list('taal')).map((r) => r.itemId)).toEqual(['b']);
+    db.close();
+  });
 });

@@ -105,8 +105,8 @@ test.describe('play timer', () => {
     expect(await readState<string>(page, 'currentScreen')).toBe('learn');
     expect(await readState<boolean>(page, 'gameRunning')).toBe(false);
     expect(await leftMs(page)).toBe(0);
-    await page.locator('.break-stub').waitFor();
-    await expect(page.locator('.break-stub button')).toHaveCount(0);
+    await page.locator('.break-screen').waitFor();
+    await expect(page.locator('[data-screen-id="break"]')).toHaveCount(1);
     const fresh = await killApp(page);
     await timerReady(fresh);
     expect(await readState<boolean>(fresh, 'breakActive')).toBe(true);

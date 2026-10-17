@@ -15,3 +15,4 @@ Written so kids can read it too.
 * Your world is saved: the blocks you built or broke, where you stand, your block bar and Hakken or Bouwen are all back when you open the app again. A save that gets cut off never breaks the old one.
 * The app fits the iPad like a real app: no zooming, no text selection, a friendly 'Draai je iPad' message in portrait, and a dino icon for the home screen.
 * Behind the scenes: the project builds, has tests, and opens in a test iPad browser.
+* The learning break works! When the timer reaches 0, Dino Juf asks 5 questions. Get points for right answers, see how a sum works step by step when it is hard, and go back to your world.
