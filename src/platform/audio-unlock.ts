@@ -1,12 +1,17 @@
 // iOS only lets sound start after a tap. Nothing may be resumed before the first tap (AC100).
 
 export interface ResumableContext {
+  /** Optional. When known, later taps resume the context if it is not running. */
+  readonly state?: string;
   resume(): Promise<void> | void;
 }
 
 export interface AudioUnlock {
   isUnlocked(): boolean;
-  /** Registers an AudioContext. It is resumed on the first tap, or at once if a tap already happened. */
+  /**
+   * Registers an AudioContext. It is resumed on the first tap, or at once if a tap already happened.
+   * After that, every tap resumes it again while it is not running (iOS suspends it in the background).
+   */
   watch(ctx: ResumableContext): void;
   /** Calls fn on the first tap (or now when already unlocked). */
   whenUnlocked(fn: () => void): void;
@@ -28,12 +33,24 @@ export function createAudioUnlock(target: EventTarget = document): AudioUnlock {
     }
   };
 
+  // Listeners stay on for good: every tap is a chance to wake a suspended context.
   const onTapEvent = () => {
-    if (unlocked) return;
+    if (unlocked) {
+      for (const c of contexts) {
+        if (c.state !== undefined && c.state !== 'running' && c.state !== 'closed') resume(c);
+      }
+      return;
+    }
     unlocked = true;
-    dispose();
     for (const c of contexts) resume(c);
-    for (const fn of callbacks.splice(0)) fn();
+    // Contexts made by these callbacks are resumed by watch(), inside this same tap.
+    for (const fn of callbacks.splice(0)) {
+      try {
+        fn();
+      } catch {
+        /* sound must never break the game (AC99) */
+      }
+    }
   };
   const dispose = () => {
     for (const name of EVENTS) target.removeEventListener(name, onTapEvent, true);

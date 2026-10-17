@@ -60,8 +60,30 @@ describe('sound (AC99, AC100)', () => {
     sound.setVolume(-1);
     expect(sound.getVolume()).toBe(0);
     sound.play('pop');
-    expect(made).toHaveLength(0);
+    expect(made[0]!.started).toBe(0);
     sound.setVolume(0.5);
+    sound.play('pop');
+    expect(made[0]!.started).toBeGreaterThan(0);
+  });
+
+  it('makes and resumes the context inside the first tap, before any play', () => {
+    const { made, createContext, tap } = setup();
+    expect(createContext).not.toHaveBeenCalled();
+    tap();
+    expect(made).toHaveLength(1);
+    expect(made[0]!.state).toBe('running');
+    expect(made[0]!.resumeCalls).toBe(1);
+  });
+
+  it('wakes a suspended context on the next tap, and not when running', () => {
+    const { sound, made, tap } = setup();
+    tap();
+    tap();
+    expect(made[0]!.resumeCalls).toBe(1);
+    made[0]!.suspend();
+    tap();
+    expect(made[0]!.resumeCalls).toBe(2);
+    expect(made[0]!.state).toBe('running');
     sound.play('pop');
     expect(made[0]!.started).toBeGreaterThan(0);
   });

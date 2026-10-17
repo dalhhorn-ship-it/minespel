@@ -33,6 +33,11 @@ export class FakeAudioContext {
   /** Set to make every sound call throw, to test that sound never breaks the game. */
   broken = false;
 
+  /** Simulates iOS suspending or interrupting the context when the app goes to the background. */
+  suspend(): void {
+    this.state = 'suspended';
+  }
+
   resume(): Promise<void> {
     this.resumeCalls += 1;
     this.state = 'running';

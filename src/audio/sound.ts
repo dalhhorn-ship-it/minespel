@@ -27,7 +27,7 @@ export const SOUND_NAMES: readonly SoundName[] = [
 ];
 
 export interface SoundOptions {
-  unlock: Pick<AudioUnlock, 'isUnlocked' | 'watch'>;
+  unlock: Pick<AudioUnlock, 'isUnlocked' | 'watch' | 'whenUnlocked'>;
   /** Makes the AudioContext. Defaults to the browser one. Tests pass a fake. */
   createContext?: () => AudioContext;
   enabled?: boolean;
@@ -156,7 +156,7 @@ export function createSound(options: SoundOptions): Sound {
   let master: GainNode | null = null;
   let failed = false;
 
-  // Made on the first play after the first tap, never before (AC100).
+  // Made inside the first tap (so iOS lets it run), never before (AC100). Also a fallback in play().
   function ensure(): boolean {
     if (failed) return false;
     if (ctx && master) return true;
@@ -174,6 +174,11 @@ export function createSound(options: SoundOptions): Sound {
       return false;
     }
   }
+
+  // Runs inside the first tap, or at once if a tap already happened.
+  unlock.whenUnlocked(() => {
+    if (enabled && volume > 0) ensure();
+  });
 
   return {
     play(name) {
