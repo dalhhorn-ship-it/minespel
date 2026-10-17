@@ -10,3 +10,4 @@ Examples: a retry, a model escalation, an agent that misread its task, a gate th
 | 2026-10-17 | architect | developer, qa | Both sanity reviewers stopped early on a session rate limit. | Resumed them after the limit reset. |
 | 2026-10-17 | build T2 | developer | Plan said 2 module wide duplicates existed, but none match the AC123 rule (operator checked too: 288 unique). | No content change. A permanent validator test goes with T7. |
 | 2026-10-17 | build T1 | developer | Sandbox proxy blocks the Playwright WebKit download (cdn.playwright.dev, 403), so e2e cannot run in the cloud container. | GitHub CI runs e2e on every push; founder may allowlist the hosts. |
+| 2026-10-17 | build T3 | developer | CI e2e failed: Linux WebKit drops the iOS only -webkit-touch-callout from computed style. | Test now checks the shipped stylesheet rule when the computed value is empty. |

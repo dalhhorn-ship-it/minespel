@@ -26,7 +26,17 @@ test.describe('iPad shell', () => {
     });
     expect(css.touchAction).toBe('none');
     expect([css.userSelect, css.webkitUserSelect]).toContain('none');
-    expect(css.callout).toBe('none');
+    // -webkit-touch-callout exists only on iOS, so Linux WebKit drops it from the
+    // computed style. Check the shipped stylesheet rule instead.
+    if (css.callout === '') {
+      const sheets = await page.evaluate(async () => {
+        const hrefs = [...document.querySelectorAll<HTMLLinkElement>('link[rel="stylesheet"]')].map((l) => l.href);
+        return Promise.all(hrefs.map(async (h) => (await fetch(h)).text()));
+      });
+      expect(sheets.join('\n')).toMatch(/body\s*\{[^}]*-webkit-touch-callout:\s*none/);
+    } else {
+      expect(css.callout).toBe('none');
+    }
     expect(css.font).toContain('Nunito');
   });
 
