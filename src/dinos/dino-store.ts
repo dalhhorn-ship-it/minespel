@@ -28,6 +28,8 @@ export interface DinoStore {
   readonly eggs: EggEntry[];
   /** A new egg. It gets its place next to the player at the next game step. */
   addEgg(kind: DinoKindId, golden?: boolean): EggEntry;
+  /** Takes an egg back out. Only the purchase uses it, when its commit failed. Null when the egg is not there. */
+  removeEgg(eggId: number): boolean;
   /** Turns an egg into a baby dino at the same spot. Null when the egg is not there. */
   hatch(eggId: number): DinoEntry | null;
   findDino(id: number): DinoEntry | undefined;
@@ -106,6 +108,13 @@ export function createDinoStore(): DinoStore {
       eggs.push(entry);
       touch();
       return entry;
+    },
+    removeEgg(eggId) {
+      const i = eggs.findIndex((e) => e.id === eggId);
+      if (i < 0) return false;
+      eggs.splice(i, 1);
+      touch();
+      return true;
     },
     hatch(eggId) {
       const i = eggs.findIndex((e) => e.id === eggId);

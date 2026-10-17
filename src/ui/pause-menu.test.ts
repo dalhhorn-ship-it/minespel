@@ -1,10 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { createAppEnv } from '../app/app-env';
 import { createScreens } from '../app/screens';
-import { openPractice } from '../app/practice-flow';
-import { openShop } from '../app/shop-flow';
-import { openLesboek } from './learn/lesboek';
-import { createPauseMenu, pointsText, setupPauseMenu } from './pause-menu';
+import { createPauseMenu, openComingSoon, pointsText, setupPauseMenu } from './pause-menu';
 
 function tap(node: Element) {
   node.dispatchEvent(new PointerEvent('pointerdown', { pointerId: 1, clientX: 5, clientY: 5, bubbles: true }));
@@ -17,16 +13,16 @@ function setup(points = 12) {
   document.body.append(host);
   const screens = createScreens(host);
   const calls = { pause: 0, resume: 0, home: 0 };
-  const env = createAppEnv({ sound: {} as never, audio: {} as never, dinos: {} as never }).env;
   const menu = createPauseMenu({
     screens,
     getPoints: () => Promise.resolve(points),
     pauseWorld: () => { calls.pause++; },
     resumeWorld: () => { calls.resume++; },
     teleportHome: () => { calls.home++; },
-    openShop: () => openShop(screens, env),
-    openLesboek: () => openLesboek(screens, env),
-    openPractice: () => openPractice(screens, env),
+    // The real screens have their own tests; here each entry opens a plain stand in.
+    openShop: () => openComingSoon(screens, 'Dinowinkel', 'kid-overlay'),
+    openLesboek: () => openComingSoon(screens, 'Lesboek', 'kid-overlay'),
+    openPractice: () => openComingSoon(screens, 'Extra oefenen', 'learn'),
   });
   return { host, screens, calls, menu };
 }

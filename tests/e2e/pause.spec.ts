@@ -41,15 +41,19 @@ test.describe('pause menu', () => {
     expect(await readState<number>(page, 'blockAt', Math.floor(start.x) + 3, 25, Math.floor(start.z))).toBe(3);
   });
 
-  for (const [name, kind] of [['Dinowinkel', 'kid-overlay'], ['Lesboek', 'kid-overlay'], ['Extra oefenen', 'learn']] as const) {
-    test(`${name} shows Komt nog and Terug returns to the menu`, async ({ page }) => {
+  for (const [name, kind, id, back] of [
+    ['Dinowinkel', 'kid-overlay', 'shop', '[data-shop="back"]'],
+    ['Lesboek', 'kid-overlay', 'lesboek', '[data-lesboek="back"]'],
+    ['Extra oefenen', 'learn', 'practice', '[data-practice="stop"]'],
+  ] as const) {
+    test(`${name} opens on top of the menu, the timer stays stopped, and back returns to the menu`, async ({ page }) => {
       await openApp(page);
       await tapText(page, 'Pauze');
       await tapText(page, name);
       expect(await screen(page)).toBe(kind);
-      await expect(page.locator('[data-screen-id="coming-soon"]')).toContainText('Komt nog');
+      await expect(page.locator(`[data-screen-id="${id}"]`)).toBeVisible();
       expect(await readState<boolean>(page, 'timerCounting')).toBe(false);
-      await tapText(page, 'Terug');
+      await page.locator(back).first().tap();
       await expect(page.locator('[data-screen-id="pause"]')).toBeVisible();
     });
   }
