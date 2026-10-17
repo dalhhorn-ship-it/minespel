@@ -57,6 +57,12 @@ export interface SettingsRecord {
   questionsPerBreak: number;
   volume: number;
   largeFont: boolean;
+  /** "Nieuwe lessen en vragen": off means only review. */
+  newLessonsEnabled: boolean;
+  /** "Waarschuwing voor de pauze" (pulse and tick). */
+  breakWarningEnabled: boolean;
+  /** "Geluidseffecten". */
+  soundEffectsEnabled: boolean;
   [key: string]: unknown;
 }
 export interface PlayerRecord {
@@ -131,7 +137,15 @@ export interface KvRecords {
 
 /** Fresh copies every call, so nobody shares or mutates a default. */
 export const KV_DEFAULTS: { [K in KvName]: () => KvRecords[K] } = {
-  settings: () => ({ breakEveryMinutes: 20, questionsPerBreak: 10, volume: 0.7, largeFont: false }),
+  settings: () => ({
+    breakEveryMinutes: 5,
+    questionsPerBreak: 5,
+    volume: 0.7,
+    largeFont: false,
+    newLessonsEnabled: true,
+    breakWarningEnabled: true,
+    soundEffectsEnabled: true,
+  }),
   player: () => ({ x: 0, y: 0, z: 0, yaw: 0, pitch: 0, hotbar: [], selectedSlot: 0, mode: 'mine' }),
   world: () => ({ diff: new Uint32Array(0) }),
   dinos: () => ({ dinos: [], eggs: [] }),

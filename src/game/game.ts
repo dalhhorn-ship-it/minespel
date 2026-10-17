@@ -74,7 +74,7 @@ export interface GameOptions {
   sound?: Sound;
 }
 
-const SILENT_UNLOCK = { isUnlocked: () => false, watch: () => {} };
+const SILENT_UNLOCK = { isUnlocked: () => false, watch: () => {}, whenUnlocked: () => {} };
 
 export function createGame(options: GameOptions): Game {
   const win = options.win ?? window;
@@ -166,7 +166,7 @@ export function createGame(options: GameOptions): Game {
       if (dinos) stepSpikeDinos(world, dinos, dt);
       renderer.setCamera(player.pose());
       renderer.render();
-      fps.frame(now);
+      fps.frame(now, dt);
       frames++;
     },
   });

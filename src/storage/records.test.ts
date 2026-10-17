@@ -7,18 +7,49 @@ let n = 0;
 const fresh = () => openDb({ name: `records-db-${n++}` });
 
 const samples: { [K in KvName]: KvRecords[K] } = {
-  settings: { breakEveryMinutes: 15, questionsPerBreak: 5, volume: 0.2, largeFont: true },
-  player: { x: 1, y: 2, z: 3, yaw: 0.5, pitch: -0.2, hotbar: [1, 2, 3], selectedSlot: 2, mode: 'build' },
+  settings: {
+    breakEveryMinutes: 15,
+    questionsPerBreak: 5,
+    volume: 0.2,
+    largeFont: true,
+    newLessonsEnabled: false,
+    breakWarningEnabled: false,
+    soundEffectsEnabled: false,
+  },
+  player: {
+    x: 1,
+    y: 2,
+    z: 3,
+    yaw: 0.5,
+    pitch: -0.2,
+    hotbar: [1, 2, 3],
+    selectedSlot: 2,
+    mode: 'build',
+  },
   world: { diff: new Uint32Array([256 + 1, 512 + 2]) },
-  dinos: { dinos: [{ kind: 'rex', name: 'Rex' }], eggs: [{ kind: 'tri', golden: true }] },
+  dinos: {
+    dinos: [{ kind: 'rex', name: 'Rex' }],
+    eggs: [{ kind: 'tri', golden: true }],
+  },
   economy: { points: 12, practicePointsToday: 3, practiceDay: '2026-10-17' },
   timers: { playMsLeft: 1000, examMsLeft: 2000 },
   rotation: { weights: { a: 2 }, topicPointers: { t: 4 }, lessonsSeen: ['s1'] },
   switches: { modules: { taal: { on: true } } },
   session: { kind: 'break', step: 2 },
-  gate: { salt: 's', pinHash: 'h', wrongTries: 1, blockedUntil: 99, resetWrongTries: 0 },
+  gate: {
+    salt: 's',
+    pinHash: 'h',
+    wrongTries: 1,
+    blockedUntil: 99,
+    resetWrongTries: 0,
+  },
   stats: { playMsPerDay: { '2026-10-17': 60000 } },
-  meta: { schemaVersion: 1, appVersion: '0.1', lastBackup: '2026-10-17', createdAt: '2026-10-01' },
+  meta: {
+    schemaVersion: 1,
+    appVersion: '0.1',
+    lastBackup: '2026-10-17',
+    createdAt: '2026-10-01',
+  },
 };
 
 describe('records', () => {
@@ -55,7 +86,36 @@ describe('records', () => {
   it('fills missing fields from the default for an older save', async () => {
     const db = await fresh();
     await put(db, 'kv', { points: 7 }, 'economy');
-    expect(await getRecord(db, 'economy')).toEqual({ points: 7, practicePointsToday: 0, practiceDay: '' });
+    expect(await getRecord(db, 'economy')).toEqual({
+      points: 7,
+      practicePointsToday: 0,
+      practiceDay: '',
+    });
+    db.close();
+  });
+
+  it('fills the newer settings from the default for an old settings save', async () => {
+    const db = await fresh();
+    await put(
+      db,
+      'kv',
+      {
+        breakEveryMinutes: 12,
+        questionsPerBreak: 4,
+        volume: 0.3,
+        largeFont: true,
+      },
+      'settings',
+    );
+    expect(await getRecord(db, 'settings')).toEqual({
+      breakEveryMinutes: 12,
+      questionsPerBreak: 4,
+      volume: 0.3,
+      largeFont: true,
+      newLessonsEnabled: true,
+      breakWarningEnabled: true,
+      soundEffectsEnabled: true,
+    });
     db.close();
   });
 
