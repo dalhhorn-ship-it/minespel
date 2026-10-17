@@ -2,7 +2,8 @@
 // transaction over `kv` and `ledger` reads the economy, checks the price and the 12 cap again, and writes the
 // economy, the dinos record and the ledger line together. If anything fails the egg is taken out again and
 // nothing was written. A kill can therefore never take the points without the egg, or give the egg for free.
-// Buys run one after the other, so ten fast taps buy at most one egg for the points the kid has.
+// The whole buy runs inside queue.hold, so no save queue flush can read the dinos (with the new egg) while the
+// buy is open. Buys also run one after the other there, so ten fast taps buy at most one egg for the points.
 import type { Clock } from '../core/clock';
 import { dayKey } from '../core/clock';
 import { MSG_CAP_REACHED, purchaseEgg, shopDinoCount, capReached } from '../core/economy';
@@ -10,12 +11,14 @@ import type { DinoStore } from '../dinos/dino-store';
 import type { DinoKindId } from '../dinos/kinds';
 import { DINO_KINDS } from '../dinos/kinds';
 import { request, transact } from '../storage/db';
+import type { SaveQueue } from '../storage/save-queue';
 import { defaultKv, type EconomyRecord } from '../storage/schema';
 
 export interface PurchaseDeps {
   db: IDBDatabase;
   dinos: DinoStore;
   clock: Clock;
+  queue: SaveQueue;
 }
 
 export type BuyOutcome =
@@ -30,17 +33,14 @@ class Blocked extends Error {
   }
 }
 
-const queues = new WeakMap<DinoStore, Promise<unknown>>();
-
 /** Buys one egg of `kind`. Never throws. */
 export function buyEgg(deps: PurchaseDeps, kind: DinoKindId): Promise<BuyOutcome> {
-  const before = queues.get(deps.dinos) ?? Promise.resolve();
-  const run = before.then(() => buyNow(deps, kind));
-  queues.set(deps.dinos, run.catch(() => undefined));
-  return run;
+  return deps.queue.hold(() => buyNow(deps, kind)).catch(
+    (): BuyOutcome => ({ ok: false, reason: 'storage', note: MSG_BUY_FAILED, points: null }),
+  );
 }
 
-async function buyNow({ db, dinos, clock }: PurchaseDeps, kind: DinoKindId): Promise<BuyOutcome> {
+async function buyNow({ db, dinos, clock }: Omit<PurchaseDeps, 'queue'>, kind: DinoKindId): Promise<BuyOutcome> {
   const count = shopDinoCount(dinos.dinos.map((d) => d.state), dinos.eggs.map((e) => e.egg));
   if (capReached(count)) return { ok: false, reason: 'cap', note: MSG_CAP_REACHED, points: null };
   const entry = dinos.addEgg(kind);

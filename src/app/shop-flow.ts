@@ -14,9 +14,9 @@ export function openShop(screens: Screens, env: AppEnv): () => void {
     getPoints: async () => (await env.records?.get('economy'))?.points ?? 0,
     shopCount: () => shopDinoCount(env.dinos.dinos.map((d) => d.state), env.dinos.eggs.map((e) => e.egg)),
     buy: async (kind) => {
-      const db = env.db;
-      if (!env.saving || !db) return { ok: false, reason: 'storage', note: MSG_BUY_FAILED, points: null };
-      return buyEgg({ db, dinos: env.dinos, clock: env.clock }, kind);
+      const { db, queue } = env;
+      if (!env.saving || !db || !queue) return { ok: false, reason: 'storage', note: MSG_BUY_FAILED, points: null };
+      return buyEgg({ db, queue, dinos: env.dinos, clock: env.clock }, kind);
     },
     // The pause menu below read its points when it opened. Read them again now (it is still there).
     onClose: () => {

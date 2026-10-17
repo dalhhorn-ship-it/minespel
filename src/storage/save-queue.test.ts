@@ -81,4 +81,34 @@ describe('save queue', () => {
     expect(await get(db, 'kv', 'stats')).toBeUndefined();
     detach();
   });
+
+  it('hold keeps flushes out until it ends, and they then read fresh values', async () => {
+    const db = await fresh();
+    const q = createSaveQueue({ db, setTimer: () => 0, clearTimer: () => {} });
+    const eco = { points: 1 };
+    q.register('economy', () => eco);
+    let flushed: Promise<void> = Promise.resolve();
+    const result = await q.hold(async () => {
+      eco.points = 99; // a change that is undone before the hold ends
+      q.markDirty('economy');
+      flushed = q.flushNow();
+      await new Promise((r) => setTimeout(r, 10));
+      expect(await get(db, 'kv', 'economy')).toBeUndefined(); // the flush has not started
+      eco.points = 2;
+      return 'done';
+    });
+    expect(result).toBe('done');
+    await flushed;
+    expect(await get(db, 'kv', 'economy')).toEqual({ points: 2 });
+  });
+
+  it('hold passes on a failure and the queue keeps working', async () => {
+    const db = await fresh();
+    const q = createSaveQueue({ db, setTimer: () => 0, clearTimer: () => {} });
+    q.register('economy', () => ({ points: 5 }));
+    await expect(q.hold(() => Promise.reject(new Error('x')))).rejects.toThrow('x');
+    q.markDirty('economy');
+    await q.flushNow();
+    expect(await get(db, 'kv', 'economy')).toEqual({ points: 5 });
+  });
 });

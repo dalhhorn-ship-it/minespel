@@ -19,6 +19,11 @@ export interface SaveQueue {
   markDirty(name: KvName): void;
   /** Writes all dirty records now, in one transaction. */
   flushNow(): Promise<void>;
+  /**
+   * Runs `fn` alone on the queue's write chain. No flush starts or reads records while it runs.
+   * Flushes asked for meanwhile wait, then read fresh values. Do not call flushNow inside `fn`.
+   */
+  hold<T>(fn: () => Promise<T>): Promise<T>;
   /** Flushes when the page is hidden (not after simulateKill). Returns a detach function. */
   attachPageListeners(doc?: Document, win?: Window): () => void;
   /** Test only: stops flushing on hide, like iOS killing the app. */
@@ -64,6 +69,12 @@ export function createSaveQueue(options: SaveQueueOptions): SaveQueue {
     return chain;
   }
 
+  function hold<T>(fn: () => Promise<T>): Promise<T> {
+    const run = chain.then(fn);
+    chain = run.then(() => undefined, () => undefined);
+    return run;
+  }
+
   const queue: SaveQueue = {
     register(name, read) {
       readers.set(name, read);
@@ -78,6 +89,7 @@ export function createSaveQueue(options: SaveQueueOptions): SaveQueue {
       }
     },
     flushNow,
+    hold,
     attachPageListeners(doc = document, win = window) {
       const onHide = () => {
         if (killed) return;

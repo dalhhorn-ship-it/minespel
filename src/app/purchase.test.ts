@@ -4,6 +4,7 @@ import { createDinoStore } from '../dinos/dino-store';
 import { openDb } from '../storage/db';
 import { createLogStore } from '../storage/log-store';
 import { createRecords } from '../storage/records';
+import { createSaveQueue } from '../storage/save-queue';
 import { buyEgg, MSG_BUY_FAILED } from './purchase';
 
 let n = 0;
@@ -13,7 +14,9 @@ async function setup(points: number) {
   await records.put('economy', { points, practicePointsToday: 0, practiceDay: '' });
   const dinos = createDinoStore();
   const clock = createFakeClock(Date.UTC(2026, 9, 17, 12));
-  return { db, records, dinos, clock, deps: { db, dinos, clock } };
+  const queue = createSaveQueue({ db, setTimer: () => 0, clearTimer: () => undefined });
+  queue.register('dinos', () => dinos.toRecord());
+  return { db, records, dinos, clock, queue, deps: { db, dinos, clock, queue } };
 }
 
 describe('buyEgg', () => {
@@ -69,6 +72,37 @@ describe('buyEgg', () => {
     expect(await createLogStore(s.db).listLedger()).toHaveLength(0);
     // and a later purchase still works
     expect((await buyEgg(s.deps, 'compy')).ok).toBe(true);
+  });
+});
+
+describe('buyEgg with a save queue flush in the middle', () => {
+  it('a failed buy leaves no egg on disk and the economy unchanged', async () => {
+    const s = await setup(45);
+    let flushed: Promise<void> | null = null;
+    const bad = {
+      ...s.deps,
+      clock: { now: (): number => { s.queue.markDirty('dinos'); flushed = s.queue.flushNow(); throw new Error('boom'); } },
+    };
+    const r = await buyEgg(bad, 'triceratops');
+    expect(r.ok).toBe(false);
+    await flushed;
+    await s.queue.flushNow();
+    expect(s.dinos.eggs).toHaveLength(0);
+    expect((await s.records.get('dinos')).eggs).toHaveLength(0);
+    expect((await s.records.get('economy')).points).toBe(45);
+    expect(await createLogStore(s.db).listLedger()).toHaveLength(0);
+  });
+
+  it('a successful buy with a concurrent flush saves exactly one egg', async () => {
+    const s = await setup(45);
+    let flushed: Promise<void> | null = null;
+    const clock = { now: (): number => { s.queue.markDirty('dinos'); flushed = s.queue.flushNow(); return s.clock.now(); } };
+    const r = await buyEgg({ ...s.deps, clock }, 'triceratops');
+    expect(r.ok).toBe(true);
+    await flushed;
+    expect((await s.records.get('dinos')).eggs).toHaveLength(1);
+    expect((await s.records.get('economy')).points).toBe(5);
+    expect(await createLogStore(s.db).listLedger()).toHaveLength(1);
   });
 });
 
