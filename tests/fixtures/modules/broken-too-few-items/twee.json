@@ -1,0 +1,119 @@
+{
+  "id": "twee",
+  "title": "twee",
+  "groups": [
+    6
+  ],
+  "lesson": {
+    "pages": [
+      {
+        "title": "Les",
+        "text": "Een korte uitleg.",
+        "examples": [
+          {
+            "good": "De dino loopt."
+          }
+        ],
+        "skill": "s"
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "beer-01",
+      "type": "choice",
+      "prompt": "Welk woord past?",
+      "sentence": "De dino beer nummer 1 rent ...",
+      "options": [
+        "snel",
+        "snelt",
+        "sneld"
+      ],
+      "answer": 0,
+      "level": "M6",
+      "skill": "s",
+      "explain": "Uitleg met de regel."
+    },
+    {
+      "id": "beer-02",
+      "type": "find-error",
+      "prompt": "Welk woord is fout?",
+      "words": [
+        "Het",
+        "ij",
+        "van",
+        "beer",
+        "nummer2"
+      ],
+      "answer": 1,
+      "correction": "ei",
+      "level": "M6",
+      "skill": "s",
+      "explain": "Uitleg met de regel."
+    },
+    {
+      "id": "beer-03",
+      "type": "type",
+      "prompt": "Schrijf het goed.",
+      "sentence": "Ik (fietsen) beer 3.",
+      "answer": [
+        "fiets"
+      ],
+      "level": "M6",
+      "skill": "s",
+      "explain": "Uitleg met de regel."
+    },
+    {
+      "id": "beer-04",
+      "type": "punctuate",
+      "prompt": "Tik waar een komma moet.",
+      "mark": ",",
+      "words": [
+        "Ik",
+        "zag",
+        "beer",
+        "een4",
+        "en",
+        "ei."
+      ],
+      "answer": [
+        2
+      ],
+      "level": "M6",
+      "skill": "s",
+      "explain": "Uitleg met de regel."
+    },
+    {
+      "id": "beer-05",
+      "type": "choice",
+      "prompt": "Welk woord past?",
+      "sentence": "De dino beer nummer 5 rent ...",
+      "options": [
+        "snel",
+        "snelt",
+        "sneld"
+      ],
+      "answer": 0,
+      "level": "M6",
+      "skill": "s",
+      "explain": "Uitleg met de regel."
+    },
+    {
+      "id": "beer-06",
+      "type": "find-error",
+      "prompt": "Welk woord is fout?",
+      "words": [
+        "Het",
+        "ij",
+        "van",
+        "beer",
+        "nummer6"
+      ],
+      "answer": 1,
+      "correction": "ei",
+      "level": "M6",
+      "skill": "s",
+      "explain": "Uitleg met de regel."
+    }
+  ]
+}

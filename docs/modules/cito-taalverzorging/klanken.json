@@ -1,0 +1,575 @@
+{
+  "id": "klanken",
+  "title": "Klanken en lettergrepen",
+  "groups": [
+    6,
+    7
+  ],
+  "lesson": {
+    "pages": [
+      {
+        "title": "ei of ij",
+        "text": "De klank in 'ei' en in 'blij' klinkt hetzelfde. Toch schrijf je het anders. Daar is geen regel voor. Je moet de woorden leren.",
+        "examples": [
+          {
+            "good": "De dino legt een groot ei.",
+            "bad": "De dino legt een groot ij."
+          },
+          {
+            "good": "Ik ben blij met mijn kleine dino.",
+            "bad": "Ik ben blei met mijn klijne dino."
+          }
+        ],
+        "tip": "Twijfel je? Denk aan een woord uit dezelfde familie: klein, kleiner, kleinste. Ze hebben allemaal ei."
+      },
+      {
+        "title": "au of ou",
+        "text": "Ook au en ou klinken hetzelfde. Ook hier moet je de woorden leren. Woorden uit dezelfde familie schrijf je op dezelfde manier.",
+        "examples": [
+          {
+            "good": "Het blauwe blok is koud.",
+            "bad": "Het blouwe blok is kaud."
+          },
+          {
+            "good": "De dino bouwt een gouden toren.",
+            "bad": "De dino bauwt een gauden toren."
+          }
+        ],
+        "tip": "Blauw, pauw en saus hebben au. Koud, goud en bouwen hebben ou."
+      },
+      {
+        "title": "g of ch, cht of gt",
+        "text": "De g en de ch klinken bijna hetzelfde. Maak het woord langer. Hoor je dan een g, dan schrijf je g. Bij werkwoorden kijk je naar het hele werkwoord: lachen wordt lacht, zeggen wordt zegt.",
+        "examples": [
+          {
+            "good": "De berg is hoog.",
+            "bad": "De berch is hooch.",
+            "why": "Bergen en hoge: je hoort een g."
+          },
+          {
+            "good": "De dino lacht en zegt hallo.",
+            "bad": "De dino lagt en zecht hallo.",
+            "why": "Lachen geeft lacht. Zeggen geeft zegt."
+          }
+        ],
+        "tip": "Maak het woord langer: hoog wordt hoge, dag wordt dagen."
+      },
+      {
+        "title": "Eén of twee klinkers, één of twee medeklinkers",
+        "text": "Hak een woord in klankgroepen. Eindigt een klankgroep op een lange klank, zoals aa, ee, oo of uu? Dan schrijf je die klank met één letter. Is de klank kort? Dan verdubbel je de medeklinker.",
+        "examples": [
+          {
+            "good": "boom wordt bo-men",
+            "bad": "boo-men",
+            "why": "Lange o aan het eind van de klankgroep: één o."
+          },
+          {
+            "good": "bom wordt bom-men",
+            "bad": "bo-men",
+            "why": "Korte o: dubbele m."
+          },
+          {
+            "good": "maan wordt ma-nen",
+            "bad": "maa-nen"
+          }
+        ],
+        "tip": "Lange klank aan het eind van een klankgroep? Eén klinker is genoeg."
+      },
+      {
+        "title": "f of v, s of z",
+        "text": "Aan het eind van een woord schrijf je nooit een v of een z. Maar in het meervoud hoor je soms wel een v of z. Dan schrijf je die ook.",
+        "examples": [
+          {
+            "good": "Eén brief, twee brieven.",
+            "bad": "Eén brief, twee briefen."
+          },
+          {
+            "good": "Eén huis, twee huizen.",
+            "bad": "Eén huiz, twee huisen."
+          }
+        ],
+        "tip": "Zeg het meervoud hardop. Hoor je een v of z? Schrijf die dan in het meervoud."
+      },
+      {
+        "title": "eer, eur, oor, eeuw en ieuw",
+        "text": "Voor een r klinkt ee, eu en oo een beetje anders. Toch schrijf je gewoon ee, eu of oo. Woorden als sneeuw en nieuw eindigen op eeuw of ieuw. Vergeet de w niet.",
+        "examples": [
+          {
+            "good": "De beer gluurt door de deur met zijn oor.",
+            "bad": "De beir gluurt door de dur met zijn ohr."
+          },
+          {
+            "good": "De leeuw speelt in de nieuwe sneeuw.",
+            "bad": "De leeu speelt in de niewe sneew."
+          }
+        ],
+        "tip": "Eeuw en ieuw: altijd met een w aan het eind."
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "kl-001",
+      "type": "choice",
+      "level": "M6",
+      "skill": "ei-ij",
+      "prompt": "Welk woord moet op de stippen?",
+      "sentence": "De dino is ... met zijn ei.",
+      "options": [
+        "blij",
+        "blei",
+        "bly"
+      ],
+      "answer": 0,
+      "explain": "Blij schrijf je met ij. Ei of ij moet je leren: blij, blijer, blijdschap."
+    },
+    {
+      "id": "kl-002",
+      "type": "choice",
+      "level": "M6",
+      "skill": "au-ou",
+      "prompt": "Welk woord moet op de stippen?",
+      "sentence": "Het ijs is erg ...",
+      "options": [
+        "kaud",
+        "koud",
+        "kout",
+        "kaut"
+      ],
+      "answer": 1,
+      "explain": "Koud schrijf je met ou en een d, net als kouder."
+    },
+    {
+      "id": "kl-003",
+      "type": "choice",
+      "level": "M6",
+      "skill": "open-gesloten",
+      "prompt": "Welk woord moet op de stippen?",
+      "sentence": "In het bos staan veel hoge ...",
+      "options": [
+        "bomen",
+        "bommen",
+        "boomen"
+      ],
+      "answer": 0,
+      "explain": "Boom wordt bo-men. De lange o staat aan het eind van de klankgroep, dus één o."
+    },
+    {
+      "id": "kl-004",
+      "type": "find-error",
+      "level": "M6",
+      "skill": "ei-ij",
+      "prompt": "Welk woord is fout geschreven?",
+      "words": [
+        "Mijn",
+        "klijne",
+        "dino",
+        "speelt",
+        "graag",
+        "in",
+        "de",
+        "wei."
+      ],
+      "answer": 1,
+      "correction": "kleine",
+      "explain": "Klein schrijf je met ei. Dat is een ei woord dat je moet leren."
+    },
+    {
+      "id": "kl-005",
+      "type": "find-error",
+      "level": "M6",
+      "skill": "g-ch",
+      "prompt": "Welk woord is fout geschreven?",
+      "words": [
+        "De",
+        "dino",
+        "tilt",
+        "het",
+        "zware",
+        "blok",
+        "hooch",
+        "op."
+      ],
+      "answer": 6,
+      "correction": "hoog",
+      "explain": "Hoog schrijf je met g. Maak het langer: hoge. Je hoort een g."
+    },
+    {
+      "id": "kl-006",
+      "type": "type",
+      "level": "M6",
+      "skill": "f-v-s-z",
+      "prompt": "Schrijf het meervoud.",
+      "sentence": "één brief, twee ...",
+      "answer": [
+        "brieven"
+      ],
+      "explain": "Brief wordt brieven. In het meervoud hoor je een v, dus schrijf je een v."
+    },
+    {
+      "id": "kl-007",
+      "type": "type",
+      "level": "M6",
+      "skill": "au-ou",
+      "prompt": "Verbeter het woord tussen haakjes.",
+      "sentence": "De lucht is (blouw).",
+      "answer": [
+        "blauw"
+      ],
+      "explain": "Blauw schrijf je met au. Dat moet je leren, net als pauw."
+    },
+    {
+      "id": "kl-008",
+      "type": "choice",
+      "level": "E6",
+      "skill": "f-v-s-z",
+      "prompt": "Welk woord moet op de stippen?",
+      "sentence": "De dino's wonen in grote ...",
+      "options": [
+        "huisen",
+        "huizen",
+        "huizzen"
+      ],
+      "answer": 1,
+      "explain": "Huis wordt huizen. In het meervoud hoor je een z, dus schrijf je een z."
+    },
+    {
+      "id": "kl-009",
+      "type": "choice",
+      "level": "E6",
+      "skill": "eer-eur-oor",
+      "prompt": "Welk woord moet op de stippen?",
+      "sentence": "De dino doet de ... dicht.",
+      "options": [
+        "deur",
+        "duir",
+        "dur"
+      ],
+      "answer": 0,
+      "explain": "Deur schrijf je met eu. Voor een r klinkt eu anders, maar je schrijft gewoon eu."
+    },
+    {
+      "id": "kl-010",
+      "type": "find-error",
+      "level": "E6",
+      "skill": "open-gesloten",
+      "prompt": "Welk woord is fout geschreven?",
+      "words": [
+        "De",
+        "dino",
+        "springt",
+        "over",
+        "de",
+        "stennen",
+        "in",
+        "de",
+        "beek."
+      ],
+      "answer": 5,
+      "correction": "stenen",
+      "explain": "Steen wordt ste-nen. De lange e staat aan het eind van de klankgroep, dus één e en één n."
+    },
+    {
+      "id": "kl-011",
+      "type": "find-error",
+      "level": "E6",
+      "skill": "cht-gt",
+      "prompt": "Welk woord is fout geschreven?",
+      "words": [
+        "Mijn",
+        "zus",
+        "zecht",
+        "dat",
+        "de",
+        "draak",
+        "hard",
+        "lacht."
+      ],
+      "answer": 2,
+      "correction": "zegt",
+      "explain": "Zeggen wordt zegt, met een g. Lachen wordt lacht, met ch. Kijk naar het hele werkwoord."
+    },
+    {
+      "id": "kl-012",
+      "type": "find-error",
+      "level": "E6",
+      "skill": "eeuw-ieuw",
+      "prompt": "Welk woord is fout geschreven?",
+      "words": [
+        "De",
+        "leeuw",
+        "ligt",
+        "in",
+        "de",
+        "sneeuw",
+        "en",
+        "kijkt",
+        "naar",
+        "de",
+        "bomen."
+      ],
+      "answer": -1,
+      "correction": null,
+      "explain": "Geen fout. Leeuw en sneeuw eindigen op eeuw, met een w aan het eind."
+    },
+    {
+      "id": "kl-013",
+      "type": "type",
+      "level": "E6",
+      "skill": "open-gesloten",
+      "prompt": "Schrijf het meervoud.",
+      "sentence": "één maan, twee ...",
+      "answer": [
+        "manen"
+      ],
+      "explain": "Maan wordt ma-nen. De lange a staat aan het eind van de klankgroep, dus één a."
+    },
+    {
+      "id": "kl-014",
+      "type": "type",
+      "level": "E6",
+      "skill": "cht-gt",
+      "prompt": "Schrijf de goede vorm van het werkwoord.",
+      "sentence": "Hij (lachen) om de grap.",
+      "answer": [
+        "lacht"
+      ],
+      "explain": "Lachen heeft ch, dus hij lacht. Stam lach plus t."
+    },
+    {
+      "id": "kl-015",
+      "type": "choice",
+      "level": "M7",
+      "skill": "eeuw-ieuw",
+      "prompt": "Welk woord moet op de stippen?",
+      "sentence": "Ik heb een ... blok gevonden.",
+      "options": [
+        "nieuw",
+        "niew",
+        "niuw"
+      ],
+      "answer": 0,
+      "explain": "Nieuw schrijf je met ieuw. Vergeet de u en de w niet."
+    },
+    {
+      "id": "kl-016",
+      "type": "choice",
+      "level": "M7",
+      "skill": "open-gesloten",
+      "prompt": "Welk woord moet op de stippen?",
+      "sentence": "De dino heeft lange ... aan zijn poten.",
+      "options": [
+        "nagels",
+        "naggels",
+        "naagels"
+      ],
+      "answer": 0,
+      "explain": "Na-gels: de lange a staat aan het eind van de klankgroep, dus één a en één g."
+    },
+    {
+      "id": "kl-017",
+      "type": "choice",
+      "level": "M7",
+      "skill": "g-ch",
+      "prompt": "Welk woord moet op de stippen?",
+      "sentence": "Na de regen was de grond nog ...",
+      "options": [
+        "vochtig",
+        "vogtig",
+        "vochtich"
+      ],
+      "answer": 0,
+      "explain": "Vochtig komt van vocht, met ch. Het eind is altijd ig."
+    },
+    {
+      "id": "kl-018",
+      "type": "find-error",
+      "level": "M7",
+      "skill": "f-v-s-z",
+      "prompt": "Welk woord is fout geschreven?",
+      "words": [
+        "Op",
+        "de",
+        "tafel",
+        "liggen",
+        "twee",
+        "grote",
+        "kaasen",
+        "en",
+        "drie",
+        "broden."
+      ],
+      "answer": 6,
+      "correction": "kazen",
+      "explain": "Kaas wordt ka-zen. Je hoort een z, en de lange a aan het eind van de klankgroep schrijf je met één a."
+    },
+    {
+      "id": "kl-019",
+      "type": "find-error",
+      "level": "M7",
+      "skill": "eer-eur-oor",
+      "prompt": "Welk woord is fout geschreven?",
+      "words": [
+        "In",
+        "het",
+        "bos",
+        "sliep",
+        "een",
+        "grote",
+        "beir",
+        "onder",
+        "een",
+        "boom."
+      ],
+      "answer": 6,
+      "correction": "beer",
+      "explain": "Beer schrijf je met ee. Voor een r klinkt ee anders, maar je schrijft gewoon ee."
+    },
+    {
+      "id": "kl-020",
+      "type": "type",
+      "level": "M7",
+      "skill": "cht-gt",
+      "prompt": "Schrijf de goede vorm van het werkwoord.",
+      "sentence": "Wat (zeggen) de juf?",
+      "answer": [
+        "zegt"
+      ],
+      "explain": "Zeggen heeft een g, dus de juf zegt. Stam zeg plus t."
+    },
+    {
+      "id": "kl-021",
+      "type": "type",
+      "level": "M7",
+      "skill": "f-v-s-z",
+      "prompt": "Schrijf het meervoud.",
+      "sentence": "één golf in de zee, veel ...",
+      "answer": [
+        "golven"
+      ],
+      "explain": "Golf wordt golven. In het meervoud hoor je een v, dus schrijf je een v."
+    },
+    {
+      "id": "kl-022",
+      "type": "choice",
+      "level": "E7",
+      "skill": "lange-woorden",
+      "prompt": "Welk woord moet op de stippen?",
+      "sentence": "De storm in het dinobos was ... hard.",
+      "options": [
+        "verschrikkelijk",
+        "verschrikelijk",
+        "verschrikkellijk",
+        "ferschrikkelijk"
+      ],
+      "answer": 0,
+      "explain": "Ver-schrik-ke-lijk: de i is kort, dus twee k's. Het eind is elijk met één l."
+    },
+    {
+      "id": "kl-023",
+      "type": "choice",
+      "level": "E7",
+      "skill": "lange-woorden",
+      "prompt": "Welk woord moet op de stippen?",
+      "sentence": "De kinderen bouwen een ... kasteel in de blokwereld.",
+      "options": [
+        "reusachtig",
+        "reuzachtig",
+        "reusachtich",
+        "reuzechtig"
+      ],
+      "answer": 0,
+      "explain": "Reusachtig komt van reus, met een s. Het eind is achtig, met ch en ig."
+    },
+    {
+      "id": "kl-024",
+      "type": "find-error",
+      "level": "E7",
+      "skill": "f-v-s-z",
+      "prompt": "Welk woord is fout geschreven?",
+      "words": [
+        "De",
+        "ondersoekers",
+        "vonden",
+        "een",
+        "versteende",
+        "voetafdruk",
+        "van",
+        "een",
+        "dinosaurus."
+      ],
+      "answer": 1,
+      "correction": "onderzoekers",
+      "explain": "Onderzoekers komt van zoeken. Zoeken begint met een z."
+    },
+    {
+      "id": "kl-025",
+      "type": "find-error",
+      "level": "E7",
+      "skill": "lange-woorden",
+      "prompt": "Welk woord is fout geschreven?",
+      "words": [
+        "Gelukkig",
+        "vond",
+        "de",
+        "vermoeide",
+        "dinosaurus",
+        "een",
+        "schaduwrijke",
+        "plek",
+        "onder",
+        "de",
+        "bomen."
+      ],
+      "answer": -1,
+      "correction": null,
+      "explain": "Geen fout. Gelukkig heeft kk en ig, en bomen heeft één o omdat bo een open klankgroep is."
+    },
+    {
+      "id": "kl-026",
+      "type": "find-error",
+      "level": "E7",
+      "skill": "open-gesloten",
+      "prompt": "Welk woord is fout geschreven?",
+      "words": [
+        "In",
+        "de",
+        "herfst",
+        "vallen",
+        "de",
+        "gele",
+        "blaaderen",
+        "van",
+        "de",
+        "bomen."
+      ],
+      "answer": 6,
+      "correction": "bladeren",
+      "explain": "Bla-de-ren: de lange a staat aan het eind van de klankgroep, dus één a."
+    },
+    {
+      "id": "kl-027",
+      "type": "type",
+      "level": "E7",
+      "skill": "open-gesloten",
+      "prompt": "Schrijf het meervoud.",
+      "sentence": "één avontuur, twee ...",
+      "answer": [
+        "avonturen"
+      ],
+      "explain": "Avontuur wordt a-von-tu-ren. De lange u staat aan het eind van de klankgroep, dus één u."
+    },
+    {
+      "id": "kl-028",
+      "type": "type",
+      "level": "E7",
+      "skill": "eeuw-ieuw",
+      "prompt": "Schrijf het meervoud.",
+      "sentence": "één leeuw, twee ...",
+      "answer": [
+        "leeuwen"
+      ],
+      "explain": "Leeuw wordt leeuwen. De w blijft staan, je plakt er en achter."
+    }
+  ]
+}

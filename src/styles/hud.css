@@ -1,0 +1,89 @@
+/* HUD. Taps only, no hover states. Buttons are at least 56px (tokens --touch-min). */
+.hud {
+  position: fixed;
+  inset: 0;
+  pointer-events: none; /* the world gets the touches; only the parts below take them */
+  touch-action: none;
+  font-family: var(--font-stack);
+  font-size: var(--font-body);
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+.hud > * { position: absolute; }
+.hud-top {
+  top: calc(var(--safe-top) + var(--gap));
+  left: calc(var(--safe-left) + var(--gap));
+  right: calc(var(--safe-right) + var(--gap));
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--gap);
+}
+.hud-top > * { position: static; pointer-events: auto; }
+.hud-countdown { min-height: var(--touch-min); min-width: var(--touch-min); }
+.hud-btn {
+  pointer-events: auto;
+  min-width: var(--touch-min);
+  min-height: var(--touch-min);
+  padding: 0 calc(var(--gap) * 1.5);
+  border: 3px solid var(--ink);
+  border-radius: var(--radius);
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+  font-weight: 800;
+  touch-action: none;
+}
+.hud-btn[aria-pressed='true'] { background: var(--grass); color: var(--on-grass); }
+.hud-modes {
+  top: calc(var(--safe-top) + var(--touch-min) + var(--gap) * 2);
+  right: calc(var(--safe-right) + var(--gap));
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
+}
+.hud-jump {
+  right: calc(var(--safe-right) + var(--gap) * 2);
+  bottom: calc(var(--safe-bottom) + var(--touch-min) + var(--gap) * 4);
+  min-width: 96px;
+  min-height: 96px;
+  border-radius: 50%;
+}
+.hud-hotbar {
+  pointer-events: auto;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: calc(var(--safe-bottom) + var(--gap));
+  display: flex;
+  gap: 6px;
+}
+.hud-slot, .hud-all-blocks {
+  min-width: var(--touch-min);
+  min-height: var(--touch-min);
+  border: 3px solid var(--ink);
+  border-radius: var(--radius);
+  background: rgb(255 255 255 / 0.7);
+}
+.stick-base {
+  position: fixed;
+  width: calc(var(--stick-radius, 60px) * 2);
+  height: calc(var(--stick-radius, 60px) * 2);
+  margin: calc(var(--stick-radius, 60px) * -1) 0 0 calc(var(--stick-radius, 60px) * -1);
+  border-radius: 50%;
+  background: rgb(255 255 255 / 0.35);
+  border: 3px solid rgb(31 45 61 / 0.5);
+  pointer-events: none;
+}
+.stick-base[hidden] { display: none; }
+.stick-knob {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 48px;
+  height: 48px;
+  margin: -24px 0 0 -24px;
+  border-radius: 50%;
+  background: var(--paper);
+  border: 3px solid var(--ink);
+}

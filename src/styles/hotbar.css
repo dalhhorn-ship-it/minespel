@@ -1,0 +1,42 @@
+/* Hotbar slots, "Alle blokken" button and the block grid. Touch targets are at least 56px. */
+.hud-slot, .hud-all-blocks { padding: 0; overflow: hidden; }
+.hotbar-slot {
+  display: flex; align-items: center; justify-content: center;
+  width: 100%; height: 100%; min-width: var(--touch-min); min-height: var(--touch-min);
+  padding: 0; border: 0; background: transparent; touch-action: none;
+}
+.hotbar-slot[aria-pressed='true'] { outline: 5px solid var(--grass); outline-offset: -5px; background: var(--sand); }
+.hotbar-swatch { display: block; width: 34px; height: 34px; border: 2px solid var(--ink); border-radius: 6px; }
+.hotbar-all {
+  min-width: 96px; width: 100%; height: 100%; min-height: var(--touch-min);
+  padding: 0 var(--gap); border: 0; background: var(--paper); color: var(--ink);
+  font: inherit; font-size: 16px; font-weight: 800; touch-action: none;
+}
+.block-grid {
+  position: fixed; inset: 0; z-index: 20;
+  display: flex; align-items: center; justify-content: center;
+  background: rgb(31 45 61 / 0.45); pointer-events: auto; touch-action: none;
+  font-family: var(--font-stack); font-size: var(--font-body);
+  user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;
+}
+.block-grid[hidden] { display: none; }
+.grid-panel {
+  display: flex; flex-direction: column; align-items: center; gap: var(--gap);
+  padding: var(--gap) calc(var(--gap) * 1.5); border: 3px solid var(--ink);
+  border-radius: var(--radius); background: var(--paper); color: var(--ink);
+}
+.grid-title { font-size: var(--font-large); font-weight: 800; }
+.grid-cells { display: grid; grid-template-columns: repeat(8, 88px); gap: 8px; }
+.grid-block {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+  min-width: 88px; min-height: 76px; padding: 4px; border: 3px solid var(--ink);
+  border-radius: 12px; background: var(--sand); color: var(--ink);
+  font: inherit; font-size: 16px; font-weight: 700; touch-action: none;
+}
+.grid-swatch { display: block; width: 36px; height: 36px; border: 2px solid var(--ink); border-radius: 6px; }
+.grid-close {
+  min-width: 140px; min-height: var(--touch-min); border: 3px solid var(--ink);
+  border-radius: var(--radius); background: var(--grass); color: var(--on-grass);
+  font: inherit; font-weight: 800; touch-action: none;
+}
+@media (max-width: 900px) { .grid-cells { grid-template-columns: repeat(4, 88px); } }

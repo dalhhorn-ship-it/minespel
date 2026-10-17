@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "note": "M1 save: only the world and player records exist. Cell (32,28,32) is stone (3), cell (10,5,10) is air (0). Diff entries are cellIndex * 256 + blockId.",
+  "kv": {
+    "world": { "diff": [29892611, 5409280] },
+    "player": {
+      "x": 20.5, "y": 12, "z": 18.5,
+      "yaw": 1.25, "pitch": -0.3,
+      "hotbar": [12, 9, 10, 3, 1, 2, 7, 6],
+      "selectedSlot": 3,
+      "mode": "build"
+    }
+  }
+}

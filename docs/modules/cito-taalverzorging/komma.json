@@ -1,0 +1,636 @@
+{
+  "id": "komma",
+  "title": "De komma",
+  "groups": [
+    6,
+    7
+  ],
+  "lesson": {
+    "pages": [
+      {
+        "title": "Komma bij een opsomming",
+        "text": "Noem je een rijtje dingen op? Zet dan een komma tussen de dingen. Voor het laatste ding staat en of of. Daar komt geen komma.",
+        "examples": [
+          {
+            "good": "Rex eet bladeren, gras, takjes en bessen.",
+            "bad": "Rex eet bladeren, gras, takjes, en bessen."
+          },
+          {
+            "good": "Wil je appelsap, melk of water?"
+          }
+        ],
+        "tip": "Tussen elk paar komt een komma, behalve bij en of of."
+      },
+      {
+        "title": "Iemand aanspreken",
+        "text": "Praat je tegen iemand en noem je zijn naam? Dan zet je een komma tussen de naam en de rest van de zin. Staat de naam in het midden? Dan komt er een komma voor en na.",
+        "examples": [
+          {
+            "good": "Sam, kom je buiten spelen?",
+            "bad": "Sam kom je buiten spelen?"
+          },
+          {
+            "good": "Waar is je jas, Mila?"
+          },
+          {
+            "good": "Weet jij, Noor, waar Rex is?"
+          }
+        ]
+      },
+      {
+        "title": "Na ja en nee",
+        "text": "Begint een antwoord met ja of nee? Zet daarna een komma.",
+        "examples": [
+          {
+            "good": "Ja, ik wil graag een ijsje.",
+            "bad": "Ja ik wil graag een ijsje."
+          },
+          {
+            "good": "Nee, de dino mag niet in de klas."
+          }
+        ]
+      },
+      {
+        "title": "Twee zinnen aan elkaar",
+        "text": "Plak je twee hele zinnen aan elkaar zonder en? Zet er dan een komma tussen. Voor want komt ook een komma.",
+        "examples": [
+          {
+            "good": "De dino had honger, hij at een boom leeg."
+          },
+          {
+            "good": "We blijven binnen, want het regent hard.",
+            "bad": "We blijven binnen want, het regent hard."
+          }
+        ]
+      },
+      {
+        "title": "Werkwoord, werkwoord",
+        "text": "Begint de zin met een stukje als Toen de dino sliep of Als de zon schijnt? Dan komt er een komma na dat stukje. Vaak staan er dan twee werkwoorden naast elkaar, met een komma ertussen.",
+        "examples": [
+          {
+            "good": "Toen de dino sliep, sloop ik weg.",
+            "bad": "Toen de dino sliep sloop ik weg."
+          },
+          {
+            "good": "Als de zon schijnt, gaan we naar het strand."
+          }
+        ],
+        "tip": "Staan er twee werkwoorden naast elkaar? Dan hoort er vaak een komma tussen."
+      },
+      {
+        "title": "Extra uitleg, rijtjes woorden en geen komma",
+        "text": "Vertel je in de zin wie iemand is, zoals Rex, mijn dino? Zet die uitleg tussen twee komma's. Staan er een paar woorden op een rij die zeggen hoe iets is? Zet er dan een komma tussen, maar nooit vlak voor het ding zelf. In een gewone korte zin hoort vaak helemaal geen komma.",
+        "examples": [
+          {
+            "good": "Rex, mijn dino, eet graag sla.",
+            "bad": "Rex mijn dino, eet graag sla."
+          },
+          {
+            "good": "Ik zag een grote, groene dino.",
+            "bad": "Ik zag een grote, groene, dino."
+          },
+          {
+            "good": "De dino slaapt in een grote grot.",
+            "bad": "De dino slaapt, in een grote grot."
+          }
+        ]
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "km-001",
+      "type": "punctuate",
+      "level": "M6",
+      "skill": "opsomming",
+      "prompt": "Tik waar een komma moet.",
+      "mark": ",",
+      "words": [
+        "In",
+        "mijn",
+        "tas",
+        "zitten",
+        "een",
+        "boek",
+        "een",
+        "appel",
+        "en",
+        "een",
+        "pen."
+      ],
+      "answer": [
+        5
+      ],
+      "explain": "Tussen boek en een appel komt een komma. Voor en komt geen komma."
+    },
+    {
+      "id": "km-002",
+      "type": "punctuate",
+      "level": "M6",
+      "skill": "opsomming",
+      "prompt": "Tik waar een komma moet.",
+      "mark": ",",
+      "words": [
+        "Rex",
+        "eet",
+        "bladeren",
+        "gras",
+        "takjes",
+        "en",
+        "bessen."
+      ],
+      "answer": [
+        2,
+        3
+      ],
+      "explain": "Bij een opsomming komt een komma na bladeren en na gras. Voor en niet."
+    },
+    {
+      "id": "km-003",
+      "type": "punctuate",
+      "level": "M6",
+      "skill": "aanspreking",
+      "prompt": "Tik waar een komma moet.",
+      "mark": ",",
+      "words": [
+        "Sam",
+        "kom",
+        "je",
+        "buiten",
+        "spelen?"
+      ],
+      "answer": [
+        0
+      ],
+      "explain": "Je praat tegen Sam. Na de naam van wie je aanspreekt komt een komma."
+    },
+    {
+      "id": "km-004",
+      "type": "choice",
+      "level": "M6",
+      "skill": "opsomming",
+      "prompt": "Welke zin is goed?",
+      "options": [
+        "Ik bouw met hout, steen, en zand.",
+        "Ik bouw met hout, steen en zand.",
+        "Ik bouw met hout steen, en zand."
+      ],
+      "answer": 1,
+      "explain": "Bij een opsomming komt een komma tussen hout en steen. Voor en komt geen komma."
+    },
+    {
+      "id": "km-005",
+      "type": "punctuate",
+      "level": "M6",
+      "skill": "geen-komma",
+      "prompt": "Tik waar een komma moet.",
+      "mark": ",",
+      "words": [
+        "De",
+        "dino",
+        "slaapt",
+        "in",
+        "een",
+        "grote",
+        "grot."
+      ],
+      "answer": [],
+      "explain": "In deze korte zin hoort geen komma. Er is geen opsomming en je spreekt niemand aan."
+    },
+    {
+      "id": "km-006",
+      "type": "choice",
+      "level": "M6",
+      "skill": "ja-nee",
+      "prompt": "Welke zin is goed?",
+      "options": [
+        "Ja ik wil, graag een ijsje.",
+        "Ja, ik wil graag een ijsje.",
+        "Ja ik, wil graag een ijsje."
+      ],
+      "answer": 1,
+      "explain": "Begint een antwoord met ja? Dan komt er een komma na ja."
+    },
+    {
+      "id": "km-007",
+      "type": "choice",
+      "level": "M6",
+      "skill": "aanspreking",
+      "prompt": "Welke zin is goed?",
+      "options": [
+        "Noor, wil je mij helpen?",
+        "Noor wil je, mij helpen?",
+        "Noor wil je mij, helpen?"
+      ],
+      "answer": 0,
+      "explain": "Je praat tegen Noor. Na de naam komt een komma."
+    },
+    {
+      "id": "km-008",
+      "type": "punctuate",
+      "level": "E6",
+      "skill": "opsomming",
+      "prompt": "Tik waar een komma moet.",
+      "mark": ",",
+      "words": [
+        "Wil",
+        "je",
+        "appelsap",
+        "melk",
+        "of",
+        "water?"
+      ],
+      "answer": [
+        2
+      ],
+      "explain": "Bij een opsomming komt een komma tussen appelsap en melk. Voor of komt geen komma."
+    },
+    {
+      "id": "km-009",
+      "type": "choice",
+      "level": "E6",
+      "skill": "twee-zinnen",
+      "prompt": "Welke zin is goed?",
+      "options": [
+        "De dino had honger hij at, een boom leeg.",
+        "De dino had honger, hij at een boom leeg.",
+        "De dino, had honger hij at een boom leeg."
+      ],
+      "answer": 1,
+      "explain": "Hier staan twee hele zinnen aan elkaar zonder en. Daartussen komt een komma."
+    },
+    {
+      "id": "km-010",
+      "type": "punctuate",
+      "level": "E6",
+      "skill": "aanspreking",
+      "prompt": "Tik waar een komma moet.",
+      "mark": ",",
+      "words": [
+        "Waar",
+        "is",
+        "je",
+        "jas",
+        "Mila?"
+      ],
+      "answer": [
+        3
+      ],
+      "explain": "Je praat tegen Mila. Staat de naam achteraan? Dan komt de komma ervoor."
+    },
+    {
+      "id": "km-011",
+      "type": "punctuate",
+      "level": "E6",
+      "skill": "geen-komma",
+      "prompt": "Tik waar een komma moet.",
+      "mark": ",",
+      "words": [
+        "Sam",
+        "en",
+        "Noor",
+        "bouwen",
+        "samen",
+        "een",
+        "hoge",
+        "toren."
+      ],
+      "answer": [],
+      "explain": "Hier hoort geen komma. Tussen Sam en Noor staat en, dus daar komt geen komma."
+    },
+    {
+      "id": "km-012",
+      "type": "choice",
+      "level": "E6",
+      "skill": "twee-zinnen",
+      "prompt": "Welke zin is goed?",
+      "options": [
+        "Ik ga naar huis, want ik ben moe.",
+        "Ik ga, naar huis want ik ben moe.",
+        "Ik ga naar huis want, ik ben moe."
+      ],
+      "answer": 0,
+      "explain": "Twee zinnen met want ertussen: de komma komt voor want."
+    },
+    {
+      "id": "km-013",
+      "type": "choice",
+      "level": "E6",
+      "skill": "ja-nee",
+      "prompt": "Welke zin is goed?",
+      "options": [
+        "Nee de dino, mag niet in de klas.",
+        "Nee, de dino mag niet in de klas.",
+        "Nee de, dino mag niet in de klas."
+      ],
+      "answer": 1,
+      "explain": "Begint een antwoord met nee? Dan komt er een komma na nee."
+    },
+    {
+      "id": "km-014",
+      "type": "punctuate",
+      "level": "E6",
+      "skill": "twee-zinnen",
+      "prompt": "Tik waar een komma moet.",
+      "mark": ",",
+      "words": [
+        "We",
+        "blijven",
+        "binnen",
+        "want",
+        "het",
+        "regent",
+        "hard."
+      ],
+      "answer": [
+        2
+      ],
+      "explain": "Twee zinnen met want ertussen: de komma komt voor want."
+    },
+    {
+      "id": "km-015",
+      "type": "punctuate",
+      "level": "M7",
+      "skill": "werkwoord-werkwoord",
+      "prompt": "Tik waar een komma moet.",
+      "mark": ",",
+      "words": [
+        "Toen",
+        "de",
+        "dino",
+        "sliep",
+        "sloop",
+        "ik",
+        "zachtjes",
+        "weg."
+      ],
+      "answer": [
+        3
+      ],
+      "explain": "Het eerste stukje eindigt bij sliep. Daarna komt een komma. Sliep en sloop zijn twee werkwoorden naast elkaar."
+    },
+    {
+      "id": "km-016",
+      "type": "punctuate",
+      "level": "M7",
+      "skill": "werkwoord-werkwoord",
+      "prompt": "Tik waar een komma moet.",
+      "mark": ",",
+      "words": [
+        "Als",
+        "de",
+        "zon",
+        "schijnt",
+        "gaan",
+        "we",
+        "naar",
+        "het",
+        "strand."
+      ],
+      "answer": [
+        3
+      ],
+      "explain": "Na het stukje Als de zon schijnt komt een komma. Schijnt en gaan zijn twee werkwoorden naast elkaar."
+    },
+    {
+      "id": "km-017",
+      "type": "choice",
+      "level": "M7",
+      "skill": "werkwoord-werkwoord",
+      "prompt": "Welke zin is goed?",
+      "options": [
+        "Omdat het koud was trok, Sam een jas aan.",
+        "Omdat het koud was, trok Sam een jas aan.",
+        "Omdat, het koud was trok Sam een jas aan."
+      ],
+      "answer": 1,
+      "explain": "Na het stukje Omdat het koud was komt een komma. Was en trok zijn twee werkwoorden naast elkaar."
+    },
+    {
+      "id": "km-018",
+      "type": "punctuate",
+      "level": "M7",
+      "skill": "aanspreking",
+      "prompt": "Tik waar een komma moet.",
+      "mark": ",",
+      "words": [
+        "Weet",
+        "jij",
+        "Noor",
+        "waar",
+        "mijn",
+        "blokken",
+        "zijn?"
+      ],
+      "answer": [
+        1,
+        2
+      ],
+      "explain": "Je praat tegen Noor en de naam staat in het midden. Dan komt er een komma voor en na de naam."
+    },
+    {
+      "id": "km-019",
+      "type": "punctuate",
+      "level": "M7",
+      "skill": "bijvoeglijk",
+      "prompt": "Tik waar een komma moet.",
+      "mark": ",",
+      "words": [
+        "Rex",
+        "is",
+        "een",
+        "lieve",
+        "slimme",
+        "grappige",
+        "dino."
+      ],
+      "answer": [
+        3,
+        4
+      ],
+      "explain": "Drie woorden zeggen hoe Rex is. Daartussen komen komma's, maar niet vlak voor dino."
+    },
+    {
+      "id": "km-020",
+      "type": "choice",
+      "level": "M7",
+      "skill": "geen-komma",
+      "prompt": "Welke zin is goed?",
+      "options": [
+        "Morgen, ga ik naar opa.",
+        "Morgen ga ik naar opa.",
+        "Morgen ga ik, naar opa."
+      ],
+      "answer": 1,
+      "explain": "In deze korte zin hoort geen komma."
+    },
+    {
+      "id": "km-021",
+      "type": "punctuate",
+      "level": "M7",
+      "skill": "aanspreking",
+      "prompt": "Tik waar een komma moet.",
+      "mark": ",",
+      "words": [
+        "Mila",
+        "wil",
+        "je",
+        "appels",
+        "peren",
+        "of",
+        "druiven?"
+      ],
+      "answer": [
+        0,
+        3
+      ],
+      "explain": "Na Mila komt een komma, want je spreekt haar aan. Na appels komt een komma, want het is een opsomming."
+    },
+    {
+      "id": "km-022",
+      "type": "punctuate",
+      "level": "E7",
+      "skill": "bijstelling",
+      "prompt": "Tik waar een komma moet.",
+      "mark": ",",
+      "words": [
+        "Rex",
+        "mijn",
+        "dino",
+        "eet",
+        "graag",
+        "sla."
+      ],
+      "answer": [
+        0,
+        2
+      ],
+      "explain": "Mijn dino vertelt wie Rex is. Die uitleg staat tussen twee komma's."
+    },
+    {
+      "id": "km-023",
+      "type": "punctuate",
+      "level": "E7",
+      "skill": "bijstelling",
+      "prompt": "Tik waar een komma moet.",
+      "mark": ",",
+      "words": [
+        "Ik",
+        "speel",
+        "met",
+        "Noor",
+        "mijn",
+        "buurmeisje",
+        "in",
+        "de",
+        "tuin."
+      ],
+      "answer": [
+        3,
+        5
+      ],
+      "explain": "Mijn buurmeisje vertelt wie Noor is. Die uitleg staat tussen twee komma's."
+    },
+    {
+      "id": "km-024",
+      "type": "choice",
+      "level": "E7",
+      "skill": "bijstelling",
+      "prompt": "Welke zin is goed?",
+      "options": [
+        "Pluis onze kat slaapt, op de bank.",
+        "Pluis onze kat, slaapt op de bank.",
+        "Pluis, onze kat, slaapt op de bank."
+      ],
+      "answer": 2,
+      "explain": "Onze kat vertelt wie Pluis is. Die uitleg staat tussen twee komma's."
+    },
+    {
+      "id": "km-025",
+      "type": "choice",
+      "level": "E7",
+      "skill": "bijvoeglijk",
+      "prompt": "Welke zin is goed?",
+      "options": [
+        "Ik zag een grote, groene, dino.",
+        "Ik zag een grote, groene dino.",
+        "Ik zag een grote groene, dino."
+      ],
+      "answer": 1,
+      "explain": "Tussen grote en groene komt een komma. Vlak voor dino komt nooit een komma."
+    },
+    {
+      "id": "km-026",
+      "type": "punctuate",
+      "level": "E7",
+      "skill": "geen-komma",
+      "prompt": "Tik waar een komma moet.",
+      "mark": ",",
+      "words": [
+        "Na",
+        "het",
+        "eten",
+        "gaan",
+        "de",
+        "kinderen",
+        "naar",
+        "hun",
+        "kamer."
+      ],
+      "answer": [],
+      "explain": "Hier hoort geen komma. Na het eten is maar een kort stukje en er staan geen twee werkwoorden naast elkaar."
+    },
+    {
+      "id": "km-027",
+      "type": "punctuate",
+      "level": "E7",
+      "skill": "werkwoord-werkwoord",
+      "prompt": "Tik waar een komma moet.",
+      "mark": ",",
+      "words": [
+        "Nadat",
+        "we",
+        "hadden",
+        "gegeten",
+        "gingen",
+        "Sam",
+        "Noor",
+        "en",
+        "ik",
+        "buiten",
+        "spelen."
+      ],
+      "answer": [
+        3,
+        5
+      ],
+      "explain": "Na gegeten komt een komma: gegeten en gingen zijn twee werkwoorden naast elkaar. Na Sam komt een komma voor de opsomming."
+    },
+    {
+      "id": "km-028",
+      "type": "punctuate",
+      "level": "E7",
+      "skill": "bijstelling",
+      "prompt": "Tik waar een komma moet.",
+      "mark": ",",
+      "words": [
+        "Sam",
+        "mijn",
+        "broer",
+        "wil",
+        "een",
+        "taart",
+        "een",
+        "ijsje",
+        "en",
+        "limonade."
+      ],
+      "answer": [
+        0,
+        2,
+        5
+      ],
+      "explain": "Mijn broer vertelt wie Sam is, dus komma's ervoor en erna. Na taart komt een komma voor de opsomming."
+    }
+  ]
+}

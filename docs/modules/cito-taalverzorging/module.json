@@ -1,0 +1,98 @@
+{
+  "id": "cito-taalverzorging",
+  "title": "Taalverzorging (Cito en IEP stijl)",
+  "subject": "taal",
+  "version": 1,
+  "language": "nl",
+  "description": "Spelling, werkwoordspelling, hoofdletters, komma, apostrof en leestekens voor groep 6 en groep 7. Met lessen, oefenvragen en oefenexamens in de stijl van de Cito LVS en IEP toetsen.",
+  "levels": ["M6", "E6", "M7", "E7"],
+  "topics": [
+    "ww-tegenwoordig",
+    "ww-verleden",
+    "klanken",
+    "woordvormen",
+    "leenwoorden",
+    "trema-koppelteken",
+    "hoofdletters",
+    "komma",
+    "apostrof",
+    "leestekens"
+  ],
+  "exams": [
+    {
+      "id": "examen-m6",
+      "title": "Oefenexamen M6",
+      "levels": ["M6"],
+      "questionCount": 30,
+      "timeLimitMinutes": 30,
+      "passPercent": 70,
+      "mix": {
+        "ww-tegenwoordig": 3,
+        "klanken": 3,
+        "woordvormen": 2,
+        "hoofdletters": 1,
+        "komma": 2,
+        "apostrof": 1,
+        "leestekens": 1
+      }
+    },
+    {
+      "id": "examen-e6",
+      "title": "Oefenexamen E6",
+      "levels": ["M6", "E6"],
+      "questionCount": 30,
+      "timeLimitMinutes": 30,
+      "passPercent": 70,
+      "mix": {
+        "ww-tegenwoordig": 3,
+        "ww-verleden": 1,
+        "klanken": 2,
+        "woordvormen": 2,
+        "hoofdletters": 1,
+        "komma": 2,
+        "apostrof": 2,
+        "leestekens": 1
+      }
+    },
+    {
+      "id": "examen-m7",
+      "title": "Oefenexamen M7",
+      "levels": ["E6", "M7"],
+      "questionCount": 40,
+      "timeLimitMinutes": 40,
+      "passPercent": 70,
+      "mix": {
+        "ww-tegenwoordig": 2,
+        "ww-verleden": 3,
+        "klanken": 1,
+        "woordvormen": 1,
+        "leenwoorden": 2,
+        "trema-koppelteken": 1,
+        "hoofdletters": 1,
+        "komma": 2,
+        "apostrof": 2,
+        "leestekens": 1
+      }
+    },
+    {
+      "id": "examen-e7",
+      "title": "Oefenexamen E7",
+      "levels": ["M7", "E7"],
+      "questionCount": 40,
+      "timeLimitMinutes": 40,
+      "passPercent": 70,
+      "mix": {
+        "ww-tegenwoordig": 2,
+        "ww-verleden": 3,
+        "klanken": 1,
+        "woordvormen": 1,
+        "leenwoorden": 2,
+        "trema-koppelteken": 1,
+        "hoofdletters": 1,
+        "komma": 2,
+        "apostrof": 2,
+        "leestekens": 1
+      }
+    }
+  ]
+}

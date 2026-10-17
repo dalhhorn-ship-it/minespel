@@ -1,0 +1,14 @@
+// Cloudflare Workers hosting for Dino Blokwereld.
+// Static assets only: there is no Worker script, no KV, D1 or R2 (PRD section 10).
+// Not to be confused with the browser service worker in offline/service-worker.js.
+// Never put an account id or a token in this file. Deploying is a founder action at /ship.
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "dino-blokwereld",
+  "compatibility_date": "2026-10-17",
+  "assets": {
+    "directory": "./dist"
+  },
+  "workers_dev": true,
+  "preview_urls": false
+}

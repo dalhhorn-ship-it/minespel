@@ -1,0 +1,526 @@
+{
+  "id": "apostrof",
+  "title": "De apostrof",
+  "groups": [
+    6,
+    7
+  ],
+  "lesson": {
+    "pages": [
+      {
+        "title": "Meervoud met 's",
+        "text": "Eindigt een woord op a, i, o, u of y? Dan schrijf je het meervoud met een apostrof en een s. Zo blijft de klank lang: auto's, oma's, baby's, menu's, foto's.",
+        "examples": [
+          {
+            "good": "Er rijden veel auto's over de weg.",
+            "bad": "Er rijden veel autos over de weg."
+          },
+          {
+            "good": "Ik heb twee foto's van mijn dino.",
+            "bad": "Ik heb twee fotos van mijn dino."
+          }
+        ],
+        "tip": "Zonder apostrof zou je autos lezen met een korte o, zoals in vos."
+      },
+      {
+        "title": "Geen apostrof",
+        "text": "Eindigt het woord op een e of op é? Dan komt er geen apostrof: tantes, cafés. Bij woorden als bal en boek ook niet: ballen, boeken.",
+        "examples": [
+          {
+            "good": "De tantes van Sam komen op bezoek.",
+            "bad": "De tante's van Sam komen op bezoek."
+          },
+          {
+            "good": "In het dorp zijn twee cafés.",
+            "bad": "In het dorp zijn twee café's."
+          }
+        ]
+      },
+      {
+        "title": "Van wie is het?",
+        "text": "Is iets van iemand en eindigt de naam op a, i, o, u of y? Schrijf dan apostrof en s: Anna's boek, Timo's fiets. Eindigt de naam op s, x of z? Schrijf dan alleen een apostrof: Klaas' fiets, Max' pet. Bij alle andere namen schrijf je alleen een s: Sannes tekening, Peters tas.",
+        "examples": [
+          {
+            "good": "Dit is Anna's fiets.",
+            "bad": "Dit is Annas fiets."
+          },
+          {
+            "good": "Dit is Max' pet.",
+            "bad": "Dit is Max's pet."
+          },
+          {
+            "good": "Dat is Peters tas.",
+            "bad": "Dat is Peter's tas."
+          }
+        ],
+        "tip": "Klinker op het eind: 's. Een s, x of z op het eind: alleen '. Anders: alleen een s."
+      },
+      {
+        "title": "Er is iets weggelaten",
+        "text": "Soms laat je letters weg. Op die plek zet je een apostrof: 's ochtends (des ochtends), 's avonds, 's nachts, zo'n (zo een), m'n (mijn).",
+        "examples": [
+          {
+            "good": "Ik eet 's ochtends een boterham.",
+            "bad": "Ik eet s'ochtends een boterham."
+          },
+          {
+            "good": "Ik wil ook zo'n grote dino!",
+            "bad": "Ik wil ook zon grote dino!"
+          }
+        ]
+      },
+      {
+        "title": "Verkleinwoorden en afkortingen",
+        "text": "Een verkleinwoord van een woord op a, i, o, u of y krijgt ook een apostrof: auto'tje, oma'tje, baby'tje, foto'tje. Het meervoud van een afkorting die je letter voor letter zegt, krijgt ook een apostrof: cd's, tv's.",
+        "examples": [
+          {
+            "good": "Mijn zusje heeft een rood auto'tje.",
+            "bad": "Mijn zusje heeft een rood autotje."
+          },
+          {
+            "good": "Opa heeft een kast vol oude cd's.",
+            "bad": "Opa heeft een kast vol oude cds."
+          }
+        ]
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "ap-001",
+      "type": "choice",
+      "level": "M6",
+      "skill": "meervoud",
+      "prompt": "Welk woord moet op de stippen?",
+      "sentence": "Er rijden veel ... over de weg.",
+      "options": [
+        "autos",
+        "auto's",
+        "autoos"
+      ],
+      "answer": 1,
+      "explain": "Auto eindigt op een o. Het meervoud krijgt dan een apostrof: auto's."
+    },
+    {
+      "id": "ap-002",
+      "type": "find-error",
+      "level": "M6",
+      "skill": "meervoud",
+      "prompt": "Welk woord is fout geschreven?",
+      "words": [
+        "Ik",
+        "heb",
+        "twee",
+        "fotos",
+        "van",
+        "mijn",
+        "dino."
+      ],
+      "answer": 3,
+      "correction": "foto's",
+      "explain": "Foto eindigt op een o. In het meervoud schrijf je foto's, met een apostrof."
+    },
+    {
+      "id": "ap-003",
+      "type": "type",
+      "level": "M6",
+      "skill": "meervoud",
+      "prompt": "Schrijf het meervoud.",
+      "sentence": "één oma, twee ...",
+      "answer": [
+        "oma's"
+      ],
+      "explain": "Oma eindigt op een a. Het meervoud is oma's, met een apostrof."
+    },
+    {
+      "id": "ap-004",
+      "type": "choice",
+      "level": "M6",
+      "skill": "weglating",
+      "prompt": "Welk woord moet op de stippen?",
+      "sentence": "De dino slaapt ... in zijn nest.",
+      "options": [
+        "'s nachts",
+        "snachts",
+        "s'nachts"
+      ],
+      "answer": 0,
+      "explain": "'s nachts is kort voor des nachts. De apostrof staat op de plek waar letters weg zijn: voor de s."
+    },
+    {
+      "id": "ap-005",
+      "type": "find-error",
+      "level": "M6",
+      "skill": "meervoud",
+      "prompt": "Welk woord is fout geschreven?",
+      "words": [
+        "Mijn",
+        "opa's",
+        "hebben",
+        "allebei",
+        "een",
+        "tuin."
+      ],
+      "answer": -1,
+      "correction": null,
+      "explain": "Geen fout. Opa eindigt op een a, dus het meervoud is opa's."
+    },
+    {
+      "id": "ap-006",
+      "type": "type",
+      "level": "M6",
+      "skill": "meervoud",
+      "prompt": "Schrijf het meervoud.",
+      "sentence": "één baby, twee ...",
+      "answer": [
+        "baby's"
+      ],
+      "explain": "Baby eindigt op een y. Het meervoud is baby's, met een apostrof."
+    },
+    {
+      "id": "ap-007",
+      "type": "find-error",
+      "level": "M6",
+      "skill": "weglating",
+      "prompt": "Welk woord is fout geschreven?",
+      "words": [
+        "Ik",
+        "eet",
+        "s'ochtends",
+        "een",
+        "boterham."
+      ],
+      "answer": 2,
+      "correction": "'s ochtends",
+      "explain": "Je schrijft 's ochtends, los van elkaar. De apostrof staat voor de s, op de plek waar letters weg zijn."
+    },
+    {
+      "id": "ap-008",
+      "type": "choice",
+      "level": "E6",
+      "skill": "bezit-naam",
+      "prompt": "Welke zin is goed?",
+      "options": [
+        "Dit is Annas fiets.",
+        "Dit is Anna's fiets.",
+        "Dit is Annas' fiets."
+      ],
+      "answer": 1,
+      "explain": "Anna eindigt op een a. Is iets van haar? Dan schrijf je Anna's."
+    },
+    {
+      "id": "ap-009",
+      "type": "find-error",
+      "level": "E6",
+      "skill": "geen-apostrof",
+      "prompt": "Welk woord is fout geschreven?",
+      "words": [
+        "De",
+        "tante's",
+        "van",
+        "Sam",
+        "komen",
+        "op",
+        "bezoek."
+      ],
+      "answer": 1,
+      "correction": "tantes",
+      "explain": "Tante eindigt op een e. Dan komt er geen apostrof: tantes."
+    },
+    {
+      "id": "ap-010",
+      "type": "type",
+      "level": "E6",
+      "skill": "bezit-naam",
+      "prompt": "De fiets is van Timo. Wat moet er op de stippen?",
+      "sentence": "Dit is ... fiets.",
+      "answer": [
+        "Timo's"
+      ],
+      "explain": "Timo eindigt op een o. Is iets van hem? Dan schrijf je Timo's."
+    },
+    {
+      "id": "ap-011",
+      "type": "choice",
+      "level": "E6",
+      "skill": "weglating",
+      "prompt": "Welk woord moet op de stippen?",
+      "sentence": "Ik wil ook ... grote dino!",
+      "options": [
+        "zo'n",
+        "zon",
+        "z'on"
+      ],
+      "answer": 0,
+      "explain": "Zo'n is kort voor zo een. De apostrof staat waar de letters weg zijn."
+    },
+    {
+      "id": "ap-012",
+      "type": "find-error",
+      "level": "E6",
+      "skill": "meervoud",
+      "prompt": "Welk woord is fout geschreven?",
+      "words": [
+        "We",
+        "eten",
+        "pizzas",
+        "met",
+        "kaas."
+      ],
+      "answer": 2,
+      "correction": "pizza's",
+      "explain": "Pizza eindigt op een a. In het meervoud schrijf je pizza's, met een apostrof."
+    },
+    {
+      "id": "ap-013",
+      "type": "choice",
+      "level": "E6",
+      "skill": "bezit-zonder-apostrof",
+      "prompt": "Welke zin is goed?",
+      "options": [
+        "Dat is Peter's tas.",
+        "Dat is Peters tas.",
+        "Dat is Peters' tas."
+      ],
+      "answer": 1,
+      "explain": "Peter eindigt op een r. Dan schrijf je alleen een s, zonder apostrof: Peters tas."
+    },
+    {
+      "id": "ap-014",
+      "type": "type",
+      "level": "E6",
+      "skill": "meervoud",
+      "prompt": "Schrijf het meervoud.",
+      "sentence": "één menu, twee ...",
+      "answer": [
+        "menu's"
+      ],
+      "explain": "Menu eindigt op een u. Het meervoud is menu's, met een apostrof."
+    },
+    {
+      "id": "ap-015",
+      "type": "find-error",
+      "level": "M7",
+      "skill": "bezit-s-klank",
+      "prompt": "Welk woord is fout geschreven?",
+      "words": [
+        "Ik",
+        "leen",
+        "Klaas's",
+        "pen."
+      ],
+      "answer": 2,
+      "correction": "Klaas'",
+      "explain": "Klaas eindigt op een s. Is iets van hem? Dan schrijf je alleen een apostrof: Klaas'."
+    },
+    {
+      "id": "ap-016",
+      "type": "choice",
+      "level": "M7",
+      "skill": "verkleinwoord",
+      "prompt": "Welk woord moet op de stippen?",
+      "sentence": "Het ... van de dino ligt in het nest.",
+      "options": [
+        "babytje",
+        "baby'tje",
+        "baby-tje"
+      ],
+      "answer": 1,
+      "explain": "Baby eindigt op een y. Het verkleinwoord krijgt dan een apostrof: baby'tje."
+    },
+    {
+      "id": "ap-017",
+      "type": "type",
+      "level": "M7",
+      "skill": "verkleinwoord",
+      "prompt": "Schrijf het verkleinwoord.",
+      "sentence": "een foto, een klein ...",
+      "answer": [
+        "foto'tje"
+      ],
+      "explain": "Foto eindigt op een o. Het verkleinwoord krijgt dan een apostrof: foto'tje."
+    },
+    {
+      "id": "ap-018",
+      "type": "find-error",
+      "level": "M7",
+      "skill": "bezit-zonder-apostrof",
+      "prompt": "Welk woord is fout geschreven?",
+      "words": [
+        "Dat",
+        "is",
+        "Sanne's",
+        "tekening",
+        "van",
+        "een",
+        "dino."
+      ],
+      "answer": 2,
+      "correction": "Sannes",
+      "explain": "Sanne eindigt op een e. Dan schrijf je alleen een s, zonder apostrof: Sannes."
+    },
+    {
+      "id": "ap-019",
+      "type": "choice",
+      "level": "M7",
+      "skill": "weglating",
+      "prompt": "Welke zin is goed?",
+      "options": [
+        "Ik zoek m'n schoen.",
+        "Ik zoek mn schoen.",
+        "Ik zoek 'mn schoen."
+      ],
+      "answer": 0,
+      "explain": "M'n is kort voor mijn. De apostrof staat waar de letters weg zijn: tussen m en n."
+    },
+    {
+      "id": "ap-020",
+      "type": "find-error",
+      "level": "M7",
+      "skill": "meervoud",
+      "prompt": "Welk woord is fout geschreven?",
+      "words": [
+        "Op",
+        "zondag",
+        "rijden",
+        "er",
+        "weinig",
+        "auto's",
+        "door",
+        "de",
+        "straat."
+      ],
+      "answer": -1,
+      "correction": null,
+      "explain": "Geen fout. Auto eindigt op een o, dus het meervoud is auto's."
+    },
+    {
+      "id": "ap-021",
+      "type": "type",
+      "level": "M7",
+      "skill": "bezit-s-klank",
+      "prompt": "De pet is van Max. Wat moet er op de stippen?",
+      "sentence": "Dit is ... pet.",
+      "answer": [
+        "Max'"
+      ],
+      "explain": "Max eindigt op een x. Is iets van hem? Dan schrijf je alleen een apostrof: Max'."
+    },
+    {
+      "id": "ap-022",
+      "type": "choice",
+      "level": "E7",
+      "skill": "afkorting",
+      "prompt": "Welk woord moet op de stippen?",
+      "sentence": "Opa heeft een kast vol oude ...",
+      "options": [
+        "cds",
+        "cd's",
+        "c.d.'s"
+      ],
+      "answer": 1,
+      "explain": "Het meervoud van een afkorting die je letter voor letter zegt, krijgt een apostrof: cd's."
+    },
+    {
+      "id": "ap-023",
+      "type": "type",
+      "level": "E7",
+      "skill": "afkorting",
+      "prompt": "Schrijf het meervoud.",
+      "sentence": "één tv, twee ...",
+      "answer": [
+        "tv's"
+      ],
+      "explain": "Tv is een afkorting die je letter voor letter zegt. Het meervoud is tv's."
+    },
+    {
+      "id": "ap-024",
+      "type": "find-error",
+      "level": "E7",
+      "skill": "verkleinwoord",
+      "prompt": "Welk woord is fout geschreven?",
+      "words": [
+        "Mijn",
+        "zusje",
+        "heeft",
+        "een",
+        "rood",
+        "autotje",
+        "gekregen."
+      ],
+      "answer": 5,
+      "correction": "auto'tje",
+      "explain": "Auto eindigt op een o. Het verkleinwoord krijgt een apostrof: auto'tje."
+    },
+    {
+      "id": "ap-025",
+      "type": "choice",
+      "level": "E7",
+      "skill": "geen-apostrof",
+      "prompt": "Welke zin is goed?",
+      "options": [
+        "In het dorp zijn twee café's.",
+        "In het dorp zijn twee cafés.",
+        "In het dorp zijn twee cafe's."
+      ],
+      "answer": 1,
+      "explain": "Café eindigt op é. Dan komt er geen apostrof: cafés."
+    },
+    {
+      "id": "ap-026",
+      "type": "find-error",
+      "level": "E7",
+      "skill": "bezit-s-klank",
+      "prompt": "Welk woord is fout geschreven?",
+      "words": [
+        "Rex'",
+        "ei",
+        "is",
+        "groter",
+        "dan",
+        "het",
+        "ei",
+        "van",
+        "Bobo."
+      ],
+      "answer": -1,
+      "correction": null,
+      "explain": "Geen fout. Rex eindigt op een x. Is iets van hem? Dan schrijf je alleen een apostrof: Rex'."
+    },
+    {
+      "id": "ap-027",
+      "type": "choice",
+      "level": "E7",
+      "skill": "weglating",
+      "prompt": "In welke zin staan de apostrofs goed?",
+      "options": [
+        "Wij eten 's avonds pizza's.",
+        "Wij eten s'avonds pizza's.",
+        "Wij eten 's avonds pizzas'."
+      ],
+      "answer": 0,
+      "explain": "Bij 's avonds staat de apostrof voor de s. Bij pizza's komen apostrof en s na de a."
+    },
+    {
+      "id": "ap-028",
+      "type": "find-error",
+      "level": "E7",
+      "skill": "bezit-zonder-apostrof",
+      "prompt": "Welk woord is fout geschreven?",
+      "words": [
+        "Ik",
+        "speel",
+        "morgen",
+        "met",
+        "Eva's",
+        "hond",
+        "en",
+        "Bram's",
+        "kat."
+      ],
+      "answer": 7,
+      "correction": "Brams",
+      "explain": "Bram eindigt op een m. Dan schrijf je alleen een s: Brams. Eva's is wel goed, want Eva eindigt op een a."
+    }
+  ]
+}

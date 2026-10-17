@@ -1,0 +1,30 @@
+{
+  "id": "fixture",
+  "title": "Fixture",
+  "subject": "taal",
+  "version": 1,
+  "language": "nl",
+  "levels": [
+    "M6"
+  ],
+  "topics": [
+    "een",
+    "twee"
+  ],
+  "exams": [
+    {
+      "id": "ex",
+      "title": "Examen",
+      "levels": [
+        "M6"
+      ],
+      "questionCount": 40,
+      "timeLimitMinutes": null,
+      "passPercent": 70,
+      "mix": {
+        "een": 1,
+        "twee": 1
+      }
+    }
+  ]
+}
