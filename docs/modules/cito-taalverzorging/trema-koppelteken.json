@@ -1,0 +1,581 @@
+{
+  "id": "trema-koppelteken",
+  "title": "Trema en koppelteken",
+  "groups": [
+    7
+  ],
+  "lesson": {
+    "pages": [
+      {
+        "title": "Het trema",
+        "text": "Soms staan er twee klinkers naast elkaar die je niet samen moet lezen. Dan zet je twee puntjes op de klinker waar een nieuwe klankgroep begint. Die puntjes heten een trema.",
+        "examples": [
+          {
+            "good": "De dino speelt bij een oude ruïne.",
+            "bad": "De dino speelt bij een oude ruine.",
+            "why": "Zonder trema lees je 'rui' zoals in 'ruiken'. Het is ru-ï-ne."
+          },
+          {
+            "good": "Mijn zus is geïnteresseerd in dino's.",
+            "bad": "Mijn zus is geinteresseerd in dino's."
+          }
+        ],
+        "tip": "Zou je de klinkers verkeerd samen lezen? Zet dan een trema op de klinker waar de nieuwe klankgroep begint."
+      },
+      {
+        "title": "Trema in het meervoud",
+        "text": "Woorden op ee of ie krijgen in het meervoud vaak ën. Het trema laat zien dat de ë bij een nieuwe klankgroep hoort.",
+        "examples": [
+          {
+            "good": "één idee, veel ideeën",
+            "bad": "veel ideeen"
+          },
+          {
+            "good": "één knie, twee knieën. één zee, twee zeeën.",
+            "bad": "twee kniëen, twee zeeen"
+          }
+        ],
+        "tip": "Het trema staat op de e van en: ideeën, knieën, zeeën."
+      },
+      {
+        "title": "Koppelteken als klinkers botsen",
+        "text": "Plak je twee woorden aan elkaar? Soms staat er dan een klinker aan het eind van het eerste woord en aan het begin van het tweede woord. Zou je die samen als één klank lezen? Dan zet je er een koppelteken tussen.",
+        "examples": [
+          {
+            "good": "Ik zag een zee-egel en een zee-eend.",
+            "bad": "Ik zag een zeeegel en een zeeëend."
+          },
+          {
+            "good": "De speelgoedauto's hadden een auto-ongeluk.",
+            "bad": "De speelgoedauto's hadden een autoongeluk."
+          },
+          {
+            "good": "De politieagent loopt op straat.",
+            "bad": "De politie-agent loopt op straat.",
+            "why": "Ie en a lees je niet als één klank. Dus geen koppelteken."
+          }
+        ],
+        "tip": "Lees je ee, oo, ou of een andere klank die niet bij elkaar hoort? Zet er dan een koppelteken tussen."
+      },
+      {
+        "title": "Koppelteken bij namen van gebieden",
+        "text": "Sommige namen van provincies en landen bestaan uit twee delen, zoals Noord en Holland. Daar komt een koppelteken tussen. Beide delen krijgen een hoofdletter.",
+        "examples": [
+          {
+            "good": "Oma woont in Noord-Holland. Kaapstad ligt in Zuid-Afrika.",
+            "bad": "Oma woont in Noordholland. Kaapstad ligt in Zuid Afrika."
+          },
+          {
+            "good": "We varen over de Noordzee.",
+            "bad": "We varen over de Noord-zee.",
+            "why": "Noordzee is één naam, en zee is geen eigen naam. Dus aan elkaar."
+          }
+        ],
+        "tip": "Noord-Holland, Zuid-Holland, Noord-Brabant: koppelteken en twee hoofdletters."
+      },
+      {
+        "title": "Koppelteken na oud en ex, en bij letters",
+        "text": "Na oud en ex in de betekenis van 'vroeger' komt een koppelteken. Ook als een woord met een losse letter of een afkorting begint, zet je een koppelteken.",
+        "examples": [
+          {
+            "good": "De oud-leerling en de ex-kampioen kwamen op bezoek.",
+            "bad": "De oudleerling en de exkampioen kwamen op bezoek."
+          },
+          {
+            "good": "Ik keek een tv-programma in mijn T-shirt.",
+            "bad": "Ik keek een tvprogramma in mijn Tshirt."
+          },
+          {
+            "good": "Ik stuur oma een e-mail en koop wc-papier.",
+            "bad": "Ik stuur oma een email en koop wcpapier."
+          }
+        ],
+        "tip": "Begint het woord met een losse letter of een afkorting? Dan komt er een koppelteken achter."
+      },
+      {
+        "title": "Meestal geen koppelteken",
+        "text": "De meeste samenstellingen schrijf je gewoon aan elkaar, zonder koppelteken. Alleen bij de regels die je net leerde komt er een koppelteken.",
+        "examples": [
+          {
+            "good": "We bouwen een boomhut en een zandkasteel.",
+            "bad": "We bouwen een boom-hut en een zand-kasteel."
+          },
+          {
+            "good": "Opa laat zijn vakantiefoto's zien.",
+            "bad": "Opa laat zijn vakantie-foto's zien."
+          }
+        ],
+        "tip": "Twijfel je? Botsen er geen klinkers en is het geen naam, oud, ex of letter? Schrijf het aan elkaar."
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "tk-001",
+      "type": "choice",
+      "level": "M6",
+      "skill": "trema-meervoud",
+      "prompt": "Welk woord moet op de stippen?",
+      "sentence": "De dino heeft heel veel goede ...",
+      "options": [
+        "ideeen",
+        "ideeën",
+        "ideëen",
+        "idees"
+      ],
+      "answer": 1,
+      "explain": "Idee wordt ideeën. Het trema staat op de e waar de nieuwe klankgroep begint: i-dee-ën."
+    },
+    {
+      "id": "tk-002",
+      "type": "choice",
+      "level": "M6",
+      "skill": "koppelteken-letters",
+      "prompt": "Welk woord moet op de stippen?",
+      "sentence": "Ik draag een rood ...",
+      "options": [
+        "T-shirt",
+        "Tshirt",
+        "T shirt"
+      ],
+      "answer": 0,
+      "explain": "T-shirt begint met een losse letter. Daarom komt er een koppelteken achter de T."
+    },
+    {
+      "id": "tk-003",
+      "type": "choice",
+      "level": "M6",
+      "skill": "geen-koppelteken",
+      "prompt": "Welk woord moet op de stippen?",
+      "sentence": "We bouwen een ... in de tuin.",
+      "options": [
+        "boomhut",
+        "boom-hut",
+        "boom hut"
+      ],
+      "answer": 0,
+      "explain": "Boomhut is een samenstelling zonder botsende klinkers. Die schrijf je aan elkaar."
+    },
+    {
+      "id": "tk-004",
+      "type": "find-error",
+      "level": "M6",
+      "skill": "trema",
+      "prompt": "Welk woord is fout geschreven?",
+      "words": [
+        "De",
+        "kleine",
+        "dino",
+        "speelt",
+        "bij",
+        "een",
+        "oude",
+        "ruine",
+        "in",
+        "het",
+        "bos."
+      ],
+      "answer": 7,
+      "correction": "ruïne",
+      "explain": "Ruïne heeft een trema op de i. Anders lees je 'rui' zoals in ruiken. Het is ru-ï-ne."
+    },
+    {
+      "id": "tk-005",
+      "type": "find-error",
+      "level": "M6",
+      "skill": "koppelteken-namen",
+      "prompt": "Welk woord is fout geschreven?",
+      "words": [
+        "Mijn",
+        "oma",
+        "woont",
+        "in",
+        "Noordholland",
+        "bij",
+        "de",
+        "zee."
+      ],
+      "answer": 4,
+      "correction": "Noord-Holland",
+      "explain": "Noord-Holland is een provincie met twee delen. Daar komt een koppelteken tussen, en twee hoofdletters."
+    },
+    {
+      "id": "tk-006",
+      "type": "type",
+      "level": "M6",
+      "skill": "trema-meervoud",
+      "prompt": "Schrijf het meervoud.",
+      "sentence": "één knie, twee ...",
+      "answer": [
+        "knieën"
+      ],
+      "explain": "Knie wordt knieën. Het trema op de e laat zien: knie-ën."
+    },
+    {
+      "id": "tk-007",
+      "type": "type",
+      "level": "M6",
+      "skill": "koppelteken-letters",
+      "prompt": "Maak er één woord van.",
+      "sentence": "papier voor de wc",
+      "answer": [
+        "wc-papier"
+      ],
+      "explain": "Wc is een afkorting. Na een afkorting komt een koppelteken: wc-papier."
+    },
+    {
+      "id": "tk-008",
+      "type": "choice",
+      "level": "E6",
+      "skill": "koppelteken-klinkers",
+      "prompt": "Welk woord moet op de stippen?",
+      "sentence": "Op het strand vond ik een stekelige ...",
+      "options": [
+        "zeeegel",
+        "zee-egel",
+        "zeeëgel",
+        "zee egel"
+      ],
+      "answer": 1,
+      "explain": "Bij zee en egel botsen de klinkers. Je zou eee samen lezen. Daarom komt er een koppelteken: zee-egel."
+    },
+    {
+      "id": "tk-009",
+      "type": "choice",
+      "level": "E6",
+      "skill": "trema",
+      "prompt": "Welk woord moet op de stippen?",
+      "sentence": "Mijn zus is erg ... in dinosaurussen.",
+      "options": [
+        "geinteresseerd",
+        "geïnteresseerd",
+        "geïntresseerd",
+        "gëinteresseerd"
+      ],
+      "answer": 1,
+      "explain": "Geïnteresseerd heeft een trema op de i. Anders lees je 'gei'. Het is ge-ïn-te-res-seerd."
+    },
+    {
+      "id": "tk-010",
+      "type": "find-error",
+      "level": "E6",
+      "skill": "trema-meervoud",
+      "prompt": "Welk woord is fout geschreven?",
+      "words": [
+        "De",
+        "dino",
+        "zwemt",
+        "in",
+        "warme",
+        "zeeen",
+        "vol",
+        "vissen."
+      ],
+      "answer": 5,
+      "correction": "zeeën",
+      "explain": "Zee wordt zeeën. Het trema op de e laat zien: zee-ën."
+    },
+    {
+      "id": "tk-011",
+      "type": "find-error",
+      "level": "E6",
+      "skill": "koppelteken-oud-ex",
+      "prompt": "Welk woord is fout geschreven?",
+      "words": [
+        "De",
+        "oudleerling",
+        "kwam",
+        "op",
+        "bezoek",
+        "bij",
+        "de",
+        "juf."
+      ],
+      "answer": 1,
+      "correction": "oud-leerling",
+      "explain": "Oud betekent hier 'vroeger'. Dan komt er een koppelteken: oud-leerling."
+    },
+    {
+      "id": "tk-012",
+      "type": "find-error",
+      "level": "E6",
+      "skill": "koppelteken-letters",
+      "prompt": "Welk woord is fout geschreven?",
+      "words": [
+        "Ik",
+        "kreeg",
+        "een",
+        "fotoboek",
+        "en",
+        "een",
+        "T-shirt",
+        "met",
+        "een",
+        "dino",
+        "erop."
+      ],
+      "answer": -1,
+      "correction": null,
+      "explain": "Geen fout. Fotoboek schrijf je aan elkaar. T-shirt krijgt een koppelteken na de losse letter."
+    },
+    {
+      "id": "tk-013",
+      "type": "type",
+      "level": "E6",
+      "skill": "trema",
+      "prompt": "Verbeter het woord tussen haakjes.",
+      "sentence": "In de winter gaan we in de bergen (skien).",
+      "answer": [
+        "skiën"
+      ],
+      "explain": "Skiën heeft een trema op de e: ski-ën. Anders lees je 'ie'."
+    },
+    {
+      "id": "tk-014",
+      "type": "type",
+      "level": "E6",
+      "skill": "koppelteken-namen",
+      "prompt": "Verbeter het woord tussen haakjes.",
+      "sentence": "Kaapstad ligt in (Zuidafrika).",
+      "answer": [
+        "Zuid-Afrika"
+      ],
+      "explain": "Zuid-Afrika is een land met twee delen. Er komt een koppelteken tussen, en twee hoofdletters."
+    },
+    {
+      "id": "tk-015",
+      "type": "choice",
+      "level": "M7",
+      "skill": "koppelteken-klinkers",
+      "prompt": "Welk woord moet op de stippen?",
+      "sentence": "De speelgoedauto's hadden een ... op de blokkenbaan.",
+      "options": [
+        "autoongeluk",
+        "auto-ongeluk",
+        "auto ongeluk",
+        "autoöngeluk"
+      ],
+      "answer": 1,
+      "explain": "Bij auto en ongeluk botsen de klinkers. Je zou oo samen lezen. Daarom komt er een koppelteken: auto-ongeluk."
+    },
+    {
+      "id": "tk-016",
+      "type": "choice",
+      "level": "M7",
+      "skill": "geen-koppelteken",
+      "prompt": "Welk woord is goed geschreven?",
+      "options": [
+        "politie-agent",
+        "politieagent",
+        "politie agent"
+      ],
+      "answer": 1,
+      "explain": "Ie en a lees je niet als één klank. De klinkers botsen dus niet. Daarom schrijf je politieagent aan elkaar."
+    },
+    {
+      "id": "tk-017",
+      "type": "choice",
+      "level": "M7",
+      "skill": "trema-meervoud",
+      "prompt": "Welk woord moet op de stippen?",
+      "sentence": "We spelen met z'n ...",
+      "options": [
+        "drieën",
+        "drieen",
+        "drie-en"
+      ],
+      "answer": 0,
+      "explain": "Met z'n drieën: het trema op de e laat zien dat er een nieuwe klankgroep begint: drie-ën."
+    },
+    {
+      "id": "tk-018",
+      "type": "find-error",
+      "level": "M7",
+      "skill": "koppelteken-letters",
+      "prompt": "Welk woord is fout geschreven?",
+      "words": [
+        "Na",
+        "het",
+        "tvprogramma",
+        "over",
+        "dino's",
+        "stuurde",
+        "ik",
+        "oma",
+        "een",
+        "e-mail."
+      ],
+      "answer": 2,
+      "correction": "tv-programma",
+      "explain": "Tv is een afkorting. Na een afkorting komt een koppelteken: tv-programma."
+    },
+    {
+      "id": "tk-019",
+      "type": "find-error",
+      "level": "M7",
+      "skill": "trema",
+      "prompt": "Welk woord is fout geschreven?",
+      "words": [
+        "Op",
+        "de",
+        "reunie",
+        "van",
+        "de",
+        "school",
+        "zagen",
+        "we",
+        "onze",
+        "oude",
+        "juf",
+        "terug."
+      ],
+      "answer": 2,
+      "correction": "reünie",
+      "explain": "Reünie heeft een trema op de u. Anders lees je 'eu'. Het is re-ü-nie."
+    },
+    {
+      "id": "tk-020",
+      "type": "type",
+      "level": "M7",
+      "skill": "koppelteken-oud-ex",
+      "prompt": "Maak er één woord van.",
+      "sentence": "ex + kampioen",
+      "answer": [
+        "ex-kampioen"
+      ],
+      "explain": "Na ex komt altijd een koppelteken: ex-kampioen."
+    },
+    {
+      "id": "tk-021",
+      "type": "type",
+      "level": "M7",
+      "skill": "koppelteken-klinkers",
+      "prompt": "Maak er één woord van.",
+      "sentence": "zee + eend",
+      "answer": [
+        "zee-eend"
+      ],
+      "explain": "Bij zee en eend botsen de klinkers. Daarom komt er een koppelteken: zee-eend."
+    },
+    {
+      "id": "tk-022",
+      "type": "choice",
+      "level": "E7",
+      "skill": "koppelteken-namen",
+      "prompt": "Welke zin is helemaal goed?",
+      "options": [
+        "We varen over de Noord-zee naar Noord-Holland.",
+        "We varen over de Noordzee naar Noord-Holland.",
+        "We varen over de Noordzee naar Noordholland."
+      ],
+      "answer": 1,
+      "explain": "Noordzee is één naam en schrijf je aan elkaar. Noord-Holland is een provincie met twee delen, dus met koppelteken."
+    },
+    {
+      "id": "tk-023",
+      "type": "choice",
+      "level": "E7",
+      "skill": "trema",
+      "prompt": "Welk woord moet op de stippen?",
+      "sentence": "Gedichten lezen en schrijven noemen we ook ...",
+      "options": [
+        "poëzie",
+        "poezie",
+        "poézie",
+        "poeëzie"
+      ],
+      "answer": 0,
+      "explain": "Poëzie heeft een trema op de e. Anders lees je 'oe'. Het is po-ë-zie."
+    },
+    {
+      "id": "tk-024",
+      "type": "find-error",
+      "level": "E7",
+      "skill": "trema",
+      "prompt": "Welk woord is fout geschreven?",
+      "words": [
+        "Zon",
+        "en",
+        "regen",
+        "beinvloeden",
+        "de",
+        "groei",
+        "van",
+        "planten."
+      ],
+      "answer": 3,
+      "correction": "beïnvloeden",
+      "explain": "Beïnvloeden heeft een trema op de i. Anders lees je 'bei'. Het is be-ïn-vloe-den."
+    },
+    {
+      "id": "tk-025",
+      "type": "find-error",
+      "level": "E7",
+      "skill": "koppelteken-namen",
+      "prompt": "Welk woord is fout geschreven?",
+      "words": [
+        "Op",
+        "het",
+        "strand",
+        "in",
+        "Zuid-Holland",
+        "vond",
+        "de",
+        "dino",
+        "een",
+        "zee-egel",
+        "en",
+        "drie",
+        "schelpen."
+      ],
+      "answer": -1,
+      "correction": null,
+      "explain": "Geen fout. Zuid-Holland krijgt een koppelteken omdat het een provincie is. Zee-egel krijgt er een omdat de klinkers botsen."
+    },
+    {
+      "id": "tk-026",
+      "type": "find-error",
+      "level": "E7",
+      "skill": "geen-koppelteken",
+      "prompt": "Welk woord is fout geschreven?",
+      "words": [
+        "Opa",
+        "liet",
+        "ons",
+        "zijn",
+        "vakantie-foto's",
+        "van",
+        "de",
+        "Noordzee",
+        "zien."
+      ],
+      "answer": 4,
+      "correction": "vakantiefoto's",
+      "explain": "Bij vakantie en foto botsen geen klinkers. Daarom schrijf je het aan elkaar: vakantiefoto's."
+    },
+    {
+      "id": "tk-027",
+      "type": "type",
+      "level": "E7",
+      "skill": "trema",
+      "prompt": "Verbeter het woord tussen haakjes.",
+      "sentence": "De jonge dino was nog erg (naief) en geloofde alles.",
+      "answer": [
+        "naïef"
+      ],
+      "explain": "Naïef heeft een trema op de i. Anders lees je 'ai'. Het is na-ïef."
+    },
+    {
+      "id": "tk-028",
+      "type": "type",
+      "level": "E7",
+      "skill": "koppelteken-klinkers",
+      "prompt": "Maak er één woord van.",
+      "sentence": "radio + omroep",
+      "answer": [
+        "radio-omroep"
+      ],
+      "explain": "Bij radio en omroep botsen de klinkers. Je zou oo samen lezen. Daarom komt er een koppelteken: radio-omroep."
+    }
+  ]
+}
