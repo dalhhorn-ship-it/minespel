@@ -124,3 +124,32 @@ Change: add AC: `./scripts/check.sh` runs `validate.py` (and says so if python3 
 * Add an AC for the first start flow on a wiped iPad (empty state) and for a "no module is switched on" parent warning (AC39 covers the kid side only).
 
 Open for the PRD owner: please answer each Q as accepted, rejected with a reason, or founder decision. Q1, Q3 and the open founder question on dino cap in Q9 go to the founder.
+
+### product response (round 1)
+
+Section 11 now numbers founder decisions F1 to F12 so they do not clash with the qa Q numbers. Old PRD Q1 to Q8 became F2, F3, F5, F8, F9, F10, F11, F12. New ACs start at AC103 and sit in their topic group.
+
+* **A1:** founder decision F1 (A: build order v1a then v1b, both in v1, recommended; B: cut v1b to Later; C: no split). Added 4.0 with the v1a and v1b lists and (v1b) marks on sections, flows and ACs.
+* **A2:** accepted. Speed spike with go or no go and 48 x 48 fallback in 4.1 and section 10; context loss in 4.19 and AC109; AC101 now 6 wild plus 12 tame, marked (iPad).
+* **A3:** accepted. Building up rule in 4.2, new AC103, AC6 notes the exception, Flow 2 step 5.
+* **A4:** accepted. Tap versus drag and hit order in 4.2, new AC104, long press does nothing (Later list).
+* **A5:** accepted. Built in pincode hash (4.12, AC128), no crash on plain http (4.19, AC140), F9 must be decided before milestone 2 (section 10).
+* **A6:** accepted. Saves within about 2 seconds (4.18); AC24 now 2:30 to 2:35, AC96 now at most 5 seconds lost; AC37 and AC71 got the same tolerance.
+* **A7:** accepted. `generator` field (4.10, section 10), Kopie maken only for JSON modules (4.14, AC83), 200 newest saved sums (AC126), saved topic pointer that always moves on (4.6 step 2, AC46).
+* **A8:** accepted, updated per operator: content is complete and validates. AC59 kept, new AC122 makes check.sh run validate.py on every module. Built in content has comma only marks, so punctuate stays comma only everywhere in v1.
+* **A9:** accepted. New view fallback in 4.15, file header with app name, format version and date (AC131), share sheet checks marked (iPad) in AC84 and AC133.
+* **A10:** accepted. Calendar days in local time (4.6), AC40 and AC42 reworded, clock going back in AC118.
+* **A11:** accepted with one change. Straight line walking, one block hop, pop after 5 seconds stuck (4.3, AC17). Rejected "never trapped under a roof" for wild dinos: a kid building a pen is part of the fun; dinos only never walk through blocks (AC21).
+* **A12:** accepted. Line in section 8 (one column, 16 point inputs, scrolling allowed) and in AC102.
+* **Q1:** accepted. AC101 rewritten with the 95 percent and 200 ms frame rule, marked (iPad), uses the reference device from F10; developer fps counter in 4.19; context loss AC109. Used 12 tame dinos (A2) as the worst case, not 4.
+* **Q2:** accepted. New AC117 (double tap and two fingers on answers), AC110 (fast feeding), AC105 (two finger build), mashing in AC57 and AC74.
+* **Q3:** accepted the stored lockout (AC74), shared counter and route test (AC75, AC76). Calculator proof reset is founder decision F4 (A: two step question plus 10 minute block, recommended; B: one question plus shared lockout; C: no in app reset, restore a backup).
+* **Q4:** founder decision F6 (A: 0 right gives no chest and Extra oefenen pays at most 10 a day, recommended; B: always pay, no cap; C: no chest at 0, no cap). ACs AC34, AC116, AC120 are written for option A and marked (F6). Accepted the "snel geklikt" mark in Pauzes (4.16, AC92).
+* **Q5:** accepted. Timer matrix in 4.4 with heartbeat gap rule (AC23, AC112, AC113); one window only (AC114); Pauze nu starten greyed and no exam during a break (AC115); "Laatste vraag" grace (4.5, AC32); exam timeout checks a typed answer (AC67). Portrait message is the only lock (section 2).
+* **Q6:** accepted. Calendar days (AC40, AC42, AC118); smooth weighted round robin saved across restarts (4.5, AC38); exams exempt in AC48; AC10 split into automated AC10 and iPad AC107; AC22 is time based with 1 second tolerance.
+* **Q7:** accepted. Safe writes AC136, broken save AC137, version and migration AC138 (update only at app start), storage full AC139, app version in settings AC135.
+* **Q8:** accepted. Restore checks first and keeps old data (4.15, AC130); backups hold no pincode (AC87, section 9); test files listed in AC85; built in id conflict AC86; AC98 also on the deployed address and Web Analytics off; download fallback in AC84 and AC133.
+* **Q9:** accepted food not used at 12 (4.3, AC20); 12 characters and a "dino name" prompt (AC18, section 9); AC17 rewritten with 8 blocks after 5 seconds; "Ik zit vast" in the pause menu (AC106, Flow 5). Golden egg at 12 is founder decision F7 (A: golden do not count, recommended; B: egg waits; C: release a dino); AC111 marked (F7).
+* **Q10:** accepted. Full parse rule and whole tenths (4.8, AC58); no dot key and thin space for thousands (AC121); no repeats and seedable generator (AC125, AC61); right answer later in AC63.
+* **Q11:** accepted. check.sh runs validate.py and fails if python3 is missing (AC122); scriptable checks added (AC123); optional comma left to the human check, since a script cannot judge it; human check in AC124.
+* **Q12:** accepted. Lock tap area AC127; contrast and icon plus colour AC141; safe areas AC143 (iPad); motion and reduced motion AC142; window under 900 points AC108; first start on a wiped iPad AC144; parent warning AC129. "Groter lettertype" moved to Later.
