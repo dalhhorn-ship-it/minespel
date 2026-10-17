@@ -1,0 +1,532 @@
+{
+  "id": "hoofdletters",
+  "title": "Hoofdletters",
+  "groups": [
+    6,
+    7
+  ],
+  "lesson": {
+    "pages": [
+      {
+        "title": "Begin van de zin en namen",
+        "text": "Een zin begint altijd met een hoofdletter. Namen van mensen en dieren krijgen ook een hoofdletter. Heet je dino Rex? Dan schrijf je Rex.",
+        "examples": [
+          {
+            "good": "De dino eet een blad.",
+            "bad": "de dino eet een blad."
+          },
+          {
+            "good": "Mijn kat Pluis slaapt bij Sam.",
+            "bad": "Mijn kat pluis slaapt bij sam."
+          }
+        ],
+        "tip": "Is het een naam? Dan krijgt het een hoofdletter."
+      },
+      {
+        "title": "Plaatsen, landen en straten",
+        "text": "Namen van plaatsen, landen, straten en zeeën schrijf je met een hoofdletter. Heeft de naam meer delen, zoals Verenigde Staten? Dan krijgt elk deel een hoofdletter. Het woordje de ervoor blijft klein.",
+        "examples": [
+          {
+            "good": "Wij wonen in de Lindelaan in Utrecht.",
+            "bad": "Wij wonen in de lindelaan in utrecht."
+          },
+          {
+            "good": "De boot vaart over de Noordzee naar de Verenigde Staten.",
+            "bad": "De boot vaart over de noordzee naar de verenigde staten."
+          }
+        ]
+      },
+      {
+        "title": "Dagen, maanden en feestdagen",
+        "text": "Dagen en maanden krijgen geen hoofdletter: maandag, januari. Seizoenen ook niet: zomer, winter. Feestdagen krijgen wel een hoofdletter: Pasen, Pinksteren, Kerstmis, Koningsdag. Maar in een samengesteld woord niet: paasei, kerstboom.",
+        "examples": [
+          {
+            "good": "Op maandag 3 januari gaan we schaatsen.",
+            "bad": "Op Maandag 3 Januari gaan we schaatsen."
+          },
+          {
+            "good": "Met Pasen zoekt Rex een paasei.",
+            "bad": "Met pasen zoekt Rex een Paasei."
+          }
+        ],
+        "tip": "Dagen en maanden: klein. Feestdagen: groot."
+      },
+      {
+        "title": "Talen, mensen en dingen uit een land",
+        "text": "Talen krijgen een hoofdletter: Nederlands, Frans, Engels. Mensen uit een land ook: een Belg, de Fransen. En ook een woord dat iets over een land zegt: Franse kaas, Belgische friet, de Nederlandse vlag.",
+        "examples": [
+          {
+            "good": "De Fransen eten Franse kaas.",
+            "bad": "De fransen eten franse kaas."
+          },
+          {
+            "good": "Tim spreekt Engels.",
+            "bad": "Tim spreekt engels."
+          }
+        ],
+        "tip": "Komt het woord van een land? Dan krijgt het een hoofdletter."
+      },
+      {
+        "title": "Titels en namen met van of de",
+        "text": "In de titel van een boek krijgt alleen het eerste woord een hoofdletter. Namen in de titel natuurlijk ook. Bij achternamen als van Dam: staat de voornaam ervoor, dan blijft van klein. Staat er geen voornaam voor, dan krijgt Van een hoofdletter.",
+        "examples": [
+          {
+            "good": "Ik lees het boek De kleine dino.",
+            "bad": "Ik lees het boek De Kleine Dino."
+          },
+          {
+            "good": "Lisa van Dam is ziek. Juf Van Dam is ook ziek.",
+            "bad": "Lisa Van Dam is ziek."
+          }
+        ]
+      },
+      {
+        "title": "Een zin die begint met 's",
+        "text": "Begint een zin met 's, zoals 's avonds of 's morgens? Dan blijft 's klein. Het woord erna krijgt de hoofdletter.",
+        "examples": [
+          {
+            "good": "'s Avonds kijkt Rex naar de sterren.",
+            "bad": "'S avonds kijkt Rex naar de sterren."
+          }
+        ],
+        "tip": "De 's blijft altijd klein."
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "hl-001",
+      "type": "choice",
+      "level": "M6",
+      "skill": "begin-zin",
+      "prompt": "Welke zin is goed geschreven?",
+      "options": [
+        "de dino eet een blad.",
+        "De dino eet een blad.",
+        "De Dino eet een blad."
+      ],
+      "answer": 1,
+      "explain": "Een zin begint met een hoofdletter. Dino is geen naam, dus die krijgt een kleine letter."
+    },
+    {
+      "id": "hl-002",
+      "type": "find-error",
+      "level": "M6",
+      "skill": "namen",
+      "prompt": "Welk woord is fout geschreven?",
+      "words": [
+        "Mijn",
+        "kat",
+        "pluis",
+        "slaapt",
+        "in",
+        "de",
+        "mand."
+      ],
+      "answer": 2,
+      "correction": "Pluis",
+      "explain": "Pluis is de naam van een dier. Namen krijgen een hoofdletter."
+    },
+    {
+      "id": "hl-003",
+      "type": "type",
+      "level": "M6",
+      "skill": "plaatsen-landen",
+      "prompt": "Schrijf het woord tussen haakjes goed op.",
+      "sentence": "Wij wonen in (utrecht).",
+      "answer": [
+        "Utrecht"
+      ],
+      "explain": "Utrecht is de naam van een plaats. Plaatsnamen krijgen een hoofdletter."
+    },
+    {
+      "id": "hl-004",
+      "type": "choice",
+      "level": "M6",
+      "skill": "dagen-maanden",
+      "prompt": "Welk woord moet op de stippen?",
+      "sentence": "Op ... gaan we zwemmen.",
+      "options": [
+        "Woensdag",
+        "woensdag"
+      ],
+      "answer": 1,
+      "explain": "Dagen van de week krijgen geen hoofdletter: woensdag."
+    },
+    {
+      "id": "hl-005",
+      "type": "find-error",
+      "level": "M6",
+      "skill": "namen",
+      "prompt": "Welk woord is fout geschreven?",
+      "words": [
+        "Sam",
+        "en",
+        "noor",
+        "bouwen",
+        "een",
+        "huis",
+        "van",
+        "blokken."
+      ],
+      "answer": 2,
+      "correction": "Noor",
+      "explain": "Noor is de naam van een meisje. Namen krijgen een hoofdletter."
+    },
+    {
+      "id": "hl-006",
+      "type": "find-error",
+      "level": "M6",
+      "skill": "plaatsen-landen",
+      "prompt": "Welk woord is fout geschreven?",
+      "words": [
+        "Rex",
+        "woont",
+        "in",
+        "een",
+        "grot",
+        "in",
+        "Drenthe."
+      ],
+      "answer": -1,
+      "correction": null,
+      "explain": "Geen fout. Rex is een naam en Drenthe is de naam van een provincie. Allebei met een hoofdletter."
+    },
+    {
+      "id": "hl-007",
+      "type": "type",
+      "level": "M6",
+      "skill": "namen",
+      "prompt": "Schrijf het woord tussen haakjes goed op.",
+      "sentence": "Mijn broertje heet (daan).",
+      "answer": [
+        "Daan"
+      ],
+      "explain": "Daan is de naam van een jongen. Namen krijgen een hoofdletter."
+    },
+    {
+      "id": "hl-008",
+      "type": "choice",
+      "level": "E6",
+      "skill": "plaatsen-landen",
+      "prompt": "Welke zin is goed?",
+      "options": [
+        "We gaan in de zomer naar spanje.",
+        "We gaan in de Zomer naar Spanje.",
+        "We gaan in de zomer naar Spanje."
+      ],
+      "answer": 2,
+      "explain": "Spanje is een land, dus een hoofdletter. Seizoenen zoals zomer krijgen geen hoofdletter."
+    },
+    {
+      "id": "hl-009",
+      "type": "find-error",
+      "level": "E6",
+      "skill": "dagen-maanden",
+      "prompt": "Welk woord is fout geschreven?",
+      "words": [
+        "In",
+        "Augustus",
+        "is",
+        "mijn",
+        "verjaardag."
+      ],
+      "answer": 1,
+      "correction": "augustus",
+      "explain": "Maanden krijgen geen hoofdletter. Je schrijft augustus."
+    },
+    {
+      "id": "hl-010",
+      "type": "type",
+      "level": "E6",
+      "skill": "feestdagen",
+      "prompt": "Schrijf het woord tussen haakjes goed op.",
+      "sentence": "Met (pasen) zoeken we eieren.",
+      "answer": [
+        "Pasen"
+      ],
+      "explain": "Pasen is een feestdag. Feestdagen krijgen een hoofdletter."
+    },
+    {
+      "id": "hl-011",
+      "type": "choice",
+      "level": "E6",
+      "skill": "straten",
+      "prompt": "Welke zin is goed?",
+      "options": [
+        "Ik woon in de Lindelaan.",
+        "Ik woon in de lindelaan.",
+        "Ik woon in De Lindelaan."
+      ],
+      "answer": 0,
+      "explain": "De naam van een straat krijgt een hoofdletter. Het woordje de ervoor blijft klein."
+    },
+    {
+      "id": "hl-012",
+      "type": "find-error",
+      "level": "E6",
+      "skill": "feestdagen",
+      "prompt": "Welk woord is fout geschreven?",
+      "words": [
+        "Op",
+        "koningsdag",
+        "verkoop",
+        "ik",
+        "mijn",
+        "oude",
+        "speelgoed."
+      ],
+      "answer": 1,
+      "correction": "Koningsdag",
+      "explain": "Koningsdag is een feestdag. Feestdagen krijgen een hoofdletter."
+    },
+    {
+      "id": "hl-013",
+      "type": "type",
+      "level": "E6",
+      "skill": "dagen-maanden",
+      "prompt": "Schrijf het woord tussen haakjes goed op.",
+      "sentence": "Mijn opa is jarig op (Vrijdag).",
+      "answer": [
+        "vrijdag"
+      ],
+      "explain": "Dagen van de week krijgen geen hoofdletter. Je schrijft vrijdag."
+    },
+    {
+      "id": "hl-014",
+      "type": "find-error",
+      "level": "E6",
+      "skill": "dagen-maanden",
+      "prompt": "Welk woord is fout geschreven?",
+      "words": [
+        "Op",
+        "zaterdag",
+        "gaan",
+        "we",
+        "met",
+        "oma",
+        "naar",
+        "Zandvoort."
+      ],
+      "answer": -1,
+      "correction": null,
+      "explain": "Geen fout. Zaterdag is een dag, dus klein. Zandvoort is een plaats, dus met een hoofdletter."
+    },
+    {
+      "id": "hl-015",
+      "type": "choice",
+      "level": "M7",
+      "skill": "talen-bewoners",
+      "prompt": "Welke zin is goed?",
+      "options": [
+        "Tim spreekt goed engels.",
+        "Tim spreekt goed Engels.",
+        "Tim Spreekt goed Engels."
+      ],
+      "answer": 1,
+      "explain": "Talen krijgen een hoofdletter: Engels. Spreekt is een gewoon woord, dus klein."
+    },
+    {
+      "id": "hl-016",
+      "type": "find-error",
+      "level": "M7",
+      "skill": "van-een-land",
+      "prompt": "Welk woord is fout geschreven?",
+      "words": [
+        "Papa",
+        "koopt",
+        "franse",
+        "kaas",
+        "op",
+        "de",
+        "markt."
+      ],
+      "answer": 2,
+      "correction": "Franse",
+      "explain": "Franse komt van Frankrijk. Een woord dat van een land komt, krijgt een hoofdletter."
+    },
+    {
+      "id": "hl-017",
+      "type": "type",
+      "level": "M7",
+      "skill": "van-een-land",
+      "prompt": "Schrijf het woord tussen haakjes goed op.",
+      "sentence": "Ik eet graag (belgische) friet.",
+      "answer": [
+        "Belgische"
+      ],
+      "explain": "Belgische komt van België. Een woord dat van een land komt, krijgt een hoofdletter."
+    },
+    {
+      "id": "hl-018",
+      "type": "choice",
+      "level": "M7",
+      "skill": "aardrijkskunde",
+      "prompt": "Hoe schrijf je de naam goed?",
+      "sentence": "De boot vaart over de ...",
+      "options": [
+        "noordzee",
+        "Noordzee",
+        "NoordZee"
+      ],
+      "answer": 1,
+      "explain": "Noordzee is de naam van een zee. Het is één woord, dus alleen de eerste letter is een hoofdletter."
+    },
+    {
+      "id": "hl-019",
+      "type": "choice",
+      "level": "M7",
+      "skill": "titels",
+      "prompt": "Je leest een boek over een kleine dino. Welke titel is goed geschreven?",
+      "options": [
+        "De kleine dino",
+        "de kleine dino",
+        "De Kleine Dino"
+      ],
+      "answer": 0,
+      "explain": "In een titel krijgt alleen het eerste woord een hoofdletter, plus namen."
+    },
+    {
+      "id": "hl-020",
+      "type": "choice",
+      "level": "M7",
+      "skill": "talen-bewoners",
+      "prompt": "Welke zin is goed?",
+      "options": [
+        "De Fransen eten graag stokbrood.",
+        "De fransen eten graag stokbrood.",
+        "De Fransen eten graag Stokbrood."
+      ],
+      "answer": 0,
+      "explain": "Mensen uit een land krijgen een hoofdletter: de Fransen. Stokbrood is een gewoon woord."
+    },
+    {
+      "id": "hl-021",
+      "type": "type",
+      "level": "M7",
+      "skill": "aardrijkskunde",
+      "prompt": "Schrijf de woorden tussen haakjes goed op.",
+      "sentence": "Wij gaan op vakantie naar de (verenigde staten).",
+      "answer": [
+        "Verenigde Staten"
+      ],
+      "explain": "Verenigde Staten is de naam van een land met twee delen. Elk deel krijgt een hoofdletter. Het woordje de blijft klein."
+    },
+    {
+      "id": "hl-022",
+      "type": "find-error",
+      "level": "E7",
+      "skill": "samenstelling-feestdag",
+      "prompt": "Welk woord is fout geschreven?",
+      "words": [
+        "Met",
+        "Pasen",
+        "verstopt",
+        "de",
+        "Paashaas",
+        "de",
+        "eieren."
+      ],
+      "answer": 4,
+      "correction": "paashaas",
+      "explain": "Pasen krijgt een hoofdletter, maar in een samengesteld woord zoals paashaas niet."
+    },
+    {
+      "id": "hl-023",
+      "type": "choice",
+      "level": "E7",
+      "skill": "begin-zin",
+      "prompt": "Welke zin is goed?",
+      "options": [
+        "'s avonds kijkt Rex naar de sterren.",
+        "'S avonds kijkt Rex naar de sterren.",
+        "'s Avonds kijkt Rex naar de sterren."
+      ],
+      "answer": 2,
+      "explain": "Begint een zin met 's? Dan blijft 's klein en krijgt het volgende woord de hoofdletter."
+    },
+    {
+      "id": "hl-024",
+      "type": "choice",
+      "level": "E7",
+      "skill": "achternamen",
+      "prompt": "Welke zin is goed?",
+      "options": [
+        "Juf van Dam leest een verhaal voor.",
+        "Juf Van Dam leest een verhaal voor.",
+        "Juf Van dam leest een verhaal voor."
+      ],
+      "answer": 1,
+      "explain": "Staat er geen voornaam voor de achternaam? Dan krijgt van een hoofdletter: juf Van Dam."
+    },
+    {
+      "id": "hl-025",
+      "type": "type",
+      "level": "E7",
+      "skill": "aardrijkskunde",
+      "prompt": "Schrijf de woorden tussen haakjes goed op.",
+      "sentence": "De (middellandse zee) is warm in de zomer.",
+      "answer": [
+        "Middellandse Zee"
+      ],
+      "explain": "Middellandse Zee is de naam van een zee met twee delen. Elk deel krijgt een hoofdletter."
+    },
+    {
+      "id": "hl-026",
+      "type": "find-error",
+      "level": "E7",
+      "skill": "van-een-land",
+      "prompt": "Welk woord is fout geschreven?",
+      "words": [
+        "Op",
+        "Koningsdag",
+        "hangt",
+        "de",
+        "nederlandse",
+        "vlag",
+        "buiten."
+      ],
+      "answer": 4,
+      "correction": "Nederlandse",
+      "explain": "Nederlandse komt van Nederland. Een woord dat van een land komt, krijgt een hoofdletter."
+    },
+    {
+      "id": "hl-027",
+      "type": "find-error",
+      "level": "E7",
+      "skill": "samenstelling-feestdag",
+      "prompt": "Welk woord is fout geschreven?",
+      "words": [
+        "In",
+        "de",
+        "kerstvakantie",
+        "gaan",
+        "we",
+        "naar",
+        "Den",
+        "Haag."
+      ],
+      "answer": -1,
+      "correction": null,
+      "explain": "Geen fout. Kerstvakantie is een samengesteld woord, dus klein. Den Haag is een plaats: beide delen met een hoofdletter."
+    },
+    {
+      "id": "hl-028",
+      "type": "find-error",
+      "level": "E7",
+      "skill": "achternamen",
+      "prompt": "Welk woord is fout geschreven?",
+      "words": [
+        "Mijn",
+        "vriendin",
+        "heet",
+        "Lisa",
+        "Van",
+        "Dijk."
+      ],
+      "answer": 4,
+      "correction": "van",
+      "explain": "Staat de voornaam voor de achternaam? Dan blijft van klein: Lisa van Dijk."
+    }
+  ]
+}

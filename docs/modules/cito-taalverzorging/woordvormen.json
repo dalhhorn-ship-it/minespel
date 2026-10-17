@@ -36,7 +36,7 @@
           },
           {
             "good": "koning wordt koninkje",
-            "bad": "koningje"
+            "bad": "koningkje"
           }
         ],
         "tip": "Zeg het verkleinwoord hardop. Je hoort meestal of het je, tje, pje, etje of kje is."
@@ -332,9 +332,9 @@
       "prompt": "Welk verkleinwoord is goed?",
       "sentence": "Een kleine koning is een ...",
       "options": [
-        "koningje",
+        "koningkje",
         "koninkje",
-        "koningetje",
+        "koninktje",
         "koninkie"
       ],
       "answer": 1,
@@ -556,11 +556,11 @@
       "level": "E7",
       "skill": "verkleinwoord",
       "prompt": "Schrijf het verkleinwoord.",
-      "sentence": "Een kleine woning is een ...",
+      "sentence": "Een klein kussen is een ...",
       "answer": [
-        "woninkje"
+        "kussentje"
       ],
-      "explain": "Woorden op ing zonder klemtoon krijgen kje. De g valt weg: woninkje."
+      "explain": "Kussen eindigt op en zonder klemtoon. Dan plak je tje erachter: kussentje."
     }
   ]
 }

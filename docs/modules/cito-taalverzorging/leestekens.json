@@ -1,0 +1,534 @@
+{
+  "id": "leestekens",
+  "title": "Leestekens",
+  "groups": [
+    6,
+    7
+  ],
+  "lesson": {
+    "pages": [
+      {
+        "title": "Punt, vraagteken en uitroepteken",
+        "text": "Een gewone zin eindigt met een punt. Een vraag eindigt met een vraagteken. Roep je iets, zoals Hoera of Help? Dan zet je een uitroepteken.",
+        "examples": [
+          {
+            "good": "Rex slaapt in zijn nest."
+          },
+          {
+            "good": "Waar woont de dino?",
+            "bad": "Waar woont de dino."
+          },
+          {
+            "good": "Hoera, Rex is uit zijn ei gekropen!"
+          }
+        ]
+      },
+      {
+        "title": "Vraag je het echt?",
+        "text": "Stel je echt een vraag? Dan komt er een vraagteken. Vertel je alleen dat er iets gevraagd wordt? Dan komt er een punt.",
+        "examples": [
+          {
+            "good": "Wil Sam meedoen?"
+          },
+          {
+            "good": "Vraag aan Sam of hij mee wil doen.",
+            "bad": "Vraag aan Sam of hij mee wil doen?"
+          }
+        ],
+        "tip": "Een zin met of in het midden is vaak geen echte vraag."
+      },
+      {
+        "title": "Wat iemand zegt",
+        "text": "Schrijf je precies op wat iemand zegt? Dat heet directe rede. Je zet dan een dubbele punt na zei, riep of vroeg. Wat iemand zegt, staat tussen aanhalingstekens. Het eerste woord krijgt een hoofdletter.",
+        "examples": [
+          {
+            "good": "Mila zei: \"Kijk, een ei!\"",
+            "bad": "Mila zei \"kijk, een ei!\""
+          },
+          {
+            "good": "Juf vroeg: \"Wie heeft de dino getekend?\""
+          }
+        ],
+        "tip": "Dubbele punt, aanhalingstekens, hoofdletter."
+      },
+      {
+        "title": "Het leesteken binnen de aanhalingstekens",
+        "text": "Het leesteken aan het eind van wat iemand zegt, staat binnen de aanhalingstekens. Komt zei of vroeg erachter? Dan staat er een komma, vraagteken of uitroepteken binnen de aanhalingstekens. Zei begint dan met een kleine letter.",
+        "examples": [
+          {
+            "good": "Juf zei: \"Pak allemaal je schrift.\"",
+            "bad": "Juf zei: \"Pak allemaal je schrift\"."
+          },
+          {
+            "good": "\"Ik ben moe,\" zei de dino.",
+            "bad": "\"Ik ben moe.\" zei de dino."
+          },
+          {
+            "good": "\"Kijk, een ei!\" riep Mila.",
+            "bad": "\"Kijk, een ei!\" Riep Mila."
+          }
+        ]
+      },
+      {
+        "title": "De dubbele punt bij een rijtje",
+        "text": "Een dubbele punt kan ook voor een rijtje dingen staan. Na die dubbele punt gaat de zin verder met een kleine letter.",
+        "examples": [
+          {
+            "good": "Neem mee: een jas, een tas en een fles water.",
+            "bad": "Neem mee: Een jas, een tas en een fles water."
+          },
+          {
+            "good": "Rex eet drie dingen: bladeren, gras en bessen."
+          }
+        ],
+        "tip": "Alleen bij directe rede komt na de dubbele punt een hoofdletter."
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "lt-001",
+      "type": "choice",
+      "level": "M6",
+      "skill": "vraagteken",
+      "prompt": "Welk leesteken moet aan het eind van de zin?",
+      "sentence": "Waar woont de dino",
+      "options": [
+        "?",
+        ".",
+        ","
+      ],
+      "answer": 0,
+      "explain": "Dit is een vraag. Een vraag eindigt met een vraagteken."
+    },
+    {
+      "id": "lt-002",
+      "type": "choice",
+      "level": "M6",
+      "skill": "uitroepteken",
+      "prompt": "Welk leesteken moet aan het eind van de zin?",
+      "sentence": "Hoera, Rex is uit zijn ei gekropen",
+      "options": [
+        "?",
+        "!",
+        ","
+      ],
+      "answer": 1,
+      "explain": "Hoera is een uitroep. Na een uitroep zet je een uitroepteken."
+    },
+    {
+      "id": "lt-003",
+      "type": "choice",
+      "level": "M6",
+      "skill": "punt",
+      "prompt": "Welk leesteken moet aan het eind van de zin?",
+      "sentence": "Rex slaapt in zijn nest",
+      "options": [
+        "?",
+        ".",
+        ":"
+      ],
+      "answer": 1,
+      "explain": "Dit is een gewone zin, geen vraag. Een gewone zin eindigt met een punt."
+    },
+    {
+      "id": "lt-004",
+      "type": "find-error",
+      "level": "M6",
+      "skill": "vraagteken",
+      "prompt": "Waar zit de fout? Tik het woord met de fout.",
+      "words": [
+        "Heb",
+        "jij",
+        "mijn",
+        "blauwe",
+        "blok",
+        "gezien."
+      ],
+      "answer": 5,
+      "correction": "gezien?",
+      "explain": "Dit is een vraag. Dan komt er aan het eind een vraagteken, geen punt."
+    },
+    {
+      "id": "lt-005",
+      "type": "find-error",
+      "level": "M6",
+      "skill": "vraagteken",
+      "prompt": "Waar zit de fout? Tik het woord met de fout.",
+      "words": [
+        "Wat",
+        "eet",
+        "een",
+        "stegosaurus?"
+      ],
+      "answer": -1,
+      "correction": null,
+      "explain": "Geen fout. Het is een vraag en de zin eindigt met een vraagteken."
+    },
+    {
+      "id": "lt-006",
+      "type": "choice",
+      "level": "M6",
+      "skill": "vraagteken",
+      "prompt": "Welke zin is goed?",
+      "options": [
+        "Hoe oud is jouw opa?",
+        "Hoe oud is jouw opa.",
+        "Hoe oud is jouw opa,"
+      ],
+      "answer": 0,
+      "explain": "Dit is een vraag. Een vraag eindigt met een vraagteken."
+    },
+    {
+      "id": "lt-007",
+      "type": "type",
+      "level": "M6",
+      "skill": "vraagteken",
+      "prompt": "Typ het leesteken dat aan het eind van de zin hoort.",
+      "sentence": "Hoe heet jouw dino",
+      "answer": [
+        "?"
+      ],
+      "explain": "Dit is een vraag. Een vraag eindigt met een vraagteken."
+    },
+    {
+      "id": "lt-008",
+      "type": "choice",
+      "level": "E6",
+      "skill": "directe-rede",
+      "prompt": "Welke zin is goed?",
+      "options": [
+        "Mila zei: \"Kijk, een ei!\"",
+        "Mila zei \"Kijk, een ei!\"",
+        "Mila zei: Kijk, een ei!"
+      ],
+      "answer": 0,
+      "explain": "Wat Mila zegt, staat tussen aanhalingstekens. Na zei komt een dubbele punt."
+    },
+    {
+      "id": "lt-009",
+      "type": "find-error",
+      "level": "E6",
+      "skill": "hoofdletter-directe-rede",
+      "prompt": "Waar zit de fout? Tik het woord met de fout.",
+      "words": [
+        "Sam",
+        "riep:",
+        "\"kom",
+        "snel",
+        "kijken!\""
+      ],
+      "answer": 2,
+      "correction": "\"Kom",
+      "explain": "Na de dubbele punt begint wat Sam zegt. Het eerste woord daarvan krijgt een hoofdletter: Kom."
+    },
+    {
+      "id": "lt-010",
+      "type": "choice",
+      "level": "E6",
+      "skill": "dubbele-punt",
+      "prompt": "Welk leesteken moet op de stippen?",
+      "sentence": "Noor vroeg ... \"Mag ik ook met de blokken spelen?\"",
+      "options": [
+        ":",
+        ",",
+        "."
+      ],
+      "answer": 0,
+      "explain": "Voor wat iemand zegt, komt een dubbele punt."
+    },
+    {
+      "id": "lt-011",
+      "type": "type",
+      "level": "E6",
+      "skill": "vraagteken",
+      "prompt": "Typ het leesteken dat op de stippen hoort.",
+      "sentence": "Opa vroeg: \"Wil je een koekje ...\"",
+      "answer": [
+        "?"
+      ],
+      "explain": "Opa stelt een vraag. Het vraagteken staat binnen de aanhalingstekens."
+    },
+    {
+      "id": "lt-012",
+      "type": "find-error",
+      "level": "E6",
+      "skill": "directe-rede",
+      "prompt": "Waar zit de fout? Tik het woord met de fout.",
+      "words": [
+        "Juf",
+        "zei:",
+        "\"Pak",
+        "allemaal",
+        "je",
+        "schrift\"."
+      ],
+      "answer": 5,
+      "correction": "schrift.\"",
+      "explain": "De punt hoort bij wat juf zegt. Hij staat dus binnen de aanhalingstekens."
+    },
+    {
+      "id": "lt-013",
+      "type": "choice",
+      "level": "E6",
+      "skill": "uitroepteken",
+      "prompt": "Welk leesteken moet aan het eind van de zin?",
+      "sentence": "Help, mijn toren valt om",
+      "options": [
+        "?",
+        "!",
+        ","
+      ],
+      "answer": 1,
+      "explain": "Help is een uitroep. Na een uitroep zet je een uitroepteken."
+    },
+    {
+      "id": "lt-014",
+      "type": "find-error",
+      "level": "E6",
+      "skill": "vraagteken",
+      "prompt": "Waar zit de fout? Tik het woord met de fout.",
+      "words": [
+        "Mila",
+        "vroeg:",
+        "\"Waar",
+        "is",
+        "Rex.\""
+      ],
+      "answer": 4,
+      "correction": "Rex?\"",
+      "explain": "Mila stelt een vraag. Daarom komt er een vraagteken binnen de aanhalingstekens."
+    },
+    {
+      "id": "lt-015",
+      "type": "choice",
+      "level": "M7",
+      "skill": "dubbele-punt",
+      "prompt": "Welke zin is goed?",
+      "options": [
+        "Neem mee: een jas, een tas en een fles water.",
+        "Neem mee: Een jas, een tas en een fles water.",
+        "Neem mee een jas: een tas en een fles water."
+      ],
+      "answer": 0,
+      "explain": "Voor een rijtje kan een dubbele punt staan. Daarna gaat de zin verder met een kleine letter."
+    },
+    {
+      "id": "lt-016",
+      "type": "find-error",
+      "level": "M7",
+      "skill": "dubbele-punt",
+      "prompt": "Waar zit de fout? Tik het woord met de fout.",
+      "words": [
+        "In",
+        "mijn",
+        "tas",
+        "zitten",
+        "drie",
+        "dingen:",
+        "Een",
+        "appel,",
+        "een",
+        "boek",
+        "en",
+        "een",
+        "pen."
+      ],
+      "answer": 6,
+      "correction": "een",
+      "explain": "Na een dubbele punt voor een rijtje komt een kleine letter: een."
+    },
+    {
+      "id": "lt-017",
+      "type": "type",
+      "level": "M7",
+      "skill": "dubbele-punt",
+      "prompt": "Typ het leesteken dat op de stippen hoort.",
+      "sentence": "Rex eet drie dingen ... bladeren, gras en bessen.",
+      "answer": [
+        ":"
+      ],
+      "explain": "Voor een rijtje dingen zet je een dubbele punt."
+    },
+    {
+      "id": "lt-018",
+      "type": "choice",
+      "level": "M7",
+      "skill": "hoofdletter-directe-rede",
+      "prompt": "Welke zin is goed?",
+      "options": [
+        "Papa riep: \"Het eten is klaar!\"",
+        "Papa riep: \"het eten is klaar!\"",
+        "Papa riep \"Het eten is klaar!\""
+      ],
+      "answer": 0,
+      "explain": "Na riep komt een dubbele punt. Wat papa zegt, begint met een hoofdletter."
+    },
+    {
+      "id": "lt-019",
+      "type": "find-error",
+      "level": "M7",
+      "skill": "dubbele-punt",
+      "prompt": "Waar zit de fout? Tik het woord met de fout.",
+      "words": [
+        "Noor",
+        "zei",
+        "\"Ik",
+        "heb",
+        "een",
+        "fossiel",
+        "gevonden!\""
+      ],
+      "answer": 1,
+      "correction": "zei:",
+      "explain": "Voor wat iemand zegt, komt een dubbele punt. Je schrijft dus zei met een dubbele punt erachter."
+    },
+    {
+      "id": "lt-020",
+      "type": "find-error",
+      "level": "M7",
+      "skill": "dubbele-punt",
+      "prompt": "Waar zit de fout? Tik het woord met de fout.",
+      "words": [
+        "Neem",
+        "voor",
+        "het",
+        "kamp",
+        "mee:",
+        "een",
+        "slaapzak,",
+        "een",
+        "zaklamp",
+        "en",
+        "laarzen."
+      ],
+      "answer": -1,
+      "correction": null,
+      "explain": "Geen fout. Voor het rijtje staat een dubbele punt en daarna een kleine letter."
+    },
+    {
+      "id": "lt-021",
+      "type": "choice",
+      "level": "M7",
+      "skill": "dubbele-punt",
+      "prompt": "Na welk woord hoort een dubbele punt?",
+      "sentence": "Opa zei \"Wat een mooie toren!\"",
+      "options": [
+        "Opa",
+        "zei",
+        "mooie"
+      ],
+      "answer": 1,
+      "explain": "Voor wat iemand zegt, komt een dubbele punt. Die staat na zei."
+    },
+    {
+      "id": "lt-022",
+      "type": "choice",
+      "level": "E7",
+      "skill": "directe-rede",
+      "prompt": "Welke zin is goed?",
+      "options": [
+        "\"Kijk, een ei!\" riep Mila.",
+        "\"Kijk, een ei!\" Riep Mila.",
+        "\"Kijk, een ei!\", riep Mila."
+      ],
+      "answer": 0,
+      "explain": "Staat riep achter wat iemand zegt? Dan gaat de zin verder met een kleine letter en zonder extra komma."
+    },
+    {
+      "id": "lt-023",
+      "type": "find-error",
+      "level": "E7",
+      "skill": "directe-rede",
+      "prompt": "Waar zit de fout? Tik het woord met de fout.",
+      "words": [
+        "\"Ik",
+        "ben",
+        "moe.\"",
+        "zei",
+        "de",
+        "dino."
+      ],
+      "answer": 2,
+      "correction": "moe,\"",
+      "explain": "Komt zei achter wat iemand zegt? Dan staat er een komma binnen de aanhalingstekens, geen punt."
+    },
+    {
+      "id": "lt-024",
+      "type": "type",
+      "level": "E7",
+      "skill": "dubbele-punt",
+      "prompt": "Typ het leesteken dat op de stippen hoort.",
+      "sentence": "Sam vroeg aan juf ... \"Mogen we naar buiten?\"",
+      "answer": [
+        ":"
+      ],
+      "explain": "Voor wat iemand zegt, komt een dubbele punt."
+    },
+    {
+      "id": "lt-025",
+      "type": "choice",
+      "level": "E7",
+      "skill": "hoofdletter-directe-rede",
+      "prompt": "Welke zin is goed?",
+      "options": [
+        "Juf vroeg: \"Wie heeft de dino getekend?\"",
+        "Juf vroeg: \"Wie heeft de dino getekend\"?",
+        "Juf vroeg: \"wie heeft de dino getekend?\""
+      ],
+      "answer": 0,
+      "explain": "Wat juf zegt, begint met een hoofdletter. Het vraagteken staat binnen de aanhalingstekens."
+    },
+    {
+      "id": "lt-026",
+      "type": "find-error",
+      "level": "E7",
+      "skill": "directe-rede",
+      "prompt": "Waar zit de fout? Tik het woord met de fout.",
+      "words": [
+        "\"Waar",
+        "is",
+        "mijn",
+        "schep?\"",
+        "vroeg",
+        "Bram."
+      ],
+      "answer": -1,
+      "correction": null,
+      "explain": "Geen fout. Het vraagteken staat binnen de aanhalingstekens en vroeg begint met een kleine letter."
+    },
+    {
+      "id": "lt-027",
+      "type": "choice",
+      "level": "E7",
+      "skill": "vraagteken",
+      "prompt": "Welke zin is goed?",
+      "options": [
+        "Vraag aan Sam of hij mee wil doen?",
+        "Vraag aan Sam of hij mee wil doen."
+      ],
+      "answer": 1,
+      "explain": "Je vertelt hier alleen dat je Sam iets moet vragen. Het is geen echte vraag, dus een punt."
+    },
+    {
+      "id": "lt-028",
+      "type": "find-error",
+      "level": "E7",
+      "skill": "vraagteken",
+      "prompt": "Waar zit de fout? Tik het woord met de fout.",
+      "words": [
+        "Ik",
+        "vraag",
+        "me",
+        "af",
+        "of",
+        "dino's",
+        "kunnen",
+        "zwemmen?"
+      ],
+      "answer": 7,
+      "correction": "zwemmen.",
+      "explain": "Je vertelt dat je iets wilt weten. Het is geen echte vraag, dus een punt aan het eind."
+    }
+  ]
+}
