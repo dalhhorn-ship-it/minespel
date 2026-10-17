@@ -78,3 +78,4 @@ The founder did not pick one of the framed concepts. The kid explores, mines and
 * Parent modules: design for parent made modules from the start. Parents can add their own subjects, lessons and tests.
 * Settings: advanced granularity. Parents pick per subject, per topic and per difficulty what gets asked, and tune things like break interval and number of questions.
 * Break rules: no skip. The game saves and pauses. The kid can finish early by completing the questions.
+* First built in Taal module (founder request): Cito LVS and IEP style taalverzorging for groep 6 and 7. Spelling, werkwoordspelling, hoofdletters, komma, apostrof and leestekens. Each topic has a lesson, practice questions and exams at levels M6, E6, M7 and E7. Content lives in `docs/modules/cito-taalverzorging/`.
