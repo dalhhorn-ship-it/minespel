@@ -134,6 +134,10 @@ export function createBreakFlow(options: BreakFlowOptions): BreakFlow {
   /** Bumped when a break ends, so a break that is still loading knows it is too late. */
   let generation = 0;
   let chain: Promise<void> = Promise.resolve();
+  /** A parent end that came while the break was still loading. Applied when the screen mounts. */
+  let pendingParentEnd = false;
+  /** Stops waiting for a parent screen to close. */
+  let stopWaiting: (() => void) | null = null;
 
   /** Storage steps run one after the other. A failing step is skipped; the kid never sees it. */
   function enqueue(task: () => Promise<void>): void {
@@ -162,8 +166,18 @@ export function createBreakFlow(options: BreakFlowOptions): BreakFlow {
       if (gen !== generation) return null;
       if (isSavedBreak(saved) && catalog.module(saved.moduleId)) {
         const r: Run = { env, stores, clock, catalog, meta: saved, screen: null, finished: false };
+        // The points come from the stored economy record, which is the truth (every step commits both together).
+        // The saved session may hold older points, e.g. when a purchase happened between the boot and this resume.
+        let economy: unknown = null;
+        try {
+          economy = await stores.records.get('economy');
+        } catch {
+          economy = null;
+        }
+        if (gen !== generation) return null;
+        const fresh = economy && typeof economy === 'object' ? (economy as typeof saved.state.economy) : saved.state.economy;
         // The thinking time restarts, so a long closed app is not logged as a slow answer.
-        r.meta.state = { ...saved.state, shownAt: clock.now() };
+        r.meta.state = { ...saved.state, economy: { ...fresh }, shownAt: clock.now() };
         mountScreen(r, host);
         // A saved session is never 'done' (the commit that ends it clears it), but a stray one still closes.
         if (r.meta.state.phase === 'done') finishRun(r);
@@ -248,6 +262,11 @@ export function createBreakFlow(options: BreakFlowOptions): BreakFlow {
 
   function onStep(r: Run, state: BreakState, effects: SessionEffect[]): void {
     for (const e of effects) if (e.type === 'answer' && e.try === 1) r.meta.firstAnswerMs.push(e.ms);
+    // A parent end on the summary: every question was answered, so the break counts as done.
+    const logState: BreakState =
+      state.phase === 'done' && state.endReason === 'parent' && r.meta.state.phase === 'summary'
+        ? { ...state, endReason: 'complete' }
+        : state;
     r.meta.state = state;
     const done = state.phase === 'done';
     const stores = r.stores;
@@ -264,7 +283,7 @@ export function createBreakFlow(options: BreakFlowOptions): BreakFlow {
         now: r.clock.now(),
         // The commit that ends the break also clears the saved session and writes the break log.
         session: done ? null : { ...r.meta, firstAnswerMs: [...r.meta.firstAnswerMs] },
-        breakLog: done ? breakLogOf({ state, sessionId: r.meta.sessionId, moduleId: r.meta.moduleId, start: r.meta.start, end: r.clock.now(), firstAnswerMs: r.meta.firstAnswerMs }) : undefined,
+        breakLog: done ? breakLogOf({ state: logState, sessionId: r.meta.sessionId, moduleId: r.meta.moduleId, start: r.meta.start, end: r.clock.now(), firstAnswerMs: r.meta.firstAnswerMs }) : undefined,
       });
       enqueue(() => commitStep(stores.db, write));
     }
@@ -287,6 +306,7 @@ export function createBreakFlow(options: BreakFlowOptions): BreakFlow {
     run?.screen?.destroy();
     run = null;
     opening = false;
+    pendingParentEnd = false;
     close?.();
     close = null;
     // Chained after the break log. The full timer is saved before the saved break is forgotten.
@@ -298,33 +318,65 @@ export function createBreakFlow(options: BreakFlowOptions): BreakFlow {
     options.resumeWorld();
   }
 
+  function begin(): void {
+    if (isActive()) return;
+    opening = true;
+    pendingParentEnd = false;
+    const gen = ++generation;
+    options.pauseWorld();
+    const host = el('div', { class: 'break-host', attrs: { 'data-screen-id': 'break', role: 'dialog' } });
+    host.style.cssText = 'position:absolute;inset:0';
+    close = options.screens.open('learn', host);
+    void openRun(options.env, host, gen)
+      .then((r) => {
+        if (r && gen === generation) {
+          run = r;
+          if (pendingParentEnd) {
+            pendingParentEnd = false;
+            if (!r.finished) r.screen?.parentEnd();
+          }
+        }
+      })
+      .catch(() => {
+        // The questions could not be made: give the kid the world back with a full timer.
+        if (gen === generation) leave();
+      })
+      .finally(() => {
+        if (gen === generation) opening = false;
+      });
+  }
+
   return {
     start() {
-      if (isActive()) return;
-      opening = true;
-      const gen = ++generation;
-      options.pauseWorld();
-      const host = el('div', { class: 'break-host', attrs: { 'data-screen-id': 'break', role: 'dialog' } });
-      host.style.cssText = 'position:absolute;inset:0';
-      close = options.screens.open('learn', host);
-      void openRun(options.env, host, gen)
-        .then((r) => {
-          if (r && gen === generation) run = r;
-        })
-        .catch(() => {
-          // The questions could not be made: give the kid the world back with a full timer.
-          if (gen === generation) leave();
-        })
-        .finally(() => {
-          if (gen === generation) opening = false;
+      if (isActive() || stopWaiting) return;
+      // A parent screen (PIN pad, first start, parent area) is on top: the break waits until it closes.
+      if (options.screens.current() === 'parent') {
+        let unsubscribe: (() => void) | null = null;
+        let cancelled = false;
+        const stop = () => {
+          cancelled = true;
+          unsubscribe?.();
+          unsubscribe = null;
+          if (stopWaiting === stop) stopWaiting = null;
+        };
+        stopWaiting = stop;
+        unsubscribe = options.screens.subscribe((kind) => {
+          if (cancelled || kind === 'parent') return;
+          stop();
+          begin();
         });
+        if (cancelled) unsubscribe?.();
+        return;
+      }
+      begin();
     },
     isActive,
     end() {
       leave();
     },
     parentEnd() {
-      run?.screen?.parentEnd();
+      if (run?.screen) run.screen.parentEnd();
+      else if (opening) pendingParentEnd = true; // still loading: applied when the break mounts
     },
     settled: () => chain,
   };

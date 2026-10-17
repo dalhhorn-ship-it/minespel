@@ -305,6 +305,74 @@ describe('break flow', () => {
     expect((await createProgressStore(r.db).list()).length).toBe(0);
   });
 
+  it('a resumed break takes its points from the stored economy record, not the saved session', async () => {
+    const r = await rig();
+    const e0 = await r.records.get('economy');
+    await r.records.put('economy', { ...e0, points: 25 });
+    r.flow.start();
+    await skipLesson(r.host);
+    await right(r); // 27
+    await r.flow.settled();
+    expect((await r.records.get('economy')).points).toBe(27);
+    // Something else (a purchase) lowers the points by 20 while the app is closed.
+    await r.records.put('economy', { ...(await r.records.get('economy')), points: 7 });
+    const again = r.newFlow();
+    again.flow.start();
+    await until(() => again.host.querySelector('.number-view'));
+    await right(r, again.host); // +2
+    await again.flow.settled();
+    expect((await r.records.get('economy')).points).toBe(9);
+    again.flow.end();
+  });
+
+  it('start() waits while a parent screen is on top and opens the break when it closes', async () => {
+    const r = await rig();
+    const closeParent = r.screens.open('parent', document.createElement('div'));
+    r.flow.start();
+    r.flow.start();
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    expect(r.calls).toEqual([]);
+    expect(r.flow.isActive()).toBe(false);
+    expect(r.host.querySelector('.break-host')).toBeNull();
+    closeParent();
+    expect(r.calls).toEqual(['pause']);
+    expect(r.screens.current()).toBe('learn');
+    await until(() => r.host.querySelector('.lesson-view, .number-view'));
+    expect(r.host.querySelectorAll('.break-host')).toHaveLength(1);
+    r.flow.end();
+  });
+
+  it('a parent end while the break is still loading is kept and applied when it mounts', async () => {
+    const r = await rig();
+    r.flow.start();
+    r.flow.parentEnd(); // the questions are not there yet
+    await until(() => r.screens.current() === 'world');
+    await r.flow.settled();
+    const logs = createLogStore(r.db);
+    const answers = await logs.listAnswers();
+    expect(answers).toHaveLength(5);
+    expect(answers.every((a) => a.given === 'niet beantwoord')).toBe(true);
+    expect((await logs.listBreaks())[0]).toMatchObject({ n: 5, score: 0, endedBy: 'stopped' });
+    expect(r.calls).toContain('restart');
+    expect(await createSessionStore(r.db).load()).toBeNull();
+  });
+
+  it('a parent end on the summary logs the break as done', async () => {
+    const r = await rig();
+    r.flow.start();
+    await skipLesson(r.host);
+    for (let i = 0; i < 5; i++) await right(r);
+    await until(() => r.host.querySelector('.break-summary'));
+    r.flow.parentEnd();
+    await until(() => r.screens.current() === 'world');
+    await r.flow.settled();
+    const logs = createLogStore(r.db);
+    expect(await logs.listBreaks()).toHaveLength(1);
+    expect((await logs.listBreaks())[0]).toMatchObject({ n: 5, score: 5, endedBy: 'done' });
+    expect((await logs.listAnswers()).filter((a) => a.given === 'niet beantwoord')).toHaveLength(0);
+    expect(await createSessionStore(r.db).load()).toBeNull();
+  });
+
   it('with nothing switched on it shows the friendly empty break and logs nothing (AC39)', async () => {
     const r = await rig({ rekenenOn: false, taalOn: false });
     r.flow.start();
