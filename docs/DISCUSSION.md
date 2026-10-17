@@ -183,3 +183,37 @@ Only real issues. Checked ARCHITECTURE.md and PLAN.md against file lists and gro
 
 **Parallel groups**
 * No same group file collisions found in the Files lists as written. Two risks: (a) `src/main.ts` is edited by T3, T22, T23, T37, T41, T43, T48, T52; this is safe only if the "start earlier than group" rule is never used for T22 (group C, M5), so T22 must not run with T23. (b) T65 (group C) edits Taal JSON and `TEST_REPORT.md`, which T32 and T64 also use, and T7 pins 288 items. Run T65 only in M7, and have T7 read the counts, not hardcode them if fixes can change them.
+
+## Architecture review (qa view)
+
+Checked ARCHITECTURE.md and PLAN.md against the 148 active ACs in the PRD. Every active AC maps to at least one task. The issues below are real gaps.
+
+**Plan holes**
+1. T50 (Inhoud kiezen) is not a dependency of any task, so T62, T63 and T64 can start without it. Add T50 to the T62 and T63 dependency lists.
+2. `scripts/check.sh` is owned by no task. AC122 (validate.py on every module folder, fail if python3 is missing) is listed under T1, but check.sh is not in T1's file list. Add it to T1.
+3. The "first download under 5 MB" constraint (PRD section 10) has no task. Add a size check to `scripts/check-dist.mjs` in T1.
+4. Shared e2e helpers (go through the gate with the PIN, read hooks, fake clock, tap target scan, "kill the app") have no owner. Parallel tasks in groups I and J will each write their own copy or collide. Give one early task (T1 or T23) `tests/e2e/helpers/*.ts`, and give T48 the PIN login helper.
+5. Egg spawn API is unspecified. T47 (buy) and T51 (golden egg) must put an egg in the world, but neither lists `dino-system.ts` or `dino-store.ts`, which T42 owns. Make T42 export `addEgg(kind, golden)` and say so in its acceptance.
+6. T51 and T56 read and write the `exams` store, but `log-store.ts` is owned by T43. T43 should export saveExam and the break flag "snel geklikt" (AC92). Today T43's acceptance does not mention either.
+7. The lock icon (T48) must never start a look drag (AC127), but T48 does not list `pointer-router.ts`. T10 should expose an "ignore zone" registration.
+8. T52 shows the 30 day backup reminder, but nothing writes `meta.lastBackup`. Add it to T53 through a backup.ts call (T18 owns the file).
+
+**Test setup**
+9. No step installs WebKit for Playwright (`npx playwright install webkit --with-deps`) in T1, check.sh or CI.
+10. AC141 needs a contrast checker. No axe-core or own helper is in the dependency list. Add a package in T1 or write a small ratio function over the tokens in T3.
+11. Plain http tests (AC128, AC140) cannot run on `localhost`, which counts as a secure context. The tests must remove `crypto.subtle`, `serviceWorker` and `isSecureContext` with `addInitScript`. Say this in T17 and T52.
+12. "Kill and reopen" (AC24, AC96, AC150) needs a hook that closes the page without the pagehide flush. `page.close()` fires pagehide and would hide the 5 second loss rule. Add such a hook in the helpers.
+13. AC109 may be untestable if headless WebKit has no WebGL and the null renderer is used. Then AC109 must move to the (iPad) list. Decide this when T1 reports on WebGL.
+14. AC97 offline with `setOffline` and a service worker is flaky in Playwright WebKit. Plan a fallback: the check on the deployed HTTPS address (T64).
+15. Multi touch (AC8, AC105, AC117) is synthetic PointerEvents, not real touch. Put "two finger play on the real iPad" on the T64 list.
+16. T32 changes `WORLD_SIZE` to 48 after T4 and T23 tests exist. AC1 tests must read the constant, not a literal 64.
+
+**Tasks too big or unclear**
+17. T48 does gate logic UI, first start flow, parent shell, lock icon and seven stubs, plus `screens.ts` and `main.ts`. Split into gate plus first start, and shell plus stubs.
+18. T23 has nine files (renderer, loop, controller, fps counter, spike, hooks, main). Split into renderer plus fps plus spike, and loop plus controller.
+19. T43 (break flow, resume, content loader, both stores, logs) and T53 (backup UI, export, import, conflict choice) are each too much for one agent run. Consider splitting by storage versus UI.
+20. T31 must say the session state is a plain serializable object, or AC37 (resume on the same try) cannot be built later in T43.
+21. T62 is unbounded: an audit of every screen with fixes across all CSS. Keep "small CSS fixes only" and send everything else to new tasks, as the task note says.
+
+**Parallel collisions**
+No file is shared inside a group once the stub rule is followed. Watch these: `src/main.ts` (T3, T22, T23, T37, T41, T43, T48, T52, never in the same group today, keep it so), `src/game/game.ts` (T23, T33, T37, T42, T55 via actions), `src/ui/hud.ts` (T10, T33, T41, T44). T65 is in group C but edits the Taal JSON while T7 and T20 read it, so run T65 only after T7 and T20 are done and re-check the 288 item count in AC59.
