@@ -74,7 +74,8 @@ test.describe('dinos in the world', () => {
     await openApp(page);
     await flatten(page);
     await readState(page, 'addTestEgg', 'triceratops', false);
-    await expect.poll(async () => (await state(page)).eggs.length).toBe(1);
+    // The egg gets its spot on the next game step; until then its position is not a number.
+    await expect.poll(async () => typeof (await state(page)).eggs[0]?.x).toBe('number');
     const egg = (await state(page)).eggs[0]!;
     const dist = Math.hypot(egg.x - (C + 0.5), egg.z - (C + 0.5));
     expect(dist).toBeGreaterThan(0.9);
@@ -130,7 +131,8 @@ test.describe('dinos in the world', () => {
     await openApp(page);
     await flatten(page);
     await readState(page, 'addTestEgg', 'compy', false);
-    await expect.poll(async () => (await state(page)).eggs.length).toBe(1);
+    // The egg gets its spot on the next game step; until then its position is not a number.
+    await expect.poll(async () => typeof (await state(page)).eggs[0]?.x).toBe('number');
     const egg = (await state(page)).eggs[0]!;
     await readState(page, 'setBuildState', { mode: 'bouwen', selected: 0 });
     // Tap the top of the ground cell the egg lies on from the player's eye.
