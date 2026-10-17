@@ -112,3 +112,34 @@ describe('save queue', () => {
     expect(await get(db, 'kv', 'economy')).toEqual({ points: 5 });
   });
 });
+
+describe('save queue stop', () => {
+  it('drops pending marks and never writes again', async () => {
+    const db = await fresh();
+    const cleared = vi.fn();
+    const q = createSaveQueue({ db, setTimer: () => 7, clearTimer: cleared });
+    q.register('economy', () => ({ points: 1 }));
+    q.markDirty('economy');
+    q.stop();
+    expect(cleared).toHaveBeenCalled();
+    expect(q.pendingCount()).toBe(0);
+    q.markDirty('economy');
+    await q.flushNow();
+    expect(q.pendingCount()).toBe(0);
+    expect(await get(db, 'kv', 'economy')).toBeUndefined();
+  });
+
+  it('writes nothing on hide or pagehide after stop', async () => {
+    const db = await fresh();
+    const q = createSaveQueue({ db, setTimer: () => 0, clearTimer: () => {} });
+    q.register('economy', () => ({ points: 1 }));
+    const detach = q.attachPageListeners();
+    q.markDirty('economy');
+    q.stop();
+    window.dispatchEvent(new Event('pagehide'));
+    document.dispatchEvent(new Event('visibilitychange'));
+    await q.flushNow();
+    detach();
+    expect(await get(db, 'kv', 'economy')).toBeUndefined();
+  });
+});
