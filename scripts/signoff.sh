@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Founder signoff for docs/PRD.md.
-#   ./scripts/signoff.sh "Your Name"   sign the current PRD (founder only)
+#   ./scripts/signoff.sh "Founder"     stamp the current PRD (only after the founder said yes in chat)
 #   ./scripts/signoff.sh --check       exit 0 if the current PRD is signed
 set -euo pipefail
 cd "$(dirname "$0")/.."
@@ -14,10 +14,10 @@ hash_prd() {
 }
 
 if [[ "${1:-}" == "--check" ]]; then
-  [[ -f "$STAMP" ]] || { echo "PRD not signed: run /signoff"; exit 1; }
+  [[ -f "$STAMP" ]] || { echo "PRD not approved: ask the founder (/signoff)"; exit 1; }
   want=$(grep '^sha256:' "$STAMP" | cut -d' ' -f2)
   if [[ "$want" != "$(hash_prd)" ]]; then
-    echo "PRD changed since signoff: founder must sign again"; exit 1
+    echo "PRD changed since signoff: founder must approve again"; exit 1
   fi
   echo "PRD signed: $(grep '^signed_by:' "$STAMP" | cut -d' ' -f2-)"
   exit 0

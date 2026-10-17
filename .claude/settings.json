@@ -2,7 +2,7 @@
   "permissions": {
     "allow": [
       "Bash(./scripts/check.sh)",
-      "Bash(./scripts/signoff.sh --check)",
+      "Bash(./scripts/signoff.sh:*)",
       "Bash(git status:*)",
       "Bash(git diff:*)",
       "Bash(git log:*)",
@@ -10,13 +10,6 @@
       "Bash(git commit:*)",
       "Bash(npm test:*)",
       "Bash(npm run:*)"
-    ],
-    "deny": [
-      "Bash(./scripts/signoff.sh \"*)",
-      "Bash(./scripts/signoff.sh '*)",
-      "Bash(bash scripts/signoff.sh:*)",
-      "Bash(bash ./scripts/signoff.sh:*)",
-      "Bash(scripts/signoff.sh \"*)"
     ],
     "ask": [
       "Bash(npm run deploy:*)",

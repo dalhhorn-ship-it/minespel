@@ -15,7 +15,7 @@ You are the operator. Follow the execution loop in CLAUDE.md.
 4. **Verify every result yourself.** Read the diff. Run `./scripts/check.sh`. Check the task's acceptance criteria. Do not trust a "done" report without evidence.
 5. On failure: send the exact error back to a `developer` agent with the task. Up to 3 attempts. If still failing, mark the task `blocked` in `docs/PLAN.md`, add a `NEEDS FOUNDER` decision with options (simplify the task, change approach, cut from v1), and ask the founder.
 6. On success: mark the task `done` in `docs/PLAN.md`, commit with message `feat(T<id>): <title>` (include tests and docs in the same commit).
-7. **Scope guard.** If any agent reports the PRD is wrong or something new is needed, ask `product` whether it is in scope. If not, it is a founder decision. Do not build it before the founder says yes and the PRD is updated and re-signed.
+7. **Scope guard.** If any agent reports the PRD is wrong or something new is needed, ask `product` whether it is in scope. If not, it is a founder decision. Do not build it before the founder says yes and the PRD is updated and approved again.
 8. **At each milestone** (M1, M2, ...):
    * Launch `architect` in milestone review mode. Fix every "must fix" via `developer` agents.
    * Launch `scribe` to update README, CHANGELOG and STATUS.
