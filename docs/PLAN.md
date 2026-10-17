@@ -119,3 +119,7 @@ At every milestone: architect review, scribe docs update, and a real iPad check 
 * **T53b.** The 10 000 item fixture is made by a small script in the test, not committed as a big file.
 * **T65.** Runs in the last groups, after T7 and T20, so content fixes cannot break their tests. T7 reads the item count from the folder.
 * **T62 and T63.** Bugs they find become new tasks (T66 and up) with their own files, not fixes inside the audit task, except small CSS fixes in T62.
+
+## Operator notes during the build
+* T47 (egg purchase) must write economy, dinos and ledger in one IndexedDB transaction (AC150). The current stores do not take a transaction, so T47 adds that through `transact` in `db.ts`. Raised by the M1 review and by T67.
+* T38 (break selection) must leave out items already asked in the current break. `srs.ts` makes a box 1 item due again on the same day.
