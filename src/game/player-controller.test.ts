@@ -121,4 +121,27 @@ describe('player controller', () => {
     expect(s.c.player.z).toBe(START_SPOT.z);
     expect(s.c.yaw).toBe(0);
   });
+  it('smoothly eases camera angle with arrow input and allows ascending higher in the sky', () => {
+    const s = setup();
+    s.c.setLookInput(1, 1);
+    s.c.update(1 / 60);
+    const firstPitch = s.c.pitch;
+    expect(firstPitch).toBeGreaterThan(0);
+    s.c.update(1 / 60);
+    // Easing accelerates on the second frame
+    expect(s.c.pitch - firstPitch).toBeGreaterThan(firstPitch);
+    // Releasing look input still glides briefly before stopping
+    s.c.setLookInput(0, 0);
+    const beforeGlide = s.c.pitch;
+    s.c.update(1 / 60);
+    expect(s.c.pitch).toBeGreaterThan(beforeGlide);
+
+    // Ascending lifts the player high into the sky (with WORLD_HEIGHT = 64)
+    const y0 = s.c.player.y;
+    s.c.setAscending(true);
+    for (let i = 0; i < 90; i++) s.c.update(1 / 60);
+    s.c.setAscending(false);
+    expect(s.c.player.y).toBeGreaterThan(y0 + 8);
+    expect(WORLD_HEIGHT).toBe(64);
+  });
 });

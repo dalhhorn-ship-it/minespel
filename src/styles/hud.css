@@ -5,7 +5,7 @@
   pointer-events: none; /* the world gets the touches; only the parts below take them */
   touch-action: none;
   font-family: var(--font-stack);
-  font-size: var(--font-body);
+  font-size: calc(var(--font-body) * var(--font-scale, 1));
   user-select: none;
   -webkit-user-select: none;
   -webkit-touch-callout: none;
@@ -21,6 +21,12 @@
   gap: var(--gap);
 }
 .hud-top > * { position: static; pointer-events: auto; }
+.hud-top-right {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--gap);
+  pointer-events: auto;
+}
 .hud-countdown { min-height: var(--touch-min); min-width: var(--touch-min); }
 .hud-btn {
   pointer-events: auto;
@@ -50,6 +56,35 @@
   min-height: 96px;
   border-radius: 50%;
 }
+.hud-ascend {
+  right: calc(var(--safe-right) + var(--gap) * 2);
+  bottom: calc(var(--safe-bottom) + var(--touch-min) + 96px + var(--gap) * 5);
+  min-width: 96px;
+  min-height: 56px;
+  border-radius: 999px;
+}
+.hud-camera-pad {
+  pointer-events: auto;
+  right: calc(var(--safe-right) + 124px + var(--gap) * 2);
+  bottom: calc(var(--safe-bottom) + var(--touch-min) + var(--gap) * 3);
+  display: grid;
+  grid-template-columns: repeat(3, 56px);
+  grid-template-rows: repeat(2, 56px);
+  gap: 6px;
+}
+.hud-cam-btn {
+  min-width: 56px;
+  min-height: 56px;
+  padding: 0;
+  font-size: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.hud-cam-up { grid-column: 2; grid-row: 1; }
+.hud-cam-left { grid-column: 1; grid-row: 2; }
+.hud-cam-down { grid-column: 2; grid-row: 2; }
+.hud-cam-right { grid-column: 3; grid-row: 2; }
 .hud-hotbar {
   pointer-events: auto;
   left: 50%;

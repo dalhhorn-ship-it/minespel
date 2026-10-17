@@ -10,6 +10,7 @@ import { onTap } from './tap';
 export interface BlockGridOptions {
   router: PointerRouter;
   onPick: (block: number) => void;
+  onOpenChange?: (open: boolean) => void;
 }
 
 export interface BlockGrid {
@@ -50,12 +51,18 @@ export function createBlockGrid(options: BlockGridOptions): BlockGrid {
   }));
 
   function close() {
-    root.hidden = true;
+    if (!root.hidden) {
+      root.hidden = true;
+      options.onOpenChange?.(false);
+    }
   }
   return {
     root,
     open() {
-      root.hidden = false;
+      if (root.hidden) {
+        root.hidden = false;
+        options.onOpenChange?.(true);
+      }
     },
     close,
     isOpen: () => !root.hidden,

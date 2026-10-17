@@ -7,10 +7,12 @@ export interface ProgressRecord {
   box: number;
   /** Local calendar day, "2026-10-18". */
   due: string;
-  level: number;
+  level: string | number;
   topic: string;
   skill: string;
   seen: number;
+  /** Timestamp (ms) when a generated sum was saved, for keeping the 200 newest per topic (AC126). */
+  savedAt?: number;
 }
 
 export const progressKey = (moduleId: string, itemId: string): string => `${moduleId}|${itemId}`;

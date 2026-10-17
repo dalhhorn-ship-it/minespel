@@ -1,14 +1,26 @@
-// Turns the stick, the look drag and the jump button into player movement and a camera pose.
+// Turns the stick, the look drag, eased camera arrows, jump, and sky ascend into player movement and a camera pose.
 import type { Look } from '../input/look';
 import type { Stick } from '../input/stick';
 import type { CameraPose } from '../render/renderer';
-import { EYE_HEIGHT, MAX_FRAME_TIME, PHYSICS_STEP, createPlayer, stepPlayer, type PlayerState } from '../world/physics';
-import { START_SPOT } from '../world/terrain';
+import {
+  EYE_HEIGHT,
+  JUMP_SPEED,
+  MAX_FRAME_TIME,
+  PHYSICS_STEP,
+  createPlayer,
+  stepPlayer,
+  type PlayerState,
+} from '../world/physics';
+import { START_SPOT, WORLD_HEIGHT } from '../world/terrain';
 import type { World } from '../world/world';
 
 /** Radians of turn per dragged point. */
 export const LOOK_SENSITIVITY = 0.006;
 export const MAX_PITCH = 1.4;
+/** Radians per second when holding a camera angle arrow button or key. */
+export const LOOK_ARROW_SPEED = 1.9;
+/** Exponential easing rate for smooth camera arrow acceleration/deceleration. */
+export const LOOK_EASE_RATE = 10;
 
 export interface PlayerController {
   readonly player: PlayerState;
@@ -16,6 +28,14 @@ export interface PlayerController {
   pitch: number;
   /** Call from the jump button. The jump is sent to physics as one frame. */
   jump(): void;
+  /** Boosts the player upward in the sky (clamped below WORLD_HEIGHT - 2). */
+  ascend(): void;
+  /** Hold-to-ascend into the sky. */
+  setAscending(active: boolean): void;
+  /** Continuous camera angle arrow input: turnX in [-1, 1] (+1 right), tiltY in [-1, 1] (+1 up). */
+  setLookInput(turnX: number, tiltY: number): void;
+  /** Smooth angular impulse for a quick tap on a camera angle arrow. */
+  nudgeLook(turnX: number, tiltY: number): void;
   update(dt: number): void;
   /** Puts the player back on the start spot, standing still, looking ahead. */
   reset(): void;
@@ -42,6 +62,14 @@ export function stickToWorld(stickX: number, stickY: number, yaw: number): { mov
 export function createPlayerController(options: PlayerControllerOptions): PlayerController {
   const player = createPlayer(START_SPOT.x, START_SPOT.y, START_SPOT.z);
   let jumpPending = false;
+  let ascendPending = false;
+  let ascendingHeld = false;
+  let targetTurnX = 0;
+  let targetTiltY = 0;
+  let yawVel = 0;
+  let pitchVel = 0;
+
+  const clampPitch = (p: number) => Math.max(-MAX_PITCH, Math.min(MAX_PITCH, p));
 
   const ctrl: PlayerController = {
     player,
@@ -50,11 +78,38 @@ export function createPlayerController(options: PlayerControllerOptions): Player
     jump() {
       jumpPending = true;
     },
+    ascend() {
+      ascendPending = true;
+    },
+    setAscending(active) {
+      ascendingHeld = active;
+      if (active) ascendPending = true;
+    },
+    setLookInput(turnX, tiltY) {
+      targetTurnX = Math.max(-1, Math.min(1, turnX));
+      targetTiltY = Math.max(-1, Math.min(1, tiltY));
+    },
+    nudgeLook(turnX, tiltY) {
+      yawVel += Math.max(-1, Math.min(1, turnX)) * LOOK_ARROW_SPEED * 0.85;
+      pitchVel += Math.max(-1, Math.min(1, tiltY)) * LOOK_ARROW_SPEED * 0.85;
+    },
     update(dt) {
+      const clampedDt = Math.min(Math.max(dt, 0), MAX_FRAME_TIME);
       const d = options.look.consumeDelta();
       // Dragging right turns right (yaw falls); dragging up looks up.
       ctrl.yaw -= d.dx * LOOK_SENSITIVITY;
-      ctrl.pitch = Math.max(-MAX_PITCH, Math.min(MAX_PITCH, ctrl.pitch - d.dy * LOOK_SENSITIVITY));
+      ctrl.pitch = clampPitch(ctrl.pitch - d.dy * LOOK_SENSITIVITY);
+
+      // Smoothly ease camera arrow angular velocity toward target input.
+      const alpha = clampedDt > 0 ? 1 - Math.exp(-clampedDt * LOOK_EASE_RATE) : 0;
+      const desiredYawVel = targetTurnX * LOOK_ARROW_SPEED;
+      const desiredPitchVel = targetTiltY * LOOK_ARROW_SPEED;
+      yawVel += (desiredYawVel - yawVel) * alpha;
+      pitchVel += (desiredPitchVel - pitchVel) * alpha;
+      if (Math.abs(yawVel) > 1e-4 || Math.abs(pitchVel) > 1e-4) {
+        ctrl.yaw -= yawVel * clampedDt;
+        ctrl.pitch = clampPitch(ctrl.pitch + pitchVel * clampedDt);
+      }
 
       const s = options.stick.vector();
       const dir = stickToWorld(s.x, s.y, ctrl.yaw);
@@ -63,9 +118,25 @@ export function createPlayerController(options: PlayerControllerOptions): Player
       const k = len > 1 ? 1 / len : 1;
 
       // The jump goes in for one frame. If this frame is too short for a physics step, wait for the next.
-      const willStep = player.leftover + Math.min(Math.max(dt, 0), MAX_FRAME_TIME) >= PHYSICS_STEP;
-      stepPlayer(options.world, player, { moveX: dir.moveX * k, moveZ: dir.moveZ * k, jump: jumpPending && willStep }, dt);
-      if (willStep) jumpPending = false;
+      const willStep = player.leftover + clampedDt >= PHYSICS_STEP;
+      if ((ascendPending || ascendingHeld) && willStep && player.y < WORLD_HEIGHT - 2) {
+        player.vy = JUMP_SPEED;
+        player.onGround = false;
+      }
+      stepPlayer(
+        options.world,
+        player,
+        { moveX: dir.moveX * k, moveZ: dir.moveZ * k, jump: jumpPending && willStep },
+        dt,
+      );
+      if (player.y > WORLD_HEIGHT - 2) {
+        player.y = WORLD_HEIGHT - 2;
+        if (player.vy > 0) player.vy = 0;
+      }
+      if (willStep) {
+        jumpPending = false;
+        ascendPending = false;
+      }
     },
     reset() {
       player.x = START_SPOT.x;
@@ -77,6 +148,12 @@ export function createPlayerController(options: PlayerControllerOptions): Player
       ctrl.yaw = 0;
       ctrl.pitch = 0;
       jumpPending = false;
+      ascendPending = false;
+      ascendingHeld = false;
+      targetTurnX = 0;
+      targetTiltY = 0;
+      yawVel = 0;
+      pitchVel = 0;
     },
     pose() {
       return { x: player.x, y: player.y + EYE_HEIGHT, z: player.z, yaw: ctrl.yaw, pitch: ctrl.pitch };

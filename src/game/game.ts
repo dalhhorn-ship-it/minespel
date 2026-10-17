@@ -72,6 +72,9 @@ export interface GameOptions {
   /** The first tap detector main.ts holds. Without it the game is silent. */
   audioUnlock?: AudioUnlock;
   sound?: Sound;
+  onPausePressed?: () => void;
+  onParentPressed?: () => void;
+  onBlockGridOpenChange?: (open: boolean) => void;
 }
 
 const SILENT_UNLOCK = { isUnlocked: () => false, watch: () => {}, whenUnlocked: () => {} };
@@ -104,11 +107,15 @@ export function createGame(options: GameOptions): Game {
   const hud = createHud({
     router,
     onJump: () => player.jump(),
+    onAscend: (active) => player.setAscending(active),
+    onLookInput: (tx, ty) => player.setLookInput(tx, ty),
+    onLookNudge: (tx, ty) => player.nudgeLook(tx, ty),
     onMode: (m) => {
       build.setMode(m);
       emitChanged('build');
     },
-    onPause: () => {}, // the pause menu comes with T41
+    onPause: () => options.onPausePressed?.(),
+    onParent: options.onParentPressed ? () => options.onParentPressed?.() : undefined,
   });
   const build = createBuildController({
     world,
@@ -143,6 +150,7 @@ export function createGame(options: GameOptions): Game {
       refreshHotbar();
       emitChanged('build');
     },
+    onOpenChange: (open) => options.onBlockGridOpenChange?.(open),
   });
   const refreshHotbar = () => {
     const s = build.getState();
@@ -176,13 +184,39 @@ export function createGame(options: GameOptions): Game {
   win.addEventListener('resize', resize);
   win.addEventListener('orientationchange', resize);
 
+  const arrowKeys = new Set<string>();
+  const syncArrowLook = () => {
+    const tx = (arrowKeys.has('ArrowRight') ? 1 : 0) - (arrowKeys.has('ArrowLeft') ? 1 : 0);
+    const ty = (arrowKeys.has('ArrowUp') ? 1 : 0) - (arrowKeys.has('ArrowDown') ? 1 : 0);
+    player.setLookInput(tx, ty);
+  };
+  const onKeyDown = (e: KeyboardEvent) => {
+    if (!loop.running) return;
+    if (e.key === 'ArrowUp' || e.key === 'ArrowDown' || e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+      arrowKeys.add(e.key);
+      syncArrowLook();
+    }
+  };
+  const onKeyUp = (e: KeyboardEvent) => {
+    if (arrowKeys.delete(e.key)) {
+      syncArrowLook();
+    }
+  };
+  win.addEventListener('keydown', onKeyDown);
+  win.addEventListener('keyup', onKeyUp);
+
   // The loop runs only when nobody asked for a pause, the iPad is landscape and big enough, and the page is visible.
   let manualPause = false;
   let guardBlocks = false;
   const update = () => {
     const hidden = doc.visibilityState === 'hidden';
-    if (manualPause || guardBlocks || hidden) loop.stop();
-    else loop.start();
+    if (manualPause || guardBlocks || hidden) {
+      arrowKeys.clear();
+      player.setLookInput(0, 0);
+      loop.stop();
+    } else {
+      loop.start();
+    }
   };
   loopRunning = () => loop.running;
   const unsubscribe = options.guard.subscribe((s) => {
@@ -237,6 +271,8 @@ export function createGame(options: GameOptions): Game {
       doc.removeEventListener('visibilitychange', update);
       win.removeEventListener('resize', resize);
       win.removeEventListener('orientationchange', resize);
+      win.removeEventListener('keydown', onKeyDown);
+      win.removeEventListener('keyup', onKeyUp);
       router.destroy();
       hud.destroy();
       hotbar.destroy();
