@@ -1,4 +1,4 @@
-# App name
+# Dino Blokwereld
 
 One fun paragraph about what this is. (The scribe fills this in.)
 

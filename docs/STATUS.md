@@ -1,11 +1,11 @@
 # Status
 
-**Phase:** not started
-**Next step:** tell Claude your idea (or `/brainstorm`)
+**Phase:** idea chosen
+**Next step:** `/prd`
 **Blockers:** none
 
 ## Done
-* (nothing yet)
+* Brainstorm: concept chosen (free 3D Minecraft world with dinos, 5 minute learning breaks, Dutch, age 8 to 10).
 
 ## Notes
-* Model escalations, surprises and anything the next session should know.
+* Biggest risk is 3D performance in iPad Safari. Test on a real iPad early.
