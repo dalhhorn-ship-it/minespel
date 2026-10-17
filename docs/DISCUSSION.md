@@ -217,3 +217,46 @@ Checked ARCHITECTURE.md and PLAN.md against the 148 active ACs in the PRD. Every
 
 **Parallel collisions**
 No file is shared inside a group once the stub rule is followed. Watch these: `src/main.ts` (T3, T22, T23, T37, T41, T43, T48, T52, never in the same group today, keep it so), `src/game/game.ts` (T23, T33, T37, T42, T55 via actions), `src/ui/hud.ts` (T10, T33, T41, T44). T65 is in group C but edits the Taal JSON while T7 and T20 read it, so run T65 only after T7 and T20 are done and re-check the 288 item count in AC59.
+
+### architect response (architecture review round 1)
+
+Plan now has 71 tasks. A script checked that no two tasks in one group share a file and that every dependency sits in an earlier group. New rule: a task never starts while another running task lists any of the same files.
+
+**Developer view**
+* **D1:** accepted. T23 is now T23a (renderer, quality, fps counter, spike load) and T23b (loop, controller, `game.ts`, `main.ts`). The hooks registry moved to T1.
+* **D2:** accepted. New T66 (typed records, progress store) and T67 (session store, log store). T43 is only the flow. T7 reads the item count from the folder.
+* **D3:** accepted. T48a shell and stubs, T48b gate, lock icon and first start; T51a kid exam, T51b parent Examens; T53a backup UI, T53b module import and export (with a stub section file made by T53a).
+* **D4:** accepted with a change. No new dependency is needed: T23b provides `game.teleportHome()` which emits `teleported`, T44 calls it, T42 listens so Volg mij dinos come along. Written in both tasks.
+* **D5:** accepted with a change. Hooks are registered inside the feature's own source file, so there are no extra hook files to list. Rule in ARCHITECTURE and PLAN.
+* **D6:** accepted. T1 owns `scripts/check.sh`, `check-dist.mjs`, `src/env.d.ts`, `tests/setup/vitest.setup.ts`, `ci.yml`. T3 and T22 list `check-dist.mjs` and never share a group.
+* **D7:** accepted. Each screen's `.ts` imports its own CSS; `main.ts` imports tokens and base.
+* **D8:** accepted, see D2 (T66).
+* **D9:** accepted. Vitest setup stubs the canvas; atlas and name tag have a pure part plus a thin wrapper checked in e2e.
+* **D10:** accepted. Without WebGL in headless WebKit, AC109 is a unit test on a fake renderer lifecycle plus the iPad check in T64.
+* **D11:** accepted. `sound.ts` takes an AudioContext factory, T11 owns the fake in `tests/unit/fakes/`.
+* **D12:** decided by the architect (small, free, reversible, decision 38): `@fontsource/nunito` through npm with a rounded system font fallback. No founder decision needed.
+* **D13:** accepted. `check.sh` uses `--with-deps` when running as root. T1 checks WebKit runs in the sandbox and trims `ci.yml` to WebKit only.
+* **Parallel risks:** accepted. T22 now depends on T52, the last `main.ts` user before it. T65 runs in group M after T7 and T20.
+
+**qa view**
+1. Accepted. T62, T63 and T65 depend on every leaf task, including T50.
+2. Accepted, see D6.
+3. Accepted. `check-dist.mjs` fails above 5 MB (T1).
+4. Accepted. T1 owns `tests/e2e/helpers/app.ts`; T48b adds `helpers/gate.ts` with `loginAsParent` and makes `openApp` pass the first start.
+5. Accepted. T42 exports `addEgg(kind, golden)`.
+6. Accepted. T67 owns `saveExam`, `listExams` and `saveBreak` with the "snel geklikt" flag.
+7. Accepted. T10 exposes `addIgnoreZone`; T48b uses it for the lock icon.
+8. Accepted. T18 `markBackupMade` writes `meta.lastBackup`, T53a calls it, T52 reads it.
+9. Accepted, see D13.
+10. Accepted. Own `src/ui/contrast.ts` in T3, no new package.
+11. Accepted. `asInsecure` helper in T1, used by T48b (AC128) and T52 (AC140).
+12. Accepted. `simulateKill` hook in the save queue (T5) plus `killApp` helper (T1).
+13. Accepted, see D10.
+14. Accepted. T22 notes the fallback: AC97 on the HTTPS test deploy in T64.
+15. Accepted. Two finger play added to T64.
+16. Accepted. T4 and T23b tests read `WORLD_SIZE`.
+17 to 19. Accepted, see D1 to D3.
+20. Accepted. T31 acceptance: session state is a plain object with a JSON round trip test.
+21. Accepted. T62 does small CSS fixes only; other findings become new tasks.
+
+No open points. No founder decisions from this round.

@@ -33,7 +33,12 @@ if [[ -f package.json ]]; then
   npm run test:dist
   if grep -q '"@playwright/test"' package.json; then
     # Installs the WebKit browser once. Fast when it is already there.
-    npx playwright install webkit
+    # As root (cloud sandbox, CI containers) also install the Linux system libraries.
+    if [[ "$(id -u)" -eq 0 ]]; then
+      npx playwright install --with-deps webkit
+    else
+      npx playwright install webkit
+    fi
     npm run test:e2e
   fi
 else

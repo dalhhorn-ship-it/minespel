@@ -12,7 +12,7 @@ Written by the architect after PRD signoff (2026-10-17). Source of truth for how
 | UI | Plain DOM with a tiny in house helper `el()` in `src/ui/dom.ts` | No framework to learn or ship. Screens are small and mostly static. `el()` only sets text with `textContent`, which keeps imported text plain (AC88). |
 | Storage | IndexedDB through a small own wrapper (`src/storage/db.ts`) | Atomic transactions give safe writes for free (AC136). Room for a year of history. |
 | Sounds | Web Audio, sounds made in code (oscillators and noise) | No sound files, no licences, tiny. |
-| Font | Nunito (SIL Open Font License), latin subset, woff2, bundled in `public/fonts/` | Round and very readable, free, works offline. |
+| Font | Nunito (SIL Open Font License) from the `@fontsource/nunito` package, latin subset, bundled by Vite. Fallback stack `"Nunito", ui-rounded, system-ui, sans-serif` | Round and very readable, free, works offline, and comes through npm so no separate download is needed. |
 | Textures | 16 x 16 pixel tiles painted in code into one atlas canvas at start (`src/render/atlas.ts`) | No image assets to license or download. One texture, one material. |
 | Unit tests | Vitest, with jsdom for DOM tests and fake-indexeddb for storage tests | Same config as Vite. |
 | End to end tests | Playwright with WebKit, iPad (gen 6) landscape as the main profile, iPad (gen 6) portrait and iPad Pro 11 landscape as extra profiles | iPad (gen 6) is the 2018 iPad, the reference device (F10). |
@@ -22,7 +22,7 @@ Written by the architect after PRD signoff (2026-10-17). Source of truth for how
 
 No backend, no accounts, no paid services, no third party requests (AC98). Node 22 (same as CI).
 
-**Dependencies.** Runtime: `three` only. Dev: `vite`, `typescript`, `vitest`, `jsdom`, `fake-indexeddb`, `@playwright/test`, `eslint`, `typescript-eslint`, `@types/three`, `wrangler`. **Only task T1 edits `package.json`.** A later task that needs a new package stops and reports it to the operator.
+**Dependencies.** Runtime: `three` and `@fontsource/nunito` (font files only). Dev: `vite`, `typescript`, `vitest`, `jsdom`, `fake-indexeddb`, `@playwright/test`, `eslint`, `typescript-eslint`, `@types/three`, `wrangler`. **Only task T1 edits `package.json`.** A later task that needs a new package stops and reports it to the operator.
 
 ## Folder structure
 
@@ -36,7 +36,6 @@ tsconfig.json
 public/
   manifest.webmanifest
   icons/                    PNG icons made by scripts/make-icons.mjs
-  fonts/                    Nunito woff2 + OFL licence text
   _headers                  cache rules for Cloudflare (service worker never cached long)
 offline/
   service-worker.js         the BROWSER service worker (offline play). Not the Cloudflare Worker.
@@ -49,6 +48,7 @@ scripts/
   bundle-module.mjs         docs/modules/<id>/ folder to one importable .json file
   signoff.sh                PRD gate (do not touch)
 src/
+  env.d.ts                  declares __E2E__ and the Vite types
   main.ts                   boot: lockdown, one window check, open storage, migrate, load, first screen
   app/                      screens and flows: glue between logic and UI
     screens.ts              which screen is up, the overlay layers, kid screen or parent screen
@@ -134,6 +134,8 @@ src/
     migrate.ts              moves old saves to the current shape
     save-queue.ts           batched writes, flush within about 1 second, flush now
     log-store.ts            answers, breaks, exams, point ledger
+    records.ts              typed get and put for every kv record, with defaults
+    progress-store.ts       box and due day per item, list and delete by module or topic
     session-store.ts        running break or exam, saved after every step
     backup.ts               backup file make, check, restore in one transaction
   results/
@@ -157,6 +159,7 @@ src/
     hotbar.ts, block-grid.ts, pause-menu.ts, shop.ts, dino-menu.ts, name-screen.ts, lock-icon.ts
     broken-save-screen.ts
     virtual-list.ts         fixed row height list for 10 000 items
+    contrast.ts             WCAG contrast ratio, used by token tests and the a11y audit
     learn/                  kid learning screens (shared by break, practice, exam, Probeer)
     parent/                 parent area screens
       editor/               own module editor
@@ -167,13 +170,24 @@ src/
     e2e-hooks.ts            window.__dino test hooks, only in the e2e build
     spike-load.ts           14 placeholder dinos for the speed spike
 tests/
+  setup/vitest.setup.ts     fake-indexeddb, canvas getContext stub
+  unit/fakes/               fake AudioContext and other test fakes
   e2e/                      Playwright specs
+  e2e/helpers/              shared helpers: openApp, readState, killApp, asInsecure, loginAsParent
   fixtures/                 modules (good and broken), old saves, backups
 ```
 
 Unit tests live next to the code: `src/world/raycast.test.ts` tests `src/world/raycast.ts`.
 
 ## Modules and data flow
+
+**Shared APIs that several tasks rely on** (the owner task in brackets):
+* `pointer-router.addIgnoreZone(el)`: touches that start there never look or tap the world (T10).
+* `game.pause()`, `game.resume()`, `game.teleportHome()` which emits `teleported` (T23b). Dinos listen to it (T42).
+* `dino-store.addEgg(kind, golden)`: used by the shop (T47) and the golden egg (T51a) (T42).
+* `log-store`: `appendAnswer`, `saveBreak` (sets "snel geklikt"), `saveExam`, `listExams`, `appendLedger` (T67).
+* `records.get(name)` and `records.put(name, value)` for every `kv` record, `progress-store` for boxes (T66).
+* `backup.markBackupMade(now)` writes `meta.lastBackup`, read by the backup reminder (T18, called by T53a, read by T52).
 
 **Layers.** `core`, `world`, `learning`, `content`, `gate`, `dinos` (except the store) and `results` are pure TypeScript: no DOM, no three.js, no storage. They take a clock and a random source as arguments. This is where most tests live. `render` draws, `input` reads fingers, `ui` builds screens, `storage` saves, `app` and `game` glue them together.
 
@@ -196,7 +210,7 @@ The same `break-session` runs three modes: `break` (malus and bonus), `practice`
 
 **Rendering details.** Chunks of 16 x 16 x 32. Only faces next to air or a cut out block are built. Each face gets a fixed brightness (top 1.0, sides 0.8 and 0.6, bottom 0.5) as vertex colour, so there are no lights and no shadows. One `MeshBasicMaterial` with the atlas and `alphaTest` for glass and leaves. Linear fog hides the edge. Pixel ratio is `min(devicePixelRatio, 2)`; the spike may lower it to 1.5. Dinos are boxes grouped per dino; golden dinos use a gold colour. At most 12 shop dinos plus golden dinos, about 5 meshes each.
 
-**Context loss (AC109).** The renderer listens for `webglcontextlost` (calls `preventDefault`) and `webglcontextrestored`. On restore it rebuilds the atlas, all chunk meshes and dino meshes from game state. If no restore comes within 1.5 seconds, it throws the canvas away and makes a new renderer. Game state never lives in three.js objects, so nothing is lost.
+**Context loss (AC109).** If headless WebKit has no WebGL, AC109 is proven with a unit test on a fake renderer lifecycle and by hand on the iPad. The renderer listens for `webglcontextlost` (calls `preventDefault`) and `webglcontextrestored`. On restore it rebuilds the atlas, all chunk meshes and dino meshes from game state. If no restore comes within 1.5 seconds, it throws the canvas away and makes a new renderer. Game state never lives in three.js objects, so nothing is lost.
 
 ## How modules are loaded
 
@@ -287,7 +301,7 @@ npm run build        # production build into dist/
 npm run preview      # build, then wrangler dev: the built site served like production
 ```
 
-The factory itself runs in the cloud, so for real iPad checks the build reaches the iPad as chosen in decision 37 (test deploy, a home computer running `npm run dev`, or Codespaces).
+The factory itself runs in the cloud, so real iPad checks use a test deploy to the `workers.dev` address at each milestone (decision 37, standing yes from the founder for milestone test deploys only).
 
 On plain http (the dev server on the home network) Safari has no service worker, no file share sheet and no persistent storage. The app runs anyway and shows parent notes (AC140). Install, offline and sharing are checked on the deployed HTTPS address.
 
@@ -297,12 +311,22 @@ On plain http (the dev server on the home network) Safari has no service worker,
 1. `validate.py` on every folder in `docs/modules/` (fails if python3 is missing).
 2. `npm ci`, `npm run lint` (ESLint), `npm run typecheck` (`tsc --noEmit`).
 3. `npm test`: Vitest unit tests (`src/**/*.test.ts`, `tests/unit/**/*.test.ts`).
-4. `npm run build`, then `npm run test:dist` (`scripts/check-dist.mjs`: `dist/index.html`, manifest, icons and service worker exist, no test hooks).
-5. `npm run test:e2e`: Playwright WebKit. Its `webServer` runs `npm run build:e2e` (output `dist-e2e/`, with test hooks) and `vite preview` on it.
+4. `npm run build`, then `npm run test:dist` (`scripts/check-dist.mjs`: `dist/index.html`, manifest, icons and service worker exist, no test hooks, total size under 5 MB).
+5. `npx playwright install webkit` (with `--with-deps` when running as root, as in the cloud sandbox), then `npm run test:e2e`: Playwright WebKit. Its `webServer` runs `npm run build:e2e` (output `dist-e2e/`, with test hooks) and `vite preview` on it.
 
 Playwright projects: `ipad-landscape` (iPad (gen 6) landscape, main), `ipad-portrait` (only the "Draai je iPad" specs), `ipad-pro-landscape` (layout specs). All have `hasTouch`. Fake time uses Playwright's `page.clock`. Multi touch uses synthetic `PointerEvent`s with `pointerType: "touch"` dispatched in the page.
 
 Test hooks (`src/dev/e2e-hooks.ts`), e2e build only: read state (player position, block at a cell, points, timers, current screen, session), simulate WebGL context loss, place the player, set points, start a break now. Hooks never open a parent screen; e2e tests go through the gate with the PIN like a parent.
+
+**Test setup.**
+* `tests/setup/vitest.setup.ts` loads `fake-indexeddb/auto` and stubs the 2D canvas, which jsdom lacks. Code that paints (atlas, name tags) has a pure part that returns pixel data or layout, unit tested, and a thin canvas wrapper checked in e2e.
+* `sound.ts` takes an AudioContext factory; unit tests pass the fake from `tests/unit/fakes/`.
+* `asInsecure(page)` simulates plain http on `localhost` (which counts as secure): an init script removes `crypto.subtle`, `navigator.serviceWorker`, `navigator.share` and `navigator.storage.persist` and sets `isSecureContext` to false (AC128, AC140).
+* `killApp(page)` simulates iOS killing the app: it calls the `simulateKill` hook (the save queue stops flushing on hide), closes the page and opens a new one in the same context (AC24, AC96, AC150).
+* After T48b, `openApp` passes the first start with a test PIN, and `loginAsParent` opens the parent area through the gate.
+* Contrast: `src/ui/contrast.ts` computes ratios; a unit test checks the kid colour tokens, the a11y audit checks rendered screens (AC141).
+* Multi touch in e2e is synthetic pointer events; real two finger play is checked on the iPad (T64).
+* Tests read `WORLD_SIZE`, never a literal 64, because the spike may change it to 48.
 
 Rules: every task adds tests that fail without its change. Pure logic is tested with unit tests, screens with jsdom unit tests plus at least one e2e spec per flow. Checks marked (iPad) in the PRD are done by hand on the real iPad at milestones and written in `docs/TEST_REPORT.md`.
 
@@ -319,9 +343,11 @@ Rules: every task adds tests that fail without its change. Pure logic is tested 
 * **Files per task.** Only touch the files your task lists, plus its tests. Parallel tasks never share a file.
 * **Stub pattern.** When a screen needs a menu entry for something a later task builds, the earlier task creates the later file as a stub that shows "Komt nog" and exports the final function signature. The later task replaces the stub. This keeps shared files out of parallel work. Stubs are listed in each task.
 * **Integration files** (`src/main.ts`, `src/game/game.ts`, `src/app/screens.ts`, `src/ui/hud.ts`, `vite.config.ts`) are touched only by tasks that list them, never by two tasks in the same parallel group.
-* **Test hooks.** `src/dev/e2e-hooks.ts` only offers `registerHook(name, fn)`. Each feature registers its own hooks in its own file inside `if (__E2E__) { ... }`, so no two tasks edit the hooks file.
+* **Test hooks.** `src/dev/e2e-hooks.ts` (T1) only offers `registerHook(name, fn)`. Each feature registers its hooks inside its own source file, in `if (__E2E__) { ... }`, so no separate hook files and no shared edits.
+* **Starting order.** A task never starts while another running task lists any of the same files.
 * **Shared docs.** In a parallel group, developers do not edit `CHANGELOG.md`, `README.md` or this file. They put the line they want in their report and the operator adds it when committing.
 * **Colocated tests.** A file listed for a task includes its test file next to it (`x.ts` and `x.test.ts`).
+* **CSS** lives in `src/styles/`, one file per screen, imported by that screen's `.ts` file (`import '../styles/x.css'`). `tokens.css` and `base.css` are imported by `main.ts`.
 * **Dutch text** for the kid and parent lives in the file of the screen that shows it. Short sentences, groep 5 level on kid screens.
 * **Point values and egg prices** live in `src/core/economy.ts` and `src/dinos/kinds.ts`, nowhere else.
 * **Time.** Never call `Date.now()` in pure code; take a `Clock`. Days are local calendar days from `clock.ts`.
@@ -336,6 +362,6 @@ Rules: every task adds tests that fail without its change. Pure logic is tested 
 | iOS kills the app without `pagehide` | Save queue writes within about 2 seconds, not only on hide. |
 | Separate storage for Safari tab and home screen app | First start note, backups. |
 | Two validators drift | Shared fixture test runs both. |
-| Large plan (65 tasks) | Pure logic first and in parallel, stubs for menus, milestones playable early. |
+| Large plan (71 tasks) | Pure logic first and in parallel, stubs for menus, milestones playable early. |
 | Share sheet in home screen mode | Fallback new view (PRD 4.15), checked on the real iPad at M5. |
 | Taal content mistakes | Validator checks plus the human check (T65). |

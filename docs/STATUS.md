@@ -1,7 +1,7 @@
 # Status
 
-**Phase:** PRD approved, architecture in progress
-**Next step:** `/architect`, then `/build`.
+**Phase:** build, milestone M1
+**Next step:** `/build` M1 tasks, starting with T1 and T2.
 **Blockers:** none
 
 ## Done
