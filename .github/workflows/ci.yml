@@ -1,0 +1,22 @@
+name: CI
+on:
+  push:
+  pull_request:
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: PRD signoff matches
+        run: |
+          if [ -d src ] || [ -f package.json ]; then ./scripts/signoff.sh --check; fi
+      - name: Install Playwright browsers if used
+        run: |
+          if [ -f package.json ] && grep -q '"@playwright/test"' package.json; then
+            npm install --no-audit --no-fund && npx playwright install --with-deps webkit chromium
+          fi
+      - name: Check
+        run: ./scripts/check.sh
