@@ -1,0 +1,36 @@
+/* Parent area. Smaller text than the kid screens, but big touch targets. Scrolling and selecting are allowed (.parent in base.css). */
+.parent-area {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
+  background: var(--sand);
+  color: var(--ink);
+  font-size: 18px;
+  padding: calc(var(--safe-top) + var(--gap)) calc(var(--safe-right) + var(--gap)) calc(var(--safe-bottom) + var(--gap)) calc(var(--safe-left) + var(--gap));
+}
+.parent-title { margin: 0; font-size: 28px; }
+.parent-body { display: flex; gap: calc(var(--gap) * 2); align-items: flex-start; flex: 1; }
+.parent-menu { display: flex; flex-direction: column; gap: var(--gap); flex: 0 0 240px; }
+.parent-content { flex: 1; min-width: 0; }
+.parent-btn {
+  min-height: 56px;
+  padding: 0 calc(var(--gap) * 1.5);
+  border: 3px solid var(--ink);
+  border-radius: var(--radius);
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+  font-size: 18px;
+  font-weight: 800;
+  text-align: left;
+}
+.parent-btn[aria-current='page'] { background: var(--grass); color: var(--on-grass); }
+.parent-btn-close { text-align: center; margin-top: var(--gap); }
+.parent-section { display: flex; flex-direction: column; gap: var(--gap); align-items: flex-start; }
+.parent-section-title { margin: 0; font-size: 24px; }
+.parent-soon, .parent-hint { margin: 0; font-size: 20px; }
+.parent input, .parent textarea, .parent select { font-size: 16px; min-height: 44px; }
+@media (orientation: portrait) {
+  .parent-body { flex-direction: column; }
+  .parent-menu { flex: none; width: 100%; }
+}
