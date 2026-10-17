@@ -37,11 +37,29 @@ export function pointsText(points: number): string {
 export function createPauseMenu(options: PauseMenuOptions): PauseMenu {
   let closeScreen: (() => void) | null = null;
   let cleanups: Array<() => void> = [];
+  let unsubscribe: (() => void) | null = null;
+  let readId = 0;
+
+  /** Reads the points and shows them. A late answer never overwrites a newer one. */
+  function refreshPoints(line: HTMLElement) {
+    const id = ++readId;
+    void options.getPoints().then(
+      (p) => { if (id === readId) line.textContent = pointsText(p); },
+      () => { /* keep what is shown */ },
+    );
+  }
+
+  function stopWatching() {
+    unsubscribe?.();
+    unsubscribe = null;
+    readId++; // answers still on their way are dropped
+  }
 
   function close() {
     if (!closeScreen) return;
     const c = closeScreen;
     closeScreen = null;
+    stopWatching();
     for (const f of cleanups) f();
     cleanups = [];
     c();
@@ -71,10 +89,17 @@ export function createPauseMenu(options: PauseMenuOptions): PauseMenu {
     ]);
     const node = el('div', { class: 'pause-menu', attrs: { role: 'dialog', 'aria-label': 'Pauze', 'data-screen-id': 'pause' } }, [panel]);
     closeScreen = options.screens.open('kid-overlay', node);
-    void options.getPoints().then(
-      (p) => { points.textContent = pointsText(p); },
-      () => { /* keep 0 */ },
-    );
+    refreshPoints(points);
+    // A screen (shop, practice) opened on top may change the points. Read again when the menu is on top again.
+    let sawChild = false;
+    unsubscribe = options.screens.subscribe(() => {
+      if (!closeScreen) return;
+      if (options.screens.depth() > 1) sawChild = true;
+      else if (sawChild) {
+        sawChild = false;
+        refreshPoints(points);
+      }
+    });
   }
 
   return {
@@ -85,34 +110,12 @@ export function createPauseMenu(options: PauseMenuOptions): PauseMenu {
       if (!closeScreen) return;
       const c = closeScreen;
       closeScreen = null;
+      stopWatching();
       for (const f of cleanups) f();
       cleanups = [];
       c();
     },
   };
-}
-
-/**
- * Opens a simple "Komt nog" screen on top of the menu. Used by the Lesboek, Extra oefenen and
- * Dinowinkel stubs until T46 and T47 replace them. Returns a function that closes it.
- */
-export function openComingSoon(screens: Screens, title: string, kind: 'kid-overlay' | 'learn' = 'kid-overlay'): () => void {
-  let close: () => void = () => {};
-  const back = el('button', { class: 'pause-btn pause-btn-main', text: 'Terug', attrs: { type: 'button', 'data-pause': 'soon-back' } });
-  const stopTap = onTap(back, () => close());
-  const node = el('div', { class: 'pause-menu', attrs: { role: 'dialog', 'aria-label': title, 'data-screen-id': 'coming-soon' } }, [
-    el('div', { class: 'pause-panel' }, [
-      el('h2', { class: 'pause-title', text: title }),
-      el('p', { class: 'pause-soon', text: 'Komt nog' }),
-      back,
-    ]),
-  ]);
-  const closeScreen = screens.open(kind, node);
-  close = () => {
-    stopTap();
-    closeScreen();
-  };
-  return () => close();
 }
 
 export interface PauseSetupOptions extends PauseMenuOptions {

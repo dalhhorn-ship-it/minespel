@@ -1,6 +1,27 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createScreens } from '../app/screens';
-import { createPauseMenu, openComingSoon, pointsText, setupPauseMenu } from './pause-menu';
+import type { Screens } from '../app/screens';
+import { el } from './dom';
+import { onTap } from './tap';
+import { createPauseMenu, pointsText, setupPauseMenu } from './pause-menu';
+
+/** Plain stand in for the real shop, Lesboek and practice screens. */
+function openComingSoon(screens: Screens, title: string, kind: 'kid-overlay' | 'learn' = 'kid-overlay'): () => void {
+  let close: () => void = () => {};
+  const back = el('button', { attrs: { type: 'button', 'data-pause': 'soon-back' } });
+  const stopTap = onTap(back, () => close());
+  const node = el('div', { attrs: { 'data-screen-id': 'coming-soon' } }, [
+    el('h2', { text: title }),
+    el('p', { text: 'Komt nog' }),
+    back,
+  ]);
+  const closeScreen = screens.open(kind, node);
+  close = () => {
+    stopTap();
+    closeScreen();
+  };
+  return () => close();
+}
 
 function tap(node: Element) {
   node.dispatchEvent(new PointerEvent('pointerdown', { pointerId: 1, clientX: 5, clientY: 5, bubbles: true }));
@@ -8,14 +29,14 @@ function tap(node: Element) {
 }
 const btn = (host: HTMLElement, id: string) => host.querySelector(`[data-pause="${id}"]`) as HTMLElement;
 
-function setup(points = 12) {
+function setup(points: number | (() => Promise<number>) = 12) {
   const host = document.createElement('div');
   document.body.append(host);
   const screens = createScreens(host);
   const calls = { pause: 0, resume: 0, home: 0 };
   const menu = createPauseMenu({
     screens,
-    getPoints: () => Promise.resolve(points),
+    getPoints: typeof points === 'function' ? points : () => Promise.resolve(points),
     pauseWorld: () => { calls.pause++; },
     resumeWorld: () => { calls.resume++; },
     teleportHome: () => { calls.home++; },
@@ -97,6 +118,41 @@ describe('pause menu', () => {
     tap(btn(host, 'soon-back'));
     expect(screens.depth()).toBe(1);
     expect(menu.isOpen()).toBe(true);
+  });
+
+  it('reads the points again when a screen on top closes', async () => {
+    let value = 5;
+    const { host, menu } = setup(() => Promise.resolve(value));
+    menu.open();
+    await Promise.resolve();
+    expect(btn(host, 'points').textContent).toBe('Je hebt 5 punten');
+    tap(btn(host, 'shop'));
+    value = 9;
+    tap(btn(host, 'soon-back'));
+    await Promise.resolve();
+    expect(btn(host, 'points').textContent).toBe('Je hebt 9 punten');
+  });
+
+  it('a late answer never overwrites a newer one', async () => {
+    const resolvers: Array<(n: number) => void> = [];
+    const { host, menu } = setup(() => new Promise<number>((r) => { resolvers.push(r); }));
+    menu.open();
+    tap(btn(host, 'shop'));
+    tap(btn(host, 'soon-back'));
+    expect(resolvers).toHaveLength(2);
+    resolvers[1]!(20);
+    await Promise.resolve();
+    resolvers[0]!(3);
+    await Promise.resolve();
+    expect(btn(host, 'points').textContent).toBe('Je hebt 20 punten');
+  });
+
+  it('does not read again when the menu itself closes', async () => {
+    const getPoints = vi.fn(() => Promise.resolve(1));
+    const { menu } = setup(getPoints);
+    menu.open();
+    menu.close();
+    expect(getPoints).toHaveBeenCalledTimes(1);
   });
 
   it('setupPauseMenu makes the Pauze button open the menu', () => {

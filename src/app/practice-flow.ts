@@ -20,7 +20,6 @@ import { createProgressStore } from '../storage/progress-store';
 import { defaultKv } from '../storage/schema';
 import { createBreakScreen, MSG_EMPTY, type BreakScreen } from '../ui/learn/break-screen';
 import { el } from '../ui/dom';
-import { pointsText } from '../ui/pause-menu';
 import { onTap } from '../ui/tap';
 import type { AppEnv } from './app-env';
 import { loadBreakCatalog, loadSwitches, topicOfItem } from './content-loader';
@@ -45,22 +44,12 @@ export function practiceModules(catalog: Catalog, switches: Switches): Array<{ i
     .map((m) => ({ id: m.id, title: m.title }));
 }
 
-/** The pause menu stays open under this screen. Show the new total when the round is over. */
-async function refreshPausePoints(env: AppEnv): Promise<void> {
-  try {
-    const eco = await env.records?.get('economy');
-    const node = document.querySelector('[data-pause="points"]');
-    if (eco && node) node.textContent = pointsText(eco.points);
-  } catch {
-    // keep what is shown
-  }
-}
-
 export function openPractice(screens: Screens, env: AppEnv, deps: PracticeDeps = {}): () => void {
   let closed = false;
   let busy = false;
   let screen: BreakScreen | null = null;
   let chain: Promise<void> = Promise.resolve();
+  let pendingCommits = 0;
   let chooserCleanup: Array<() => void> = [];
   const cleanups: Array<() => void> = [];
 
@@ -80,9 +69,10 @@ export function openPractice(screens: Screens, env: AppEnv, deps: PracticeDeps =
     screen = null;
     for (const c of [...chooserCleanup, ...cleanups]) c();
     chooserCleanup = [];
-    closeScreen();
-    // After the last commit, so the total is the real one.
-    void chain.then(() => refreshPausePoints(env));
+    // The pause menu below reads its points again when this screen closes. So close after the last
+    // commit, when there is one on its way, so the total it reads is the real one.
+    if (pendingCommits === 0) closeScreen();
+    else void chain.then(closeScreen);
   }
 
   function note(text: string): void {
@@ -168,7 +158,11 @@ export function openPractice(screens: Screens, env: AppEnv, deps: PracticeDeps =
           session: null,
         });
         delete write.session; // leave the saved session alone: a practice round is never a saved break
-        chain = chain.then(() => commitStep(db, write)).catch(() => undefined);
+        pendingCommits++;
+        chain = chain
+          .then(() => commitStep(db, write))
+          .catch(() => undefined)
+          .then(() => { pendingCommits--; });
       }
       if (state.phase === 'done') queueMicrotask(close);
     };

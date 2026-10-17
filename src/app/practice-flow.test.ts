@@ -181,18 +181,14 @@ describe('Extra oefenen', () => {
     await vi.waitFor(async () => expect(await r.records.get('economy')).toMatchObject({ points: 22, practicePointsToday: 2, practiceDay: '2026-10-18' }));
   });
 
-  it('Stoppen closes the round, keeps the points, and refreshes the pause menu points', async () => {
+  it('Stoppen closes the round after its last save and keeps the points', async () => {
+    // The pause menu re-reads the points itself when this screen closes (see pause-menu.test.ts).
     const r = await rig();
-    const pause = document.createElement('p');
-    pause.setAttribute('data-pause', 'points');
-    pause.textContent = 'Je hebt 0 punten';
-    document.body.append(pause);
     const { box } = await start(r);
     await skipLesson(r.host);
     await rightAnswer(r, box);
     tap(r.host.querySelector('[data-practice="stop"]'));
-    expect(r.screens.current()).toBe('world');
-    await vi.waitFor(() => expect(pause.textContent).toBe('Je hebt 2 punten'));
+    await vi.waitFor(() => expect(r.screens.current()).toBe('world'));
     expect((await r.records.get('economy')).points).toBe(2);
   });
 
