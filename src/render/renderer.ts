@@ -5,6 +5,7 @@ import {
   BoxGeometry, Color, Fog, Group, Mesh, MeshBasicMaterial, PerspectiveCamera, Scene, WebGLRenderer,
   type BufferGeometry,
 } from 'three';
+import { registerHook } from '../dev/e2e-hooks';
 import { SPIKE_DINO_COUNT, type SpikeDino } from '../dev/spike-load';
 import { CHUNK_SIZE } from '../world/terrain';
 import { createAtlasTexture } from './atlas';
@@ -54,8 +55,8 @@ function chunkKey(cx: number, cz: number): string {
   return `${cx},${cz}`;
 }
 
-/** The real WebGL renderer. */
-export const createWebGlRenderer: RendererFactory = ({ canvas, quality = DEFAULT_QUALITY }) => {
+/** One WebGL renderer on one canvas, with no recovery. `createWebGlRenderer` wraps it. */
+const createPlainWebGlRenderer: RendererFactory = ({ canvas, quality = DEFAULT_QUALITY }) => {
   let q = quality;
   const gl = new WebGLRenderer({ canvas, antialias: false, alpha: false, powerPreference: 'high-performance' });
   const scene = new Scene();
@@ -193,3 +194,152 @@ export const createNullRenderer: RendererFactory = ({ canvas }) => ({
 export function createRenderer(options: RendererOptions, factory: RendererFactory = createWebGlRenderer): GameRenderer {
   return factory(options);
 }
+
+/** How long to wait for the browser to restore a lost WebGL context before making a new canvas. */
+export const CONTEXT_RESTORE_WAIT_MS = 1500;
+
+/**
+ * Wraps a renderer so that a lost WebGL context (iOS does this when the app was in the background)
+ * is fixed. Everything the game told the renderer is remembered. On restore the inner renderer is
+ * built again on the same canvas (atlas, chunks, dinos). With no restore in 1.5 seconds it is built
+ * on a new canvas that takes the place of the old one. The game state is not touched.
+ */
+export function withContextRecovery(inner: RendererFactory): RendererFactory {
+  return ({ canvas: firstCanvas, quality }) => {
+    let canvas = firstCanvas;
+    let q = quality;
+    let world: WorldView | null = null;
+    let pose: CameraPose | null = null;
+    let size: { w: number; h: number; dpr: number } | null = null;
+    let dinos: readonly SpikeDino[] | null = null;
+    let lost = false;
+    let disposed = false;
+    let generation = 0;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    let core: GameRenderer = inner({ canvas, quality: q });
+
+    const clearTimer = () => {
+      if (timer !== undefined) clearTimeout(timer);
+      timer = undefined;
+    };
+
+    const replay = () => {
+      if (size) core.resize(size.w, size.h, size.dpr);
+      if (world) core.setWorld(world);
+      if (dinos) core.setSpikeDinos(dinos);
+      if (pose) core.setCamera(pose);
+    };
+
+    const onLost = (event: Event) => {
+      event.preventDefault(); // Tells the browser that we want the context back.
+      if (disposed) return;
+      lost = true;
+      clearTimer();
+      timer = setTimeout(newCanvas, CONTEXT_RESTORE_WAIT_MS);
+    };
+    const onRestored = () => {
+      if (disposed || !lost) return;
+      clearTimer();
+      rebuild(canvas);
+    };
+    const listen = (c: HTMLCanvasElement) => {
+      c.addEventListener('webglcontextlost', onLost);
+      c.addEventListener('webglcontextrestored', onRestored);
+    };
+    const unlisten = (c: HTMLCanvasElement) => {
+      c.removeEventListener('webglcontextlost', onLost);
+      c.removeEventListener('webglcontextrestored', onRestored);
+    };
+
+    /** Builds the inner renderer again on this canvas and gives it everything. */
+    function rebuild(onto: HTMLCanvasElement): void {
+      try {
+        core.dispose();
+      } catch {
+        /* the old one may be half dead */
+      }
+      try {
+        core = inner({ canvas: onto, quality: q });
+        replay();
+        lost = false;
+      } catch {
+        // WebGL is not ready yet. Try again later, the screen keeps its last picture.
+        lost = true;
+        clearTimer();
+        timer = setTimeout(newCanvas, CONTEXT_RESTORE_WAIT_MS);
+      }
+    }
+
+    function newCanvas(): void {
+      timer = undefined;
+      if (disposed) return;
+      const fresh = document.createElement('canvas');
+      for (const a of Array.from(canvas.attributes)) fresh.setAttribute(a.name, a.value);
+      unlisten(canvas);
+      canvas.replaceWith(fresh);
+      canvas = fresh;
+      listen(canvas);
+      generation++;
+      rebuild(canvas);
+    }
+
+    listen(canvas);
+
+    if (__E2E__) {
+      // A lost context gives no extension, so keep the one we got while it was alive.
+      let loseExt: WEBGL_lose_context | null = null;
+      registerHook('loseWebGl', () => {
+        loseExt = canvas.getContext('webgl2')?.getExtension('WEBGL_lose_context') ?? canvas.getContext('webgl')?.getExtension('WEBGL_lose_context') ?? null;
+        loseExt?.loseContext();
+        return !!loseExt;
+      });
+      registerHook('restoreWebGl', () => {
+        loseExt?.restoreContext();
+      });
+      registerHook('canvasGeneration', () => generation);
+      registerHook('webGlLost', () => lost);
+    }
+
+    return {
+      get canvas() {
+        return canvas;
+      },
+      setWorld(w) {
+        world = w;
+        core.setWorld(w);
+      },
+      blockChanged(x, z) {
+        if (!lost) core.blockChanged(x, z); // the saved world already has it, the rebuild draws it
+      },
+      setCamera(p) {
+        pose = p;
+        if (!lost) core.setCamera(p);
+      },
+      resize(width, height, dpr) {
+        size = { w: width, h: height, dpr };
+        if (!lost) core.resize(width, height, dpr);
+      },
+      setQuality(next) {
+        q = next;
+        if (!lost) core.setQuality(next);
+      },
+      setSpikeDinos(d) {
+        dinos = d;
+        if (!lost) core.setSpikeDinos(d);
+      },
+      render() {
+        if (!lost) core.render();
+      },
+      dispose() {
+        disposed = true;
+        clearTimer();
+        unlisten(canvas);
+        core.dispose();
+        canvas.remove();
+      },
+    };
+  };
+}
+
+/** The real WebGL renderer, with context loss recovery. */
+export const createWebGlRenderer: RendererFactory = withContextRecovery(createPlainWebGlRenderer);
