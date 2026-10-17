@@ -1,0 +1,33 @@
+:root {
+  /* Colours. Pairs are checked by src/ui/contrast.test.ts (AC141). */
+  --sky: #8fd3ff;
+  --sky-light: #d9f0ff;
+  --grass: #2e7d32;
+  --sand: #f6e7c1;
+  --ink: #1f2d3d;
+  --paper: #ffffff;
+  --on-grass: #ffffff;
+  --right: #1b6e2f;
+  --right-bg: #def5e1;
+  --wrong: #8a3b00;
+  --wrong-bg: #ffe3c7;
+  --malus: #5a6570;
+  --lock: #3d4852;
+
+  /* Sizes */
+  --kid-scale: 1; /* Groter lettertype sets this to 1.25 */
+  --font-body: calc(20px * var(--kid-scale));
+  --font-large: calc(28px * var(--kid-scale));
+  --font-title: calc(40px * var(--kid-scale));
+  --touch-min: 56px;
+  --radius: 16px;
+  --gap: 12px;
+
+  /* Safe areas */
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+
+  --font-stack: 'Nunito', ui-rounded, system-ui, sans-serif;
+}
