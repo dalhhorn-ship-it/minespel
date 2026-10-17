@@ -1,13 +1,14 @@
 # Status
 
-**Phase:** PRD ready for signoff
-**Next step:** founder reads `docs/PRD.md` and runs `/signoff`. Then `/architect`.
-**Blockers:** founder signoff
+**Phase:** PRD approved, architecture in progress
+**Next step:** `/architect`, then `/build`.
+**Blockers:** none
 
 ## Done
 * Brainstorm: concept chosen (free 3D Minecraft world with dinos, learning breaks, Dutch, age 8 to 10).
 * Cito taalverzorging module for groep 6 and 7: 10 topics, 288 questions, 4 exams in `docs/modules/cito-taalverzorging/`. Passes `docs/modules/validate.py`.
 * PRD drafted, reviewed by architect and qa (1 round), all founder decisions F1 to F15 answered.
+* PRD approved by the founder in chat on 2026-10-17.
 
 ## Notes
 * Biggest risk is 3D performance in iPad Safari. The architect plans a speed spike first.

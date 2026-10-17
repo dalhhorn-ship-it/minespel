@@ -1,6 +1,6 @@
 # PRD: Dino Blokwereld (working title)
 
-Status: READY FOR SIGNOFF
+Status: APPROVED by Founder on 2026-10-17
 
 ## 1. Summary
 Dino Blokwereld is a small 3D block world on the iPad where a kid explores, mines and builds with Minecraft style blocks. Every few minutes the game pauses for a short learning break in Rekenen or Taal. Right answers earn dino points. In the Dinowinkel the kid buys dino eggs with those points, and the eggs hatch into friendly blocky dinos that walk around in the world. A passed practice exam gives a golden dino.
