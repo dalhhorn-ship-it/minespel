@@ -1,0 +1,85 @@
+import { describe, expect, it } from 'vitest';
+import { get, openDb, put } from './db';
+import { createRecords, getRecord, putRecord } from './records';
+import { KV_NAMES, defaultKv, type KvName, type KvRecords } from './schema';
+
+let n = 0;
+const fresh = () => openDb({ name: `records-db-${n++}` });
+
+const samples: { [K in KvName]: KvRecords[K] } = {
+  settings: { breakEveryMinutes: 15, questionsPerBreak: 5, volume: 0.2, largeFont: true },
+  player: { x: 1, y: 2, z: 3, yaw: 0.5, pitch: -0.2, hotbar: [1, 2, 3], selectedSlot: 2, mode: 'build' },
+  world: { diff: new Uint32Array([256 + 1, 512 + 2]) },
+  dinos: { dinos: [{ kind: 'rex', name: 'Rex' }], eggs: [{ kind: 'tri', golden: true }] },
+  economy: { points: 12, practicePointsToday: 3, practiceDay: '2026-10-17' },
+  timers: { playMsLeft: 1000, examMsLeft: 2000 },
+  rotation: { weights: { a: 2 }, topicPointers: { t: 4 }, lessonsSeen: ['s1'] },
+  switches: { modules: { taal: { on: true } } },
+  session: { kind: 'break', step: 2 },
+  gate: { salt: 's', pinHash: 'h', wrongTries: 1, blockedUntil: 99, resetWrongTries: 0 },
+  stats: { playMsPerDay: { '2026-10-17': 60000 } },
+  meta: { schemaVersion: 1, appVersion: '0.1', lastBackup: '2026-10-17', createdAt: '2026-10-01' },
+};
+
+describe('records', () => {
+  it('has a sample for every kv name', () => {
+    expect(Object.keys(samples).sort()).toEqual([...KV_NAMES].sort());
+  });
+
+  for (const name of KV_NAMES) {
+    it(`${name}: default when empty, round trip after put`, async () => {
+      const db = await fresh();
+      const records = createRecords(db);
+      expect(await records.get(name)).toEqual(defaultKv(name));
+      await records.put(name, samples[name] as never);
+      const back = await records.get(name);
+      if (name === 'world') {
+        // fake-indexeddb clones in another realm in jsdom, so compare the numbers.
+        expect(Array.from((back as KvRecords['world']).diff)).toEqual(Array.from(samples.world.diff));
+      } else {
+        expect(back).toEqual(samples[name]);
+      }
+      db.close();
+    });
+  }
+
+  it('keeps the world diff as a Uint32Array', async () => {
+    const db = await fresh();
+    await putRecord(db, 'world', samples.world);
+    const w = await getRecord(db, 'world');
+    expect(Object.prototype.toString.call(w.diff)).toBe('[object Uint32Array]');
+    expect([...w.diff]).toEqual([257, 514]);
+    db.close();
+  });
+
+  it('fills missing fields from the default for an older save', async () => {
+    const db = await fresh();
+    await put(db, 'kv', { points: 7 }, 'economy');
+    expect(await getRecord(db, 'economy')).toEqual({ points: 7, practicePointsToday: 0, practiceDay: '' });
+    db.close();
+  });
+
+  it('meta has lastBackup, null by default', async () => {
+    const db = await fresh();
+    expect((await getRecord(db, 'meta')).lastBackup).toBeNull();
+    db.close();
+  });
+
+  it('gives a fresh default each time', async () => {
+    const db = await fresh();
+    const a = await getRecord(db, 'dinos');
+    a.dinos.push({});
+    expect((await getRecord(db, 'dinos')).dinos).toEqual([]);
+    db.close();
+  });
+
+  it('update changes and saves a record', async () => {
+    const db = await fresh();
+    const records = createRecords(db);
+    await records.update('economy', (e) => ({ ...e, points: e.points + 5 }));
+    await records.update('economy', (e) => ({ ...e, points: e.points + 5 }));
+    expect((await records.get('economy')).points).toBe(10);
+    expect(await get(db, 'kv', 'economy')).toMatchObject({ points: 10 });
+    db.close();
+  });
+});
