@@ -1,0 +1,50 @@
+/* Countdown in the HUD. One pulse per second at most (AC142). */
+.countdown {
+  min-height: var(--touch-min);
+  padding: 0 calc(var(--gap) * 1.5);
+  display: flex;
+  align-items: center;
+  border-radius: var(--radius);
+  background: var(--paper);
+  color: var(--ink);
+  border: 3px solid var(--ink);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  transform-origin: left center;
+  transition: transform 0.4s ease;
+}
+.countdown-warning {
+  transform: scale(1.35);
+  animation: countdown-pulse 1s ease-in-out infinite;
+}
+@keyframes countdown-pulse {
+  0%, 100% { background: var(--paper); }
+  50% { background: var(--wrong-bg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .countdown { transition: none; }
+  .countdown-warning { animation: none; background: var(--wrong-bg); } /* still grows, no pulse */
+}
+
+/* Layer for pause menu, break and other screens. Under the portrait and too small overlays (z-index 1000). */
+.screen-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 500;
+  font-family: var(--font-stack);
+}
+.screen-layer[hidden] { display: none; }
+.screen-layer > * { position: absolute; inset: 0; }
+.break-stub {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--gap);
+  background: var(--sky-light);
+  color: var(--ink);
+  font-size: var(--font-large);
+  font-weight: 800;
+  user-select: none;
+  -webkit-user-select: none;
+}

@@ -8,9 +8,11 @@ import { createGame, type Game } from './game/game';
 import { createNullRenderer, createWebGlRenderer, type RendererFactory } from './render/renderer';
 import { bootSave, createWorldSave } from './game/world-save';
 import { openDb } from './storage/db';
-import { createRecords } from './storage/records';
+import { createRecords, type Records } from './storage/records';
 import { createSaveQueue, type SaveQueue } from './storage/save-queue';
 import { el } from './ui/dom';
+import { createScreens } from './app/screens';
+import { startPlayTimer, type PlayTimer } from './app/timer-driver';
 
 installLockdown();
 const guard = startScreenGuard();
@@ -19,6 +21,7 @@ const audio = createAudioUnlock();
 const app = document.getElementById('app');
 let game: Game | null = null;
 let queue: SaveQueue | null = null;
+let records: Records | null = null;
 let teleported = 0;
 let rendererFactoryIsReal = true;
 if (app) {
@@ -58,14 +61,21 @@ const booted = game
         const db = await openDb();
         const q = createSaveQueue({ db });
         queue = q;
-        return createWorldSave({ game: game as Game, queue: q, records: createRecords(db) });
+        const r = createRecords(db);
+        records = r;
+        return createWorldSave({ game: game as Game, queue: q, records: r });
       },
     })
   : Promise.resolve('not-saving');
+const screens = createScreens();
+let playTimer: PlayTimer | null = null;
 void booted.finally(() => {
   restored = true;
+  // The play timer starts when the saved time is known. It stays off if the 3D world could not start.
+  if (game) void startPlayTimer({ game, screens, guard, audio, records, queue, wantsPause: () => userPaused }).then((t) => { playTimer = t; });
 });
 
+const openedScreens: Array<() => void> = [];
 if (__E2E__) {
   registerHook('ready', () => restored);
   registerHook('screenGuard', () => guard.state());
@@ -106,6 +116,18 @@ if (__E2E__) {
     registerHook('resetWorld', () => g.resetWorld());
     registerHook('buildState', () => g.getBuildState());
     registerHook('setBuildState', (s: Partial<ReturnType<Game['getBuildState']>>) => g.setBuildState(s));
+    registerHook('playMsLeft', () => playTimer?.driver.remainingMs() ?? null);
+    registerHook('timerCounting', () => playTimer?.driver.isCounting() ?? false);
+    registerHook('countdownText', () => g.hud.countdownSlot.textContent);
+    registerHook('currentScreen', () => screens.current());
+    // Opens a screen like the pause menu would. Returns an id for closeScreen.
+    registerHook('openScreen', (kind: 'kid-overlay' | 'learn' | 'exam' | 'parent') => {
+      openedScreens.push(screens.open(kind));
+      return openedScreens.length - 1;
+    });
+    registerHook('closeScreen', (id: number) => openedScreens[id]?.());
+    registerHook('breakActive', () => playTimer?.breakFlow.isActive() ?? false);
+    registerHook('endBreak', () => playTimer?.breakFlow.end());
     registerHook('usesRealRenderer', () => rendererFactoryIsReal);
   }
 }

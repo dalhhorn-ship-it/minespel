@@ -24,11 +24,14 @@ export interface Hud {
   /** Holder for the countdown text. */
   readonly countdownSlot: HTMLElement;
   setMode(mode: BuildMode): void;
+  /** Replaces what the Pauze button does (the pause menu sets it). */
+  setPauseHandler(handler: () => void): void;
   destroy(): void;
 }
 
 export function createHud(options: HudOptions): Hud {
   const cleanups: Array<() => void> = [];
+  let onPause = options.onPause;
   const zone = (node: HTMLElement) => {
     cleanups.push(options.router.addIgnoreZone(node));
     return node;
@@ -40,7 +43,7 @@ export function createHud(options: HudOptions): Hud {
   };
 
   const jump = button('Spring', 'hud-jump', options.onJump);
-  const pause = button('Pauze', 'hud-pause', options.onPause);
+  const pause = button('Pauze', 'hud-pause', () => onPause());
   const hakken = button('Hakken', 'hud-mode', () => select('hakken'));
   const bouwen = button('Bouwen', 'hud-mode', () => select('bouwen'));
   const countdownSlot = zone(el('div', { class: 'hud-countdown' }));
@@ -72,6 +75,9 @@ export function createHud(options: HudOptions): Hud {
     allBlocksSlot,
     countdownSlot,
     setMode,
+    setPauseHandler(handler) {
+      onPause = handler;
+    },
     destroy() {
       for (const c of cleanups) c();
       root.remove();
