@@ -155,3 +155,31 @@ Section 11 now numbers founder decisions F1 to F12 so they do not clash with the
 * **Q12:** accepted. Lock tap area AC127; contrast and icon plus colour AC141; safe areas AC143 (iPad); motion and reduced motion AC142; window under 900 points AC108; first start on a wiped iPad AC144; parent warning AC129. "Groter lettertype" moved to Later.
 
 ### product: founder answers F1 to F13 folded into PRD
+
+## Architecture review
+
+### developer view
+
+Only real issues. Checked ARCHITECTURE.md and PLAN.md against file lists and groups.
+
+**Too big or unclear**
+* **D1. T23** (renderer, loop, controller, fps counter, spike, hooks, null renderer) is too big. Suggest T23a renderer, quality, fps counter, loop, game.ts; T23b player controller, e2e hooks, spike load.
+* **D2. T43** (break flow, content loader, resume, session store, log store, e2e) is too big. Suggest moving `session-store.ts` and `log-store.ts` to their own task after T5 (they can run early in group C), so T43 is only the flow.
+* **D3. T48, T51, T53** are each two or three jobs. Suggest T48 into gate and parent shell vs first start flow; T51 into exam screen and flow vs the parent exams screen; T53 into backup UI vs module import and export.
+* **D4. T44 vs T42, "Ik zit vast".** The button lives in T44 (`pause-menu.ts`), the Volg mij behavior in T42, and T44 does not depend on T42. Name one owner. Suggest T44 calls a `game.imStuck()` that T42 adds, and T44 depends on T42.
+
+**Files lists that break the "only touch listed files" rule**
+* **D5.** Per feature e2e hook files (`registerHook` in "its own file") are not listed in any task (T33, T41, T43 and others). List them per task, and say where they are imported (side effect import from the feature file).
+* **D6.** `scripts/check-dist.mjs` is extended by T3 and T22 (T1 note) but is in neither Files list. Also `src/env.d.ts` (`__E2E__` declaration) and a Vitest setup file are in no list. Add them to T1.
+* **D7.** CSS files: no task says where `src/styles/*.css` get imported. Say "imported from the screen's .ts file" or list the importer.
+
+**Missing tasks or test setup**
+* **D8. No owner for the progress store** (box, due day, level per item) and for typed load and save of the `kv` records (`economy`, `timers`, `rotation`, `switches`, `stats`). T5 only has generic db and queue. T13, T38, T43 all need it. Add to T5 or a new task after T5.
+* **D9. Canvas in unit tests.** jsdom has no 2D canvas and we may not add the `canvas` package. T8 (atlas), T26 (name tag) and tests for them need a pure part (tile pixel data, label text) plus a thin canvas wrapper, or an e2e check only. Say so in the tasks.
+* **D10. T34 (AC109)** needs real WebGL `WEBGL_lose_context`. If headless WebKit has no WebGL (the T1 report may say so), the e2e cannot prove it. Add the fallback: unit test with a fake GL context and the hand check on the iPad.
+* **D11. Web Audio in tests (T11, AC100).** jsdom has no `AudioContext`. State that tests use a fake AudioContext injected through `sound.ts`.
+* **D12. Font and icons (T3).** Nunito woff2 must be downloaded and the cloud sandbox may have no network. Needs a decision: operator supplies the file, or fall back to a system rounded font stack.
+* **D13. `npx playwright install webkit`** in `check.sh` does not install Linux system libraries. May need `--with-deps` (root) in the cloud and in `ci.yml`. T1 should verify and fix `check.sh` and `ci.yml` (add both to T1 Files).
+
+**Parallel groups**
+* No same group file collisions found in the Files lists as written. Two risks: (a) `src/main.ts` is edited by T3, T22, T23, T37, T41, T43, T48, T52; this is safe only if the "start earlier than group" rule is never used for T22 (group C, M5), so T22 must not run with T23. (b) T65 (group C) edits Taal JSON and `TEST_REPORT.md`, which T32 and T64 also use, and T7 pins 288 items. Run T65 only in M7, and have T7 read the counts, not hardcode them if fixes can change them.
