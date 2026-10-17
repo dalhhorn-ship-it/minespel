@@ -6,6 +6,9 @@ import { createLogStore } from '../storage/log-store';
 import { createProgressStore } from '../storage/progress-store';
 import { createRecords, type Records } from '../storage/records';
 import { createSessionStore } from '../storage/session-store';
+import { createAudioUnlock } from '../platform/audio-unlock';
+import { createSound } from '../audio/sound';
+import { FakeAudioContext } from '../../tests/unit/fakes/audio-context';
 import { createBreakFlow, type BreakEnv, type BreakFlow } from './break-flow';
 import { createScreens, type Screens } from './screens';
 
@@ -288,6 +291,58 @@ describe('break flow', () => {
     for (let i = 1; i <= 5; i++) expect(saved.some((p) => p.itemId === `optellen:1+${i}`)).toBe(false);
     for (let i = 6; i <= 200; i++) expect(saved.some((p) => p.itemId === `optellen:1+${i}`)).toBe(true);
     r.flow.end();
+  });
+
+  it('three breaks in a row use one app wide Sound and so one AudioContext (decision 46)', async () => {
+    const target = new EventTarget();
+    const unlock = createAudioUnlock(target);
+    const made: FakeAudioContext[] = [];
+    const sound = createSound({
+      unlock,
+      createContext: () => {
+        const c = new FakeAudioContext();
+        made.push(c);
+        return c as unknown as AudioContext;
+      },
+    });
+    const r = await rig();
+    r.env.sound = sound;
+    expect(made).toHaveLength(0); // nothing before the first tap (AC100)
+    target.dispatchEvent(new Event('pointerup'));
+    for (let i = 0; i < 3; i++) {
+      r.flow.start();
+      await until(() => r.host.querySelector('.lesson-view, .number-view'));
+      if (r.host.querySelector('.lesson-view')) await skipLesson(r.host);
+      const before = made[0]?.started ?? 0;
+      await right(r);
+      expect(made[0]!.started).toBeGreaterThan(before); // the chime played
+      r.flow.end();
+      await r.flow.settled();
+      expect(r.flow.isActive()).toBe(false);
+    }
+    expect(made).toHaveLength(1);
+  });
+
+  it('a break is silent when the app Sound is off in the settings (AC99)', async () => {
+    const target = new EventTarget();
+    const unlock = createAudioUnlock(target);
+    const made: FakeAudioContext[] = [];
+    const sound = createSound({
+      unlock,
+      enabled: false,
+      createContext: () => {
+        const c = new FakeAudioContext();
+        made.push(c);
+        return c as unknown as AudioContext;
+      },
+    });
+    const r = await rig();
+    r.env.sound = sound;
+    target.dispatchEvent(new Event('pointerup'));
+    r.flow.start();
+    await skipLesson(r.host);
+    await right(r);
+    expect(made).toHaveLength(0);
   });
 
   it('still plays when storage is not available', async () => {

@@ -133,6 +133,10 @@ test.describe('dinos in the world', () => {
     await readState(page, 'addTestEgg', 'compy', false);
     // The egg gets its spot on the next game step; until then its position is not a number.
     await expect.poll(async () => typeof (await state(page)).eggs[0]?.x).toBe('number');
+    // Put the egg straight in front of the player, so it projects onto the screen.
+    // Beside the player it would sit on the eye plane and project to infinity.
+    const placed = (await state(page)).eggs[0]!;
+    await readState(page, 'placeEgg', placed.id, C + 0.5, GROUND + 1, C + 2.5);
     const egg = (await state(page)).eggs[0]!;
     await readState(page, 'setBuildState', { mode: 'bouwen', selected: 0 });
     // Tap the top of the ground cell the egg lies on from the player's eye.

@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { createAppEnv } from '../app/app-env';
 import { createScreens } from '../app/screens';
 import { openPractice } from '../app/practice-flow';
 import { openShop } from '../app/shop-flow';
@@ -16,15 +17,16 @@ function setup(points = 12) {
   document.body.append(host);
   const screens = createScreens(host);
   const calls = { pause: 0, resume: 0, home: 0 };
+  const env = createAppEnv({ sound: {} as never, audio: {} as never, dinos: {} as never }).env;
   const menu = createPauseMenu({
     screens,
     getPoints: () => Promise.resolve(points),
     pauseWorld: () => { calls.pause++; },
     resumeWorld: () => { calls.resume++; },
     teleportHome: () => { calls.home++; },
-    openShop: () => openShop(screens),
-    openLesboek: () => openLesboek(screens),
-    openPractice: () => openPractice(screens),
+    openShop: () => openShop(screens, env),
+    openLesboek: () => openLesboek(screens, env),
+    openPractice: () => openPractice(screens, env),
   });
   return { host, screens, calls, menu };
 }

@@ -1,7 +1,7 @@
 // Drives the play timer in the running app (PRD 4.4). The pure rules live in core/timers.ts.
 // It listens to visibility, focus, pagehide, the screen guard and the open screen, counts only time the
 // heartbeat accepts (AC113), saves the time left and the play time per day, and tells the break flow at 0.
-import { dayKey, systemClock, type Clock } from '../core/clock';
+import { dayKey, type Clock } from '../core/clock';
 import {
   HEARTBEAT_INTERVAL_MS,
   createHeartbeat,
@@ -16,10 +16,9 @@ import type { SaveQueue } from '../storage/save-queue';
 import type { Records } from '../storage/records';
 import type { StatsRecord, TimersRecord } from '../storage/schema';
 import type { Game } from '../game/game';
-import type { AudioUnlock } from '../platform/audio-unlock';
-import { createSound } from '../audio/sound';
 import { createCountdownView } from '../ui/countdown';
 import { createBreakFlow, type BreakFlow } from './break-flow';
+import type { AppEnv } from './app-env';
 import type { Screens } from './screens';
 
 export interface TimerSettings {
@@ -250,10 +249,8 @@ export interface PlayTimerDeps {
   game: Pick<Game, 'pause' | 'resume' | 'hud'>;
   screens: Screens;
   guard: { subscribe(listener: (state: GuardState) => void): () => void };
-  audio: AudioUnlock;
-  records: Records | null;
-  queue: SaveQueue | null;
-  clock?: Clock;
+  /** Storage, the one Sound and the clock. */
+  env: AppEnv;
   /** True when the kid (or a test) asked for a pause: after the break the world stays paused. */
   wantsPause?: () => boolean;
 }
@@ -265,8 +262,12 @@ export interface PlayTimer {
 
 /** Wires the countdown in the HUD, the tick sound, the timer driver and the break stub. Call after the save has loaded. */
 export async function startPlayTimer(deps: PlayTimerDeps): Promise<PlayTimer> {
-  const inputs = await loadTimerInputs(deps.records);
-  const sound = createSound({ unlock: deps.audio, enabled: inputs.sound.enabled, volume: inputs.sound.volume });
+  const { env } = deps;
+  const inputs = await loadTimerInputs(env.records);
+  // The app wide Sound follows the saved settings (AC99).
+  const sound = env.sound;
+  sound.setEnabled(inputs.sound.enabled);
+  sound.setVolume(inputs.sound.volume);
   const view = createCountdownView(deps.game.hud.countdownSlot);
   let driver: TimerDriver | null = null;
   const breakFlow = createBreakFlow({
@@ -276,15 +277,16 @@ export async function startPlayTimer(deps: PlayTimerDeps): Promise<PlayTimer> {
       if (!deps.wantsPause?.()) deps.game.resume();
     },
     restartTimer: () => driver?.restart(),
+    env,
   });
   driver = createTimerDriver({
-    clock: deps.clock ?? systemClock,
+    clock: env.clock,
     screens: deps.screens,
     guard: deps.guard,
     settings: inputs.settings,
     saved: inputs.saved,
     stats: inputs.stats,
-    queue: deps.queue,
+    queue: env.queue,
     onChange: (ms, warn) => view.update(ms, warn),
     onTick: () => sound.play('tick'),
     onExpire: () => breakFlow.start(),

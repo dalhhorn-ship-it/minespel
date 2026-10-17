@@ -1,5 +1,6 @@
 // At boot: continue a running break or exam from the session store (AC37, AC44).
 import type { SessionStore } from '../storage/session-store';
+import type { AppEnv } from './app-env';
 import { resumeExam } from './exam-flow';
 
 export type ResumeResult = 'break' | 'exam' | 'none';
@@ -10,7 +11,7 @@ export type ResumeResult = 'break' | 'exam' | 'none';
  */
 export async function resumeRunningSession(
   sessions: Pick<SessionStore, 'load'> | null,
-  breakFlow: { start(): void },
+  env: AppEnv,
 ): Promise<ResumeResult> {
   if (!sessions) return 'none';
   let saved;
@@ -21,8 +22,8 @@ export async function resumeRunningSession(
   }
   if (!saved) return 'none';
   if (saved.kind === 'break') {
-    breakFlow.start(); // finds the saved break itself
+    env.breaks.start(); // finds the saved break itself
     return 'break';
   }
-  return resumeExam(saved) ? 'exam' : 'none';
+  return resumeExam(saved, env) ? 'exam' : 'none';
 }

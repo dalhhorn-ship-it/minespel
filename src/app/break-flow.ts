@@ -21,8 +21,7 @@ import {
   type SessionState as BreakState,
 } from '../learning/break-session';
 import type { Response } from '../learning/answer-check';
-import { createSound, type Sound } from '../audio/sound';
-import type { AudioUnlock } from '../platform/audio-unlock';
+import type { Sound } from '../audio/sound';
 import type { SaveQueue } from '../storage/save-queue';
 import { createLogStore, type BreakEnd, type LogStore } from '../storage/log-store';
 import { createProgressStore, type ProgressStore } from '../storage/progress-store';
@@ -42,8 +41,8 @@ export interface BreakFlowOptions {
   resumeWorld: () => void;
   /** Gives the kid a full play timer again. */
   restartTimer: () => void;
-  /** Storage and helpers. Defaults to what `setBreakEnv` set. */
-  env?: BreakEnv;
+  /** Storage and helpers. Read when a break starts, so storage that joins later is used. */
+  env: BreakEnv;
 }
 
 export interface BreakFlow {
@@ -63,17 +62,9 @@ export interface BreakEnv {
   db: IDBDatabase | null;
   records: Records | null;
   queue: Pick<SaveQueue, 'flushNow'> | null;
-  audio?: AudioUnlock | null;
   sound?: Pick<Sound, 'play'>;
   clock?: Clock;
   rng?: Rng;
-}
-
-let sharedEnv: BreakEnv | null = null;
-
-/** The app calls this once the save is loaded. The play timer builds the break flow with only the four screen options. */
-export function setBreakEnv(env: BreakEnv | null): void {
-  sharedEnv = env;
 }
 
 /** The saved break in the `session` record. The state inside is a plain object (AC37). */
@@ -260,21 +251,12 @@ export function createBreakFlow(options: BreakFlowOptions): BreakFlow {
     const { catalog, meta } = r;
     const topicOf = (item: Item): string => topicOfItem(catalog, meta.moduleId, item);
     const lessonOf = (item: Item): Lesson | undefined => catalog.topic(meta.moduleId, topicOf(item))?.lesson;
-    let sound = r.env.sound;
-    if (!sound && r.env.audio) {
-      void r.stores?.records.get('settings').then(
-        (s) => {
-          sound = createSound({ unlock: r.env.audio as AudioUnlock, enabled: s.soundEffectsEnabled, volume: s.volume });
-        },
-        () => undefined,
-      );
-    }
     const screen = createBreakScreen({
       state: meta.state,
       lesson: meta.lessonTopic ? catalog.topic(meta.moduleId, meta.lessonTopic)?.lesson : undefined,
       lessonOf,
       now: () => r.clock.now(),
-      sound: { play: (name) => sound?.play(name) },
+      sound: { play: (name) => r.env.sound?.play(name) },
       onStep: (state, effects) => onStep(r, state, effects),
     });
     r.screen = screen;
@@ -421,8 +403,8 @@ export function createBreakFlow(options: BreakFlowOptions): BreakFlow {
   /** Closes the screen, wakes the world and restarts the timer, then clears the saved break. */
   function leave(): void {
     if (!isActive()) return;
-    const env = run?.env ?? options.env ?? sharedEnv;
-    const stores = run?.stores ?? (env ? storesOf(env) : null);
+    const env = run?.env ?? options.env;
+    const stores = run?.stores ?? storesOf(env);
     generation++;
     run?.screen?.destroy();
     run = null;
@@ -432,7 +414,7 @@ export function createBreakFlow(options: BreakFlowOptions): BreakFlow {
     // Chained after the break log. The full timer is saved before the saved break is forgotten.
     options.restartTimer();
     enqueue(async () => {
-      await env?.queue?.flushNow().catch(() => undefined);
+      await env.queue?.flushNow().catch(() => undefined);
       await stores?.sessions.clear();
     });
     options.resumeWorld();
@@ -447,8 +429,7 @@ export function createBreakFlow(options: BreakFlowOptions): BreakFlow {
       const host = el('div', { class: 'break-host', attrs: { 'data-screen-id': 'break', role: 'dialog' } });
       host.style.cssText = 'position:absolute;inset:0';
       close = options.screens.open('learn', host);
-      const env = options.env ?? sharedEnv ?? { db: null, records: null, queue: null };
-      void openRun(env, host, gen)
+      void openRun(options.env, host, gen)
         .then((r) => {
           if (r && gen === generation) run = r;
         })
