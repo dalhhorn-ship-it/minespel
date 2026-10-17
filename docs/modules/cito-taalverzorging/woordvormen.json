@@ -1,0 +1,566 @@
+{
+  "id": "woordvormen",
+  "title": "Woorden maken: meervoud, verkleinwoord en achtervoegsels",
+  "groups": [
+    6,
+    7
+  ],
+  "lesson": {
+    "pages": [
+      {
+        "title": "Meervoud met en of s",
+        "text": "Meestal maak je een meervoud met en: boek wordt boeken. Eindigt een woord op el, er, em of en? Dan krijgt het meestal een s: tafel wordt tafels. Een paar woorden krijgen eren: kind wordt kinderen.",
+        "examples": [
+          {
+            "good": "Eén boek, twee boeken. Eén tafel, twee tafels.",
+            "bad": "Eén tafel, twee tafelen."
+          },
+          {
+            "good": "Eén kind, drie kinderen. Eén ei, tien eieren.",
+            "bad": "Eén kind, drie kinden."
+          }
+        ],
+        "tip": "Woorden met eren om te leren: kinderen, eieren, liederen, lammeren, kalveren."
+      },
+      {
+        "title": "Verkleinwoorden",
+        "text": "Een verkleinwoord maakt iets klein. Meestal plak je er je achter: boekje. Na een lange klank met l, n of r wordt het tje: stoeltje. Na een lange klank met m wordt het pje: boompje. Na een korte klank met l, m, n, r of ng wordt het etje: balletje, ringetje. Bij ing zonder klemtoon wordt het kje: koninkje.",
+        "examples": [
+          {
+            "good": "boek wordt boekje, stoel wordt stoeltje",
+            "bad": "boektje, stoelje"
+          },
+          {
+            "good": "boom wordt boompje, bal wordt balletje",
+            "bad": "boomje, baltje"
+          },
+          {
+            "good": "koning wordt koninkje",
+            "bad": "koningje"
+          }
+        ],
+        "tip": "Zeg het verkleinwoord hardop. Je hoort meestal of het je, tje, pje, etje of kje is."
+      },
+      {
+        "title": "Woorden met lijk, elijk en ig",
+        "text": "Het eind lijk klinkt als 'luk', maar je schrijft lijk. Soms staat er een e voor: vriendelijk. Het eind ig klinkt als 'ug', maar je schrijft ig.",
+        "examples": [
+          {
+            "good": "De dino is vriendelijk en gelukkig.",
+            "bad": "De dino is vriendluk en gelukkug."
+          },
+          {
+            "good": "Het is moeilijk, maar ik blijf geduldig.",
+            "bad": "Het is moeiluk, maar ik blijf geduldug."
+          }
+        ],
+        "tip": "Hoor je 'luk' of 'ug' aan het eind? Schrijf lijk of ig."
+      },
+      {
+        "title": "Woorden met heid en ing",
+        "text": "Met heid en ing maak je van een woord een ding. Vrij wordt vrijheid. Tekenen wordt tekening. Heid schrijf je met ei. Ing schrijf je met één n.",
+        "examples": [
+          {
+            "good": "Ik maak een tekening van mijn vrijheid.",
+            "bad": "Ik maak een tekenning van mijn vrijhijd."
+          },
+          {
+            "good": "De wandeling was een verrassing.",
+            "bad": "De wandelling was een verassing."
+          }
+        ],
+        "tip": "Heid altijd met ei, ing altijd met één n."
+      },
+      {
+        "title": "Samenstellingen",
+        "text": "Plak je twee woorden aan elkaar, dan maak je een samenstelling. Die schrijf je als één woord. Soms komt er een s tussen: verjaardag en taart wordt verjaardagstaart. Soms komt er en tussen: pan en koek wordt pannenkoek.",
+        "examples": [
+          {
+            "good": "Ik vond een dinosaurusei bij de boomhut.",
+            "bad": "Ik vond een dinosaurus ei bij de boom hut."
+          },
+          {
+            "good": "We eten pannenkoeken met een verjaardagstaart toe.",
+            "bad": "We eten pannekoeken met een verjaardagtaart toe."
+          }
+        ],
+        "tip": "Hoor je een s tussen de woorden? Schrijf die s. Hoor je 'e' en heeft het eerste woord een meervoud met en? Schrijf dan en: pannenkoek, paardenbloem, boekenkast."
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "wv-001",
+      "type": "choice",
+      "level": "M6",
+      "skill": "meervoud",
+      "prompt": "Wat is het meervoud?",
+      "sentence": "één tafel, twee ...",
+      "options": [
+        "tafelen",
+        "tafels",
+        "tafeln"
+      ],
+      "answer": 1,
+      "explain": "Tafel eindigt op el. Dan krijgt het meervoud meestal een s: tafels."
+    },
+    {
+      "id": "wv-002",
+      "type": "choice",
+      "level": "M6",
+      "skill": "verkleinwoord",
+      "prompt": "Welk verkleinwoord is goed?",
+      "sentence": "Een klein boek is een ...",
+      "options": [
+        "boekje",
+        "boektje",
+        "boekie"
+      ],
+      "answer": 0,
+      "explain": "Na een k plak je je erachter: boekje."
+    },
+    {
+      "id": "wv-003",
+      "type": "choice",
+      "level": "M6",
+      "skill": "ig",
+      "prompt": "Welk woord moet op de stippen?",
+      "sentence": "Ik ben zo ... dat ik een ei vond!",
+      "options": [
+        "gelukkig",
+        "gelukkug",
+        "gelukig"
+      ],
+      "answer": 0,
+      "explain": "Gelukkig: je hoort 'ug', maar je schrijft ig. De u is kort, dus twee k's."
+    },
+    {
+      "id": "wv-004",
+      "type": "find-error",
+      "level": "M6",
+      "skill": "meervoud",
+      "prompt": "Welk woord is fout geschreven?",
+      "words": [
+        "In",
+        "de",
+        "stal",
+        "staan",
+        "twee",
+        "paards",
+        "en",
+        "drie",
+        "koeien."
+      ],
+      "answer": 5,
+      "correction": "paarden",
+      "explain": "Paard krijgt en in het meervoud: paarden."
+    },
+    {
+      "id": "wv-005",
+      "type": "find-error",
+      "level": "M6",
+      "skill": "verkleinwoord",
+      "prompt": "Welk woord is fout geschreven?",
+      "words": [
+        "De",
+        "kleine",
+        "dino",
+        "speelt",
+        "met",
+        "een",
+        "baltje",
+        "in",
+        "de",
+        "tuin."
+      ],
+      "answer": 6,
+      "correction": "balletje",
+      "explain": "Bal heeft een korte a en eindigt op l. Dan wordt het etje, met dubbele l: balletje."
+    },
+    {
+      "id": "wv-006",
+      "type": "type",
+      "level": "M6",
+      "skill": "meervoud",
+      "prompt": "Schrijf het meervoud.",
+      "sentence": "één kind, drie ...",
+      "answer": [
+        "kinderen"
+      ],
+      "explain": "Kind krijgt eren in het meervoud: kinderen."
+    },
+    {
+      "id": "wv-007",
+      "type": "type",
+      "level": "M6",
+      "skill": "verkleinwoord",
+      "prompt": "Schrijf het verkleinwoord.",
+      "sentence": "Een kleine stoel is een ...",
+      "answer": [
+        "stoeltje"
+      ],
+      "explain": "Stoel heeft een lange klank en eindigt op l. Dan wordt het tje: stoeltje."
+    },
+    {
+      "id": "wv-008",
+      "type": "choice",
+      "level": "E6",
+      "skill": "verkleinwoord",
+      "prompt": "Welk verkleinwoord is goed?",
+      "sentence": "Een kleine boom is een ...",
+      "options": [
+        "boomje",
+        "boompje",
+        "boometje",
+        "boomtje"
+      ],
+      "answer": 1,
+      "explain": "Boom heeft een lange klank en eindigt op m. Dan wordt het pje: boompje."
+    },
+    {
+      "id": "wv-009",
+      "type": "choice",
+      "level": "E6",
+      "skill": "heid-ing",
+      "prompt": "Welk woord moet op de stippen?",
+      "sentence": "Ik maak een mooie ... van een dino.",
+      "options": [
+        "tekening",
+        "tekenning",
+        "tekenig"
+      ],
+      "answer": 0,
+      "explain": "Tekenen wordt tekening. Ing schrijf je met één n."
+    },
+    {
+      "id": "wv-010",
+      "type": "find-error",
+      "level": "E6",
+      "skill": "ig",
+      "prompt": "Welk woord is fout geschreven?",
+      "words": [
+        "De",
+        "oefening",
+        "was",
+        "moeilijk,",
+        "maar",
+        "de",
+        "dino",
+        "bleef",
+        "geduldug",
+        "en",
+        "vrolijk."
+      ],
+      "answer": 8,
+      "correction": "geduldig",
+      "explain": "Geduldig: je hoort 'ug', maar je schrijft ig."
+    },
+    {
+      "id": "wv-011",
+      "type": "find-error",
+      "level": "E6",
+      "skill": "meervoud",
+      "prompt": "Welk woord is fout geschreven?",
+      "words": [
+        "De",
+        "kip",
+        "legt",
+        "elke",
+        "dag",
+        "eieren",
+        "en",
+        "de",
+        "lamen",
+        "spelen",
+        "in",
+        "de",
+        "wei."
+      ],
+      "answer": 8,
+      "correction": "lammeren",
+      "explain": "Lam krijgt eren in het meervoud: lammeren. De a is kort, dus twee m's."
+    },
+    {
+      "id": "wv-012",
+      "type": "find-error",
+      "level": "E6",
+      "skill": "meervoud",
+      "prompt": "Welk woord is fout geschreven?",
+      "words": [
+        "De",
+        "kinderen",
+        "zingen",
+        "liedjes",
+        "over",
+        "draken",
+        "en",
+        "dinosaurussen."
+      ],
+      "answer": -1,
+      "correction": null,
+      "explain": "Geen fout. Kinderen met eren, draken met één a en dinosaurussen met dubbele s."
+    },
+    {
+      "id": "wv-013",
+      "type": "type",
+      "level": "E6",
+      "skill": "heid-ing",
+      "prompt": "Maak er een ding van met heid.",
+      "sentence": "vrij wordt de ...",
+      "answer": [
+        "vrijheid"
+      ],
+      "explain": "Vrij plus heid wordt vrijheid. Heid schrijf je altijd met ei."
+    },
+    {
+      "id": "wv-014",
+      "type": "type",
+      "level": "E6",
+      "skill": "verkleinwoord",
+      "prompt": "Schrijf het verkleinwoord.",
+      "sentence": "Een kleine ring is een ...",
+      "answer": [
+        "ringetje"
+      ],
+      "explain": "Ring heeft een korte klank en eindigt op ng. Dan wordt het etje: ringetje."
+    },
+    {
+      "id": "wv-015",
+      "type": "choice",
+      "level": "M7",
+      "skill": "verkleinwoord",
+      "prompt": "Welk verkleinwoord is goed?",
+      "sentence": "Een kleine koning is een ...",
+      "options": [
+        "koningje",
+        "koninkje",
+        "koningetje",
+        "koninkie"
+      ],
+      "answer": 1,
+      "explain": "Woorden op ing zonder klemtoon krijgen kje. De g valt weg: koninkje."
+    },
+    {
+      "id": "wv-016",
+      "type": "choice",
+      "level": "M7",
+      "skill": "samenstelling",
+      "prompt": "Welk woord moet op de stippen?",
+      "sentence": "We eten vandaag ...",
+      "options": [
+        "pannekoeken",
+        "pannenkoeken",
+        "panenkoeken"
+      ],
+      "answer": 1,
+      "explain": "Pan heeft als meervoud pannen. Daarom schrijf je pannenkoeken, met en in het midden."
+    },
+    {
+      "id": "wv-017",
+      "type": "choice",
+      "level": "M7",
+      "skill": "lijk-elijk",
+      "prompt": "Welk woord moet op de stippen?",
+      "sentence": "Wat een ... dino! Hij deelt al zijn blokken.",
+      "options": [
+        "vriendlijke",
+        "vriendelijke",
+        "vriendelukke"
+      ],
+      "answer": 1,
+      "explain": "Vriendelijk schrijf je met elijk. Je hoort 'luk', maar je schrijft lijk."
+    },
+    {
+      "id": "wv-018",
+      "type": "find-error",
+      "level": "M7",
+      "skill": "samenstelling",
+      "prompt": "Welk woord is fout geschreven?",
+      "words": [
+        "Voor",
+        "mijn",
+        "verjaardag",
+        "kreeg",
+        "ik",
+        "een",
+        "verjaardagtaart",
+        "met",
+        "tien",
+        "kaarsjes."
+      ],
+      "answer": 6,
+      "correction": "verjaardagstaart",
+      "explain": "Je hoort een s tussen verjaardag en taart. Die schrijf je ook: verjaardagstaart."
+    },
+    {
+      "id": "wv-019",
+      "type": "find-error",
+      "level": "M7",
+      "skill": "heid-ing",
+      "prompt": "Welk woord is fout geschreven?",
+      "words": [
+        "De",
+        "wandelling",
+        "door",
+        "het",
+        "dinobos",
+        "was",
+        "een",
+        "echte",
+        "verrassing."
+      ],
+      "answer": 1,
+      "correction": "wandeling",
+      "explain": "Wandelen wordt wandeling, met één l. Je plakt alleen ing achter wandel."
+    },
+    {
+      "id": "wv-020",
+      "type": "type",
+      "level": "M7",
+      "skill": "samenstelling",
+      "prompt": "Maak er één woord van.",
+      "sentence": "een ei van een dinosaurus",
+      "answer": [
+        "dinosaurusei"
+      ],
+      "explain": "Een samenstelling schrijf je als één woord: dinosaurusei."
+    },
+    {
+      "id": "wv-021",
+      "type": "type",
+      "level": "M7",
+      "skill": "meervoud",
+      "prompt": "Schrijf het meervoud.",
+      "sentence": "één lied, drie ...",
+      "answer": [
+        "liederen"
+      ],
+      "explain": "Lied krijgt eren in het meervoud: liederen."
+    },
+    {
+      "id": "wv-022",
+      "type": "choice",
+      "level": "E7",
+      "skill": "samenstelling",
+      "prompt": "Welk woord moet op de stippen?",
+      "sentence": "In het gras groeit een gele ...",
+      "options": [
+        "paardebloem",
+        "paardenbloem",
+        "paardsbloem"
+      ],
+      "answer": 1,
+      "explain": "Paard heeft als meervoud paarden. Daarom schrijf je paardenbloem, met en in het midden."
+    },
+    {
+      "id": "wv-023",
+      "type": "choice",
+      "level": "E7",
+      "skill": "heid-ing",
+      "prompt": "Welk woord is goed geschreven?",
+      "options": [
+        "eerlijkheid",
+        "eerlijkhijd",
+        "eerlikheid",
+        "eerlijkhied"
+      ],
+      "answer": 0,
+      "explain": "Eerlijk plus heid wordt eerlijkheid. Lijk en heid schrijf je met ij en ei."
+    },
+    {
+      "id": "wv-024",
+      "type": "find-error",
+      "level": "E7",
+      "skill": "samenstelling",
+      "prompt": "Welk woord is fout geschreven?",
+      "words": [
+        "Na",
+        "school",
+        "bouwden",
+        "we",
+        "een",
+        "boomhut",
+        "met",
+        "een",
+        "echte",
+        "boekekast",
+        "erin."
+      ],
+      "answer": 9,
+      "correction": "boekenkast",
+      "explain": "Boek heeft als meervoud boeken. Daarom schrijf je boekenkast, met en in het midden."
+    },
+    {
+      "id": "wv-025",
+      "type": "find-error",
+      "level": "E7",
+      "skill": "verkleinwoord",
+      "prompt": "Welk woord is fout geschreven?",
+      "words": [
+        "Mijn",
+        "zusje",
+        "heeft",
+        "een",
+        "kammetje,",
+        "een",
+        "ringetje",
+        "en",
+        "een",
+        "sjaaltje",
+        "gekregen."
+      ],
+      "answer": -1,
+      "correction": null,
+      "explain": "Geen fout. Kam en ring krijgen etje, sjaal krijgt tje."
+    },
+    {
+      "id": "wv-026",
+      "type": "find-error",
+      "level": "E7",
+      "skill": "lijk-elijk",
+      "prompt": "Welk woord is fout geschreven?",
+      "words": [
+        "De",
+        "dino",
+        "kreeg",
+        "een",
+        "duidelijke",
+        "uitleg",
+        "en",
+        "een",
+        "hartlijk",
+        "welkom",
+        "in",
+        "de",
+        "grot."
+      ],
+      "answer": 8,
+      "correction": "hartelijk",
+      "explain": "Hartelijk schrijf je met elijk, met een e na hart."
+    },
+    {
+      "id": "wv-027",
+      "type": "type",
+      "level": "E7",
+      "skill": "samenstelling",
+      "prompt": "Maak er één woord van.",
+      "sentence": "een feest voor je verjaardag",
+      "answer": [
+        "verjaardagsfeest"
+      ],
+      "explain": "Je hoort een s tussen verjaardag en feest. Schrijf alles als één woord: verjaardagsfeest."
+    },
+    {
+      "id": "wv-028",
+      "type": "type",
+      "level": "E7",
+      "skill": "verkleinwoord",
+      "prompt": "Schrijf het verkleinwoord.",
+      "sentence": "Een kleine woning is een ...",
+      "answer": [
+        "woninkje"
+      ],
+      "explain": "Woorden op ing zonder klemtoon krijgen kje. De g valt weg: woninkje."
+    }
+  ]
+}

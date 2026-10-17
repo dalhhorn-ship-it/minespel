@@ -1,0 +1,571 @@
+{
+  "id": "leenwoorden",
+  "title": "Leenwoorden",
+  "groups": [
+    7
+  ],
+  "lesson": {
+    "pages": [
+      {
+        "title": "De c: als k of als s",
+        "text": "Leenwoorden komen uit een andere taal. Daarom schrijf je ze vaak anders dan je denkt. In veel leenwoorden staat een c. Soms klinkt die als k, soms als s.",
+        "examples": [
+          {
+            "good": "Ik kreeg een cadeau en een citroen.",
+            "bad": "Ik kreeg een kadoo en een sitroen."
+          },
+          {
+            "good": "In het circus zit een dino achter de computer.",
+            "bad": "In het sirkus zit een dino achter de kompjoeter."
+          }
+        ],
+        "tip": "Een c voor e of i klinkt als s: citroen, centimeter. Een c voor a, o of u klinkt als k: cadeau, computer."
+      },
+      {
+        "title": "Woorden met tie en isch",
+        "text": "Hoor je 'sie' of 'tsie' aan het eind? Dan schrijf je vaak tie, zoals in politie en vakantie. Hoor je 'ies' aan het eind van een woord als logisch? Dan schrijf je isch.",
+        "examples": [
+          {
+            "good": "De politie gaat op vakantie.",
+            "bad": "De polietsie gaat op vakansie."
+          },
+          {
+            "good": "Dat is logisch en fantastisch.",
+            "bad": "Dat is logies en fantasties."
+          }
+        ],
+        "tip": "Let op: een paar woorden hebben toch sie, zoals televisie. Die moet je leren."
+      },
+      {
+        "title": "Het eind: ie, ee of é",
+        "text": "Sommige leenwoorden eindigen op ie, zoals bacterie en familie. Andere eindigen op ee, zoals idee en puree. En een paar hebben een streepje op de e: café.",
+        "examples": [
+          {
+            "good": "Wat een goed idee om naar het café te gaan!",
+            "bad": "Wat een goed idée om naar het kaffee te gaan!"
+          },
+          {
+            "good": "Mijn familie eet puree.",
+            "bad": "Mijn famielie eet puré."
+          }
+        ],
+        "tip": "Café is een van de weinige woorden met é. Idee en puree hebben gewoon ee."
+      },
+      {
+        "title": "Engelse woorden",
+        "text": "Veel woorden komen uit het Engels. Die schrijf je net als in het Engels, ook al spreek je ze anders uit dan je ziet.",
+        "examples": [
+          {
+            "good": "Ons team speelt een game op de computer.",
+            "bad": "Ons tiem speelt een geem op de kompjoeter."
+          },
+          {
+            "good": "Het team vindt de game cool.",
+            "bad": "Het tiem vindt de geem koel."
+          }
+        ],
+        "tip": "Ken je het woord uit het Engels? Schrijf het dan ook zo."
+      },
+      {
+        "title": "Franse woorden",
+        "text": "Franse woorden hebben vaak lastige letters. Eau klinkt als 'oo'. Ch klinkt als 'sj'. Ge klinkt als 'zje'.",
+        "examples": [
+          {
+            "good": "De chauffeur zet de auto in de garage.",
+            "bad": "De sjoffeur zet de auto in de garaazje."
+          },
+          {
+            "good": "Mama werkt aan haar bureau.",
+            "bad": "Mama werkt aan haar buro."
+          }
+        ],
+        "tip": "Hoor je 'oo' aan het eind van een Frans woord? Denk aan eau: cadeau, bureau."
+      },
+      {
+        "title": "De y en de th",
+        "text": "In sommige leenwoorden staat een y. Die klinkt als 'ie'. En soms staat er een h na de t, die je niet hoort.",
+        "examples": [
+          {
+            "good": "De baby slaapt. Mijn hobby is bouwen.",
+            "bad": "De babie slaapt. Mijn hobbie is bouwen."
+          },
+          {
+            "good": "Opa drinkt thee in het theater.",
+            "bad": "Opa drinkt tee in het teater."
+          }
+        ],
+        "tip": "Baby en hobby eindigen op y. Thee, theater en bibliotheek hebben th."
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "lw-001",
+      "type": "choice",
+      "level": "M6",
+      "skill": "c-k-s",
+      "prompt": "Welk woord moet op de stippen?",
+      "sentence": "Voor mijn verjaardag kreeg ik een groot ...",
+      "options": [
+        "cadoo",
+        "cadeau",
+        "cadeu"
+      ],
+      "answer": 1,
+      "explain": "Cadeau komt uit het Frans. De c klinkt als k en eau klinkt als 'oo'."
+    },
+    {
+      "id": "lw-002",
+      "type": "choice",
+      "level": "M6",
+      "skill": "engels",
+      "prompt": "Welk woord moet op de stippen?",
+      "sentence": "Ik speel een spel op de ...",
+      "options": [
+        "computer",
+        "kompjoeter",
+        "compjuter"
+      ],
+      "answer": 0,
+      "explain": "Computer is een Engels woord. Je schrijft het zoals in het Engels."
+    },
+    {
+      "id": "lw-003",
+      "type": "choice",
+      "level": "M6",
+      "skill": "y-th",
+      "prompt": "Welk woord moet op de stippen?",
+      "sentence": "Opa drinkt een kop ...",
+      "options": [
+        "tee",
+        "thee",
+        "thé"
+      ],
+      "answer": 1,
+      "explain": "Thee schrijf je met th. De h hoor je niet."
+    },
+    {
+      "id": "lw-004",
+      "type": "find-error",
+      "level": "M6",
+      "skill": "tie",
+      "prompt": "Welk woord is fout geschreven?",
+      "words": [
+        "In",
+        "de",
+        "vakansie",
+        "gaan",
+        "we",
+        "naar",
+        "een",
+        "camping",
+        "met",
+        "een",
+        "zwembad."
+      ],
+      "answer": 2,
+      "correction": "vakantie",
+      "explain": "Vakantie schrijf je met tie aan het eind, ook al hoor je 'sie'."
+    },
+    {
+      "id": "lw-005",
+      "type": "find-error",
+      "level": "M6",
+      "skill": "y-th",
+      "prompt": "Welk woord is fout geschreven?",
+      "words": [
+        "De",
+        "babie",
+        "van",
+        "de",
+        "buren",
+        "slaapt",
+        "in",
+        "de",
+        "wieg."
+      ],
+      "answer": 1,
+      "correction": "baby",
+      "explain": "Baby komt uit het Engels en eindigt op y. Die klinkt als 'ie'."
+    },
+    {
+      "id": "lw-006",
+      "type": "type",
+      "level": "M6",
+      "skill": "tie",
+      "prompt": "Verbeter het woord tussen haakjes.",
+      "sentence": "De agent werkt bij de (polietsie).",
+      "answer": [
+        "politie"
+      ],
+      "explain": "Politie schrijf je met tie aan het eind."
+    },
+    {
+      "id": "lw-007",
+      "type": "type",
+      "level": "M6",
+      "skill": "frans",
+      "prompt": "Verbeter het woord tussen haakjes.",
+      "sentence": "Papa zet de auto in de (garaazje).",
+      "answer": [
+        "garage"
+      ],
+      "explain": "Garage komt uit het Frans. De 'zje' schrijf je als ge."
+    },
+    {
+      "id": "lw-008",
+      "type": "choice",
+      "level": "E6",
+      "skill": "c-k-s",
+      "prompt": "Welk woord moet op de stippen?",
+      "sentence": "In het ... zag ik een clown en een olifant.",
+      "options": [
+        "sirkus",
+        "circus",
+        "circes",
+        "cirkus"
+      ],
+      "answer": 1,
+      "explain": "Circus heeft twee keer een c. De eerste klinkt als s, de tweede als k."
+    },
+    {
+      "id": "lw-009",
+      "type": "choice",
+      "level": "E6",
+      "skill": "ie-ee-e",
+      "prompt": "Welk woord moet op de stippen?",
+      "sentence": "Wat een goed ...! Laten we een toren bouwen.",
+      "options": [
+        "idee",
+        "idée",
+        "ideé"
+      ],
+      "answer": 0,
+      "explain": "Idee eindigt op ee, zonder streepje."
+    },
+    {
+      "id": "lw-010",
+      "type": "find-error",
+      "level": "E6",
+      "skill": "c-k-s",
+      "prompt": "Welk woord is fout geschreven?",
+      "words": [
+        "De",
+        "dino",
+        "perst",
+        "een",
+        "sitroen",
+        "uit",
+        "voor",
+        "limonade."
+      ],
+      "answer": 4,
+      "correction": "citroen",
+      "explain": "Citroen begint met een c. Een c voor de i klinkt als s."
+    },
+    {
+      "id": "lw-011",
+      "type": "find-error",
+      "level": "E6",
+      "skill": "engels",
+      "prompt": "Welk woord is fout geschreven?",
+      "words": [
+        "Ons",
+        "tiem",
+        "heeft",
+        "de",
+        "wedstrijd",
+        "gewonnen."
+      ],
+      "answer": 1,
+      "correction": "team",
+      "explain": "Team is een Engels woord. Je schrijft het zoals in het Engels: team."
+    },
+    {
+      "id": "lw-012",
+      "type": "find-error",
+      "level": "E6",
+      "skill": "frans",
+      "prompt": "Welk woord is fout geschreven?",
+      "words": [
+        "Mama",
+        "zit",
+        "aan",
+        "haar",
+        "bureau",
+        "en",
+        "drinkt",
+        "een",
+        "kop",
+        "thee."
+      ],
+      "answer": -1,
+      "correction": null,
+      "explain": "Geen fout. Bureau komt uit het Frans, met eau. Thee heeft th."
+    },
+    {
+      "id": "lw-013",
+      "type": "type",
+      "level": "E6",
+      "skill": "isch",
+      "prompt": "Verbeter het woord tussen haakjes.",
+      "sentence": "Dat is heel (logies).",
+      "answer": [
+        "logisch"
+      ],
+      "explain": "Hoor je 'ies' aan het eind van logisch? Dan schrijf je isch."
+    },
+    {
+      "id": "lw-014",
+      "type": "type",
+      "level": "E6",
+      "skill": "ie-ee-e",
+      "prompt": "Verbeter het woord tussen haakjes.",
+      "sentence": "Bij het eten krijgen we (puré) met worteltjes.",
+      "answer": [
+        "puree"
+      ],
+      "explain": "Puree eindigt op ee, zonder streepje. Alleen café heeft een é."
+    },
+    {
+      "id": "lw-015",
+      "type": "choice",
+      "level": "M7",
+      "skill": "tie",
+      "prompt": "Welk woord moet op de stippen?",
+      "sentence": "In de bibliotheek vind je veel ... over dino's.",
+      "options": [
+        "informatie",
+        "informasie",
+        "informaatsie",
+        "infermatie"
+      ],
+      "answer": 0,
+      "explain": "Informatie eindigt op tie, ook al hoor je 'sie'."
+    },
+    {
+      "id": "lw-016",
+      "type": "choice",
+      "level": "M7",
+      "skill": "frans",
+      "prompt": "Welk woord moet op de stippen?",
+      "sentence": "De ... rijdt de bus naar school.",
+      "options": [
+        "sjoffeur",
+        "chauffeur",
+        "chaufeur"
+      ],
+      "answer": 1,
+      "explain": "Chauffeur komt uit het Frans: ch klinkt als 'sj', au als 'oo', en er staan twee f's."
+    },
+    {
+      "id": "lw-017",
+      "type": "choice",
+      "level": "M7",
+      "skill": "ie-ee-e",
+      "prompt": "Welk woord moet op de stippen?",
+      "sentence": "We drinken warme chocolademelk in het ...",
+      "options": [
+        "kafee",
+        "café",
+        "cafee",
+        "caffé"
+      ],
+      "answer": 1,
+      "explain": "Café komt uit het Frans. Het begint met c en eindigt op é."
+    },
+    {
+      "id": "lw-018",
+      "type": "find-error",
+      "level": "M7",
+      "skill": "isch",
+      "prompt": "Welk woord is fout geschreven?",
+      "words": [
+        "De",
+        "robot",
+        "in",
+        "de",
+        "blokwereld",
+        "is",
+        "elektries",
+        "en",
+        "heel",
+        "praktisch."
+      ],
+      "answer": 6,
+      "correction": "elektrisch",
+      "explain": "Hoor je 'ies' aan het eind? Dan schrijf je isch: elektrisch, net als praktisch."
+    },
+    {
+      "id": "lw-019",
+      "type": "find-error",
+      "level": "M7",
+      "skill": "y-th",
+      "prompt": "Welk woord is fout geschreven?",
+      "words": [
+        "In",
+        "het",
+        "teater",
+        "zagen",
+        "we",
+        "een",
+        "toneelstuk",
+        "over",
+        "een",
+        "draak."
+      ],
+      "answer": 2,
+      "correction": "theater",
+      "explain": "Theater schrijf je met th. De h hoor je niet."
+    },
+    {
+      "id": "lw-020",
+      "type": "type",
+      "level": "M7",
+      "skill": "c-k-s",
+      "prompt": "Verbeter het woord tussen haakjes.",
+      "sentence": "Het blok is tien (sentimeter) hoog.",
+      "answer": [
+        "centimeter"
+      ],
+      "explain": "Centimeter begint met een c. Een c voor de e klinkt als s."
+    },
+    {
+      "id": "lw-021",
+      "type": "type",
+      "level": "M7",
+      "skill": "engels",
+      "prompt": "Verbeter het woord tussen haakjes.",
+      "sentence": "Ik speel een (geem) op de tablet.",
+      "answer": [
+        "game"
+      ],
+      "explain": "Game is een Engels woord. Je schrijft het zoals in het Engels."
+    },
+    {
+      "id": "lw-022",
+      "type": "choice",
+      "level": "E7",
+      "skill": "tie",
+      "prompt": "Welk woord moet op de stippen?",
+      "sentence": "Pannenkoeken eten op zondag is bij ons een ...",
+      "options": [
+        "tradiesie",
+        "traditie",
+        "tradisie",
+        "traditsie"
+      ],
+      "answer": 1,
+      "explain": "Traditie eindigt op tie, net als politie en vakantie."
+    },
+    {
+      "id": "lw-023",
+      "type": "choice",
+      "level": "E7",
+      "skill": "isch",
+      "prompt": "Welk woord moet op de stippen?",
+      "sentence": "De reis naar het dinoland was ...",
+      "options": [
+        "fantasties",
+        "fantastisch",
+        "fantastiesch",
+        "fantastich"
+      ],
+      "answer": 1,
+      "explain": "Hoor je 'ies' aan het eind? Dan schrijf je isch: fantastisch."
+    },
+    {
+      "id": "lw-024",
+      "type": "find-error",
+      "level": "E7",
+      "skill": "frans",
+      "prompt": "Welk woord is fout geschreven?",
+      "words": [
+        "De",
+        "chauffeur",
+        "parkeerde",
+        "de",
+        "bus",
+        "naast",
+        "het",
+        "restorant",
+        "bij",
+        "de",
+        "haven."
+      ],
+      "answer": 7,
+      "correction": "restaurant",
+      "explain": "Restaurant komt uit het Frans. De 'o' klank schrijf je hier als au."
+    },
+    {
+      "id": "lw-025",
+      "type": "find-error",
+      "level": "E7",
+      "skill": "tie",
+      "prompt": "Welk woord is fout geschreven?",
+      "words": [
+        "Na",
+        "de",
+        "vakantie",
+        "kreeg",
+        "de",
+        "juf",
+        "een",
+        "cadeau",
+        "van",
+        "de",
+        "hele",
+        "klas."
+      ],
+      "answer": -1,
+      "correction": null,
+      "explain": "Geen fout. Vakantie heeft tie en cadeau heeft een c en eau."
+    },
+    {
+      "id": "lw-026",
+      "type": "find-error",
+      "level": "E7",
+      "skill": "c-k-s",
+      "prompt": "Welk woord is fout geschreven?",
+      "words": [
+        "De",
+        "dokter",
+        "zegt",
+        "dat",
+        "een",
+        "bakterie",
+        "je",
+        "ziek",
+        "kan",
+        "maken."
+      ],
+      "answer": 5,
+      "correction": "bacterie",
+      "explain": "Bacterie schrijf je met een c die klinkt als k. Het eind is ie."
+    },
+    {
+      "id": "lw-027",
+      "type": "type",
+      "level": "E7",
+      "skill": "y-th",
+      "prompt": "Verbeter het woord tussen haakjes.",
+      "sentence": "Mijn (hobbie) is bouwen in de blokwereld.",
+      "answer": [
+        "hobby"
+      ],
+      "explain": "Hobby komt uit het Engels en eindigt op y."
+    },
+    {
+      "id": "lw-028",
+      "type": "type",
+      "level": "E7",
+      "skill": "frans",
+      "prompt": "Verbeter het woord tussen haakjes.",
+      "sentence": "Ik leg mijn tekening op mijn (buro).",
+      "answer": [
+        "bureau"
+      ],
+      "explain": "Bureau komt uit het Frans. De 'oo' aan het eind schrijf je als eau."
+    }
+  ]
+}
