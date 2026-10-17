@@ -1,10 +1,11 @@
 // The menu that opens when the kid taps a dino (AC16): Volg mij, Blijf hier, Naam geven, Knuffel.
-// STUB from T42: the panel opens and closes and Volg mij / Blijf hier work. T45 adds the naming
-// keyboard and the hearts, and the style sheet (src/styles/dino-menu.css). Inline styles for now.
+// Naam geven swaps the panel for the naming screen (src/ui/name-screen.ts). Styles: src/styles/dino-menu.css.
+import '../styles/dino-menu.css';
 import type { PointerRouter } from '../input/pointer-router';
 import type { DinoMode } from '../dinos/dino-ai';
 import { DINO_KINDS, type DinoKindId } from '../dinos/kinds';
 import { el } from './dom';
+import { createNameScreen, type NameScreen } from './name-screen';
 import { onTap } from './tap';
 
 export interface DinoMenuTarget {
@@ -18,9 +19,9 @@ export interface DinoMenuOptions {
   container: HTMLElement;
   router: PointerRouter;
   onMode: (id: number, mode: DinoMode) => void;
-  /** T45: opens the naming screen. */
-  onName?: (id: number) => void;
-  /** T45: hearts. */
+  /** The kid finished a name. The owner stores it (the store trims it to 12 characters). */
+  onRename?: (id: number, name: string) => void;
+  /** Knuffel: the owner shows hearts at the dino and plays a happy sound. The menu closes after it. */
   onHug?: (id: number) => void;
   /** Called after the menu closed, so the game can go on. */
   onClose?: () => void;
@@ -34,49 +35,36 @@ export interface DinoMenu {
   destroy(): void;
 }
 
-const PANEL_STYLE =
-  'background:#fff;border:4px solid #1f2d3d;border-radius:16px;padding:16px;min-width:300px;' +
-  'display:flex;flex-direction:column;gap:12px;font-family:var(--font-stack);color:#1f2d3d;';
-const ROOT_STYLE =
-  'position:fixed;inset:0;align-items:center;justify-content:center;' +
-  'background:rgb(31 45 61 / 0.35);touch-action:none;user-select:none;-webkit-user-select:none;z-index:20;';
-const BUTTON_STYLE =
-  'min-height:56px;min-width:56px;font:inherit;font-size:22px;font-weight:700;border:3px solid #1f2d3d;' +
-  'border-radius:16px;background:#def5e1;color:#1f2d3d;';
-
 export function createDinoMenu(options: DinoMenuOptions): DinoMenu {
   const cleanups: Array<() => void> = [];
   let current: DinoMenuTarget | null = null;
+  let naming: NameScreen | null = null;
 
   const button = (label: string, handler: () => void): HTMLButtonElement => {
-    const b = el('button', { text: label, attrs: { type: 'button' } });
-    b.style.cssText = BUTTON_STYLE;
+    const b = el('button', { class: 'dino-btn', text: label, attrs: { type: 'button' } });
     cleanups.push(onTap(b, handler));
     return b;
   };
   const title = el('div', { class: 'dino-menu-title' });
-  title.style.cssText = 'font-size:28px;font-weight:800;text-align:center;';
   const follow = button('Volg mij', () => choose('follow'));
   const stay = button('Blijf hier', () => choose('stay'));
-  const name = button('Naam geven', () => {
-    if (current) options.onName?.(current.id);
-  });
+  const name = button('Naam geven', () => openNaming());
   const hug = button('Knuffel', () => {
-    if (current) options.onHug?.(current.id);
+    if (!current) return;
+    options.onHug?.(current.id);
+    close();
   });
   const back = button('Terug naar de wereld', () => close());
   const panel = el('div', { class: 'dino-menu-panel' }, [title, follow, stay, name, hug, back]);
-  panel.style.cssText = PANEL_STYLE;
   const root = el('div', { class: 'dino-menu', attrs: { role: 'dialog', 'aria-label': 'Dino' } }, [panel]);
-  root.style.cssText = ROOT_STYLE;
   setShown(false);
   cleanups.push(options.router.addIgnoreZone(root));
   options.container.append(root);
 
-  /** The hidden attribute alone loses against display:flex, so the display is set too. */
+  /** The hidden attribute alone loses against display:flex in old browsers, so the display is set too. */
   function setShown(shown: boolean): void {
     root.hidden = !shown;
-    root.style.display = shown ? 'flex' : 'none';
+    root.style.display = shown ? '' : 'none';
   }
   function choose(mode: DinoMode): void {
     if (!current) return;
@@ -87,11 +75,34 @@ export function createDinoMenu(options: DinoMenuOptions): DinoMenu {
   function refresh(): void {
     if (!current) return;
     title.textContent = current.name !== '' ? current.name : DINO_KINDS[current.kind].name;
-    follow.style.background = current.mode === 'follow' ? '#a5d6a7' : '#def5e1';
-    stay.style.background = current.mode === 'stay' ? '#a5d6a7' : '#def5e1';
+    follow.setAttribute('aria-pressed', String(current.mode === 'follow'));
+    stay.setAttribute('aria-pressed', String(current.mode === 'stay'));
+  }
+  function closeNaming(): void {
+    if (!naming) return;
+    naming.destroy();
+    naming = null;
+    panel.hidden = false;
+  }
+  function openNaming(): void {
+    if (!current || naming) return;
+    const id = current.id;
+    naming = createNameScreen({
+      initial: current.name,
+      onDone(value) {
+        options.onRename?.(id, value);
+        if (current) current = { ...current, name: value };
+        closeNaming();
+        refresh();
+      },
+      onCancel: closeNaming,
+    });
+    panel.hidden = true;
+    root.append(naming.root);
   }
   function close(): void {
     if (root.hidden) return;
+    closeNaming();
     setShown(false);
     current = null;
     options.onClose?.();
@@ -100,6 +111,7 @@ export function createDinoMenu(options: DinoMenuOptions): DinoMenu {
   return {
     root,
     open(target) {
+      closeNaming();
       current = target;
       refresh();
       setShown(true);
@@ -107,6 +119,7 @@ export function createDinoMenu(options: DinoMenuOptions): DinoMenu {
     close,
     isOpen: () => !root.hidden,
     destroy() {
+      closeNaming();
       for (const c of cleanups) c();
       root.remove();
     },

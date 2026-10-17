@@ -19,6 +19,7 @@ import { World } from '../world/world';
 import { createDinoRender } from '../render/dino-render';
 import { createDinoStore, setActiveDinoStore, type DinoStore } from '../dinos/dino-store';
 import { createDinoMenu } from '../ui/dino-menu';
+import { DINO_KINDS } from '../dinos/kinds';
 import { createDinoSystem, type DinoSystem } from './dino-system';
 import { registerHook } from '../dev/e2e-hooks';
 import { createLoop } from './loop';
@@ -189,6 +190,13 @@ export function createGame(options: GameOptions): Game {
     container: options.container,
     router,
     onMode: (id, mode) => dinoStore.setMode(id, mode),
+    onRename: (id, name) => dinoStore.rename(id, name),
+    onHug: (id) => {
+      const d = dinoStore.findDino(id);
+      if (!d) return;
+      dinoRender.burst('hearts', d.state.x, d.state.y + DINO_KINDS[d.state.kind].size.h, d.state.z);
+      sound.play('chirp');
+    },
     onClose: () => {
       menuOpen = false;
       updateLoop();
