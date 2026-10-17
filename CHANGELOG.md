@@ -11,3 +11,4 @@ Written so kids can read it too.
 * The world now has painted blocks: grass, stone, glass, wool and more. Only the sides you can see are drawn, so the game stays fast.
 * You can walk around, jump up onto a block, and reach blocks up to 6 steps away. You can't walk out of the world.
 * Walk with one thumb and look around with the other hand. Tapping a button never turns the camera by accident.
+* You can now walk around the 3D world: move with the left thumb, look around with the right, and tap Spring to jump up a block.
