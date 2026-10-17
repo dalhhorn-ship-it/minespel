@@ -17,6 +17,20 @@ describe('screens', () => {
     closeMenu();
     expect(s.current()).toBe('world');
   });
+  it('a node less screen counts for current() but leaves the layer hidden so it never blocks taps', () => {
+    const host = document.createElement('div');
+    const s = createScreens(host);
+    const layer = host.querySelector('.screen-layer') as HTMLElement;
+    const close = s.open('kid-overlay');
+    expect(s.current()).toBe('kid-overlay');
+    expect(layer.hidden).toBe(true);
+    const closeNode = s.open('learn', document.createElement('div'));
+    expect(layer.hidden).toBe(false);
+    closeNode();
+    expect(layer.hidden).toBe(true);
+    close();
+    expect(s.current()).toBe('world');
+  });
   it('tells subscribers and shows the node in the layer', () => {
     const host = document.createElement('div');
     const s = createScreens(host);

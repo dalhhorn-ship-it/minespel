@@ -4,6 +4,7 @@ import { createNullRenderer, type GameRenderer } from '../render/renderer';
 import { START_SPOT } from '../world/terrain';
 import { addEgg, getActiveDinoStore } from '../dinos/dino-store';
 import { createGame, type Game } from './game';
+import { createScreens } from '../app/screens';
 
 let frameCb: ((t: number) => void) | null = null;
 let clock = 0;
@@ -18,6 +19,7 @@ function runFrames(n: number, ms = 16): void {
 }
 
 function setup(search = '') {
+  const screens = createScreens(document.body);
   const container = document.createElement('div');
   document.body.append(container);
   let guardListener: ((s: GuardState) => void) | null = null;
@@ -37,12 +39,13 @@ function setup(search = '') {
     container,
     guard,
     search,
+    screens,
     rendererFactory: (o) => {
       renderer = { ...createNullRenderer(o), render, setCamera };
       return renderer;
     },
   });
-  return { game, container, render, setCamera, setGuard: (s: GuardState) => guardListener?.(s) };
+  return { game, screens, container, render, setCamera, setGuard: (s: GuardState) => guardListener?.(s) };
 }
 
 beforeEach(() => {
@@ -59,6 +62,37 @@ beforeEach(() => {
 afterEach(() => {
   vi.unstubAllGlobals();
   document.body.textContent = '';
+});
+
+describe('game screens', () => {
+  it('the dino menu is a kid-overlay screen while open', () => {
+    const s = setup();
+    s.game.dinos.store.load({ dinos: [{ kind: 'compy', x: 22.5, y: 40, z: 22.5, growth: 2 }] });
+    const id = s.game.dinos.store.dinos[0]!.id;
+    expect(s.screens.current()).toBe('world');
+    s.game.openDinoMenu(id);
+    expect(s.screens.current()).toBe('kid-overlay');
+    s.game.openDinoMenu(id); // twice opens only one screen
+    expect(s.screens.depth()).toBe(1);
+    const back = [...s.container.querySelectorAll('.dino-menu button')].find((b) => b.textContent === 'Terug naar de wereld')!;
+    for (const type of ['pointerdown', 'pointerup']) {
+      const e = new MouseEvent(type, { bubbles: true });
+      Object.defineProperty(e, 'pointerId', { value: 9 });
+      back.dispatchEvent(e);
+    }
+    expect(s.screens.current()).toBe('world');
+  });
+  it('the block grid is a kid-overlay screen while open', async () => {
+    const s = setup();
+    const grid = s.container.querySelector('.block-grid') as HTMLElement;
+    const flush = () => new Promise((r) => setTimeout(r, 0));
+    grid.hidden = false;
+    await flush();
+    expect(s.screens.current()).toBe('kid-overlay');
+    grid.hidden = true;
+    await flush();
+    expect(s.screens.current()).toBe('world');
+  });
 });
 
 describe('game', () => {

@@ -26,7 +26,8 @@ export function createScreens(host?: HTMLElement, doc: Document = document): Scr
   const emit = () => {
     const k = current();
     layer.dataset.screen = k;
-    layer.hidden = stack.length === 0;
+    // A screen without a node (the dino menu draws itself) must not leave an empty layer that eats taps.
+    layer.hidden = !stack.some((e) => e.node);
     for (const l of [...listeners]) l(k);
   };
   layer.hidden = true;

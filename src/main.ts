@@ -30,6 +30,7 @@ const audio = createAudioUnlock();
 // The one Sound of the app. Off until the saved settings load (AC99).
 const sound = createSound({ unlock: audio, enabled: false });
 
+const screens = createScreens();
 const app = document.getElementById('app');
 let game: Game | null = null;
 let envHost: AppEnvHost | null = null;
@@ -50,7 +51,7 @@ if (app) {
     }
   }
   try {
-    game = createGame({ container, rendererFactory, guard, search: window.location.search, audioUnlock: audio, sound });
+    game = createGame({ container, rendererFactory, guard, search: window.location.search, audioUnlock: audio, sound, screens });
     envHost = createAppEnv({ sound, audio, dinos: game.dinos.store });
     game.on('teleported', () => {
       teleported++;
@@ -95,7 +96,6 @@ const booted = game && envHost
       },
     })
   : Promise.resolve('not-saving' as const);
-const screens = createScreens();
 let playTimer: PlayTimer | null = null;
 if (game && envHost) {
   const g = game;

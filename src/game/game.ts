@@ -22,6 +22,7 @@ import { createDinoMenu } from '../ui/dino-menu';
 import { DINO_KINDS } from '../dinos/kinds';
 import { createDinoSystem, type DinoSystem } from './dino-system';
 import { registerHook } from '../dev/e2e-hooks';
+import type { Screens } from '../app/screens';
 import { createLoop } from './loop';
 import { createPlayerController, type PlayerController } from './player-controller';
 
@@ -82,6 +83,8 @@ export interface GameOptions {
   /** The first tap detector main.ts holds. Without it the game is silent. */
   audioUnlock?: AudioUnlock;
   sound?: Sound;
+  /** When given, the dino menu and the block grid open a node less 'kid-overlay' screen, so the play timer waits (AC23). */
+  screens?: Screens;
 }
 
 const SILENT_UNLOCK = { isUnlocked: () => false, watch: () => {}, whenUnlocked: () => {} };
@@ -122,6 +125,8 @@ export function createGame(options: GameOptions): Game {
     onEvent: (e) => dinoRender.burst(e.type, e.x, e.y, e.z),
   });
   let menuOpen = false;
+  let closeMenuScreen: (() => void) | null = null;
+  let closeGridScreen: (() => void) | null = null;
   let updateLoop = () => {};
   const hud = createHud({
     router,
@@ -180,6 +185,15 @@ export function createGame(options: GameOptions): Game {
     hud.setMode(s.mode);
   };
   options.container.append(hud.root, stick.element, grid.root);
+  // The grid closes itself (pick, Klaar, backdrop), so watch its hidden flag.
+  const gridWatch = new MutationObserver(() => {
+    if (grid.isOpen() && !closeGridScreen && options.screens) closeGridScreen = options.screens.open('kid-overlay');
+    else if (!grid.isOpen() && closeGridScreen) {
+      closeGridScreen();
+      closeGridScreen = null;
+    }
+  });
+  gridWatch.observe(grid.root, { attributes: true, attributeFilter: ['hidden'] });
 
   let spike: SpikeDino[] | null = null;
   if (isSpikeEnabled(search)) {
@@ -199,6 +213,8 @@ export function createGame(options: GameOptions): Game {
     },
     onClose: () => {
       menuOpen = false;
+      closeMenuScreen?.();
+      closeMenuScreen = null;
       updateLoop();
     },
   });
@@ -206,6 +222,7 @@ export function createGame(options: GameOptions): Game {
     const d = dinoStore.findDino(id);
     if (!d) return;
     menuOpen = true;
+    if (!closeMenuScreen && options.screens) closeMenuScreen = options.screens.open('kid-overlay');
     dinoMenu.open({ id: d.id, kind: d.state.kind, name: d.name, mode: d.state.mode });
     updateLoop();
   }
@@ -302,6 +319,9 @@ export function createGame(options: GameOptions): Game {
       router.destroy();
       hud.destroy();
       hotbar.destroy();
+      gridWatch.disconnect();
+      closeGridScreen?.();
+      closeMenuScreen?.();
       grid.destroy();
       dinoMenu.destroy();
       renderer.setDinoLayer(null);

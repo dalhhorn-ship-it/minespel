@@ -73,6 +73,7 @@ test('dino menu: Blijf hier, naming with the kid keyboard, name kept after reope
   await readState(page, 'resumeGame');
   await openMenu(page, 21);
   expect(await readState<boolean>(page, 'gameRunning')).toBe(false); // the menu stops the timer and the world
+  expect(await readState<boolean>(page, 'timerCounting')).toBe(false); // no break over the name keyboard (AC23)
   await page.screenshot({ path: info.outputPath('dino-menu.png') });
 
   const menu = page.locator('.dino-menu-panel');
@@ -89,6 +90,7 @@ test('dino menu: Blijf hier, naming with the kid keyboard, name kept after reope
   await expect(page.locator('.dino-menu-panel')).toBeHidden(); // the naming screen replaces the menu
   await expect(page.locator('.name-text')).toHaveText('rexxxxxxxxxx'); // 12 at most
   await page.screenshot({ path: info.outputPath('name-screen.png') });
+  expect(await readState<boolean>(page, 'timerCounting')).toBe(false);
   await tapEl(page, '.name-screen', 'Klaar');
   await expect(page.locator('.dino-menu-title')).toHaveText('rexxxxxxxxxx');
   await expect.poll(async () => (await dinos(page))[0]!.name).toBe('rexxxxxxxxxx');
@@ -96,6 +98,7 @@ test('dino menu: Blijf hier, naming with the kid keyboard, name kept after reope
   // Reopen: the name is shown.
   await readState(page, 'closeDinoMenu');
   expect(await readState<boolean>(page, 'gameRunning')).toBe(true);
+  await expect.poll(() => readState<boolean>(page, 'timerCounting')).toBe(true);
   await openMenu(page, 22);
   await expect(page.locator('.dino-menu-title')).toHaveText('rexxxxxxxxxx');
 });
