@@ -32,7 +32,7 @@ if (app) {
     }
   }
   try {
-    game = createGame({ container, rendererFactory, guard, search: window.location.search });
+    game = createGame({ container, rendererFactory, guard, search: window.location.search, audioUnlock: audio });
     game.on('teleported', () => {
       teleported++;
     });

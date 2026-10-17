@@ -1,4 +1,10 @@
 // The running game: world, renderer, input, HUD and the loop. Other features hook in through the returned object.
+import { createSound, type Sound } from '../audio/sound';
+import type { AudioUnlock } from '../platform/audio-unlock';
+import { createEffects } from '../render/effects';
+import { createBlockGrid } from '../ui/block-grid';
+import { createHotbar } from '../ui/hotbar';
+import { createBuildController, type BuildState } from './build-controller';
 import { createFpsCounter, type FpsCounter } from '../render/fps-counter';
 import { createLook } from '../input/look';
 import { createPointerRouter } from '../input/pointer-router';
@@ -33,6 +39,9 @@ export interface Game {
   resume(): void;
   /** True while frames are being drawn. */
   isRunning(): boolean;
+  /** Mode, the 8 hotbar blocks and the selected slot. T37 saves these. */
+  getBuildState(): BuildState;
+  setBuildState(state: Partial<BuildState>): void;
   /** Puts the player back on the start spot and says so with `teleported`. */
   teleportHome(): void;
   on<K extends keyof GameEvents>(event: K, listener: (payload: GameEvents[K]) => void): () => void;
@@ -52,7 +61,12 @@ export interface GameOptions {
   win?: Window;
   doc?: Document;
   world?: World;
+  /** The first tap detector main.ts holds. Without it the game is silent. */
+  audioUnlock?: AudioUnlock;
+  sound?: Sound;
 }
+
+const SILENT_UNLOCK = { isUnlocked: () => false, watch: () => {} };
 
 export function createGame(options: GameOptions): Game {
   const win = options.win ?? window;
@@ -68,16 +82,55 @@ export function createGame(options: GameOptions): Game {
   renderer.setWorld(world);
 
   const stick = createStick();
-  const look = createLook({ onTap: () => {} }); // taps mine and build in T33
+  const sound = options.sound ?? createSound({ unlock: options.audioUnlock ?? SILENT_UNLOCK });
+  const effects = createEffects(options.container, doc);
+  const tapWorld: { fn: ((x: number, y: number) => void) | null } = { fn: null }; // set once the build controller exists
+  let loopRunning = () => false;
+  const look = createLook({ onTap: (x, y) => tapWorld.fn?.(x, y) });
   const router = createPointerRouter(options.container, { stick, look });
   const player = createPlayerController({ world, stick, look });
   const hud = createHud({
     router,
     onJump: () => player.jump(),
-    onMode: () => {}, // T33
+    onMode: (m) => build.setMode(m),
     onPause: () => {}, // the pause menu comes with T41
   });
-  options.container.append(hud.root, stick.element);
+  const build = createBuildController({
+    world,
+    player,
+    onBlockChanged: (x, z) => renderer.blockChanged(x, z),
+    effects,
+    sound,
+    viewport: () => ({ width: win.innerWidth, height: win.innerHeight }),
+    canAct: () => loopRunning(),
+  });
+  tapWorld.fn = (x, y) => build.tap(x, y);
+  const initial = build.getState();
+  const hotbar = createHotbar({
+    slots: hud.slots,
+    allBlocksSlot: hud.allBlocksSlot,
+    blocks: initial.hotbar,
+    selected: initial.selected,
+    onSelect: (slot) => {
+      build.select(slot);
+      hotbar.setSelected(slot);
+    },
+    onAllBlocks: () => grid.open(),
+  });
+  const grid = createBlockGrid({
+    router,
+    onPick: (block) => {
+      build.setSlotBlock(build.getState().selected, block);
+      refreshHotbar();
+    },
+  });
+  const refreshHotbar = () => {
+    const s = build.getState();
+    hotbar.setBlocks(s.hotbar);
+    hotbar.setSelected(s.selected);
+    hud.setMode(s.mode);
+  };
+  options.container.append(hud.root, stick.element, grid.root);
 
   const listeners: { [K in keyof GameEvents]: Set<(p: GameEvents[K]) => void> } = { teleported: new Set() };
 
@@ -113,6 +166,7 @@ export function createGame(options: GameOptions): Game {
     if (manualPause || guardBlocks || hidden) loop.stop();
     else loop.start();
   };
+  loopRunning = () => loop.running;
   const unsubscribe = options.guard.subscribe((s) => {
     guardBlocks = s.portrait || s.tooSmall;
     if (!guardBlocks) resize();
@@ -135,6 +189,11 @@ export function createGame(options: GameOptions): Game {
       update();
     },
     isRunning: () => loop.running,
+    getBuildState: () => build.getState(),
+    setBuildState(state) {
+      build.setState(state);
+      refreshHotbar();
+    },
     teleportHome() {
       player.reset();
       const p = player.player;
@@ -154,6 +213,9 @@ export function createGame(options: GameOptions): Game {
       win.removeEventListener('orientationchange', resize);
       router.destroy();
       hud.destroy();
+      hotbar.destroy();
+      grid.destroy();
+      effects.dispose();
       stick.element.remove();
       fps.dispose();
       renderer.dispose();

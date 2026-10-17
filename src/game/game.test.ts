@@ -144,4 +144,29 @@ describe('game', () => {
     expect(s.container.children).toHaveLength(0);
     expect(s.game.isRunning()).toBe(false);
   });
+
+  it('has 8 hotbar slots and the Alle blokken button, and the Bouwen button switches mode (AC7)', () => {
+    const s = setup();
+    expect(s.container.querySelectorAll('.hotbar-slot')).toHaveLength(8);
+    expect(s.container.querySelector('.hotbar-all')?.textContent).toBe('Alle blokken');
+    expect(s.game.getBuildState().mode).toBe('hakken');
+    const bouwen = [...s.container.querySelectorAll('.hud-mode')].find((b) => b.textContent === 'Bouwen')!;
+    const fire = (type: string) => {
+      const e = new MouseEvent(type, { bubbles: true });
+      Object.defineProperty(e, 'pointerId', { value: 3 });
+      bouwen.dispatchEvent(e);
+    };
+    fire('pointerdown');
+    fire('pointerup');
+    expect(s.game.getBuildState().mode).toBe('bouwen');
+  });
+
+  it('the hotbar can be read and set back (for saving)', () => {
+    const s = setup();
+    const state = { mode: 'bouwen' as const, hotbar: [1, 2, 3, 4, 5, 6, 7, 8], selected: 6 };
+    s.game.setBuildState(state);
+    expect(s.game.getBuildState()).toEqual(state);
+    const pressed = [...s.container.querySelectorAll('.hotbar-slot')].map((b) => b.getAttribute('aria-pressed'));
+    expect(pressed.indexOf('true')).toBe(6);
+  });
 });
