@@ -38,6 +38,10 @@ export interface PlayerInput {
   moveZ: number;
   /** True while the jump button is held. A jump starts only on the ground. */
   jump: boolean;
+  /** True when the player is floating in the sky (gravity is off; flyY controls vertical motion). */
+  floating?: boolean;
+  /** Vertical flight input while floating: +1 up, -1 down, 0 hover in place. */
+  flyY?: number;
 }
 
 export function createPlayer(x: number, y: number, z: number): PlayerState {
@@ -93,6 +97,30 @@ function stepOnce(world: World, p: PlayerState, input: PlayerInput, dt: number):
   if (len > 1) { mx /= len; mz /= len; }
   if (!Number.isFinite(mx) || !Number.isFinite(mz)) { mx = 0; mz = 0; }
   moveHorizontal(world, p, mx * WALK_SPEED * dt, mz * WALK_SPEED * dt);
+
+  if (input.floating) {
+    const flyY = Number.isFinite(input.flyY) ? Math.max(-1, Math.min(1, input.flyY ?? 0)) : 0;
+    p.vy = flyY * JUMP_SPEED;
+    const dy = p.vy * dt;
+    if (dy === 0) {
+      p.onGround = collides(world, p.x, p.y - 0.01, p.z);
+      return;
+    }
+    const ny = p.y + dy;
+    if (!collides(world, p.x, ny, p.z)) {
+      p.y = ny;
+      p.onGround = false;
+    } else if (dy < 0) {
+      p.y = Math.floor(p.y + dy) + 1;
+      p.vy = 0;
+      p.onGround = true;
+    } else {
+      p.y = Math.ceil(p.y + PLAYER_HEIGHT + dy) - 1 - PLAYER_HEIGHT - EPS;
+      p.vy = 0;
+      p.onGround = false;
+    }
+    return;
+  }
 
   if (input.jump && p.onGround) {
     p.vy = JUMP_SPEED;

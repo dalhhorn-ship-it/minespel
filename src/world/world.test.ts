@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { AIR, GRAS, BLADEREN, BOOMSTAM, KEISTEEN, OERSTEEN, PLACEABLE_BLOCKS, ZAND, isSolid } from './blocks';
+import { AIR, GRAS, BLADEREN, BOOMSTAM, KEISTEEN, OBSIDIAAN, OERSTEEN, PLACEABLE_BLOCKS, VUURSTEEN, ZAND, isSolid } from './blocks';
 import { CELL_COUNT, START_SPOT, WORLD_HEIGHT, WORLD_SIZE, generateTerrain } from './terrain';
 import { World } from './world';
 
@@ -27,10 +27,13 @@ describe('terrain', () => {
     expect(other).toBe(0);
   });
 
-  it('has the expected kinds of ground', () => {
+  it('has the expected kinds of ground including 4 obsidian blocks for the gate floor (CR2)', () => {
     const counts = new Map<number, number>();
     for (const b of generateTerrain()) counts.set(b, (counts.get(b) ?? 0) + 1);
-    for (const id of [GRAS, ZAND, BOOMSTAM, BLADEREN, KEISTEEN]) expect(counts.get(id) ?? 0).toBeGreaterThan(0);
+    for (const id of [GRAS, ZAND, BOOMSTAM, BLADEREN, KEISTEEN, VUURSTEEN]) {
+      expect(counts.get(id) ?? 0).toBeGreaterThan(0);
+    }
+    expect(counts.get(OBSIDIAAN)).toBe(4);
   });
 
   it('has gentle hills (not flat, not steep)', () => {
@@ -58,9 +61,9 @@ describe('World', () => {
     expect(new World().diff()).toHaveLength(0);
   });
 
-  it('all 16 placeable blocks can be set and read back', () => {
+  it('all 32 placeable blocks can be set and read back', () => {
     const w = new World();
-    expect(PLACEABLE_BLOCKS).toHaveLength(16);
+    expect(PLACEABLE_BLOCKS).toHaveLength(32);
     PLACEABLE_BLOCKS.forEach((id, i) => {
       expect(w.set(i, WORLD_HEIGHT - 1, 0, id)).toBe(true);
       expect(w.get(i, WORLD_HEIGHT - 1, 0)).toBe(id);

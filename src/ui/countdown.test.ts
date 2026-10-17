@@ -31,4 +31,21 @@ describe('countdown view (T41)', () => {
     expect(view.getText()).toBe('Leerpauze over 0:00');
     expect(view.isWarningActive()).toBe(false);
   });
+
+  it('allows overriding the countdown clock with the Nu oefenen button', () => {
+    let started = 0;
+    const view = createCountdownView({
+      initialMs: 180_000,
+      onStartNow: () => {
+        started++;
+      },
+    });
+    const btn = view.root.querySelector<HTMLButtonElement>('[data-testid="countdown-start-now"]');
+    expect(btn).not.toBeNull();
+    expect(btn?.hidden).toBe(false);
+    btn?.dispatchEvent(new PointerEvent('pointerdown', { pointerId: 1, clientX: 5, clientY: 5, bubbles: true }));
+    btn?.dispatchEvent(new PointerEvent('pointerup', { pointerId: 1, clientX: 5, clientY: 5, bubbles: true }));
+    expect(started).toBe(1);
+    view.destroy();
+  });
 });

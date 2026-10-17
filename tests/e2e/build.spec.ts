@@ -115,7 +115,7 @@ test.describe('mine and build', () => {
     await hudTap(page, '.hud-mode', 20, 'Bouwen');
     await hudTap(page, '.hotbar-all', 21);
     await expect(page.locator('.block-grid')).toBeVisible();
-    await expect(page.locator('.grid-block')).toHaveCount(16);
+    await expect(page.locator('.grid-block')).toHaveCount(32);
     await page.waitForTimeout(400);
     await hudTap(page, '.grid-block', 22, 'wol paars');
     await expect(page.locator('.block-grid')).toBeHidden();

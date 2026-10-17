@@ -1,10 +1,12 @@
 // The running game: world, renderer, input, HUD and the loop. Other features hook in through the returned object.
 import { createSound, type Sound } from '../audio/sound';
+import { createDinoStore, type DinoStore, type WorldDino } from '../dinos/dino-store';
 import type { AudioUnlock } from '../platform/audio-unlock';
 import { createEffects } from '../render/effects';
 import { createBlockGrid } from '../ui/block-grid';
 import { createHotbar } from '../ui/hotbar';
 import { createBuildController, type BuildState } from './build-controller';
+import { createDinoSystem, type DinoSystem } from './dino-system';
 import { createFpsCounter, type FpsCounter } from '../render/fps-counter';
 import { createLook } from '../input/look';
 import { createPointerRouter } from '../input/pointer-router';
@@ -40,6 +42,8 @@ export interface Game {
   readonly player: PlayerController;
   readonly renderer: GameRenderer;
   readonly hud: Hud;
+  readonly dinoStore: DinoStore;
+  readonly dinoSystem: DinoSystem;
   /** Stops the world: no steps, no drawing. Safe to call twice. */
   pause(): void;
   resume(): void;
@@ -74,6 +78,7 @@ export interface GameOptions {
   sound?: Sound;
   onPausePressed?: () => void;
   onParentPressed?: () => void;
+  onDinoTapped?: (dino: WorldDino, screenX: number, screenY: number) => void;
   onBlockGridOpenChange?: (open: boolean) => void;
 }
 
@@ -104,10 +109,32 @@ export function createGame(options: GameOptions): Game {
     for (const l of [...listeners.changed]) l({ kind });
   };
   const player = createPlayerController({ world, stick, look });
+  const dinoStore = createDinoStore({
+    world,
+    getPlayerSpot: () => ({
+      x: player.player.x,
+      y: player.player.y,
+      z: player.player.z,
+    }),
+  });
+  const dinoSystem = createDinoSystem({
+    world,
+    player,
+    store: dinoStore,
+    renderer,
+    container: options.container,
+    sound,
+    effects,
+    viewport: () => ({ width: win.innerWidth, height: win.innerHeight }),
+    onDinoTapped: (dino, sx, sy) => options.onDinoTapped?.(dino, sx, sy),
+    doc,
+  });
+
   const hud = createHud({
     router,
     onJump: () => player.jump(),
     onAscend: (active) => player.setAscending(active),
+    onDescend: (active) => player.setDescending(active),
     onLookInput: (tx, ty) => player.setLookInput(tx, ty),
     onLookNudge: (tx, ty) => player.nudgeLook(tx, ty),
     onMode: (m) => {
@@ -127,9 +154,14 @@ export function createGame(options: GameOptions): Game {
     effects,
     sound,
     viewport: () => ({ width: win.innerWidth, height: win.innerHeight }),
+    isOccupied: (box) => dinoSystem.isOccupied(box),
     canAct: () => loopRunning(),
   });
-  tapWorld.fn = (x, y) => build.tap(x, y);
+  tapWorld.fn = (x, y) => {
+    if (!loopRunning()) return;
+    if (dinoSystem.handleTap(x, y)) return;
+    build.tap(x, y);
+  };
   const initial = build.getState();
   const hotbar = createHotbar({
     slots: hud.slots,
@@ -139,12 +171,20 @@ export function createGame(options: GameOptions): Game {
     onSelect: (slot) => {
       build.select(slot);
       hotbar.setSelected(slot);
+      grid.setHotbar?.(build.getState().hotbar, slot);
       emitChanged('build');
     },
     onAllBlocks: () => grid.open(),
   });
   const grid = createBlockGrid({
     router,
+    hotbar: initial.hotbar,
+    selectedSlot: initial.selected,
+    onSelectSlot: (slot) => {
+      build.select(slot);
+      hotbar.setSelected(slot);
+      emitChanged('build');
+    },
     onPick: (block) => {
       build.setSlotBlock(build.getState().selected, block);
       refreshHotbar();
@@ -156,6 +196,7 @@ export function createGame(options: GameOptions): Game {
     const s = build.getState();
     hotbar.setBlocks(s.hotbar);
     hotbar.setSelected(s.selected);
+    grid.setHotbar?.(s.hotbar, s.selected);
     hud.setMode(s.mode);
   };
   options.container.append(hud.root, stick.element, grid.root);
@@ -171,6 +212,7 @@ export function createGame(options: GameOptions): Game {
   const loop = createLoop({
     frame(dt, now) {
       player.update(dt);
+      dinoSystem.step(dt);
       if (dinos) stepSpikeDinos(world, dinos, dt);
       renderer.setCamera(player.pose());
       renderer.render();
@@ -230,6 +272,7 @@ export function createGame(options: GameOptions): Game {
   function teleportHome() {
     player.reset();
     const p = player.player;
+    dinoSystem.onPlayerTeleported({ x: p.x, y: p.y, z: p.z });
     for (const l of [...listeners.teleported]) l({ x: p.x, y: p.y, z: p.z });
   }
 
@@ -238,6 +281,8 @@ export function createGame(options: GameOptions): Game {
     player,
     renderer,
     hud,
+    dinoStore,
+    dinoSystem,
     pause() {
       manualPause = true;
       update();
@@ -277,6 +322,7 @@ export function createGame(options: GameOptions): Game {
       hud.destroy();
       hotbar.destroy();
       grid.destroy();
+      dinoSystem.dispose();
       effects.dispose();
       stick.element.remove();
       fps.dispose();

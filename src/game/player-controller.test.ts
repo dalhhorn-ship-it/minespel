@@ -139,9 +139,34 @@ describe('player controller', () => {
     // Ascending lifts the player high into the sky (with WORLD_HEIGHT = 64)
     const y0 = s.c.player.y;
     s.c.setAscending(true);
-    for (let i = 0; i < 90; i++) s.c.update(1 / 60);
+    for (let i = 0; i < 60; i++) s.c.update(1 / 60);
     s.c.setAscending(false);
-    expect(s.c.player.y).toBeGreaterThan(y0 + 8);
+    const skyY = s.c.player.y;
+    expect(skyY).toBeGreaterThan(y0 + 5);
+    expect(s.c.isFloating()).toBe(true);
+
+    // Releasing Omhoog keeps the player floating in the air at the same height
+    for (let i = 0; i < 60; i++) s.c.update(1 / 60);
+    expect(s.c.player.y).toBeCloseTo(skyY, 2);
+    expect(s.c.isFloating()).toBe(true);
+
+    // Holding Omlaag descends; releasing mid-air stays floating at the lower height
+    s.c.setDescending(true);
+    for (let i = 0; i < 20; i++) s.c.update(1 / 60);
+    s.c.setDescending(false);
+    const midY = s.c.player.y;
+    expect(midY).toBeLessThan(skyY - 1);
+    expect(midY).toBeGreaterThan(y0 + 1);
+    for (let i = 0; i < 30; i++) s.c.update(1 / 60);
+    expect(s.c.player.y).toBeCloseTo(midY, 2);
+
+    // Descending all the way to the ground lands and disengages floating
+    s.c.setDescending(true);
+    for (let i = 0; i < 120; i++) s.c.update(1 / 60);
+    s.c.setDescending(false);
+    expect(s.c.player.y).toBeCloseTo(y0, 1);
+    expect(s.c.player.onGround).toBe(true);
+    expect(s.c.isFloating()).toBe(false);
     expect(WORLD_HEIGHT).toBe(64);
   });
 });

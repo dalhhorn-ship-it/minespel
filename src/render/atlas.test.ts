@@ -15,7 +15,7 @@ describe('atlas', () => {
       }
     }
     expect(tileFor(AIR, 'top')).toBe(-1);
-    expect(MAX_BLOCK_ID).toBe(17);
+    expect(MAX_BLOCK_ID).toBe(33);
   });
 
   it('gives grass its own top and side', () => {

@@ -1,8 +1,9 @@
 // Little visual effects that do not need the renderer: pop bits when a block is mined or placed.
 // They are small coloured squares in the page, moved with CSS transforms and removed after a moment.
 import {
-  AARDE, BAKSTEEN, BLADEREN, BOOMSTAM, GLAS, GRAS, KEISTEEN, PLANKEN, STEEN, WOL_BLAUW, WOL_GEEL,
-  WOL_GROEN, WOL_PAARS, WOL_ROOD, WOL_WIT, ZAND,
+  AARDE, BAKSTEEN, BASALT, BLADEREN, BOOMSTAM, DIAMANT, DIEPSTEEN, GLAS, GOUDSTEEN, GRANIET, GRAS,
+  IJS, KEISTEEN, LAVA, MARMER, MOSSTEEN, OBSIDIAAN, PLANKEN, SNEEUW, STEEN, VUUR, VUURSTEEN, WATER,
+  WOL_BLAUW, WOL_GEEL, WOL_GROEN, WOL_ORANJE, WOL_PAARS, WOL_ROOD, WOL_WIT, ZAND, ZANDSTEEN,
 } from '../world/blocks';
 
 /** A flat colour for each block, for pop bits and the hotbar swatches. */
@@ -23,6 +24,22 @@ export const BLOCK_COLORS: Readonly<Record<number, string>> = {
   [WOL_BLAUW]: '#1e88e5',
   [WOL_GROEN]: '#43a047',
   [WOL_PAARS]: '#8e24aa',
+  [OBSIDIAAN]: '#2d184b',
+  [VUUR]: '#ff7018',
+  [LAVA]: '#ec4410',
+  [MOSSTEEN]: '#568c4d',
+  [ZANDSTEEN]: '#e0c680',
+  [GRANIET]: '#a86c5c',
+  [MARMER]: '#ececf2',
+  [BASALT]: '#404048',
+  [DIEPSTEEN]: '#4e525e',
+  [VUURSTEEN]: '#7c5342',
+  [GOUDSTEEN]: '#f4c430',
+  [DIAMANT]: '#4ae2ec',
+  [WATER]: '#2c84ec',
+  [IJS]: '#a4dafc',
+  [SNEEUW]: '#f6faff',
+  [WOL_ORANJE]: '#f58220',
 };
 
 export function blockColor(id: number): string {

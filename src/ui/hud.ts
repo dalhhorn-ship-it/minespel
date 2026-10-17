@@ -16,8 +16,10 @@ export interface HudOptions {
   onPause: () => void;
   /** Optional parental controls button handler ("Ouders"). */
   onParent?: () => void;
-  /** Optional sky-ascend hold/tap handler ("Omhoog") to climb higher into the sky. */
+  /** Optional sky-ascend hold/tap handler ("Omhoog") to float higher into the sky. */
   onAscend?: (active: boolean) => void;
+  /** Optional sky-descend hold/tap handler ("Omlaag") to descend from the sky. */
+  onDescend?: (active: boolean) => void;
   /** Optional eased camera angle arrow controls (turnX: -1 left / +1 right, tiltY: +1 up / -1 down). */
   onLookInput?: (turnX: number, tiltY: number) => void;
   onLookNudge?: (turnX: number, tiltY: number) => void;
@@ -110,6 +112,33 @@ export function createHud(options: HudOptions): Hud {
       ascendBtn.removeEventListener('pointerleave', up);
     });
     rootChildren.push(ascendBtn);
+  }
+
+  if (options.onDescend) {
+    const descendBtn = zone(
+      el('button', {
+        class: 'hud-btn hud-descend',
+        text: 'Omlaag \u{2B07}',
+        attrs: {
+          type: 'button',
+          'aria-label': 'Lager uit de lucht',
+          'data-testid': 'hud-descend',
+        },
+      }),
+    );
+    const down = () => options.onDescend?.(true);
+    const up = () => options.onDescend?.(false);
+    descendBtn.addEventListener('pointerdown', down);
+    descendBtn.addEventListener('pointerup', up);
+    descendBtn.addEventListener('pointercancel', up);
+    descendBtn.addEventListener('pointerleave', up);
+    cleanups.push(() => {
+      descendBtn.removeEventListener('pointerdown', down);
+      descendBtn.removeEventListener('pointerup', up);
+      descendBtn.removeEventListener('pointercancel', up);
+      descendBtn.removeEventListener('pointerleave', up);
+    });
+    rootChildren.push(descendBtn);
   }
 
   if (options.onLookInput || options.onLookNudge) {

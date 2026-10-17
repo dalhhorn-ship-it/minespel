@@ -4,6 +4,18 @@ Written so kids can read it too.
 
 ## Unreleased
 
+### M3: dinos in the world, Dinowinkel, floating in the sky & instant coin practice
+
+* **Stay floating in the sky (`Omhoog ⬆` & `Omlaag ⬇`):** When you fly up with **Omhoog ⬆**, you now **stay floating in the air** when you let go — so you can walk around in the clouds and build sky castles! Use the new **Omlaag ⬇** button whenever you want to float back down to the ground.
+* **Override the countdown anytime (`Nu oefenen 🪙`):** Don't want to wait for the countdown clock? Tap **Nu oefenen 🪙** right on the countdown bar (or inside the **Dinowinkel**, **Lesboek**, or **Extra oefenen**) to start exercises and lessons immediately and earn coins!
+* **Compelling Dinowinkel (`docs/SHOP_PRD.md`):** Spend your earned coins on four dino eggs: **Compy** (20 🪙), **Triceratops** (40 🪙), **Stegosaurus** (40 🪙), and **Brachiosaurus** (80 🪙)! Each card shows a blocky dino emblem, personality traits, size badge, progress bar toward your next egg, a safe **Kopen → Ja / Nee** confirmation, and your live **Mijn Dino-verzameling** showcase.
+* **Hatching eggs & walking dinos in your 3D world:** Bought eggs appear right next to you in the world, wobble, and hatch after 5 seconds of play into baby dinos that grow up and follow you around!
+* **Dino menu, naming & knuffels:** Tap any of your dinos in the world to open its menu: choose **Volg mij** or **Blijf hier**, give it a custom name up to 12 letters with **Naam geven** (which floats above its head!), or give it a **❤️ Knuffel** for a burst of hearts and a happy chirp.
+* **Full Lesboek & Extra oefenen:** Read any topic lesson in the **Lesboek** and jump straight into practicing that topic, or pick any subject in **Extra oefenen** to earn up to 10 extra practice coins per day.
+* **CR1 — 32 building blocks & custom lower-bar chooser (`Alle blokken`):** Choose from **32 block variants** — including stones (`mossteen`, `zandsteen`, `graniet`, `marmer`, `basalt`, `diepsteen`, `vuursteen`), treasures (`goudsteen`, `diamant`), nature (`water`, `ijs`, `sneeuw`), and colors — and tap any of the 8 slots in your lower bar right inside **Alle blokken** to customize your bar!
+* **CR2 & CR4 — Obsidian gate floor, fire (`vuur`), stones & molten `lava`:** Right in front of your starting spot lie **4 blocks of `obsidiaan` on the ground** flanked by stones! Build `obsidiaan` up on the left and right to make a gate and place **`vuur`** inside to light the gate, or build with glowing **`lava`**!
+* **CR3 — Deploy live chickens (`🐔 Kippenhok`) in the Dinowinkel:** Open the **Dinowinkel** and tap **🐔 Kip loslaten** or **🐔🐔🐔 3 Kippen loslaten** in the **Kippenhok** to release live 3D chickens right into your world!
+
 ### M2: learning breaks, sky controls, countdown & parental controls
 
 * **Go higher in the sky!** The sky is now twice as high (`64` blocks tall), and you can hold **Omhoog ⬆** above the jump button to soar higher up into the sky.

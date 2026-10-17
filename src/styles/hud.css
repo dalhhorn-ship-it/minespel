@@ -56,10 +56,17 @@
   min-height: 96px;
   border-radius: 50%;
 }
+.hud-descend {
+  right: calc(var(--safe-right) + var(--gap) * 2);
+  bottom: calc(var(--safe-bottom) + var(--touch-min) + 96px + var(--gap) * 4.75);
+  min-width: 108px;
+  min-height: 56px;
+  border-radius: 999px;
+}
 .hud-ascend {
   right: calc(var(--safe-right) + var(--gap) * 2);
-  bottom: calc(var(--safe-bottom) + var(--touch-min) + 96px + var(--gap) * 5);
-  min-width: 96px;
+  bottom: calc(var(--safe-bottom) + var(--touch-min) + 96px + 56px + var(--gap) * 5.5);
+  min-width: 108px;
   min-height: 56px;
   border-radius: 999px;
 }

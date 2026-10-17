@@ -110,6 +110,7 @@ export function createWorldSave(options: WorldSaveOptions): WorldSave {
 
   queue.register('world', () => ({ diff: game.world.diff() }));
   queue.register('player', readPlayer);
+  game.dinoStore?.attachPersistence(records, queue);
 
   function restoreWorld(raw: unknown): void {
     const diff = cleanDiff((raw as { diff?: unknown } | null)?.diff);
@@ -152,6 +153,15 @@ export function createWorldSave(options: WorldSaveOptions): WorldSave {
     } catch {
       /* a broken player record: start at home */
     }
+    try {
+      if (cancelled) return;
+      await game.dinoStore?.load();
+      if (!cancelled && game.dinoStore) {
+        game.renderer.syncDinos?.(game.dinoStore.dinos(), game.dinoStore.eggs());
+      }
+    } catch {
+      /* broken dinos record: start with no dinos */
+    }
   }
 
   function start(): () => void {
@@ -170,7 +180,12 @@ export function createWorldSave(options: WorldSaveOptions): WorldSave {
       }
     }, pollMs);
     // Listeners are added in this order: first mark the spot dirty, then the queue flushes (not after a simulated kill).
-    const onHide = () => queue.markDirty('player');
+    const onHide = () => {
+      queue.markDirty('player');
+      if (game.dinoStore && (game.dinoStore.dinos().length > 0 || game.dinoStore.eggs().length > 0)) {
+        queue.markDirty('dinos');
+      }
+    };
     doc.addEventListener('visibilitychange', onHide);
     win.addEventListener('pagehide', onHide);
     const detach = queue.attachPageListeners(doc, win);

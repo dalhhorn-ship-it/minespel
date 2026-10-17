@@ -4,7 +4,6 @@ import type { Stick } from '../input/stick';
 import type { CameraPose } from '../render/renderer';
 import {
   EYE_HEIGHT,
-  JUMP_SPEED,
   MAX_FRAME_TIME,
   PHYSICS_STEP,
   createPlayer,
@@ -28,10 +27,16 @@ export interface PlayerController {
   pitch: number;
   /** Call from the jump button. The jump is sent to physics as one frame. */
   jump(): void;
-  /** Boosts the player upward in the sky (clamped below WORLD_HEIGHT - 2). */
+  /** Boosts the player upward in the sky (clamped below WORLD_HEIGHT - 2) and engages floating. */
   ascend(): void;
-  /** Hold-to-ascend into the sky. */
+  /** Hold-to-ascend into the sky; releasing leaves the player floating at that altitude. */
   setAscending(active: boolean): void;
+  /** Moves the player downward from the sky. */
+  descend(): void;
+  /** Hold-to-descend from the sky; landing on solid ground disengages floating. */
+  setDescending(active: boolean): void;
+  /** True while the player is floating in mid-air via Omhoog/Omlaag. */
+  isFloating(): boolean;
   /** Continuous camera angle arrow input: turnX in [-1, 1] (+1 right), tiltY in [-1, 1] (+1 up). */
   setLookInput(turnX: number, tiltY: number): void;
   /** Smooth angular impulse for a quick tap on a camera angle arrow. */
@@ -62,8 +67,11 @@ export function stickToWorld(stickX: number, stickY: number, yaw: number): { mov
 export function createPlayerController(options: PlayerControllerOptions): PlayerController {
   const player = createPlayer(START_SPOT.x, START_SPOT.y, START_SPOT.z);
   let jumpPending = false;
+  let floating = false;
   let ascendPending = false;
   let ascendingHeld = false;
+  let descendPending = false;
+  let descendingHeld = false;
   let targetTurnX = 0;
   let targetTiltY = 0;
   let yawVel = 0;
@@ -79,12 +87,34 @@ export function createPlayerController(options: PlayerControllerOptions): Player
       jumpPending = true;
     },
     ascend() {
+      floating = true;
       ascendPending = true;
+      descendPending = false;
     },
     setAscending(active) {
       ascendingHeld = active;
-      if (active) ascendPending = true;
+      if (active) {
+        floating = true;
+        ascendPending = true;
+        descendPending = false;
+      }
     },
+    descend() {
+      if (!player.onGround || floating) {
+        floating = true;
+        descendPending = true;
+        ascendPending = false;
+      }
+    },
+    setDescending(active) {
+      descendingHeld = active;
+      if (active && (!player.onGround || floating)) {
+        floating = true;
+        descendPending = true;
+        ascendPending = false;
+      }
+    },
+    isFloating: () => floating,
     setLookInput(turnX, tiltY) {
       targetTurnX = Math.max(-1, Math.min(1, turnX));
       targetTiltY = Math.max(-1, Math.min(1, tiltY));
@@ -119,16 +149,25 @@ export function createPlayerController(options: PlayerControllerOptions): Player
 
       // The jump goes in for one frame. If this frame is too short for a physics step, wait for the next.
       const willStep = player.leftover + clampedDt >= PHYSICS_STEP;
-      if ((ascendPending || ascendingHeld) && willStep && player.y < WORLD_HEIGHT - 2) {
-        player.vy = JUMP_SPEED;
-        player.onGround = false;
-      }
+      const wantUp = (ascendingHeld || (ascendPending && willStep)) && player.y < WORLD_HEIGHT - 2;
+      const wantDown = descendingHeld || (descendPending && willStep);
+      const flyY = wantUp ? 1 : wantDown ? -1 : 0;
+
       stepPlayer(
         options.world,
         player,
-        { moveX: dir.moveX * k, moveZ: dir.moveZ * k, jump: jumpPending && willStep },
+        {
+          moveX: dir.moveX * k,
+          moveZ: dir.moveZ * k,
+          jump: jumpPending && willStep,
+          floating,
+          flyY,
+        },
         dt,
       );
+      if (floating && wantDown && player.onGround) {
+        floating = false;
+      }
       if (player.y > WORLD_HEIGHT - 2) {
         player.y = WORLD_HEIGHT - 2;
         if (player.vy > 0) player.vy = 0;
@@ -136,6 +175,7 @@ export function createPlayerController(options: PlayerControllerOptions): Player
       if (willStep) {
         jumpPending = false;
         ascendPending = false;
+        descendPending = false;
       }
     },
     reset() {
@@ -148,8 +188,11 @@ export function createPlayerController(options: PlayerControllerOptions): Player
       ctrl.yaw = 0;
       ctrl.pitch = 0;
       jumpPending = false;
+      floating = false;
       ascendPending = false;
       ascendingHeld = false;
+      descendPending = false;
+      descendingHeld = false;
       targetTurnX = 0;
       targetTiltY = 0;
       yawVel = 0;

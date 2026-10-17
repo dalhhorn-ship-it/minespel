@@ -7,9 +7,11 @@ import {
 } from 'three';
 import { registerHook } from '../dev/e2e-hooks';
 import { SPIKE_DINO_COUNT, type SpikeDino } from '../dev/spike-load';
+import type { WorldDino, WorldEgg } from '../dinos/dino-store';
 import { CHUNK_SIZE } from '../world/terrain';
 import { createAtlasTexture } from './atlas';
 import { CHUNKS_PER_SIDE, buildChunkGeometry, chunksTouchedBy, type WorldView } from './chunk-mesh';
+import { createDinoSceneSync } from './dino-render';
 import { DEFAULT_QUALITY, pixelRatioFor, type Quality } from './quality';
 
 export { CHUNK_SIZE };
@@ -38,6 +40,8 @@ export interface GameRenderer {
   setQuality(quality: Quality): void;
   /** Shows these placeholder dinos (the speed spike), or none with null. Transforms are read every frame. */
   setSpikeDinos(dinos: readonly SpikeDino[] | null): void;
+  /** Syncs real world dinos and eggs into the 3D scene (T42). */
+  syncDinos?(dinos: readonly WorldDino[], eggs: readonly WorldEgg[]): void;
   render(): void;
   dispose(): void;
 }
@@ -70,6 +74,9 @@ const createPlainWebGlRenderer: RendererFactory = ({ canvas, quality = DEFAULT_Q
   scene.add(chunkGroup);
   const chunks = new Map<string, Mesh>();
   let world: WorldView | null = null;
+
+  const dinoSync = createDinoSceneSync(canvas.ownerDocument);
+  scene.add(dinoSync.group);
 
   const spikeGroup = new Group();
   scene.add(spikeGroup);
@@ -155,6 +162,9 @@ const createPlainWebGlRenderer: RendererFactory = ({ canvas, quality = DEFAULT_Q
         return g;
       });
     },
+    syncDinos(dinos, eggs) {
+      dinoSync.sync(dinos, eggs);
+    },
     render() {
       spikeDinos.forEach((d, i) => {
         const g = spikeGroups[i];
@@ -167,6 +177,7 @@ const createPlainWebGlRenderer: RendererFactory = ({ canvas, quality = DEFAULT_Q
     dispose() {
       for (const m of chunks.values()) m.geometry.dispose();
       chunks.clear();
+      dinoSync.dispose();
       clearSpike();
       spikeGeometry.dispose();
       for (const m of spikeMaterials.values()) m.dispose();
@@ -186,6 +197,7 @@ export const createNullRenderer: RendererFactory = ({ canvas }) => ({
   resize() {},
   setQuality() {},
   setSpikeDinos() {},
+  syncDinos() {},
   render() {},
   dispose() {},
 });
@@ -212,6 +224,8 @@ export function withContextRecovery(inner: RendererFactory): RendererFactory {
     let pose: CameraPose | null = null;
     let size: { w: number; h: number; dpr: number } | null = null;
     let dinos: readonly SpikeDino[] | null = null;
+    let worldDinos: readonly WorldDino[] = [];
+    let worldEggs: readonly WorldEgg[] = [];
     let lost = false;
     let disposed = false;
     let generation = 0;
@@ -227,6 +241,7 @@ export function withContextRecovery(inner: RendererFactory): RendererFactory {
       if (size) core.resize(size.w, size.h, size.dpr);
       if (world) core.setWorld(world);
       if (dinos) core.setSpikeDinos(dinos);
+      if (worldDinos.length > 0 || worldEggs.length > 0) core.syncDinos?.(worldDinos, worldEggs);
       if (pose) core.setCamera(pose);
     };
 
@@ -326,6 +341,11 @@ export function withContextRecovery(inner: RendererFactory): RendererFactory {
       setSpikeDinos(d) {
         dinos = d;
         if (!lost) core.setSpikeDinos(d);
+      },
+      syncDinos(dList, eList) {
+        worldDinos = dList;
+        worldEggs = eList;
+        if (!lost) core.syncDinos?.(dList, eList);
       },
       render() {
         if (!lost) core.render();

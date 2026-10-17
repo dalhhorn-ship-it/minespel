@@ -15,6 +15,8 @@ import { createCatalog, type Catalog } from './content/catalog';
 import { systemClock } from './core/clock';
 import { createRng } from './core/rng';
 import { registerHook } from './dev/e2e-hooks';
+import type { WorldDino } from './dinos/dino-store';
+import type { DinoKindId } from './dinos/kinds';
 import { createGame, type Game } from './game/game';
 import { bootSave, createWorldSave } from './game/world-save';
 import { createAudioUnlock } from './platform/audio-unlock';
@@ -28,6 +30,7 @@ import { createRecords, type Records } from './storage/records';
 import { createSaveQueue, type SaveQueue } from './storage/save-queue';
 import { createSessionStore } from './storage/session-store';
 import { createCountdownView } from './ui/countdown';
+import { createDinoMenu, type DinoMenu } from './ui/dino-menu';
 import { el } from './ui/dom';
 import { createLesboek } from './ui/learn/lesboek';
 import { createLockIcon } from './ui/lock-icon';
@@ -51,6 +54,7 @@ let parentFlow: ParentFlow | null = null;
 let shopFlow: ShopFlow | null = null;
 let practiceFlow: PracticeFlow | null = null;
 let activePauseMenu: PauseMenu | null = null;
+let activeDinoMenu: DinoMenu | null = null;
 
 let teleported = 0;
 let rendererFactoryIsReal = true;
@@ -58,7 +62,13 @@ let userPaused = false;
 let worldActiveFromScreen = true;
 let restored = false;
 
-const countdownView = createCountdownView({ initialMs: 5 * 60_000, warningEnabled: true });
+const countdownView = createCountdownView({
+  initialMs: 5 * 60_000,
+  warningEnabled: true,
+  onStartNow: () => {
+    void breakFlow?.startBreak();
+  },
+});
 
 function syncGamePauseState() {
   if (!game) return;
@@ -67,6 +77,33 @@ function syncGamePauseState() {
   } else if (restored) {
     game.resume();
   }
+}
+
+function openDinoMenu(dino: WorldDino, screenX?: number, screenY?: number) {
+  if (!screens || !game) return;
+  if (activeDinoMenu) {
+    activeDinoMenu.destroy();
+    activeDinoMenu = null;
+  }
+  const menu = createDinoMenu({
+    dino,
+    onModeChange: (mode) => {
+      game?.dinoStore.setDinoMode(dino.id, mode);
+    },
+    onNameSave: (name) => {
+      game?.dinoStore.setDinoName(dino.id, name);
+    },
+    onKnuffel: () => {
+      game?.dinoSystem.showHearts(screenX, screenY);
+    },
+    onClose: () => {
+      activeDinoMenu?.destroy();
+      activeDinoMenu = null;
+      screens?.showWorld();
+    },
+  });
+  activeDinoMenu = menu;
+  screens.showKidOverlay(menu.element);
 }
 
 async function openPauseMenu() {
@@ -102,6 +139,10 @@ async function openPauseMenu() {
         const lesboek = createLesboek({
           catalog,
           switches,
+          onPracticeTopic: (moduleId, topicId) => {
+            lesboek.destroy();
+            void practiceFlow?.startTopic(moduleId, topicId);
+          },
           onClose: () => {
             lesboek.destroy();
             screens?.showWorld();
@@ -174,6 +215,9 @@ if (app) {
       onParentPressed: () => {
         void parentFlow?.open();
       },
+      onDinoTapped: (dino, sx, sy) => {
+        openDinoMenu(dino, sx, sy);
+      },
       onBlockGridOpenChange: (open) => {
         screens?.setExternalKidOverlay(open);
       },
@@ -192,7 +236,7 @@ if (app) {
   }
 }
 
-// Loads the saved world and player, then starts saving and initializes M2 flows (timers, breaks, parental controls).
+// Loads the saved world and player, then starts saving and initializes M2 + M3 flows (timers, breaks, dinos, shop, practice, parental controls).
 const booted = game
   ? bootSave({
       game,
@@ -246,10 +290,28 @@ const booted = game
 
           shopFlow = createShopFlow({
             screens,
-            getPoints: async () => (await recs.get('economy')).points,
+            db,
+            records: recs,
+            logStore,
+            dinoStore: game?.dinoStore,
+            clock: systemClock,
+            sound,
+            onEarnCoins: () => {
+              void breakFlow?.startBreak();
+            },
           });
           practiceFlow = createPracticeFlow({
             screens,
+            clock: systemClock,
+            rng,
+            records: recs,
+            progressStore,
+            logStore,
+            getCatalog: () => catalog,
+            sound,
+            onStartBreakRound: async () => {
+              await breakFlow?.startBreak();
+            },
           });
           parentFlow = createParentFlow({
             clock: systemClock,
@@ -289,6 +351,7 @@ if (__E2E__) {
   registerHook('audioUnlocked', () => audio.isUnlocked());
   registerHook('openPauseMenu', () => openPauseMenu());
   registerHook('openParentControls', () => parentFlow?.open());
+  registerHook('openPractice', () => practiceFlow?.open());
   registerHook('points', async () => (records ? (await records.get('economy')).points : 0));
   registerHook('setPoints', async (pts: number) => {
     if (records) {
@@ -309,6 +372,13 @@ if (__E2E__) {
     db.close();
     return list;
   });
+  registerHook('ledgerLog', async () => {
+    if (!records) return [];
+    const db = await openDb();
+    const list = await createLogStore(db).listLedger();
+    db.close();
+    return list;
+  });
   if (game) {
     const g = game;
     registerHook('player', () => ({
@@ -316,6 +386,7 @@ if (__E2E__) {
       y: g.player.player.y,
       z: g.player.player.z,
       onGround: g.player.player.onGround,
+      floating: g.player.isFloating(),
       yaw: g.player.yaw,
       pitch: g.player.pitch,
     }));
@@ -348,8 +419,19 @@ if (__E2E__) {
       g.player.yaw = yaw;
     });
     registerHook('ascendPlayer', (active: boolean) => g.player.setAscending(active));
+    registerHook('descendPlayer', (active: boolean) => g.player.setDescending(active));
+    registerHook('isPlayerFloating', () => g.player.isFloating());
     registerHook('setLookInput', (tx: number, ty: number) => g.player.setLookInput(tx, ty));
     registerHook('nudgeLook', (tx: number, ty: number) => g.player.nudgeLook(tx, ty));
+    // Dinos & eggs hooks (M3)
+    registerHook('dinos', () => g.dinoStore.dinos());
+    registerHook('eggs', () => g.dinoStore.eggs());
+    registerHook('addEgg', (kind: DinoKindId, golden?: boolean) => g.dinoStore.addEgg(kind, golden));
+    registerHook('stepDinos', (dt: number) => g.dinoSystem.step(dt));
+    registerHook('openDinoMenuFor', (id: string) => {
+      const d = g.dinoStore.getDino(id);
+      if (d) openDinoMenu(d);
+    });
     // Test blocks are set straight in the world, so they tell the save queue themselves.
     registerHook('markWorldDirty', () => queue?.markDirty('world'));
     registerHook('flushSave', () => queue?.flushNow());

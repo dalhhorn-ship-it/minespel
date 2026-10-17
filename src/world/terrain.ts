@@ -1,5 +1,5 @@
 import { createRng } from '../core/rng';
-import { AARDE, AIR, BLADEREN, BOOMSTAM, GRAS, KEISTEEN, OERSTEEN, STEEN, ZAND } from './blocks';
+import { AARDE, AIR, BLADEREN, BOOMSTAM, GRAS, KEISTEEN, OBSIDIAAN, OERSTEEN, STEEN, VUURSTEEN, ZAND } from './blocks';
 
 /** Blocks wide and deep. The speed spike may change this to 48. Tests read this constant. */
 export const WORLD_SIZE = 64;
@@ -102,6 +102,15 @@ export function generateTerrain(seed: number = WORLD_SEED): Uint8Array {
       }
     }
   }
+
+  // CR2: Four blocks of obsidian on the ground in front of the start spot to build a gate (plus flanking stones).
+  const gateZ = MID + 3;
+  const gateY = height[gateZ * WORLD_SIZE + MID] ?? startH;
+  for (let gx = MID - 1; gx <= MID + 2; gx++) {
+    blocks[cellIndex(gx, gateY, gateZ)] = OBSIDIAAN;
+  }
+  blocks[cellIndex(MID - 2, gateY, gateZ)] = STEEN;
+  blocks[cellIndex(MID + 3, gateY, gateZ)] = VUURSTEEN;
 
   // Trees: trunk of 4 or 5, a ball of leaves. Kept inside the world and away from the start.
   let planted = 0;

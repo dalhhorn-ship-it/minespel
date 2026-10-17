@@ -18,6 +18,22 @@ export const WOL_BLAUW = 14;
 export const WOL_GROEN = 15;
 export const WOL_PAARS = 16;
 export const OERSTEEN = 17;
+export const OBSIDIAAN = 18;
+export const VUUR = 19;
+export const LAVA = 20;
+export const MOSSTEEN = 21;
+export const ZANDSTEEN = 22;
+export const GRANIET = 23;
+export const MARMER = 24;
+export const BASALT = 25;
+export const DIEPSTEEN = 26;
+export const VUURSTEEN = 27;
+export const GOUDSTEEN = 28;
+export const DIAMANT = 29;
+export const WATER = 30;
+export const IJS = 31;
+export const SNEEUW = 32;
+export const WOL_ORANJE = 33;
 
 export interface BlockInfo {
   id: number;
@@ -52,13 +68,29 @@ export const BLOCKS: readonly BlockInfo[] = [
   block(WOL_GROEN, 'wol groen'),
   block(WOL_PAARS, 'wol paars'),
   { id: OERSTEEN, name: 'oersteen', solid: true, cutout: false, minable: false, placeable: false },
+  block(OBSIDIAAN, 'obsidiaan'),
+  block(VUUR, 'vuur', true),
+  block(LAVA, 'lava'),
+  block(MOSSTEEN, 'mossteen'),
+  block(ZANDSTEEN, 'zandsteen'),
+  block(GRANIET, 'graniet'),
+  block(MARMER, 'marmer'),
+  block(BASALT, 'basalt'),
+  block(DIEPSTEEN, 'diepsteen'),
+  block(VUURSTEEN, 'vuursteen'),
+  block(GOUDSTEEN, 'goudsteen'),
+  block(DIAMANT, 'diamant'),
+  block(WATER, 'water', true),
+  block(IJS, 'ijs', true),
+  block(SNEEUW, 'sneeuw'),
+  block(WOL_ORANJE, 'wol oranje'),
 ];
 
-/** The 16 blocks a kid can place, in grid order. */
+/** All blocks a kid can place, in grid order. */
 export const PLACEABLE_BLOCKS: readonly number[] = BLOCKS.filter((b) => b.placeable).map((b) => b.id);
 
 /** Highest block id, used to size atlas tables. */
-export const MAX_BLOCK_ID = OERSTEEN;
+export const MAX_BLOCK_ID = WOL_ORANJE;
 
 export function blockInfo(id: number): BlockInfo {
   const info = BLOCKS[id];

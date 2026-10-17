@@ -1,0 +1,154 @@
+/* Dino interaction menu & naming screen (T45, AC16, AC18, AC23). */
+
+.dino-menu-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  background: rgba(15, 24, 36, 0.72);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
+.dino-menu-card {
+  width: min(560px, 94vw);
+  max-height: 92vh;
+  background: #fffdf7;
+  border: 4px solid #1f2d3d;
+  border-radius: 28px;
+  padding: 24px 28px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  color: #1f2d3d;
+  font-family: var(--font-stack);
+  font-size: calc(var(--font-body, 20px) * var(--kid-scale, 1));
+}
+
+.dino-menu-card-wide {
+  width: min(780px, 96vw);
+}
+
+.dino-menu-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.dino-menu-title {
+  margin: 0;
+  font-size: calc(28px * var(--kid-scale, 1));
+  font-weight: 800;
+  color: #1f2d3d;
+}
+
+.dino-menu-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: #fff3b0;
+  border: 2px solid #e0a000;
+  color: #5c3d00;
+  font-weight: 800;
+  font-size: calc(16px * var(--kid-scale, 1));
+}
+
+.dino-menu-status {
+  margin: 0;
+  padding: 10px 14px;
+  border-radius: 14px;
+  background: #eef6ff;
+  border: 2px solid #90caf9;
+  color: #133b63;
+  font-weight: 700;
+  text-align: center;
+}
+
+.dino-menu-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.dino-menu-btn {
+  min-height: 60px;
+  padding: 12px 18px;
+  border-radius: 16px;
+  border: 3px solid #1f2d3d;
+  background: #f4efe3;
+  color: #1f2d3d;
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+  touch-action: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.dino-menu-btn[aria-pressed='true'] {
+  background: #2e7d32;
+  border-color: #1b5e20;
+  color: #ffffff;
+}
+
+.dino-menu-btn-knuffel {
+  background: #ffeef2;
+  border-color: #c2185b;
+  color: #880e4f;
+}
+
+.dino-menu-btn-close {
+  background: #1f2d3d;
+  color: #ffffff;
+}
+
+/* Name screen */
+.name-screen-subtitle {
+  margin: 0;
+  font-weight: 700;
+  color: #415468;
+  text-align: center;
+}
+
+.name-screen-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 64px;
+  padding: 12px 20px;
+  border-radius: 16px;
+  border: 3px solid #1f2d3d;
+  background: #ffffff;
+}
+
+.name-screen-value {
+  font-size: calc(26px * var(--kid-scale, 1));
+  font-weight: 800;
+  color: #1f2d3d;
+  letter-spacing: 0.02em;
+}
+
+.name-screen-placeholder {
+  font-size: calc(20px * var(--kid-scale, 1));
+  font-weight: 700;
+  color: #6b7c93;
+}
+
+.name-screen-counter {
+  font-size: calc(16px * var(--kid-scale, 1));
+  font-weight: 800;
+  color: #415468;
+  font-variant-numeric: tabular-nums;
+}

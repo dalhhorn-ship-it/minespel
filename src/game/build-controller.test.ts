@@ -1,9 +1,9 @@
 import { describe, expect, it, vi } from 'vitest';
-import { AIR, GRAS, OERSTEEN, STEEN, WOL_ROOD } from '../world/blocks';
+import { AIR, GRAS, OBSIDIAAN, OERSTEEN, STEEN, VUUR, WOL_ROOD } from '../world/blocks';
 import { WORLD_HEIGHT, WORLD_SIZE } from '../world/terrain';
 import { World } from '../world/world';
 import { EYE_HEIGHT, createPlayer } from '../world/physics';
-import { DEFAULT_HOTBAR, aimFromScreen, createBuildController } from './build-controller';
+import { DEFAULT_HOTBAR, aimFromScreen, createBuildController, tryLightObsidianGate } from './build-controller';
 
 const FLOOR = 4; // floor top at y = 5
 function flatWorld(): World {
@@ -185,5 +185,25 @@ describe('build controller', () => {
     c.setState({ hotbar: [1, 2, 3, 4, 5, 6, 7, 8], selected: 5 });
     expect(c.getState().hotbar).toEqual([1, 2, 3, 4, 5, 6, 7, 8]);
     expect(c.getState().selected).toBe(5);
+  });
+
+  it('CR2: lights the inner gate floor with VUUR when 4 obsidian floor blocks have left and right pillars', () => {
+    const w = flatWorld();
+    const changed: Array<[number, number]> = [];
+    // 4 obsidian blocks on the ground at y = 5, x = 10..13, z = 20
+    for (let x = 10; x <= 13; x++) w.set(x, 5, 20, OBSIDIAAN);
+    // Left pillar (x=10) and right pillar (x=13) built up 2 blocks high (y=6, 7)
+    w.set(10, 6, 20, OBSIDIAAN);
+    w.set(10, 7, 20, OBSIDIAAN);
+    w.set(13, 6, 20, OBSIDIAAN);
+    w.set(13, 7, 20, OBSIDIAAN);
+    // Place fire on one inner floor block (x=11, y=6, z=20)
+    w.set(11, 6, 20, VUUR);
+
+    const lit = tryLightObsidianGate(w, 11, 6, 20, (x, z) => changed.push([x, z]));
+    expect(lit).toBe(true);
+    expect(w.get(11, 6, 20)).toBe(VUUR);
+    expect(w.get(12, 6, 20)).toBe(VUUR);
+    expect(changed).toContainEqual([12, 20]);
   });
 });

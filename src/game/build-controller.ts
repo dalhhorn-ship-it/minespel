@@ -3,7 +3,7 @@ import type { Effects } from '../render/effects';
 import type { BuildMode } from '../ui/hud';
 import type { Sound } from '../audio/sound';
 import {
-  AARDE, BAKSTEEN, BOOMSTAM, GLAS, GRAS, PLANKEN, STEEN, WOL_ROOD, isPlaceable,
+  AIR, GLAS, GRAS, LAVA, OBSIDIAAN, PLANKEN, STEEN, VUUR, WOL_ROOD, isPlaceable,
 } from '../world/blocks';
 import { mineBlock, placeBlock, type Aim, type IsOccupied } from '../world/build';
 import type { CameraPose } from '../render/renderer';
@@ -13,7 +13,75 @@ import type { PlayerController } from './player-controller';
 export const HOTBAR_SIZE = 8;
 /** Vertical field of view of the camera in degrees (the renderer uses the same). */
 export const CAMERA_FOV = 70;
-export const DEFAULT_HOTBAR: readonly number[] = [GRAS, AARDE, STEEN, PLANKEN, BOOMSTAM, GLAS, BAKSTEEN, WOL_ROOD];
+export const DEFAULT_HOTBAR: readonly number[] = [GRAS, STEEN, OBSIDIAAN, VUUR, LAVA, PLANKEN, GLAS, WOL_ROOD];
+
+/**
+ * Checks if a newly placed VUUR or OBSIDIAAN block sits on a 4-block obsidian gate floor
+ * with obsidian pillars built up on the left and right (CR2), and lights the inner gate floor with fire.
+ */
+export function tryLightObsidianGate(
+  world: World,
+  px: number,
+  py: number,
+  pz: number,
+  onBlockChanged: (x: number, z: number) => void,
+): boolean {
+  // Check both X-aligned and Z-aligned 4-block obsidian floors around (px, py, pz)
+  for (const axis of ['x', 'z'] as const) {
+    for (let floorY = py - 3; floorY <= py; floorY++) {
+      for (let offset = -3; offset <= 0; offset++) {
+        const coords = (i: number, dy: number): [number, number, number] =>
+          axis === 'x' ? [px + offset + i, floorY + dy, pz] : [px, floorY + dy, pz + offset + i];
+
+        // 1. Four blocks of obsidian on the floor
+        let floorOk = true;
+        for (let i = 0; i < 4; i++) {
+          const [fx, fy, fz] = coords(i, 0);
+          if (world.get(fx, fy, fz) !== OBSIDIAAN) {
+            floorOk = false;
+            break;
+          }
+        }
+        if (!floorOk) continue;
+
+        // 2. Left (i=0) and right (i=3) obsidian walls built up at least 2 blocks high
+        const [lx1, ly1, lz1] = coords(0, 1);
+        const [lx2, ly2, lz2] = coords(0, 2);
+        const [rx1, ry1, rz1] = coords(3, 1);
+        const [rx2, ry2, rz2] = coords(3, 2);
+        if (
+          world.get(lx1, ly1, lz1) !== OBSIDIAAN ||
+          world.get(lx2, ly2, lz2) !== OBSIDIAAN ||
+          world.get(rx1, ry1, rz1) !== OBSIDIAAN ||
+          world.get(rx2, ry2, rz2) !== OBSIDIAAN
+        ) {
+          continue;
+        }
+
+        // 3. Require at least one VUUR inside the gate to trigger lighting the inner floor
+        const [in1x, in1y, in1z] = coords(1, 1);
+        const [in2x, in2y, in2z] = coords(2, 1);
+        const hasFire =
+          world.get(in1x, in1y, in1z) === VUUR || world.get(in2x, in2y, in2z) === VUUR;
+        if (!hasFire) continue;
+
+        let litNew = false;
+        for (const [ix, iy, iz] of [
+          [in1x, in1y, in1z],
+          [in2x, in2y, in2z],
+        ] as const) {
+          if (world.get(ix, iy, iz) === AIR) {
+            world.set(ix, iy, iz, VUUR);
+            onBlockChanged(ix, iz);
+            litNew = true;
+          }
+        }
+        return litNew || hasFire;
+      }
+    }
+  }
+  return false;
+}
 
 export interface BuildState {
   mode: BuildMode;
@@ -97,6 +165,9 @@ export function createBuildController(options: BuildControllerOptions): BuildCon
         p.vy = 0;
       }
       options.onBlockChanged(r.x, r.z);
+      if (r.block === VUUR || r.block === OBSIDIAAN) {
+        tryLightObsidianGate(options.world, r.x, r.y, r.z, options.onBlockChanged);
+      }
       options.effects.pop(x, y, r.block);
       options.sound.play('thunk');
     },

@@ -1,9 +1,16 @@
 import { describe, expect, it } from 'vitest';
-import { BLOCKS, MAX_BLOCK_ID, OERSTEEN, PLACEABLE_BLOCKS, AIR, GLAS, BLADEREN, STEEN, blockInfo, isCutout, isMinable, isPlaceable, isSolid } from './blocks';
+import {
+  AIR, BLADEREN, BLOCKS, GLAS, IJS, LAVA, MAX_BLOCK_ID, OBSIDIAAN, OERSTEEN, PLACEABLE_BLOCKS,
+  STEEN, VUUR, VUURSTEEN, WATER, blockInfo, isCutout, isMinable, isPlaceable, isSolid,
+} from './blocks';
 
 describe('blocks', () => {
-  it('has 16 placeable blocks, all with a name', () => {
-    expect(PLACEABLE_BLOCKS).toHaveLength(16);
+  it('has 32 placeable blocks, all with a name (CR1, CR2, CR4)', () => {
+    expect(PLACEABLE_BLOCKS).toHaveLength(32);
+    expect(PLACEABLE_BLOCKS).toContain(OBSIDIAAN);
+    expect(PLACEABLE_BLOCKS).toContain(VUUR);
+    expect(PLACEABLE_BLOCKS).toContain(LAVA);
+    expect(PLACEABLE_BLOCKS).toContain(VUURSTEEN);
     for (const id of PLACEABLE_BLOCKS) {
       expect(blockInfo(id).name.length).toBeGreaterThan(0);
       expect(isMinable(id)).toBe(true);
@@ -33,10 +40,15 @@ describe('blocks', () => {
     expect(isPlaceable(AIR)).toBe(false);
   });
 
-  it('glass and leaves are cut out, stone is not', () => {
+  it('glass, leaves, fire, water, and ice are cut out; stone, obsidian, and lava are not', () => {
     expect(isCutout(GLAS)).toBe(true);
     expect(isCutout(BLADEREN)).toBe(true);
+    expect(isCutout(VUUR)).toBe(true);
+    expect(isCutout(WATER)).toBe(true);
+    expect(isCutout(IJS)).toBe(true);
     expect(isCutout(STEEN)).toBe(false);
+    expect(isCutout(OBSIDIAAN)).toBe(false);
+    expect(isCutout(LAVA)).toBe(false);
   });
 
   it('throws for an unknown id', () => {
