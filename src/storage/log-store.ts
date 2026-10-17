@@ -15,7 +15,7 @@ export interface AnswerInput {
   moduleId: string;
   topic: string;
   skill: string;
-  level: number;
+  level: string; // level name, for example M6
   itemId: string;
   /** 1 or 2. */
   try: number;

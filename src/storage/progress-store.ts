@@ -7,7 +7,7 @@ export interface ProgressRecord {
   box: number;
   /** Local calendar day, "2026-10-18". */
   due: string;
-  level: number;
+  level: string; // level name, for example M6
   topic: string;
   skill: string;
   seen: number;

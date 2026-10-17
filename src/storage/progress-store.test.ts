@@ -10,7 +10,7 @@ const rec = (moduleId: string, itemId: string, topic = 't1', box = 1): ProgressR
   itemId,
   box,
   due: '2026-10-18',
-  level: 3,
+  level: 'E6',
   topic,
   skill: 's',
   seen: 2,

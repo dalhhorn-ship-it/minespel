@@ -19,7 +19,7 @@ const answer = (over: Partial<AnswerInput> = {}): AnswerInput => ({
   moduleId: 'taal',
   topic: 'komma',
   skill: 'k1',
-  level: 3,
+  level: 'E6',
   itemId: 'i1',
   try: 1,
   correct: true,
