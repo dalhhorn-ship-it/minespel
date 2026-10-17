@@ -260,3 +260,50 @@ Plan now has 71 tasks. A script checked that no two tasks in one group share a f
 21. Accepted. T62 does small CSS fixes only; other findings become new tasks.
 
 No open points. No founder decisions from this round.
+
+## M1 milestone review
+
+Architect, 2026-10-17. Scope: `src/`, `tests/`, `scripts/`, `index.html`, `vite.config.ts`, `playwright.config.ts`, `.github/workflows/`, checked against ARCHITECTURE, PLAN and the M1 ACs.
+
+`./scripts/check.sh` in the cloud sandbox: validate.py OK, lint OK, typecheck OK, 243 unit tests pass, build OK, check-dist OK (676 KB). E2e did not run here: the proxy blocks the WebKit download (known, FRICTION). CI on GitHub is green for T33, T34 and T37, with real WebGL (decision 40). The production bundle has no `__dino`, no hook names and no network calls. Only the `simulateKill` method name is left, as a plain method on the save queue, not on `window`. That is harmless.
+
+Overall: the code follows the architecture. Pure parts are pure and well tested. Hooks stay out of the real build. No kid safety problems: no links, no network, no personal data, text goes in through `textContent`. The items below are what to fix before T32 and before M2 starts.
+
+### Must fix
+
+1. **The deploy workflow will fail at the e2e step, so T32 cannot deploy.** `.github/workflows/deploy.yml` line 16 runs `./scripts/check.sh`. On a GitHub runner the user is not root, so `check.sh` (line 40) runs `npx playwright install webkit` without `--with-deps`, and WebKit cannot start without the Linux libraries. `ci.yml` only works because it has its own install step first. Fix: add the same step to `deploy.yml` before "Check": `npm install --no-audit --no-fund && npx playwright install --with-deps webkit`. Also add `permissions: contents: read` and `concurrency: { group: deploy, cancel-in-progress: false }` at the top level. With that, the workflow is ready for T32 once the founder adds `CLOUDFLARE_API_TOKEN` (template "Edit Cloudflare Workers") and `CLOUDFLARE_ACCOUNT_ID`. The workflow is already on `main`, so "Run workflow" shows up. The founder must pick the branch `claude/clever-euler-c9e2kq` in the branch menu, or merge it first.
+
+2. **The fps counter would give a wrong spike result.** `src/render/fps-counter.ts`:
+   * Line 50: the stats cover only the last 600 frames (about 10 to 20 seconds). AC101 and T32 judge 2 minutes, so a hitch at minute 1 is gone by the time the founder reads the number. Fix: keep running totals since the measuring started: frame count, frames within budget, frames over 200 ms, worst frame, and a 1 ms bucket histogram for the 95th percentile. Show the elapsed seconds too, so the founder knows when 2 minutes are up.
+   * Lines 78 to 81: `last` is never reset when the loop stops. A trip to the background, a turn to portrait or a pause becomes one huge "frame" and counts as over 200 ms. The loop already passes `dt = 0` on the first frame after a start. Fix: in `src/game/game.ts` line 169 pass that through (`fps.frame(now, dt === 0)`) and skip the sample when it is a restart.
+   * Warm up: the first frames compile shaders and upload chunks and can take over 200 ms. Fix: start measuring after the first 3 seconds of play.
+   * Line 29: `v <= 33` counts a frame that takes two screen refreshes (33.3 ms, plus timer jitter) as too slow. An iPad that holds a steady 30 fps would fail. Fix: count frames up to 34 ms as within budget, and log this reading of AC101 in DECISIONS.
+   * T32 note for the founder: turn Low Power Mode off, because it caps Safari at 30 fps. Use a Safari tab with `?fps=1&spike=1`, because the home screen app drops the query.
+
+3. **Sound can stay silent on the iPad.** `src/audio/sound.ts` line 160 only makes the AudioContext on the first `play()`. `src/platform/audio-unlock.ts` line 16 then line 34: the first `pointerup` sets "unlocked" and removes the `touchend` and `click` listeners. Two problems follow:
+   * If the first sound is not played inside a tap (the countdown tick in M2, an egg hatch in M3), the context is made and resumed outside a user gesture and iOS keeps it suspended for good. Also, if iOS does not accept `pointerup` as the gesture, the `touchend` chance is already gone.
+   * After the app was in the background, or after Siri or a call, iOS puts the context in `interrupted` or `suspended`. Nothing ever calls `resume()` again.
+
+   Fix: `createSound` calls `unlock.whenUnlocked(() => ensure())`, so the context is made and resumed inside the first tap. `audio-unlock.ts` keeps a light capture listener on `touchend` and `click` (not only `pointerup`) and calls `resume()` on every tap while any watched context is not `running`. Unit test with the fake context: a play from a timer before any tap never makes a context. After a tap the context exists. After the fake goes to `interrupted`, the next tap resumes it.
+
+4. **The kid can play before the save is loaded.** `src/main.ts` line 40 starts the game and its loop, then line 63 opens IndexedDB and restores asynchronously. On a cold start Safari can take a moment. Blocks mined in that moment are wiped by `applyDiff`, the player jumps to the saved spot, and changes made before `save.start()` are never marked dirty. Fix: call `game.pause()` right after `createGame`, and `game.resume()` in the `finally` at line 64. Add a 3 second timeout around `startSaving`, so a hanging `indexedDB.open` (a known Safari problem) still lets the kid play, without saving. This is also the boot shape M2 needs (PIN first, then the world).
+
+5. **Settings defaults do not match the PRD.** `src/storage/schema.ts` line 134 has `breakEveryMinutes: 20, questionsPerBreak: 10`. PRD 4.17 says 5 minutes and 5 questions (AC22, AC28). Fix it now, before the first settings record is ever written, because `withDefaults` keeps stored values. Add a test that pins the defaults to the PRD table.
+
+### Later
+
+Before M2 starts (these touch shared files, so plan them as tasks):
+* **`main.ts` and `game.ts` growth.** `main.ts` lines 68 to 104 register about 25 game hooks. Every later feature that needs a hook would edit `main.ts`, which serialises the parallel groups. Move the game hooks into `game.ts` (or `src/game/e2e-hooks-game.ts`, owned by game) under `if (__E2E__)`, and make `main.ts` a short boot sequence (`src/app/boot.ts`). In `game.ts`, add `addSystem({ update(dt), onRestore?, onTeleport?, dispose? })`, so dinos (T42) and timers plug in without editing the frame function (line 164). Suggest one small refactor task before T41 and T42, done alone, not in a parallel group.
+* **Single save queue.** It only writes the `kv` store. AC150 needs economy, dinos and the ledger in one transaction. Add `queue.commit(extraStores, fn)` that runs on the same promise chain and writes all dirty `kv` records in that same transaction, so a batched flush and a purchase can never interleave. Also schedule a retry after a failed write (today a failed record waits for the next change, `save-queue.ts` line 57). Wire `onError` to the AC139 storage note.
+* **Never write over a save that could not be read (AC137).** `src/game/world-save.ts` lines 86 to 97 swallow a failed read and play on in the start world. The next change then overwrites the kid's world. When a record fails to load, stop saving it until the broken save screen has asked the parent.
+* **IndexedDB upkeep in `src/storage/db.ts`.** Set `db.onversionchange = () => db.close()` before the first `SCHEMA_VERSION` bump. `onblocked` (line 35) should not reject, because the open can still succeed. Call `navigator.storage.persist()` on HTTPS (AC140 path).
+* **Reset input on pause and hide.** `pointer-router.ts` keeps owned pointers if an up event never arrives, and `look.ts` keeps adding drag while the loop is stopped. Add `router.reset()` that cancels every owner, and call it whenever the loop stops. Otherwise the player may walk on by itself, or the camera may jump, after a trip to the background.
+* **Tap rule.** `look.ts` line 50 compares only the start and end points. A finger that moves 30 points and comes back within 300 ms still counts as a tap. Track the largest distance seen (AC104).
+* **Jump on press.** `hud.ts` uses `onTap` for "Spring", so the jump happens on release, after a 350 ms repeat guard. Jump on `pointerdown` instead. It feels much better for kids.
+* **Text sizes (AC102).** `src/styles/hotbar.css` line 13 ("Alle blokken") and line 34 (block names) use 16px. Kid text must be at least 20 points. Widen the grid cells so "Wol paars" fits at 20px.
+* **Saved block ids.** `cleanDiff` (`world-save.ts` line 31) checks the cell index but not the block id. Also keep only AIR or known block ids.
+* **Performance on the 2018 iPad.** `chunk-mesh.ts` builds into `number[]` with a closure per face. A tap on a chunk edge rebuilds up to 3 chunks in one frame. Ask the founder to mine and build at chunk edges during T32. If that hitches, write into reused typed arrays. In `sound.ts`, make one noise buffer and reuse it, instead of a new one per sound.
+* **Hosting.** `public/_headers` from ARCHITECTURE "How to deploy" does not exist yet. That is fine for T32. It must land with the service worker (T22).
+* **Nits.** Two words for the same mode (`mine` and `build` in the save, `hakken` and `bouwen` in the game). Pick one before more records copy it. `check-dist.mjs` could also grep for a few hook names, not only `__dino`.
+
+No founder decisions come from this review. One item to tell the founder for T32: turn Low Power Mode off, and open the test address in a Safari tab with `?fps=1&spike=1`.

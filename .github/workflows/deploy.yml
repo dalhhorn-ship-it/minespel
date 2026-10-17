@@ -3,6 +3,11 @@ name: Deploy to Cloudflare Workers
 # Needs repo secrets CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID.
 on:
   workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: deploy
+  cancel-in-progress: false
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -13,6 +18,8 @@ jobs:
           node-version: 22
       - name: PRD signoff matches
         run: ./scripts/signoff.sh --check
+      - name: Install dependencies and Playwright WebKit
+        run: npm install --no-audit --no-fund && npx playwright install --with-deps webkit
       - name: Check
         run: ./scripts/check.sh
       - name: Deploy
