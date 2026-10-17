@@ -25,8 +25,14 @@ export interface TeleportedEvent {
   z: number;
 }
 
+/** Something worth saving changed: a block, or the mode, hotbar or selected slot. */
+export interface ChangedEvent {
+  kind: 'world' | 'build';
+}
+
 export interface GameEvents {
   teleported: TeleportedEvent;
+  changed: ChangedEvent;
 }
 
 export interface Game {
@@ -44,6 +50,8 @@ export interface Game {
   setBuildState(state: Partial<BuildState>): void;
   /** Puts the player back on the start spot and says so with `teleported`. */
   teleportHome(): void;
+  /** Puts every block back to the start world, saves that, and puts the player on the start spot. */
+  resetWorld(): void;
   on<K extends keyof GameEvents>(event: K, listener: (payload: GameEvents[K]) => void): () => void;
   /** Frames drawn since the start. */
   frameCount(): number;
@@ -88,17 +96,27 @@ export function createGame(options: GameOptions): Game {
   let loopRunning = () => false;
   const look = createLook({ onTap: (x, y) => tapWorld.fn?.(x, y) });
   const router = createPointerRouter(options.container, { stick, look });
+  const listeners: { [K in keyof GameEvents]: Set<(p: GameEvents[K]) => void> } = { teleported: new Set(), changed: new Set() };
+  const emitChanged = (kind: ChangedEvent['kind']) => {
+    for (const l of [...listeners.changed]) l({ kind });
+  };
   const player = createPlayerController({ world, stick, look });
   const hud = createHud({
     router,
     onJump: () => player.jump(),
-    onMode: (m) => build.setMode(m),
+    onMode: (m) => {
+      build.setMode(m);
+      emitChanged('build');
+    },
     onPause: () => {}, // the pause menu comes with T41
   });
   const build = createBuildController({
     world,
     player,
-    onBlockChanged: (x, z) => renderer.blockChanged(x, z),
+    onBlockChanged: (x, z) => {
+      renderer.blockChanged(x, z);
+      emitChanged('world');
+    },
     effects,
     sound,
     viewport: () => ({ width: win.innerWidth, height: win.innerHeight }),
@@ -114,6 +132,7 @@ export function createGame(options: GameOptions): Game {
     onSelect: (slot) => {
       build.select(slot);
       hotbar.setSelected(slot);
+      emitChanged('build');
     },
     onAllBlocks: () => grid.open(),
   });
@@ -122,6 +141,7 @@ export function createGame(options: GameOptions): Game {
     onPick: (block) => {
       build.setSlotBlock(build.getState().selected, block);
       refreshHotbar();
+      emitChanged('build');
     },
   });
   const refreshHotbar = () => {
@@ -131,8 +151,6 @@ export function createGame(options: GameOptions): Game {
     hud.setMode(s.mode);
   };
   options.container.append(hud.root, stick.element, grid.root);
-
-  const listeners: { [K in keyof GameEvents]: Set<(p: GameEvents[K]) => void> } = { teleported: new Set() };
 
   let dinos: SpikeDino[] | null = null;
   if (isSpikeEnabled(search)) {
@@ -175,6 +193,12 @@ export function createGame(options: GameOptions): Game {
   doc.addEventListener('visibilitychange', update);
   update();
 
+  function teleportHome() {
+    player.reset();
+    const p = player.player;
+    for (const l of [...listeners.teleported]) l({ x: p.x, y: p.y, z: p.z });
+  }
+
   return {
     world,
     player,
@@ -194,10 +218,12 @@ export function createGame(options: GameOptions): Game {
       build.setState(state);
       refreshHotbar();
     },
-    teleportHome() {
-      player.reset();
-      const p = player.player;
-      for (const l of [...listeners.teleported]) l({ x: p.x, y: p.y, z: p.z });
+    teleportHome,
+    resetWorld() {
+      world.reset();
+      renderer.setWorld(world);
+      emitChanged('world');
+      teleportHome();
     },
     on(event, listener) {
       const set = listeners[event] as Set<typeof listener>;

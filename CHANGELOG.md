@@ -13,3 +13,4 @@ Written so kids can read it too.
 * Walk with one thumb and look around with the other hand. Tapping a button never turns the camera by accident.
 * You can now walk around the 3D world: move with the left thumb, look around with the right, and tap Spring to jump up a block.
 * You can mine and build! Tap a block to break it, or put a new block next to it. Pick your block in the bar at the bottom, or choose one from "Alle blokken". Blocks pop and make a sound.
+* Your world is saved: the blocks you build and break, where you stand, your block bar and Hakken or Bouwen are all back when you open the app again.

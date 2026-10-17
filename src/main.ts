@@ -6,6 +6,10 @@ import { installLockdown } from './platform/lockdown';
 import { startScreenGuard } from './platform/screen-guard';
 import { createGame, type Game } from './game/game';
 import { createNullRenderer, createWebGlRenderer, type RendererFactory } from './render/renderer';
+import { createWorldSave } from './game/world-save';
+import { openDb } from './storage/db';
+import { createRecords } from './storage/records';
+import { createSaveQueue, type SaveQueue } from './storage/save-queue';
 import { el } from './ui/dom';
 
 installLockdown();
@@ -14,6 +18,7 @@ const audio = createAudioUnlock();
 
 const app = document.getElementById('app');
 let game: Game | null = null;
+let queue: SaveQueue | null = null;
 let teleported = 0;
 let rendererFactoryIsReal = true;
 if (app) {
@@ -41,8 +46,27 @@ if (app) {
   }
 }
 
+// Loads the saved world and player, then starts saving. Without storage or with a broken save the game still plays.
+async function startSaving(g: Game): Promise<void> {
+  try {
+    const db = await openDb();
+    const q = createSaveQueue({ db });
+    queue = q;
+    const save = createWorldSave({ game: g, queue: q, records: createRecords(db) });
+    await save.restore();
+    save.start();
+  } catch {
+    /* no storage: play without saving */
+  }
+}
+let restored = false;
+const booted = game ? startSaving(game) : Promise.resolve();
+void booted.finally(() => {
+  restored = true;
+});
+
 if (__E2E__) {
-  registerHook('ready', () => true);
+  registerHook('ready', () => restored);
   registerHook('screenGuard', () => guard.state());
   registerHook('audioUnlocked', () => audio.isUnlocked());
   if (game) {
@@ -69,6 +93,12 @@ if (__E2E__) {
       p.x = x; p.y = y; p.z = z; p.vy = 0; p.onGround = false;
       g.player.yaw = yaw;
     });
+    // Test blocks are set straight in the world, so they tell the save queue themselves.
+    registerHook('markWorldDirty', () => queue?.markDirty('world'));
+    registerHook('flushSave', () => queue?.flushNow());
+    registerHook('resetWorld', () => g.resetWorld());
+    registerHook('buildState', () => g.getBuildState());
+    registerHook('setBuildState', (s: Partial<ReturnType<Game['getBuildState']>>) => g.setBuildState(s));
     registerHook('usesRealRenderer', () => rendererFactoryIsReal);
   }
 }
