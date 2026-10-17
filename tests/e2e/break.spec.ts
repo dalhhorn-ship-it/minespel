@@ -114,6 +114,9 @@ test.describe('learning break', () => {
     const before = await saved(page);
     const prompt = before.state.entries[1]?.item.prompt ?? '';
     expect(before.state).toMatchObject({ index: 1, try: 2 });
+    const pointsBefore = await readState<number>(page, 'points');
+    const countsBefore = await readState(page, 'logCounts');
+    expect(pointsBefore).toBe(2);
 
     const fresh = await killApp(page);
     await timerReady(fresh);
@@ -122,6 +125,9 @@ test.describe('learning break', () => {
     await expect(fresh.locator('.lesson-view')).toHaveCount(0);
     expect(await readState<boolean>(fresh, 'breakActive')).toBe(true);
     expect((await saved(fresh)).state).toMatchObject({ index: 1, try: 2 });
+    // The points and the logs survive the kill and the resume changes none of them.
+    expect(await readState<number>(fresh, 'points')).toBe(pointsBefore);
+    expect(await readState(fresh, 'logCounts')).toEqual(countsBefore);
     expect(prompt).not.toBe('');
     await expect(fresh.locator('.break-screen')).toContainText(prompt.replace(' = ?', '').replace(/\s*\?$/, ''));
     // And it plays on to the end.

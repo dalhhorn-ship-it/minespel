@@ -39,7 +39,7 @@ interface Rig {
   calls: string[];
   flow: BreakFlow;
   env: BreakEnv;
-  newFlow(): { flow: BreakFlow; host: HTMLElement; calls: string[] };
+  newFlow(): { flow: BreakFlow; host: HTMLElement; calls: string[]; screens: Screens };
 }
 
 async function rig(options: { storage?: boolean; taalOn?: boolean; rekenenOn?: boolean } = {}): Promise<Rig> {
@@ -217,6 +217,72 @@ describe('break flow', () => {
     flow2.end();
     await flow2.settled();
     expect(await createSessionStore(r.db).load()).toBeNull();
+  });
+
+  it('a kill between steps never loses or doubles a log line, box, ledger line or points', async () => {
+    const r = await rig();
+    r.flow.start();
+    await skipLesson(r.host);
+    const logs = createLogStore(r.db);
+    await right(r); // +2
+    await r.flow.settled();
+    const counts = async () => ({
+      answers: (await logs.listAnswers()).length,
+      ledger: (await logs.listLedger()).map((l) => l.delta),
+      points: (await r.records.get('economy')).points,
+      breaks: (await logs.listBreaks()).length,
+    });
+    expect(await counts()).toEqual({ answers: 1, ledger: [2], points: 2, breaks: 0 });
+
+    // Killed and opened again, three times: opening writes nothing and pays nothing.
+    for (let i = 0; i < 3; i++) {
+      const again = r.newFlow();
+      again.flow.start();
+      await until(() => again.host.querySelector('.number-view'));
+      await again.flow.settled();
+      expect(await counts()).toEqual({ answers: 1, ledger: [2], points: 2, breaks: 0 });
+    }
+    // The resumed break goes on from question 2.
+    const again = r.newFlow();
+    again.flow.start();
+    await until(() => again.host.querySelector('.number-view'));
+    await right(r, again.host);
+    await again.flow.settled();
+    expect(await counts()).toEqual({ answers: 2, ledger: [2, 2], points: 4, breaks: 0 });
+  });
+
+  it('a resume on the summary writes the break log once, and none after the break is over', async () => {
+    const r = await rig();
+    r.flow.start();
+    await skipLesson(r.host);
+    for (let i = 0; i < 5; i++) await right(r);
+    await until(() => r.host.querySelector('.break-summary'));
+    await r.flow.settled();
+    const logs = createLogStore(r.db);
+    expect(await logs.listBreaks()).toHaveLength(0); // the break log comes with the last step
+    expect((await createSessionStore(r.db).load())?.kind).toBe('break');
+
+    // Killed on the summary: the new flow shows it again and the tap ends the break.
+    const again = r.newFlow();
+    again.flow.start();
+    await until(() => again.host.querySelector('.break-summary'));
+    await again.flow.settled();
+    expect(await logs.listBreaks()).toHaveLength(0);
+    tap(again.host.querySelector('.break-button'));
+    await until(() => again.screens.current() === 'world');
+    await again.flow.settled();
+    expect(await logs.listBreaks()).toHaveLength(1);
+    expect(await createSessionStore(r.db).load()).toBeNull();
+    expect((await r.records.get('economy')).points).toBe(13); // 5 right answers and the perfect break bonus
+    expect((await logs.listLedger()).map((l) => l.delta)).toEqual([2, 2, 2, 2, 2, 3]);
+
+    // Killed again after the end: nothing to resume, no second log.
+    const third = r.newFlow();
+    third.flow.start();
+    await until(() => third.host.querySelector('.lesson-view, .number-view'));
+    await third.flow.settled();
+    expect(await logs.listBreaks()).toHaveLength(1);
+    third.flow.end();
   });
 
   it('a parent can end the break: open questions are logged "niet beantwoord" (AC95)', async () => {

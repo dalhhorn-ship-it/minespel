@@ -3,15 +3,15 @@
 // shows the lesson the first time a topic gives new items, saves every step (AC37), writes the answer
 // log, the break log, the point ledger and the Leitner boxes, and resumes a saved break after a restart.
 //
-// Save order of one step: the session first (so a reopen is on the right question), then points,
-// boxes and logs. A kill in between can lose a log line but never makes the kid answer twice for points.
+// Every step is saved by `commitStep` (session-writer.ts) in one transaction: the session, points, boxes,
+// answer log and ledger together. The break log is written in the commit that clears the session, so a kill
+// can never lose or double a log line or points. The start of a break (rotation plus first session) is one commit.
 // Storage trouble never blocks the kid: a break without working storage still plays, it just does not save.
 import type { Catalog } from '../content/catalog';
 import type { Item, Lesson } from '../content/format';
 import { rotationWeights, type Switches } from '../content/switches';
 import { dayKey, systemClock, type Clock } from '../core/clock';
 import { createRng, type Rng } from '../core/rng';
-import { sumsToForget } from '../learning/generated-items';
 import { pickModule, hasSeenLesson, markLessonSeen, type RotationState } from '../learning/rotation';
 import { selectQuestions } from '../learning/selection';
 import {
@@ -20,13 +20,12 @@ import {
   type SessionEntry,
   type SessionState as BreakState,
 } from '../learning/break-session';
-import type { Response } from '../learning/answer-check';
 import type { Sound } from '../audio/sound';
 import type { SaveQueue } from '../storage/save-queue';
-import { createLogStore, type BreakEnd, type LogStore } from '../storage/log-store';
 import { createProgressStore, type ProgressStore } from '../storage/progress-store';
 import type { Records } from '../storage/records';
 import { createSessionStore, type SessionStore } from '../storage/session-store';
+import { breakLogOf, commitStep, stepWrite } from './session-writer';
 import { defaultKv } from '../storage/schema';
 import { createBreakScreen, type BreakScreen } from '../ui/learn/break-screen';
 import { el } from '../ui/dom';
@@ -77,8 +76,6 @@ interface SavedBreak {
   lessonTopic: string | null;
   /** Time to answer of every first try, for the "snel geklikt" flag. */
   firstAnswerMs: number[];
-  /** The break log is written. Set so a restart does not write it twice. */
-  logged: boolean;
   state: BreakState;
   [key: string]: unknown;
 }
@@ -103,9 +100,9 @@ function isSavedBreak(v: unknown): v is SavedBreak {
 }
 
 interface Stores {
+  db: IDBDatabase;
   sessions: SessionStore;
   progress: ProgressStore;
-  logs: LogStore;
   records: Records;
 }
 
@@ -123,24 +120,11 @@ interface Run {
 function storesOf(env: BreakEnv): Stores | null {
   if (!env.db || !env.records) return null;
   return {
+    db: env.db,
     sessions: createSessionStore(env.db),
     progress: createProgressStore(env.db),
-    logs: createLogStore(env.db),
     records: env.records,
   };
-}
-
-function givenText(item: Item, r: Response): string {
-  switch (r.type) {
-    case 'choice':
-      return item.type === 'choice' ? (item.options[r.index] ?? String(r.index)) : String(r.index);
-    case 'find-error':
-      return r.index < 0 ? 'Geen fout' : item.type === 'find-error' ? (item.words[r.index] ?? String(r.index)) : String(r.index);
-    case 'type':
-      return r.text;
-    case 'punctuate':
-      return [...r.gaps].sort((a, b) => a - b).join(',');
-  }
 }
 
 export function createBreakFlow(options: BreakFlowOptions): BreakFlow {
@@ -163,6 +147,7 @@ export function createBreakFlow(options: BreakFlowOptions): BreakFlow {
     const rng = env.rng ?? createRng((Math.random() * 4294967296) >>> 0);
     const stores = storesOf(env);
     await env.queue?.flushNow().catch(() => undefined); // the time left and the world are on disk before the questions
+    await chain; // the end of the last break is written before this one reads the saved session
     const catalog = await loadBreakCatalog();
     if (gen !== generation) return null;
 
@@ -179,8 +164,8 @@ export function createBreakFlow(options: BreakFlowOptions): BreakFlow {
         const r: Run = { env, stores, clock, catalog, meta: saved, screen: null, finished: false };
         // The thinking time restarts, so a long closed app is not logged as a slow answer.
         r.meta.state = { ...saved.state, shownAt: clock.now() };
-        if (saved.state.economy) void stores.records.put('economy', saved.state.economy).catch(() => undefined);
         mountScreen(r, host);
+        // A saved session is never 'done' (the commit that ends it clears it), but a stray one still closes.
         if (r.meta.state.phase === 'done') finishRun(r);
         return r;
       }
@@ -230,14 +215,12 @@ export function createBreakFlow(options: BreakFlowOptions): BreakFlow {
       start: at,
       lessonTopic,
       firstAnswerMs: [],
-      logged: false,
       state: started.state,
     };
     const r: Run = { env, stores, clock, catalog, meta, screen: null, finished: false };
     if (stores) {
       try {
-        await stores.records.put('rotation', nextRotation);
-        await stores.sessions.save(meta);
+        await commitStep(stores.db, { session: meta, rotation: nextRotation });
       } catch {
         // The break plays without saving.
       }
@@ -266,138 +249,33 @@ export function createBreakFlow(options: BreakFlowOptions): BreakFlow {
   function onStep(r: Run, state: BreakState, effects: SessionEffect[]): void {
     for (const e of effects) if (e.type === 'answer' && e.try === 1) r.meta.firstAnswerMs.push(e.ms);
     r.meta.state = state;
-    const snapshot: SavedBreak = { ...r.meta, firstAnswerMs: [...r.meta.firstAnswerMs] };
+    const done = state.phase === 'done';
     const stores = r.stores;
-    if (stores) {
-      enqueue(async () => {
-        if (state.phase !== 'done') await stores.sessions.save(snapshot);
-        for (const e of effects) await applyEffect(r, stores, state, e);
+    if (stores && !r.finished) {
+      const write = stepWrite({
+        state,
+        effects,
+        context: 'break',
+        ledgerReason: 'break',
+        sessionId: r.meta.sessionId,
+        moduleId: r.meta.moduleId,
+        topicOf: (item) => topicOfItem(r.catalog, r.meta.moduleId, item),
+        isOpen: (topic) => r.catalog.isOpen(r.meta.moduleId, topic),
+        now: r.clock.now(),
+        // The commit that ends the break also clears the saved session and writes the break log.
+        session: done ? null : { ...r.meta, firstAnswerMs: [...r.meta.firstAnswerMs] },
+        breakLog: done ? breakLogOf({ state, sessionId: r.meta.sessionId, moduleId: r.meta.moduleId, start: r.meta.start, end: r.clock.now(), firstAnswerMs: r.meta.firstAnswerMs }) : undefined,
       });
+      enqueue(() => commitStep(stores.db, write));
     }
-    if (state.phase === 'done') finishRun(r);
+    if (done) finishRun(r);
   }
 
-  /** Writes one effect of a step: logs, boxes, points and the ledger. */
-  async function applyEffect(r: Run, stores: Stores, state: BreakState, e: SessionEffect): Promise<void> {
-    const moduleId = r.meta.moduleId;
-    const entryOf = (itemId: string): SessionEntry | undefined => state.entries.find((x) => x.item.id === itemId);
-    const ts = r.clock.now();
-    switch (e.type) {
-      case 'answer': {
-        const entry = entryOf(e.itemId);
-        if (!entry) return;
-        await stores.logs.appendAnswer({
-          ts: e.at,
-          day: state.day,
-          context: 'break',
-          sessionId: r.meta.sessionId,
-          moduleId,
-          topic: topicOfItem(r.catalog, moduleId, entry.item),
-          skill: entry.item.skill,
-          level: entry.item.level,
-          itemId: e.itemId,
-          try: e.try,
-          correct: e.correct,
-          given: givenText(entry.item, e.response),
-          ms: e.ms,
-        });
-        return;
-      }
-      case 'unanswered': {
-        const entry = entryOf(e.itemId);
-        if (!entry) return;
-        await stores.logs.appendAnswer({
-          ts,
-          day: state.day,
-          context: 'break',
-          sessionId: r.meta.sessionId,
-          moduleId,
-          topic: topicOfItem(r.catalog, moduleId, entry.item),
-          skill: entry.item.skill,
-          level: entry.item.level,
-          itemId: e.itemId,
-          try: 1,
-          correct: false,
-          given: 'niet beantwoord',
-          ms: 0,
-        });
-        return;
-      }
-      case 'box':
-        await saveBox(r, stores, state, e.itemId, e.box, e.due);
-        return;
-      case 'points':
-        await stores.records.put('economy', { ...state.economy });
-        if (e.applied !== 0) {
-          await stores.logs.appendLedger({ ts, day: state.day, delta: e.applied, reason: e.applied < 0 ? 'malus' : 'break' });
-        }
-        return;
-      case 'end':
-        return;
-    }
-  }
-
-  /**
-   * Box and due day of one item after its first try. A generated sum (optellen, aftrekken) is only
-   * saved when it was answered wrong; a saved sum keeps following the boxes. At most 200 stay (AC126).
-   */
-  async function saveBox(r: Run, stores: Stores, state: BreakState, itemId: string, box: number, due: string): Promise<void> {
-    const moduleId = r.meta.moduleId;
-    const entry = state.entries.find((x) => x.item.id === itemId);
-    if (!entry) return;
-    const topic = topicOfItem(r.catalog, moduleId, entry.item);
-    const open = r.catalog.isOpen(moduleId, topic);
-    if (open && entry.box === 0 && box > 1) return; // a new sum answered right is not kept
-    const old = await stores.progress.get(moduleId, itemId);
-    await stores.progress.put({
-      moduleId,
-      itemId,
-      box,
-      due,
-      level: entry.item.level,
-      topic,
-      skill: entry.item.skill,
-      seen: (old?.seen ?? 0) + 1,
-      added: r.clock.now(), // the store keeps an older value
-    });
-    if (open) {
-      const all = await stores.progress.list(moduleId);
-      for (const gone of sumsToForget(all, moduleId, topic)) {
-        await stores.progress.delete(gone.moduleId, gone.itemId);
-      }
-    }
-  }
-
-  /** The break is over: write the break log, give the timer back, close the screen. */
+  /** The break is over: give the timer back and close the screen. Its log is in the final step commit. */
   function finishRun(r: Run): void {
     if (r.finished) return;
     r.finished = true;
-    const state = r.meta.state;
-    const stores = r.stores;
-    if (stores) {
-      enqueue(async () => {
-        const reason = state.endReason;
-        if (!r.meta.logged && reason !== 'empty' && state.entries.length > 0) {
-          const endedBy: BreakEnd = reason === 'parent' ? 'stopped' : 'done';
-          const right = state.results.filter((x) => x === 'first' || x === 'retry').length;
-          await stores.logs.saveBreak({
-            start: r.meta.start,
-            end: r.clock.now(),
-            day: state.day,
-            sessionId: r.meta.sessionId,
-            moduleId: r.meta.moduleId,
-            n: state.entries.length,
-            score: right,
-            points: state.earned,
-            endedBy,
-            firstAnswerMs: [...r.meta.firstAnswerMs],
-          });
-          r.meta.logged = true;
-          await stores.sessions.save({ ...r.meta }); // a restart now only leaves the break
-        }
-      });
-    }
-    leave();
+    leave(); // leave() also clears a stray saved session
   }
 
   /** Closes the screen, wakes the world and restarts the timer, then clears the saved break. */
