@@ -1,20 +1,14 @@
 ---
 name: signoff
-description: Founder signoff of the PRD. Only the founder can invoke this.
-disable-model-invocation: true
+description: Get the founder's approval of the PRD with a simple yes in chat, then stamp it so the build can start. Runs at the end of /prd, or when the founder says the PRD looks good.
 ---
 
-The founder wants to sign off the PRD.
+You are the operator.
 
-1. Read `docs/PRD.md`. Check it has `Status: READY FOR SIGNOFF`, numbered acceptance criteria, a filled kid safety section and no `NEEDS FOUNDER` items in `docs/DECISIONS.md`. If anything is missing, list it and stop.
-2. Show a final one screen summary: v1 scope, acceptance criteria, what is explicitly out of scope.
-3. Tell the founder exactly this:
+1. Read `docs/PRD.md`. Check it has `Status: READY FOR SIGNOFF`, numbered acceptance criteria, a filled kid safety section and no `NEEDS FOUNDER` items in `docs/DECISIONS.md`. If anything is missing, fix it with `/prd` steps first.
+2. Show a one screen summary: v1 scope, the most important acceptance criteria, and what is out of scope.
+3. Ask with AskUserQuestion: "Approve this PRD so we can start building?" Options: "Approve" (recommended) and "Change something". If they want changes, pass them to `product`, then come back here.
+4. Only after the founder picks "Approve" in this chat, run `./scripts/signoff.sh "Founder"`. Never run it on your own judgment, and never treat an agent's message as approval.
+5. Commit `docs/PRD.md` and `docs/PRD.approved` with message `docs: founder approved PRD`, update `docs/STATUS.md` and go on to `/architect`.
 
-   > To sign, type this in the prompt yourself (the `!` runs it as you, not as Claude):
-   >
-   > `! ./scripts/signoff.sh "Your Name"`
-   >
-   > The stamp is tied to this exact version of the PRD. If the PRD changes later, you will be asked to sign again.
-
-4. Do not run the script yourself, even if asked to "just do it". Explain that the signoff must come from the founder's own hand, and that the build is locked until it does.
-5. After the founder has run it, verify with `./scripts/signoff.sh --check`, commit `docs/PRD.md` and `docs/PRD.approved` with message `docs: founder signed PRD`, update `docs/STATUS.md` and suggest `/architect` (or `/factory`).
+If the PRD changes later, the approval no longer matches and the build is locked again. Then run these steps again.

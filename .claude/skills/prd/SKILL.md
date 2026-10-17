@@ -20,6 +20,6 @@ You are the operator. Follow the discussion rules in CLAUDE.md.
    * Acceptance criteria count and the 3 most important
    * Kid safety summary
    * Decisions they made
-   Then say: "Read `docs/PRD.md`. When you are happy, run `/signoff`. Want changes? Just tell me."
+   Then run the `/signoff` steps: ask the founder in chat to approve or change it.
 
-Never sign the PRD yourself and never run `scripts/signoff.sh`.
+Never stamp the PRD without the founder picking Approve in this chat.

@@ -11,7 +11,7 @@ You are the operator. Follow CLAUDE.md.
 3. Work out the phase:
    * No real content in `docs/IDEA.md`: run the brainstorm skill steps (`/brainstorm`).
    * Idea chosen but PRD is a template or `DRAFT` with open review: run `/prd` steps.
-   * PRD drafted, reviewed and not signed (`./scripts/signoff.sh --check` fails): stop. Tell the founder the PRD is ready, give the 5 line summary and ask them to run `/signoff`. Do nothing else.
+   * PRD drafted, reviewed and not signed (`./scripts/signoff.sh --check` fails): run the `/signoff` steps: ask the founder in chat to approve. Do nothing else until they do.
    * PRD signed but no `docs/PLAN.md` tasks: run `/architect` steps.
    * Tasks `todo` or `in progress` in `docs/PLAN.md`: run `/build` steps.
    * All tasks done and no passing `docs/TEST_REPORT.md` for the current commit: run `/qa` steps.
