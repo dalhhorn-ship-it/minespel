@@ -1,0 +1,38 @@
+/* Kid question views: choice, find-error, punctuate. Touch targets are at least 56px. No hover. */
+.q-view {
+  display: flex; flex-direction: column; align-items: center; gap: calc(var(--gap) * 1.5);
+  width: 100%; box-sizing: border-box; padding: var(--gap);
+  font-family: var(--font-stack); font-size: var(--font-body); color: var(--ink);
+  user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;
+}
+.q-prompt { margin: 0; font-size: var(--font-large); font-weight: 800; text-align: center; }
+.q-sentence {
+  margin: 0; padding: var(--gap) calc(var(--gap) * 1.5); border-radius: var(--radius);
+  background: var(--sky-light); font-size: var(--font-large); font-weight: 700; text-align: center;
+}
+.q-options { display: flex; flex-direction: column; gap: var(--gap); width: min(100%, 640px); }
+
+.q-option, .q-word, .q-none, .q-gap, .q-done {
+  box-sizing: border-box; min-height: var(--touch-min); min-width: var(--touch-min);
+  border: 3px solid var(--ink); border-radius: var(--radius);
+  background: var(--paper); color: var(--ink);
+  font: inherit; font-weight: 800; touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+.q-option { padding: var(--gap) calc(var(--gap) * 1.5); font-size: var(--font-large); }
+.q-picked { background: var(--sand); outline: 5px solid var(--grass); outline-offset: 2px; }
+[aria-disabled='true'] { pointer-events: none; }
+
+.q-words, .q-line { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: var(--gap); }
+.q-word, .q-none { padding: 0 calc(var(--gap) * 1.5); font-size: var(--font-large); }
+.q-none { background: var(--sky-light); }
+
+.q-line { gap: 4px; font-size: var(--font-large); }
+.q-text-word { font-size: var(--font-large); font-weight: 700; padding: 0 2px; }
+.q-gap {
+  width: var(--touch-min); padding: 0; border-style: dashed; border-color: var(--malus);
+  background: var(--sky-light); font-size: var(--font-large); line-height: 1;
+}
+.q-gap[aria-pressed='true'] { border-style: solid; border-color: var(--grass); background: var(--right-bg); color: var(--right); }
+.q-done { padding: 0 calc(var(--gap) * 3); background: var(--grass); border-color: var(--grass); color: var(--on-grass); font-size: var(--font-large); }
+.q-done.q-picked { background: var(--grass); }
