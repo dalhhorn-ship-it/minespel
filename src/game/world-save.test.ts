@@ -7,7 +7,7 @@ import { createNullRenderer } from '../render/renderer';
 import { AIR, STEEN } from '../world/blocks';
 import { START_SPOT } from '../world/terrain';
 import { createGame, type Game } from './game';
-import { createWorldSave, cleanDiff } from './world-save';
+import { bootSave, createWorldSave, cleanDiff } from './world-save';
 
 let n = 0;
 const games: Game[] = [];
@@ -152,5 +152,97 @@ describe('world save', () => {
     expect(cleanDiff([-1, 1.5, 1e12, 256 * 3 + 2])).toEqual([770]);
     expect(cleanDiff('x')).toEqual([]);
     expect(cleanDiff(null)).toEqual([]);
+  });
+
+  describe('bootSave', () => {
+    it('keeps the game paused until the restore is done, then resumes and saves', async () => {
+      const { records, queue } = await setupDb();
+      queue.markDirty('world');
+      const seed = makeGame();
+      seed.world.set(5, 20, 5, STEEN);
+      createWorldSave({ game: seed, queue, records }).start();
+      queue.markDirty('world');
+      await queue.flushNow();
+
+      const game = makeGame();
+      const inner = createWorldSave({ game, queue, records });
+      let release!: () => void;
+      const gate = new Promise<void>((r) => (release = r));
+      const running: boolean[] = [];
+      const booting = bootSave({
+        game,
+        create: async () => ({
+          ...inner,
+          restore: async () => {
+            await gate;
+            running.push(game.isRunning());
+            await inner.restore();
+          },
+        }),
+      });
+      await Promise.resolve();
+      expect(game.isRunning()).toBe(false);
+      release();
+      expect(await booting).toBe('saving');
+      expect(running).toEqual([false]);
+      expect(game.world.get(5, 20, 5)).toBe(STEEN);
+      expect(game.isRunning()).toBe(true);
+    });
+
+    it('does not resume when someone paused meanwhile', async () => {
+      const { records, queue } = await setupDb();
+      const game = makeGame();
+      let paused = false;
+      await bootSave({
+        game,
+        wantsPause: () => paused,
+        create: async () => {
+          paused = true;
+          return createWorldSave({ game, queue, records });
+        },
+      });
+      expect(game.isRunning()).toBe(false);
+    });
+
+    it('after the timeout the kid plays without saving, and a late restore changes nothing', async () => {
+      const { records, queue } = await setupDb();
+      const game = makeGame();
+      const inner = createWorldSave({ game, queue, records });
+      const start = vi.fn(inner.start);
+      let release!: () => void;
+      const gate = new Promise<void>((r) => (release = r));
+      const result = await bootSave({
+        game,
+        timeoutMs: 20,
+        create: async () => ({
+          ...inner,
+          start,
+          restore: async () => {
+            await gate;
+            await inner.restore();
+          },
+        }),
+      });
+      expect(result).toBe('not-saving');
+      expect(game.isRunning()).toBe(true);
+      expect(start).not.toHaveBeenCalled();
+      release();
+      await new Promise((r) => setTimeout(r, 10));
+      expect(queue.pendingCount()).toBe(0);
+    });
+
+    it('a storage that never opens still lets the kid play', async () => {
+      const game = makeGame();
+      const result = await bootSave({ game, timeoutMs: 20, create: () => new Promise(() => {}) });
+      expect(result).toBe('not-saving');
+      expect(game.isRunning()).toBe(true);
+    });
+
+    it('a storage that fails to open still lets the kid play', async () => {
+      const game = makeGame();
+      const result = await bootSave({ game, create: () => Promise.reject(new Error('no idb')) });
+      expect(result).toBe('not-saving');
+      expect(game.isRunning()).toBe(true);
+    });
   });
 });

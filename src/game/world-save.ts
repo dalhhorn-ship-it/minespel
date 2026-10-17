@@ -23,6 +23,58 @@ export interface WorldSave {
   restore(): Promise<void>;
   /** Starts watching for changes. Returns a stop function. */
   start(): () => void;
+  /** A restore that is still waiting will not touch the game any more. */
+  cancel(): void;
+}
+
+export interface BootSaveOptions {
+  game: Pick<Game, 'pause' | 'resume'>;
+  /** Opens the storage and builds the save. May hang or throw. */
+  create: () => Promise<WorldSave>;
+  /** After this long the kid plays without saving. Default 3000 ms. */
+  timeoutMs?: number;
+  /** True when someone else asked for a pause meanwhile. Then no resume. */
+  wantsPause?: () => boolean;
+}
+
+/**
+ * Keeps the game paused while the saved world loads, so nothing the kid does is wiped by the restore.
+ * If storage is slow, broken or hangs, the game starts anyway and does NOT save (so a save that could not be read is never overwritten).
+ */
+export async function bootSave(options: BootSaveOptions): Promise<'saving' | 'not-saving'> {
+  const { game } = options;
+  const timeoutMs = options.timeoutMs ?? 3000;
+  game.pause();
+  let result: 'saving' | 'not-saving' = 'not-saving';
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  let save: WorldSave | null = null;
+  let timedOut = false;
+  try {
+    const load = (async () => {
+      save = await options.create();
+      await save.restore();
+    })();
+    const timeout = new Promise<void>((resolve) => {
+      timer = setTimeout(() => {
+        timedOut = true;
+        resolve();
+      }, timeoutMs);
+    });
+    await Promise.race([load, timeout]);
+    if (timedOut) {
+      (save as WorldSave | null)?.cancel();
+      load.catch(() => {});
+    } else {
+      (save as unknown as WorldSave).start();
+      result = 'saving';
+    }
+  } catch {
+    /* no storage: play without saving */
+  } finally {
+    clearTimeout(timer);
+    if (!options.wantsPause?.()) game.resume();
+  }
+  return result;
 }
 
 const isNum = (n: unknown): n is number => typeof n === 'number' && Number.isFinite(n);
@@ -83,14 +135,20 @@ export function createWorldSave(options: WorldSaveOptions): WorldSave {
     }
   }
 
+  let cancelled = false;
+
   async function restore(): Promise<void> {
     try {
-      restoreWorld(await records.get('world'));
+      const raw = await records.get('world');
+      if (cancelled) return;
+      restoreWorld(raw);
     } catch {
       /* a broken world record: play on in the start world */
     }
     try {
-      restorePlayer(await records.get('player'));
+      const raw = await records.get('player');
+      if (cancelled) return;
+      restorePlayer(raw);
     } catch {
       /* a broken player record: start at home */
     }
@@ -125,5 +183,5 @@ export function createWorldSave(options: WorldSaveOptions): WorldSave {
     };
   }
 
-  return { restore, start };
+  return { restore, start, cancel: () => { cancelled = true; } };
 }

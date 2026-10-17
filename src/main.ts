@@ -6,7 +6,7 @@ import { installLockdown } from './platform/lockdown';
 import { startScreenGuard } from './platform/screen-guard';
 import { createGame, type Game } from './game/game';
 import { createNullRenderer, createWebGlRenderer, type RendererFactory } from './render/renderer';
-import { createWorldSave } from './game/world-save';
+import { bootSave, createWorldSave } from './game/world-save';
 import { openDb } from './storage/db';
 import { createRecords } from './storage/records';
 import { createSaveQueue, type SaveQueue } from './storage/save-queue';
@@ -46,21 +46,22 @@ if (app) {
   }
 }
 
-// Loads the saved world and player, then starts saving. Without storage or with a broken save the game still plays.
-async function startSaving(g: Game): Promise<void> {
-  try {
-    const db = await openDb();
-    const q = createSaveQueue({ db });
-    queue = q;
-    const save = createWorldSave({ game: g, queue: q, records: createRecords(db) });
-    await save.restore();
-    save.start();
-  } catch {
-    /* no storage: play without saving */
-  }
-}
+// Loads the saved world and player, then starts saving. The game stays paused until that is done (or 3 seconds pass).
+// Without storage or with a broken save the game still plays, but does not save.
+let userPaused = false;
 let restored = false;
-const booted = game ? startSaving(game) : Promise.resolve();
+const booted = game
+  ? bootSave({
+      game,
+      wantsPause: () => userPaused,
+      create: async () => {
+        const db = await openDb();
+        const q = createSaveQueue({ db });
+        queue = q;
+        return createWorldSave({ game: game as Game, queue: q, records: createRecords(db) });
+      },
+    })
+  : Promise.resolve('not-saving');
 void booted.finally(() => {
   restored = true;
 });
@@ -77,8 +78,14 @@ if (__E2E__) {
     }));
     registerHook('gameRunning', () => g.isRunning());
     registerHook('frameCount', () => g.frameCount());
-    registerHook('pauseGame', () => g.pause());
-    registerHook('resumeGame', () => g.resume());
+    registerHook('pauseGame', () => {
+      userPaused = true;
+      g.pause();
+    });
+    registerHook('resumeGame', () => {
+      userPaused = false;
+      if (restored) g.resume(); // before that, the boot resumes
+    });
     registerHook('teleportHome', () => g.teleportHome());
     registerHook('teleportedCount', () => teleported);
     registerHook('blockAt', (x: number, y: number, z: number) => g.world.get(x, y, z));
