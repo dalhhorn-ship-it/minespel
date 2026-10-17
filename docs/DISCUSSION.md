@@ -153,3 +153,5 @@ Section 11 now numbers founder decisions F1 to F12 so they do not clash with the
 * **Q10:** accepted. Full parse rule and whole tenths (4.8, AC58); no dot key and thin space for thousands (AC121); no repeats and seedable generator (AC125, AC61); right answer later in AC63.
 * **Q11:** accepted. check.sh runs validate.py and fails if python3 is missing (AC122); scriptable checks added (AC123); optional comma left to the human check, since a script cannot judge it; human check in AC124.
 * **Q12:** accepted. Lock tap area AC127; contrast and icon plus colour AC141; safe areas AC143 (iPad); motion and reduced motion AC142; window under 900 points AC108; first start on a wiped iPad AC144; parent warning AC129. "Groter lettertype" moved to Later.
+
+### product: founder answers F1 to F13 folded into PRD

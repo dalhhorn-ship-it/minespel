@@ -24,3 +24,5 @@ Every notable decision. Founder decisions are marked `NEEDS FOUNDER` until answe
 | 18 | 2026-10-17 | F11: Rekenen scope | plus, minus, tafels, delen; smaller; bigger | Plus, minus, tafels, delen | Founder | DECIDED |
 | 19 | 2026-10-17 | F12: App name | kid picks; keep Dino Blokwereld | Not answered; keep Dino Blokwereld as working title | Founder | DECIDED (default) |
 | 20 | 2026-10-17 | F13: Small scope changes | snel geklikt mark in v1a; Groter lettertype to Later | Snel geklikt mark: yes. Groter lettertype to Later: not approved, stays in v1 | Founder | DECIDED |
+| 21 | 2026-10-17 | F14: Malus in Extra oefenen | no malus; same as breaks | No malus in Extra oefenen | Founder | DECIDED |
+| 22 | 2026-10-17 | F15: Dino kinds and egg prices | add Compy; keep 3 kinds; add T-rex | Add Compy: Compy 20, Triceratops 40, Stegosaurus 40, Brachiosaurus 80 | Founder | DECIDED |
