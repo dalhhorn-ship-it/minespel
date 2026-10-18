@@ -14,6 +14,14 @@
   "assets": {
     "directory": "./dist"
   },
+  // Request logs in the founder's own Cloudflare dashboard (Workers Logs). No app data is sent.
+  "observability": {
+    "logs": {
+      "enabled": true,
+      "invocation_logs": true,
+      "persist": true
+    }
+  },
   "workers_dev": true,
   "preview_urls": false
 }

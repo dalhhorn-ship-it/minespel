@@ -79,6 +79,8 @@ test.describe('Lesboek and Extra oefenen', () => {
 
   test('Extra oefenen: 5 questions, points shown after, the cap message, the timer stays stopped (AC52, AC120)', async ({ page }) => {
     await openApp(page);
+    // The play timer loads its saved time after the boot; read it once it has one.
+    await expect.poll(() => readState<number | null>(page, 'playMsLeft')).toBeGreaterThan(0);
     const timerBefore = await readState<number>(page, 'playMsLeft');
     await openPractice(page);
     expect(await readState<string>(page, 'currentScreen')).toBe('learn');
@@ -96,7 +98,8 @@ test.describe('Lesboek and Extra oefenen', () => {
     await tapOn(page, '.break-button');
     // Back on the pause menu with the new total: 10 points, the day cap (AC120).
     await expect(page.locator('[data-screen-id="pause"]')).toBeVisible();
-    expect(await readState<string>(page, 'currentScreen')).toBe('kid-overlay');
+    // The pause menu shows before the practice screen's async close has popped it off the stack.
+    await expect.poll(() => readState<string>(page, 'currentScreen')).toBe('kid-overlay');
     await expect(page.locator('[data-pause="points"]')).toHaveText('Je hebt 10 punten');
     // A second round earns nothing more and says so.
     await tapText(page, 'Extra oefenen');
