@@ -1,5 +1,6 @@
 // Lesson view: a lesson page by page. Swipe or tap "Volgende". The last page has "Ik snap het!" (AC49 view part).
 // Text is set with textContent only (AC88). No hover, buttons act once on a double tap (AC117).
+import '../../styles/mc-menu.css';
 import '../../styles/lesson.css';
 import type { Lesson, LessonPage } from '../../content/format';
 import { el } from '../dom';
@@ -44,7 +45,7 @@ export interface LessonView {
 export function createLessonView(options: LessonViewOptions): LessonView {
   const pages = options.lesson.pages;
   const root = el('section', { class: 'lesson-view', attrs: { 'aria-label': 'Les' } });
-  const body = el('div', { class: 'lesson-body' });
+  const body = el('div', { class: 'lesson-body scrollable' });
   const dots = el('div', { class: 'lesson-dots', attrs: { 'aria-hidden': 'true' } });
   const nextButton = el('button', { class: 'lesson-next', attrs: { type: 'button' } });
   root.append(body, dots, nextButton);

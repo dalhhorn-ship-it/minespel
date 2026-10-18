@@ -1,0 +1,99 @@
+/* Minecraft style menu look for the learning screens: stone panels with a chunky pixel border and blocky buttons.
+   Shared by break.css, lesson.css, questions.css and keyboard.css. No hover rules, only :active. */
+:root {
+  --mc-edge: #121212;
+  --mc-light: #ffffff;
+  --mc-shade: #6e6e6e;
+  --mc-panel: #c6c6c6;
+  --mc-text: #1a1a1a;
+  --mc-btn: #e2e2e2;
+  --mc-btn-down: #b4b4b4;
+  --mc-slot: #a9a9a9;
+  --mc-green: #2e6b1c;
+  --mc-green-light: #7fd24f;
+  --mc-green-shade: #1a4210;
+  --mc-wash: rgba(10, 12, 20, 0.5);
+  --mc-step: 4px;
+}
+
+/* Panels */
+.dino-juf,
+.break-dots,
+.break-feedback-card,
+.break-summary,
+.break-empty,
+.lesson-view,
+.teach-moment,
+.q-view {
+  background: var(--mc-panel);
+  color: var(--mc-text);
+  border: var(--mc-step) solid var(--mc-edge);
+  border-radius: 0;
+  box-shadow: inset var(--mc-step) var(--mc-step) 0 var(--mc-light), inset calc(var(--mc-step) * -1) calc(var(--mc-step) * -1) 0 var(--mc-shade);
+}
+
+/* Sunken slots: examples, tips, sentences and the answer field */
+.lesson-example,
+.lesson-tip,
+.teach-lesson,
+.q-sentence,
+.type-field {
+  background: var(--mc-slot);
+  color: #000;
+  border: 0;
+  border-radius: 0;
+  box-shadow: inset var(--mc-step) var(--mc-step) 0 #373737, inset calc(var(--mc-step) * -1) calc(var(--mc-step) * -1) 0 var(--mc-light);
+}
+
+/* Blocky buttons: light grey, dark bevel, they sink when tapped */
+.q-option,
+.q-word,
+.q-none,
+.q-gap,
+.kb-key {
+  background: var(--mc-btn);
+  color: var(--mc-text);
+  border: var(--mc-step) solid var(--mc-edge);
+  border-radius: 0;
+  box-shadow: inset var(--mc-step) var(--mc-step) 0 var(--mc-light), inset calc(var(--mc-step) * -1) calc(var(--mc-step) * -1) 0 var(--mc-shade);
+}
+
+/* Green main buttons */
+.break-next-btn,
+.summary-done-btn,
+.lesson-next,
+.teach-done,
+.q-done,
+.kb-done {
+  background: var(--mc-green);
+  color: #fff;
+  border: var(--mc-step) solid var(--mc-edge);
+  border-radius: 0;
+  box-shadow: inset var(--mc-step) var(--mc-step) 0 var(--mc-green-light), inset calc(var(--mc-step) * -1) calc(var(--mc-step) * -1) 0 var(--mc-green-shade);
+  text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.45);
+}
+
+/* Pressed look */
+.q-option:active,
+.q-word:active,
+.q-none:active,
+.q-gap:active,
+.kb-key:active {
+  background: var(--mc-btn-down);
+  transform: translateY(3px);
+  box-shadow: inset var(--mc-step) var(--mc-step) 0 var(--mc-shade), inset calc(var(--mc-step) * -1) calc(var(--mc-step) * -1) 0 var(--mc-light);
+}
+
+.break-next-btn:active,
+.summary-done-btn:active,
+.lesson-next:active,
+.teach-done:active,
+.q-done:active,
+.kb-done:active:not(:disabled) {
+  transform: translateY(3px);
+  box-shadow: inset var(--mc-step) var(--mc-step) 0 var(--mc-green-shade), inset calc(var(--mc-step) * -1) calc(var(--mc-step) * -1) 0 var(--mc-green-light);
+}
+
+.type-view .type-field {
+  background: var(--paper);
+}

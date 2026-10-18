@@ -42,6 +42,13 @@ describe('lesson view', () => {
     expect(button.textContent).toBe('Volgende');
   });
 
+  it('the page text scrolls on its own and Volgende stays outside it (F6)', () => {
+    const { view, button } = setup();
+    const body = view.element.querySelector('.lesson-body');
+    expect(body?.classList.contains('scrollable')).toBe(true);
+    expect(body?.contains(button)).toBe(false);
+  });
+
   it('Volgende pages forward and the last page has Ik snap het!', () => {
     const t = setup();
     t.tap();

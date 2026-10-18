@@ -2,6 +2,7 @@
 // No storage, no timers of its own. Progress dots at the top, Dino Juf in the header,
 // and the current phase (lesson, question with retry banner, right feedback, teach moment, summary, empty).
 
+import '../../styles/mc-menu.css';
 import '../../styles/break.css';
 import type { Sound } from '../../audio/sound';
 import type { Item, Lesson } from '../../content/format';
@@ -13,6 +14,7 @@ import { onTap } from '../tap';
 import { createDinoJuf } from './dino-juf';
 import { createLessonView } from './lesson-view';
 import { createQuestionHost, formatRightAnswer } from './question-host';
+import { applyMcBackground } from './mc-background';
 import { createSummaryView } from './summary';
 import { createTeachMoment, pickLessonPage, type Teaching } from './teach-moment';
 
@@ -71,6 +73,8 @@ function buildTeaching(
 
 export function createBreakScreen(options: BreakScreenOptions): BreakScreen {
   const root = el('div', { class: 'break-screen', attrs: { role: 'main', 'aria-label': 'Leerpauze' } });
+  root.classList.add('scrollable');
+  applyMcBackground(root);
   const juf = createDinoJuf('Tijd voor een leerpauze!');
   const dotsWrap = el('div', { class: 'break-dots', attrs: { 'aria-label': 'Voortgang' } });
   const header = el('header', { class: 'break-header' }, [juf.element, dotsWrap]);

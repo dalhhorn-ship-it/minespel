@@ -1,38 +1,43 @@
-/* Kid question views: choice, find-error, punctuate. Touch targets are at least 56px. No hover. */
+/* Kid question views: choice, find-error, punctuate. Minecraft menu look (mc-menu.css).
+   Touch targets are at least 56px. No hover. */
 .q-view {
-  display: flex; flex-direction: column; align-items: center; gap: calc(var(--gap) * 1.5);
-  width: 100%; box-sizing: border-box; padding: var(--gap);
-  font-family: var(--font-stack); font-size: var(--font-body); color: var(--ink);
+  display: flex; flex-direction: column; align-items: center; gap: var(--gap);
+  width: 100%; box-sizing: border-box; padding: 14px 20px;
+  font-family: var(--font-stack); font-size: var(--font-body);
   user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;
 }
 .q-prompt { margin: 0; font-size: var(--font-large); font-weight: 800; text-align: center; }
 .q-sentence {
-  margin: 0; padding: var(--gap) calc(var(--gap) * 1.5); border-radius: var(--radius);
-  background: var(--sky-light); font-size: var(--font-large); font-weight: 700; text-align: center;
+  margin: 0; padding: var(--gap) calc(var(--gap) * 1.5);
+  font-size: var(--font-large); font-weight: 700; text-align: center;
 }
 .q-options { display: flex; flex-direction: column; gap: var(--gap); width: min(100%, 640px); }
 
 .q-option, .q-word, .q-none, .q-gap, .q-done {
   box-sizing: border-box; min-height: var(--touch-min); min-width: var(--touch-min);
-  border: 3px solid var(--ink); border-radius: var(--radius);
-  background: var(--paper); color: var(--ink);
   font: inherit; font-weight: 800; touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
 }
 .q-option { padding: var(--gap) calc(var(--gap) * 1.5); font-size: var(--font-large); }
-.q-picked { background: var(--sand); outline: 5px solid var(--grass); outline-offset: 2px; }
+.q-option.q-picked, .q-word.q-picked, .q-none.q-picked { outline: 5px solid var(--mc-green-light); outline-offset: 2px; background: #cfeec0; }
+.q-done.q-picked { background: var(--mc-green); }
 [aria-disabled='true'] { pointer-events: none; }
 
 .q-words, .q-line { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: var(--gap); }
 .q-word, .q-none { padding: 0 calc(var(--gap) * 1.5); font-size: var(--font-large); }
-.q-none { background: var(--sky-light); }
+.q-view .q-none { background: #d6e8f2; }
 
-.q-line { gap: 4px; font-size: var(--font-large); }
+/* Gap buttons are 56 wide, at least 8px from their neighbours (F9). */
+.q-line { gap: 8px; font-size: var(--font-large); }
 .q-text-word { font-size: var(--font-large); font-weight: 700; padding: 0 2px; }
-.q-gap {
-  width: var(--touch-min); padding: 0; border-style: dashed; border-color: var(--malus);
-  background: var(--sky-light); font-size: var(--font-large); line-height: 1;
+.q-line .q-gap {
+  width: var(--touch-min); padding: 0; border-style: dashed; border-color: #3a3a3a;
+  font-size: var(--font-large); line-height: 1;
 }
-.q-gap[aria-pressed='true'] { border-style: solid; border-color: var(--grass); background: var(--right-bg); color: var(--right); }
-.q-done { padding: 0 calc(var(--gap) * 3); background: var(--grass); border-color: var(--grass); color: var(--on-grass); font-size: var(--font-large); }
-.q-done.q-picked { background: var(--grass); }
+.q-line .q-gap[aria-pressed='true'] { border-style: solid; border-color: var(--mc-edge); background: #b6e8a0; color: #0d3d18; }
+.q-done { padding: 0 calc(var(--gap) * 3); font-size: var(--font-large); }
+
+@media (max-height: 740px) {
+  .q-view { padding: 10px 20px; gap: 8px; }
+  .q-options { gap: 8px; }
+}

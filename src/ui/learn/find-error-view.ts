@@ -1,5 +1,6 @@
 // Find-error view: tap the wrong word, or "Geen fout" when there is no mistake (AC54).
 // It only collects the answer (word index, or -1). Only the first tap counts (AC117).
+import '../../styles/mc-menu.css';
 import '../../styles/questions.css';
 import type { FindErrorItem } from '../../content/format';
 import { el } from '../dom';

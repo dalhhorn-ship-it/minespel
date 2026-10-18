@@ -1,6 +1,7 @@
 // Teach moment card (AC146 view part): "Zo zit het:", the right answer, the explain text,
 // teaching (a lesson page or a worked example), "-1 punt" in soft grey and "Ik snap het".
 // The point change itself is done by the caller. This only shows the card.
+import '../../styles/mc-menu.css';
 import '../../styles/lesson.css';
 import type { Lesson, LessonPage } from '../../content/format';
 import { el } from '../dom';
@@ -37,23 +38,26 @@ export interface TeachMoment {
 
 export function createTeachMoment(options: TeachMomentOptions): TeachMoment {
   const root = el('section', { class: 'teach-moment', attrs: { 'aria-label': 'Zo zit het' } });
-  root.append(el('h2', { class: 'teach-heading', text: 'Zo zit het:' }));
-  root.append(el('p', { class: 'teach-answer', text: options.answer }));
-  root.append(el('p', { class: 'teach-explain', text: options.explain }));
+  // The text part scrolls on its own (.scrollable lets the finger scroll, see lockdown.ts).
+  // The footer with "Ik snap het" always stays in view (F5).
+  const scroll = el('div', { class: 'teach-scroll scrollable' });
+  scroll.append(el('h2', { class: 'teach-heading', text: 'Zo zit het:' }));
+  scroll.append(el('p', { class: 'teach-answer', text: options.answer }));
+  scroll.append(el('p', { class: 'teach-explain', text: options.explain }));
 
   const t = options.teaching;
   if (t?.kind === 'page') {
     const box = el('div', { class: 'teach-lesson' }, [renderLessonPage(t.page)]);
-    root.append(box);
+    scroll.append(box);
   } else if (t?.kind === 'example') {
     const list = el('ol', { class: 'teach-steps' });
     for (const step of t.example.steps) list.append(el('li', { text: step }));
-    root.append(el('div', { class: 'teach-lesson teach-worked' }, [el('h3', { class: 'lesson-title', text: t.example.title }), list]));
+    scroll.append(el('div', { class: 'teach-lesson teach-worked' }, [el('h3', { class: 'lesson-title', text: t.example.title }), list]));
   }
 
-  root.append(el('p', { class: 'teach-malus', text: '-1 punt' }));
   const button = el('button', { class: 'teach-done', text: 'Ik snap het', attrs: { type: 'button' } });
-  root.append(button);
+  const footer = el('div', { class: 'teach-footer' }, [el('p', { class: 'teach-malus', text: '-1 punt' }), button]);
+  root.append(scroll, footer);
 
   let done = false;
   const off = onTap(

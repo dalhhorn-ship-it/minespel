@@ -1,14 +1,15 @@
-/* Kid keyboard, number pad and the answer field. Keys are 64px or more. No hover rules. */
+/* Kid keyboard, number pad and the answer field. Minecraft menu look (mc-menu.css).
+   Key height follows the screen height so Klaar always fits (F7): 56px at 690 high, 68px at 768 and up.
+   No hover rules. */
 .type-view {
-  display: flex; flex-direction: column; align-items: center; gap: var(--gap);
-  font-family: var(--font-stack); color: var(--ink);
+  display: flex; flex-direction: column; align-items: center; gap: 8px; width: 100%;
+  font-family: var(--font-stack);
   user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;
 }
 .type-sentence { margin: 0; font-size: var(--font-large); font-weight: 700; text-align: center; }
 .type-field {
   box-sizing: border-box; display: flex; align-items: center; justify-content: center;
-  min-width: 320px; max-width: 100%; min-height: 72px; padding: 0 var(--gap);
-  border: 3px solid var(--ink); border-radius: var(--radius); background: var(--paper);
+  min-width: 320px; max-width: 100%; min-height: clamp(52px, 8vh, 72px); padding: 0 var(--gap);
   font-size: var(--font-title); font-weight: 800; overflow-wrap: anywhere; white-space: pre-wrap;
 }
 .type-caret { display: inline-block; width: 3px; height: 1.1em; margin-left: 2px; background: var(--ink); }
@@ -17,20 +18,18 @@
 .kid-keyboard { display: flex; flex-direction: column; gap: 8px; width: 100%; max-width: 960px; touch-action: manipulation; }
 .kb-row { display: flex; justify-content: center; gap: 8px; }
 .kb-key {
-  box-sizing: border-box; flex: 1 1 0; max-width: 88px; min-width: 56px; height: 68px; padding: 0;
-  border: 3px solid var(--ink); border-radius: 12px; background: var(--sky-light); color: var(--ink);
+  box-sizing: border-box; flex: 1 1 0; max-width: 88px; min-width: 56px; height: clamp(52px, 8.2vh, 68px); padding: 0;
   font: inherit; font-size: var(--font-large); font-weight: 800;
   touch-action: manipulation; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;
   -webkit-tap-highlight-color: transparent;
 }
-.kb-key:active { background: var(--sky); }
-.kb-wide { max-width: 120px; flex-grow: 1.4; background: var(--sand); }
-.kb-shift[aria-pressed='true'] { background: var(--grass); color: var(--on-grass); }
+.kb-key.kb-wide { max-width: 120px; flex-grow: 1.4; background: #cfcfcf; }
+.kb-shift[aria-pressed='true'] { background: var(--mc-green); color: var(--on-grass); }
 .kb-space { max-width: none; flex-grow: 5; }
-.kb-done { max-width: 200px; flex-grow: 2; background: var(--grass); color: var(--on-grass); }
-.kb-key:disabled { background: var(--malus); border-color: var(--malus); color: var(--paper); }
+.kb-key.kb-done { max-width: 200px; flex-grow: 2; }
+.kb-key.kb-key:disabled { background: var(--malus); border-color: var(--mc-edge); color: var(--paper); box-shadow: none; text-shadow: none; }
 
 .number-pad { display: grid; grid-template-columns: repeat(3, 96px); gap: 8px; touch-action: manipulation; }
-.number-pad .kb-key { max-width: none; width: 96px; height: 76px; }
+.number-pad .kb-key { max-width: none; width: 96px; height: clamp(52px, 8.2vh, 76px); }
 .number-pad .kb-done { grid-column: span 3; width: auto; max-width: none; }
-.number-pad .kb-back { background: var(--sand); }
+.number-pad .kb-back { background: #cfcfcf; }

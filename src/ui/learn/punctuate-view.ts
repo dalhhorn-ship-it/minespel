@@ -1,6 +1,7 @@
 // Punctuate view: tap the gaps between words to place or remove the mark, then tap Klaar (AC55).
 // Gap i is the space right after words[i]. It only collects the marked gaps (sorted).
 // Only the first Klaar counts (AC117).
+import '../../styles/mc-menu.css';
 import '../../styles/questions.css';
 import type { PunctuateItem } from '../../content/format';
 import { el } from '../dom';
