@@ -128,7 +128,7 @@ Please play only from the home screen icon. The home screen app and a Safari tab
 
 ## Where it is deployed
 
-Not yet. The plan is Cloudflare Workers as static assets, at a `dino-blokwereld` address on workers.dev. The first test deploy waits for the founder. It needs the repo secrets `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`, and the founder must say yes. The deploy workflow is manual only (`.github/workflows/deploy.yml`).
+Cloudflare Workers as static assets, Worker `minespel`, at `minespel.<account subdomain>.workers.dev`. The founder connected the repo to Cloudflare Workers Builds, so a push to `main` builds and deploys it (decision 54). The manual workflow `.github/workflows/deploy.yml` still works with the repo secrets `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`.
 
 ## Built by an agent factory
 This app was made with the agent factory in `CLAUDE.md`. Start Claude Code in this folder and say what you want to make, or type `/factory` to continue where you left off.

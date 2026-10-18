@@ -333,8 +333,8 @@ Rules: every task adds tests that fail without its change. Pure logic is tested 
 
 ## How to deploy
 
-* Worker name `dino-blokwereld`, static assets from `./dist`, `compatibility_date` 2026-10-17, see `wrangler.jsonc`. No Worker script, no KV, D1 or R2. `preview_urls` is off so no extra public addresses appear.
-* Address: `https://dino-blokwereld.<account subdomain>.workers.dev` (F9, public).
+* Worker name `minespel` (the Worker the founder connected in Cloudflare, decision 54), static assets from `./dist`, `compatibility_date` 2026-10-17, see `wrangler.jsonc`. No Worker script, no KV, D1 or R2. `preview_urls` is off so no extra public addresses appear.
+* Address: `https://minespel.<account subdomain>.workers.dev` (F9, public). The IndexedDB name stays `dino-blokwereld`.
 * `npm run deploy` (build, then `wrangler deploy`) on the founder's machine after `npx wrangler login`, or the manual "Deploy to Cloudflare Workers" GitHub workflow with the repo secrets `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`, which only the founder adds.
 * Every deploy is a founder decision. The ship checklist confirms Cloudflare Web Analytics is off for this Worker (AC98).
 * `public/_headers` sets `Cache-Control: no-cache` for `/service-worker.js` and `/index.html`, and long caching for hashed files in `/assets/`.

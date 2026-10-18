@@ -4,7 +4,7 @@
 // Never put an account id or a token in this file. Deploying is a founder action at /ship.
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
-  "name": "dino-blokwereld",
+  "name": "minespel",
   "compatibility_date": "2026-10-17",
   "assets": {
     "directory": "./dist"
