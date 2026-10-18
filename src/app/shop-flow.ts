@@ -4,7 +4,7 @@
 
 import type { Sound } from '../audio/sound';
 import { systemClock, today, type Clock } from '../core/clock';
-import { purchaseEgg, shopDinoCount } from '../core/economy';
+import { chickenCount, purchaseChicken, purchaseEgg, shopDinoCount } from '../core/economy';
 import { registerHook } from '../dev/e2e-hooks';
 import {
   addEgg,
@@ -43,7 +43,7 @@ export interface ShopFlowOptions {
 export interface ShopFlow {
   open(): Promise<void>;
   buyEgg(kind: DinoKindId): Promise<boolean>;
-  deployChickens(count?: number): Promise<number>;
+  buyChicken(): Promise<boolean>;
   destroy(): void;
 }
 
@@ -87,6 +87,12 @@ export function createShopFlow(options: ShopFlowOptions): ShopFlow {
     };
   }
 
+  function boughtToast(kind: DinoKindId): string {
+    return kind === 'kip'
+      ? 'Tok tok! Je nieuwe kip loopt naast je in de wereld!'
+      : `Hoera! Je ${DINO_KINDS[kind].name}-ei ligt naast je in de wereld!`;
+  }
+
   async function executeBuy(kind: DinoKindId): Promise<boolean> {
     const store = resolveDinoStore();
     const dayStr = today(clock);
@@ -94,7 +100,7 @@ export function createShopFlow(options: ShopFlowOptions): ShopFlow {
 
     // Atomic IndexedDB transaction writing economy, dinos, and ledger together (AC150)
     if (options.db && store) {
-      let spawnedEggId: string | null = null;
+      let spawnedId: string | null = null;
       try {
         const bought = await transact(
           options.db,
@@ -108,12 +114,14 @@ export function createShopFlow(options: ShopFlowOptions): ShopFlow {
               ...defaultKv('economy'),
               ...(rawEco ?? {}),
             };
-            const currentShopCount = store.shopCount();
-            const res = purchaseEgg(currentEco, currentShopCount, kind);
+            const res =
+              kind === 'kip'
+                ? purchaseChicken(currentEco, store.chickenCount())
+                : purchaseEgg(currentEco, store.shopCount(), kind);
             if (!res.ok) return false;
 
-            const egg = store.spawnEggInMemory(kind, false);
-            spawnedEggId = egg.id;
+            const spawned = kind === 'kip' ? store.spawnChickenInMemory() : store.spawnEggInMemory(kind, false);
+            spawnedId = spawned.id;
             const nextDinosRecord: DinosRecord = store.toRecord();
             const ledgerEntry: LedgerInput = {
               ts,
@@ -132,14 +140,15 @@ export function createShopFlow(options: ShopFlowOptions): ShopFlow {
           return false;
         }
         options.sound?.play('clink');
-        lastToast = `Hoera! Je ${DINO_KINDS[kind].name}-ei ligt naast je in de wereld!`;
+        lastToast = boughtToast(kind);
         if (activeView) {
           activeView.render(await readViewState());
         }
         return true;
       } catch {
-        if (spawnedEggId) {
-          store.removeEggInMemory(spawnedEggId);
+        if (spawnedId) {
+          store.removeEggInMemory(spawnedId);
+          store.removeDinoInMemory(spawnedId);
         }
         return false;
       }
@@ -151,18 +160,43 @@ export function createShopFlow(options: ShopFlowOptions): ShopFlow {
         options.records.get('economy'),
         options.records.get('dinos'),
       ]);
-      const currentShopCount = store
-        ? store.shopCount()
-        : shopDinoCount(
-            (dinosRec.dinos ?? []) as { golden?: boolean; kind?: string }[],
-            (dinosRec.eggs ?? []) as { golden?: boolean; kind?: string }[],
-          );
-      const res = purchaseEgg(eco, currentShopCount, kind);
+      const rawDinos = (dinosRec.dinos ?? []) as { golden?: boolean; kind?: string }[];
+      const rawEggs = (dinosRec.eggs ?? []) as { golden?: boolean; kind?: string }[];
+      const res =
+        kind === 'kip'
+          ? purchaseChicken(eco, store ? store.chickenCount() : chickenCount(rawDinos))
+          : purchaseEgg(eco, store ? store.shopCount() : shopDinoCount(rawDinos, rawEggs), kind);
       if (!res.ok) return false;
 
       await options.records.put('economy', res.economy);
       if (store) {
-        await addEgg(kind, false);
+        if (kind === 'kip') {
+          store.spawnChickenInMemory();
+          await store.saveNow();
+        } else {
+          await addEgg(kind, false);
+        }
+      } else if (kind === 'kip') {
+        await options.records.put('dinos', {
+          dinos: [
+            ...(dinosRec.dinos ?? []),
+            {
+              id: `kip-${ts}`,
+              kind: 'kip' as const,
+              golden: false,
+              name: '',
+              mode: 'follow' as const,
+              x: 32,
+              y: 10,
+              z: 32,
+              heading: 0,
+              growth: 2,
+              stayX: 32,
+              stayZ: 32,
+            },
+          ],
+          eggs: [...(dinosRec.eggs ?? [])],
+        });
       } else {
         await options.records.put('dinos', {
           dinos: [...(dinosRec.dinos ?? [])],
@@ -181,7 +215,7 @@ export function createShopFlow(options: ShopFlowOptions): ShopFlow {
         });
       }
       options.sound?.play('clink');
-      lastToast = `Hoera! Je ${DINO_KINDS[kind].name}-ei ligt naast je in de wereld!`;
+      lastToast = boughtToast(kind);
       if (activeView) {
         activeView.render(await readViewState());
       }
@@ -191,59 +225,11 @@ export function createShopFlow(options: ShopFlowOptions): ShopFlow {
     return false;
   }
 
-  /** Serializes purchase calls so 10 rapid taps in 1 second never double-spend (AC110). */
+  /** Serializes purchase calls (eggs and chickens) so rapid taps never double-spend (AC110). */
   function buyEgg(kind: DinoKindId): Promise<boolean> {
     const next = buyLock.then(() => executeBuy(kind)).catch(() => false);
     buyLock = next;
     return next;
-  }
-
-  async function deployChickens(count = 1): Promise<number> {
-    const store = resolveDinoStore();
-    const n = Math.max(1, Math.min(10, Math.floor(count)));
-    if (store) {
-      const spawned = await store.deployChicken(n);
-      options.sound?.play('chirp');
-      lastToast =
-        spawned.length === 1
-          ? 'Tok tok! Er loopt nu een kip naast je in de wereld!'
-          : `Tok tok! Er lopen nu ${spawned.length} nieuwe kippen naast je in de wereld!`;
-      if (activeView) {
-        activeView.render(await readViewState());
-      }
-      return spawned.length;
-    }
-    if (options.records) {
-      const dinosRec = await options.records.get('dinos');
-      const newChickens = Array.from({ length: n }, (_, idx) => ({
-        id: `kip-${clock.now()}-${idx}`,
-        kind: 'kip' as const,
-        golden: false,
-        name: '',
-        mode: 'follow' as const,
-        x: 32 + idx,
-        y: 10,
-        z: 32,
-        heading: 0,
-        growth: 2,
-        stayX: 32 + idx,
-        stayZ: 32,
-      }));
-      await options.records.put('dinos', {
-        dinos: [...(dinosRec.dinos ?? []), ...newChickens],
-        eggs: [...(dinosRec.eggs ?? [])],
-      });
-      options.sound?.play('chirp');
-      lastToast =
-        n === 1
-          ? 'Tok tok! Er loopt nu een kip naast je in de wereld!'
-          : `Tok tok! Er lopen nu ${n} nieuwe kippen naast je in de wereld!`;
-      if (activeView) {
-        activeView.render(await readViewState());
-      }
-      return n;
-    }
-    return 0;
   }
 
   function clear() {
@@ -264,9 +250,6 @@ export function createShopFlow(options: ShopFlowOptions): ShopFlow {
         onBuy: async (kind) => {
           await buyEgg(kind);
         },
-        onDeployChickens: async (count) => {
-          await deployChickens(count);
-        },
         onEarnCoins: options.onEarnCoins
           ? () => {
               clear();
@@ -281,7 +264,7 @@ export function createShopFlow(options: ShopFlowOptions): ShopFlow {
       options.screens.showKidOverlay(activeView.element);
     },
     buyEgg,
-    deployChickens,
+    buyChicken: () => buyEgg('kip'),
     destroy() {
       clear();
     },
@@ -290,7 +273,7 @@ export function createShopFlow(options: ShopFlowOptions): ShopFlow {
   if (__E2E__) {
     registerHook('openShop', () => flow.open());
     registerHook('buyEggInShop', (kind: DinoKindId) => flow.buyEgg(kind));
-    registerHook('deployChickensInShop', (count?: number) => flow.deployChickens(count));
+    registerHook('buyChickenInShop', () => flow.buyChicken());
   }
 
   return flow;

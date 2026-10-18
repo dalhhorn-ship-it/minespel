@@ -468,7 +468,7 @@ export function createPracticeFlow(options: PracticeFlowOptions): PracticeFlow {
           attrs: { type: 'button', 'data-testid': 'practice-start-break-now' },
         },
         [
-          el('span', { text: '\u{1FA99} Start nu een volledige leerpauze (onbeperkt munten verdienen!)' }),
+          el('span', { text: '\u{1FA99} Start nu een volledige leerpauze' }),
           el('span', { text: 'Start \u{27A1}' }),
         ],
       );

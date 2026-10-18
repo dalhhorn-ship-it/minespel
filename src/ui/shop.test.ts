@@ -2,7 +2,7 @@
 import { describe, expect, it } from 'vitest';
 import { createScreenManager } from '../app/screens';
 import { createShopFlow } from '../app/shop-flow';
-import { MSG_CAP_REACHED } from '../core/economy';
+import { MSG_CAP_REACHED, MSG_COOP_FULL } from '../core/economy';
 import { createDinoStore } from '../dinos/dino-store';
 import { openDb } from '../storage/db';
 import { createLogStore } from '../storage/log-store';
@@ -21,6 +21,8 @@ describe('shop view and shop flow (T47, AC20, AC110, AC149, AC150)', () => {
     const modal = view.element.querySelector('.shop-modal');
     expect(modal?.classList.contains('scrollable')).toBe(true);
     expect(view.element.querySelector('[data-testid="shop-chicken-coop"]')).not.toBeNull();
+    expect(view.element.textContent).not.toContain('3 Kippen');
+    expect(view.element.querySelector('[data-testid="shop-deploy-chicken-flock"]')).toBeNull();
     expect(view.element.querySelector('.shop-close-btn')).not.toBeNull();
     // Fits at 1024x768: no long blurb per card.
     expect(view.element.querySelector('.shop-card-trait')).toBeNull();
@@ -124,22 +126,101 @@ describe('shop view and shop flow (T47, AC20, AC110, AC149, AC150)', () => {
     expect(ledgerAfter[0]?.delta).toBe(-40);
     expect(ledgerAfter[0]?.reason).toBe('shop');
 
-    // CR3: Deploy chickens in the shop (1 chicken, then 3 chickens)
-    const deployOneBtn = host.querySelector<HTMLButtonElement>('[data-testid="shop-deploy-chicken"]');
-    expect(deployOneBtn).not.toBeNull();
-    const deployedOne = await flow.deployChickens(1);
-    expect(deployedOne).toBe(1);
-    const deployedFlock = await flow.deployChickens(3);
-    expect(deployedFlock).toBe(3);
+    flow.destroy();
+    db.close();
+  });
 
-    const chickens = dinoStore.dinos().filter((d) => d.kind === 'kip');
-    expect(chickens).toHaveLength(4);
-    expect(host.querySelector('[data-testid="shop-chicken-count"]')?.textContent).toBe(
-      'Kippen in je wereld: 4',
-    );
-    // Chickens do not count toward the 12 shop dino cap
-    expect(dinoStore.shopCount()).toBe(1);
+  const press = (el: Element | null | undefined) => {
+    el?.dispatchEvent(new PointerEvent('pointerdown', { pointerId: 1, clientX: 5, clientY: 5, bubbles: true }));
+    el?.dispatchEvent(new PointerEvent('pointerup', { pointerId: 1, clientX: 5, clientY: 5, bubbles: true }));
+  };
 
+  it('chicken card: count, greyed with "Nog 1 punt nodig", and full coop', () => {
+    const view = createShopView({
+      state: { points: 4, dinos: [], eggs: [] },
+      onBuy: () => {},
+      onClose: () => {},
+    });
+    const q = (id: string) => view.element.querySelector<HTMLElement>(`[data-testid="${id}"]`);
+    expect(q('shop-chicken-count')?.textContent).toBe('Kippen: 0 van de 10');
+    expect(q('shop-note-kip')?.textContent).toBe('Nog 1 punt nodig');
+    expect((q('shop-buy-kip') as HTMLButtonElement).disabled).toBe(true);
+    view.render({
+      points: 100,
+      dinos: Array.from({ length: 10 }, (_, i) => ({ id: `k${i}`, kind: 'kip' as const })),
+      eggs: [],
+    });
+    expect(q('shop-chicken-count')?.textContent).toBe('Kippen: 10 van de 10');
+    expect(q('shop-note-kip')?.textContent).toBe(MSG_COOP_FULL);
+    expect((q('shop-buy-kip') as HTMLButtonElement).disabled).toBe(true);
+    // 12 dinos and a chicken: the dino cap does not block chickens
+    view.render({
+      points: 100,
+      dinos: Array.from({ length: 12 }, (_, i) => ({ id: `d${i}`, kind: 'compy' as const })),
+      eggs: [],
+    });
+    expect((q('shop-buy-kip') as HTMLButtonElement).disabled).toBe(false);
+    view.destroy();
+  });
+
+  it('buys a chicken with Kopen, Ja, takes 5 points once on 5 fast taps and writes the ledger (decision 55)', async () => {
+    const db = await openDb({ name: `shop-chicken-${Math.random()}` });
+    const records = createRecords(db);
+    const logStore = createLogStore(db);
+    const dinoStore = createDinoStore({
+      world: new World(),
+      getPlayerSpot: () => ({ x: START_SPOT.x, y: START_SPOT.y, z: START_SPOT.z }),
+      records,
+    });
+    const host = document.createElement('div');
+    const screens = createScreenManager({ host });
+    await records.put('economy', { points: 5, practicePointsToday: 0, practiceDay: '2026-10-17' });
+    const flow = createShopFlow({ screens, db, records, logStore, dinoStore });
+    await flow.open();
+
+    press(host.querySelector('[data-testid="shop-buy-kip"]'));
+    expect(host.textContent).toContain('Wil je een kip kopen voor 5 punten?');
+    // 5 fast taps on Ja
+    const yes = host.querySelector('[data-testid="shop-confirm-yes-kip"]');
+    for (let i = 0; i < 5; i++) press(yes);
+    const results = await Promise.all(Array.from({ length: 5 }, () => flow.buyChicken()));
+    await new Promise((r) => setTimeout(r, 20));
+    expect(results.filter(Boolean)).toHaveLength(0);
+
+    expect((await records.get('economy')).points).toBe(0);
+    expect(dinoStore.dinos().filter((d) => d.kind === 'kip')).toHaveLength(1);
+    expect((await records.get('dinos')).dinos).toHaveLength(1);
+    const ledger = await logStore.listLedger();
+    expect(ledger).toHaveLength(1);
+    expect(ledger[0]).toMatchObject({ delta: -5, reason: 'shop' });
+    expect(dinoStore.shopCount()).toBe(0);
+
+    flow.destroy();
+    db.close();
+  });
+
+  it('fast calls without the screen buy exactly one chicken and 10 chickens fill the coop', async () => {
+    const db = await openDb({ name: `shop-chicken2-${Math.random()}` });
+    const records = createRecords(db);
+    const logStore = createLogStore(db);
+    const dinoStore = createDinoStore({
+      world: new World(),
+      getPlayerSpot: () => ({ x: START_SPOT.x, y: START_SPOT.y, z: START_SPOT.z }),
+      records,
+    });
+    const screens = createScreenManager({ host: document.createElement('div') });
+    await records.put('economy', { points: 5, practicePointsToday: 0, practiceDay: '2026-10-17' });
+    const flow = createShopFlow({ screens, db, records, logStore, dinoStore });
+    const r = await Promise.all(Array.from({ length: 5 }, () => flow.buyChicken()));
+    expect(r.filter(Boolean)).toHaveLength(1);
+    expect((await records.get('economy')).points).toBe(0);
+
+    await records.put('economy', { points: 100, practicePointsToday: 0, practiceDay: '2026-10-17' });
+    const more = await Promise.all(Array.from({ length: 15 }, () => flow.buyChicken()));
+    expect(more.filter(Boolean)).toHaveLength(9);
+    expect(dinoStore.chickenCount()).toBe(10);
+    expect((await records.get('economy')).points).toBe(100 - 45);
+    expect(await flow.buyChicken()).toBe(false);
     flow.destroy();
     db.close();
   });

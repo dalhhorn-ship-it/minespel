@@ -4,6 +4,11 @@ Written so kids can read it too.
 
 ## Unreleased
 
+### Chickens and Nu oefenen
+
+* Chickens now cost 5 points each and the coop holds 10 (they do not count toward the 12 dinos). You buy them like an egg, with Ja or Nee.
+* When you tap Nu oefenen yourself, your plus points count toward the 10 extra points a day, and you never lose a point. A break that starts by itself still gives all its points.
+
 ### Stoppen, a small lock and a grown up check
 
 * In Extra oefenen you can now tap "Stoppen" any time, and you keep the points you already earned.

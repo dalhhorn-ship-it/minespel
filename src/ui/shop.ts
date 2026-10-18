@@ -6,9 +6,12 @@ import '../styles/shop.css';
 import {
   buyState,
   capReached,
+  chickenBuyState,
+  MAX_CHICKENS,
   MAX_SHOP_DINOS,
   MSG_CAP_REACHED,
   shopDinoCount,
+  type BuyState,
 } from '../core/economy';
 import { EGG_HATCH_SECONDS } from '../dinos/egg';
 import { DINO_KINDS, SHOP_KINDS, type DinoKindId } from '../dinos/kinds';
@@ -40,7 +43,6 @@ export interface ShopViewState {
 export interface ShopViewOptions {
   state: ShopViewState;
   onBuy: (kind: DinoKindId) => Promise<void> | void;
-  onDeployChickens?: (count: number) => Promise<void> | void;
   onClose: () => void;
   /** Optional shortcut to override the countdown and earn coins immediately. */
   onEarnCoins?: () => void;
@@ -112,6 +114,124 @@ export function createShopView(options: ShopViewOptions): ShopView {
       },
       [face],
     );
+  }
+
+  /** Progress bar and note when locked, then Kopen or the Ja/Nee question (AC20, AC110, AC149, decision 55). */
+  function buyControls(
+    kindId: DinoKindId,
+    name: string,
+    price: number,
+    bState: BuyState,
+    confirmText: string,
+    withBar: boolean,
+  ): HTMLElement[] {
+    const bottomChildren: HTMLElement[] = [];
+    if (!bState.canBuy && bState.note) {
+      const note = el('p', {
+        class: 'shop-card-note',
+        text: bState.note,
+        attrs: { 'data-testid': `shop-note-${kindId}` },
+      });
+      if (withBar) {
+        const pct = Math.min(100, Math.max(0, Math.round((state.points / price) * 100)));
+        const fill = el('div', { class: 'shop-progress-fill' });
+        fill.style.width = `${pct}%`;
+        bottomChildren.push(
+          el('div', { class: 'shop-progress-wrap' }, [el('div', { class: 'shop-progress-track' }, [fill]), note]),
+        );
+      } else {
+        bottomChildren.push(note);
+      }
+    }
+
+    // Kopen button or Ja/Nee confirmation (AC20, AC110)
+    if (confirmingKind === kindId && bState.canBuy) {
+      const yesBtn = el('button', {
+        class: 'shop-confirm-yes',
+        text: 'Ja',
+        attrs: {
+          type: 'button',
+          'data-testid': `shop-confirm-yes-${kindId}`,
+        },
+      });
+      const noBtn = el('button', {
+        class: 'shop-confirm-no',
+        text: 'Nee',
+        attrs: {
+          type: 'button',
+          'data-testid': `shop-confirm-no-${kindId}`,
+        },
+      });
+      yesBtn.disabled = purchaseInFlight;
+
+      cleanups.push(
+        onTap(
+          yesBtn,
+          () => {
+            if (purchaseInFlight) return;
+            purchaseInFlight = true;
+            yesBtn.disabled = true;
+            Promise.resolve(options.onBuy(kindId)).finally(() => {
+              purchaseInFlight = false;
+              confirmingKind = null;
+              renderView();
+            });
+          },
+          { now: options.now },
+        ),
+        onTap(
+          noBtn,
+          () => {
+            if (purchaseInFlight) return;
+            confirmingKind = null;
+            renderView();
+          },
+          { now: options.now },
+        ),
+      );
+
+      bottomChildren.push(
+        el(
+          'div',
+          {
+            class: 'shop-confirm-box',
+            attrs: { 'data-testid': `shop-confirm-${kindId}` },
+          },
+          [
+            el('p', {
+              class: 'shop-confirm-text',
+              text: confirmText,
+            }),
+            el('div', { class: 'shop-confirm-actions' }, [yesBtn, noBtn]),
+          ],
+        ),
+      );
+    } else {
+      const buyBtn = el('button', {
+        class: 'shop-buy-btn',
+        text: 'Kopen',
+        attrs: {
+          type: 'button',
+          'data-testid': `shop-buy-${kindId}`,
+          'aria-label': `Koop ${name} voor ${price} punten`,
+        },
+      });
+      buyBtn.disabled = !bState.canBuy;
+      if (bState.canBuy) {
+        cleanups.push(
+          onTap(
+            buyBtn,
+            () => {
+              confirmingKind = kindId;
+              renderView();
+            },
+            { now: options.now },
+          ),
+        );
+      }
+      bottomChildren.push(buyBtn);
+    }
+    return bottomChildren;
   }
 
   function renderView() {
@@ -236,112 +356,14 @@ export function createShopView(options: ShopViewOptions): ShopView {
         info,
       ]);
 
-      const bottomChildren: HTMLElement[] = [];
-
-      // Affordability progress meter & note when locked (AC149)
-      if (!bState.canBuy && bState.note) {
-        const pct = Math.min(100, Math.max(0, Math.round((state.points / kind.price) * 100)));
-        const fill = el('div', { class: 'shop-progress-fill' });
-        fill.style.width = `${pct}%`;
-        bottomChildren.push(
-          el('div', { class: 'shop-progress-wrap' }, [
-            el('div', { class: 'shop-progress-track' }, [fill]),
-            el('p', {
-              class: 'shop-card-note',
-              text: bState.note,
-              attrs: { 'data-testid': `shop-note-${kind.id}` },
-            }),
-          ]),
-        );
-      }
-
-      // Kopen button or Ja/Nee confirmation (AC20, AC110)
-      if (confirmingKind === kind.id && bState.canBuy) {
-        const yesBtn = el('button', {
-          class: 'shop-confirm-yes',
-          text: 'Ja',
-          attrs: {
-            type: 'button',
-            'data-testid': `shop-confirm-yes-${kind.id}`,
-          },
-        });
-        const noBtn = el('button', {
-          class: 'shop-confirm-no',
-          text: 'Nee',
-          attrs: {
-            type: 'button',
-            'data-testid': `shop-confirm-no-${kind.id}`,
-          },
-        });
-        yesBtn.disabled = purchaseInFlight;
-
-        cleanups.push(
-          onTap(
-            yesBtn,
-            () => {
-              if (purchaseInFlight) return;
-              purchaseInFlight = true;
-              yesBtn.disabled = true;
-              Promise.resolve(options.onBuy(kind.id)).finally(() => {
-                purchaseInFlight = false;
-                confirmingKind = null;
-                renderView();
-              });
-            },
-            { now: options.now },
-          ),
-          onTap(
-            noBtn,
-            () => {
-              if (purchaseInFlight) return;
-              confirmingKind = null;
-              renderView();
-            },
-            { now: options.now },
-          ),
-        );
-
-        bottomChildren.push(
-          el(
-            'div',
-            {
-              class: 'shop-confirm-box',
-              attrs: { 'data-testid': `shop-confirm-${kind.id}` },
-            },
-            [
-              el('p', {
-                class: 'shop-confirm-text',
-                text: `Wil je een ${kind.name}-ei kopen voor ${kind.price} punten?`,
-              }),
-              el('div', { class: 'shop-confirm-actions' }, [yesBtn, noBtn]),
-            ],
-          ),
-        );
-      } else {
-        const buyBtn = el('button', {
-          class: 'shop-buy-btn',
-          text: 'Kopen',
-          attrs: {
-            type: 'button',
-            'data-testid': `shop-buy-${kind.id}`,
-            'aria-label': `Koop ${kind.name} voor ${kind.price} punten`,
-          },
-        });
-        buyBtn.disabled = !bState.canBuy;
-        if (bState.canBuy) {
-          cleanups.push(
-            onTap(
-              buyBtn,
-              () => {
-                confirmingKind = kind.id;
-                renderView();
-              },
-              { now: options.now },
-            ),
-          );
-        }
-        bottomChildren.push(buyBtn);
-      }
+      const bottomChildren = buyControls(
+        kind.id,
+        kind.name,
+        kind.price,
+        bState,
+        `Wil je een ${kind.name}-ei kopen voor ${kind.price} punten?`,
+        true,
+      );
 
       const card = el(
         'article',
@@ -358,64 +380,13 @@ export function createShopView(options: ShopViewOptions): ShopView {
     }
     modal.append(grid);
 
-    // CR3: Kippenhok — Deploy live chickens directly into the world!
+    // Kippenhok: 5 points a chicken, at most 10 (decision 55). Bought like an egg: Kopen, then Ja or Nee.
     const chickenCount = state.dinos.filter((d) => d.kind === 'kip').length;
-    const deployOneBtn = el('button', {
-      class: 'shop-buy-btn shop-deploy-chicken-btn',
-      text: '\u{1F414} Kip loslaten',
-      attrs: {
-        type: 'button',
-        'data-testid': 'shop-deploy-chicken',
-        'aria-label': 'Laat 1 kip los in je wereld',
-      },
-    });
-    const deployFlockBtn = el('button', {
-      class: 'shop-buy-btn shop-deploy-chicken-btn',
-      text: '\u{1F414}\u{1F414}\u{1F414} 3 Kippen loslaten',
-      attrs: {
-        type: 'button',
-        'data-testid': 'shop-deploy-chicken-flock',
-        'aria-label': 'Laat 3 kippen los in je wereld',
-      },
-    });
-    deployOneBtn.disabled = purchaseInFlight;
-    deployFlockBtn.disabled = purchaseInFlight;
-
-    cleanups.push(
-      onTap(
-        deployOneBtn,
-        () => {
-          if (purchaseInFlight) return;
-          purchaseInFlight = true;
-          deployOneBtn.disabled = true;
-          deployFlockBtn.disabled = true;
-          Promise.resolve(options.onDeployChickens?.(1)).finally(() => {
-            purchaseInFlight = false;
-            renderView();
-          });
-        },
-        { now: options.now },
-      ),
-      onTap(
-        deployFlockBtn,
-        () => {
-          if (purchaseInFlight) return;
-          purchaseInFlight = true;
-          deployOneBtn.disabled = true;
-          deployFlockBtn.disabled = true;
-          Promise.resolve(options.onDeployChickens?.(3)).finally(() => {
-            purchaseInFlight = false;
-            renderView();
-          });
-        },
-        { now: options.now },
-      ),
-    );
-
+    const cState = chickenBuyState(state.points, chickenCount);
     const chickenCoop = el(
       'section',
       {
-        class: 'shop-card shop-card-affordable shop-chicken-coop',
+        class: `shop-card ${cState.canBuy ? 'shop-card-affordable' : 'shop-card-greyed'} shop-chicken-coop`,
         attrs: { 'aria-label': 'Kippenhok', 'data-testid': 'shop-chicken-coop' },
       },
       [
@@ -423,20 +394,31 @@ export function createShopView(options: ShopViewOptions): ShopView {
           buildArtEmblem('kip'),
           el('div', { class: 'shop-card-info' }, [
             el('div', { class: 'shop-card-title-row' }, [
-              el('h3', { class: 'shop-card-name', text: '\u{1F414} Kippenhok — Kippen loslaten' }),
-              el('span', { class: 'shop-card-price', text: 'Direct in je wereld!' }),
+              el('h3', { class: 'shop-card-name', text: '\u{1F414} Kippenhok' }),
+              el('span', { class: 'shop-card-price', text: `${DINO_KINDS.kip.price} punten per kip` }),
             ]),
             el('div', { class: 'shop-card-meta' }, [
               el('span', { class: 'shop-chip', text: SPECIES_META.kip.sizeLabel }),
               el('span', {
                 class: 'shop-chip shop-chip-owned',
-                text: `Kippen in je wereld: ${chickenCount}`,
+                text: `Kippen: ${chickenCount} van de ${MAX_CHICKENS}`,
                 attrs: { 'data-testid': 'shop-chicken-count' },
               }),
             ]),
           ]),
         ]),
-        el('div', { class: 'shop-confirm-actions' }, [deployOneBtn, deployFlockBtn]),
+        el(
+          'div',
+          { class: 'shop-coop-buy' },
+          buyControls(
+            'kip',
+            DINO_KINDS.kip.name,
+            DINO_KINDS.kip.price,
+            cState,
+            `Wil je een kip kopen voor ${DINO_KINDS.kip.price} punten?`,
+            false,
+          ),
+        ),
       ],
     );
     modal.append(chickenCoop);

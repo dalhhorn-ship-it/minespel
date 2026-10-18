@@ -459,7 +459,7 @@ const SCREENS: ScreenDef[] = [
     back: '.shop-close-btn',
     open: async (page) => {
       await openShopWithPoints(page, 200);
-      await readState(page, 'deployChickensInShop', 3);
+      for (let i = 0; i < 3; i++) await readState(page, 'buyChickenInShop');
       await readState(page, 'addEgg', 'brachiosaurus', false);
       await settle(page);
       await page.locator('.shop-modal').evaluate((n) => {
@@ -1215,7 +1215,7 @@ test.describe('UI review real taps', () => {
   test('Dinowinkel Kippenhok buttons are reachable without scrolling', async ({ page }) => {
     await prepare(page);
     await openShopWithPoints(page, 200);
-    const box = await page.locator('[data-testid="shop-deploy-chicken"]').boundingBox();
+    const box = await page.locator('[data-testid="shop-buy-kip"]').boundingBox();
     expect(box && box.y + box.height <= 768).toBe(true);
   });
 });

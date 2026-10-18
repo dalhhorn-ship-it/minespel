@@ -42,4 +42,44 @@ test.describe('Dinowinkel shop (T47, AC20, AC110, AC149, AC150)', () => {
     expect(ledger[0]?.delta).toBe(-40);
     expect(ledger[0]?.reason).toBe('shop');
   });
+
+  test('buys one chicken for 5 points with Kopen and Ja, and a chicken needs no egg room (decision 55)', async ({
+    page,
+  }) => {
+    await openApp(page);
+    await readState(page, 'setPoints', 9);
+    await readState(page, 'openShop');
+    await expect(page.locator('[data-testid="shop-chicken-count"]')).toHaveText('Kippen: 0 van de 10');
+    await expect(page.locator('[data-testid="shop-deploy-chicken-flock"]')).toHaveCount(0);
+
+    await page.locator('[data-testid="shop-buy-kip"]').click();
+    await page.locator('[data-testid="shop-confirm-yes-kip"]').click();
+    await expect(page.locator('[data-testid="shop-chicken-count"]')).toHaveText('Kippen: 1 van de 10');
+    expect(await readState<number>(page, 'points')).toBe(4);
+    // 4 points left: not enough for another one
+    await expect(page.locator('[data-testid="shop-note-kip"]')).toHaveText('Nog 1 punt nodig');
+    await expect(page.locator('[data-testid="shop-buy-kip"]')).toBeDisabled();
+
+    const ledger = await readState<Array<{ delta: number; reason: string }>>(page, 'ledgerLog');
+    expect(ledger).toHaveLength(1);
+    expect(ledger[0]).toMatchObject({ delta: -5, reason: 'shop' });
+  });
+
+  test('Nu oefenen starts an early break; a countdown break is not early (decision 56)', async ({ page }) => {
+    await openApp(page);
+    await readState(page, 'setPracticeUsed', 10);
+    await page.locator('[data-testid="countdown-start-now"]').click();
+    await expect.poll(() => readState<boolean>(page, 'isBreakActive')).toBe(true);
+    expect((await readState<{ early?: boolean }>(page, 'breakState')).early).toBe(true);
+
+    // Closing the app during the break: it comes back as an early break
+    const page2 = await killApp(page);
+    await expect.poll(() => readState<boolean>(page2, 'isBreakActive')).toBe(true);
+    expect((await readState<{ early?: boolean }>(page2, 'breakState')).early).toBe(true);
+    await readState(page2, 'endBreakByParent');
+
+    await readState(page2, 'startBreakNow');
+    expect((await readState<{ early?: boolean }>(page2, 'breakState')).early).toBeFalsy();
+    await readState(page2, 'endBreakByParent');
+  });
 });

@@ -2,7 +2,7 @@
 // Holds the live dinos and incubating eggs in the world, serializes to/from `kv.dinos`,
 // hooks into SaveQueue (`queue.register('dinos', ...)`), and exports `addEgg(kind, golden)`.
 
-import { shopDinoCount } from '../core/economy';
+import { chickenCount, shopDinoCount } from '../core/economy';
 import { createRng, type Rng } from '../core/rng';
 import { cleanName } from '../render/name-tag';
 import type { Records } from '../storage/records';
@@ -155,8 +155,12 @@ export interface DinoStore {
   removeEggInMemory(eggId: string): void;
   /** Spawns an egg next to the player and persists immediately to storage. */
   addEgg(kind: DinoKindId, golden?: boolean): Promise<WorldEgg>;
-  /** Spawns live chickens ('kip') next to the player and persists immediately to storage (CR3). */
-  deployChicken(count?: number): Promise<WorldDino[]>;
+  /** Number of chickens ('kip') in the world. */
+  chickenCount(): number;
+  /** Creates a chicken next to the player in memory and returns it (used by atomic shop transactions). */
+  spawnChickenInMemory(): WorldDino;
+  /** Removes a dino or chicken by id in memory (used if an atomic transaction aborts). */
+  removeDinoInMemory(id: string): void;
   /** Hatches an egg into a baby dino at the egg's spot. */
   hatchEgg(eggId: string): WorldDino | null;
   setDinoMode(id: string, mode: DinoMode): WorldDino | undefined;
@@ -182,14 +186,6 @@ export async function addEgg(kind: DinoKindId, golden = false): Promise<WorldEgg
     throw new Error('No active DinoStore initialized');
   }
   return activeStore.addEgg(kind, golden);
-}
-
-/** Spawns live chickens next to the player and saves them (CR3). */
-export async function deployChicken(count = 1): Promise<WorldDino[]> {
-  if (!activeStore) {
-    throw new Error('No active DinoStore initialized');
-  }
-  return activeStore.deployChicken(count);
 }
 
 export function createDinoStore(options: DinoStoreOptions): DinoStore {
@@ -278,6 +274,22 @@ export function createDinoStore(options: DinoStoreOptions): DinoStore {
     saveNow,
     markDirty,
     spawnEggInMemory,
+    chickenCount: () => chickenCount(dinosList),
+    spawnChickenInMemory() {
+      const spot = findEggSpawnSpot(options.world, options.getPlayerSpot(), rng);
+      const base = createDino({ kind: 'kip', golden: false, x: spot.x, y: spot.y, z: spot.z }, true);
+      const chicken: WorldDino = { ...base, id: `kip-${Date.now()}-${nextSeq++}`, name: '' };
+      dinosList.push(chicken);
+      notify();
+      return chicken;
+    },
+    removeDinoInMemory(id) {
+      const idx = dinosList.findIndex((d) => d.id === id);
+      if (idx >= 0) {
+        dinosList.splice(idx, 1);
+        notify();
+      }
+    },
     removeEggInMemory(eggId) {
       const idx = eggsList.findIndex((e) => e.id === eggId);
       if (idx >= 0) {
@@ -290,25 +302,6 @@ export function createDinoStore(options: DinoStoreOptions): DinoStore {
       markDirty();
       await saveNow();
       return egg;
-    },
-    async deployChicken(count = 1) {
-      const n = Math.max(1, Math.min(10, Math.floor(count)));
-      const spawned: WorldDino[] = [];
-      for (let i = 0; i < n; i++) {
-        const spot = findEggSpawnSpot(options.world, options.getPlayerSpot(), rng);
-        const base = createDino({ kind: 'kip', golden: false, x: spot.x, y: spot.y, z: spot.z }, true);
-        const chicken: WorldDino = {
-          ...base,
-          id: `kip-${Date.now()}-${nextSeq++}`,
-          name: '',
-        };
-        dinosList.push(chicken);
-        spawned.push(chicken);
-      }
-      notify();
-      markDirty();
-      await saveNow();
-      return spawned;
     },
     hatchEgg(eggId) {
       const idx = eggsList.findIndex((e) => e.id === eggId);

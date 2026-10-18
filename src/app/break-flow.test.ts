@@ -111,4 +111,54 @@ describe('break flow & resume (T43)', () => {
       db.close();
     }
   });
+
+  it('a break from Nu oefenen is early, resumes as early, and a normal break is not early (decision 56)', async () => {
+    const db = await openDb({ name: `break-flow-early-${Math.random()}` });
+    try {
+      const catalog = await loadCatalog(db);
+      const records = createRecords(db);
+      const progressStore = createProgressStore(db);
+      const logStore = createLogStore(db);
+      const sessionStore = createSessionStore(db);
+      const clock = createFakeClock(new Date('2026-10-17T14:00:00Z').getTime());
+      const rng = createRng(7);
+      const host = document.createElement('div');
+      document.body.append(host);
+      const make = () =>
+        createBreakFlow({
+          clock,
+          rng,
+          screens: createScreenManager({ host }),
+          records,
+          progressStore,
+          logStore,
+          sessionStore,
+          getCatalog: () => catalog,
+        });
+
+      const normal = make();
+      await normal.startBreak();
+      expect(normal.currentState()?.early).toBeFalsy();
+      await normal.endBreakByParent();
+
+      const early = make();
+      await early.startBreak({ early: true });
+      expect(early.currentState()?.early).toBe(true);
+      early.destroy();
+
+      const again = make();
+      expect(await resumeSessionIfAny({ sessionStore, records, breakFlow: again })).toBe('break');
+      expect(again.currentState()?.early).toBe(true);
+      await again.endBreakByParent();
+
+      // The timer ran out while the app was closed: a normal break, never early.
+      await records.update('timers', (t) => ({ ...t, playMsLeft: 0 }));
+      const timed = make();
+      expect(await resumeSessionIfAny({ sessionStore, records, breakFlow: timed })).toBe('break');
+      expect(timed.currentState()?.early).toBeFalsy();
+      host.remove();
+    } finally {
+      db.close();
+    }
+  });
 });

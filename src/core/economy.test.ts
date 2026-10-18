@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import type { EconomyRecord } from '../storage/schema';
 import {
   addPoints, answerPoints, applyPoints, bonusPoints, buyState, canReceiveGolden, capReached,
-  purchaseEgg, shopDinoCount, practiceCapReached, MSG_CAP_REACHED, MSG_ENOUGH_PRACTICE,
+  purchaseEgg, purchaseChicken, chickenBuyState, chickenCount, MAX_CHICKENS, MSG_COOP_FULL, shopDinoCount, practiceCapReached, MSG_CAP_REACHED, MSG_ENOUGH_PRACTICE,
 } from './economy';
 
 const eco = (points: number, today = 0, day = '2026-10-17'): EconomyRecord => ({
@@ -121,5 +121,95 @@ describe('Dinowinkel', () => {
   });
   it('counts eggs too', () => {
     expect(shopDinoCount([{}, {}], [{}])).toBe(3);
+  });
+});
+
+describe('early break points (decision 56)', () => {
+  const early = (e: EconomyRecord, delta: number, day = D) => applyPoints(e, 'break', delta, day, true);
+  it('counts plus points toward the day limit', () => {
+    const r = early(eco(0, 0), 2);
+    expect(r.applied).toBe(2);
+    expect(r.economy.practicePointsToday).toBe(2);
+    expect(r.economy.practiceDay).toBe(D);
+  });
+  it('with 8 used a +2 fits exactly and shows the message', () => {
+    const r = early(eco(0, 8), 2);
+    expect(r.applied).toBe(2);
+    expect(r.message).toBe(MSG_ENOUGH_PRACTICE);
+  });
+  it('with 9 used a +2 gives only 1', () => {
+    const r = early(eco(0, 9), 2);
+    expect(r.applied).toBe(1);
+    expect(r.economy.practicePointsToday).toBe(10);
+    expect(r.capHit).toBe(true);
+  });
+  it('at the limit the +3 bonus and every plus give nothing', () => {
+    expect(early(eco(5, 10), 3).applied).toBe(0);
+    expect(early(eco(5, 10), 3).economy.points).toBe(5);
+    expect(early(eco(5, 10), 1).message).toBe(MSG_ENOUGH_PRACTICE);
+  });
+  it('has no malus', () => {
+    const r = early(eco(5, 0), -1);
+    expect(r.applied).toBe(0);
+    expect(r.economy.points).toBe(5);
+  });
+  it('a normal break keeps full points and its malus', () => {
+    expect(applyPoints(eco(5, 10), 'break', 3, D).applied).toBe(3);
+    expect(applyPoints(eco(5, 10), 'break', -1, D).applied).toBe(-1);
+  });
+  it('is shared with Extra oefenen', () => {
+    const afterEarly = early(eco(0, 0), 6).economy;
+    const practice = applyPoints(afterEarly, 'practice', 6, D);
+    expect(practice.applied).toBe(4);
+    const afterPractice = applyPoints(eco(0, 0), 'practice', 7, D).economy;
+    expect(early(afterPractice, 5).applied).toBe(3);
+  });
+  it('starts again the next day', () => {
+    const r = early(eco(0, 10, D), 2, '2026-10-18');
+    expect(r.applied).toBe(2);
+    expect(r.economy.practicePointsToday).toBe(2);
+  });
+});
+
+describe('Kippenhok (decision 55)', () => {
+  it('a chicken costs 5 points and is taken once on 5 fast taps', () => {
+    let e = eco(5);
+    let chickens = 0;
+    let bought = 0;
+    for (let i = 0; i < 5; i++) {
+      const r = purchaseChicken(e, chickens);
+      if (r.ok) {
+        e = r.economy;
+        chickens++;
+        bought++;
+      }
+    }
+    expect(bought).toBe(1);
+    expect(e.points).toBe(0);
+  });
+  it('4 points are blocked with "Nog 1 punt nodig"', () => {
+    const s = chickenBuyState(4, 0);
+    expect(s.canBuy).toBe(false);
+    expect(s.note).toBe('Nog 1 punt nodig');
+    expect(chickenBuyState(2, 0).note).toBe('Nog 3 punten nodig');
+  });
+  it('the 10th chicken can be bought, then the coop is full', () => {
+    expect(purchaseChicken(eco(50), MAX_CHICKENS - 1).ok).toBe(true);
+    const full = purchaseChicken(eco(50), MAX_CHICKENS);
+    expect(full.ok).toBe(false);
+    expect(chickenBuyState(50, MAX_CHICKENS).note).toBe(MSG_COOP_FULL);
+    expect(chickenBuyState(50, 12).canBuy).toBe(false);
+  });
+  it('chickens do not count in the 12 dinos and 12 dinos still allow a chicken', () => {
+    const dinos = [
+      ...Array.from({ length: 12 }, () => ({ kind: 'compy' })),
+      { kind: 'kip' },
+      { kind: 'kip' },
+    ];
+    expect(shopDinoCount(dinos, [])).toBe(12);
+    expect(chickenCount(dinos)).toBe(2);
+    expect(purchaseChicken(eco(10), chickenCount(dinos)).ok).toBe(true);
+    // eggs never count against chickens
+    expect(chickenCount([{ kind: 'compy' }])).toBe(0);
   });
 });
