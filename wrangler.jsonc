@@ -6,11 +6,6 @@
   "$schema": "./node_modules/wrangler/config-schema.json",
   "name": "minespel",
   "compatibility_date": "2026-10-17",
-  // Wrangler builds the site first on every deploy or upload, so Cloudflare Workers Builds
-  // works even when its dashboard build command is empty.
-  "build": {
-    "command": "npm run build"
-  },
   "assets": {
     "directory": "./dist"
   },
@@ -22,6 +17,9 @@
       "persist": true
     }
   },
+  // Cloudflare Workers Builds runs `npx wrangler preview` for non-main branches (PR previews),
+  // which needs this block, even empty. main deploys with `wrangler deploy`.
+  "previews": {},
   "workers_dev": true,
   "preview_urls": false
 }
