@@ -42,7 +42,7 @@ The founder starts an app by copying the template into a new repo and opening Cl
 
 `/factory` looks at `docs/STATUS.md` and runs the next step, stopping at every gate.
 
-**Gate 1: PRD approval.** No application code is written until the founder has approved the PRD in chat. This is enforced by a hook (`.claude/hooks/prd-gate.sh`): edits outside `docs/`, `.claude/`, `CLAUDE.md` and `README.md` are blocked unless `docs/PRD.approved` matches the current PRD. If the PRD changes after signoff, the gate closes again and the founder must approve again. Approval is a simple yes in chat: follow the `/signoff` steps, ask with AskUserQuestion, and only after the founder picks Approve run `./scripts/signoff.sh "Founder"` to stamp it. Never stamp it on your own judgment, and never edit `docs/PRD.approved` by hand.
+**Gate 1: PRD approval.** No application code is written until the founder has approved the PRD in chat. This is enforced by a hook (`.claude/hooks/prd-gate.sh`): edits outside `docs/`, `.claude/`, `CLAUDE.md` and `README.md` are blocked unless `docs/PRD.approved` matches the current PRD. If the PRD changes after signoff, the gate closes again and the founder must approve again. Approval is a simple yes in chat: follow the `/signoff` steps and ask with AskUserQuestion. When the founder picks Approve (or types a message that starts with "approve"), the hook `.claude/hooks/prd-approve.sh` stamps it. Never run `./scripts/signoff.sh "Founder"` yourself, and never edit `docs/PRD.approved` by hand.
 
 **Gate 2: Founder decisions.** Bring these to the founder, do not decide them yourselves:
 * Scope changes after signoff (adding, cutting or changing a feature)
@@ -117,7 +117,7 @@ Apps are hosted on Cloudflare Workers, serving the built site as static assets.
 | `docs/STATUS.md` | Current phase, what is next, blockers. The operator keeps it current. |
 | `docs/IDEA.md` | Output of brainstorming |
 | `docs/PRD.md` | The product spec the founder approves |
-| `docs/PRD.approved` | Approval stamp. Written only by `scripts/signoff.sh`, after the founder says yes in chat. |
+| `docs/PRD.approved` | Approval stamp. Written only by the approval hook, after the founder says yes in chat. |
 | `docs/ARCHITECTURE.md` | Stack, structure, key choices |
 | `docs/PLAN.md` | Task graph |
 | `docs/DECISIONS.md` | Decision log, including founder decisions |
