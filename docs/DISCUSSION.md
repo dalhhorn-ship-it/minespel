@@ -381,3 +381,11 @@ Small:
 * Main chunk 666 KB. Fine offline after the first visit, but lazy load the learn screens if `test:dist` gets near its budget.
 
 No founder decisions come from this review. iPad check for M3: buy an egg and press the home button right after Ja, reopen, and check the egg and the points; then open the dino menu with 10 seconds left on the countdown and watch that it stops (it does not today, must fix 2).
+
+## PRD change of 2026-10-18 (product)
+
+Product, 2026-10-18. The founder put the change requests from the side branch in v1 (decisions 50 to 52). Folded into `docs/PRD.md` as F16 to F18. Status set back to DRAFT; the founder signs again.
+* Changed: summary, 4.0, 4.1 (64 high world, 32 blocks, all solid, nothing flows or burns), 4.2 (button layout, flying, camera arrows, block grid with slot chooser), 4.3 (trait lines, size chips, progress bars, Mijn dino's tab, chickens at 5 points, max 10), 4.4 timer matrix, 4.5, 4.7 (shared cap, partial plus), 4.15, 4.16 ("zelf gestart"), 4.17, 4.18 (older saves), new 4.20 (obsidiaan gate) and 4.21 (Nu oefenen), section 5, flows 11 and 12, sections 8 to 11.
+* Updated ACs: AC1, AC7, AC23, AC101, AC143, AC151. New ACs: AC155 to AC181. AC20, AC110, AC149 and AC150 are unchanged.
+* Kept: the small grey lock icon, not a labelled "Ouders" button. The default hotbar. No "3 kippen" button.
+* Not reviewed by architect or qa yet. The architect should check the T32 spike plan with the 64 high world.

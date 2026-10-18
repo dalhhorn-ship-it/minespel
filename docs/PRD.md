@@ -1,9 +1,9 @@
 # PRD: Dino Blokwereld (working title)
 
-Status: APPROVED by Founder on 2026-10-17
+Status: DRAFT (first approved by the Founder on 2026-10-17; the change of 2026-10-18 in 4.1 to 4.5, 4.20 and 4.21 waits for a new signoff)
 
 ## 1. Summary
-Dino Blokwereld is a small 3D block world on the iPad where a kid explores, mines and builds with Minecraft style blocks. Every few minutes the game pauses for a short learning break in Rekenen or Taal. Right answers earn dino points. In the Dinowinkel the kid buys dino eggs with those points, and the eggs hatch into friendly blocky dinos that walk around in the world. A passed practice exam gives a golden dino.
+Dino Blokwereld is a small 3D block world on the iPad where a kid explores, mines, builds and flies with Minecraft style blocks. Every few minutes the game pauses for a short learning break in Rekenen or Taal. Right answers earn dino points. In the Dinowinkel the kid buys dino eggs and chickens with those points, and the eggs hatch into friendly blocky dinos that walk around in the world. A passed practice exam gives a golden dino.
 
 The parent decides what gets asked, can write their own lessons and questions, starts practice exams and follows progress. Everything stays on the iPad.
 
@@ -28,18 +28,33 @@ The founder will feel it worked when:
 
 ### 4.0 One v1, suggested build order (F1)
 Everything in this section ships together as v1. There is no v1a or v1b. The suggested build order for the architect, so the riskiest parts come first:
-1. 3D speed spike on the reference iPad, world, controls, saving.
-2. Learning engine: breaks with retry and teach moment, spaced repetition, lessons, both built in modules, dino points, Dinowinkel, eggs and dinos.
+1. 3D speed spike on the reference iPad (with the 64 high world and all 32 blocks), world, controls, flying, camera arrows, saving.
+2. Learning engine: breaks with retry and teach moment, spaced repetition, lessons, both built in modules, dino points, Nu oefenen, Dinowinkel, eggs, dinos and chickens.
 3. Parent gate, Inhoud kiezen, Instellingen, exams, Resultaten, backup.
 4. Eigen modules editor, import and export of modules, the remaining results views.
 
 The architect may change this order. It does not change what v1 is.
 
+**Change of 2026-10-18 (F16 to F18).** The founder added these to v1 after the first signoff: 16 more blocks and a slot chooser (4.1, 4.2), the obsidiaan gate (4.20), flying in a world 64 high (4.1, 4.2), camera arrow buttons (4.2), the Nu oefenen button (4.21), chickens (4.3) and a richer Dinowinkel (4.3). They come from a side branch built by another AI. That code may be reused where it fits, but this PRD is the source of truth.
+
 ### 4.1 The world
-* One fixed world of 64 x 64 blocks wide and 32 blocks high, the same for every new game (fixed seed). Gentle hills, grass, sand patches, trees, stone underneath. No caves, no water in v1. If the first milestone spike shows this is too slow on the reference iPad, the world shrinks to 48 x 48.
-* Invisible walls at the edges, softened with fog. The bottom layer is unbreakable `oersteen`. The player cannot fall out of the world.
+* One fixed world of 64 x 64 blocks wide and 64 blocks high (F16), the same for every new game (fixed seed). Gentle hills, grass, sand patches, trees, stone underneath. The ground stays about as high as before; the extra height is open sky for building and flying. No caves, no lakes or seas in v1. If the first milestone spike shows this is too slow on the reference iPad, the world shrinks to 48 x 48 wide (still 64 high).
+* The fixed world also holds 4 obsidiaan blocks in a row, set into the ground 4 blocks in front of the start spot: the start of the obsidiaan gate (4.20).
+* Invisible walls at the edges, softened with fog. The bottom layer is unbreakable `oersteen`. The player cannot fall out of the world. Nothing can be placed and nobody can fly above the top layer (layer 64).
 * Always daytime. No weather.
-* **Building blocks (16), all free from the start, unlimited (F5):** gras, aarde, steen, keisteen, zand, boomstam, planken, bladeren, glas, baksteen, and wol in wit, rood, geel, blauw, groen and paars. The kid never has to earn, collect or count blocks.
+* **Building blocks (32), all free from the start, unlimited (F5, F16):**
+
+| Row in the grid | Blocks |
+|---|---|
+| Natuur | gras, aarde, zand, boomstam, bladeren, sneeuw, ijs, water |
+| Steen | steen, keisteen, mossteen, zandsteen, graniet, marmer, basalt, diepsteen |
+| Bouwen | planken, baksteen, glas, obsidiaan, vuursteen, goudsteen, diamant, lava |
+| Kleur | wol wit, wol rood, wol geel, wol blauw, wol groen, wol paars, wol oranje, vuur |
+
+* The kid never has to earn, collect or count blocks.
+* **Every block is a plain solid block.** The player, dinos and chickens cannot walk through any of them, including water, lava and vuur. Nothing new happens in physics.
+* **Water, lava and vuur are just blocks.** They do not flow, spread, burn, melt or hurt (the game has no damage). Ijs is not slippery.
+* **Looks of the new blocks:** water, ijs and vuur use see through textures like glas (cut out, simple). Lava and vuur use bright, warm colours so they look glowing, but they give no real light and change no lighting. All textures are still pictures, no animation.
 * **Oersteen:** bottom layer only, cannot be mined or placed.
 * Mining a block removes it from the world. Nothing is collected, because every block is always free.
 * No crafting, no tools, no health, no hunger, no damage, no enemies, no death.
@@ -47,16 +62,38 @@ The architect may change this order. It does not change what v1 is.
 ### 4.2 Moving and building (touch)
 * First person view.
 * Left thumb stick (bottom left) to walk. Drag anywhere on the right half to look around. A jump button bottom right.
+* **Button layout on the right side (landscape):** the jump button sits in the bottom right corner. **Omhoog** and **Omlaag** sit in a small column just left of it, Omhoog on top. The four camera arrows sit in a small plus shaped cluster above the jump and fly buttons, below the lock icon. Every one of these buttons has a tap area of at least 44 x 44 points (bigger is better), sits inside the safe area and does not cover the hotbar or the countdown. These button areas are not part of the look drag zone: a touch that starts on them never turns the view by dragging. The architect fixes the exact positions.
 * A mode switch with two big buttons: **Hakken** (mine) and **Bouwen** (build).
 * **Tap or drag:** a touch that moves less than 10 points and lasts less than 300 ms is a tap. Any other touch on the right half is a look drag and never mines or places. A touch that starts on a button, the stick or the hotbar never starts a look drag. Long press in the world does nothing in v1.
-* **What a tap hits:** the nearest thing under the finger. A dino or an egg comes before a block.
+* **What a tap hits:** the nearest thing under the finger. A dino, a chicken or an egg comes before a block.
 * Tap a block within 6 blocks reach:
   * In Hakken mode the block breaks right away with a small pop of pixel bits.
-  * In Bouwen mode the selected block is placed against the tapped face, unless it would end up inside the player, a dino or an egg.
-* **Building up:** in Bouwen mode, tapping the top face of the block the player stands on places a block there and lifts the player one block up onto it, if there is room above the head. This is how the kid climbs without fiddly timing. No flying in v1.
-* **Hotbar:** 8 big slots along the bottom, filled at the start with gras, aarde, steen, planken, boomstam, glas, baksteen and wol rood. Tap a slot to select it. A ninth button, **Alle blokken**, opens a grid with all 16 blocks. Tapping a block there puts it in the selected slot and closes the grid. The hotbar is saved. There are no counts.
+  * In Bouwen mode the selected block is placed against the tapped face, unless it would end up inside the player, a dino, a chicken or an egg.
+* **Building up:** in Bouwen mode, tapping the top face of the block the player stands on places a block there and lifts the player one block up onto it, if there is room above the head. This is how the kid climbs without fiddly timing. It works only while standing, not while floating.
+* **Flying (F16):**
+  * Holding **Omhoog** makes the player rise straight up at a steady speed (about 4 blocks a second). Letting go stops the rise and the player **floats** at that height: no gravity.
+  * While floating, the stick walks the player around in the air at normal speed, on the same height. Looking and building work as usual.
+  * Holding **Omlaag** makes the player sink at the same speed. When the feet touch a block, floating ends and normal walking and gravity are back. Omlaag while standing on the ground does nothing.
+  * Holding Omhoog and Omlaag at the same time does nothing.
+  * The jump button works only when standing on a block. While floating it does nothing.
+  * Flying never goes through a block: rising stops under a block, sinking stops on a block, walking in the air stops at a wall. The head never goes above the world top.
+  * Mining the block under a floating player changes nothing. Mining the block under a standing player makes them fall like before. A fall never hurts.
+  * Floating is saved with the player position. "Ik zit vast" puts the player on the ground at the start spot and ends floating.
+  * **Things that appear next to the player** (a bought egg, a golden egg, a chicken, a dino that pops back) while the player floats land on the ground below, next to the column under the player. Dinos and chickens on Volg mij walk toward the spot below a floating player. The 8 block follow distance is measured flat, ignoring height.
+* **Camera arrows (F16):** four on screen arrow buttons (up, down, left, right) turn the view, in addition to drag look.
+  * A short tap turns the view about 15 degrees, smoothly.
+  * Holding an arrow keeps turning at about 90 degrees a second. The turn eases in when the button is pressed and eases out after it is let go (about a quarter of a second each), so it never jumps.
+  * Up and down stop at the same limits as drag look (straight up and straight down).
+  * The arrows work together with the stick (two fingers). They never mine or place a block.
+  * Nice to have, for testing on a desktop only: the keyboard arrow keys do the same. Not required and not tested.
+* **Hotbar:** 8 big slots along the bottom, filled at the start with gras, aarde, steen, planken, boomstam, glas, baksteen and wol rood (the same as before). Tap a slot to select it. A ninth button, **Alle blokken**, opens the block grid. The hotbar is saved. There are no counts.
+* **Alle blokken (block grid):** one screen with all 32 blocks at once, in the four rows of the table in 4.1. No tabs. Each block tile is at least 64 x 64 points and shows the block and its name. Above the grid the 8 hotbar slots show, with the selected slot marked.
+  * The kid can tap any of the 8 slots in this screen to choose which slot to fill. That slot gets the mark.
+  * Tapping a block puts it in the marked slot, selects that slot in the hotbar and closes the grid.
+  * A "Terug" button closes the grid without changing anything.
+  * The same block may sit in more than one slot.
 * Walking and looking work with two fingers at the same time (stick plus look).
-* **Ik zit vast:** a button in the pause menu moves the player to the start spot. Dinos set to Volg mij come along. Nothing else changes.
+* **Ik zit vast:** a button in the pause menu moves the player to the start spot. Dinos and chickens set to Volg mij come along. Nothing else changes.
 
 ### 4.3 Dinos, dino points and the Dinowinkel (F5, F7)
 All dinos are earned through learning. There are no wild dinos and no taming.
@@ -70,22 +107,42 @@ All dinos are earned through learning. There are no wild dinos and no taming.
 | Stegosaurus | middel | 40 punten |
 | Brachiosaurus (langnek) | groot | 80 punten |
 
-* **Dino points** are earned in learning breaks and Extra oefenen (see 4.5 and 4.7). The total is always shown in the pause menu and the Dinowinkel. The total never goes below 0.
-* **Dinowinkel:** opened from the pause menu. It shows the four eggs with a picture of the dino, its name, its size and its price, and the kid's point total. The play timer stops while it is open.
+* **Traits:** each kind has a short Dutch line on its shop card:
+
+| Dino | Trait line |
+|---|---|
+| Compy | "Klein, snel en nieuwsgierig!" |
+| Triceratops | "Sterk en lief, met drie hoorns!" |
+| Stegosaurus | "Rustig, met platen op zijn rug!" |
+| Brachiosaurus | "Zo lang dat hij over de bomen kijkt!" |
+
+* **Dino points** are earned in learning breaks, early breaks (Nu oefenen, 4.21) and Extra oefenen (see 4.5 and 4.7). The total is always shown in the pause menu and the Dinowinkel. The total never goes below 0.
+* **Dinowinkel:** opened from the pause menu. The play timer stops while it is open. At the top: the kid's point total, big, and a **Nu oefenen** button (4.21). Below that two tabs, **Winkel** (open first) and **Mijn dino's**.
+  * **Winkel** shows five cards: the four eggs and the Kippenhok. Each egg card has a picture of the dino, its name, its trait line, a size chip ("klein", "middel" or "groot") and its price.
   * An egg the kid can afford has a big "Kopen" button. Tapping it asks "Koop dit ei voor 40 punten?" with "Ja" and "Nee".
-  * An egg the kid cannot afford is greyed out and says "Nog 12 punten nodig".
-  * When the kid has 12 dinos (eggs that have not hatched yet count too), every Kopen button is greyed out and the shop says "Je hebt al 12 dino's! Wat een kudde."
+  * An egg the kid cannot afford is greyed out and says "Nog 12 punten nodig". Next to that text a progress bar shows how far the kid is: filled for the points they have, out of the price (30 of 40 points is three quarters full). It never shows more than full.
+  * When the kid has 12 dinos (eggs that have not hatched yet count too), every Kopen button on the egg cards is greyed out and the shop says "Je hebt al 12 dino's! Wat een kudde." The Kippenhok card is not affected by this.
+  * **Mijn dino's** lists every dino the kid has: eggs that have not hatched yet ("Ei: Triceratops") and hatched dinos with their name, or their kind if they have no name yet. Golden dinos have a small gold mark. Below the list one line shows the chickens: "Kippen: 4 van de 10". The list only shows things. Tapping it does nothing.
   * The shop uses only dino points. There is no real money, no payment screen and no link anywhere.
+* **Chickens (F18):** the Kippenhok card has a picture of a chicken, the line "Tok tok! Kippen scharrelen gezellig rond.", the price of 5 punten, the count ("4 van de 10") and a "Kip kopen" button.
+  * Tapping "Kip kopen" asks "Koop een kip voor 5 punten?" with "Ja" and "Nee". The same purchase rules as eggs apply: the chicken and the points are saved together in one write, and fast taps never buy more than the points allow.
+  * Without enough points the button is greyed out with "Nog 3 punten nodig". With 10 chickens it is greyed out with "Het kippenhok is vol!".
+  * There is no egg. When the kid goes back to the world, the chicken stands on the ground next to the player.
+  * At most 10 chickens. Chickens do not count toward the 12 dinos, and dinos do not count toward the 10 chickens.
+  * A chicken is a boxy Minecraft style chicken, about half a block high: white, with a red comb and a yellow beak. It moves like a dino (walks straight, hops up one block, never into a block, no path finding) and gets the same menu as a dino: Volg mij, Blijf hier, Naam geven, Knuffel. A new chicken starts on Volg mij, like a new dino.
+  * Chickens never lay eggs, never hurt anyone and never break or place blocks. They are never taken away, like dinos.
+  * There is one way to buy chickens: one at a time.
 * **Eggs:** after buying, the kid goes back to the world and the egg appears on the ground next to the player. It wobbles and hatches after 5 seconds of play into a baby sized version of that dino, which then grows to full size in 2 seconds. The new dino starts on **Volg mij**. A bought egg is saved right away, so closing the app never loses the egg or the points.
 * **Dino menu:** tapping a dino opens a small menu: **Volg mij**, **Blijf hier**, **Naam geven** (kid types a name with the in game keyboard, max 12 characters), **Knuffel** (hearts, no cost). The name screen says "Bedenk een leuke dinonaam" so the kid does not type their own name.
 * **Simple on purpose:** dinos walk straight toward their goal and can hop up one block. They never walk into or through any block. No path finding. A dino on Blijf hier idles and wanders a little within 3 blocks of where it was told to stay. A dino the kid walls in stays there (building a pen is fine). Dinos never hurt the kid and never break or place blocks.
 * **Following:** a dino on Volg mij walks toward the player. A following dino that is stuck for more than 5 seconds, or more than 8 blocks away for more than 5 seconds, pops next to the player with a little puff.
 * **At most 12 dinos** bought in the shop (hatched or still an egg).
 * **Gouden dino:** passing a practice exam gives a golden egg. When the kid is back in the world, the egg appears next to the player and hatches like a normal egg into a golden version of a random dino kind (same model, gold colour). Golden dinos do not count toward the 12 (F7), so a passed exam always pays. Golden dinos have the same menu as other dinos.
-* Dinos are never taken away. No wrong answer, malus or reset removes a dino or an egg.
+* Dinos are never taken away. No wrong answer, malus or reset removes a dino, an egg or a chicken.
+* Wherever this PRD says what happens to dinos (Ik zit vast, Wereld opnieuw beginnen, backup), the same goes for chickens.
 
 ### 4.4 Timers
-* A countdown is always visible at the top of the screen during play: "Leerpauze over 4:12".
+* A countdown is always visible at the top of the screen during play: "Leerpauze over 4:12". The countdown pill also holds a **Nu oefenen** button (4.21).
 * All timers are time based (real clock), not frame based.
 * In the last 30 seconds the countdown grows and pulses. In the last 10 seconds a soft tick plays (if sound is on).
 * At zero the game saves, pauses and opens the learning break. There is no skip button.
@@ -97,7 +154,7 @@ All dinos are earned through learning. There are no wild dinos and no taming.
 | Situation | Play timer | Exam timer |
 |---|---|---|
 | World on screen, app visible | runs | |
-| Pause menu, Dinowinkel, Lesboek, Extra oefenen, dino menu, block grid, name keyboard | stops | |
+| Pause menu, Dinowinkel, Lesboek, Extra oefenen, dino or chicken menu, block grid, name keyboard, Nu oefenen question | stops | |
 | Learning break, including lessons, teach moments and summary | stops | |
 | Exam, including its end screen and review | stops | runs until the last answer |
 | Parent gate or parent area open | stops | stops |
@@ -134,6 +191,7 @@ All dinos are earned through learning. There are no wild dinos and no taming.
 * **Summary screen:** the score ("4 van de 5 goed!", counting right on the first try or the retry), the points earned in this break and the new total. When the kid can now afford an egg, it adds "Je kunt een ei kopen in de Dinowinkel!".
   * With 0 right: a kind message ("Dit was lastig. Volgende keer gaat het vast beter!") and the total, with no plus points.
 * After the summary the kid taps "Terug naar de wereld" and play resumes with a full play timer.
+* A break the kid starts early with Nu oefenen works exactly like this, with one difference in points: see 4.21.
 * If the app is closed during a break, reopening it continues the same break at the same question and the same try (first try, retry or teach moment), with the same questions.
 
 ### 4.6 Choosing the questions (spaced repetition)
@@ -165,8 +223,8 @@ Answers in exams and in Extra oefenen also move the boxes the same way. Exams ig
 ### 4.7 Lessons and practice
 * Every topic has a lesson: a few short pages with a title, a short text, good and wrong examples, and a tip. The kid swipes or taps "Volgende" through them. The last page has "Ik snap het!".
 * A lesson shows automatically in a break the first time new items of that topic are asked.
-* **Lesboek:** from the pause menu the kid can open any lesson of any switched on topic at any time. Reading the Lesboek does not change the timers or the points.
-* **Extra oefenen:** from the pause menu the kid can start a practice round of N questions from a module of their choice, picked with the same rules as 4.6. Each question works like in a break: retry, teach moment and the same points, but no malus (F14). Extra oefenen earns at most 10 plus points a calendar day (F6). After that the round still works but earns no plus points, and the kid sees "Genoeg geoefend voor vandaag, ga lekker bouwen!". The +3 bonus does not apply in Extra oefenen. It stops the play timer while open and does not reset it, so it never replaces a learning break.
+* **Lesboek:** from the pause menu the kid can open any lesson of any switched on topic at any time. Reading the Lesboek does not change the timers or the points. The Lesboek has a **Nu oefenen** button (4.21).
+* **Extra oefenen:** from the pause menu the kid can start a practice round of N questions from a module of their choice, picked with the same rules as 4.6. Each question works like in a break: retry, teach moment and the same points, but no malus (F14). Extra oefenen earns at most 10 plus points a calendar day (F6). Early breaks share this cap (4.21). A plus that does not fully fit under the cap gives only the part that fits. After that the round still works but earns no plus points, and the kid sees "Genoeg geoefend voor vandaag, ga lekker bouwen!". The +3 bonus does not apply in Extra oefenen. It stops the play timer while open and does not reset it, so it never replaces a learning break.
 
 ### 4.8 Answer types and input
 All four item types from `docs/modules/README.md` are supported: `choice`, `find-error`, `type` and `punctuate`.
@@ -263,12 +321,12 @@ A small module where the questions are made by the app, so there are always new 
 * **Importeer module:** pick a `.json` file from Bestanden. The app checks it with the same rules the editor uses and shows clear Dutch errors ("Vraag komma-012: het goede antwoord ontbreekt"). Files over 2 MB are refused.
 * Importing a module with an id that already exists asks: "Vervangen" (progress for items with the same id is kept) or "Als nieuwe module toevoegen". A module with the id of a built in module can only be added as a new module.
 * The built in Taal module folder in `docs/modules/cito-taalverzorging/` can be bundled with a small script into an importable file, so new content written outside the app can be loaded.
-* **Backup maken:** one file with everything (settings, own modules, progress, results, world, hotbar, dinos, eggs, dino points), except the pincode.
+* **Backup maken:** one file with everything (settings, own modules, progress, results, world, player position and floating, hotbar, dinos, eggs, chickens, dino points and the daily extra points count), except the pincode.
 * **Backup terugzetten:** pick a backup file, confirm, and everything is replaced. The whole file is checked first. The old data stays until the new data is fully written, then the app switches. A broken file changes nothing. The current pincode stays.
 
 ### 4.16 Parent area: results (Resultaten)
 * **Overzicht:** today and this week: play time, number of breaks, questions answered, percent right on the first try, percent right after the retry, number of teach moments, dino points earned and spent.
-* **Pauzes:** a list of breaks with date, time, module, score, points, length and how it ended (klaar or door ouder beëindigd). A break where every first answer took less than 2 seconds gets a "snel geklikt" mark (F13), so the parent can spot guessing.
+* **Pauzes:** a list of breaks with date, time, module, score, points, length and how it ended (klaar or door ouder beëindigd). A break started with Nu oefenen is marked "zelf gestart". A break where every first answer took less than 2 seconds gets a "snel geklikt" mark (F13), so the parent can spot guessing.
 * **Per onderdeel:** drill down subject > module > topic > skill, with a level filter. For each: answered, percent right on the first try in the last 30 days and all time, number beheerst out of total, and how many items are in each box.
 * **Over tijd:** a simple bar chart per week for the last 12 weeks: questions answered and percent right on the first try, for the selected node.
 * **Lastige vragen:** the 20 items answered wrong on the first try most often in the last 30 days, with the kid's last wrong answer and the right answer.
@@ -288,7 +346,7 @@ A small module where the questions are made by the app, so there are always new 
 | Pincode wijzigen | | |
 | Pauze nu starten | button, for testing or a quick check. Greyed out during a break or exam. | |
 | Pauze nu beëindigen | button, only during a break, logged as "door ouder beëindigd" | |
-| Wereld opnieuw beginnen | confirm, resets the blocks of the world and the player position. Dinos, eggs, dino points and learning progress stay. Dinos move to the start spot. | |
+| Wereld opnieuw beginnen | confirm, resets the blocks of the world and the player position (on the ground, not floating). This also brings back the 4 obsidiaan blocks of the gate. Dinos, eggs, chickens, dino points and learning progress stay. Dinos and chickens move to the start spot. | |
 | Alles wissen | confirm twice, deletes everything | |
 
 * **Groter lettertype:** makes all text on kid screens (breaks, lessons, Lesboek, exams, review, Dinowinkel, menus) 25 percent bigger. Layouts still fit in landscape without cutting off text; long content scrolls inside its card where needed. It does not change the parent area.
@@ -302,6 +360,7 @@ A small module where the questions are made by the app, so there are always new 
 * **Safe writes:** a save that is cut off halfway leaves the previous save readable.
 * **Broken save:** if the save cannot be read, the app shows a friendly Dutch message for the parent with "Backup terugzetten" and "Opnieuw beginnen" (confirm twice). It never shows a blank screen and never wipes data on its own.
 * **Updates:** saved data carries a version number. A new app version moves old saves to the new shape. A new app version is applied only when the app starts, never during a break or exam.
+* **Changed fixed world (2026-10-18):** the world is now 64 high and holds the 4 obsidiaan gate blocks. Saved world changes are stored against the fixed world, so a save made before this change may look different (for example the gate blocks show up, or an old change lands in a slightly different spot). There are no real players yet, only test saves, so this is fine. The architect may reset the world part of an older save. Dinos, eggs, points, hotbar, settings and learning progress in an older save must survive (AC138).
 * **Storage full or refused:** the parent area shows a gentle note and play goes on.
 * The app asks Safari for persistent storage where possible. The parent area shows a gentle note if the app is not added to the home screen, and a reminder to make a backup if the last backup is older than 30 days.
 
@@ -316,11 +375,43 @@ A small module where the questions are made by the app, so there are always new 
 * Hosted as static files on Cloudflare Workers at the public `workers.dev` address (F9). No Worker code, no server storage. Cloudflare Web Analytics stays off. Deploying is done by the founder at `/ship`.
 * A developer fps counter exists for the founder's iPad check. It is hidden from the kid by default.
 
+### 4.20 The obsidiaan gate (F16)
+A decoration the kid can finish and light. It does nothing else: no teleport, no other world, no sound loop, no damage.
+
+* **Where:** the fixed world has 4 obsidiaan blocks in a row, set into the ground (their top is level with the grass), 4 blocks in front of the start spot, running left to right as seen from the start. The ground around them is flat. Call the four cells F1, F2, F3 and F4 from left to right, at ground height G.
+* **The frame is complete when:** F1 to F4 are all obsidiaan, and above F1 and above F4 there is a pillar of obsidiaan at least 2 blocks high (heights G+1 and G+2, and more if the kid builds higher). The pillar height counts unbroken obsidiaan straight up from G+1. No top bar is needed.
+* **The opening** is the cells above F2 and F3, from G+1 up to the height of the lower of the two pillars. With 2 high pillars the opening is 2 wide and 2 high; with 3 high pillars it is 2 wide and 3 high.
+* **Lighting:** whenever the kid places a block and, after that, the frame is complete and at least one cell of the opening holds vuur, every empty cell of the opening fills with vuur. So it works in both orders: build the frame and then place vuur inside, or place vuur first and finish the pillar after. A soft whoosh plays if sound is on.
+* Cells of the opening that hold another block, or the player, a dino, a chicken or an egg, are skipped.
+* The fire is ordinary vuur blocks. They are saved like any placed block and can be mined in Hakken mode. Mining them or the frame never does anything else.
+* Only this one spot works as a gate in v1. A frame built anywhere else is just blocks.
+
+### 4.21 Nu oefenen: an early learning break (F17)
+The kid can choose to do the next learning break now.
+
+* **Where:** a **Nu oefenen** button on the countdown pill, in the Dinowinkel and in the Lesboek. Each has a tap area of at least 44 x 44 points.
+* **Not shown** during a learning break, an exam (including its end screen and review), Extra oefenen, the parent gate or the parent area.
+* Tapping it asks "Nu een leerpauze doen?" with "Ja" and "Nee". "Nee" goes back to where the kid was. "Ja" starts a learning break right away. The question stops the play timer while it is open.
+* **It is a normal learning break** (4.5, 4.6): the next module in turn, the same question picking, lessons, retry, teach moment, malus, +3 bonus and summary. It moves the spaced repetition boxes and the module turn like any break. A parent can end it with "Pauze nu beëindigen". If the app is closed during it, it resumes like any break and stays an early break.
+* **After it** the kid taps "Terug naar de wereld" and is back in the world (also when it was started from the Dinowinkel or the Lesboek). The play countdown starts again from the full interval set by the parent.
+* **Every break started with Nu oefenen is an early break.** A break that starts because the countdown reached 0 is never an early break.
+* **Points in an early break (F17):**
+  * Plus points (+2, +1 and the +3 bonus) count toward the same 10 extra points per calendar day cap as Extra oefenen (4.7). Early breaks and Extra oefenen together give at most 10 plus points a day.
+  * A plus that does not fully fit gives only the part that fits. Example: with 9 of the 10 used, a +2 gives +1.
+  * The malus (-1 after a teach moment) works as in a normal break. It lowers the total (never below 0) but does not change the cap count: it neither uses up the cap nor gives room back.
+  * Once the cap is reached, Nu oefenen still works. Learning is always fine. Right answers still show the green check and "Goed zo!", but no plus points, and the summary shows "Genoeg geoefend voor vandaag, ga lekker bouwen!" next to the score.
+  * The cap starts again the next calendar day. Normal timed breaks never count toward the cap and are never limited by it.
+* The parent setting "Tijd tussen leerpauzes" still decides the interval. Nu oefenen does not change it.
+
 ## 5. Out of scope (Later)
-* Bigger world, more biomes, caves, water and lava, day and night, weather.
-* More block types, crafting, tools, chests to store blocks, doors.
+* Bigger world (wider), more biomes, caves, lakes and seas, day and night, weather.
+* Water or lava that flows, fire that spreads or burns, ice that melts or is slippery, blocks that give light, animated textures, swimming through water.
+* More block types beyond the 32, crafting, tools, chests to store blocks, doors.
+* A gate that teleports or leads to another world, gates built anywhere else than the fixed spot.
 * Wild dinos, taming with food, earning blocks.
-* Flying or creative mode, riding dinos, dino eggs found in the world, baby dinos that grow up over days, more dino kinds, dino skins, selling or swapping dinos.
+* Creative mode, riding dinos, dino eggs found in the world, baby dinos that grow up over days, more dino kinds, dino skins, selling or swapping dinos.
+* Chickens that lay eggs, other farm animals, buying several chickens with one button.
+* Keyboard controls as a real feature (arrow keys are only a desktop testing aid).
 * Hidden treasures or quests in the world.
 * More Rekenen: klokkijken, breuken, geld, metriek stelsel, verhaaltjessommen, cijferen, delen met rest.
 * More Taal modules: begrijpend lezen, woordenschat, grammatica (ontleden), dictee with spoken words.
@@ -414,17 +505,32 @@ A small module where the questions are made by the app, so there are always new 
 2. The share sheet opens and the parent saves the file to Bestanden.
 3. Weeks later on a wiped iPad the parent goes through the first start, then taps "Backup terugzetten", picks the file, confirms, and the world, dinos, points and progress are back. The new pincode stays.
 
+### Flow 11: new blocks, flying and the gate
+1. In front of me I see four black obsidiaan blocks in the grass.
+2. I tap "Alle blokken". I tap the last hotbar slot at the top, then obsidiaan. The grid closes and obsidiaan is in that slot.
+3. I build a pillar of 3 obsidiaan on the left block and 3 on the right block.
+4. I pick vuur the same way and tap the inside of the frame. The whole opening fills with fire. The gate is lit!
+5. I hold Omhoog and rise into the sky. I let go and I float. I walk around in the air and build a lava floor up high.
+6. I tap the left arrow twice to look around, then hold Omlaag until I stand on the grass again.
+
+### Flow 12: Nu oefenen and a chicken
+1. I have 3 punten. In the Dinowinkel I see the Kippenhok: a kip costs 5. The bar under the Compy is only a little bit full.
+2. I tap "Nu oefenen" and then "Ja". A learning break starts right away.
+3. I answer 5 questions and get "+6 punten". Now I have 9. I tap "Terug naar de wereld". The countdown shows 5:00 again.
+4. I open the Dinowinkel, tap "Kip kopen" and "Ja". Back in the world a chicken stands next to me and follows me.
+5. I tap "Mijn dino's" in the shop and see my Compy "Pip" and "Kippen: 1 van de 10".
+
 ## 7. Acceptance criteria
-Times in these criteria are play time with the app visible, unless stated otherwise. Tests may use a fake clock. Criteria AC103 to AC144 were added in review round 1, and AC145 and up when the founder answered F1 to F13. They sit in their topic group. **(iPad)** marks a check the founder or QA does by hand on the reference iPad, because headless WebKit cannot measure it. Removed criteria keep their number so references stay valid.
+Times in these criteria are play time with the app visible, unless stated otherwise. Tests may use a fake clock. Criteria AC103 to AC144 were added in review round 1, and AC145 and up when the founder answered F1 to F13. They sit in their topic group. AC155 to AC181 were added for the change of 2026-10-18 (F16 to F18), in a group of their own at the end. **(iPad)** marks a check the founder or QA does by hand on the reference iPad, because headless WebKit cannot measure it. Removed criteria keep their number so references stay valid.
 
 ### World and controls
-* **AC1:** Given a new game, when the world loads, then it is 64 x 64 blocks wide and 32 high (or 48 x 48 if the spike says so) with hills, trees, sand and stone, and it is identical every time a new game starts.
+* **AC1:** Given a new game, when the world loads, then it is 64 x 64 blocks wide and 64 high (or 48 x 48 wide if the spike says so) with hills, trees, sand, stone and the 4 obsidiaan gate blocks, and it is identical every time a new game starts.
 * **AC2:** Given the player walks into the world edge, when they keep pushing, then they stop at the edge and cannot leave the world.
 * **AC3:** Given Hakken mode, when the kid taps a minable block within 6 blocks, then the block disappears.
 * **AC4:** Given Hakken mode, when the kid taps oersteen or a block further than 6 blocks away, then nothing changes.
 * **AC5:** Given Bouwen mode with any block selected, when the kid taps a block face within reach, then a block of the selected type appears against that face. There is no count and no limit.
 * **AC6:** Given Bouwen mode, when the placed block would overlap the player, a dino or an egg, then no block is placed. (Building up, AC103, is the one exception for the player.)
-* **AC7:** Given any moment of play, then the hotbar shows 8 filled slots and the "Alle blokken" button. Given "Alle blokken", then all 16 building blocks from 4.1 show, and picking one puts it in the selected slot. The hotbar choice is saved across restarts.
+* **AC7:** Given any moment of play, then the hotbar shows 8 filled slots and the "Alle blokken" button. Given "Alle blokken", then all 32 building blocks from 4.1 show, and picking one puts it in the selected slot. The hotbar choice is saved across restarts.
 * **AC8:** Given the kid holds the move stick with one finger, when they drag on the right half with a second finger, then the player walks and turns at the same time.
 * **AC9:** Given the kid taps the jump button while standing on a block, then the player jumps high enough to land on a block one higher.
 * **AC10:** Given the built app (automated check), then the viewport meta blocks zoom, game areas have `touch-action: none`, `user-select: none` and `-webkit-touch-callout: none`, and `gesturestart` is prevented.
@@ -436,7 +542,7 @@ Times in these criteria are play time with the app visible, unless stated otherw
 * **AC107 (iPad):** Given the world, a break or an exam on the reference iPad, when the kid double taps, pinches, long presses or pulls down, then nothing zooms, scrolls, selects text or shows a callout menu.
 * **AC108:** Given the window is less than 900 points wide (Split View or Slide Over), then only "Maak dit venster groter" shows and all timers stop. Making the window bigger restores the screen without losing state.
 * **AC109:** Given the 3D view is lost (simulated WebGL context loss), then within 3 seconds the world shows again with the same blocks, dinos, eggs and player position, and no black screen stays.
-* **AC151:** Given a new game, then all 16 building blocks from 4.1 can be placed right away, without earning anything, and no block type ever runs out.
+* **AC151:** Given a new game, then all 32 building blocks from 4.1 can be placed right away, without earning anything, and no block type ever runs out.
 
 ### Dinos, points and the Dinowinkel
 * **AC12:** Given a new game, when the world loads, then there are no dinos and no eggs in the world and the kid has 0 dino points.
@@ -457,7 +563,7 @@ Times in these criteria are play time with the app visible, unless stated otherw
 
 ### Timers
 * **AC22:** Given default settings, when play starts, then the top of the screen shows "Leerpauze over 5:00" and after 60 seconds of real time it shows 4:00, plus or minus 1 second, whatever the frame rate.
-* **AC23:** Given the pause menu, Dinowinkel, Lesboek, Extra oefenen, the dino menu, the block grid, the parent gate or the parent area is open, or the app is in portrait, too small or in the background, then the play timer does not count down.
+* **AC23:** Given the pause menu, Dinowinkel, Lesboek, Extra oefenen, the dino or chicken menu, the block grid, the Nu oefenen question, the parent gate or the parent area is open, or the app is in portrait, too small or in the background, then the play timer does not count down.
 * **AC24:** Given 2:30 left on the play timer, when the app is killed and reopened, then the timer shows between 2:30 and 2:35.
 * **AC25:** Given warnings are on, when 30 seconds are left, then the countdown grows and pulses, and in the last 10 seconds a tick plays if sound is on.
 * **AC26:** Given the play timer reaches 0, then the game saves, the world stops, and the learning break opens. There is no way for the kid to close it.
@@ -587,7 +693,7 @@ Times in these criteria are play time with the app visible, unless stated otherw
 * **AC98:** Given the app runs, locally and on the deployed address, then it makes no network requests except loading its own files from its own address. The ship checklist confirms Cloudflare Web Analytics is off.
 * **AC99:** Given the mute switch is on or sound is off in settings, then the game is fully playable and every right or wrong answer is still clear on screen.
 * **AC100:** Given sound is on, then no sound plays before the first tap.
-* **AC101 (iPad):** Given the reference iPad (2018 or newer, iPadOS 16 or newer) and the developer fps counter, when the founder walks around the world for 2 minutes with 12 shop dinos and 2 golden dinos following, then 95 percent of frames take 33 ms or less and no frame takes over 200 ms.
+* **AC101 (iPad):** Given the reference iPad (2018 or newer, iPadOS 16 or newer) and the developer fps counter, when the founder walks and flies around the 64 high world for 2 minutes with 12 shop dinos, 2 golden dinos and 10 chickens following, and a lit obsidiaan gate in view, then 95 percent of frames take 33 ms or less and no frame takes over 200 ms.
 * **AC102:** Every button and tappable word has a tap area of at least 44 x 44 points. Kid screen text is at least 20 points, question text at least 24 points. Every text input in the parent area is at least 16 points, so Safari does not zoom.
 * **AC136:** Given a save is cut off halfway (simulated in a test), when the app reopens, then the previous save loads.
 * **AC137:** Given an unreadable save, when the app opens, then a friendly Dutch message shows with "Backup terugzetten" and "Opnieuw beginnen", no data is deleted without a double confirm, and no blank screen shows.
@@ -596,10 +702,51 @@ Times in these criteria are play time with the app visible, unless stated otherw
 * **AC140:** Given the app runs over plain http, then it starts and plays without errors, and the parent sees a note where sharing or offline is not available.
 * **AC141:** Given every kid screen, then normal text has a contrast of at least 4.5 to 1 and large text at least 3 to 1, also on the soft orange "wrong" colour, the grey malus text and the lock icon. Right and wrong always show an icon (check or cross) as well as a colour.
 * **AC142:** Given the pulsing countdown and pop effects, then nothing flashes more than 2 times a second. Given `prefers-reduced-motion`, then the pulse is off and the countdown text still grows.
-* **AC143 (iPad):** Given the reference iPad, then the stick, jump button, hotbar, countdown and lock icon sit inside the safe area, and the hotbar sits high enough that using it never triggers the home swipe.
+* **AC143 (iPad):** Given the reference iPad, then the stick, jump button, Omhoog and Omlaag, the camera arrows, the hotbar, the countdown with Nu oefenen and the lock icon sit inside the safe area without overlapping, and the hotbar sits high enough that using it never triggers the home swipe.
 * **AC144:** Given a wiped iPad (empty storage), when the app opens, then the first start flow shows, and after "Geef de iPad aan je kind" the world loads with no errors.
 
-**Count:** AC1 to AC154, of which 6 are removed (AC13, AC14, AC15, AC19, AC32, AC33). 148 active criteria.
+### Change of 2026-10-18 (F16 to F18)
+
+Blocks and the block grid
+* **AC155:** Given "Alle blokken", then one screen shows all 32 blocks of 4.1 in the four rows of the table, with no tabs, each tile at least 64 x 64 points, and the 8 hotbar slots above the grid with the selected slot marked.
+* **AC156:** Given the block grid, when the kid taps hotbar slot 5 in the grid screen and then taps diamant, then slot 5 holds diamant, slot 5 is selected in the hotbar, the grid is closed, and the other 7 slots are unchanged. Given "Terug", then nothing changes. Given a new game, then the hotbar holds the default 8 blocks of 4.2.
+* **AC157:** Given each of the 16 new blocks, then it can be placed in Bouwen mode and mined in Hakken mode like the old ones, and the player, a dino and a chicken cannot walk into a cell holding it (also water, lava and vuur).
+* **AC158:** Given a placed water, lava or vuur block, when 60 seconds of play pass, then no other cell of the world has changed: nothing flows, spreads or burns. The player standing next to or on lava or vuur loses nothing.
+
+The obsidiaan gate
+* **AC159:** Given a new game, then the 4 obsidiaan cells F1 to F4 of 4.20 are in the world, flush with the ground, 4 blocks in front of the start spot. Given "Wereld opnieuw beginnen", then they are back.
+* **AC160:** Given pillars of 2 obsidiaan on F1 and F4, when the kid places vuur in one of the 2 cells at G+1 above F2 or F3, then all 4 cells of the 2 x 2 opening hold vuur.
+* **AC161:** Given pillars of 3 on F1 and 2 on F4, when vuur is placed in the opening, then exactly the 4 cells from G+1 to G+2 above F2 and F3 hold vuur, and the cell at G+3 stays empty.
+* **AC162:** Given vuur placed above F2 at G+1 and a pillar of 2 on F1 and 1 on F4, when the kid places the second obsidiaan on F4, then the opening fills with vuur. Given a pillar of only 1 on either side, or a missing floor cell, or a pillar of another block, then placing vuur fills nothing else.
+* **AC163:** Given a cell of the opening holds planken or the player stands in it, when the gate lights, then that cell is not changed. Given the lit gate, when the kid mines a vuur block of it, then only that block goes away. Given the same frame built anywhere else in the world, then placing vuur in it fills nothing else.
+
+Flying
+* **AC164:** Given the player stands on the ground, when the kid holds Omhoog for 1 second and lets go, then the player is about 4 blocks higher (3 to 5), and 5 seconds later is still at that height.
+* **AC165:** Given the player floats, when the kid uses the stick, then the player moves on the same height and stops at a wall. Given the player floats, when the kid holds Omlaag, then the player sinks, stops on the first block below, and normal gravity and jumping work again.
+* **AC166:** Given the player floats under a block, when the kid holds Omhoog, then the head stops under that block. Given the player near the world top, when the kid holds Omhoog, then the head never goes above layer 64. Given any flying, then the player never ends up inside a block.
+* **AC167:** Given the player floats, when the kid taps the jump button, then nothing happens. Given the player stands on the ground, when the kid holds Omlaag, then nothing happens. Given Omhoog and Omlaag are held together, then the player does not move up or down.
+* **AC168:** Given the player floats, when the kid taps a block in reach in Hakken or Bouwen mode, then it is mined or placed as on the ground. Given the player floats over a block, when that block is mined, then the player keeps floating. Given placing a block above layer 64, then nothing is placed.
+* **AC169:** Given the player floats, when the app is killed and reopened, then the player floats at the same spot. Given "Ik zit vast" while floating, then the player stands on the ground at the start spot and is not floating.
+* **AC170:** Given the player floats 10 blocks above the ground, when a bought egg, a golden egg or a chicken appears, or a following dino pops back, then it stands on the ground next to the column under the player, never in the air.
+
+Camera arrows
+* **AC171:** Given the world, when the kid taps the left arrow once, then the view turns left by about 15 degrees (10 to 20) and the turn takes more than one frame (no jump). Given the kid holds the right arrow for 2 seconds, then the view turns right by about 180 degrees (140 to 220) and keeps turning a little after release before it stops.
+* **AC172:** Given the up or down arrow is held for 5 seconds, then the view stops at straight up or straight down, the same limits as drag look. Given the kid holds the stick and an arrow at the same time, then the player walks and turns together. Given a touch that starts on an arrow, Omhoog or Omlaag and then drags, then the view only turns as the arrow says and no block is mined or placed. Every arrow, Omhoog and Omlaag has a tap area of at least 44 x 44 points.
+
+Nu oefenen
+* **AC173:** Given the world, the Dinowinkel or the Lesboek, then a Nu oefenen button shows. Given a break, an exam (with its end screen and review), Extra oefenen, the parent gate or the parent area, then no Nu oefenen button shows. Given "Nu oefenen" then "Nee", then nothing changes and the play timer did not count down while the question was open.
+* **AC174:** Given 3:12 left on the countdown, when the kid taps "Nu oefenen" and "Ja" in the Dinowinkel, then a normal learning break of the next module in turn starts. After the summary, "Terug naar de wereld" goes to the world and the countdown shows the full interval (5:00 by default, 10:00 when the parent set 10 minutes). Resultaten Pauzes marks it "zelf gestart".
+* **AC175 (F17):** Given 0 extra points used today, when the kid does an early break with 5 questions all right on the first try, then they get 10 points (+2 x 5 = 10, and the +3 bonus does not fit), and the summary shows "Genoeg geoefend voor vandaag, ga lekker bouwen!". Given 9 of 10 used, when a first try is right, then the total goes up by 1. Given the cap is reached by early breaks, then Extra oefenen gives no plus points that day either, and the other way round.
+* **AC176 (F17):** Given the cap is reached, when the kid does another early break, then it runs fully, right answers show a green check with no plus points, a teach moment still takes 1 point (never below 0), and the cap count stays at 10. Given the next calendar day, then the cap starts again. Given a normal timed break when the cap is reached, then it gives its full points as in 4.5.
+
+Chickens and the richer Dinowinkel
+* **AC177 (F18):** Given 9 points and 0 chickens, when the kid taps "Kip kopen" and "Ja" 5 times within 1 second, then exactly one chicken is bought and the total is 4. Given "Nee", then nothing changes. Given the kid returns to the world, then the chicken stands next to the player and is on Volg mij. Given the app is killed right after "Ja", when it reopens, then the chicken is there and the 5 points were taken exactly once.
+* **AC178 (F18):** Given 10 chickens, then "Kip kopen" is greyed out with "Het kippenhok is vol!". Given 12 shop dinos, then a chicken can still be bought; given 10 chickens, then an egg can still be bought. Given 4 points, then "Kip kopen" is greyed out with "Nog 1 punt nodig". Given a chicken, when the kid taps it, then the menu Volg mij, Blijf hier, Naam geven and Knuffel appears and works as for a dino. No chicken ever lays an egg, breaks or places a block, or is removed by a wrong answer, malus, "Wereld opnieuw beginnen" or a restart.
+* **AC179:** Given the Dinowinkel, then each egg card shows its trait line from 4.3 and a size chip (Compy "klein", Triceratops and Stegosaurus "middel", Brachiosaurus "groot"). Given 30 points, then the Triceratops card shows "Nog 10 punten nodig" with a progress bar three quarters full, and the Brachiosaurus card a bar three eighths full.
+* **AC180:** Given one egg not yet hatched, a Compy named "Pip", an unnamed Stegosaurus, a golden Triceratops and 4 chickens, when the kid opens Mijn dino's, then it lists "Ei: " with the egg's kind, "Pip", "Stegosaurus" and the golden Triceratops with a gold mark, and shows "Kippen: 4 van de 10". Tapping the list changes nothing.
+* **AC181:** Given "Backup maken" with chickens, a floating player and 6 extra points used today, when the backup is restored, then the chickens, the floating position and the 6 used extra points are back. Given a save from before the 2026-10-18 change (test fixture), when the new version opens it, then dinos, eggs, points, hotbar, settings and learning progress load, and the world shows either the old changes or a fresh fixed world, with no crash.
+
+**Count:** AC1 to AC181, of which 6 are removed (AC13, AC14, AC15, AC19, AC32, AC33). 175 active criteria.
 
 ## 8. Look, sound and feel
 * **Style:** bright, friendly Minecraft style pixel blocks with 16 x 16 pixel textures. Dinos are chunky and cute with big eyes, made of boxes. Eggs are spotted and wobble. Soft, still fog at the edge (no flicker). No blood, no scary sounds, no angry dinos.
@@ -607,19 +754,22 @@ Times in these criteria are play time with the app visible, unless stated otherw
 * **Motion:** the mining pop is a short burst of a few pixel bits, under half a second. The egg wobble and hatch take about 2 seconds. Nothing flashes more than 2 times a second. Reduced motion turns the pulse and the egg wobble off.
 * **Learning screens:** calm, white or soft paper background, one question at a time, big text, a small dino teacher ("Dino Juf") in the corner. Lots of space. The teach moment looks like a friendly lesson card, not a red mark.
 * **Exam screen:** even calmer: no dino animations, no sounds except a soft chime at the end. The review pages look like the teach moment card.
-* **Dinowinkel:** bright and cheerful, four big egg cards side by side, the point total big at the top.
+* **Dinowinkel:** bright and cheerful, the point total big at the top with Nu oefenen next to it, then five big cards side by side (four eggs and the Kippenhok) on the Winkel tab. The progress bars are soft green. Mijn dino's is a calm list.
+* **New blocks:** 16 x 16 pixel textures like the others. Lava and vuur in bright orange and yellow so they look warm and glowing. Water and ijs light blue and see through. Diamant and goudsteen sparkle in the texture, not with motion.
+* **Chickens:** boxy, white, red comb, yellow beak, a soft "tok" when tapped. The lit gate gets a soft whoosh, no loud sound.
 * **Parent area:** plain and clear, grey and white, normal sized text, works like a settings app. Forms are one column, inputs are at least 16 points, and the active field scrolls into view above the iPad keyboard. The parent area is the one place where normal scrolling is allowed.
 * **Font:** one round, very readable font, bundled with the app so it works offline. Kid text at least 20 points, questions at least 24 points, and 25 percent bigger with Groter lettertype.
 * **Words:** Dutch, short sentences, groep 5 reading level on kid screens. Kind and encouraging: "Bijna!", "Goed zo!", "Wat knap!". Never "Fout!" on its own. A wrong first try says "Net niet. Probeer het nog een keer." The teach moment says "Zo zit het:".
 * **Sounds:** short and soft. A pop when mining, a thunk when placing, a chime for right, a gentle "hmm" for wrong, a coin clink when buying an egg, a crack and a happy chirp when an egg hatches, a fanfare for a passed exam. No sound for the malus. No music in v1.
 
 ## 9. Kid safety and privacy
-* **Data stored and where:** only on this iPad, in Safari's storage for this app. Stored: settings, pincode (hashed), own modules, answer history, break and exam results, the world changes, the hotbar, dinos and eggs (with names the kid types), dino points. No real name, age, photo, location or contact data is asked for or stored. The dino name screen asks for a dino name, not the kid's name.
+* **Data stored and where:** only on this iPad, in Safari's storage for this app. Stored: settings, pincode (hashed), own modules, answer history, break and exam results, the world changes, the player position (and whether they float), the hotbar, dinos, eggs and chickens (with names the kid types), dino points and the daily extra points count. No real name, age, photo, location or contact data is asked for or stored. The dino name screen asks for a dino name, not the kid's name.
 * **Files:** backup and export files only leave the iPad when the parent shares them through the share sheet, behind the gate. Backups do not hold the pincode.
 * **Network use:** only to load the app's own files from the public `workers.dev` address on first visit and for updates (F9). No other requests. No data is ever sent anywhere. The server holds only the app files, nothing about the kid. Cloudflare Web Analytics and any other Cloudflare injected script stay off.
 * **Tracking, ads, chat:** none. No analytics, no cookies for tracking, no third party scripts or fonts from other servers.
 * **Purchases:** none with real money. The Dinowinkel only uses dino points earned by learning. There is no payment code, no store link and no way to buy points.
 * **External links:** none. Text in imported modules is shown as plain text and is never a link.
+* **Change of 2026-10-18:** the new blocks, the gate, flying, camera arrows, Nu oefenen, chickens and the richer Dinowinkel add no links, no accounts, no network requests, no new personal data and no real money. Chickens cost dino points only. Lava and vuur never hurt and nothing can burn down a build. Nu oefenen cannot be used to skip learning: it only starts a break sooner.
 * **Parent gate:** a 4 digit pincode protects settings, content choice, own modules, import, export, backup, results, ending a break and stopping an exam. The lockout survives reloads. PIN vergeten uses a fresh two step grown up question with a 10 minute block after 2 wrong tries, sharing the lockout with the pin pad (F3, F4).
 * **Content:** all questions and lessons are original and kid friendly (dinos, nature, school, family). Nothing scary or violent. Taal content gets a human spelling check before release (AC124).
 * **Breaks and malus:** the break is firm but kind. It has no time pressure, every question gets a second try, and a second mistake leads to a short lesson, not a scolding. The malus is 1 point, shown in soft grey, and the total never goes below 0. Mistakes never take away blocks, dinos or eggs.
@@ -633,13 +783,13 @@ Times in these criteria are play time with the app visible, unless stated otherw
 * **Offline:** everything works offline after the first visit.
 * **Size:** the first download should stay under 5 MB so it loads fast on home wifi.
 * **Storage:** keep a year of history small enough to stay well under Safari's limits. The architect picks the storage (IndexedDB is expected).
-* **Performance:** see AC101 on the reference iPad. Small world, merged block faces, one texture atlas, no shadows, pixel ratio capped at 2. Glass and leaves use simple cut out textures. The first world task is a speed spike on the reference iPad with a written go or no go; the fallback is a 48 x 48 world.
+* **Performance:** see AC101 on the reference iPad. Small world, merged block faces, one texture atlas, no shadows, pixel ratio capped at 2. Glass, leaves, water, ijs and vuur use simple cut out textures. All 32 blocks fit in the one texture atlas. The first world task is a speed spike on the reference iPad with a written go or no go, measured with the 64 high world; the fallback is a 48 x 48 wide world.
 * **Content:** the Taal module in `docs/modules/cito-taalverzorging/` is complete (10 topics, 288 items, 4 exams) and validates. The module format may be adapted by the architect (decision 6), but built in and parent made modules use the same format. Only built in code modules (Rekenen) use the `generator` field. Lesson pages get an optional `skill` field for the teach moment.
 
 ## 11. Risks and decisions
 
 ### Decided
-All founder decisions are answered. Details are in `docs/DECISIONS.md` (rows 8 to 22).
+All founder decisions are answered. Details are in `docs/DECISIONS.md` (rows 8 to 22, and 50 to 52 for F16 to F18).
 
 | # | Question | Founder's answer | Where in this PRD |
 |---|---|---|---|
@@ -658,8 +808,23 @@ All founder decisions are answered. Details are in `docs/DECISIONS.md` (rows 8 t
 | F13 | Small scope changes | "Snel geklikt" mark in v1. "Groter lettertype" stays in v1. | 4.16, 4.17, AC92, AC154 |
 | F14 | Malus in Extra oefenen | No malus in Extra oefenen. Malus only in learning breaks. | 4.7, AC52 |
 | F15 | Dino kinds and prices | Compy 20, Triceratops 40, Stegosaurus 40, Brachiosaurus 80 | 4.3, AC149 |
+| F16 | Change requests of 2026-10-18 (decision 50) | All in v1: 16 more blocks and a slot chooser, the obsidiaan gate, flying in a world 64 high, camera arrows, Nu oefenen, chickens, a richer Dinowinkel. This PRD wins over the side branch. | 4.0 to 4.3, 4.20, 4.21, AC155 to AC181 |
+| F17 | Points in an early break (decision 51) | A normal break. The countdown restarts after it. Plus points share the 10 a day cap with Extra oefenen. | 4.21, AC173 to AC176 |
+| F18 | Chickens (decision 52) | A few points each (5), at most 10, not counted in the 12 dinos | 4.3, AC177, AC178 |
 
 Choices made by product inside these answers, which the founder sees when signing: the point values (+2, +1, -1, +3 bonus) and egg prices (20, 40, 40, 80); a fourth small dino kind (Compy) so there is a cheap first egg (confirmed by the founder, F15); no malus in Extra oefenen (founder, F14); only the first try counts for spaced repetition; exams give no points; "Wereld opnieuw beginnen" keeps dinos and points.
+
+Choices made by product inside F16 to F18, which the founder sees when signing again:
+* All 32 blocks are solid, also water, lava and vuur. Nothing flows, burns or hurts. Water, ijs and vuur are see through; lava and vuur only look glowing.
+* The block grid shows all 32 blocks on one screen in four rows, no tabs. The default hotbar stays the same. The same block may sit in two slots.
+* The gate works only at the fixed spot. It lights when the frame (4 floor blocks, pillars at least 2 high, no top bar) is complete and any vuur is in the opening, in either order. The opening is as high as the lower pillar.
+* Flying speed about 4 blocks a second. The jump button does nothing while floating. Floating is saved. Eggs and chickens never appear in the air.
+* Camera arrows: a tap turns about 15 degrees, holding turns about 90 degrees a second with easing.
+* Nu oefenen asks "Nu een leerpauze doen?" first, so a stray tap does not start a break. It always returns to the world. A plus that does not fully fit under the cap gives only the part that fits (this is how Extra oefenen already works). The +3 bonus counts under the cap. The malus does not touch the cap count. Early breaks are marked "zelf gestart" for the parent.
+* Chickens cost 5 points, are bought one at a time (no "3 kippen" button), get the same menu as dinos and start on Volg mij.
+* The Dinowinkel gets two tabs, Winkel and Mijn dino's, so the screen stays calm.
+* The parent lock stays a small grey lock icon (4.12), not a labelled "Ouders" button, so the kid is not invited to tap it.
+* Older test saves may lose their world changes because the fixed world changed.
 
 ### Risks
 | Risk | Effect | What we do |
@@ -677,4 +842,7 @@ Choices made by product inside these answers, which the founder sees when signin
 | The Taal content has mistakes | Wrong spelling is taught | Validator with content checks, human check by QA and the founder (AC124), the parent can switch off any skill. |
 | The parent editor is fiddly on an iPad | The parent gives up on own modules | One column forms, Probeer preview, import of JSON made elsewhere as a backup path. Built late in the suggested order. |
 | Share sheet behaves differently in home screen mode | Backup or export fails | Test on the real iPad on the deployed address. Fallback: open the file in a new view and share from there. |
-| Scope is large (one v1, about 60 tasks) | Long build | Suggested build order in 4.0: the risky 3D spike and the learning engine come before the parent tools and any world polish. |
+| A 64 high world, 32 blocks, a lit gate and 10 chickens add load | Stutter on an older iPad | The T32 speed spike is done again with the 64 high world, all 32 blocks and 10 chickens plus 14 dinos following (AC101). Empty sky costs little; skip empty chunks. If it fails, cut the width to 48 x 48 first, then bring the rest to the founder. |
+| Many buttons on the right side | Cluttered screen, wrong taps that turn the view | One compact cluster (4.2), every button outside the look drag zone, checked on the real iPad (AC143). |
+| The fixed world changed after the first build | Old test saves look odd | No real players yet. Learning progress, points and dinos survive (AC181). |
+| Scope is large (one v1, about 60 tasks, more after F16) | Long build | Suggested build order in 4.0: the risky 3D spike and the learning engine come before the parent tools and any world polish. |
