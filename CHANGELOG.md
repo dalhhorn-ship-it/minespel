@@ -8,6 +8,8 @@ Written so kids can read it too.
 
 * The questions and lessons now look like a Minecraft menu, with grass, dirt, stone and diamonds behind them.
 * The keyboard and the "Ik snap het" button always fit on the screen now.
+* The Dinowinkel fits on the iPad screen, with all eggs, the Kippenhok and Sluiten in view.
+* The Pauze button works again, buttons are bigger with more space between them, and long lists scroll with your finger.
 
 ### M3: dinos in the world, Dinowinkel, floating in the sky & instant coin practice
 

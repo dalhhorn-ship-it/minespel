@@ -59,7 +59,7 @@
   border: 2px solid #e0a000;
   color: #5c3d00;
   font-weight: 800;
-  font-size: calc(16px * var(--kid-scale, 1));
+  font-size: calc(17px * var(--kid-scale, 1));
 }
 
 .dino-menu-status {
@@ -147,7 +147,7 @@
 }
 
 .name-screen-counter {
-  font-size: calc(16px * var(--kid-scale, 1));
+  font-size: calc(17px * var(--kid-scale, 1));
   font-weight: 800;
   color: #415468;
   font-variant-numeric: tabular-nums;

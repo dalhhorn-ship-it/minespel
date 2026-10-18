@@ -12,6 +12,20 @@ import { World } from '../world/world';
 import { createShopView } from './shop';
 
 describe('shop view and shop flow (T47, AC20, AC110, AC149, AC150)', () => {
+  it('the shop card can be scrolled by finger and keeps the Kippenhok and Sluiten', () => {
+    const view = createShopView({
+      state: { points: 200, dinos: [], eggs: [] },
+      onBuy: () => {},
+      onClose: () => {},
+    });
+    const modal = view.element.querySelector('.shop-modal');
+    expect(modal?.classList.contains('scrollable')).toBe(true);
+    expect(view.element.querySelector('[data-testid="shop-chicken-coop"]')).not.toBeNull();
+    expect(view.element.querySelector('.shop-close-btn')).not.toBeNull();
+    // Fits at 1024x768: no long blurb per card.
+    expect(view.element.querySelector('.shop-card-trait')).toBeNull();
+  });
+
   it('shows 4 species cards, greys out unaffordable ones with "Nog X punten nodig", and shows 12-cap banner (AC149)', () => {
     const view = createShopView({
       state: {

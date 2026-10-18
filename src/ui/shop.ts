@@ -88,7 +88,7 @@ export function createShopView(options: ShopViewOptions): ShopView {
   const cleanups: Array<() => void> = [];
 
   const modal = el('div', {
-    class: 'shop-modal pause-card',
+    class: 'shop-modal pause-card scrollable',
     attrs: { role: 'dialog', 'aria-label': 'Dinowinkel' },
   });
   const root = el('div', { class: 'shop-backdrop pause-backdrop' }, [modal]);
@@ -110,10 +110,7 @@ export function createShopView(options: ShopViewOptions): ShopView {
         class: `shop-art shop-art-${kind}`,
         attrs: { 'aria-hidden': 'true' },
       },
-      [
-        face,
-        el('span', { class: 'shop-art-egg-tag', text: 'Dino-ei' }),
-      ],
+      [face],
     );
   }
 
@@ -231,7 +228,6 @@ export function createShopView(options: ShopViewOptions): ShopView {
             text: `${kind.price} punten`,
           }),
         ]),
-        el('p', { class: 'shop-card-trait', text: meta.trait }),
         el('div', { class: 'shop-card-meta' }, chips),
       ]);
 
@@ -430,7 +426,6 @@ export function createShopView(options: ShopViewOptions): ShopView {
               el('h3', { class: 'shop-card-name', text: '\u{1F414} Kippenhok — Kippen loslaten' }),
               el('span', { class: 'shop-card-price', text: 'Direct in je wereld!' }),
             ]),
-            el('p', { class: 'shop-card-trait', text: SPECIES_META.kip.trait }),
             el('div', { class: 'shop-card-meta' }, [
               el('span', { class: 'shop-chip', text: SPECIES_META.kip.sizeLabel }),
               el('span', {

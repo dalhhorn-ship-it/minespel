@@ -84,7 +84,6 @@ export function createBlockGrid(options: BlockGridOptions): BlockGrid {
         },
       },
       [
-        el('span', { class: 'grid-slot-num', text: `${idx + 1}` }),
         swatch,
         nameEl,
       ],
@@ -167,7 +166,7 @@ export function createBlockGrid(options: BlockGridOptions): BlockGrid {
   const slotBar = el('div', { class: 'grid-slot-bar', attrs: { 'aria-label': 'Jouw onderste balk' } }, slotButtons.map((s) => s.btn));
   const catBar = el('div', { class: 'grid-cat-bar' }, catButtons.map((c) => c.btn));
 
-  const panel = el('div', { class: 'grid-panel' }, [
+  const panel = el('div', { class: 'grid-panel scrollable' }, [
     headerRow,
     slotBar,
     catBar,

@@ -20,6 +20,10 @@
   -webkit-user-select: none;
 }
 
+.lock-icon-btn[hidden] {
+  display: none;
+}
+
 .lock-icon-btn-floating {
   position: fixed;
   top: calc(10px + var(--safe-top, 0px));
@@ -141,7 +145,7 @@
 .parent-sidebar {
   background: #eae3d2;
   border-right: 2px solid #d4cbb8;
-  padding: 16px;
+  padding: 16px 16px calc(var(--safe-bottom, 0px) + 16px);
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -174,7 +178,7 @@
 
 .parent-close-btn {
   margin-top: auto;
-  min-height: 48px;
+  min-height: 56px;
   padding: 10px 14px;
   border-radius: 12px;
   border: 2px solid #14502b;
@@ -264,13 +268,13 @@
 
 .parent-level-pills {
   display: inline-flex;
-  gap: 6px;
+  gap: 8px;
   flex-wrap: wrap;
 }
 
 .parent-level-pill {
-  min-height: 38px;
-  padding: 4px 12px;
+  min-height: 44px;
+  padding: 4px 14px;
   border-radius: 999px;
   border: 2px solid #bfb39c;
   background: #f5f0e4;
