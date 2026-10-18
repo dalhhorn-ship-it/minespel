@@ -1,263 +1,281 @@
-// Break screen (T36): renders a break-session and sends taps back as session events.
-// It owns no storage and no points logic. Every state change is handed to `onStep(state, effects)`,
-// and the caller (break-flow, T43) saves and logs. Input that does not fit the phase is ignored
-// by the reducer, so a double tap can never skip a question (AC117).
-// There is no break countdown on this screen (AC28). Dutch texts for kids of 8 to 10.
+// Break screen (T36): renders a SessionState from break-session.ts, sends events back.
+// No storage, no timers of its own. Progress dots at the top, Dino Juf in the header,
+// and the current phase (lesson, question with retry banner, right feedback, teach moment, summary, empty).
+
 import '../../styles/break.css';
-import { SHOP_KINDS } from '../../dinos/kinds';
+import type { Sound } from '../../audio/sound';
 import type { Item, Lesson } from '../../content/format';
 import { workedExampleOf } from '../../content/rekenen/generator';
-import type { WorkedExample } from '../../content/rekenen/worked-example';
-import {
-  currentEntry,
-  reduce,
-  type SessionEffect,
-  type SessionEvent,
-  type SessionState,
-} from '../../learning/break-session';
-import type { Sound } from '../../audio/sound';
+import type { Response } from '../../learning/answer-check';
+import { currentEntry, type SessionState } from '../../learning/break-session';
 import { el } from '../dom';
 import { onTap } from '../tap';
-import { createDinoJuf, type DinoJuf } from './dino-juf';
-import { createQuestionHost } from './question-host';
-import { createSummary, pointsText } from './summary';
-import { createTeachMoment, pickLessonPage, type Teaching } from './teach-moment';
+import { createDinoJuf } from './dino-juf';
 import { createLessonView } from './lesson-view';
+import { createQuestionHost, formatRightAnswer } from './question-host';
+import { createSummaryView } from './summary';
+import { createTeachMoment, pickLessonPage, type Teaching } from './teach-moment';
 
-export const MSG_RETRY = 'Net niet. Probeer het nog een keer.';
-export const MSG_EMPTY = 'Er staan geen vragen aan. Vraag een grote om iets aan te zetten.';
-
-/** Cheapest egg price, used when the caller does not pass its own `canBuyEgg`. */
-const CHEAPEST_EGG = Math.min(...SHOP_KINDS.map((k) => k.price));
-
-/** The right answer as text, for the teach moment. */
-export function answerText(item: Item): string {
-  switch (item.type) {
-    case 'choice':
-      return item.options[item.answer] ?? '';
-    case 'find-error':
-      return item.answer < 0 ? 'Geen fout' : (item.correction ?? item.words[item.answer] ?? '');
-    case 'type':
-      return item.answer[0] ?? '';
-    case 'punctuate': {
-      const gaps = new Set(item.answer);
-      return item.words.map((w, i) => (gaps.has(i) ? w + item.mark : w)).join(' ');
-    }
-  }
-}
-
-/** Worked example steps as the strings the teach moment shows: the sentence, then the sum. */
-export function exampleSteps(example: WorkedExample): string[] {
-  return example.steps.map((s) => `${s.text} ${s.sum}`);
-}
+export type BreakScreenAction =
+  | { type: 'lessonDone' }
+  | { type: 'answer'; response: Response; q: number }
+  | { type: 'next'; q: number }
+  | { type: 'understood'; q: number }
+  | { type: 'finish' };
 
 export interface BreakScreenOptions {
-  /** From `startSession`, or a saved state when resuming (AC37). */
+  /** Initial session state. Call `render(state)` whenever it changes. */
   state: SessionState;
-  /** The lesson shown first when the session starts in the lesson phase. */
+  /** Topic lesson for the initial `lesson` phase, if any. */
   lesson?: Lesson;
-  /** The topic lesson of an item, for the teach moment of Taal and parent items. */
-  lessonOf?: (item: Item) => Lesson | undefined;
-  /** Worked example of a Rekenen item. Defaults to the built in generator. */
-  workedExample?: (item: Item, level: string) => WorkedExample | null;
-  /** Called after every state change with the new state and its effects. */
-  onStep: (state: SessionState, effects: SessionEffect[]) => void;
+  /** Resolves the topic lesson for an item (used by the teach moment for Taal and own items). */
+  lessonForItem?: (item: Item) => Lesson | undefined;
+  /** True when the kid can afford at least one egg in the Dinowinkel and is under the 12 cap. */
+  canAffordEgg?: (pointsTotal: number) => boolean;
   sound?: Pick<Sound, 'play'>;
-  /** True when this point total pays for an egg the kid can buy. */
-  canBuyEgg?: (points: number) => boolean;
-  /** Clock in ms for event times, injectable for tests. */
+  finishLabel?: string;
+  onAction: (action: BreakScreenAction) => void;
   now?: () => number;
-  /** Clock for the double tap guard, injectable for tests. */
-  tapNow?: () => number;
 }
 
 export interface BreakScreen {
-  element: HTMLElement;
-  getState(): SessionState;
-  /** Parent ended the break ("Pauze nu beeindigen", AC95). */
-  parentEnd(): void;
-  /** Let time pass (the empty break ends after 10 seconds). Scheduled by the screen itself too. */
-  tick(): void;
+  readonly element: HTMLElement;
+  render(state: SessionState): void;
   destroy(): void;
 }
 
+function buildTeaching(
+  item: Item,
+  numeric: boolean | undefined,
+  lessonForItem?: (item: Item) => Lesson | undefined,
+): Teaching | undefined {
+  if (numeric) {
+    const worked = workedExampleOf(item.id, item.level);
+    if (worked) {
+      return {
+        kind: 'example',
+        example: {
+          title: 'Stap voor stap:',
+          steps: worked.steps.map((s) => `${s.text} (${s.sum})`),
+        },
+      };
+    }
+  }
+  const lesson = lessonForItem?.(item);
+  if (lesson) {
+    const page = pickLessonPage(lesson, item.skill);
+    if (page) return { kind: 'page', page };
+  }
+  return undefined;
+}
+
 export function createBreakScreen(options: BreakScreenOptions): BreakScreen {
-  const now = options.now ?? (() => Date.now());
-  const tapNow = options.tapNow;
-  const canBuyEgg = options.canBuyEgg ?? ((p: number) => p >= CHEAPEST_EGG);
-  const exampleOf = options.workedExample ?? ((item: Item, level: string) => workedExampleOf(item.id, level));
-
-  let state = options.state;
-  let destroyed = false;
-  let lastGain = 0;
-  let timer: ReturnType<typeof setTimeout> | null = null;
-  let cleanup: Array<() => void> = [];
-
-  const juf: DinoJuf = createDinoJuf();
-  const dots = el('div', { class: 'break-dots', attrs: { role: 'img' } });
-  const header = el('header', { class: 'break-header' }, [juf.element, dots]);
+  const root = el('div', { class: 'break-screen', attrs: { role: 'main', 'aria-label': 'Leerpauze' } });
+  const juf = createDinoJuf('Tijd voor een leerpauze!');
+  const dotsWrap = el('div', { class: 'break-dots', attrs: { 'aria-label': 'Voortgang' } });
+  const header = el('header', { class: 'break-header' }, [juf.element, dotsWrap]);
   const body = el('div', { class: 'break-body' });
-  const root = el('main', { class: 'break-screen', attrs: { 'aria-label': 'Leerpauze' } }, [header, body]);
+  root.append(header, body);
 
-  function clearBody() {
-    for (const c of cleanup) c();
-    cleanup = [];
+  let childCleanup: (() => void) | null = null;
+  let lastSoundKey = '';
+
+  function clearChild() {
+    if (childCleanup) {
+      childCleanup();
+      childCleanup = null;
+    }
     body.replaceChildren();
   }
 
-  function drawDots() {
-    const total = state.entries.length;
-    dots.hidden = total === 0;
-    dots.setAttribute('aria-label', `Vraag ${Math.min(state.index + 1, total)} van ${total}`);
-    dots.replaceChildren(
+  function renderDots(state: SessionState) {
+    dotsWrap.replaceChildren(
       ...state.entries.map((_, i) => {
         const done = state.results[i] !== null;
-        const cls = done ? 'break-dot done' : i === state.index && state.phase !== 'summary' ? 'break-dot now' : 'break-dot';
+        const current =
+          !done &&
+          (state.phase === 'question' || state.phase === 'feedback' || state.phase === 'teach') &&
+          i === state.index;
+        const cls = [
+          'break-dot',
+          done ? 'break-dot-done' : '',
+          current ? 'break-dot-current' : '',
+        ]
+          .filter(Boolean)
+          .join(' ');
         return el('span', { class: cls });
       }),
     );
   }
 
-  function button(text: string, cls: string, handler: () => void): HTMLButtonElement {
-    const b = el('button', { class: cls, text, attrs: { type: 'button' } });
-    cleanup.push(onTap(b, handler, { now: tapNow }));
-    return b;
+  function playOnce(key: string, name: 'chime' | 'hmm' | 'fanfare') {
+    if (lastSoundKey === key) return;
+    lastSoundKey = key;
+    options.sound?.play(name);
   }
 
-  function teachingFor(item: Item, numeric: boolean): Teaching | undefined {
-    if (numeric) {
-      const ex = exampleOf(item, item.level);
-      if (ex) return { kind: 'example', example: { title: 'Zo reken je het uit', steps: exampleSteps(ex) } };
+  function render(state: SessionState) {
+    clearChild();
+    renderDots(state);
+
+    if (state.phase === 'empty') {
+      juf.say('Even geen vragen.');
+      body.append(
+        el('div', { class: 'break-empty' }, [
+          el('p', {
+            class: 'break-empty-text',
+            text: 'Er staan geen vragen aan. Vraag papa of mama om vragen te kiezen.',
+          }),
+        ]),
+      );
+      return;
     }
-    const lesson = options.lessonOf?.(item);
-    const page = lesson ? pickLessonPage(lesson, item.skill) : undefined;
-    return page ? { kind: 'page', page } : undefined;
-  }
 
-  function render() {
-    clearBody();
-    drawDots();
-    const entry = currentEntry(state);
-    const phase = state.phase;
-    const idx = state.index;
+    if (state.phase === 'lesson') {
+      juf.say('Lees eerst even deze korte uitleg.');
+      const lesson = options.lesson ?? { pages: [] };
+      const view = createLessonView({
+        lesson,
+        onDone: () => options.onAction({ type: 'lessonDone' }),
+        now: options.now,
+      });
+      body.append(view.element);
+      childCleanup = () => view.destroy();
+      return;
+    }
 
-    if (phase === 'lesson') {
-      juf.setMood('happy');
-      if (!options.lesson || options.lesson.pages.length === 0) {
-        // Nothing to teach: go straight to the questions.
-        queueMicrotask(() => send({ type: 'lessonDone', at: now() }));
-        return;
-      }
-      const v = createLessonView({ lesson: options.lesson, onDone: () => send({ type: 'lessonDone', at: now() }), now: tapNow });
-      cleanup.push(() => v.destroy());
-      body.append(v.element);
-    } else if (phase === 'question' && entry) {
-      juf.setMood(state.try === 2 ? 'think' : 'happy');
+    if (state.phase === 'question') {
+      const entry = currentEntry(state);
+      if (!entry) return;
+
       if (state.try === 2) {
+        // AC30: soft orange cross and retry message, no right answer shown, input cleared.
+        playOnce(`q-${state.index}-retry`, 'hmm');
+        juf.say('Net niet. Probeer het nog een keer.');
         body.append(
-          el('p', { class: 'break-retry', attrs: { role: 'status' } }, [el('span', { class: 'mark mark-wrong', text: '✗', attrs: { 'aria-hidden': 'true' } }), MSG_RETRY]),
+          el('div', { class: 'break-banner break-banner-wrong', attrs: { role: 'status' } }, [
+            el('span', { class: 'break-banner-icon', text: '✗', attrs: { 'aria-hidden': 'true' } }),
+            el('span', { text: 'Net niet. Probeer het nog een keer.' }),
+          ]),
         );
+      } else {
+        juf.say(`Vraag ${state.index + 1} van ${state.entries.length}`);
       }
+
+      if (state.message) {
+        body.append(el('p', { class: 'break-cap-note', text: state.message }));
+      }
+
+      const qIndex = state.index;
       const host = createQuestionHost({
         item: entry.item,
         numeric: entry.numeric,
-        onAnswer: (response) => send({ type: 'answer', at: now(), response, q: idx }),
+        onAnswer: (response) => options.onAction({ type: 'answer', response, q: qIndex }),
       });
-      cleanup.push(() => host.destroy());
       body.append(host.element);
-    } else if (phase === 'feedback') {
-      juf.setMood('cheer');
-      const outcome = state.results[idx];
-      const retry = outcome === 'retry';
-      const gain = lastGain;
-      let line: string;
-      if (state.mode === 'preview' || gain <= 0) line = retry ? 'Goed zo!' : 'Goed!';
-      else if (retry) line = `Goed zo! +${pointsText(gain)}`;
-      else line = `+${pointsText(gain)}`;
-      body.append(
-        el('div', { class: 'break-feedback', attrs: { role: 'status' } }, [
-          el('span', { class: 'mark mark-right', text: '✓', attrs: { 'aria-hidden': 'true' } }),
-          el('p', { class: 'feedback-text', text: line }),
-          ...(state.message ? [el('p', { class: 'summary-note', text: state.message })] : []),
-        ]),
-        button('Verder', 'break-button', () => send({ type: 'next', at: now(), q: idx })),
+      childCleanup = () => host.destroy();
+      return;
+    }
+
+    if (state.phase === 'feedback') {
+      const entry = currentEntry(state);
+      const outcome = state.results[state.index];
+      playOnce(`q-${state.index}-feedback`, 'chime');
+
+      // AC29 (+2 punten on first try) and AC145 ("Goed zo! +1 punt" on retry).
+      const feedbackText = outcome === 'retry' ? 'Goed zo! +1 punt' : 'Goed! +2 punten';
+      juf.say(feedbackText);
+
+      const banner = el(
+        'div',
+        { class: 'break-banner break-banner-right', attrs: { role: 'status' } },
+        [
+          el('span', { class: 'break-banner-icon', text: '✓', attrs: { 'aria-hidden': 'true' } }),
+          el('span', { text: feedbackText }),
+        ],
       );
-    } else if (phase === 'teach' && entry) {
-      juf.setMood('think');
-      const tm = createTeachMoment({
-        answer: answerText(entry.item),
+
+      const cardChildren: Node[] = [banner];
+      if (entry?.item.type === 'find-error' && entry.item.correction) {
+        cardChildren.push(
+          el('p', {
+            class: 'break-correction',
+            text: `Goede schrijfwijze: ${entry.item.correction}`,
+          }),
+        );
+      }
+      if (entry?.item.explain) {
+        cardChildren.push(el('p', { class: 'break-explain', text: entry.item.explain }));
+      }
+      if (state.message) {
+        cardChildren.push(el('p', { class: 'break-cap-note', text: state.message }));
+      }
+
+      const qIndex = state.index;
+      const nextBtn = el('button', {
+        class: 'break-next-btn',
+        text: 'Verder',
+        attrs: { type: 'button' },
+      });
+      cardChildren.push(nextBtn);
+      body.append(el('div', { class: 'break-feedback-card' }, cardChildren));
+
+      let acted = false;
+      const off = onTap(
+        nextBtn,
+        () => {
+          if (acted) return;
+          acted = true;
+          options.onAction({ type: 'next', q: qIndex });
+        },
+        { now: options.now },
+      );
+      childCleanup = off;
+      return;
+    }
+
+    if (state.phase === 'teach') {
+      const entry = currentEntry(state);
+      if (!entry) return;
+      playOnce(`q-${state.index}-teach`, 'hmm');
+      juf.say('Kijk even mee, zo zit het.');
+
+      const qIndex = state.index;
+      const teach = createTeachMoment({
+        answer: formatRightAnswer(entry.item),
         explain: entry.item.explain,
-        teaching: teachingFor(entry.item, entry.numeric === true),
-        onDone: () => send({ type: 'understood', at: now(), q: idx }),
-        now: tapNow,
+        teaching: buildTeaching(entry.item, entry.numeric, options.lessonForItem),
+        onDone: () => options.onAction({ type: 'understood', q: qIndex }),
+        now: options.now,
       });
-      cleanup.push(() => tm.destroy());
-      body.append(tm.element);
-    } else if (phase === 'summary' && state.summary) {
-      const s = state.summary;
-      juf.setMood(s.hard ? 'think' : 'cheer');
-      const v = createSummary({
-        summary: s,
-        showPoints: state.mode !== 'preview',
-        canBuyEgg: state.mode === 'break' && canBuyEgg(s.pointsTotal),
-        message: state.message,
-        onDone: () => send({ type: 'finish', at: now() }),
-        now: tapNow,
+      body.append(teach.element);
+      childCleanup = () => teach.destroy();
+      return;
+    }
+
+    if (state.phase === 'summary' && state.summary) {
+      playOnce('summary', state.summary.hard ? 'hmm' : 'fanfare');
+      juf.say(state.summary.hard ? 'Goed geprobeerd!' : 'Knap gedaan!');
+      const summaryView = createSummaryView({
+        summary: state.summary,
+        canAffordEgg: options.canAffordEgg?.(state.summary.pointsTotal) ?? false,
+        capMessage: state.message,
+        buttonLabel: options.finishLabel,
+        onFinish: () => options.onAction({ type: 'finish' }),
+        now: options.now,
       });
-      cleanup.push(() => v.destroy());
-      body.append(v.element);
-    } else if (phase === 'empty') {
-      juf.setMood('happy');
-      body.append(el('p', { class: 'break-empty', text: MSG_EMPTY, attrs: { role: 'status' } }));
+      body.append(summaryView.element);
+      childCleanup = () => summaryView.destroy();
     }
-    schedule();
   }
 
-  function schedule() {
-    if (timer !== null) {
-      clearTimeout(timer);
-      timer = null;
-    }
-    if (destroyed || state.phase !== 'empty' || state.emptyUntil === null) return;
-    timer = setTimeout(() => {
-      timer = null;
-      send({ type: 'tick', at: Math.max(now(), state.emptyUntil ?? 0) });
-    }, Math.max(0, state.emptyUntil - now()));
-  }
-
-  function send(ev: SessionEvent) {
-    if (destroyed) return;
-    const before = state;
-    const r = reduce(state, ev);
-    if (r.state === before) return; // ignored input: nothing changes, nothing is saved
-    state = r.state;
-    const answerPoints = r.effects.find((e) => e.type === 'points' && e.reason === 'answer');
-    lastGain = answerPoints && answerPoints.type === 'points' ? Math.max(0, answerPoints.applied) : 0;
-    if (ev.type === 'answer') {
-      if (state.phase === 'feedback') options.sound?.play('chime');
-      else if (state.phase === 'question') options.sound?.play('hmm');
-    }
-    options.onStep(state, r.effects);
-    if (destroyed) return;
-    render();
-  }
-
-  // Resuming into feedback: the gain is not known any more, so show the usual one.
-  if (state.phase === 'feedback' && state.mode !== 'preview') {
-    lastGain = state.results[state.index] === 'retry' ? 1 : 2;
-  }
-  render();
+  render(options.state);
 
   return {
     element: root,
-    getState: () => state,
-    parentEnd: () => send({ type: 'parentEnd', at: now() }),
-    tick: () => send({ type: 'tick', at: now() }),
+    render,
     destroy() {
-      destroyed = true;
-      if (timer !== null) clearTimeout(timer);
-      clearBody();
-      juf.element.remove();
+      clearChild();
       root.remove();
     },
   };

@@ -1,50 +1,77 @@
-/* Countdown in the HUD. One pulse per second at most (AC142). */
-.countdown {
-  min-height: var(--touch-min);
-  padding: 0 calc(var(--gap) * 1.5);
-  display: flex;
-  align-items: center;
-  border-radius: var(--radius);
-  background: var(--paper);
-  color: var(--ink);
-  border: 3px solid var(--ink);
-  font-weight: 800;
-  font-variant-numeric: tabular-nums;
-  transform-origin: left center;
-  transition: transform 0.4s ease;
-}
-.countdown-warning {
-  transform: scale(1.35);
-  animation: countdown-pulse 1s ease-in-out infinite;
-}
-@keyframes countdown-pulse {
-  0%, 100% { background: var(--paper); }
-  50% { background: var(--wrong-bg); }
-}
-@media (prefers-reduced-motion: reduce) {
-  .countdown { transition: none; }
-  .countdown-warning { animation: none; background: var(--wrong-bg); } /* still grows, no pulse */
-}
+/* HUD countdown pill (T41, AC21, AC25). */
 
-/* Layer for pause menu, break and other screens. Under the portrait and too small overlays (z-index 1000). */
-.screen-layer {
-  position: fixed;
-  inset: 0;
-  z-index: 500;
-  font-family: var(--font-stack);
-}
-.screen-layer[hidden] { display: none; }
-.screen-layer > * { position: absolute; inset: 0; }
-.break-stub {
-  display: flex;
-  flex-direction: column;
+.countdown-pill {
+  display: inline-flex;
   align-items: center;
-  justify-content: center;
-  gap: var(--gap);
-  background: var(--sky-light);
-  color: var(--ink);
-  font-size: var(--font-large);
+  gap: 8px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: rgba(20, 32, 48, 0.72);
+  border: 2px solid rgba(255, 255, 255, 0.25);
+  color: #ffffff;
   font-weight: 800;
+  font-size: var(--font-ui, 18px);
+  line-height: 1.2;
+  letter-spacing: 0.01em;
+  font-variant-numeric: tabular-nums;
+  transition: transform 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
   user-select: none;
   -webkit-user-select: none;
+}
+
+.countdown-pill-icon {
+  font-size: 1.1em;
+  line-height: 1;
+}
+
+.countdown-now-btn {
+  pointer-events: auto;
+  min-height: 44px;
+  padding: 4px 12px;
+  margin-left: 4px;
+  border-radius: 999px;
+  border: 2px solid #8a5600;
+  background: linear-gradient(180deg, #ffe066 0%, #f59f00 100%);
+  color: #1f2d3d;
+  font: inherit;
+  font-size: 0.92em;
+  font-weight: 800;
+  cursor: pointer;
+  touch-action: none;
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.25);
+}
+
+.countdown-now-btn[hidden] {
+  display: none;
+}
+
+.countdown-now-btn:active {
+  transform: translateY(1px);
+}
+
+.countdown-pill.countdown-warning {
+  background: rgba(180, 68, 18, 0.92);
+  border-color: #ffd166;
+  color: #fffdf7;
+  transform: scale(1.08);
+  animation: countdown-pulse 1s ease-in-out infinite;
+}
+
+@keyframes countdown-pulse {
+  0%,
+  100% {
+    transform: scale(1.06);
+  }
+  50% {
+    transform: scale(1.13);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .countdown-pill,
+  .countdown-pill.countdown-warning {
+    animation: none;
+    transition: none;
+    transform: none;
+  }
 }

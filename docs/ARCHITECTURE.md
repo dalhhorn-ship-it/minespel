@@ -71,7 +71,6 @@ src/
   world/                    pure voxel logic
     blocks.ts               block ids, Dutch names, flags (solid, cutout, minable, placeable)
     terrain.ts              fixed seed world generation, WORLD_SIZE constant (64 or 48)
-    gate.ts                 the obsidiaan gate rule: gateFill(world, isOccupied) returns the vuur cells to add
     world.ts                World: get and set blocks, diff against the start world, (de)serialize
     raycast.ts              voxel ray walk (Amanatides and Woo) for taps
     physics.ts              player box movement, gravity, jump, edge walls, step rules
@@ -155,7 +154,7 @@ src/
   ui/
     dom.ts                  el(), text only helpers
     tap.ts                  onTap(): pointer based tap, acts once, ignores repeats
-    hud.ts                  stick, jump, Omhoog/Omlaag, camera arrows, mode buttons, hotbar slot, countdown slot, pause button, releaseAll()
+    hud.ts                  stick, jump, mode buttons, hotbar slot, countdown slot, pause button
     countdown.ts            "Leerpauze over 4:12", pulse, tick
     hotbar.ts, block-grid.ts, pause-menu.ts, shop.ts, dino-menu.ts, name-screen.ts, lock-icon.ts
     broken-save-screen.ts
@@ -209,7 +208,7 @@ Unit tests live next to the code: `src/world/raycast.test.ts` tests `src/world/r
 
 The same `break-session` runs three modes: `break` (malus and bonus), `practice` (no malus, no bonus, day cap, AC52 and AC120) and `preview` (Probeer: no points, no boxes, no logs). `exam-session` is a separate, simpler machine: one try, no feedback, a timer.
 
-**Rendering details.** Chunks of 16 x 16 x 64 (`WORLD_HEIGHT = 64`; "layer 64" in the PRD is y index `63` in code, `0` to `WORLD_HEIGHT - 1`). Each chunk tracks its highest non-air y and the mesher loops only up to that y plus 1. Only faces next to air or a cut out block are built. Each face gets a fixed brightness (top 1.0, sides 0.8 and 0.6, bottom 0.5) as vertex colour, so there are no lights and no shadows. One `MeshBasicMaterial` with the atlas and `alphaTest` for glass and leaves. Linear fog hides the edge. Pixel ratio is `min(devicePixelRatio, 2)`; the spike may lower it to 1.5. Dinos are boxes grouped per dino; golden dinos use a gold colour. At most 12 shop dinos plus golden dinos, about 5 meshes each.
+**Rendering details.** Chunks of 16 x 16 x 32. Only faces next to air or a cut out block are built. Each face gets a fixed brightness (top 1.0, sides 0.8 and 0.6, bottom 0.5) as vertex colour, so there are no lights and no shadows. One `MeshBasicMaterial` with the atlas and `alphaTest` for glass and leaves. Linear fog hides the edge. Pixel ratio is `min(devicePixelRatio, 2)`; the spike may lower it to 1.5. Dinos are boxes grouped per dino; golden dinos use a gold colour. At most 12 shop dinos plus golden dinos, about 5 meshes each.
 
 **Context loss (AC109).** If headless WebKit has no WebGL, AC109 is proven with a unit test on a fake renderer lifecycle and by hand on the iPad. The renderer listens for `webglcontextlost` (calls `preventDefault`) and `webglcontextrestored`. On restore it rebuilds the atlas, all chunk meshes and dino meshes from game state. If no restore comes within 1.5 seconds, it throws the canvas away and makes a new renderer. Game state never lives in three.js objects, so nothing is lost.
 
@@ -333,8 +332,8 @@ Rules: every task adds tests that fail without its change. Pure logic is tested 
 
 ## How to deploy
 
-* Worker name `minespel` (the Worker the founder connected in Cloudflare, decision 54), static assets from `./dist`, `compatibility_date` 2026-10-17, see `wrangler.jsonc`. No Worker script, no KV, D1 or R2. `preview_urls` is off so no extra public addresses appear.
-* Address: `https://minespel.<account subdomain>.workers.dev` (F9, public). The IndexedDB name stays `dino-blokwereld`.
+* Worker name `dino-blokwereld`, static assets from `./dist`, `compatibility_date` 2026-10-17, see `wrangler.jsonc`. No Worker script, no KV, D1 or R2. `preview_urls` is off so no extra public addresses appear.
+* Address: `https://dino-blokwereld.<account subdomain>.workers.dev` (F9, public).
 * `npm run deploy` (build, then `wrangler deploy`) on the founder's machine after `npx wrangler login`, or the manual "Deploy to Cloudflare Workers" GitHub workflow with the repo secrets `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`, which only the founder adds.
 * Every deploy is a founder decision. The ship checklist confirms Cloudflare Web Analytics is off for this Worker (AC98).
 * `public/_headers` sets `Cache-Control: no-cache` for `/service-worker.js` and `/index.html`, and long caching for hashed files in `/assets/`.
@@ -366,19 +365,3 @@ Rules: every task adds tests that fail without its change. Pure logic is tested 
 | Large plan (71 tasks) | Pure logic first and in parallel, stubs for menus, milestones playable early. |
 | Share sheet in home screen mode | Fallback new view (PRD 4.15), checked on the real iPad at M5. |
 | Taal content mistakes | Validator checks plus the human check (T65). |
-
-## The obsidiaan gate (G3, PRD 4.20)
-
-* Fixed spot, set in `terrain.ts` (yaw 0 looks toward +z, so the kid's right is -x). Let G be the start ground height (`GROUND_Y`, the y index of the top grass block at the start). F1 to F4 are obsidiaan at y = G, z = `MID + 4`, x = `MID + 1`, `MID`, `MID - 1`, `MID - 2` (`GATE_Z`, `GATE_FLOOR_X`). Their top is level with the grass.
-* Terrain flattens x `MID - 3` to `MID + 2`, z `MID + 3` to `MID + 5` to the start height and keeps trunks and leaves out of it. Fixed world version stays 2.
-* `world/gate.ts` is pure. `gateFill` needs F1 to F4 as obsidiaan and unbroken obsidiaan pillars at least 2 high (from G+1) above F1 and F4. The opening is the cells above F2 and F3 from G+1 to the lower pillar's height. If one opening cell holds vuur it returns every AIR opening cell that `isOccupied` does not flag.
-* `game/build-controller.ts` calls it after a successful place, only when the placed cell is in a gate column. It writes the vuur, calls `onBlockChanged` once per touched chunk (the gate straddles the chunk border at x 32, so at most 2 calls) and plays `whoosh`. The controller adds the player box to the dino and egg `isOccupied`. Mining never lights.
-
-## Right side HUD buttons (G6)
-
-All in `src/ui/hud.ts` and `src/styles/hud.css`. Every button is a router ignore zone. Positions (landscape, safe area added to each edge offset, 1024 x 768 shown):
-* Jump: 96 px circle, right 24 px, bottom 24 + 56 + 24 = 104 px offset (`--hud-jump-bottom` is safe bottom + 56 + 48).
-* Omhoog (top) and Omlaag: one column, 76 x 56 px each, 12 px gap, same bottom as jump, 8 px left of jump (x 824 to 900).
-* Camera arrows: plus cluster of four 56 px tiles (4 px gap) in a 3 x 3 grid, right edge level with jump, 12 px above the fly column (x 832 to 1000, y about 376 to 544).
-* Hotbar: bottom 24 px, ends near x 827 and sits below the fly column. Mode buttons end at y about 192, far above the arrows. At 1180 x 820 and 1366 x 1024 the same offsets hold (all anchored right and bottom). `tests/e2e/hud-buttons.spec.ts` checks size, viewport, overlap and a 20 px bottom margin at all three.
-* Release: every held control (Omhoog, Omlaag, arrows) lets go on pointerup, pointercancel, lostpointercapture, window blur, page hidden, orientationchange or a resize that flips orientation, and `hud.releaseAll()` runs when `game.pause()` is called or any screen opens (`screens.subscribe` in `game.ts`). Arrows: under 200 ms (`LOOK_TAP_MAX_MS`) and released by pointerup is one `tapLook`; past 200 ms `setLookInput` gets the sum of the arrows that passed 200 ms. A press cut short by a system event is neither tap nor hold.

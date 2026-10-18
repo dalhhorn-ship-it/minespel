@@ -95,8 +95,11 @@ export function applyPoints(eco: EconomyRecord, mode: SessionMode, delta: number
 
 // ---- Dinowinkel ----
 
-export function shopDinoCount(dinos: { golden?: boolean }[], eggs: { golden?: boolean }[]): number {
-  return [...dinos, ...eggs].filter((d) => !d.golden).length;
+export function shopDinoCount(
+  dinos: { golden?: boolean; kind?: string }[],
+  eggs: { golden?: boolean; kind?: string }[],
+): number {
+  return [...dinos, ...eggs].filter((d) => !d.golden && d.kind !== 'kip').length;
 }
 
 export function capReached(shopCount: number): boolean {

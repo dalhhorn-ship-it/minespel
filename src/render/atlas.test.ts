@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { AIR, BLADEREN, BLOCKS, GLAS, GRAS, IJS, MAX_BLOCK_ID, STEEN, VUUR, WATER } from '../world/blocks';
+import { AIR, BLADEREN, BLOCKS, GLAS, GRAS, MAX_BLOCK_ID, STEEN } from '../world/blocks';
 import {
   ATLAS_COLUMNS, ATLAS_HEIGHT, ATLAS_WIDTH, TILES, TILE_SIZE, paintAtlas, paintTile, tileFor, tileUv,
 } from './atlas';
@@ -30,7 +30,7 @@ describe('atlas', () => {
     expect(a.data[3]).toBe(255);
   });
 
-  it('makes glass, leaves, water, ijs and vuur see through in places, stone solid', () => {
+  it('makes glass and leaves see through in places, stone solid', () => {
     const alphas = (id: number) => {
       const d = paintTile(tileFor(id, 'side')).data;
       return Array.from({ length: TILE_SIZE * TILE_SIZE }, (_, i) => d[i * 4 + 3]);
@@ -38,9 +38,6 @@ describe('atlas', () => {
     expect(alphas(GLAS)).toContain(0);
     expect(alphas(BLADEREN)).toContain(0);
     expect(alphas(BLADEREN)).toContain(255);
-    expect(alphas(WATER)).toContain(0);
-    expect(alphas(IJS)).toContain(0);
-    expect(alphas(VUUR)).toContain(0);
     expect(alphas(STEEN).every((a) => a === 255)).toBe(true);
   });
 

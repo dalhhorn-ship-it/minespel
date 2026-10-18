@@ -1,10 +1,12 @@
 // The running game: world, renderer, input, HUD and the loop. Other features hook in through the returned object.
 import { createSound, type Sound } from '../audio/sound';
+import { createDinoStore, type DinoStore, type WorldDino } from '../dinos/dino-store';
 import type { AudioUnlock } from '../platform/audio-unlock';
 import { createEffects } from '../render/effects';
 import { createBlockGrid } from '../ui/block-grid';
 import { createHotbar } from '../ui/hotbar';
 import { createBuildController, type BuildState } from './build-controller';
+import { createDinoSystem, type DinoSystem } from './dino-system';
 import { createFpsCounter, type FpsCounter } from '../render/fps-counter';
 import { createLook } from '../input/look';
 import { createPointerRouter } from '../input/pointer-router';
@@ -16,13 +18,6 @@ import type { GameRenderer, RendererFactory } from '../render/renderer';
 import { createHud, type Hud } from '../ui/hud';
 import { el } from '../ui/dom';
 import { World } from '../world/world';
-import { createDinoRender } from '../render/dino-render';
-import { createDinoStore, setActiveDinoStore, type DinoStore } from '../dinos/dino-store';
-import { createDinoMenu } from '../ui/dino-menu';
-import { DINO_KINDS } from '../dinos/kinds';
-import { createDinoSystem, type DinoSystem } from './dino-system';
-import { registerHook } from '../dev/e2e-hooks';
-import type { Screens } from '../app/screens';
 import { createLoop } from './loop';
 import { createPlayerController, type PlayerController } from './player-controller';
 
@@ -47,10 +42,8 @@ export interface Game {
   readonly player: PlayerController;
   readonly renderer: GameRenderer;
   readonly hud: Hud;
-  /** Dinos and eggs: the store, hit tests and stepping. */
-  readonly dinos: DinoSystem;
-  /** Opens the dino menu for a dino (the tap does this by itself). */
-  openDinoMenu(id: number): void;
+  readonly dinoStore: DinoStore;
+  readonly dinoSystem: DinoSystem;
   /** Stops the world: no steps, no drawing. Safe to call twice. */
   pause(): void;
   resume(): void;
@@ -59,13 +52,6 @@ export interface Game {
   /** Mode, the 8 hotbar blocks and the selected slot. T37 saves these. */
   getBuildState(): BuildState;
   setBuildState(state: Partial<BuildState>): void;
-  /** Omhoog and Omlaag, for the buttons that come with G6. */
-  setAscending(on: boolean): void;
-  setDescending(on: boolean): void;
-  isFloating(): boolean;
-  /** Camera arrows for G6. Tap (press under 200 ms) calls `tapLook`; a longer press calls `setLookInput` once 200 ms have passed. */
-  setLookInput(turnX: number, tiltY: number): void;
-  tapLook(turnX: number, tiltY: number): void;
   /** Puts the player back on the start spot and says so with `teleported`. */
   teleportHome(): void;
   /** Puts every block back to the start world, saves that, and puts the player on the start spot. */
@@ -90,8 +76,10 @@ export interface GameOptions {
   /** The first tap detector main.ts holds. Without it the game is silent. */
   audioUnlock?: AudioUnlock;
   sound?: Sound;
-  /** When given, the dino menu and the block grid open a node less 'kid-overlay' screen, so the play timer waits (AC23). */
-  screens?: Screens;
+  onPausePressed?: () => void;
+  onParentPressed?: () => void;
+  onDinoTapped?: (dino: WorldDino, screenX: number, screenY: number) => void;
+  onBlockGridOpenChange?: (open: boolean) => void;
 }
 
 const SILENT_UNLOCK = { isUnlocked: () => false, watch: () => {}, whenUnlocked: () => {} };
@@ -121,34 +109,40 @@ export function createGame(options: GameOptions): Game {
     for (const l of [...listeners.changed]) l({ kind });
   };
   const player = createPlayerController({ world, stick, look });
-  const dinoStore: DinoStore = createDinoStore();
-  setActiveDinoStore(dinoStore);
-  const dinoRender = createDinoRender(doc);
-  renderer.setDinoLayer(dinoRender.layer);
-  const dinos = createDinoSystem({
+  const dinoStore = createDinoStore({
     world,
-    store: dinoStore,
-    player: () => player.player,
-    onEvent: (e) => dinoRender.burst(e.type, e.x, e.y, e.z),
+    getPlayerSpot: () => ({
+      x: player.player.x,
+      y: player.player.y,
+      z: player.player.z,
+    }),
   });
-  let menuOpen = false;
-  let closeMenuScreen: (() => void) | null = null;
-  let closeGridScreen: (() => void) | null = null;
-  let updateLoop = () => {};
+  const dinoSystem = createDinoSystem({
+    world,
+    player,
+    store: dinoStore,
+    renderer,
+    container: options.container,
+    sound,
+    effects,
+    viewport: () => ({ width: win.innerWidth, height: win.innerHeight }),
+    onDinoTapped: (dino, sx, sy) => options.onDinoTapped?.(dino, sx, sy),
+    doc,
+  });
+
   const hud = createHud({
     router,
     onJump: () => player.jump(),
+    onAscend: (active) => player.setAscending(active),
+    onDescend: (active) => player.setDescending(active),
+    onLookInput: (tx, ty) => player.setLookInput(tx, ty),
+    onLookNudge: (tx, ty) => player.nudgeLook(tx, ty),
     onMode: (m) => {
       build.setMode(m);
       emitChanged('build');
     },
-    onPause: () => {}, // the pause menu comes with T41
-    onAscend: (on) => player.setAscending(on),
-    onDescend: (on) => player.setDescending(on),
-    onLookTap: (x, y) => player.tapLook(x, y),
-    onLook: (x, y) => player.setLookInput(x, y),
-    win,
-    doc,
+    onPause: () => options.onPausePressed?.(),
+    onParent: options.onParentPressed ? () => options.onParentPressed?.() : undefined,
   });
   const build = createBuildController({
     world,
@@ -160,16 +154,14 @@ export function createGame(options: GameOptions): Game {
     effects,
     sound,
     viewport: () => ({ width: win.innerWidth, height: win.innerHeight }),
+    isOccupied: (box) => dinoSystem.isOccupied(box),
     canAct: () => loopRunning(),
-    isOccupied: (box) => dinos.isOccupied(box),
-    tapFirst: (aim) => {
-      const hit = dinos.hitTest(aim);
-      if (!hit) return false;
-      if (hit.kind === 'dino') openDinoMenu(hit.id);
-      return true;
-    },
   });
-  tapWorld.fn = (x, y) => build.tap(x, y);
+  tapWorld.fn = (x, y) => {
+    if (!loopRunning()) return;
+    if (dinoSystem.handleTap(x, y)) return;
+    build.tap(x, y);
+  };
   const initial = build.getState();
   const hotbar = createHotbar({
     slots: hud.slots,
@@ -179,70 +171,40 @@ export function createGame(options: GameOptions): Game {
     onSelect: (slot) => {
       build.select(slot);
       hotbar.setSelected(slot);
+      grid.setHotbar?.(build.getState().hotbar, slot);
       emitChanged('build');
     },
     onAllBlocks: () => grid.open(),
   });
   const grid = createBlockGrid({
     router,
-    getState: () => build.getState(),
-    onPick: (slot, block) => {
-      build.setSlotBlock(slot, block);
+    hotbar: initial.hotbar,
+    selectedSlot: initial.selected,
+    onSelectSlot: (slot) => {
+      build.select(slot);
+      hotbar.setSelected(slot);
+      emitChanged('build');
+    },
+    onPick: (block) => {
+      build.setSlotBlock(build.getState().selected, block);
       refreshHotbar();
       emitChanged('build');
     },
+    onOpenChange: (open) => options.onBlockGridOpenChange?.(open),
   });
   const refreshHotbar = () => {
     const s = build.getState();
     hotbar.setBlocks(s.hotbar);
     hotbar.setSelected(s.selected);
+    grid.setHotbar?.(s.hotbar, s.selected);
     hud.setMode(s.mode);
   };
   options.container.append(hud.root, stick.element, grid.root);
-  // The grid closes itself (pick, Klaar, backdrop), so watch its hidden flag.
-  const gridWatch = new MutationObserver(() => {
-    if (grid.isOpen() && !closeGridScreen && options.screens) closeGridScreen = options.screens.open('kid-overlay');
-    else if (!grid.isOpen() && closeGridScreen) {
-      closeGridScreen();
-      closeGridScreen = null;
-    }
-  });
-  gridWatch.observe(grid.root, { attributes: true, attributeFilter: ['hidden'] });
 
-  let spike: SpikeDino[] | null = null;
+  let dinos: SpikeDino[] | null = null;
   if (isSpikeEnabled(search)) {
-    spike = createSpikeDinos(world);
-    renderer.setSpikeDinos(spike);
-  }
-  const dinoMenu = createDinoMenu({
-    container: options.container,
-    router,
-    onMode: (id, mode) => dinoStore.setMode(id, mode),
-    onRename: (id, name) => dinoStore.rename(id, name),
-    onHug: (id) => {
-      const d = dinoStore.findDino(id);
-      if (!d) return;
-      dinoRender.burst('hearts', d.state.x, d.state.y + DINO_KINDS[d.state.kind].size.h, d.state.z);
-      sound.play('chirp');
-    },
-    onClose: () => {
-      menuOpen = false;
-      closeMenuScreen?.();
-      closeMenuScreen = null;
-      updateLoop();
-    },
-  });
-  function openDinoMenu(id: number): void {
-    const d = dinoStore.findDino(id);
-    if (!d) return;
-    menuOpen = true;
-    if (!closeMenuScreen && options.screens) closeMenuScreen = options.screens.open('kid-overlay');
-    dinoMenu.open({ id: d.id, kind: d.state.kind, name: d.name, mode: d.state.mode });
-    updateLoop();
-  }
-  if (__E2E__) {
-    registerHook('dinoMenuOpen', () => dinoMenu.isOpen());
-    registerHook('closeDinoMenu', () => dinoMenu.close());
+    dinos = createSpikeDinos(world);
+    renderer.setSpikeDinos(dinos);
   }
   const fps: FpsCounter = createFpsCounter(search, doc.body);
 
@@ -250,9 +212,8 @@ export function createGame(options: GameOptions): Game {
   const loop = createLoop({
     frame(dt, now) {
       player.update(dt);
-      if (spike) stepSpikeDinos(world, spike, dt);
-      dinos.step(dt);
-      dinoRender.sync(dinoStore.dinos, dinoStore.eggs, dt);
+      dinoSystem.step(dt);
+      if (dinos) stepSpikeDinos(world, dinos, dt);
       renderer.setCamera(player.pose());
       renderer.render();
       fps.frame(now, dt);
@@ -265,15 +226,40 @@ export function createGame(options: GameOptions): Game {
   win.addEventListener('resize', resize);
   win.addEventListener('orientationchange', resize);
 
+  const arrowKeys = new Set<string>();
+  const syncArrowLook = () => {
+    const tx = (arrowKeys.has('ArrowRight') ? 1 : 0) - (arrowKeys.has('ArrowLeft') ? 1 : 0);
+    const ty = (arrowKeys.has('ArrowUp') ? 1 : 0) - (arrowKeys.has('ArrowDown') ? 1 : 0);
+    player.setLookInput(tx, ty);
+  };
+  const onKeyDown = (e: KeyboardEvent) => {
+    if (!loop.running) return;
+    if (e.key === 'ArrowUp' || e.key === 'ArrowDown' || e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+      arrowKeys.add(e.key);
+      syncArrowLook();
+    }
+  };
+  const onKeyUp = (e: KeyboardEvent) => {
+    if (arrowKeys.delete(e.key)) {
+      syncArrowLook();
+    }
+  };
+  win.addEventListener('keydown', onKeyDown);
+  win.addEventListener('keyup', onKeyUp);
+
   // The loop runs only when nobody asked for a pause, the iPad is landscape and big enough, and the page is visible.
   let manualPause = false;
   let guardBlocks = false;
   const update = () => {
     const hidden = doc.visibilityState === 'hidden';
-    if (manualPause || menuOpen || guardBlocks || hidden) loop.stop();
-    else loop.start();
+    if (manualPause || guardBlocks || hidden) {
+      arrowKeys.clear();
+      player.setLookInput(0, 0);
+      loop.stop();
+    } else {
+      loop.start();
+    }
   };
-  updateLoop = update;
   loopRunning = () => loop.running;
   const unsubscribe = options.guard.subscribe((s) => {
     guardBlocks = s.portrait || s.tooSmall;
@@ -283,21 +269,10 @@ export function createGame(options: GameOptions): Game {
   doc.addEventListener('visibilitychange', update);
   update();
 
-  // A held fly or look control must never outlive the moment the world stops (a stuck Omhoog flies the kid to the top).
-  function releaseHolds() {
-    hud.releaseAll();
-    player.setAscending(false);
-    player.setDescending(false);
-    player.setLookInput(0, 0);
-  }
-  const unsubscribeScreens = options.screens?.subscribe((kind) => {
-    if (kind !== 'world') releaseHolds();
-  });
-
   function teleportHome() {
     player.reset();
     const p = player.player;
-    dinos.teleported();
+    dinoSystem.onPlayerTeleported({ x: p.x, y: p.y, z: p.z });
     for (const l of [...listeners.teleported]) l({ x: p.x, y: p.y, z: p.z });
   }
 
@@ -306,10 +281,9 @@ export function createGame(options: GameOptions): Game {
     player,
     renderer,
     hud,
-    dinos,
-    openDinoMenu,
+    dinoStore,
+    dinoSystem,
     pause() {
-      releaseHolds();
       manualPause = true;
       update();
     },
@@ -323,11 +297,6 @@ export function createGame(options: GameOptions): Game {
       build.setState(state);
       refreshHotbar();
     },
-    setAscending: (on) => player.setAscending(on),
-    setDescending: (on) => player.setDescending(on),
-    isFloating: () => player.isFloating(),
-    setLookInput: (turnX, tiltY) => player.setLookInput(turnX, tiltY),
-    tapLook: (turnX, tiltY) => player.tapLook(turnX, tiltY),
     teleportHome,
     resetWorld() {
       world.reset();
@@ -344,21 +313,16 @@ export function createGame(options: GameOptions): Game {
     dispose() {
       loop.stop();
       unsubscribe();
-      unsubscribeScreens?.();
       doc.removeEventListener('visibilitychange', update);
       win.removeEventListener('resize', resize);
       win.removeEventListener('orientationchange', resize);
+      win.removeEventListener('keydown', onKeyDown);
+      win.removeEventListener('keyup', onKeyUp);
       router.destroy();
       hud.destroy();
       hotbar.destroy();
-      gridWatch.disconnect();
-      closeGridScreen?.();
-      closeMenuScreen?.();
       grid.destroy();
-      dinoMenu.destroy();
-      renderer.setDinoLayer(null);
-      dinoRender.dispose();
-      setActiveDinoStore(null);
+      dinoSystem.dispose();
       effects.dispose();
       stick.element.remove();
       fps.dispose();

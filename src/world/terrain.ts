@@ -1,5 +1,5 @@
 import { createRng } from '../core/rng';
-import { AARDE, AIR, BLADEREN, BOOMSTAM, GRAS, KEISTEEN, OBSIDIAAN, OERSTEEN, STEEN, ZAND } from './blocks';
+import { AARDE, AIR, BLADEREN, BOOMSTAM, GRAS, KEISTEEN, OBSIDIAAN, OERSTEEN, STEEN, VUURSTEEN, ZAND } from './blocks';
 
 /** Blocks wide and deep. The speed spike may change this to 48. Tests read this constant. */
 export const WORLD_SIZE = 64;
@@ -14,23 +14,10 @@ export function cellIndex(x: number, y: number, z: number): number {
 
 export const CELL_COUNT = WORLD_SIZE * WORLD_HEIGHT * WORLD_SIZE;
 
-export const MID = Math.floor(WORLD_SIZE / 2);
+const MID = Math.floor(WORLD_SIZE / 2);
 const BASE_HEIGHT = 10;
 /** Radius around the start spot kept flat and free of trees. */
 const CLEAR_RADIUS = 4;
-
-/**
- * The obsidiaan gate spot (4.20). Yaw 0 looks toward +z, so the kid's right is -x.
- * F1 to F4 run left to right at x MID+1, MID, MID-1, MID-2, all at z GATE_Z, flush with the ground.
- */
-export const GATE_Z = MID + 4;
-export const GATE_FLOOR_X: readonly number[] = [MID + 1, MID, MID - 1, MID - 2];
-/** The rectangle flattened and kept free of trees around the gate. */
-const GATE_AREA = { x0: MID - 3, x1: MID + 2, z0: MID + 3, z1: MID + 5 };
-const inGateArea = (x: number, z: number): boolean =>
-  x >= GATE_AREA.x0 && x <= GATE_AREA.x1 && z >= GATE_AREA.z0 && z <= GATE_AREA.z1;
-/** Cap on the ground height, so hills never reach the top of the world. */
-const MAX_GROUND = 24;
 
 /** Averages each column with its neighbours so hills are gentle. */
 function smoothHeight(rawHeights: Int32Array): Int32Array {
@@ -91,11 +78,6 @@ export function generateTerrain(seed: number = WORLD_SEED): Uint8Array {
     }
   }
 
-  // The gate area is flat too, at the same height.
-  for (let z = GATE_AREA.z0; z <= GATE_AREA.z1; z++) {
-    for (let x = GATE_AREA.x0; x <= GATE_AREA.x1; x++) height[z * WORLD_SIZE + x] = startH;
-  }
-
   // Sand patches.
   const sandSpots = Array.from({ length: 5 }, () => ({
     x: rng.int(0, WORLD_SIZE - 1),
@@ -108,7 +90,7 @@ export function generateTerrain(seed: number = WORLD_SEED): Uint8Array {
 
   for (let z = 0; z < WORLD_SIZE; z++) {
     for (let x = 0; x < WORLD_SIZE; x++) {
-      const top = Math.min(height[z * WORLD_SIZE + x] ?? BASE_HEIGHT, MAX_GROUND);
+      const top = Math.min(height[z * WORLD_SIZE + x] ?? BASE_HEIGHT, WORLD_HEIGHT - 8);
       height[z * WORLD_SIZE + x] = top;
       blocks[cellIndex(x, 0, z)] = OERSTEEN;
       for (let y = 1; y <= top; y++) {
@@ -121,9 +103,14 @@ export function generateTerrain(seed: number = WORLD_SEED): Uint8Array {
     }
   }
 
-  // F1 to F4 of the gate: obsidiaan set into the ground, top level with the grass.
-  const groundY = Math.min(startH, MAX_GROUND);
-  for (const x of GATE_FLOOR_X) blocks[cellIndex(x, groundY, GATE_Z)] = OBSIDIAAN;
+  // CR2: Four blocks of obsidian on the ground in front of the start spot to build a gate (plus flanking stones).
+  const gateZ = MID + 3;
+  const gateY = height[gateZ * WORLD_SIZE + MID] ?? startH;
+  for (let gx = MID - 1; gx <= MID + 2; gx++) {
+    blocks[cellIndex(gx, gateY, gateZ)] = OBSIDIAAN;
+  }
+  blocks[cellIndex(MID - 2, gateY, gateZ)] = STEEN;
+  blocks[cellIndex(MID + 3, gateY, gateZ)] = VUURSTEEN;
 
   // Trees: trunk of 4 or 5, a ball of leaves. Kept inside the world and away from the start.
   let planted = 0;
@@ -131,7 +118,7 @@ export function generateTerrain(seed: number = WORLD_SEED): Uint8Array {
     const x = rng.int(3, WORLD_SIZE - 4);
     const z = rng.int(3, WORLD_SIZE - 4);
     const trunk = rng.int(4, 5);
-    if (Math.hypot(x - MID, z - MID) <= CLEAR_RADIUS + 3 || inGateArea(x, z)) continue;
+    if (Math.hypot(x - MID, z - MID) <= CLEAR_RADIUS + 3) continue;
     const top = height[z * WORLD_SIZE + x] ?? 0;
     if (blocks[cellIndex(x, top, z)] !== GRAS) continue;
     planted++;
@@ -146,7 +133,6 @@ export function generateTerrain(seed: number = WORLD_SEED): Uint8Array {
           const cz = z + dz;
           const cy = crown + dy;
           if (cx < 0 || cz < 0 || cx >= WORLD_SIZE || cz >= WORLD_SIZE || cy >= WORLD_HEIGHT) continue;
-          if (inGateArea(cx, cz)) continue;
           const i = cellIndex(cx, cy, cz);
           if (blocks[i] === AIR) blocks[i] = BLADEREN;
         }
@@ -164,6 +150,3 @@ export const START_SPOT = (() => {
   while (y > 0 && blocks[cellIndex(MID, y, MID)] === AIR) y--;
   return { x: MID + 0.5, y: y + 1, z: MID + 0.5 };
 })();
-
-/** Ground height G at the start spot: the y index of the top grass block. The gate floor sits at this height. */
-export const GROUND_Y = START_SPOT.y - 1;

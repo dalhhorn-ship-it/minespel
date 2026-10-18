@@ -1,46 +1,14 @@
 import { AIR } from './blocks';
-import { CELL_COUNT, CHUNK_SIZE, WORLD_HEIGHT, WORLD_SEED, WORLD_SIZE, cellIndex, generateTerrain } from './terrain';
-
-const CHUNKS_PER_SIDE = WORLD_SIZE / CHUNK_SIZE;
+import { CELL_COUNT, WORLD_HEIGHT, WORLD_SEED, WORLD_SIZE, cellIndex, generateTerrain } from './terrain';
 
 /** The voxel world: a flat block array plus the diff against the fixed start world. */
 export class World {
   private readonly blocks: Uint8Array;
   private readonly start: Uint8Array;
-  private readonly chunkTop: Int16Array;
 
   constructor(seed: number = WORLD_SEED) {
     this.start = generateTerrain(seed);
     this.blocks = this.start.slice();
-    this.chunkTop = new Int16Array(CHUNKS_PER_SIDE * CHUNKS_PER_SIDE);
-    this.recomputeAllChunkTops();
-  }
-
-  private scanChunkTop(cx: number, cz: number, fromY: number = WORLD_HEIGHT - 1): number {
-    const x0 = cx * CHUNK_SIZE;
-    const z0 = cz * CHUNK_SIZE;
-    for (let y = fromY; y >= 0; y--) {
-      for (let z = z0; z < z0 + CHUNK_SIZE; z++) {
-        for (let x = x0; x < x0 + CHUNK_SIZE; x++) {
-          if (this.blocks[cellIndex(x, y, z)] !== AIR) return y;
-        }
-      }
-    }
-    return -1;
-  }
-
-  private recomputeAllChunkTops(): void {
-    for (let cz = 0; cz < CHUNKS_PER_SIDE; cz++) {
-      for (let cx = 0; cx < CHUNKS_PER_SIDE; cx++) {
-        this.chunkTop[cz * CHUNKS_PER_SIDE + cx] = this.scanChunkTop(cx, cz);
-      }
-    }
-  }
-
-  /** Highest y index in chunk (cx, cz) with a non-air block, or -1 when all air. */
-  highestNonAirY(cx: number, cz: number): number {
-    if (cx < 0 || cz < 0 || cx >= CHUNKS_PER_SIDE || cz >= CHUNKS_PER_SIDE) return -1;
-    return this.chunkTop[cz * CHUNKS_PER_SIDE + cx] ?? -1;
   }
 
   inBounds(x: number, y: number, z: number): boolean {
@@ -60,15 +28,6 @@ export class World {
   set(x: number, y: number, z: number, id: number): boolean {
     if (!this.inBounds(x, y, z)) return false;
     this.blocks[cellIndex(x, y, z)] = id;
-    const cx = Math.floor(x / CHUNK_SIZE);
-    const cz = Math.floor(z / CHUNK_SIZE);
-    const ci = cz * CHUNKS_PER_SIDE + cx;
-    const cur = this.chunkTop[ci] ?? -1;
-    if (id !== AIR) {
-      if (y > cur) this.chunkTop[ci] = y;
-    } else if (y === cur) {
-      this.chunkTop[ci] = this.scanChunkTop(cx, cz, y);
-    }
     return true;
   }
 
@@ -90,13 +49,11 @@ export class World {
       const index = Math.floor(entry / 256);
       if (index >= 0 && index < CELL_COUNT) this.blocks[index] = entry % 256;
     }
-    this.recomputeAllChunkTops();
   }
 
   /** Back to the start world. */
   reset(): void {
     this.blocks.set(this.start);
-    this.recomputeAllChunkTops();
   }
 
   static fromDiff(diff: ArrayLike<number>, seed: number = WORLD_SEED): World {

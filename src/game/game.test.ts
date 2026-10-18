@@ -2,9 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { GuardState } from '../platform/screen-guard';
 import { createNullRenderer, type GameRenderer } from '../render/renderer';
 import { START_SPOT } from '../world/terrain';
-import { addEgg, getActiveDinoStore } from '../dinos/dino-store';
 import { createGame, type Game } from './game';
-import { createScreens } from '../app/screens';
 
 let frameCb: ((t: number) => void) | null = null;
 let clock = 0;
@@ -19,7 +17,6 @@ function runFrames(n: number, ms = 16): void {
 }
 
 function setup(search = '') {
-  const screens = createScreens(document.body);
   const container = document.createElement('div');
   document.body.append(container);
   let guardListener: ((s: GuardState) => void) | null = null;
@@ -39,13 +36,12 @@ function setup(search = '') {
     container,
     guard,
     search,
-    screens,
     rendererFactory: (o) => {
       renderer = { ...createNullRenderer(o), render, setCamera };
       return renderer;
     },
   });
-  return { game, screens, container, render, setCamera, setGuard: (s: GuardState) => guardListener?.(s) };
+  return { game, container, render, setCamera, setGuard: (s: GuardState) => guardListener?.(s) };
 }
 
 beforeEach(() => {
@@ -62,89 +58,6 @@ beforeEach(() => {
 afterEach(() => {
   vi.unstubAllGlobals();
   document.body.textContent = '';
-});
-
-describe('game screens', () => {
-  it('the dino menu is a kid-overlay screen while open', () => {
-    const s = setup();
-    s.game.dinos.store.load({ dinos: [{ kind: 'compy', x: 22.5, y: 40, z: 22.5, growth: 2 }] });
-    const id = s.game.dinos.store.dinos[0]!.id;
-    expect(s.screens.current()).toBe('world');
-    s.game.openDinoMenu(id);
-    expect(s.screens.current()).toBe('kid-overlay');
-    s.game.openDinoMenu(id); // twice opens only one screen
-    expect(s.screens.depth()).toBe(1);
-    const back = [...s.container.querySelectorAll('.dino-menu button')].find((b) => b.textContent === 'Terug naar de wereld')!;
-    for (const type of ['pointerdown', 'pointerup']) {
-      const e = new MouseEvent(type, { bubbles: true });
-      Object.defineProperty(e, 'pointerId', { value: 9 });
-      back.dispatchEvent(e);
-    }
-    expect(s.screens.current()).toBe('world');
-  });
-  it('the block grid is a kid-overlay screen while open', async () => {
-    const s = setup();
-    const grid = s.container.querySelector('.block-grid') as HTMLElement;
-    const flush = () => new Promise((r) => setTimeout(r, 0));
-    grid.hidden = false;
-    await flush();
-    expect(s.screens.current()).toBe('kid-overlay');
-    grid.hidden = true;
-    await flush();
-    expect(s.screens.current()).toBe('world');
-  });
-});
-
-describe('held HUD controls', () => {
-  const press = (node: Element, type: string, id = 3) => {
-    const e = new MouseEvent(type, { bubbles: true });
-    Object.defineProperty(e, 'pointerId', { value: id });
-    node.dispatchEvent(e);
-  };
-  const setupHeld = () => {
-    const s = setup();
-    const up = s.container.querySelector('.hud-fly-up')!;
-    const arrow = s.container.querySelector('.hud-arrow-right')!;
-    const asc = vi.spyOn(s.game.player, 'setAscending');
-    const look = vi.spyOn(s.game.player, 'setLookInput');
-    return { ...s, up, arrow, asc, look };
-  };
-  it('the Omhoog button drives the player', () => {
-    const s = setupHeld();
-    press(s.up, 'pointerdown');
-    expect(s.asc).toHaveBeenLastCalledWith(true);
-    press(s.up, 'pointerup');
-    expect(s.asc).toHaveBeenLastCalledWith(false);
-  });
-  it('opening a screen on top lets go of a held Omhoog and a held arrow', async () => {
-    vi.useFakeTimers();
-    try {
-      const s = setupHeld();
-      press(s.up, 'pointerdown', 3);
-      press(s.arrow, 'pointerdown', 4);
-      vi.advanceTimersByTime(250);
-      expect(s.look).toHaveBeenLastCalledWith(1, 0);
-      s.asc.mockClear();
-      s.look.mockClear();
-      s.screens.open('kid-overlay');
-      expect(s.asc).toHaveBeenCalledWith(false);
-      expect(s.look).toHaveBeenLastCalledWith(0, 0);
-      expect(s.up.getAttribute('data-held')).toBeNull();
-      press(s.up, 'pointerup', 3); // the late pointerup finds nothing held
-      expect(s.asc.mock.calls.filter((c) => c[0] === false).length).toBe(2); // once from the HUD, once from the game's own release
-    } finally {
-      vi.useRealTimers();
-    }
-  });
-  it('pause lets go of fly and look holds', () => {
-    const s = setupHeld();
-    press(s.up, 'pointerdown');
-    s.asc.mockClear();
-    s.game.pause();
-    expect(s.asc).toHaveBeenCalledWith(false);
-    expect(s.look).toHaveBeenCalledWith(0, 0);
-    expect(s.up.getAttribute('data-held')).toBeNull();
-  });
 });
 
 describe('game', () => {
@@ -255,47 +168,5 @@ describe('game', () => {
     expect(s.game.getBuildState()).toEqual(state);
     const pressed = [...s.container.querySelectorAll('.hotbar-slot')].map((b) => b.getAttribute('aria-pressed'));
     expect(pressed.indexOf('true')).toBe(6);
-  });
-
-  it('has no dinos or eggs at the start, and the dino menu pauses the world (AC12, AC16)', () => {
-    const s = setup();
-    expect(s.game.dinos.store.dinos).toHaveLength(0);
-    expect(s.game.dinos.store.eggs).toHaveLength(0);
-    const egg = s.game.dinos.store.addEgg('compy');
-    runFrames(2);
-    expect(Number.isFinite(egg.egg.x)).toBe(true);
-    s.game.dinos.store.load({ dinos: [{ kind: 'compy', x: 22.5, y: 40, z: 22.5, growth: 2 }] });
-    runFrames(2);
-    const id = s.game.dinos.store.dinos[0]!.id;
-    s.game.openDinoMenu(id);
-    expect(s.container.querySelector('.dino-menu')).not.toBeNull();
-    expect((s.container.querySelector('.dino-menu') as HTMLElement).hidden).toBe(false);
-    expect(s.game.isRunning()).toBe(false);
-    const back = [...s.container.querySelectorAll('.dino-menu button')].find((b) => b.textContent === 'Terug naar de wereld')!;
-    for (const type of ['pointerdown', 'pointerup']) {
-      const e = new MouseEvent(type, { bubbles: true });
-      Object.defineProperty(e, 'pointerId', { value: 9 });
-      back.dispatchEvent(e);
-    }
-    expect(s.game.isRunning()).toBe(true);
-  });
-
-  it('teleportHome brings a Volg mij dino along (AC106) and resetWorld keeps all dinos (AC152)', () => {
-    const s = setup();
-    s.game.dinos.store.load({ dinos: [{ kind: 'compy', x: 5.5, y: 40, z: 5.5, growth: 2 }] });
-    runFrames(2);
-    s.game.teleportHome();
-    const d = s.game.dinos.store.dinos[0]!.state;
-    expect(Math.hypot(d.x - START_SPOT.x, d.z - START_SPOT.z)).toBeLessThan(3.5);
-    s.game.resetWorld();
-    expect(s.game.dinos.store.dinos).toHaveLength(1);
-  });
-
-  it('the shared addEgg goes to the running game and stops at dispose', () => {
-    const s = setup();
-    addEgg('brachiosaurus', true);
-    expect(s.game.dinos.store.eggs).toHaveLength(1);
-    s.game.dispose();
-    expect(getActiveDinoStore()).toBeNull();
   });
 });

@@ -1,11 +1,21 @@
-// Exam flow STUB (T43). T51a builds the real exam. Until then a saved exam session is left alone,
-// so nothing is lost when the exam comes along.
-import type { SessionState } from '../storage/session-store';
-import type { AppEnv } from './app-env';
+// Exam flow stub for M2 (T43; full implementation in M3 T51).
 
-/** Called at boot when the session store holds a running exam. Returns true when it took over. */
-export function resumeExam(_state: SessionState, _env: AppEnv): boolean {
-  void _state;
-  void _env;
-  return false;
+import type { SessionState as StoredSessionRecord } from '../storage/session-store';
+
+export interface ExamFlow {
+  isActive(): boolean;
+  resumeExam?(saved: StoredSessionRecord): Promise<void>;
+  destroy(): void;
+}
+
+export function createExamFlow(): ExamFlow {
+  return {
+    isActive: () => false,
+    async resumeExam() {
+      /* implemented in M3 T51 */
+    },
+    destroy() {
+      /* no-op in M2 */
+    },
+  };
 }

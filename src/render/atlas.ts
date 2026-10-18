@@ -2,8 +2,8 @@ import { CanvasTexture, NearestFilter, SRGBColorSpace } from 'three';
 import {
   AARDE, BAKSTEEN, BASALT, BLADEREN, BOOMSTAM, DIAMANT, DIEPSTEEN, GLAS, GOUDSTEEN, GRANIET, GRAS,
   IJS, KEISTEEN, LAVA, MARMER, MOSSTEEN, OBSIDIAAN, OERSTEEN, PLANKEN, SNEEUW, STEEN, VUUR,
-  VUURSTEEN, WATER, WOL_BLAUW, WOL_GEEL, WOL_GROEN, WOL_ORANJE, WOL_PAARS, WOL_ROOD, WOL_WIT,
-  ZAND, ZANDSTEEN,
+  VUURSTEEN, WATER, WOL_BLAUW, WOL_GEEL, WOL_GROEN, WOL_ORANJE, WOL_PAARS, WOL_ROOD, WOL_WIT, ZAND,
+  ZANDSTEEN,
 } from '../world/blocks';
 
 export const TILE_SIZE = 16;
@@ -87,21 +87,21 @@ export const TILES: readonly TileSpec[] = [
     pattern: (x, y) => ((x * 5 + y * 9) % 13 === 0 ? [112, 48, 178, 255] : (x + y) % 7 === 0 ? [14, 8, 26, 255] : null),
   },
   {
-    name: 'vuur', base: [255, 132, 28], speckle: 14,
+    name: 'vuur', base: [255, 118, 24], speckle: 18,
     pattern: (x, y) => {
-      const tongue = Math.abs((x % 5) - 2) + Math.floor(y / 2);
-      if (y < 4 && tongue >= 2) return [0, 0, 0, 0];
+      const tongue = Math.abs((x % 5) - 2) + Math.floor(y / 4);
+      if (y < 3 && tongue > 2) return [0, 0, 0, 0];
       if (y > 11) return [255, 232, 82, 255];
-      if (y > 6 && (x + y) % 2 === 0) return [255, 186, 42, 255];
+      if (y > 7 && (x + y) % 2 === 0) return [255, 182, 36, 255];
       return null;
     },
   },
   {
-    name: 'lava', base: [244, 104, 24], speckle: 12,
+    name: 'lava', base: [236, 68, 16], speckle: 14,
     pattern: (x, y) => {
       const wave = (x + (y >> 1) * 3) % 7;
       if (wave === 0) return [255, 214, 52, 255];
-      if (wave === 1) return [255, 152, 32, 255];
+      if (wave === 1) return [255, 140, 24, 255];
       return null;
     },
   },
@@ -142,8 +142,8 @@ export const TILES: readonly TileSpec[] = [
     pattern: (x, y) => (x === 0 || y === 0 || x === 15 || y === 15 ? [38, 174, 192, 255] : (x + y) === 7 ? [224, 255, 255, 255] : null),
   },
   {
-    name: 'water', base: [68, 156, 244], speckle: 8,
-    pattern: (x, y) => ((x + y) % 9 === 0 ? [0, 0, 0, 0] : y % 4 === 0 ? [116, 192, 255, 255] : null),
+    name: 'water', base: [44, 132, 236], speckle: 8,
+    pattern: (x, y) => ((x + y) % 9 === 0 ? [0, 0, 0, 0] : y % 4 === 0 ? [96, 176, 252, 255] : null),
   },
   {
     name: 'ijs', base: [164, 218, 252], speckle: 6,

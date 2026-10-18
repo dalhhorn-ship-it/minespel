@@ -1,5 +1,4 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { Group } from 'three';
 import { World } from '../world/world';
 import {
   CONTEXT_RESTORE_WAIT_MS, createNullRenderer, createRenderer, withContextRecovery, type GameRenderer, type RendererFactory,
@@ -50,7 +49,6 @@ describe('withContextRecovery', () => {
         resize: () => void calls.push('resize'),
         setQuality: () => void calls.push('quality'),
         setSpikeDinos: (d) => void calls.push(d ? 'dinos' : 'nodinos'),
-        setDinoLayer: (l) => void calls.push(l ? 'layer' : 'nolayer'),
         render: () => void calls.push('render'),
         dispose,
       };
@@ -91,14 +89,6 @@ describe('withContextRecovery', () => {
     expect(made[1]?.calls).toContain('render');
     vi.advanceTimersByTime(5000);
     expect(made).toHaveLength(2); // the timer was cancelled
-  });
-
-  it('gives the dino layer to the new renderer after a restore', () => {
-    const { made, canvas, r } = setup();
-    r.setDinoLayer(new Group());
-    lose(canvas);
-    canvas.dispatchEvent(new Event('webglcontextrestored'));
-    expect(made[1]?.calls).toEqual(['resize', 'world', 'dinos', 'layer', 'camera']);
   });
 
   it('makes a new canvas in the same place when there is no restore in 1.5 seconds', () => {

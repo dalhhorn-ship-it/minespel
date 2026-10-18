@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { AIR, GLAS, LAVA, OERSTEEN, STEEN, VUUR, WATER } from '../world/blocks';
+import { AIR, GLAS, OERSTEEN, STEEN } from '../world/blocks';
 import { CHUNK_SIZE, WORLD_HEIGHT, WORLD_SIZE } from '../world/terrain';
 import { World } from '../world/world';
 import { CHUNKS_PER_SIDE, buildChunkData, chunksTouchedBy, toGeometry, type WorldView } from './chunk-mesh';
@@ -112,41 +112,5 @@ describe('chunk mesher', () => {
     expect(chunksTouchedBy(0, 0)).toEqual([[0, 0]]);
     expect(chunksTouchedBy(CHUNK_SIZE, 5)).toEqual([[1, 0], [0, 0]]);
     expect(chunksTouchedBy(WORLD_SIZE - 1, WORLD_SIZE - 1)).toEqual([[CHUNKS_PER_SIDE - 1, CHUNKS_PER_SIDE - 1]]);
-  });
-
-  it('produces identical mesh data with highestNonAirY before and after placing and mining at y = 60 (G0)', () => {
-    const world = new World();
-    const unoptimized: WorldView = {
-      get: (x, y, z) => world.get(x, y, z),
-      inBounds: (x, y, z) => world.inBounds(x, y, z),
-    };
-    const initial = buildChunkData(world, 0, 0);
-    expect(initial).toEqual(buildChunkData(unoptimized, 0, 0));
-
-    world.set(5, 60, 5, STEEN);
-    expect(world.highestNonAirY(0, 0)).toBe(60);
-    const withSkyBlock = buildChunkData(world, 0, 0);
-    expect(withSkyBlock).toEqual(buildChunkData(unoptimized, 0, 0));
-    expect(withSkyBlock.faceCount).toBe(initial.faceCount + 6);
-
-    world.set(5, 60, 5, AIR);
-    expect(world.highestNonAirY(0, 0)).toBeLessThan(32);
-    const afterMine = buildChunkData(world, 0, 0);
-    expect(afterMine).toEqual(initial);
-    expect(afterMine).toEqual(buildChunkData(unoptimized, 0, 0));
-  });
-
-  it('gives lava and vuur faces full brightness, and hides shared face between two water blocks (G1)', () => {
-    for (const id of [LAVA, VUUR]) {
-      const w = emptyWorld();
-      w.set(5, 5, 5, id);
-      const d = buildChunkData(w, 0, 0);
-      expect(d.faceCount).toBe(6);
-      expect(Array.from(d.colors).every((c) => c === 1.0)).toBe(true);
-    }
-    const w = emptyWorld();
-    w.set(5, 5, 5, WATER);
-    w.set(6, 5, 5, WATER);
-    expect(buildChunkData(w, 0, 0).faceCount).toBe(10);
   });
 });

@@ -32,6 +32,7 @@ const PALETTES: Record<DinoKindId, Palette> = {
   triceratops: { body: 0xffa726, head: 0xffb74d, legs: 0xf57c00, feature: 0xfff3e0 },
   stegosaurus: { body: 0x26a69a, head: 0x4db6ac, legs: 0x00897b, feature: 0xf48fb1 },
   brachiosaurus: { body: 0x42a5f5, head: 0x64b5f6, legs: 0x1e88e5, feature: 0x90caf9 },
+  kip: { body: 0xfafafa, head: 0xf5f5f5, legs: 0xff9800, feature: 0xe53935 },
 };
 const GOLD_PALETTE: Palette = { body: GOLD_COLOR, head: 0xffe066, legs: 0xe0a000, feature: 0xfff3b0 };
 
@@ -91,6 +92,16 @@ const SPECS: Record<DinoKindId, Spec> = {
     tail: { x: 0, y: 1.0, z: -0.8, w: 0.35, h: 0.3, d: 0.4 },
     leg: { w: 0.35, h: 0.7, d: 0.35, at: [[-0.4, -0.55], [0.4, -0.55], [-0.4, 0.4], [0.4, 0.4]] },
     feature: [{ x: 0, y: 1.75, z: 0.45, w: 0.4, h: 1.1, d: 0.4 }],
+  },
+  kip: {
+    body: { x: 0, y: 0.34, z: -0.03, w: 0.34, h: 0.26, d: 0.38 },
+    head: { x: 0, y: 0.52, z: 0.18, w: 0.24, h: 0.24, d: 0.22 },
+    tail: { x: 0, y: 0.4, z: -0.26, w: 0.18, h: 0.18, d: 0.12 },
+    leg: { w: 0.08, h: 0.22, d: 0.08, at: [[-0.09, -0.02], [0.09, -0.02]] },
+    feature: [
+      { x: 0, y: 0.67, z: 0.18, w: 0.08, h: 0.08, d: 0.14 },
+      { x: 0, y: 0.48, z: 0.33, w: 0.12, h: 0.08, d: 0.1 },
+    ],
   },
 };
 

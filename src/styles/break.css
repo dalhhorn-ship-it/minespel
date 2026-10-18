@@ -1,66 +1,172 @@
-/* Break screen: calm paper, Dino Juf in the corner, progress dots, no countdown. No hover. */
+/* Calm full screen for learning breaks, Extra oefenen and Probeer (T36, PRD 8). */
 .break-screen {
-  position: absolute; inset: 0;
-  display: flex; flex-direction: column;
-  padding: var(--safe-top) var(--safe-right) var(--safe-bottom) var(--safe-left);
-  background: var(--paper); color: var(--ink);
-  font-family: var(--font-stack); font-size: var(--font-body);
-  user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  padding: calc(var(--safe-top) + var(--gap)) calc(var(--safe-right) + var(--gap) * 2) calc(var(--safe-bottom) + var(--gap)) calc(var(--safe-left) + var(--gap) * 2);
+  background: var(--sand);
+  color: var(--ink);
+  font-family: var(--font-stack);
+  font-size: var(--font-body);
+  overflow-y: auto;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
 }
-.break-header {
-  display: flex; align-items: center; justify-content: space-between; gap: var(--gap);
-  padding: 8px 20px; flex: none;
-}
-.juf { width: 72px; height: 72px; flex: none; order: 2; }
-.juf svg { display: block; }
-.juf-cheer { animation: juf-hop 0.5s ease-out 1; }
-@keyframes juf-hop { 40% { transform: translateY(-10px); } }
-@media (prefers-reduced-motion: reduce) { .juf-cheer { animation: none; } }
 
-.break-dots { display: flex; gap: 10px; flex-wrap: wrap; order: 1; }
-.break-dot { width: 20px; height: 20px; border-radius: 50%; border: 3px solid var(--sky); background: var(--paper); box-sizing: border-box; }
-.break-dot.now { border-color: var(--grass); background: var(--sky-light); }
-.break-dot.done { border-color: var(--grass); background: var(--grass); }
+.break-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--gap);
+  margin-bottom: var(--gap);
+  padding-right: calc(var(--touch-min) + var(--gap)); /* room for the lock icon */
+}
+
+.dino-juf {
+  display: flex;
+  align-items: center;
+  gap: var(--gap);
+  background: var(--paper);
+  border: 3px solid var(--ink);
+  border-radius: var(--radius);
+  padding: 8px 14px;
+}
+
+.dino-juf-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--grass);
+  color: var(--on-grass);
+  font-weight: 800;
+  font-size: 24px;
+  flex-shrink: 0;
+}
+
+.dino-juf-name {
+  font-weight: 800;
+  margin-right: 6px;
+}
+
+.dino-juf-speech {
+  margin: 0;
+  font-weight: 700;
+}
+
+.break-dots {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.break-dot {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 3px solid var(--ink);
+  background: var(--paper);
+}
+
+.break-dot-current {
+  transform: scale(1.2);
+  background: var(--sky);
+}
+
+.break-dot-done {
+  background: var(--grass);
+}
 
 .break-body {
-  flex: 1; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch;
-  touch-action: pan-y; overscroll-behavior: contain;
-  display: flex; flex-direction: column; align-items: center; gap: var(--gap);
-  padding: 8px 0 16px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  max-width: 820px;
+  width: 100%;
+  margin: 0 auto;
+  gap: var(--gap);
 }
-.break-body > * { width: 100%; max-width: 820px; }
 
-.break-retry {
-  display: flex; align-items: center; justify-content: center; gap: 10px;
-  margin: 0; padding: 10px 16px; border-radius: var(--radius);
-  background: var(--wrong-bg); color: var(--wrong);
-  font-size: var(--font-large); font-weight: 800; text-align: center;
+.break-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  border-radius: var(--radius);
+  border: 3px solid var(--ink);
+  font-weight: 800;
+  font-size: var(--font-large);
 }
-.mark { display: inline-flex; align-items: center; justify-content: center; width: 48px; height: 48px; border-radius: 50%; font-size: 32px; font-weight: 800; flex: none; }
-.mark-right { background: var(--right); color: #fff; }
-.mark-wrong { background: var(--wrong); color: #fff; width: 36px; height: 36px; font-size: 22px; }
 
-.break-feedback { display: flex; flex-direction: column; align-items: center; gap: var(--gap); padding: 24px 16px; background: var(--right-bg); border-radius: var(--radius); }
-.break-feedback .mark { width: 88px; height: 88px; font-size: 60px; }
-.feedback-text { margin: 0; font-size: var(--font-title); font-weight: 800; color: var(--right); text-align: center; }
-
-.break-button {
-  align-self: center; width: auto; min-width: 240px; min-height: var(--touch-min);
-  padding: 12px 36px; border: 0; border-radius: var(--radius);
-  background: var(--grass); color: var(--on-grass);
-  font: 800 var(--font-large) var(--font-stack);
-  touch-action: manipulation; -webkit-tap-highlight-color: transparent;
+.break-banner-right {
+  background: var(--right-bg);
+  color: var(--right);
 }
-.break-button:active { transform: scale(0.97); }
 
-.break-empty { margin: 40px 0; font-size: var(--font-large); font-weight: 800; text-align: center; }
+.break-banner-wrong {
+  background: var(--wrong-bg);
+  color: var(--wrong);
+}
 
-.break-summary { display: flex; flex-direction: column; align-items: center; gap: calc(var(--gap) * 1.5); padding: 16px; text-align: center; }
-.summary-score { margin: 0; font-size: var(--font-title); line-height: 1.15; }
-.summary-hard { font-size: var(--font-large); }
-.summary-lines { display: flex; flex-direction: column; gap: 6px; }
-.summary-lines p, .summary-note { margin: 0; font-size: var(--font-large); }
-.summary-total { font-weight: 800; }
-.summary-bonus { color: var(--right); font-weight: 800; }
-.summary-note { color: var(--malus); font-size: var(--font-body); }
-.summary-egg { margin: 0; padding: 12px 20px; border-radius: var(--radius); background: var(--sand); font-size: var(--font-large); font-weight: 800; }
+.break-cap-note {
+  margin: 0;
+  padding: 10px 14px;
+  border-radius: var(--radius);
+  background: var(--sky-light);
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.break-feedback-card,
+.break-summary,
+.break-empty {
+  background: var(--paper);
+  border: 3px solid var(--ink);
+  border-radius: var(--radius);
+  padding: calc(var(--gap) * 2);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--gap);
+}
+
+.break-next-btn,
+.summary-done-btn {
+  min-width: var(--touch-min);
+  min-height: var(--touch-min);
+  padding: 0 calc(var(--gap) * 2);
+  border: 3px solid var(--ink);
+  border-radius: var(--radius);
+  background: var(--grass);
+  color: var(--on-grass);
+  font: inherit;
+  font-size: var(--font-large);
+  font-weight: 800;
+  touch-action: none;
+}
+
+.summary-title {
+  margin: 0;
+  font-size: var(--font-title);
+}
+
+.summary-points,
+.summary-total,
+.summary-egg-hint {
+  margin: 0;
+  font-size: var(--font-large);
+  font-weight: 700;
+}
+
+.summary-egg-hint {
+  padding: 10px 14px;
+  border-radius: var(--radius);
+  background: var(--right-bg);
+  color: var(--right);
+}

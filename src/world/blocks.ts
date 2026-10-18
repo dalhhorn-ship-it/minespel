@@ -86,21 +86,8 @@ export const BLOCKS: readonly BlockInfo[] = [
   block(WOL_ORANJE, 'wol oranje'),
 ];
 
-export interface BlockGridRow {
-  label: string;
-  blocks: readonly number[];
-}
-
-/** The 4 rows of the PRD 4.1 block grid. */
-export const BLOCK_GRID_ROWS: readonly BlockGridRow[] = [
-  { label: 'Natuur', blocks: [GRAS, AARDE, ZAND, BOOMSTAM, BLADEREN, SNEEUW, IJS, WATER] },
-  { label: 'Steen', blocks: [STEEN, KEISTEEN, MOSSTEEN, ZANDSTEEN, GRANIET, MARMER, BASALT, DIEPSTEEN] },
-  { label: 'Bouwen', blocks: [PLANKEN, BAKSTEEN, GLAS, OBSIDIAAN, VUURSTEEN, GOUDSTEEN, DIAMANT, LAVA] },
-  { label: 'Kleur', blocks: [WOL_WIT, WOL_ROOD, WOL_GEEL, WOL_BLAUW, WOL_GROEN, WOL_PAARS, WOL_ORANJE, VUUR] },
-];
-
-/** The 32 blocks a kid can place, in PRD 4.1 grid order. */
-export const PLACEABLE_BLOCKS: readonly number[] = BLOCK_GRID_ROWS.flatMap((r) => r.blocks);
+/** All blocks a kid can place, in grid order. */
+export const PLACEABLE_BLOCKS: readonly number[] = BLOCKS.filter((b) => b.placeable).map((b) => b.id);
 
 /** Highest block id, used to size atlas tables. */
 export const MAX_BLOCK_ID = WOL_ORANJE;
@@ -115,4 +102,3 @@ export const isSolid = (id: number): boolean => blockInfo(id).solid;
 export const isCutout = (id: number): boolean => blockInfo(id).cutout;
 export const isMinable = (id: number): boolean => blockInfo(id).minable;
 export const isPlaceable = (id: number): boolean => blockInfo(id).placeable;
-export const isGlowing = (id: number): boolean => id === LAVA || id === VUUR;

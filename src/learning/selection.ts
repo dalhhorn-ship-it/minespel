@@ -1,181 +1,243 @@
-// Picks the questions of a break or an Extra oefenen round (PRD 4.6). Pure: no storage, no clock.
-// The caller loads progress, switches and rotation, passes them in and saves what comes back.
-import type { Rng } from '../core/rng';
-import type { Catalog } from '../content/catalog';
+// Question selection for a learning break or Extra oefenen round (T38, PRD 4.6).
+// Pure: takes Catalog, SwitchesRecord, RotationState, ProgressRecord[], Clock day and Rng.
+// Returns the chosen SessionEntry list, the topic of any new items (for showing its lesson first),
+// and the updated RotationState (with the topic pointer moved past that topic, AC46).
+
+import { isGeneratedModule, type Catalog } from '../content/catalog';
 import type { Item } from '../content/format';
-import { generateItem, type RekenenLevel } from '../content/rekenen/generator';
+import { generateItems } from '../content/rekenen/generator';
 import type { RekenenTopicId } from '../content/rekenen/module';
 import {
-  isUsable,
-  topicLevels,
-  usableItems,
-  usableOpen,
-  usableTopics,
-  type Switches,
+  effectiveLevels,
+  isItemSwitchedOn,
+  isTopicOn,
+  switchedOnFixedItems,
+  switchedOnSkills,
 } from '../content/switches';
+import type { Rng } from '../core/rng';
 import type { ProgressRecord } from '../storage/progress-store';
-import { newSumExclude } from './generated-items';
-import { pickTopic, type RotationState } from './rotation';
-import { isItemDue } from './srs';
+import type { SwitchesRecord } from '../storage/schema';
 import type { SessionEntry } from './break-session';
+import { savedSumIds } from './generated-items';
+import { pickTopic, type RotationState, type TopicCandidate } from './rotation';
+import { isItemDue } from './srs';
 
-export interface SelectionInput {
+export interface SelectBreakOptions {
   catalog: Catalog;
-  switches: Switches;
-  moduleId: string;
-  /** Number of questions (N). */
-  count: number;
-  /** All progress records (any module is fine, others are ignored). */
-  progress: readonly ProgressRecord[];
+  switches: SwitchesRecord;
   rotation: RotationState;
-  /** Today by the clock, "2026-10-18". */
+  progress: readonly ProgressRecord[];
+  moduleId: string;
+  /** Number of questions to pick (N). */
+  count: number;
+  /** Effective local calendar day, e.g. "2026-10-17". */
   today: string;
-  /** Latest day seen, so a clock set back keeps due items due (AC118). */
+  /** Last seen calendar day, for the clock-set-back rule (AC118). */
   lastSeenDay?: string | null;
-  /** Setting "Nieuwe lessen en vragen" (AC47). */
-  newAllowed: boolean;
-  /** Ids already asked in this break. They are left out (AC41, AC119). */
-  asked?: Iterable<string>;
+  /** "Nieuwe lessen en vragen" setting. When false, only seen items are picked (AC47). */
+  newLessonsEnabled?: boolean;
+  /** Extra item ids to leave out (for example items already asked in the current break). */
+  excludeIds?: ReadonlySet<string>;
+  /** Mix question order at the end (PRD 4.6 step 5). Default true. */
+  shuffleOrder?: boolean;
   rng: Rng;
 }
 
 export interface SelectionResult {
-  /** In the order to ask them (mixed). Accepted by `startSession`. */
   entries: SessionEntry[];
-  /** Rotation state after the pick. Save it. */
-  rotation: RotationState;
-  /** Topic the new items came from, null when no new slot was used. T43 uses it for the lesson. */
+  /** Topic id from which new items were picked, or null when no new items were used. */
   newTopicId: string | null;
-  /** Number of new (box 0) entries. */
-  newCount: number;
+  /** Updated rotation state (topic pointer advanced when new items were picked). */
+  rotation: RotationState;
 }
 
-type Due = { rec: ProgressRecord; item: Item };
+interface SeenCandidate {
+  item: Item;
+  box: number;
+  due: string;
+  topic: string;
+}
 
 function shuffle<T>(list: readonly T[], rng: Rng): T[] {
-  const a = [...list];
-  for (let i = a.length - 1; i > 0; i--) {
+  const out = [...list];
+  for (let i = out.length - 1; i > 0; i--) {
     const j = rng.int(0, i);
-    [a[i], a[j]] = [a[j] as T, a[i] as T];
-  }
-  return a;
-}
-
-const isRekenenTopic = (t: string): t is RekenenTopicId =>
-  t === 'optellen' || t === 'aftrekken' || t === 'tafels' || t === 'delen';
-
-/** Fresh sums for an open topic at one level, skills filtered, no excluded ids. */
-function newOpenItems(
-  topic: string,
-  level: string,
-  skills: ReadonlySet<string>,
-  want: number,
-  exclude: Set<string>,
-  rng: Rng,
-): Item[] {
-  if (!isRekenenTopic(topic)) return [];
-  const out: Item[] = [];
-  for (let tries = 0; out.length < want && tries < want * 200 + 200; tries++) {
-    const it = generateItem(topic, level as RekenenLevel, rng);
-    if (exclude.has(it.id) || !skills.has(it.skill)) continue;
-    exclude.add(it.id);
-    out.push(it);
+    [out[i], out[j]] = [out[j] as T, out[i] as T];
   }
   return out;
 }
 
-export function selectQuestions(input: SelectionInput): SelectionResult {
-  const { catalog, switches: sw, moduleId, count, progress, rng } = input;
-  const mod = catalog.module(moduleId);
-  const used = new Set<string>(input.asked ?? []);
-  const mine = progress.filter((p) => p.moduleId === moduleId);
-  const byId = new Map(mine.map((p) => [p.itemId, p]));
-  const numeric = mod?.generated === true;
-  const entry = (item: Item, box: number): SessionEntry =>
-    numeric && item.type === 'type' ? { item, box, numeric: true } : { item, box };
+export function selectBreakItems(options: SelectBreakOptions): SelectionResult {
+  const {
+    catalog,
+    switches,
+    rotation,
+    progress,
+    moduleId,
+    count,
+    today,
+    lastSeenDay,
+    newLessonsEnabled = true,
+    excludeIds = new Set<string>(),
+    shuffleOrder = true,
+    rng,
+  } = options;
 
-  // Seen items that may be asked (AC48), with their item rebuilt.
-  const seen: Due[] = [];
-  for (const rec of mine) {
-    if (rec.box <= 0 || used.has(rec.itemId)) continue;
-    const item = catalog.item(moduleId, rec.itemId, rec.level);
-    if (!item || !isUsable(sw, catalog, moduleId, rec.topic, item.skill, rec.level)) continue;
-    seen.push({ rec, item });
+  const bundle = catalog.getModule(moduleId);
+  if (!bundle || count <= 0) {
+    return { entries: [], newTopicId: null, rotation };
   }
-  const byOldest = (a: Due, b: Due): number =>
-    a.rec.due < b.rec.due ? -1 : a.rec.due > b.rec.due ? 1 : a.rec.itemId < b.rec.itemId ? -1 : 1;
-  const dueList = seen
-    .filter((d) => isItemDue(d.rec, input.today, input.lastSeenDay))
-    .sort((a, b) => {
-      const a1 = a.rec.box === 1 ? 0 : 1;
-      const b1 = b.rec.box === 1 ? 0 : 1;
-      return a1 - b1 || byOldest(a, b);
-    });
-  const notDue = seen
-    .filter((d) => !isItemDue(d.rec, input.today, input.lastSeenDay))
-    .sort((a, b) => a.rec.box - b.rec.box || byOldest(a, b));
 
-  const picked: SessionEntry[] = [];
-  const take = (list: readonly Due[], max: number): void => {
-    for (const d of list) {
-      if (picked.length >= max) return;
-      if (used.has(d.rec.itemId)) continue;
-      used.add(d.rec.itemId);
-      picked.push(entry(d.item, d.rec.box));
+  const numeric = isGeneratedModule(bundle);
+  const progressByItem = new Map<string, ProgressRecord>();
+  for (const p of progress) {
+    if (p.moduleId === moduleId) {
+      progressByItem.set(p.itemId, p);
     }
+  }
+
+  // Gather all seen (box > 0) switched on items for this module.
+  const dueItems: SeenCandidate[] = [];
+  const notDueItems: SeenCandidate[] = [];
+
+  for (const p of progressByItem.values()) {
+    if (p.box <= 0 || excludeIds.has(p.itemId)) continue;
+    const item = catalog.getItem(moduleId, p.itemId, String(p.level));
+    if (!item) continue;
+    const topicId = p.topic || catalog.topicOfItem(moduleId, p.itemId) || '';
+    if (!topicId || !isItemSwitchedOn(switches, catalog, moduleId, topicId, item)) continue;
+
+    const candidate: SeenCandidate = { item, box: p.box, due: p.due, topic: topicId };
+    if (isItemDue(p, today, lastSeenDay)) {
+      dueItems.push(candidate);
+    } else {
+      notDueItems.push(candidate);
+    }
+  }
+
+  // PRD 4.6 step 1: Box 1 items first, then other due items, the oldest due date first.
+  dueItems.sort((a, b) => {
+    const aBox1 = a.box === 1 ? 0 : 1;
+    const bBox1 = b.box === 1 ? 0 : 1;
+    if (aBox1 !== bBox1) return aBox1 - bBox1;
+    const dueCmp = a.due.localeCompare(b.due);
+    if (dueCmp !== 0) return dueCmp;
+    if (a.box !== b.box) return a.box - b.box;
+    return a.item.id.localeCompare(b.item.id);
+  });
+
+  // PRD 4.6 step 3 fallback: not yet due items with the lowest box, then oldest due date.
+  notDueItems.sort((a, b) => {
+    if (a.box !== b.box) return a.box - b.box;
+    const dueCmp = a.due.localeCompare(b.due);
+    if (dueCmp !== 0) return dueCmp;
+    return a.item.id.localeCompare(b.item.id);
+  });
+
+  const entries: SessionEntry[] = [];
+  const pickedIds = new Set<string>(excludeIds);
+
+  const addEntry = (item: Item, box: number) => {
+    if (pickedIds.has(item.id)) return;
+    pickedIds.add(item.id);
+    entries.push({ item, box, ...(numeric ? { numeric: true } : {}) });
   };
 
-  // 1. Review slots: up to half of N, rounded up.
-  take(dueList, Math.min(count, Math.ceil(count / 2)));
+  // Step 1: Review slots — up to half of N rounded up (or all of N if new lessons are off, AC43, AC47).
+  const maxReview = newLessonsEnabled ? Math.ceil(count / 2) : count;
+  for (const c of dueItems) {
+    if (entries.length >= maxReview) break;
+    addEntry(c.item, c.box);
+  }
 
-  // 2. New slots from one topic.
-  let rotation = input.rotation;
+  // Step 2: New slots (box 0) from one topic chosen by the module's topic pointer (AC44, AC45, AC46).
+  let nextRotation = rotation;
   let newTopicId: string | null = null;
-  let newCount = 0;
-  if (input.newAllowed && picked.length < count) {
-    const newIn = (topic: string): number => {
-      if (catalog.isOpen(moduleId, topic)) return usableOpen(sw, catalog, moduleId, topic).length;
-      return usableItems(sw, catalog, moduleId, topic).filter((m) => !byId.has(m.id) && !used.has(m.id)).length;
-    };
-    const topics = catalog.topics(moduleId).map((t) => ({
-      id: t.id,
-      hasNew: usableTopics(sw, catalog, moduleId).includes(t.id) && newIn(t.id) > 0,
-    }));
-    const pick = pickTopic(input.rotation, moduleId, topics);
-    rotation = pick.state;
-    if (pick.topicId !== null) {
-      const topic = pick.topicId;
-      newTopicId = topic;
-      const levels = topicLevels(sw, catalog, moduleId, topic);
-      const open = catalog.isOpen(moduleId, topic);
-      const exclude = newSumExclude(mine, moduleId, topic, used);
-      const stored = open ? [] : usableItems(sw, catalog, moduleId, topic).filter((m) => !byId.has(m.id) && !used.has(m.id));
-      for (const level of levels) {
-        const want = count - picked.length;
-        if (want <= 0) break;
-        let items: Item[];
-        if (open) {
-          const skills = new Set(usableOpen(sw, catalog, moduleId, topic).filter((c) => c.level === level).map((c) => c.skill));
-          items = newOpenItems(topic, level, skills, want, exclude, rng);
-        } else {
-          const ids = shuffle(stored.filter((m) => m.level === level), rng).slice(0, want);
-          items = ids.flatMap((m) => {
-            const it = catalog.item(moduleId, m.id, level);
-            return it ? [it] : [];
-          });
+  const newSlotsWanted = count - entries.length;
+
+  if (newLessonsEnabled && newSlotsWanted > 0) {
+    const topicCandidates: TopicCandidate[] = bundle.topics.map((topic) => {
+      if (!isTopicOn(switches, catalog, moduleId, topic.id)) {
+        return { id: topic.id, hasNew: false };
+      }
+      const levels = effectiveLevels(switches, catalog, moduleId, topic.id);
+      const skills = switchedOnSkills(switches, catalog, moduleId, topic.id);
+      if (levels.length === 0 || skills.length === 0) {
+        return { id: topic.id, hasNew: false };
+      }
+      if (catalog.isOpenTopic(moduleId, topic.id)) {
+        return { id: topic.id, hasNew: true };
+      }
+      const hasUnseen = switchedOnFixedItems(switches, catalog, moduleId, topic.id, levels).some(
+        (item) => (progressByItem.get(item.id)?.box ?? 0) === 0 && !pickedIds.has(item.id),
+      );
+      return { id: topic.id, hasNew: hasUnseen };
+    });
+
+    const pickedTopic = pickTopic(rotation, moduleId, topicCandidates);
+    if (pickedTopic.topicId !== null) {
+      const topicId = pickedTopic.topicId;
+      nextRotation = pickedTopic.state;
+      newTopicId = topicId;
+
+      const levels = effectiveLevels(switches, catalog, moduleId, topicId);
+      const skills = switchedOnSkills(switches, catalog, moduleId, topicId);
+
+      if (catalog.isOpenTopic(moduleId, topicId)) {
+        const easiestLevel = levels[0];
+        if (easiestLevel !== undefined) {
+          const exclude = new Set<string>([
+            ...savedSumIds(progress, topicId),
+            ...pickedIds,
+          ]);
+          const generated = generateItems(
+            topicId as RekenenTopicId,
+            easiestLevel,
+            newSlotsWanted,
+            rng,
+            { skills, exclude },
+          );
+          for (const item of generated) {
+            if (entries.length >= count) break;
+            addEntry(item, 0);
+          }
         }
-        for (const it of items) {
-          used.add(it.id);
-          picked.push(entry(it, 0));
-          newCount++;
+      } else {
+        // Fixed topic: easiest switched on level first, in random order within each level (AC45).
+        for (const lv of levels) {
+          if (entries.length >= count) break;
+          const levelNew = switchedOnFixedItems(switches, catalog, moduleId, topicId, [lv]).filter(
+            (item) => (progressByItem.get(item.id)?.box ?? 0) === 0 && !pickedIds.has(item.id),
+          );
+          for (const item of shuffle(levelNew, rng)) {
+            if (entries.length >= count) break;
+            addEntry(item, 0);
+          }
         }
       }
     }
   }
 
-  // 3. Fill up with more due items, then the not yet due items with the lowest box.
-  take(dueList, count);
-  take(notDue, count);
+  // Step 3: Fill any remaining slots with more due items, then not yet due items with lowest box.
+  if (entries.length < count) {
+    for (const c of dueItems) {
+      if (entries.length >= count) break;
+      addEntry(c.item, c.box);
+    }
+  }
+  if (entries.length < count) {
+    for (const c of notDueItems) {
+      if (entries.length >= count) break;
+      addEntry(c.item, c.box);
+    }
+  }
 
-  return { entries: shuffle(picked, rng), rotation, newTopicId, newCount };
+  // Step 5: Mix the question order inside the break (PRD 4.6 step 5).
+  const finalEntries = shuffleOrder && entries.length > 1 ? shuffle(entries, rng) : entries;
+
+  return {
+    entries: finalEntries,
+    newTopicId,
+    rotation: nextRotation,
+  };
 }

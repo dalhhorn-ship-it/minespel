@@ -8,7 +8,6 @@ function withDefaults<K extends KvName>(name: K, stored: unknown): KvRecords[K] 
   if (stored === undefined || stored === null) return base;
   if (typeof base !== 'object' || base === null || Array.isArray(base)) return stored as KvRecords[K];
   if (typeof stored !== 'object' || Array.isArray(stored)) return base;
-  if (name === 'world') return { diff: new Uint32Array(0), ...(stored as object) } as KvRecords[K];
   return { ...base, ...(stored as object) } as KvRecords[K];
 }
 

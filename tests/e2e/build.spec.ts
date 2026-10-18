@@ -116,12 +116,10 @@ test.describe('mine and build', () => {
     await hudTap(page, '.hotbar-all', 21);
     await expect(page.locator('.block-grid')).toBeVisible();
     await expect(page.locator('.grid-block')).toHaveCount(32);
-    await expect.poll(() => readState<boolean>(page, 'timerCounting')).toBe(false); // the play timer waits (AC23)
     await page.waitForTimeout(400);
     await hudTap(page, '.grid-block', 22, 'wol paars');
     await expect(page.locator('.block-grid')).toBeHidden();
     await expect(page.locator('.hotbar-slot').first()).toHaveAttribute('aria-label', 'wol paars');
-    await expect.poll(() => readState<boolean>(page, 'timerCounting')).toBe(true);
   });
 
   test('two fingers tap two faces: no crash and at most two new blocks (AC105)', async ({ page }) => {

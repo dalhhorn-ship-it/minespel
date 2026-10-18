@@ -1,90 +1,132 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
-import type { BuyOutcome } from '../app/purchase';
-import { createScreens } from '../app/screens';
-import { openShopScreen, MSG_SHOP_CLOSED, type ShopOptions } from './shop';
+// @vitest-environment jsdom
+import { describe, expect, it } from 'vitest';
+import { createScreenManager } from '../app/screens';
+import { createShopFlow } from '../app/shop-flow';
+import { MSG_CAP_REACHED } from '../core/economy';
+import { createDinoStore } from '../dinos/dino-store';
+import { openDb } from '../storage/db';
+import { createLogStore } from '../storage/log-store';
+import { createRecords } from '../storage/records';
+import { START_SPOT } from '../world/terrain';
+import { World } from '../world/world';
+import { createShopView } from './shop';
 
-function tap(node: Element) {
-  node.dispatchEvent(new PointerEvent('pointerdown', { pointerId: 1, clientX: 5, clientY: 5, bubbles: true }));
-  node.dispatchEvent(new PointerEvent('pointerup', { pointerId: 1, clientX: 5, clientY: 5, bubbles: true }));
-}
-const q = (host: HTMLElement, id: string) => host.querySelector(`[data-shop="${id}"]`) as HTMLElement;
-const flush = async () => { for (let i = 0; i < 5; i++) await Promise.resolve(); };
+describe('shop view and shop flow (T47, AC20, AC110, AC149, AC150)', () => {
+  it('shows 4 species cards, greys out unaffordable ones with "Nog X punten nodig", and shows 12-cap banner (AC149)', () => {
+    const view = createShopView({
+      state: {
+        points: 30,
+        dinos: [],
+        eggs: [],
+      },
+      onBuy: () => {},
+      onClose: () => {},
+    });
 
-function setup(over: Partial<ShopOptions> = {}, points = 45) {
-  const host = document.createElement('div');
-  document.body.append(host);
-  const screens = createScreens(host);
-  const buy = vi.fn(async (): Promise<BuyOutcome> => ({ ok: true, points: 5, kind: 'triceratops', price: 40 }));
-  const onClose = vi.fn();
-  const close = openShopScreen({ screens, saving: true, getPoints: async () => points, shopCount: () => 0, buy, onClose, ...over });
-  return { host, screens, buy, onClose, close };
-}
-let now = 0;
-vi.spyOn(performance, 'now').mockImplementation(() => now);
-afterEach(() => { document.body.replaceChildren(); });
+    // Compy (20) is affordable; Triceratops (40), Stegosaurus (40), Brachiosaurus (80) are greyed
+    expect(
+      view.element.querySelector('[data-dino-card="compy"]')?.getAttribute('aria-disabled'),
+    ).toBe('false');
+    expect(
+      view.element.querySelector('[data-dino-card="triceratops"]')?.getAttribute('aria-disabled'),
+    ).toBe('true');
+    expect(
+      view.element.querySelector('[data-testid="shop-note-triceratops"]')?.textContent,
+    ).toBe('Nog 10 punten nodig');
+    expect(
+      view.element.querySelector('[data-testid="shop-note-brachiosaurus"]')?.textContent,
+    ).toBe('Nog 50 punten nodig');
 
-describe('shop screen', () => {
-  it('shows four cards with the Dutch names, prices and "Nog N punten nodig"', async () => {
-    const { host, screens } = setup();
-    await flush();
-    expect(screens.current()).toBe('kid-overlay');
-    const text = host.textContent ?? '';
-    for (const t of ['Compy', '20 punten', 'Triceratops', '40 punten', 'Stegosaurus', 'Brachiosaurus', '80 punten', 'Nog 35 punten nodig', 'Je hebt 45 punten']) {
-      expect(text).toContain(t);
-    }
-    expect(host.querySelectorAll('.shop-grey')).toHaveLength(1);
-    expect(host.querySelector('a, input')).toBeNull();
+    // Render with 12 shop dinos -> cap banner shown and all buy buttons disabled (AC149)
+    view.render({
+      points: 200,
+      dinos: Array.from({ length: 12 }, (_, i) => ({
+        id: `d-${i}`,
+        kind: 'compy' as const,
+        golden: false,
+      })),
+      eggs: [],
+    });
+    expect(view.element.textContent).toContain(MSG_CAP_REACHED);
+    expect(
+      view.element.querySelector<HTMLButtonElement>('[data-testid="shop-buy-compy"]')?.disabled,
+    ).toBe(true);
+
+    view.destroy();
   });
 
-  it('Kopen asks, Nee buys nothing, Ja buys once', async () => {
-    const { host, buy } = setup();
-    await flush();
-    tap(q(host, 'buy-triceratops'));
-    expect(q(host, 'confirm').textContent).toContain('Triceratops kopen voor 40 punten?');
-    tap(q(host, 'no'));
-    expect(buy).not.toHaveBeenCalled();
-    expect(q(host, 'confirm')).toBeNull();
-    now += 1000; // past the double tap guard
-    tap(q(host, 'buy-triceratops'));
-    const yes = q(host, 'yes');
-    tap(yes);
-    tap(yes);
-    expect(q(host, 'confirm')).toBeNull(); // gone at once
-    await flush();
-    expect(buy).toHaveBeenCalledTimes(1);
-    expect(buy).toHaveBeenCalledWith('triceratops');
-    expect(q(host, 'status').textContent).toContain('Triceratops-ei');
-  });
+  it('buys an egg atomically with Kopen -> Ja and prevents 10 fast taps from double-spending (AC20, AC110, AC150)', async () => {
+    const db = await openDb({ name: `shop-flow-test-${Math.random()}` });
+    const records = createRecords(db);
+    const logStore = createLogStore(db);
+    const world = new World();
+    const dinoStore = createDinoStore({
+      world,
+      getPlayerSpot: () => ({ x: START_SPOT.x, y: START_SPOT.y, z: START_SPOT.z }),
+      records,
+    });
+    const host = document.createElement('div');
+    const screens = createScreenManager({ host });
 
-  it('a grey card does not ask', async () => {
-    const { host } = setup();
-    await flush();
-    tap(q(host, 'buy-brachiosaurus'));
-    expect(q(host, 'confirm')).toBeNull();
-  });
+    // Start with 45 points
+    await records.put('economy', {
+      points: 45,
+      practicePointsToday: 0,
+      practiceDay: '2026-10-17',
+    });
 
-  it('is all grey with a friendly line when the save is not running', async () => {
-    const { host, buy } = setup({ saving: false }, 500);
-    await flush();
-    expect(host.querySelectorAll('.shop-grey')).toHaveLength(4);
-    expect(host.textContent).toContain(MSG_SHOP_CLOSED);
-    tap(q(host, 'buy-compy'));
-    expect(q(host, 'confirm')).toBeNull();
-    expect(buy).not.toHaveBeenCalled();
-  });
+    const flow = createShopFlow({
+      screens,
+      db,
+      records,
+      logStore,
+      dinoStore,
+    });
 
-  it('shows the 12 dino message', async () => {
-    const { host } = setup({ shopCount: () => 12 }, 500);
-    await flush();
-    expect(host.querySelectorAll('.shop-grey')).toHaveLength(4);
-    expect(host.textContent).toContain("Je hebt al 12 dino's! Wat een kudde.");
-  });
+    await flow.open();
+    expect(host.textContent).toContain('45 punten');
 
-  it('Terug closes the shop and tells the caller', async () => {
-    const { host, screens, onClose } = setup();
-    await flush();
-    tap(q(host, 'back'));
-    expect(screens.depth()).toBe(0);
-    expect(onClose).toHaveBeenCalledTimes(1);
+    // Tap Kopen on Triceratops (40 points)
+    const buyBtn = host.querySelector<HTMLButtonElement>('[data-testid="shop-buy-triceratops"]');
+    expect(buyBtn).not.toBeNull();
+    buyBtn?.dispatchEvent(new PointerEvent('pointerdown', { pointerId: 1, clientX: 5, clientY: 5, bubbles: true }));
+    buyBtn?.dispatchEvent(new PointerEvent('pointerup', { pointerId: 1, clientX: 5, clientY: 5, bubbles: true }));
+    expect(host.textContent).toContain('Wil je een Triceratops-ei kopen voor 40 punten?');
+
+    // Fire 10 rapid purchases in parallel (AC110: 45 points, 40 egg -> 1 bought, 5 points left)
+    const results = await Promise.all(
+      Array.from({ length: 10 }, () => flow.buyEgg('triceratops')),
+    );
+    expect(results.filter(Boolean)).toHaveLength(1);
+
+    const ecoAfter = await records.get('economy');
+    const dinosAfter = await records.get('dinos');
+    const ledgerAfter = await logStore.listLedger();
+
+    expect(ecoAfter.points).toBe(5);
+    expect(dinoStore.eggs()).toHaveLength(1);
+    expect(dinosAfter.eggs).toHaveLength(1);
+    expect(ledgerAfter).toHaveLength(1);
+    expect(ledgerAfter[0]?.delta).toBe(-40);
+    expect(ledgerAfter[0]?.reason).toBe('shop');
+
+    // CR3: Deploy chickens in the shop (1 chicken, then 3 chickens)
+    const deployOneBtn = host.querySelector<HTMLButtonElement>('[data-testid="shop-deploy-chicken"]');
+    expect(deployOneBtn).not.toBeNull();
+    const deployedOne = await flow.deployChickens(1);
+    expect(deployedOne).toBe(1);
+    const deployedFlock = await flow.deployChickens(3);
+    expect(deployedFlock).toBe(3);
+
+    const chickens = dinoStore.dinos().filter((d) => d.kind === 'kip');
+    expect(chickens).toHaveLength(4);
+    expect(host.querySelector('[data-testid="shop-chicken-count"]')?.textContent).toBe(
+      'Kippen in je wereld: 4',
+    );
+    // Chickens do not count toward the 12 shop dino cap
+    expect(dinoStore.shopCount()).toBe(1);
+
+    flow.destroy();
+    db.close();
   });
 });

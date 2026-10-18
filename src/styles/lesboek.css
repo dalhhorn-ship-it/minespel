@@ -1,45 +1,149 @@
-/* Lesboek and Extra oefenen. Big buttons, taps only, no hover states. */
-.lesboek,
-.practice-host {
-  position: absolute; inset: 0;
-  display: flex; flex-direction: column;
-  box-sizing: border-box;
-  padding: calc(var(--safe-top) + var(--gap)) calc(var(--safe-right) + var(--gap)) calc(var(--safe-bottom) + var(--gap)) calc(var(--safe-left) + var(--gap));
-  background: var(--paper); color: var(--ink);
-  font-family: var(--font-stack); font-size: var(--font-body);
-  user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;
-}
-.lesboek-header, .practice-bar {
-  display: flex; align-items: center; gap: calc(var(--gap) * 2);
-  flex: none; padding-bottom: var(--gap);
-}
-.lesboek-title { margin: 0; font-size: var(--font-title); line-height: 1.15; }
-.lesboek-back {
-  min-height: 64px; min-width: 120px; padding: 0 calc(var(--gap) * 2);
-  border: 3px solid var(--ink); border-radius: var(--radius);
-  background: var(--sand); color: var(--ink);
-  font: inherit; font-size: var(--font-large); font-weight: 800;
+/* Lesboek & Extra oefenen styles (T46, AC51, AC52, AC120). */
+
+.lesboek-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  background: rgba(15, 24, 36, 0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
   touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
 }
-.lesboek-body, .practice-stage {
-  flex: 1; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch;
-  touch-action: pan-y; overscroll-behavior: contain;
-}
-.practice-stage { display: flex; flex-direction: column; gap: var(--gap); position: relative; }
-.lesboek-list { display: flex; flex-direction: column; gap: var(--gap); max-width: 820px; margin: 0 auto; }
-.lesboek-module { margin: var(--gap) 0 0; font-size: var(--font-large); }
-.lesboek-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: var(--gap); }
-.lesboek-topic {
-  min-height: 72px; padding: 8px calc(var(--gap) * 2);
-  border: 3px solid var(--ink); border-radius: var(--radius);
-  background: var(--sky-light); color: var(--ink);
-  font: inherit; font-size: var(--font-large); font-weight: 800;
+
+.lesboek-card {
+  width: min(820px, 95vw);
+  max-height: 90vh;
+  background: #fffdf7;
+  border: 4px solid #1f2d3d;
+  border-radius: 28px;
+  padding: 24px 28px;
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.35);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  color: #1f2d3d;
+  font-family: var(--font-stack);
+  font-size: calc(var(--font-body, 20px) * var(--kid-scale, 1));
+  overflow-y: auto;
   touch-action: pan-y;
 }
-.lesboek-note { margin: 0; padding: var(--gap); font-size: var(--font-large); font-weight: 800; text-align: center; }
 
-/* The round: the break screen fills the stage under the Stoppen bar. */
-.practice-running { padding: 0; }
-.practice-running .practice-bar { padding: calc(var(--safe-top) + 8px) calc(var(--safe-right) + 20px) 0 calc(var(--safe-left) + 20px); }
-.practice-running .practice-stage { overflow: hidden; }
-.practice-running .break-screen { position: static; flex: 1; min-height: 0; padding-top: 0; }
+.lesboek-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.lesboek-title {
+  margin: 0;
+  font-size: calc(28px * var(--kid-scale, 1));
+  font-weight: 800;
+  color: #1f2d3d;
+}
+
+.lesboek-badges {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.lesboek-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: #fff3b0;
+  border: 2px solid #e0a000;
+  color: #4a3000;
+  font-weight: 800;
+  font-size: calc(17px * var(--kid-scale, 1));
+}
+
+.lesboek-cap-banner {
+  margin: 0;
+  padding: 12px 16px;
+  border-radius: 16px;
+  background: #e8f5e9;
+  border: 2px solid #2e7d32;
+  color: #1b5e20;
+  font-weight: 800;
+  text-align: center;
+}
+
+.lesboek-override-btn {
+  min-height: 60px;
+  padding: 12px 20px;
+  border-radius: 18px;
+  border: 3px solid #8a5600;
+  background: linear-gradient(180deg, #ffe066 0%, #f59f00 100%);
+  color: #1f2d3d;
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.lesboek-topics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 12px;
+}
+
+.lesboek-topic-btn {
+  min-height: 60px;
+  padding: 12px 16px;
+  border-radius: 16px;
+  border: 3px solid #1f2d3d;
+  background: #f4efe3;
+  color: #1f2d3d;
+  font: inherit;
+  font-weight: 800;
+  text-align: left;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.lesboek-topic-subject {
+  font-size: calc(14px * var(--kid-scale, 1));
+  color: #415468;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.lesboek-topic-name {
+  font-size: calc(19px * var(--kid-scale, 1));
+  font-weight: 800;
+  color: #1f2d3d;
+}
+
+.lesboek-empty {
+  margin: 0;
+  padding: 16px;
+  border-radius: 16px;
+  background: #f4efe3;
+  text-align: center;
+  font-weight: 700;
+}
+
+.lesboek-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 4px;
+}

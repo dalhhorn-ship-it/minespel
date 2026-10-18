@@ -1,267 +1,279 @@
-// Dinos and eggs in the world: steps them every frame, hatches eggs after 5 seconds of play,
-// brings Volg mij dinos along when the player goes home, answers "is a dino here?" for building,
-// and "which dino is under this tap?" for taps (AC104).
+// World dino system (T42, AC6, AC12, AC16, AC17, AC21, AC104, AC106, AC150).
+// Steps eggs and dinos during active world play, checks block-placement overlap,
+// raycasts dino taps before blocks, brings `follow` dinos along on `teleported`, and shows hearts/puff.
+
+import type { Sound } from '../audio/sound';
 import { createRng, type Rng } from '../core/rng';
-import { registerHook } from '../dev/e2e-hooks';
-import { boxCollides, createDino, dinoBounds, popNextTo, stepDino, type Point } from '../dinos/dino-ai';
-import { isPlaced, type DinoEntry, type DinoStore, type EggEntry } from '../dinos/dino-store';
-import { isDinoKindId } from '../dinos/kinds';
-import { hatchSpot, stepEgg, type EggState } from '../dinos/egg';
-import type { Records } from '../storage/records';
-import type { SaveQueue } from '../storage/save-queue';
-import { isSolid } from '../world/blocks';
+import {
+  dinoBounds,
+  popNextTo,
+  stepDino,
+  type Point,
+} from '../dinos/dino-ai';
+import {
+  EGG_BOX_HEIGHT,
+  EGG_BOX_SIDE,
+  type DinoStore,
+  type WorldDino,
+  type WorldEgg,
+} from '../dinos/dino-store';
+import { stepEgg } from '../dinos/egg';
+import type { Effects } from '../render/effects';
+import type { GameRenderer } from '../render/renderer';
+import { WOL_GEEL, WOL_WIT } from '../world/blocks';
+import type { Aim, Box } from '../world/build';
 import { raycast, REACH } from '../world/raycast';
-import type { Aim, Box, IsOccupied } from '../world/build';
-import { MAX_FRAME_TIME } from '../world/physics';
 import type { World } from '../world/world';
+import { aimFromScreen } from './build-controller';
+import type { PlayerController } from './player-controller';
 
-/** A tap on a dino or egg counts when the ray passes this close to the box. Kids tap loosely. */
-const TAP_MARGIN = 0.15;
-const EGG_SIDE = 0.4;
-const EGG_HEIGHT = 0.66;
-/** While dinos or eggs exist their spots are saved this often (play seconds). */
-const SAVE_EVERY = 3;
-
-export type DinoTarget =
-  | { kind: 'dino'; id: number; distance: number }
-  | { kind: 'egg'; id: number; distance: number };
-
-/** Something the renderer can show once: a cloud where a dino pops or an egg hatches. */
-export interface DinoWorldEvent {
-  type: 'puff';
-  x: number;
-  y: number;
-  z: number;
-}
-
-export interface DinoSystemOptions {
-  world: World;
-  /** Feet position of the player. Read every step. */
-  player: () => Point;
-  store: DinoStore;
-  rng?: Rng;
-  onEvent?: (event: DinoWorldEvent) => void;
-}
-
-export interface DinoSystem {
-  readonly store: DinoStore;
-  /** One frame of play time. Eggs count, dinos walk. */
-  step(dt: number): void;
-  /** Volg mij dinos jump next to the player (the player was put back on the start spot). */
-  teleported(): void;
-  /** True when a dino or egg overlaps the box. Passed to `placeBlock` (AC6). */
-  isOccupied: IsOccupied;
-  /** The nearest dino or egg under the aim within 6 blocks, unless a block is in front of it. */
-  hitTest(aim: Aim): DinoTarget | null;
-}
-
-export function eggBounds(e: Pick<EggState, 'x' | 'y' | 'z'>): Box {
-  const h = EGG_SIDE / 2;
-  return [e.x - h, e.y, e.z - h, e.x + h, e.y + EGG_HEIGHT, e.z + h];
-}
+const EPS = 1e-3;
 
 function boxesOverlap(a: Box, b: Box): boolean {
-  return a[0] < b[3] && a[3] > b[0] && a[1] < b[4] && a[4] > b[1] && a[2] < b[5] && a[5] > b[2];
+  return (
+    a[0] < b[3] - EPS &&
+    a[3] > b[0] + EPS &&
+    a[1] < b[4] - EPS &&
+    a[4] > b[1] + EPS &&
+    a[2] < b[5] - EPS &&
+    a[5] > b[2] + EPS
+  );
 }
 
-/** Distance along a unit ray to a box, or null. Slab method. */
-function rayBox(aim: Aim, box: Box, margin: number): number | null {
-  const o = [aim.ox, aim.oy, aim.oz];
-  const d = [aim.dx, aim.dy, aim.dz];
+export function eggBounds(e: Pick<WorldEgg, 'x' | 'y' | 'z'>): Box {
+  const h = EGG_BOX_SIDE / 2;
+  return [e.x - h, e.y, e.z - h, e.x + h, e.y + EGG_BOX_HEIGHT, e.z + h];
+}
+
+/** True when `box` overlaps any dino or egg in the world (AC6). */
+export function isBoxOccupiedByDinoOrEgg(
+  box: Box,
+  dinos: readonly WorldDino[],
+  eggs: readonly WorldEgg[],
+): boolean {
+  for (const d of dinos) {
+    if (boxesOverlap(box, dinoBounds(d))) return true;
+  }
+  for (const e of eggs) {
+    if (boxesOverlap(box, eggBounds(e))) return true;
+  }
+  return false;
+}
+
+/**
+ * Ray-AABB intersection along `aim`. Returns the distance along the normalized ray in `[0, maxDistance]`,
+ * or `null` when the ray misses `box` or hits beyond `maxDistance`.
+ */
+export function rayHitsBox(aim: Aim, box: Box, maxDistance: number = REACH): number | null {
+  const len = Math.hypot(aim.dx, aim.dy, aim.dz);
+  if (!(len > 0) || !Number.isFinite(len)) return null;
+  const ux = aim.ox;
+  const uy = aim.oy;
+  const uz = aim.oz;
+  const dx = aim.dx / len;
+  const dy = aim.dy / len;
+  const dz = aim.dz / len;
+
   let tMin = 0;
-  let tMax = Infinity;
-  for (let i = 0; i < 3; i++) {
-    const lo = box[i]! - margin;
-    const hi = box[i + 3]! + margin;
-    if (Math.abs(d[i]!) < 1e-9) {
-      if (o[i]! < lo || o[i]! > hi) return null;
+  let tMax = maxDistance;
+
+  const axes: Array<[number, number, number, number]> = [
+    [ux, dx, box[0], box[3]],
+    [uy, dy, box[1], box[4]],
+    [uz, dz, box[2], box[5]],
+  ];
+
+  for (const [origin, dir, minB, maxB] of axes) {
+    if (Math.abs(dir) < 1e-8) {
+      if (origin < minB || origin > maxB) return null;
     } else {
-      let t1 = (lo - o[i]!) / d[i]!;
-      let t2 = (hi - o[i]!) / d[i]!;
-      if (t1 > t2) [t1, t2] = [t2, t1];
+      let t1 = (minB - origin) / dir;
+      let t2 = (maxB - origin) / dir;
+      if (t1 > t2) {
+        const tmp = t1;
+        t1 = t2;
+        t2 = tmp;
+      }
       tMin = Math.max(tMin, t1);
       tMax = Math.min(tMax, t2);
       if (tMin > tMax) return null;
     }
   }
-  return tMin;
+
+  return tMin <= maxDistance ? Math.max(0, tMin) : null;
+}
+
+/**
+ * Picks the closest dino hit by `aim` within `maxDistance` that stands in front of any solid block (`AC104`).
+ */
+export function pickDinoAtAim(
+  world: World,
+  dinos: readonly WorldDino[],
+  aim: Aim,
+  maxDistance: number = REACH,
+): WorldDino | null {
+  const blockHit = raycast(world, aim.ox, aim.oy, aim.oz, aim.dx, aim.dy, aim.dz, maxDistance);
+  const maxT = blockHit ? blockHit.distance : maxDistance;
+
+  let bestDino: WorldDino | null = null;
+  let bestDist = maxT;
+
+  for (const d of dinos) {
+    // Slightly generous tap padding (+0.15 block) so excited kid taps on a moving dino feel responsive.
+    const b = dinoBounds(d);
+    const padded: Box = [b[0] - 0.15, b[1], b[2] - 0.15, b[3] + 0.15, b[4] + 0.15, b[5] + 0.15];
+    const t = rayHitsBox(aim, padded, maxDistance);
+    if (t !== null && t <= bestDist) {
+      bestDist = t;
+      bestDino = d;
+    }
+  }
+
+  return bestDino;
+}
+
+export interface DinoSystemOptions {
+  world: World;
+  player: PlayerController;
+  store: DinoStore;
+  renderer: GameRenderer;
+  container: HTMLElement;
+  sound?: Pick<Sound, 'play'>;
+  effects?: Pick<Effects, 'pop'>;
+  viewport: () => { width: number; height: number };
+  onDinoTapped?: (dino: WorldDino, screenX: number, screenY: number) => void;
+  rng?: Rng;
+  doc?: Document;
+}
+
+export interface DinoSystem {
+  readonly store: DinoStore;
+  step(dt: number): void;
+  /** Returns true when the tap hit a dino (opening the dino menu instead of mining/placing a block). */
+  handleTap(screenX: number, screenY: number): boolean;
+  isOccupied(box: Box): boolean;
+  onPlayerTeleported(spot: Point): void;
+  showHearts(screenX?: number, screenY?: number): void;
+  dispose(): void;
 }
 
 export function createDinoSystem(options: DinoSystemOptions): DinoSystem {
-  const { world, store } = options;
-  const rng = options.rng ?? createRng(Date.now() >>> 0);
-  const emit = (type: DinoWorldEvent['type'], p: Point) => options.onEvent?.({ type, x: p.x, y: p.y + 0.4, z: p.z });
-  let sinceSave = 0;
+  const rng = options.rng ?? createRng(0x44494e4f);
+  const doc = options.doc ?? (typeof document !== 'undefined' ? document : undefined);
+  const heartTimers = new Set<ReturnType<typeof setTimeout>>();
+  let dirtyTimer = 0;
 
-  /** Finds a free spot on the ground next to the player for something of this size. */
-  function spotNextTo(kind: DinoEntry['state']['kind'], player: Point): Point | null {
-    const probe = createDino({ kind, golden: false, x: player.x, y: player.y, z: player.z });
-    return popNextTo(world, probe, player, rng) ? { x: probe.x, y: probe.y, z: probe.z } : null;
+  const unsubscribeStore = options.store.subscribe(() => {
+    options.renderer.syncDinos?.(options.store.dinos(), options.store.eggs());
+  });
+
+  function showPuff(golden = false) {
+    const { width, height } = options.viewport();
+    options.effects?.pop(width / 2, height / 2, golden ? WOL_GEEL : WOL_WIT);
   }
 
-  function placeEgg(e: EggEntry, player: Point): void {
-    const spot = spotNextTo(e.egg.kind, player) ?? player;
-    e.egg.x = spot.x; e.egg.y = spot.y; e.egg.z = spot.z;
-    store.touch();
-  }
-
-  /** Keeps an egg on solid ground: it falls when the floor is mined, and moves out of a block. */
-  function settleEgg(e: EggEntry, player: Point): void {
-    const g = e.egg;
-    if (boxCollides(world, g.x, g.y, g.z, EGG_SIDE, EGG_HEIGHT)) {
-      for (let up = 1; up <= 3; up++) {
-        if (!boxCollides(world, g.x, g.y + up, g.z, EGG_SIDE, EGG_HEIGHT)) { g.y += up; return; }
-      }
-      placeEgg(e, player);
-      return;
+  function showHearts(screenX?: number, screenY?: number) {
+    options.sound?.play('chirp');
+    if (!doc) return;
+    const { width, height } = options.viewport();
+    const cx = screenX ?? width / 2;
+    const cy = screenY ?? height / 2;
+    for (let i = 0; i < 6; i++) {
+      const heart = doc.createElement('div');
+      heart.className = 'dino-heart';
+      heart.textContent = '\u{2764}\u{FE0F}';
+      heart.setAttribute('aria-hidden', 'true');
+      const offsetX = (i - 2.5) * 24;
+      heart.style.cssText =
+        `position:fixed;left:${cx + offsetX}px;top:${cy}px;font-size:28px;pointer-events:none;z-index:45;` +
+        'transition:transform 650ms ease-out,opacity 650ms ease-in;';
+      options.container.append(heart);
+      const t1 = setTimeout(() => {
+        heartTimers.delete(t1);
+        heart.style.transform = `translate(${offsetX * 0.5}px, -70px) scale(1.25)`;
+        heart.style.opacity = '0';
+      }, 16);
+      const t2 = setTimeout(() => {
+        heartTimers.delete(t2);
+        heart.remove();
+      }, 700);
+      heartTimers.add(t1);
+      heartTimers.add(t2);
     }
-    if (g.y > 0 && !boxCollides(world, g.x, g.y - 0.05, g.z, EGG_SIDE, EGG_HEIGHT)) {
-      let y = Math.floor(g.y) - 1;
-      while (y > 0 && !boxCollides(world, g.x, y - 0.05, g.z, EGG_SIDE, EGG_HEIGHT)) y--;
-      g.y = Math.max(0, y);
-    }
   }
 
-  const system: DinoSystem = {
-    store,
-    step(dtRaw) {
-      if (!(dtRaw > 0) || !Number.isFinite(dtRaw)) return;
-      const dt = Math.min(dtRaw, MAX_FRAME_TIME);
-      const player = options.player();
+  return {
+    store: options.store,
+    step(dt) {
+      if (!(dt > 0) || !Number.isFinite(dt)) return;
+      const p = options.player.player;
+      const playerSpot: Point = { x: p.x, y: p.y, z: p.z };
 
-      // New and loaded eggs and dinos get their place first.
-      for (const e of store.eggs) if (!isPlaced(e.egg)) placeEgg(e, player);
-      for (const d of store.dinos) {
-        if (isPlaced(d.state)) continue;
-        const s = d.state;
-        if (!popNextTo(world, s, player, rng)) { s.x = player.x; s.y = player.y; s.z = player.z; }
-        s.stayX = s.x; s.stayZ = s.z;
-        store.touch();
-      }
-
-      for (const e of [...store.eggs]) {
-        settleEgg(e, player);
-        if (stepEgg(e.egg, dt)) {
-          const spot = hatchSpot(e.egg);
-          store.hatch(e.id);
-          emit('puff', spot);
+      // 1. Step eggs (only during active world play, AC150)
+      const eggsSnapshot = [...options.store.eggs()];
+      for (const egg of eggsSnapshot) {
+        const ready = stepEgg(egg, dt);
+        if (ready) {
+          const hatched = options.store.hatchEgg(egg.id);
+          if (hatched) {
+            options.sound?.play('crack');
+            options.sound?.play('chirp');
+            showPuff(hatched.golden);
+          }
         }
       }
-      for (const d of store.dinos) {
-        if (stepDino(world, d.state, player, rng, dt) === 'popped') emit('puff', d.state);
+
+      // 2. Step dinos
+      const dinosList = options.store.dinos();
+      for (const dino of dinosList) {
+        const ev = stepDino(options.world, dino, playerSpot, rng, dt);
+        if (ev === 'popped') {
+          showPuff(dino.golden);
+        }
       }
 
-      sinceSave += dt;
-      if (sinceSave >= SAVE_EVERY) {
-        sinceSave = 0;
-        if (store.dinos.length > 0 || store.eggs.length > 0) store.touch();
+      // 3. Periodically mark dirty when eggs or dinos exist so playSeconds and positions save
+      if (eggsSnapshot.length > 0 || dinosList.length > 0) {
+        dirtyTimer += dt;
+        if (dirtyTimer >= 1) {
+          dirtyTimer = 0;
+          options.store.markDirty();
+        }
       }
+
+      options.renderer.syncDinos?.(options.store.dinos(), options.store.eggs());
     },
-    teleported() {
-      const player = options.player();
-      for (const d of store.dinos) {
-        if (d.state.mode !== 'follow' || !isPlaced(d.state)) continue;
-        if (popNextTo(world, d.state, player, rng)) emit('puff', d.state);
-      }
-      store.touch();
+    handleTap(screenX, screenY) {
+      const { width, height } = options.viewport();
+      const aim = aimFromScreen(options.player.pose(), width, height, screenX, screenY);
+      const hitDino = pickDinoAtAim(options.world, options.store.dinos(), aim, REACH);
+      if (!hitDino) return false;
+      options.sound?.play('chirp');
+      options.onDinoTapped?.(hitDino, screenX, screenY);
+      return true;
     },
     isOccupied(box) {
-      for (const d of store.dinos) if (isPlaced(d.state) && boxesOverlap(box, dinoBounds(d.state))) return true;
-      for (const e of store.eggs) if (isPlaced(e.egg) && boxesOverlap(box, eggBounds(e.egg))) return true;
-      return false;
+      return isBoxOccupiedByDinoOrEgg(box, options.store.dinos(), options.store.eggs());
     },
-    hitTest(aim) {
-      const len = Math.hypot(aim.dx, aim.dy, aim.dz);
-      if (!(len > 0) || !Number.isFinite(len)) return null;
-      const unit: Aim = { ...aim, dx: aim.dx / len, dy: aim.dy / len, dz: aim.dz / len };
-      const found: DinoTarget[] = [];
-      const consider = (target: DinoTarget['kind'], id: number, box: Box) => {
-        const t = rayBox(unit, box, TAP_MARGIN);
-        if (t !== null && t <= REACH) found.push({ kind: target, id, distance: t });
-      };
-      for (const d of store.dinos) if (isPlaced(d.state)) consider('dino', d.id, dinoBounds(d.state));
-      for (const e of store.eggs) if (isPlaced(e.egg)) consider('egg', e.id, eggBounds(e.egg));
-      found.sort((a, b) => a.distance - b.distance);
-      const best = found[0];
-      if (!best) return null;
-      // A block in front of it wins: a kid tapping a wall must not open the menu of a dino behind it.
-      const hit = raycast(world, unit.ox, unit.oy, unit.oz, unit.dx, unit.dy, unit.dz, REACH);
-      if (hit && isSolid(world.get(hit.x, hit.y, hit.z)) && hit.distance < best.distance - 0.05) return null;
-      return best;
-    },
-  };
-
-  if (__E2E__) {
-    const round = (n: number) => (Number.isFinite(n) ? Math.round(n * 100) / 100 : null);
-    registerHook('dinoState', () => ({
-      dinos: store.dinos.map((d) => ({
-        id: d.id, kind: d.state.kind, golden: d.state.golden, name: d.name, mode: d.state.mode,
-        x: round(d.state.x), y: round(d.state.y), z: round(d.state.z), growth: round(d.state.growth),
-      })),
-      eggs: store.eggs.map((e) => ({
-        id: e.id, kind: e.egg.kind, golden: e.egg.golden,
-        x: round(e.egg.x), y: round(e.egg.y), z: round(e.egg.z), playSeconds: round(e.egg.playSeconds),
-      })),
-    }));
-    registerHook('placeDino', (id: number, x: number, y: number, z: number) => {
-      const d = store.findDino(id);
-      if (!d) return false;
-      d.state.x = x; d.state.y = y; d.state.z = z; d.state.vy = 0;
-      d.state.stayX = x; d.state.stayZ = z; d.state.goal = null;
-      return true;
-    });
-    registerHook('placeEgg', (id: number, x: number, y: number, z: number) => {
-      const e = store.eggs.find((g) => g.id === id);
-      if (!e) return false;
-      e.egg.x = x; e.egg.y = y; e.egg.z = z;
-      return true;
-    });
-    registerHook('addTestEgg', (kind: string, golden: boolean) => {
-      if (isDinoKindId(kind)) store.addEgg(kind, golden === true);
-    });
-    registerHook('renameDino', (id: number, name: string) => store.rename(id, name));
-    registerHook('dinoRecord', () => store.toRecord());
-  }
-
-  return system;
-}
-
-// ---- Saving ----
-
-export interface DinoSaveOptions {
-  store: DinoStore;
-  queue: Pick<SaveQueue, 'register' | 'markDirty'>;
-  records: Pick<Records, 'get'>;
-}
-
-export interface DinoSave {
-  /** Loads the saved dinos and eggs. Never throws: a bad record is ignored. */
-  restore(): Promise<void>;
-  /** Marks the `dinos` record dirty whenever the store changes. Returns a stop function. */
-  start(): () => void;
-  /** A restore that is still waiting will not touch the store any more. */
-  cancel(): void;
-}
-
-export function createDinoSave(options: DinoSaveOptions): DinoSave {
-  const { store, queue, records } = options;
-  queue.register('dinos', () => store.toRecord());
-  let cancelled = false;
-  return {
-    async restore() {
-      try {
-        const raw = await records.get('dinos');
-        if (cancelled) return;
-        store.load(raw);
-      } catch {
-        /* a broken dinos record: start with none, the old record stays on disk until something changes */
+    onPlayerTeleported(spot) {
+      let moved = false;
+      for (const d of options.store.dinos()) {
+        if (d.mode === 'follow') {
+          if (popNextTo(options.world, d, spot, rng)) {
+            moved = true;
+          }
+        }
+      }
+      if (moved) {
+        options.store.markDirty();
+        options.renderer.syncDinos?.(options.store.dinos(), options.store.eggs());
       }
     },
-    start() {
-      return store.subscribe(() => queue.markDirty('dinos'));
-    },
-    cancel() {
-      cancelled = true;
+    showHearts,
+    dispose() {
+      unsubscribeStore();
+      for (const t of heartTimers) clearTimeout(t);
+      heartTimers.clear();
     },
   };
 }

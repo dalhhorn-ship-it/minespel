@@ -1,45 +1,196 @@
 import './styles/tokens.css';
 import './styles/base.css';
+import { createBreakFlow, type BreakFlow } from './app/break-flow';
+import { loadCatalog } from './app/content-loader';
+import { createExamFlow } from './app/exam-flow';
+import { createParentFlow, type ParentFlow } from './app/parent-flow';
+import { createPracticeFlow, type PracticeFlow } from './app/practice-flow';
+import { resumeSessionIfAny } from './app/resume';
+import { createScreenManager, type ScreenManager } from './app/screens';
+import { applySettingsToRuntime } from './app/settings-apply';
+import { createShopFlow, type ShopFlow } from './app/shop-flow';
+import { createTimerDriver, type TimerDriver } from './app/timer-driver';
+import { createSound } from './audio/sound';
+import { createCatalog, type Catalog } from './content/catalog';
+import { systemClock } from './core/clock';
+import { createRng } from './core/rng';
 import { registerHook } from './dev/e2e-hooks';
+import type { WorldDino } from './dinos/dino-store';
+import type { DinoKindId } from './dinos/kinds';
+import { createGame, type Game } from './game/game';
+import { bootSave, createWorldSave } from './game/world-save';
 import { createAudioUnlock } from './platform/audio-unlock';
 import { installLockdown } from './platform/lockdown';
 import { startScreenGuard } from './platform/screen-guard';
-import { createGame, type Game } from './game/game';
 import { createNullRenderer, createWebGlRenderer, type RendererFactory } from './render/renderer';
-import { bootSave, createWorldSave } from './game/world-save';
-import { createDinoSave } from './game/dino-system';
 import { openDb } from './storage/db';
-import { createRecords } from './storage/records';
-import { createSaveQueue } from './storage/save-queue';
-import { el } from './ui/dom';
-import { createScreens } from './app/screens';
-import { startPlayTimer, type PlayTimer } from './app/timer-driver';
-import { createSound } from './audio/sound';
-import { createAppEnv, type AppEnvHost } from './app/app-env';
-import { resumeRunningSession } from './app/resume';
-import { createSessionStore } from './storage/session-store';
 import { createLogStore } from './storage/log-store';
-import { setupPauseMenu } from './ui/pause-menu';
-import { openShop } from './app/shop-flow';
-import { openPractice } from './app/practice-flow';
-import { openLesboek } from './ui/learn/lesboek';
+import { createProgressStore } from './storage/progress-store';
+import { createRecords, type Records } from './storage/records';
+import { createSaveQueue, type SaveQueue } from './storage/save-queue';
+import { createSessionStore } from './storage/session-store';
+import { createCountdownView } from './ui/countdown';
+import { createDinoMenu, type DinoMenu } from './ui/dino-menu';
+import { el } from './ui/dom';
+import { createLesboek } from './ui/learn/lesboek';
+import { createLockIcon } from './ui/lock-icon';
+import { createPauseMenu, type PauseMenu } from './ui/pause-menu';
 
 installLockdown();
 const guard = startScreenGuard();
 const audio = createAudioUnlock();
-// The one Sound of the app. Off until the saved settings load (AC99).
-const sound = createSound({ unlock: audio, enabled: false });
+const sound = createSound({ unlock: audio });
+const rng = createRng(Date.now() ^ 0x5f3759df);
 
-const screens = createScreens();
 const app = document.getElementById('app');
 let game: Game | null = null;
-let envHost: AppEnvHost | null = null;
-let teleported = 0, rendererFactoryIsReal = true;
+let queue: SaveQueue | null = null;
+let records: Records | null = null;
+let catalog: Catalog = createCatalog();
+let screens: ScreenManager | null = null;
+let timerDriver: TimerDriver | null = null;
+let breakFlow: BreakFlow | null = null;
+let parentFlow: ParentFlow | null = null;
+let shopFlow: ShopFlow | null = null;
+let practiceFlow: PracticeFlow | null = null;
+let activePauseMenu: PauseMenu | null = null;
+let activeDinoMenu: DinoMenu | null = null;
+
+let teleported = 0;
+let rendererFactoryIsReal = true;
+let userPaused = false;
+let worldActiveFromScreen = true;
+let restored = false;
+
+const countdownView = createCountdownView({
+  initialMs: 5 * 60_000,
+  warningEnabled: true,
+  onStartNow: () => {
+    void breakFlow?.startBreak();
+  },
+});
+
+function syncGamePauseState() {
+  if (!game) return;
+  if (userPaused || !worldActiveFromScreen) {
+    game.pause();
+  } else if (restored) {
+    game.resume();
+  }
+}
+
+function openDinoMenu(dino: WorldDino, screenX?: number, screenY?: number) {
+  if (!screens || !game) return;
+  if (activeDinoMenu) {
+    activeDinoMenu.destroy();
+    activeDinoMenu = null;
+  }
+  const menu = createDinoMenu({
+    dino,
+    onModeChange: (mode) => {
+      game?.dinoStore.setDinoMode(dino.id, mode);
+    },
+    onNameSave: (name) => {
+      game?.dinoStore.setDinoName(dino.id, name);
+    },
+    onKnuffel: () => {
+      game?.dinoSystem.showHearts(screenX, screenY);
+    },
+    onClose: () => {
+      activeDinoMenu?.destroy();
+      activeDinoMenu = null;
+      screens?.showWorld();
+    },
+  });
+  activeDinoMenu = menu;
+  screens.showKidOverlay(menu.element);
+}
+
+async function openPauseMenu() {
+  if (!screens || !game) return;
+  if (activePauseMenu) {
+    activePauseMenu.destroy();
+    activePauseMenu = null;
+  }
+  const economy = records ? await records.get('economy') : { points: 0 };
+  const menu = createPauseMenu({
+    points: economy.points,
+    onResume: () => {
+      activePauseMenu?.destroy();
+      activePauseMenu = null;
+      screens?.showWorld();
+    },
+    onTeleportHome: () => {
+      game?.teleportHome();
+      activePauseMenu?.destroy();
+      activePauseMenu = null;
+      screens?.showWorld();
+    },
+    onShop: () => {
+      activePauseMenu?.destroy();
+      activePauseMenu = null;
+      void shopFlow?.open();
+    },
+    onLesboek: () => {
+      void (async () => {
+        const switches = records ? await records.get('switches') : { modules: {} };
+        activePauseMenu?.destroy();
+        activePauseMenu = null;
+        const lesboek = createLesboek({
+          catalog,
+          switches,
+          onPracticeTopic: (moduleId, topicId) => {
+            lesboek.destroy();
+            void practiceFlow?.startTopic(moduleId, topicId);
+          },
+          onClose: () => {
+            lesboek.destroy();
+            screens?.showWorld();
+          },
+        });
+        screens?.showKidOverlay(lesboek.element);
+      })();
+    },
+    onPractice: () => {
+      activePauseMenu?.destroy();
+      activePauseMenu = null;
+      practiceFlow?.open();
+    },
+    onParent: () => {
+      void parentFlow?.open();
+    },
+  });
+  activePauseMenu = menu;
+  screens.showKidOverlay(menu.element);
+}
+
 if (app) {
   app.append(el('h1', { text: 'Dino Blokwereld' }));
   const container = el('div', { class: 'world' });
-  container.style.cssText = 'position:absolute;left:0;top:0;width:100%;height:100%;overflow:hidden;touch-action:none';
+  container.style.cssText =
+    'position:absolute;left:0;top:0;width:100%;height:100%;overflow:hidden;touch-action:none';
   app.append(container);
+
+  screens = createScreenManager({
+    host: app,
+    onWorldActiveChange: (active) => {
+      worldActiveFromScreen = active;
+      syncGamePauseState();
+    },
+  });
+
+  // Floating parental controls lock button visible during kid overlays/breaks so parents can always enter the gate.
+  const floatingLock = createLockIcon({
+    floating: true,
+    onOpenParent: () => {
+      void parentFlow?.open();
+    },
+  });
+  floatingLock.element.hidden = true;
+  app.append(floatingLock.element);
+  screens.subscribe((kind) => {
+    floatingLock.element.hidden = kind === 'world' || kind === 'parent';
+  });
 
   // The real renderer. The e2e build may fall back to a renderer that draws nothing when WebGL is missing.
   let rendererFactory: RendererFactory = createWebGlRenderer;
@@ -51,98 +202,193 @@ if (app) {
     }
   }
   try {
-    game = createGame({ container, rendererFactory, guard, search: window.location.search, audioUnlock: audio, sound, screens });
-    envHost = createAppEnv({ sound, audio, dinos: game.dinos.store });
+    game = createGame({
+      container,
+      rendererFactory,
+      guard,
+      search: window.location.search,
+      audioUnlock: audio,
+      sound,
+      onPausePressed: () => {
+        void openPauseMenu();
+      },
+      onParentPressed: () => {
+        void parentFlow?.open();
+      },
+      onDinoTapped: (dino, sx, sy) => {
+        openDinoMenu(dino, sx, sy);
+      },
+      onBlockGridOpenChange: (open) => {
+        screens?.setExternalKidOverlay(open);
+      },
+    });
+    game.hud.countdownSlot.append(countdownView.root);
     game.on('teleported', () => {
       teleported++;
     });
   } catch {
-    container.append(el('p', { class: 'shell-text', text: 'Je iPad kan de 3D wereld nu niet laten zien. Sluit de app en probeer het nog eens.' }));
+    container.append(
+      el('p', {
+        class: 'shell-text',
+        text: 'Je iPad kan de 3D wereld nu niet laten zien. Sluit de app en probeer het nog eens.',
+      }),
+    );
   }
 }
 
-// Loads the saved world and player, then starts saving. The game stays paused until that is done (or 3 seconds pass).
-// Without storage or with a broken save the game still plays, but does not save.
-let userPaused = false, restored = false;
-const booted = game && envHost
+// Loads the saved world and player, then starts saving and initializes M2 + M3 flows (timers, breaks, dinos, shop, practice, parental controls).
+const booted = game
   ? bootSave({
       game,
-      wantsPause: () => userPaused,
+      wantsPause: () => userPaused || !worldActiveFromScreen,
       create: async () => {
         const db = await openDb();
         const q = createSaveQueue({ db });
-        const r = createRecords(db);
-        (envHost as AppEnvHost).setStorage({ db, records: r, queue: q });
-        const worldSave = createWorldSave({ game: game as Game, queue: q, records: r });
-        const dinoSave = createDinoSave({ store: (game as Game).dinos.store, queue: q, records: r });
-        return {
-          restore: async () => {
-            await worldSave.restore();
-            await dinoSave.restore();
-          },
-          start: () => {
-            const stopWorld = worldSave.start();
-            const stopDinos = dinoSave.start();
-            return () => {
-              stopWorld();
-              stopDinos();
-            };
-          },
-          cancel: () => {
-            worldSave.cancel();
-            dinoSave.cancel();
-          },
-        };
+        queue = q;
+        const recs = createRecords(db);
+        records = recs;
+        const progressStore = createProgressStore(db);
+        const logStore = createLogStore(db);
+        const sessionStore = createSessionStore(db);
+
+        catalog = await loadCatalog(db);
+        const [settings, timers] = await Promise.all([recs.get('settings'), recs.get('timers')]);
+
+        if (screens) {
+          const examFlow = createExamFlow();
+          breakFlow = createBreakFlow({
+            clock: systemClock,
+            rng,
+            screens,
+            records: recs,
+            progressStore,
+            logStore,
+            sessionStore,
+            getCatalog: () => catalog,
+            sound,
+            onBreakFinished: () => {
+              timerDriver?.resetPlayTimer();
+            },
+          });
+
+          timerDriver = createTimerDriver({
+            clock: systemClock,
+            screens,
+            guard,
+            records: recs,
+            sound,
+            countdownView,
+            initialBreakEveryMinutes: settings.breakEveryMinutes || 5,
+            initialPlayMsLeft: timers.playMsLeft,
+            initialWarningEnabled: settings.breakWarningEnabled !== false,
+            onBreakDue: () => {
+              void breakFlow?.startBreak();
+            },
+          });
+
+          applySettingsToRuntime(settings, { sound, timerDriver });
+
+          shopFlow = createShopFlow({
+            screens,
+            db,
+            records: recs,
+            logStore,
+            dinoStore: game?.dinoStore,
+            clock: systemClock,
+            sound,
+            onEarnCoins: () => {
+              void breakFlow?.startBreak();
+            },
+          });
+          practiceFlow = createPracticeFlow({
+            screens,
+            clock: systemClock,
+            rng,
+            records: recs,
+            progressStore,
+            logStore,
+            getCatalog: () => catalog,
+            sound,
+            onStartBreakRound: async () => {
+              await breakFlow?.startBreak();
+            },
+          });
+          parentFlow = createParentFlow({
+            clock: systemClock,
+            rng,
+            screens,
+            records: recs,
+            progressStore,
+            logStore,
+            getCatalog: () => catalog,
+            breakFlow,
+            timerDriver,
+            sound,
+            onResetWorld: () => {
+              game?.resetWorld();
+            },
+          });
+
+          await resumeSessionIfAny({
+            sessionStore,
+            records: recs,
+            breakFlow,
+            examFlow,
+          });
+        }
+
+        return createWorldSave({ game: game as Game, queue: q, records: recs });
       },
     })
-  : Promise.resolve('not-saving' as const);
-let playTimer: PlayTimer | null = null;
-if (game && envHost) {
-  const g = game;
-  const env = envHost.env;
-  setupPauseMenu({
-    hud: g.hud,
-    screens,
-    getPoints: async () => (await env.records?.get('economy'))?.points ?? 0,
-    pauseWorld: () => {
-      userPaused = true;
-      g.pause();
-    },
-    resumeWorld: () => {
-      userPaused = false;
-      if (restored) g.resume();
-    },
-    teleportHome: () => g.teleportHome(),
-    openShop: () => openShop(screens, env),
-    openLesboek: () => openLesboek(screens, env),
-    openPractice: () => openPractice(screens, env),
-  });
-}
-void booted.then((result) => {
+  : Promise.resolve('not-saving');
+void booted.finally(() => {
   restored = true;
-  if (game && envHost) {
-    const host = envHost;
-    host.finishBoot(result);
-    void startPlayTimer({ game, screens, guard, env: host.env, wantsPause: () => userPaused }).then((t) => {
-      playTimer = t;
-      host.bindBreaks(t.breakFlow);
-      host.bindTimer(t.driver);
-      void resumeRunningSession(host.env.db ? createSessionStore(host.env.db) : null, host.env);
-    });
-  }
 });
 
-const openedScreens: Array<() => void> = [];
 if (__E2E__) {
   registerHook('ready', () => restored);
   registerHook('screenGuard', () => guard.state());
   registerHook('audioUnlocked', () => audio.isUnlocked());
-  if (game && envHost) {
+  registerHook('openPauseMenu', () => openPauseMenu());
+  registerHook('openParentControls', () => parentFlow?.open());
+  registerHook('openPractice', () => practiceFlow?.open());
+  registerHook('points', async () => (records ? (await records.get('economy')).points : 0));
+  registerHook('setPoints', async (pts: number) => {
+    if (records) {
+      await records.update('economy', (e) => ({ ...e, points: pts }));
+    }
+  });
+  registerHook('breaksLog', async () => {
+    if (!records) return [];
+    const db = await openDb();
+    const list = await createLogStore(db).listBreaks();
+    db.close();
+    return list;
+  });
+  registerHook('answersLog', async () => {
+    if (!records) return [];
+    const db = await openDb();
+    const list = await createLogStore(db).listAnswers();
+    db.close();
+    return list;
+  });
+  registerHook('ledgerLog', async () => {
+    if (!records) return [];
+    const db = await openDb();
+    const list = await createLogStore(db).listLedger();
+    db.close();
+    return list;
+  });
+  if (game) {
     const g = game;
-    const env = envHost.env;
     registerHook('player', () => ({
-      x: g.player.player.x, y: g.player.player.y, z: g.player.player.z,
-      onGround: g.player.player.onGround, floating: g.player.isFloating(), yaw: g.player.yaw, pitch: g.player.pitch,
+      x: g.player.player.x,
+      y: g.player.player.y,
+      z: g.player.player.z,
+      onGround: g.player.player.onGround,
+      floating: g.player.isFloating(),
+      yaw: g.player.yaw,
+      pitch: g.player.pitch,
     }));
     registerHook('gameRunning', () => g.isRunning());
     registerHook('frameCount', () => g.frameCount());
@@ -152,7 +398,7 @@ if (__E2E__) {
     });
     registerHook('resumeGame', () => {
       userPaused = false;
-      if (restored) g.resume(); // before that, the boot resumes
+      syncGamePauseState();
     });
     registerHook('teleportHome', () => g.teleportHome());
     registerHook('teleportedCount', () => teleported);
@@ -165,39 +411,35 @@ if (__E2E__) {
     registerHook('rebuildWorld', () => g.renderer.setWorld(g.world));
     registerHook('placePlayer', (x: number, y: number, z: number, yaw: number) => {
       const p = g.player.player;
-      p.x = x; p.y = y; p.z = z; p.vy = 0; p.onGround = false;
+      p.x = x;
+      p.y = y;
+      p.z = z;
+      p.vy = 0;
+      p.onGround = false;
       g.player.yaw = yaw;
     });
+    registerHook('ascendPlayer', (active: boolean) => g.player.setAscending(active));
+    registerHook('descendPlayer', (active: boolean) => g.player.setDescending(active));
+    registerHook('isPlayerFloating', () => g.player.isFloating());
+    registerHook('setLookInput', (tx: number, ty: number) => g.player.setLookInput(tx, ty));
+    registerHook('nudgeLook', (tx: number, ty: number) => g.player.nudgeLook(tx, ty));
+    // Dinos & eggs hooks (M3)
+    registerHook('dinos', () => g.dinoStore.dinos());
+    registerHook('eggs', () => g.dinoStore.eggs());
+    registerHook('addEgg', (kind: DinoKindId, golden?: boolean) => g.dinoStore.addEgg(kind, golden));
+    registerHook('stepDinos', (dt: number) => g.dinoSystem.step(dt));
+    registerHook('openDinoMenuFor', (id: string) => {
+      const d = g.dinoStore.getDino(id);
+      if (d) openDinoMenu(d);
+    });
     // Test blocks are set straight in the world, so they tell the save queue themselves.
-    registerHook('markWorldDirty', () => env.queue?.markDirty('world'));
-    registerHook('flushSave', () => env.queue?.flushNow());
+    registerHook('markWorldDirty', () => queue?.markDirty('world'));
+    registerHook('flushSave', () => queue?.flushNow());
     registerHook('resetWorld', () => g.resetWorld());
     registerHook('buildState', () => g.getBuildState());
-    registerHook('setBuildState', (s: Partial<ReturnType<Game['getBuildState']>>) => g.setBuildState(s));
-    registerHook('playMsLeft', () => playTimer?.driver.remainingMs() ?? null);
-    registerHook('timerCounting', () => playTimer?.driver.isCounting() ?? false);
-    registerHook('countdownText', () => g.hud.countdownSlot.textContent);
-    registerHook('currentScreen', () => screens.current());
-    // Opens a screen like the pause menu would. Returns an id for closeScreen.
-    registerHook('openScreen', (kind: 'kid-overlay' | 'learn' | 'exam' | 'parent') => {
-      openedScreens.push(screens.open(kind));
-      return openedScreens.length - 1;
-    });
-    registerHook('closeScreen', (id: number) => openedScreens[id]?.());
-    registerHook('breakActive', () => env.breaks.isActive());
-    registerHook('endBreak', () => playTimer?.breakFlow.end());
-    registerHook('parentEndBreak', () => env.breaks.parentEnd());
-    // Resolves when the break has written everything it queued (a test can then kill the app).
-    registerHook('breakSaved', () => playTimer?.breakFlow.settled());
-    // Starts a break now, like the timer reaching 0.
-    registerHook('startBreak', () => env.breaks.start());    registerHook('savedSession', async () => (env.db ? createSessionStore(env.db).load() : null));
-    registerHook('logCounts', async () => {
-      if (!env.db) return null;
-      const logs = createLogStore(env.db);
-      const [answers, breaks, ledger] = await Promise.all([logs.listAnswers(), logs.listBreaks(), logs.listLedger()]);
-      return { answers: answers.length, breaks: breaks.length, ledger: ledger.map((l) => l.delta) };
-    });
-    registerHook('points', async () => (await env.records?.get('economy'))?.points ?? 0);
+    registerHook('setBuildState', (s: Partial<ReturnType<Game['getBuildState']>>) =>
+      g.setBuildState(s),
+    );
     registerHook('usesRealRenderer', () => rendererFactoryIsReal);
   }
 }

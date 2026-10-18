@@ -4,39 +4,26 @@ Written so kids can read it too.
 
 ## Unreleased
 
-### Change of 2026-10-18
+### M3: dinos in the world, Dinowinkel, floating in the sky & instant coin practice
 
-* The sky is now 64 blocks high so there is lots of room above the hills and trees.
-* 16 new blocks to build with: obsidiaan, vuur, lava, mossteen, zandsteen, graniet, marmer, basalt, diepsteen, vuursteen, goudsteen, diamant, water, ijs, sneeuw and wol oranje (32 building blocks in total).
-* Alle blokken shows all 32 blocks on one screen with your 8 hotbar slots on top: tap a slot, tap a block, and it lands in that slot.
-* Near the start there is now a gate to finish: build two tall obsidiaan pillars, put vuur in the middle, and the whole gate lights up with a whoosh.
-* You can fly! Hold Omhoog to float up into the sky, let go to stay floating, and hold Omlaag to come back down.
-* Four arrow buttons turn your view: tap for a small turn, hold to keep turning.
+* **Stay floating in the sky (`Omhoog ⬆` & `Omlaag ⬇`):** When you fly up with **Omhoog ⬆**, you now **stay floating in the air** when you let go — so you can walk around in the clouds and build sky castles! Use the new **Omlaag ⬇** button whenever you want to float back down to the ground.
+* **Override the countdown anytime (`Nu oefenen 🪙`):** Don't want to wait for the countdown clock? Tap **Nu oefenen 🪙** right on the countdown bar (or inside the **Dinowinkel**, **Lesboek**, or **Extra oefenen**) to start exercises and lessons immediately and earn coins!
+* **Compelling Dinowinkel (`docs/SHOP_PRD.md`):** Spend your earned coins on four dino eggs: **Compy** (20 🪙), **Triceratops** (40 🪙), **Stegosaurus** (40 🪙), and **Brachiosaurus** (80 🪙)! Each card shows a blocky dino emblem, personality traits, size badge, progress bar toward your next egg, a safe **Kopen → Ja / Nee** confirmation, and your live **Mijn Dino-verzameling** showcase.
+* **Hatching eggs & walking dinos in your 3D world:** Bought eggs appear right next to you in the world, wobble, and hatch after 5 seconds of play into baby dinos that grow up and follow you around!
+* **Dino menu, naming & knuffels:** Tap any of your dinos in the world to open its menu: choose **Volg mij** or **Blijf hier**, give it a custom name up to 12 letters with **Naam geven** (which floats above its head!), or give it a **❤️ Knuffel** for a burst of hearts and a happy chirp.
+* **Full Lesboek & Extra oefenen:** Read any topic lesson in the **Lesboek** and jump straight into practicing that topic, or pick any subject in **Extra oefenen** to earn up to 10 extra practice coins per day.
+* **CR1 — 32 building blocks & custom lower-bar chooser (`Alle blokken`):** Choose from **32 block variants** — including stones (`mossteen`, `zandsteen`, `graniet`, `marmer`, `basalt`, `diepsteen`, `vuursteen`), treasures (`goudsteen`, `diamant`), nature (`water`, `ijs`, `sneeuw`), and colors — and tap any of the 8 slots in your lower bar right inside **Alle blokken** to customize your bar!
+* **CR2 & CR4 — Obsidian gate floor, fire (`vuur`), stones & molten `lava`:** Right in front of your starting spot lie **4 blocks of `obsidiaan` on the ground** flanked by stones! Build `obsidiaan` up on the left and right to make a gate and place **`vuur`** inside to light the gate, or build with glowing **`lava`**!
+* **CR3 — Deploy live chickens (`🐔 Kippenhok`) in the Dinowinkel:** Open the **Dinowinkel** and tap **🐔 Kip loslaten** or **🐔🐔🐔 3 Kippen loslaten** in the **Kippenhok** to release live 3D chickens right into your world!
 
-### M3: dinos and the Dinowinkel
+### M2: learning breaks, sky controls, countdown & parental controls
 
-* Buy dino eggs in the Dinowinkel with your points. Tap Kopen, then Ja.
-* Eggs cost 20 points for Compy, 40 for Triceratops and Stegosaurus, and 80 for Brachiosaurus.
-* An egg hatches after 5 seconds of play. The baby dino grows bigger.
-* Tap a dino to open its menu. Let it follow you or stay put, give it a name, or give it a hug with hearts.
-* You can have up to 12 dinos from the shop.
-* Lesboek in the pause menu lets you read the lesson pages again.
-* Extra oefenen in the pause menu lets you practise any time. You can't lose points there. Up to 10 points a day count.
-* The Dinowinkel, Lesboek and Extra oefenen are open now. They don't say "Komt nog" anymore.
-
-### M2: learning breaks
-
-* A countdown runs at the top of the screen. When it hits 0, your break starts. In the last 30 seconds the numbers grow and pulse.
-* Right on the first try gives you 2 points. Right on the second try gives you 1 point.
-* Some questions are hard. Then Dino Juf shows "Zo zit het" with the answer and an explanation. That costs 1 point. You never go below 0 points.
-* Get all 5 questions right on the first try and you get 3 bonus points.
-* Before a new topic, you can read a lesson page first.
-* Tap the Pauze button at the top to open the pause menu. The countdown waits while you are in it.
-* "Ik zit vast" takes you back to the start. Your world stays just as you left it.
-* Dinos and eggs can now be in the world. Buying eggs comes later.
-* Dinowinkel, Lesboek and Extra oefenen say "Komt nog" for now. They are coming soon.
-* Rekenen (sums) is in the game too, with lesson pages and questions for each level.
-* A checker now looks at the Taal questions. It finds doubled questions and questions without an answer, and a few were fixed.
+* **Go higher in the sky!** The sky is now twice as high (`64` blocks tall), and you can hold **Omhoog ⬆** above the jump button to soar higher up into the sky.
+* **Smooth camera angle arrows:** Use the **▲ ▼ ◀ ▶** camera arrow buttons on screen (or the arrow keys on a keyboard) to smoothly tilt your view up toward the sky or look around with gentle easing.
+* **Countdown to your learning moment:** The top-left of the screen shows **"Leerpauze over 5:00"**. In the last 30 seconds it grows and pulses so you can finish placing your block, and in the last 10 seconds it softly ticks. Opening a menu pauses the countdown.
+* **Dino Juf learning breaks:** When the countdown reaches `0:00`, Dino Juf appears with Rekenen and Taal questions! New topics start with a short lesson. A right answer on the first try gives **+2 punten** (and **+3 bonus** if you get every question right on the first try!). If you miss once, you get a second try for **+1 punt**; if it's still tricky, Dino Juf shows a step-by-step explanation so you can learn it for next time.
+* **Pause menu & Lesboek:** Tap **Pauze** to see your star points, teleport back to the start spot with **Ik zit vast**, peek at the **Dinowinkel**, or read your **Lesboek** lessons.
+* **Parental controls button (`🔒 Ouders`):** Parents can tap **🔒 Ouders** in the top bar or in the Pause menu to set/enter their 4-digit PIN, adjust break intervals and question counts, toggle **Groter lettertype** or sound effects, start or end a learning break right away, and pick Groep 6 / Groep 7 levels and topics.
 
 ### M1: the block world
 
@@ -49,4 +36,3 @@ Written so kids can read it too.
 * Your world is saved: the blocks you built or broke, where you stand, your block bar and Hakken or Bouwen are all back when you open the app again. A save that gets cut off never breaks the old one.
 * The app fits the iPad like a real app: no zooming, no text selection, a friendly 'Draai je iPad' message in portrait, and a dino icon for the home screen.
 * Behind the scenes: the project builds, has tests, and opens in a test iPad browser.
-* The learning break works! When the timer reaches 0, Dino Juf asks 5 questions. Get points for right answers, see how a sum works step by step when it is hard, and go back to your world.

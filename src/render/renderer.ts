@@ -3,13 +3,15 @@
 
 import {
   BoxGeometry, Color, Fog, Group, Mesh, MeshBasicMaterial, PerspectiveCamera, Scene, WebGLRenderer,
-  type BufferGeometry, type Object3D,
+  type BufferGeometry,
 } from 'three';
 import { registerHook } from '../dev/e2e-hooks';
 import { SPIKE_DINO_COUNT, type SpikeDino } from '../dev/spike-load';
+import type { WorldDino, WorldEgg } from '../dinos/dino-store';
 import { CHUNK_SIZE } from '../world/terrain';
 import { createAtlasTexture } from './atlas';
 import { CHUNKS_PER_SIDE, buildChunkGeometry, chunksTouchedBy, type WorldView } from './chunk-mesh';
+import { createDinoSceneSync } from './dino-render';
 import { DEFAULT_QUALITY, pixelRatioFor, type Quality } from './quality';
 
 export { CHUNK_SIZE };
@@ -38,8 +40,8 @@ export interface GameRenderer {
   setQuality(quality: Quality): void;
   /** Shows these placeholder dinos (the speed spike), or none with null. Transforms are read every frame. */
   setSpikeDinos(dinos: readonly SpikeDino[] | null): void;
-  /** Shows this group of dinos and eggs (the game moves it), or nothing with null. */
-  setDinoLayer(layer: Object3D | null): void;
+  /** Syncs real world dinos and eggs into the 3D scene (T42). */
+  syncDinos?(dinos: readonly WorldDino[], eggs: readonly WorldEgg[]): void;
   render(): void;
   dispose(): void;
 }
@@ -73,13 +75,15 @@ const createPlainWebGlRenderer: RendererFactory = ({ canvas, quality = DEFAULT_Q
   const chunks = new Map<string, Mesh>();
   let world: WorldView | null = null;
 
+  const dinoSync = createDinoSceneSync(canvas.ownerDocument);
+  scene.add(dinoSync.group);
+
   const spikeGroup = new Group();
   scene.add(spikeGroup);
   const spikeGeometry = new BoxGeometry(1, 1, 1);
   const spikeMaterials = new Map<number, MeshBasicMaterial>();
   let spikeDinos: readonly SpikeDino[] = [];
   let spikeGroups: Group[] = [];
-  let dinoLayer: Object3D | null = null;
 
   function rebuildChunk(cx: number, cz: number): void {
     if (!world) return;
@@ -158,10 +162,8 @@ const createPlainWebGlRenderer: RendererFactory = ({ canvas, quality = DEFAULT_Q
         return g;
       });
     },
-    setDinoLayer(layer) {
-      if (dinoLayer) scene.remove(dinoLayer);
-      dinoLayer = layer;
-      if (layer) scene.add(layer);
+    syncDinos(dinos, eggs) {
+      dinoSync.sync(dinos, eggs);
     },
     render() {
       spikeDinos.forEach((d, i) => {
@@ -175,8 +177,8 @@ const createPlainWebGlRenderer: RendererFactory = ({ canvas, quality = DEFAULT_Q
     dispose() {
       for (const m of chunks.values()) m.geometry.dispose();
       chunks.clear();
+      dinoSync.dispose();
       clearSpike();
-      if (dinoLayer) scene.remove(dinoLayer);
       spikeGeometry.dispose();
       for (const m of spikeMaterials.values()) m.dispose();
       material.map?.dispose();
@@ -195,7 +197,7 @@ export const createNullRenderer: RendererFactory = ({ canvas }) => ({
   resize() {},
   setQuality() {},
   setSpikeDinos() {},
-  setDinoLayer() {},
+  syncDinos() {},
   render() {},
   dispose() {},
 });
@@ -222,7 +224,8 @@ export function withContextRecovery(inner: RendererFactory): RendererFactory {
     let pose: CameraPose | null = null;
     let size: { w: number; h: number; dpr: number } | null = null;
     let dinos: readonly SpikeDino[] | null = null;
-    let dinoLayer: Object3D | null = null;
+    let worldDinos: readonly WorldDino[] = [];
+    let worldEggs: readonly WorldEgg[] = [];
     let lost = false;
     let disposed = false;
     let generation = 0;
@@ -238,7 +241,7 @@ export function withContextRecovery(inner: RendererFactory): RendererFactory {
       if (size) core.resize(size.w, size.h, size.dpr);
       if (world) core.setWorld(world);
       if (dinos) core.setSpikeDinos(dinos);
-      if (dinoLayer) core.setDinoLayer(dinoLayer);
+      if (worldDinos.length > 0 || worldEggs.length > 0) core.syncDinos?.(worldDinos, worldEggs);
       if (pose) core.setCamera(pose);
     };
 
@@ -339,9 +342,10 @@ export function withContextRecovery(inner: RendererFactory): RendererFactory {
         dinos = d;
         if (!lost) core.setSpikeDinos(d);
       },
-      setDinoLayer(layer) {
-        dinoLayer = layer;
-        if (!lost) core.setDinoLayer(layer);
+      syncDinos(dList, eList) {
+        worldDinos = dList;
+        worldEggs = eList;
+        if (!lost) core.syncDinos?.(dList, eList);
       },
       render() {
         if (!lost) core.render();

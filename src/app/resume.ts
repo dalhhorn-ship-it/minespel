@@ -1,29 +1,38 @@
-// At boot: continue a running break or exam from the session store (AC37, AC44).
+// Resumes an interrupted break or exam session at startup (T43, AC37).
+
+import type { Records } from '../storage/records';
 import type { SessionStore } from '../storage/session-store';
-import type { AppEnv } from './app-env';
-import { resumeExam } from './exam-flow';
+import { isPersistedBreakSession, type BreakFlow } from './break-flow';
+import type { ExamFlow } from './exam-flow';
 
-export type ResumeResult = 'break' | 'exam' | 'none';
+export interface ResumeOptions {
+  sessionStore: SessionStore;
+  records: Pick<Records, 'get'>;
+  breakFlow: BreakFlow;
+  examFlow?: ExamFlow;
+}
 
-/**
- * Looks in the session store. A saved break reopens on the question it was on. A broken or
- * unreadable record is ignored, so the world always opens.
- */
-export async function resumeRunningSession(
-  sessions: Pick<SessionStore, 'load'> | null,
-  env: AppEnv,
-): Promise<ResumeResult> {
-  if (!sessions) return 'none';
-  let saved;
-  try {
-    saved = await sessions.load();
-  } catch {
-    return 'none';
+export async function resumeSessionIfAny(
+  options: ResumeOptions,
+): Promise<'break' | 'exam' | null> {
+  const saved = await options.sessionStore.load();
+  if (saved) {
+    if (saved.kind === 'break' && isPersistedBreakSession(saved)) {
+      await options.breakFlow.resumeBreak(saved);
+      return 'break';
+    }
+    if (saved.kind === 'exam' && options.examFlow?.resumeExam) {
+      await options.examFlow.resumeExam(saved);
+      return 'exam';
+    }
+    await options.sessionStore.clear();
   }
-  if (!saved) return 'none';
-  if (saved.kind === 'break') {
-    env.breaks.start(); // finds the saved break itself
+
+  const timers = await options.records.get('timers');
+  if (timers.playMsLeft !== null && timers.playMsLeft <= 0) {
+    await options.breakFlow.startBreak();
     return 'break';
   }
-  return resumeExam(saved, env) ? 'exam' : 'none';
+
+  return null;
 }

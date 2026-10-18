@@ -97,7 +97,7 @@ describe('world save', () => {
     expect(Array.from((await records.get('world')).diff)).toEqual([]);
   });
 
-  it('drops the world diff for a pre-change save (missing or old worldVersion) while keeping the player record (G0)', async () => {
+  it('restores the v1 fixture (an old M1 save)', async () => {
     const { db, records, queue } = await setupDb();
     await transact(db, 'kv', 'readwrite', async (tx) => {
       const store = tx.objectStore('kv');
@@ -106,30 +106,11 @@ describe('world save', () => {
     });
     const game = makeGame();
     await createWorldSave({ game, queue, records }).restore();
-    expect(game.world.diff().length).toBe(0);
-    expect(game.world.get(32, 28, 32)).toBe(AIR);
-    expect(game.player.player.x).toBe(20.5);
-    expect(game.player.yaw).toBe(1.25);
-    expect(game.getBuildState()).toEqual({ mode: 'bouwen', hotbar: fixture.kv.player.hotbar, selected: 3 });
-  });
-
-  it('keeps the world diff when worldVersion, size and height match current (G0)', async () => {
-    const { db, records, queue } = await setupDb();
-    await transact(db, 'kv', 'readwrite', async (tx) => {
-      const store = tx.objectStore('kv');
-      await request(
-        store.put(
-          { diff: Uint32Array.from(fixture.kv.world.diff), worldVersion: 2, size: 64, height: 64 },
-          'world',
-        ),
-      );
-      await request(store.put(fixture.kv.player, 'player'));
-    });
-    const game = makeGame();
-    await createWorldSave({ game, queue, records }).restore();
     expect(game.world.get(32, 28, 32)).toBe(STEEN);
     expect(game.world.get(10, 5, 10)).toBe(AIR);
     expect(game.player.player.x).toBe(20.5);
+    expect(game.player.yaw).toBe(1.25);
+    expect(game.getBuildState()).toEqual({ mode: 'bouwen', hotbar: fixture.kv.player.hotbar, selected: 3 });
   });
 
   it('ignores a corrupt save and still boots', async () => {
@@ -171,72 +152,6 @@ describe('world save', () => {
     expect(cleanDiff([-1, 1.5, 1e12, 256 * 3 + 2])).toEqual([770]);
     expect(cleanDiff('x')).toEqual([]);
     expect(cleanDiff(null)).toEqual([]);
-  });
-
-  describe('flying (G4)', () => {
-    it('AC169: saves and restores a floating player at the same spot', async () => {
-      const { records, queue } = await setupDb();
-      const a = makeGame();
-      const stop = createWorldSave({ game: a, queue, records }).start();
-      const p = a.player.player;
-      p.x = 30.5; p.y = 40; p.z = 31.5;
-      a.setAscending(true);
-      a.setAscending(false);
-      expect(a.isFloating()).toBe(true);
-      queue.markDirty('player');
-      await queue.flushNow();
-      stop();
-      expect((await records.get('player')).floating).toBe(true);
-
-      const b = makeGame();
-      await createWorldSave({ game: b, queue, records }).restore();
-      expect(b.isFloating()).toBe(true);
-      expect([b.player.player.x, b.player.player.y, b.player.player.z]).toEqual([30.5, 40, 31.5]);
-    });
-
-    it('a change in floating alone, without moving, is saved by the poll', async () => {
-      const { records, queue } = await setupDb();
-      const game = makeGame();
-      const stop = createWorldSave({ game, queue, records, pollMs: 5 }).start();
-      expect(queue.pendingCount()).toBe(0);
-      game.setAscending(true);
-      await new Promise((r) => setTimeout(r, 40));
-      expect(queue.pendingCount()).toBeGreaterThan(0);
-      stop();
-    });
-
-    it('Ik zit vast while floating: on the ground at the start, not floating', () => {
-      const game = makeGame();
-      game.setAscending(true);
-      game.player.player.y = 40;
-      game.teleportHome();
-      expect(game.isFloating()).toBe(false);
-      expect(game.player.player.y).toBe(START_SPOT.y);
-    });
-
-    it('a saved floating spot now inside a block is restored on the ground in that column', async () => {
-      const { db, records, queue } = await setupDb();
-      await transact(db, 'kv', 'readwrite', async (tx) => {
-        const store = tx.objectStore('kv');
-        await request(store.put({ ...fixture.kv.player, x: 20.5, y: 28, z: 20.5, floating: true }, 'player'));
-      });
-      const game = makeGame();
-      for (let y = 20; y < 40; y++) game.world.set(20, y, 20, STEEN);
-      await createWorldSave({ game, queue, records }).restore();
-      expect(game.isFloating()).toBe(false);
-      expect(game.player.player.y).toBeGreaterThanOrEqual(40);
-      expect(game.world.get(20, Math.floor(game.player.player.y), 20)).toBe(AIR);
-    });
-
-    it('an old player record without floating loads as not floating', async () => {
-      const { db, records, queue } = await setupDb();
-      await transact(db, 'kv', 'readwrite', async (tx) => {
-        await request(tx.objectStore('kv').put(fixture.kv.player, 'player'));
-      });
-      const game = makeGame();
-      await createWorldSave({ game, queue, records }).restore();
-      expect(game.isFloating()).toBe(false);
-    });
   });
 
   describe('bootSave', () => {

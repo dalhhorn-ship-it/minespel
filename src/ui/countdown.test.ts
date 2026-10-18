@@ -1,22 +1,51 @@
+// @vitest-environment jsdom
 import { describe, expect, it } from 'vitest';
 import { createCountdownView } from './countdown';
 
-describe('countdown view', () => {
-  it('shows the label and grows only in the last 30 seconds with warnings on', () => {
-    const slot = document.createElement('div');
-    const v = createCountdownView(slot);
-    const node = slot.querySelector('.countdown') as HTMLElement;
-    v.update(252_000, true);
-    expect(node.textContent).toBe('Leerpauze over 4:12');
-    expect(node.classList.contains('countdown-warning')).toBe(false);
-    v.update(30_000, true);
-    expect(node.classList.contains('countdown-warning')).toBe(true);
-    v.update(30_000, false);
-    expect(node.classList.contains('countdown-warning')).toBe(false);
-    v.update(0, true);
-    expect(node.textContent).toBe('Leerpauze over 0:00');
-    expect(node.classList.contains('countdown-warning')).toBe(false);
-    v.destroy();
-    expect(slot.querySelector('.countdown')).toBeNull();
+describe('countdown view (T41)', () => {
+  it('renders "Leerpauze over M:SS" and updates text', () => {
+    const view = createCountdownView({ initialMs: 300_000 });
+    expect(view.getText()).toBe('Leerpauze over 5:00');
+    expect(view.isWarningActive()).toBe(false);
+
+    view.update(65_000);
+    expect(view.getText()).toBe('Leerpauze over 1:05');
+    expect(view.isWarningActive()).toBe(false);
+  });
+
+  it('activates warning state in the last 30 seconds when enabled (AC25)', () => {
+    const view = createCountdownView({ initialMs: 31_000, warningEnabled: true });
+    expect(view.isWarningActive()).toBe(false);
+
+    view.update(30_000);
+    expect(view.getText()).toBe('Leerpauze over 0:30');
+    expect(view.isWarningActive()).toBe(true);
+
+    view.setWarningEnabled(false);
+    expect(view.isWarningActive()).toBe(false);
+
+    view.setWarningEnabled(true);
+    expect(view.isWarningActive()).toBe(true);
+
+    view.update(0);
+    expect(view.getText()).toBe('Leerpauze over 0:00');
+    expect(view.isWarningActive()).toBe(false);
+  });
+
+  it('allows overriding the countdown clock with the Nu oefenen button', () => {
+    let started = 0;
+    const view = createCountdownView({
+      initialMs: 180_000,
+      onStartNow: () => {
+        started++;
+      },
+    });
+    const btn = view.root.querySelector<HTMLButtonElement>('[data-testid="countdown-start-now"]');
+    expect(btn).not.toBeNull();
+    expect(btn?.hidden).toBe(false);
+    btn?.dispatchEvent(new PointerEvent('pointerdown', { pointerId: 1, clientX: 5, clientY: 5, bubbles: true }));
+    btn?.dispatchEvent(new PointerEvent('pointerup', { pointerId: 1, clientX: 5, clientY: 5, bubbles: true }));
+    expect(started).toBe(1);
+    view.destroy();
   });
 });

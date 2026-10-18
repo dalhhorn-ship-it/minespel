@@ -1,59 +1,160 @@
-// Screen manager. Keeps a stack of open screens. The top one decides the screen kind for the timer matrix (PRD 4.4).
-// Kinds: world (nothing open), kid-overlay (pause menu, shop, Lesboek, dino menu, block grid, name keyboard),
-// learn (break, practice), exam, parent. The guard overlays (portrait, too small) are not screens: the guard reports them.
+// Screen manager and overlay layers (T41).
+// Tracks which screen is on top (`world`, `kid-overlay`, `learn`, `exam`, `parent`),
+// pauses the 3D world when a full screen or menu is up, and restores what the kid was doing
+// when the parent area closes (PRD 4.12).
+
 import type { ScreenKind } from '../core/timers';
+import { registerHook } from '../dev/e2e-hooks';
 import { el } from '../ui/dom';
 
-export interface Screens {
-  /** Kind of the top screen, or 'world'. */
-  current(): ScreenKind;
-  /** Opens a screen on top. `node` is shown in the screen layer. Returns a function that closes exactly this screen. */
-  open(kind: ScreenKind, node?: HTMLElement): () => void;
-  /** Number of open screens. */
-  depth(): number;
-  /** Calls the listener now and on every change. Returns an unsubscribe function. */
-  subscribe(listener: (kind: ScreenKind) => void): () => void;
+export type { ScreenKind };
+
+export interface ScreenManagerOptions {
+  host: HTMLElement;
+  onWorldActiveChange?: (active: boolean) => void;
 }
 
-export function createScreens(host?: HTMLElement, doc: Document = document): Screens {
-  const root = host ?? doc.getElementById('overlays') ?? doc.body;
-  const layer = el('div', { class: 'screen-layer' });
-  root.append(layer);
-  const stack: Array<{ kind: ScreenKind; node: HTMLElement | undefined }> = [];
-  const listeners = new Set<(k: ScreenKind) => void>();
+export interface ScreenManager {
+  readonly root: HTMLElement;
+  current(): ScreenKind;
+  /** The kid screen underneath when `parent` is open. */
+  underlyingKidScreen(): Exclude<ScreenKind, 'parent'>;
+  showWorld(): void;
+  showKidOverlay(node: HTMLElement | null): void;
+  /** Marks an in-HUD kid overlay (such as "Alle blokken") open or closed so the play timer stops (AC23). */
+  setExternalKidOverlay(open: boolean): void;
+  showLearn(node: HTMLElement | null): void;
+  showExam(node: HTMLElement | null): void;
+  showParent(node: HTMLElement | null): void;
+  subscribe(listener: (kind: ScreenKind) => void): () => void;
+  destroy(): void;
+}
 
-  const current = (): ScreenKind => stack[stack.length - 1]?.kind ?? 'world';
-  const emit = () => {
-    const k = current();
-    layer.dataset.screen = k;
-    // A screen without a node (the dino menu draws itself) must not leave an empty layer that eats taps.
-    layer.hidden = !stack.some((e) => e.node);
-    for (const l of [...listeners]) l(k);
-  };
-  layer.hidden = true;
+export function createScreenManager(options: ScreenManagerOptions): ScreenManager {
+  const kidOverlayLayer = el('div', { class: 'screen-layer screen-layer-kid-overlay' });
+  const learnLayer = el('div', { class: 'screen-layer screen-layer-learn' });
+  const examLayer = el('div', { class: 'screen-layer screen-layer-exam' });
+  const parentLayer = el('div', { class: 'screen-layer screen-layer-parent' });
 
-  return {
-    current,
-    open(kind, node) {
-      const entry = { kind, node };
-      stack.push(entry);
-      if (node) layer.append(node);
-      emit();
-      let closed = false;
-      return () => {
-        if (closed) return;
-        closed = true;
-        const i = stack.indexOf(entry);
-        if (i >= 0) stack.splice(i, 1);
-        node?.remove();
-        emit();
-      };
+  kidOverlayLayer.hidden = true;
+  learnLayer.hidden = true;
+  examLayer.hidden = true;
+  parentLayer.hidden = true;
+
+  const root = el('div', { class: 'screen-layers' }, [
+    kidOverlayLayer,
+    learnLayer,
+    examLayer,
+    parentLayer,
+  ]);
+  options.host.append(root);
+
+  let hasKidOverlayNode = false;
+  let externalKidOverlay = false;
+  let hasLearnNode = false;
+  let hasExamNode = false;
+  let hasParentNode = false;
+
+  const listeners = new Set<(kind: ScreenKind) => void>();
+
+  function underlyingKidScreen(): Exclude<ScreenKind, 'parent'> {
+    if (hasExamNode) return 'exam';
+    if (hasLearnNode) return 'learn';
+    if (hasKidOverlayNode || externalKidOverlay) return 'kid-overlay';
+    return 'world';
+  }
+
+  function computeKind(): ScreenKind {
+    if (hasParentNode) return 'parent';
+    return underlyingKidScreen();
+  }
+
+  let lastKind: ScreenKind = computeKind();
+  let lastWorldActive = lastKind === 'world';
+
+  function sync() {
+    kidOverlayLayer.hidden = !hasKidOverlayNode;
+    learnLayer.hidden = !hasLearnNode;
+    examLayer.hidden = !hasExamNode;
+    parentLayer.hidden = !hasParentNode;
+
+    const nextKind = computeKind();
+    // Keep the 3D world running only when the world is on screen (or when only "Alle blokken" is up).
+    const worldActive = nextKind === 'world' || (nextKind === 'kid-overlay' && !hasKidOverlayNode && externalKidOverlay);
+    if (worldActive !== lastWorldActive) {
+      lastWorldActive = worldActive;
+      options.onWorldActiveChange?.(worldActive);
+    }
+    if (nextKind !== lastKind) {
+      lastKind = nextKind;
+      for (const l of [...listeners]) l(nextKind);
+    }
+  }
+
+  const manager: ScreenManager = {
+    root,
+    current: () => lastKind,
+    underlyingKidScreen,
+    showWorld() {
+      kidOverlayLayer.replaceChildren();
+      learnLayer.replaceChildren();
+      examLayer.replaceChildren();
+      parentLayer.replaceChildren();
+      hasKidOverlayNode = false;
+      externalKidOverlay = false;
+      hasLearnNode = false;
+      hasExamNode = false;
+      hasParentNode = false;
+      sync();
     },
-    depth: () => stack.length,
+    showKidOverlay(node) {
+      kidOverlayLayer.replaceChildren(...(node ? [node] : []));
+      hasKidOverlayNode = node !== null;
+      sync();
+    },
+    setExternalKidOverlay(open) {
+      externalKidOverlay = open;
+      sync();
+    },
+    showLearn(node) {
+      learnLayer.replaceChildren(...(node ? [node] : []));
+      hasLearnNode = node !== null;
+      if (node !== null) {
+        kidOverlayLayer.replaceChildren();
+        hasKidOverlayNode = false;
+        externalKidOverlay = false;
+      }
+      sync();
+    },
+    showExam(node) {
+      examLayer.replaceChildren(...(node ? [node] : []));
+      hasExamNode = node !== null;
+      if (node !== null) {
+        kidOverlayLayer.replaceChildren();
+        hasKidOverlayNode = false;
+        externalKidOverlay = false;
+      }
+      sync();
+    },
+    showParent(node) {
+      parentLayer.replaceChildren(...(node ? [node] : []));
+      hasParentNode = node !== null;
+      sync();
+    },
     subscribe(listener) {
       listeners.add(listener);
-      listener(current());
+      listener(lastKind);
       return () => listeners.delete(listener);
     },
+    destroy() {
+      listeners.clear();
+      root.remove();
+    },
   };
+
+  if (__E2E__) {
+    registerHook('currentScreen', () => manager.current());
+  }
+
+  return manager;
 }

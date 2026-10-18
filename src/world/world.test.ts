@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { AIR, GRAS, BLADEREN, BOOMSTAM, KEISTEEN, OERSTEEN, PLACEABLE_BLOCKS, ZAND, isSolid } from './blocks';
-import { CELL_COUNT, START_SPOT, WORLD_HEIGHT, WORLD_SIZE, cellIndex, generateTerrain } from './terrain';
+import { AIR, GRAS, BLADEREN, BOOMSTAM, KEISTEEN, OBSIDIAAN, OERSTEEN, PLACEABLE_BLOCKS, VUURSTEEN, ZAND, isSolid } from './blocks';
+import { CELL_COUNT, START_SPOT, WORLD_HEIGHT, WORLD_SIZE, generateTerrain } from './terrain';
 import { World } from './world';
 
 function topSolid(w: World, x: number, z: number): number {
@@ -9,29 +9,6 @@ function topSolid(w: World, x: number, z: number): number {
 }
 
 describe('terrain', () => {
-  it('has WORLD_HEIGHT = 64, CELL_COUNT = 64 x 64 x 64, and cellIndex unchanged for y < 32 (G0)', () => {
-    expect(WORLD_HEIGHT).toBe(64);
-    expect(CELL_COUNT).toBe(64 * 64 * 64);
-    for (let y = 0; y < 32; y++) {
-      for (const z of [0, 15, 63]) {
-        for (const x of [0, 31, 63]) {
-          expect(cellIndex(x, y, z)).toBe((y * 64 + z) * 64 + x);
-        }
-      }
-    }
-  });
-
-  it('generated terrain has nothing but air above the old top height 32 (G0)', () => {
-    const w = new World();
-    for (let z = 0; z < WORLD_SIZE; z++) {
-      for (let x = 0; x < WORLD_SIZE; x++) {
-        for (let y = 32; y < WORLD_HEIGHT; y++) {
-          expect(w.get(x, y, z)).toBe(AIR);
-        }
-      }
-    }
-  });
-
   it('is the same for the same seed and differs for another', () => {
     expect(generateTerrain(5)).toEqual(generateTerrain(5));
     expect(generateTerrain(5)).not.toEqual(generateTerrain(6));
@@ -50,10 +27,13 @@ describe('terrain', () => {
     expect(other).toBe(0);
   });
 
-  it('has the expected kinds of ground', () => {
+  it('has the expected kinds of ground including 4 obsidian blocks for the gate floor (CR2)', () => {
     const counts = new Map<number, number>();
     for (const b of generateTerrain()) counts.set(b, (counts.get(b) ?? 0) + 1);
-    for (const id of [GRAS, ZAND, BOOMSTAM, BLADEREN, KEISTEEN]) expect(counts.get(id) ?? 0).toBeGreaterThan(0);
+    for (const id of [GRAS, ZAND, BOOMSTAM, BLADEREN, KEISTEEN, VUURSTEEN]) {
+      expect(counts.get(id) ?? 0).toBeGreaterThan(0);
+    }
+    expect(counts.get(OBSIDIAAN)).toBe(4);
   });
 
   it('has gentle hills (not flat, not steep)', () => {

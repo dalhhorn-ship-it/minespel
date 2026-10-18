@@ -1,10 +1,7 @@
-// Question host: picks the view for an item type and turns what the view reports into a
-// session `Response`. Rekenen items (numeric) get the number pad, other typed items the letter keyboard.
-// The host only shows a question and reports the first answer. Scoring is the session's job.
+// Hosts the right question view for any Item type (`choice`, `find-error`, `punctuate`, `type`, or numeric Rekenen).
 import type { Item } from '../../content/format';
-import '../../styles/questions.css';
-import { el } from '../dom';
 import type { Response } from '../../learning/answer-check';
+import { el } from '../dom';
 import { createChoiceView } from './choice-view';
 import { createFindErrorView } from './find-error-view';
 import { createNumberView } from './number-view';
@@ -13,44 +10,84 @@ import { createTypeView } from './type-view';
 
 export interface QuestionHostOptions {
   item: Item;
-  /** Rekenen: use the number pad. */
+  /** True for Rekenen sums: uses the number pad instead of the letter keyboard. */
   numeric?: boolean;
   onAnswer: (response: Response) => void;
   doc?: Document;
 }
 
 export interface QuestionHost {
-  element: HTMLElement;
+  readonly element: HTMLElement;
+  /** Current typed text for `type` or numeric items (empty for others). */
+  getTypedText(): string;
   destroy(): void;
 }
 
 export function createQuestionHost(options: QuestionHostOptions): QuestionHost {
-  const { item, onAnswer, doc } = options;
+  const { item, numeric, onAnswer, doc } = options;
+
   switch (item.type) {
     case 'choice': {
-      const v = createChoiceView({ item, onAnswer, doc });
-      return { element: v.element, destroy: () => v.destroy() };
+      const view = createChoiceView({ item, onAnswer, doc });
+      return { element: view.element, getTypedText: () => '', destroy: () => view.destroy() };
     }
     case 'find-error': {
-      const v = createFindErrorView({ item, onAnswer, doc });
-      return { element: v.element, destroy: () => v.destroy() };
+      const view = createFindErrorView({ item, onAnswer, doc });
+      return { element: view.element, getTypedText: () => '', destroy: () => view.destroy() };
     }
     case 'punctuate': {
-      const v = createPunctuateView({ item, onAnswer, doc });
-      return { element: v.element, destroy: () => v.destroy() };
+      const view = createPunctuateView({ item, onAnswer, doc });
+      return { element: view.element, getTypedText: () => '', destroy: () => view.destroy() };
     }
     case 'type': {
-      const send = (text: string) => onAnswer({ type: 'type', text });
-      const v = options.numeric ? createNumberView({ item, onAnswer: send }) : createTypeView({ item, onAnswer: send });
-      // The typing views show the sentence but not the prompt, so the host puts it on top.
-      const element = el('div', { class: 'q-view q-typed' }, [el('p', { class: 'q-prompt', text: item.prompt }, [], doc), v.el], doc);
+      const promptNode = el('p', { class: 'q-prompt', text: item.prompt }, [], doc);
+      if (numeric) {
+        const view = createNumberView({
+          item,
+          onAnswer: (text) => onAnswer({ type: 'type', text }),
+        });
+        const wrap = el('div', { class: 'q-view q-number-host' }, [promptNode, view.el], doc);
+        return {
+          element: wrap,
+          getTypedText: () => view.getText(),
+          destroy: () => {
+            view.destroy();
+            wrap.remove();
+          },
+        };
+      }
+      const view = createTypeView({
+        item,
+        onAnswer: (text) => onAnswer({ type: 'type', text }),
+      });
+      const wrap = el('div', { class: 'q-view q-type-host' }, [promptNode, view.el], doc);
       return {
-        element,
-        destroy() {
-          v.destroy();
-          element.remove();
+        element: wrap,
+        getTypedText: () => view.getText(),
+        destroy: () => {
+          view.destroy();
+          wrap.remove();
         },
       };
+    }
+  }
+}
+
+/** Plain text representation of an item's right answer, for the teach moment and exam review. */
+export function formatRightAnswer(item: Item): string {
+  switch (item.type) {
+    case 'choice':
+      return item.options[item.answer] ?? '';
+    case 'find-error': {
+      if (item.answer < 0) return 'Geen fout';
+      const wrong = item.words[item.answer] ?? '';
+      return item.correction ? `${wrong} → ${item.correction}` : wrong;
+    }
+    case 'type':
+      return item.answer[0] ?? '';
+    case 'punctuate': {
+      const gaps = new Set(item.answer);
+      return item.words.map((w, i) => (gaps.has(i) ? `${w}${item.mark}` : w)).join(' ');
     }
   }
 }

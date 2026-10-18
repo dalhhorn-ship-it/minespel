@@ -1,131 +1,183 @@
-// Lesboek (T46, PRD 4.7, AC51): every switched on topic of every module is listed, and each lesson opens page
-// by page. Reading never changes the timers, the points or any saved record: this screen only reads.
-// It is a 'kid-overlay' screen on top of the pause menu, so the play timer stays stopped (AC23).
+// Lesboek view (T46, AC51): lets the kid browse and read lessons of all switched-on topics,
+// and optionally jump straight into practicing a topic to earn coins.
+
 import '../../styles/lesboek.css';
-import type { AppEnv } from '../../app/app-env';
-import { loadBreakCatalog, loadSwitches } from '../../app/content-loader';
-import type { Screens } from '../../app/screens';
 import type { Catalog } from '../../content/catalog';
+import { subjectLabel } from '../../content/catalog';
 import type { Lesson } from '../../content/format';
-import { isModuleOn, isTopicOn, type Switches } from '../../content/switches';
+import { isModuleOn, isTopicOn } from '../../content/switches';
+import type { SwitchesRecord } from '../../storage/schema';
 import { el } from '../dom';
 import { onTap } from '../tap';
 import { createLessonView } from './lesson-view';
 
-export const MSG_LESBOEK_EMPTY = 'Er staan nu geen lessen aan. Vraag een grote om iets aan te zetten.';
-export const MSG_LESBOEK_ERROR = 'Het Lesboek kan nu niet open. Probeer het straks nog eens.';
-
-/** What the Lesboek needs. The defaults read the real catalog and switches; tests pass their own. */
-export interface LesboekDeps {
-  catalog?: () => Promise<Catalog>;
-  switches?: () => Promise<Switches>;
+export interface LesboekOptions {
+  catalog?: Catalog;
+  switches?: SwitchesRecord;
+  onClose: () => void;
+  /** Optional handler to immediately practice a topic from its lesson view and earn coins. */
+  onPracticeTopic?: (moduleId: string, topicId: string) => void;
+  now?: () => number;
 }
 
-/** One lesson that can be opened. */
-export interface LesboekEntry {
-  moduleId: string;
-  moduleTitle: string;
-  topicId: string;
-  title: string;
-  lesson: Lesson;
+export interface LesboekView {
+  readonly element: HTMLElement;
+  destroy(): void;
 }
 
-/** Every switched on topic that has a lesson, grouped by module in catalog order (AC51). */
-export function lesboekEntries(catalog: Catalog, switches: Switches): LesboekEntry[] {
-  const out: LesboekEntry[] = [];
-  for (const m of catalog.modules()) {
-    if (!isModuleOn(switches, m.id)) continue;
-    for (const t of catalog.topics(m.id)) {
-      if (!isTopicOn(switches, m.id, t.id) || t.lesson.pages.length === 0) continue;
-      out.push({ moduleId: m.id, moduleTitle: m.title, topicId: t.id, title: t.title, lesson: t.lesson });
-    }
-  }
-  return out;
-}
-
-export function openLesboek(screens: Screens, env: AppEnv, deps: LesboekDeps = {}): () => void {
-  let closed = false;
-  let lessonCleanup: Array<() => void> = [];
+export function createLesboek(options: LesboekOptions): LesboekView {
   const cleanups: Array<() => void> = [];
+  const card = el('div', {
+    class: 'lesboek-card pause-card',
+    attrs: { role: 'dialog', 'aria-label': 'Lesboek' },
+  });
+  const root = el('div', { class: 'lesboek-backdrop pause-backdrop' }, [card]);
+  let activeLessonCleanup: (() => void) | null = null;
 
-  const title = el('h2', { class: 'lesboek-title', text: 'Lesboek' });
-  const back = el('button', { class: 'lesboek-back', text: 'Terug', attrs: { type: 'button', 'data-lesboek': 'back' } });
-  const body = el('div', { class: 'lesboek-body' });
-  const root = el('div', { class: 'lesboek', attrs: { role: 'dialog', 'aria-label': 'Lesboek', 'data-screen-id': 'lesboek' } }, [
-    el('header', { class: 'lesboek-header' }, [back, title]),
-    body,
-  ]);
-  const closeScreen = screens.open('kid-overlay', root);
-  let onBack: () => void = close;
-  cleanups.push(onTap(back, () => onBack()));
-
-  function close(): void {
-    if (closed) return;
-    closed = true;
-    for (const c of [...lessonCleanup, ...cleanups]) c();
-    lessonCleanup = [];
-    closeScreen();
-  }
-
-  function clearLesson(): void {
-    for (const c of lessonCleanup) c();
-    lessonCleanup = [];
-  }
-
-  function message(text: string): void {
-    clearLesson();
-    body.replaceChildren(el('p', { class: 'lesboek-note', text, attrs: { role: 'status' } }));
-  }
-
-  function showList(entries: LesboekEntry[]): void {
-    clearLesson();
-    title.textContent = 'Lesboek';
-    back.textContent = 'Terug';
-    onBack = close;
-    if (entries.length === 0) return message(MSG_LESBOEK_EMPTY);
-    const list = el('div', { class: 'lesboek-list' });
-    let lastModule = '';
-    let grid: HTMLElement | null = null;
-    for (const e of entries) {
-      if (e.moduleId !== lastModule) {
-        lastModule = e.moduleId;
-        list.append(el('h3', { class: 'lesboek-module', text: e.moduleTitle }));
-        grid = el('div', { class: 'lesboek-grid' });
-        list.append(grid);
-      }
-      const b = el('button', {
-        class: 'lesboek-topic',
-        text: e.title,
-        attrs: { type: 'button', 'data-lesboek-topic': `${e.moduleId}/${e.topicId}` },
-      });
-      lessonCleanup.push(onTap(b, () => showLesson(entries, e)));
-      grid?.append(b);
+  function clearListCleanups() {
+    while (cleanups.length > 0) {
+      cleanups.pop()?.();
     }
-    body.replaceChildren(list);
   }
 
-  function showLesson(entries: LesboekEntry[], e: LesboekEntry): void {
-    clearLesson();
-    title.textContent = e.title;
-    back.textContent = 'Alle lessen';
-    onBack = () => showList(entries);
-    // "Ik snap het!" on the last page goes back to the list. Nothing is saved.
-    const view = createLessonView({ lesson: e.lesson, onDone: () => showList(entries) });
-    lessonCleanup.push(() => view.destroy());
-    body.replaceChildren(view.element);
+  function clearActiveLesson() {
+    if (activeLessonCleanup) {
+      activeLessonCleanup();
+      activeLessonCleanup = null;
+    }
   }
 
-  const loadCatalog = deps.catalog ?? loadBreakCatalog;
-  const loadSw = deps.switches ?? (() => loadSwitches(env.records));
-  message('Even laden...');
-  Promise.all([loadCatalog(), loadSw()]).then(
-    ([catalog, switches]) => {
-      if (!closed) showList(lesboekEntries(catalog, switches));
-    },
-    () => {
-      if (!closed) message(MSG_LESBOEK_ERROR);
-    },
-  );
+  function showTopicLesson(moduleId: string, topicId: string, title: string, lesson: Lesson) {
+    clearActiveLesson();
+    clearListCleanups();
+    card.replaceChildren();
 
-  return close;
+    const backBtn = el('button', {
+      class: 'pause-btn',
+      text: 'Terug naar Lesboek',
+      attrs: { type: 'button' },
+    });
+    const offBack = onTap(backBtn, () => renderList(), { now: options.now });
+
+    const headerChildren: HTMLElement[] = [
+      el('h2', { class: 'lesboek-title pause-title', text: title }),
+      backBtn,
+    ];
+    if (options.onPracticeTopic) {
+      const practiceBtn = el('button', {
+        class: 'lesboek-override-btn',
+        text: 'Oefen dit onderwerp \u{1FA99}',
+        attrs: { type: 'button', 'data-testid': 'lesboek-practice-topic' },
+      });
+      cleanups.push(
+        onTap(
+          practiceBtn,
+          () => {
+            options.onPracticeTopic?.(moduleId, topicId);
+          },
+          { now: options.now },
+        ),
+      );
+      headerChildren.push(practiceBtn);
+    }
+
+    const header = el('div', { class: 'lesboek-header pause-header' }, headerChildren);
+    const lessonView = createLessonView({
+      lesson,
+      onDone: () => renderList(),
+      now: options.now,
+    });
+
+    activeLessonCleanup = () => {
+      offBack();
+      lessonView.destroy();
+    };
+    card.append(header, lessonView.element);
+  }
+
+  function renderList() {
+    clearActiveLesson();
+    clearListCleanups();
+    card.replaceChildren();
+
+    const closeBtn = el('button', {
+      class: 'pause-btn pause-btn-primary',
+      text: 'Sluiten',
+      attrs: { type: 'button' },
+    });
+    cleanups.push(onTap(closeBtn, () => options.onClose(), { now: options.now }));
+
+    const header = el('div', { class: 'lesboek-header pause-header' }, [
+      el('h2', { class: 'lesboek-title pause-title', text: 'Lesboek' }),
+      closeBtn,
+    ]);
+
+    const subtitle = el('p', {
+      text: 'Kies een onderwerp om de uitleg en voorbeelden rustig door te lezen.',
+    });
+
+    const listWrap = el('div', { class: 'lesboek-topics-grid pause-actions' });
+    let count = 0;
+
+    if (options.catalog && options.switches) {
+      for (const bundle of options.catalog.modules()) {
+        if (!isModuleOn(options.switches, options.catalog, bundle.module.id)) continue;
+        for (const topic of bundle.topics) {
+          if (!isTopicOn(options.switches, options.catalog, bundle.module.id, topic.id)) continue;
+          if (!topic.lesson || topic.lesson.pages.length === 0) continue;
+          count++;
+          const btn = el(
+            'button',
+            {
+              class: 'lesboek-topic-btn pause-btn',
+              attrs: {
+                type: 'button',
+                'data-topic-id': `${bundle.module.id}:${topic.id}`,
+              },
+            },
+            [
+              el('span', {
+                class: 'lesboek-topic-subject',
+                text: subjectLabel(bundle.module.subject),
+              }),
+              el('span', {
+                class: 'lesboek-topic-name',
+                text: topic.title,
+              }),
+            ],
+          );
+          cleanups.push(
+            onTap(
+              btn,
+              () => showTopicLesson(bundle.module.id, topic.id, topic.title, topic.lesson),
+              { now: options.now },
+            ),
+          );
+          listWrap.append(btn);
+        }
+      }
+    }
+
+    if (count === 0) {
+      listWrap.append(
+        el('p', {
+          class: 'lesboek-empty',
+          text: 'Er staan momenteel geen lessen aan.',
+        }),
+      );
+    }
+
+    card.append(header, subtitle, listWrap);
+  }
+
+  renderList();
+
+  return {
+    element: root,
+    destroy() {
+      clearActiveLesson();
+      clearListCleanups();
+      root.remove();
+    },
+  };
 }

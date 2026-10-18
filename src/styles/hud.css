@@ -5,7 +5,7 @@
   pointer-events: none; /* the world gets the touches; only the parts below take them */
   touch-action: none;
   font-family: var(--font-stack);
-  font-size: var(--font-body);
+  font-size: calc(var(--font-body) * var(--font-scale, 1));
   user-select: none;
   -webkit-user-select: none;
   -webkit-touch-callout: none;
@@ -21,6 +21,12 @@
   gap: var(--gap);
 }
 .hud-top > * { position: static; pointer-events: auto; }
+.hud-top-right {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--gap);
+  pointer-events: auto;
+}
 .hud-countdown { min-height: var(--touch-min); min-width: var(--touch-min); }
 .hud-btn {
   pointer-events: auto;
@@ -46,17 +52,51 @@
 .hud-jump {
   right: calc(var(--safe-right) + var(--gap) * 2);
   bottom: calc(var(--safe-bottom) + var(--touch-min) + var(--gap) * 4);
-  box-sizing: border-box;
-  width: 96px;
-  height: 96px;
-  padding: 0;
+  min-width: 96px;
+  min-height: 96px;
   border-radius: 50%;
 }
+.hud-descend {
+  right: calc(var(--safe-right) + var(--gap) * 2);
+  bottom: calc(var(--safe-bottom) + var(--touch-min) + 96px + var(--gap) * 4.75);
+  min-width: 108px;
+  min-height: 56px;
+  border-radius: 999px;
+}
+.hud-ascend {
+  right: calc(var(--safe-right) + var(--gap) * 2);
+  bottom: calc(var(--safe-bottom) + var(--touch-min) + 96px + 56px + var(--gap) * 5.5);
+  min-width: 108px;
+  min-height: 56px;
+  border-radius: 999px;
+}
+.hud-camera-pad {
+  pointer-events: auto;
+  right: calc(var(--safe-right) + 124px + var(--gap) * 2);
+  bottom: calc(var(--safe-bottom) + var(--touch-min) + var(--gap) * 3);
+  display: grid;
+  grid-template-columns: repeat(3, 56px);
+  grid-template-rows: repeat(2, 56px);
+  gap: 6px;
+}
+.hud-cam-btn {
+  min-width: 56px;
+  min-height: 56px;
+  padding: 0;
+  font-size: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.hud-cam-up { grid-column: 2; grid-row: 1; }
+.hud-cam-left { grid-column: 1; grid-row: 2; }
+.hud-cam-down { grid-column: 2; grid-row: 2; }
+.hud-cam-right { grid-column: 3; grid-row: 2; }
 .hud-hotbar {
   pointer-events: auto;
   left: 50%;
   transform: translateX(-50%);
-  bottom: calc(var(--safe-bottom) + var(--gap) * 2); /* 24px, so the bottom row is clear of the edge */
+  bottom: calc(var(--safe-bottom) + var(--gap));
   display: flex;
   gap: 6px;
 }
@@ -89,44 +129,3 @@
   background: var(--paper);
   border: 3px solid var(--ink);
 }
-
-/* Right side controls (G6). Jump: 96px circle, right 24px, bottom 24+56+... see --hud-jump-bottom.
-   Fly column: 64px wide, just left of jump, same bottom. Arrows: plus cluster of 56px tiles above them. */
-.hud {
-  --hud-jump-bottom: calc(var(--safe-bottom) + var(--touch-min) + var(--gap) * 4);
-  --hud-right: calc(var(--safe-right) + var(--gap) * 2);
-  --hud-fly-w: 76px;
-  --hud-arrow: var(--touch-min);
-  --hud-arrow-gap: 4px;
-}
-.hud-fly-column {
-  right: calc(var(--hud-right) + 96px + 8px);
-  bottom: var(--hud-jump-bottom);
-  width: var(--hud-fly-w);
-  display: flex;
-  flex-direction: column;
-  gap: var(--gap);
-}
-.hud-fly {
-  width: var(--hud-fly-w);
-  height: var(--touch-min);
-  padding: 0;
-  font-size: 0.7em;
-  line-height: 1.1;
-  white-space: normal;
-}
-.hud-arrows {
-  right: var(--hud-right);
-  /* above the fly column (two buttons and their gaps) */
-  bottom: calc(var(--hud-jump-bottom) + var(--touch-min) * 2 + var(--gap) * 2);
-  display: grid;
-  grid-template-columns: repeat(3, var(--hud-arrow));
-  grid-template-rows: repeat(3, var(--hud-arrow));
-  gap: var(--hud-arrow-gap);
-}
-.hud-arrow { padding: 0; width: var(--hud-arrow); height: var(--hud-arrow); }
-.hud-arrow-up { grid-column: 2; grid-row: 1; }
-.hud-arrow-left { grid-column: 1; grid-row: 2; }
-.hud-arrow-right { grid-column: 3; grid-row: 2; }
-.hud-arrow-down { grid-column: 2; grid-row: 3; }
-.hud-btn[data-held='true'] { background: var(--grass); color: var(--on-grass); }

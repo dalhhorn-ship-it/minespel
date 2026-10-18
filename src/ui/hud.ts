@@ -1,10 +1,10 @@
-// HUD skeleton: jump, mode buttons, empty hotbar slots, countdown slot, pause button.
-// Every button is an ignore zone, so a touch on it never looks or taps the world (AC104).
+// HUD skeleton: jump, sky ascend, eased camera angle arrows, mode buttons, hotbar slots,
+// countdown slot, pause button, and parental controls button.
+// Every button is an ignore zone, so a touch on it never looks or taps the world (AC104, AC127).
 import '../styles/hud.css';
 import { el } from './dom';
 import { onTap } from './tap';
 import type { PointerRouter } from '../input/pointer-router';
-import { LOOK_TAP_MAX_MS } from '../game/player-controller';
 
 export type BuildMode = 'hakken' | 'bouwen';
 export const HOTBAR_SLOTS = 8;
@@ -14,17 +14,15 @@ export interface HudOptions {
   onJump: () => void;
   onMode: (mode: BuildMode) => void;
   onPause: () => void;
-  /** Omhoog and Omlaag are plain holds: true on press, false on every kind of release. */
-  onAscend?: (on: boolean) => void;
-  onDescend?: (on: boolean) => void;
-  /** Camera arrows. A press under LOOK_TAP_MAX_MS is one `onLookTap`; a longer one sets `onLook` to the sum of held arrows. */
-  onLookTap?: (turnX: number, tiltY: number) => void;
-  onLook?: (turnX: number, tiltY: number) => void;
-  /** Test seams. */
-  win?: Window;
-  doc?: Document;
-  setTimer?: (fn: () => void, ms: number) => unknown;
-  clearTimer?: (id: unknown) => void;
+  /** Optional parental controls button handler ("Ouders"). */
+  onParent?: () => void;
+  /** Optional sky-ascend hold/tap handler ("Omhoog") to float higher into the sky. */
+  onAscend?: (active: boolean) => void;
+  /** Optional sky-descend hold/tap handler ("Omlaag") to descend from the sky. */
+  onDescend?: (active: boolean) => void;
+  /** Optional eased camera angle arrow controls (turnX: -1 left / +1 right, tiltY: +1 up / -1 down). */
+  onLookInput?: (turnX: number, tiltY: number) => void;
+  onLookNudge?: (turnX: number, tiltY: number) => void;
 }
 
 export interface Hud {
@@ -36,160 +34,32 @@ export interface Hud {
   /** Holder for the countdown text. */
   readonly countdownSlot: HTMLElement;
   setMode(mode: BuildMode): void;
-  /** Replaces what the Pauze button does (the pause menu sets it). */
-  setPauseHandler(handler: () => void): void;
-  /** Lets go of every held fly and look control (pause, a screen on top, blur, rotation). Safe to call any time. */
-  releaseAll(): void;
   destroy(): void;
 }
 
 export function createHud(options: HudOptions): Hud {
   const cleanups: Array<() => void> = [];
-  let onPause = options.onPause;
   const zone = (node: HTMLElement) => {
     cleanups.push(options.router.addIgnoreZone(node));
     return node;
   };
-  const button = (text: string, cls: string, handler: () => void, label?: string) => {
-    const b = el('button', { class: `hud-btn ${cls}`, text, attrs: { type: 'button', ...(label ? { 'aria-label': label } : {}) } });
+  const button = (
+    text: string,
+    cls: string,
+    handler: () => void,
+    extraAttrs?: Record<string, string>,
+  ) => {
+    const b = el('button', {
+      class: `hud-btn ${cls}`,
+      text,
+      attrs: { type: 'button', ...(extraAttrs ?? {}) },
+    });
     cleanups.push(onTap(b, handler));
     return zone(b);
   };
 
   const jump = button('Spring', 'hud-jump', options.onJump);
-  const win = options.win ?? window;
-  const doc = options.doc ?? document;
-  const setTimer = options.setTimer ?? ((fn, ms) => setTimeout(fn, ms));
-  const clearTimer = options.clearTimer ?? ((id) => clearTimeout(id as ReturnType<typeof setTimeout>));
-
-  interface Held {
-    node: HTMLElement;
-    pointerId: number | null;
-    /** Arrows only: the 200 ms timer, and whether it fired (so the press is a hold). */
-    timer: unknown;
-    fired: boolean;
-    turnX: number;
-    tiltY: number;
-    kind: 'up' | 'down' | 'look';
-  }
-  const helds: Held[] = [];
-  let lastLookSent = '0,0';
-  const sendLook = () => {
-    let x = 0;
-    let y = 0;
-    for (const h of helds) if (h.kind === 'look' && h.pointerId !== null && h.fired) { x += h.turnX; y += h.tiltY; }
-    const key = `${x},${y}`;
-    if (key === lastLookSent) return;
-    lastLookSent = key;
-    options.onLook?.(x, y);
-  };
-  /** Frees the given controls, then tells the game once per kind. `tap` lets an arrow that never reached 200 ms count as a tap. */
-  const release = (list: Held[], tap: boolean) => {
-    let lookChanged = false;
-    for (const h of list) {
-      if (h.pointerId === null) continue;
-      const id = h.pointerId;
-      h.pointerId = null;
-      h.node.removeAttribute('data-held');
-      try {
-        if (h.node.hasPointerCapture?.(id)) h.node.releasePointerCapture(id);
-      } catch {
-        /* already gone */
-      }
-      if (h.kind === 'up') options.onAscend?.(false);
-      else if (h.kind === 'down') options.onDescend?.(false);
-      else {
-        if (h.timer !== null) clearTimer(h.timer);
-        h.timer = null;
-        if (h.fired) lookChanged = true;
-        else if (tap) options.onLookTap?.(h.turnX, h.tiltY);
-        h.fired = false;
-      }
-    }
-    if (lookChanged) sendLook();
-  };
-  const heldControl = (node: HTMLElement, kind: Held['kind'], turnX = 0, tiltY = 0) => {
-    const h: Held = { node, pointerId: null, timer: null, fired: false, turnX, tiltY, kind };
-    helds.push(h);
-    const down = (e: PointerEvent) => {
-      if (h.pointerId !== null) return; // a second finger on the same button is ignored
-      h.pointerId = e.pointerId;
-      node.setAttribute('data-held', 'true');
-      try {
-        node.setPointerCapture?.(e.pointerId);
-      } catch {
-        /* capture is only a safety net */
-      }
-      if (kind === 'up') options.onAscend?.(true);
-      else if (kind === 'down') options.onDescend?.(true);
-      else {
-        h.fired = false;
-        h.timer = setTimer(() => {
-          h.timer = null;
-          if (h.pointerId === null) return;
-          h.fired = true;
-          sendLook();
-        }, LOOK_TAP_MAX_MS);
-      }
-    };
-    const end = (tap: boolean) => (e: PointerEvent) => {
-      if (e.pointerId === h.pointerId) release([h], tap);
-    };
-    const up = end(true);
-    const other = end(false);
-    node.addEventListener('pointerdown', down);
-    node.addEventListener('pointerup', up);
-    node.addEventListener('pointercancel', other);
-    node.addEventListener('lostpointercapture', other);
-    cleanups.push(() => {
-      node.removeEventListener('pointerdown', down);
-      node.removeEventListener('pointerup', up);
-      node.removeEventListener('pointercancel', other);
-      node.removeEventListener('lostpointercapture', other);
-    });
-    return zone(node);
-  };
-  const holdButton = (text: string, cls: string, label: string, kind: 'up' | 'down') =>
-    heldControl(el('button', { class: `hud-btn hud-fly ${cls}`, text, attrs: { type: 'button', 'aria-label': label } }), kind);
-  const arrow = (glyph: string, cls: string, label: string, turnX: number, tiltY: number) =>
-    heldControl(el('button', { class: `hud-btn hud-arrow ${cls}`, text: glyph, attrs: { type: 'button', 'aria-label': label } }), 'look', turnX, tiltY);
-  const releaseAll = () => release(helds, false);
-
-  const ascend = holdButton('▲ Omhoog', 'hud-fly-up', 'Omhoog vliegen', 'up');
-  const descend = holdButton('▼ Omlaag', 'hud-fly-down', 'Omlaag vliegen', 'down');
-  const flyColumn = el('div', { class: 'hud-fly-column' }, [ascend, descend]);
-  const arrows = el('div', { class: 'hud-arrows' }, [
-    arrow('▲', 'hud-arrow-up', 'Kijk omhoog', 0, 1),
-    arrow('◀', 'hud-arrow-left', 'Kijk naar links', -1, 0),
-    arrow('▶', 'hud-arrow-right', 'Kijk naar rechts', 1, 0),
-    arrow('▼', 'hud-arrow-down', 'Kijk omlaag', 0, -1),
-  ]);
-
-  // Anything that could swallow the pointerup lets go of every held control.
-  let landscape = win.innerWidth >= win.innerHeight;
-  const onResize = () => {
-    const now = win.innerWidth >= win.innerHeight;
-    if (now !== landscape) {
-      landscape = now;
-      releaseAll();
-    }
-  };
-  const onVisibility = () => {
-    if (doc.visibilityState === 'hidden') releaseAll();
-  };
-  win.addEventListener('blur', releaseAll);
-  win.addEventListener('orientationchange', releaseAll);
-  win.addEventListener('resize', onResize);
-  doc.addEventListener('visibilitychange', onVisibility);
-  cleanups.push(() => {
-    releaseAll();
-    win.removeEventListener('blur', releaseAll);
-    win.removeEventListener('orientationchange', releaseAll);
-    win.removeEventListener('resize', onResize);
-    doc.removeEventListener('visibilitychange', onVisibility);
-  });
-
-  const pause = button('Pauze', 'hud-pause', () => onPause());
+  const pause = button('Pauze', 'hud-pause', options.onPause);
   const hakken = button('Hakken', 'hud-mode', () => select('hakken'));
   const bouwen = button('Bouwen', 'hud-mode', () => select('bouwen'));
   const countdownSlot = zone(el('div', { class: 'hud-countdown' }));
@@ -198,14 +68,147 @@ export function createHud(options: HudOptions): Hud {
   const hotbar = zone(el('div', { class: 'hud-hotbar' }, [...slots, allBlocksSlot]));
   const modes = el('div', { class: 'hud-modes' }, [hakken, bouwen]);
 
-  const root = el('div', { class: 'hud' }, [
-    el('div', { class: 'hud-top' }, [countdownSlot, pause]),
-    modes,
-    jump,
-    flyColumn,
-    arrows,
-    hotbar,
+  const topRightChildren: HTMLElement[] = [];
+  if (options.onParent) {
+    const parentBtn = button('\u{1F512} Ouders', 'hud-parent', options.onParent, {
+      'aria-label': 'Ouders',
+      'data-testid': 'parent-controls-btn',
+    });
+    topRightChildren.push(parentBtn);
+  }
+  topRightChildren.push(pause);
+
+  const topBar = el('div', { class: 'hud-top' }, [
+    countdownSlot,
+    topRightChildren.length === 1
+      ? pause
+      : el('div', { class: 'hud-top-right' }, topRightChildren),
   ]);
+
+  const rootChildren: HTMLElement[] = [topBar, modes, jump];
+
+  if (options.onAscend) {
+    const ascendBtn = zone(
+      el('button', {
+        class: 'hud-btn hud-ascend',
+        text: 'Omhoog \u{2B06}',
+        attrs: {
+          type: 'button',
+          'aria-label': 'Hoger in de lucht',
+          'data-testid': 'hud-ascend',
+        },
+      }),
+    );
+    const down = () => options.onAscend?.(true);
+    const up = () => options.onAscend?.(false);
+    ascendBtn.addEventListener('pointerdown', down);
+    ascendBtn.addEventListener('pointerup', up);
+    ascendBtn.addEventListener('pointercancel', up);
+    ascendBtn.addEventListener('pointerleave', up);
+    cleanups.push(() => {
+      ascendBtn.removeEventListener('pointerdown', down);
+      ascendBtn.removeEventListener('pointerup', up);
+      ascendBtn.removeEventListener('pointercancel', up);
+      ascendBtn.removeEventListener('pointerleave', up);
+    });
+    rootChildren.push(ascendBtn);
+  }
+
+  if (options.onDescend) {
+    const descendBtn = zone(
+      el('button', {
+        class: 'hud-btn hud-descend',
+        text: 'Omlaag \u{2B07}',
+        attrs: {
+          type: 'button',
+          'aria-label': 'Lager uit de lucht',
+          'data-testid': 'hud-descend',
+        },
+      }),
+    );
+    const down = () => options.onDescend?.(true);
+    const up = () => options.onDescend?.(false);
+    descendBtn.addEventListener('pointerdown', down);
+    descendBtn.addEventListener('pointerup', up);
+    descendBtn.addEventListener('pointercancel', up);
+    descendBtn.addEventListener('pointerleave', up);
+    cleanups.push(() => {
+      descendBtn.removeEventListener('pointerdown', down);
+      descendBtn.removeEventListener('pointerup', up);
+      descendBtn.removeEventListener('pointercancel', up);
+      descendBtn.removeEventListener('pointerleave', up);
+    });
+    rootChildren.push(descendBtn);
+  }
+
+  if (options.onLookInput || options.onLookNudge) {
+    let heldX = 0;
+    let heldY = 0;
+    const makeCamArrow = (
+      symbol: string,
+      cls: string,
+      label: string,
+      dir: string,
+      dx: number,
+      dy: number,
+    ) => {
+      const b = zone(
+        el('button', {
+          class: `hud-btn hud-cam-btn ${cls}`,
+          text: symbol,
+          attrs: {
+            type: 'button',
+            'aria-label': label,
+            'data-cam-dir': dir,
+          },
+        }),
+      );
+      const onDown = () => {
+        heldX = dx;
+        heldY = dy;
+        options.onLookInput?.(heldX, heldY);
+        options.onLookNudge?.(dx, dy);
+      };
+      const onUp = () => {
+        if (heldX === dx && heldY === dy) {
+          heldX = 0;
+          heldY = 0;
+          options.onLookInput?.(0, 0);
+        }
+      };
+      b.addEventListener('pointerdown', onDown);
+      b.addEventListener('pointerup', onUp);
+      b.addEventListener('pointercancel', onUp);
+      b.addEventListener('pointerleave', onUp);
+      cleanups.push(() => {
+        b.removeEventListener('pointerdown', onDown);
+        b.removeEventListener('pointerup', onUp);
+        b.removeEventListener('pointercancel', onUp);
+        b.removeEventListener('pointerleave', onUp);
+      });
+      return b;
+    };
+
+    const camPad = zone(
+      el(
+        'div',
+        {
+          class: 'hud-camera-pad',
+          attrs: { 'aria-label': 'Kijkrichting', 'data-testid': 'camera-arrows' },
+        },
+        [
+          makeCamArrow('\u{25B2}', 'hud-cam-up', 'Kijk omhoog', 'up', 0, 1),
+          makeCamArrow('\u{25C0}', 'hud-cam-left', 'Kijk links', 'left', -1, 0),
+          makeCamArrow('\u{25BC}', 'hud-cam-down', 'Kijk omlaag', 'down', 0, -1),
+          makeCamArrow('\u{25B6}', 'hud-cam-right', 'Kijk rechts', 'right', 1, 0),
+        ],
+      ),
+    );
+    rootChildren.push(camPad);
+  }
+
+  rootChildren.push(hotbar);
+  const root = el('div', { class: 'hud' }, rootChildren);
 
   function setMode(mode: BuildMode) {
     hakken.setAttribute('aria-pressed', String(mode === 'hakken'));
@@ -223,10 +226,6 @@ export function createHud(options: HudOptions): Hud {
     allBlocksSlot,
     countdownSlot,
     setMode,
-    releaseAll,
-    setPauseHandler(handler) {
-      onPause = handler;
-    },
     destroy() {
       for (const c of cleanups) c();
       root.remove();

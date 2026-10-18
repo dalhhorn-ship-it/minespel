@@ -1,198 +1,555 @@
-// Extra oefenen (T46, PRD 4.7, AC52, AC120). The kid picks a module and gets a round of N questions chosen
-// by the same rules as a break. Each question works like in a break (retry, teach moment, points) but there is
-// no malus and no +3 bonus, and at most 10 plus points count per calendar day (the economy does that, mode
-// 'practice'). It is a 'learn' screen: the play timer is stopped and never reset, so it never replaces a break.
-//
-// Every step is saved by `commitStep` (session-writer.ts) with context 'practice' and ledger reason 'practice'.
-// The round is NOT saved as a session: the `session` record is left alone, so the boot resume can never open
-// a practice round as a break. A round that is closed early keeps the answers and points it already committed.
+// Extra oefenen flow (T46, AC52, AC120):
+// Lets the kid pick any switched-on topic to practice for extra coins (up to 10 points/day cap in practice mode),
+// or override the countdown timer to start a full learning break immediately.
+
 import '../styles/lesboek.css';
-import { registerHook } from '../dev/e2e-hooks';
-import type { Catalog } from '../content/catalog';
+import type { Sound } from '../audio/sound';
+import { isGeneratedModule, subjectLabel, type Catalog } from '../content/catalog';
 import type { Item, Lesson } from '../content/format';
-import { moduleHasUsable, type Switches } from '../content/switches';
-import { dayKey } from '../core/clock';
+import { generateItems } from '../content/rekenen/generator';
+import type { RekenenTopicId } from '../content/rekenen/module';
+import {
+  effectiveLevels,
+  isItemSwitchedOn,
+  isModuleOn,
+  isTopicOn,
+  switchedOnFixedItems,
+  switchedOnSkills,
+} from '../content/switches';
+import { effectiveDay, systemClock, today, type Clock } from '../core/clock';
+import {
+  MAX_SHOP_DINOS,
+  MSG_ENOUGH_PRACTICE,
+  PRACTICE_DAY_CAP,
+  practiceCapReached,
+  practiceEarnedToday,
+  shopDinoCount,
+} from '../core/economy';
 import { createRng, type Rng } from '../core/rng';
-import { startSession, type SessionEffect, type SessionState } from '../learning/break-session';
-import { hasSeenLesson, markLessonSeen } from '../learning/rotation';
-import { selectQuestions } from '../learning/selection';
-import { createProgressStore } from '../storage/progress-store';
-import { defaultKv } from '../storage/schema';
-import { createBreakScreen, MSG_EMPTY, type BreakScreen } from '../ui/learn/break-screen';
+import { SHOP_KINDS } from '../dinos/kinds';
+import type { Response } from '../learning/answer-check';
+import {
+  reduce,
+  startSession,
+  type SessionEffect,
+  type SessionEntry,
+  type SessionEvent,
+  type SessionState,
+} from '../learning/break-session';
+import { savedSumIds, saveProgressWithCap } from '../learning/generated-items';
+import { isItemDue } from '../learning/srs';
+import type { LogStore } from '../storage/log-store';
+import type { ProgressRecord, ProgressStore } from '../storage/progress-store';
+import type { Records } from '../storage/records';
+import type { SwitchesRecord } from '../storage/schema';
 import { el } from '../ui/dom';
+import { createBreakScreen, type BreakScreen, type BreakScreenAction } from '../ui/learn/break-screen';
 import { onTap } from '../ui/tap';
-import type { AppEnv } from './app-env';
-import { loadBreakCatalog, loadSwitches, topicOfItem } from './content-loader';
-import type { Screens } from './screens';
-import { commitStep, stepWrite } from './session-writer';
+import type { ScreenManager } from './screens';
 
-export const MSG_PRACTICE_ERROR = 'Extra oefenen kan nu niet starten. Probeer het straks nog eens.';
-
-/** Extras for tests. The defaults are the real catalog and a random generator. */
-export interface PracticeDeps {
-  catalog?: () => Promise<Catalog>;
+export interface PracticeFlowOptions {
+  screens: ScreenManager;
+  clock?: Clock;
   rng?: Rng;
-  /** Called with the state when the round starts and after every step. */
-  onState?: (state: SessionState) => void;
+  records?: Records;
+  progressStore?: ProgressStore;
+  logStore?: LogStore;
+  getCatalog?: () => Catalog;
+  sound?: Pick<Sound, 'play'>;
+  /** Optional callback to override the countdown clock and trigger a full break round immediately. */
+  onStartBreakRound?: () => Promise<void>;
+  now?: () => number;
 }
 
-/** Modules the kid can practise: switched on and with something to ask (AC48). */
-export function practiceModules(catalog: Catalog, switches: Switches): Array<{ id: string; title: string }> {
-  return catalog
-    .modules()
-    .filter((m) => moduleHasUsable(switches, catalog, m.id))
-    .map((m) => ({ id: m.id, title: m.title }));
+export interface PracticeFlow {
+  open(): void;
+  startTopic(moduleId: string, topicId: string): Promise<void>;
+  destroy(): void;
 }
 
-export function openPractice(screens: Screens, env: AppEnv, deps: PracticeDeps = {}): () => void {
-  let closed = false;
-  let busy = false;
-  let screen: BreakScreen | null = null;
-  let chain: Promise<void> = Promise.resolve();
-  let pendingCommits = 0;
-  let chooserCleanup: Array<() => void> = [];
+/** Picks up to `count` questions for a specific switched-on topic in Extra oefenen (AC52). */
+export function selectPracticeTopicItems(options: {
+  catalog: Catalog;
+  switches: SwitchesRecord;
+  progress: readonly ProgressRecord[];
+  moduleId: string;
+  topicId: string;
+  count: number;
+  today: string;
+  lastSeenDay?: string | null;
+  rng: Rng;
+}): SessionEntry[] {
+  const {
+    catalog,
+    switches,
+    progress,
+    moduleId,
+    topicId,
+    count,
+    today: day,
+    lastSeenDay,
+    rng,
+  } = options;
+  const bundle = catalog.getModule(moduleId);
+  if (!bundle || count <= 0) return [];
+  if (!isTopicOn(switches, catalog, moduleId, topicId)) return [];
+
+  const levels = effectiveLevels(switches, catalog, moduleId, topicId);
+  const skills = switchedOnSkills(switches, catalog, moduleId, topicId);
+  if (levels.length === 0 || skills.length === 0) return [];
+
+  const numeric = isGeneratedModule(bundle);
+  const entries: SessionEntry[] = [];
+  const pickedIds = new Set<string>();
+  const progressByItem = new Map<string, ProgressRecord>();
+  for (const p of progress) {
+    if (p.moduleId === moduleId) {
+      progressByItem.set(p.itemId, p);
+    }
+  }
+
+  const addEntry = (item: Item, box: number) => {
+    if (pickedIds.has(item.id) || entries.length >= count) return;
+    pickedIds.add(item.id);
+    entries.push({ item, box, ...(numeric ? { numeric: true } : {}) });
+  };
+
+  // 1. Due items in this topic first
+  const topicSeen = [...progressByItem.values()].filter(
+    (p) => p.box > 0 && (p.topic === topicId || catalog.topicOfItem(moduleId, p.itemId) === topicId),
+  );
+  for (const p of topicSeen) {
+    if (entries.length >= count) break;
+    if (!isItemDue(p, day, lastSeenDay)) continue;
+    const item = catalog.getItem(moduleId, p.itemId, String(p.level));
+    if (item && isItemSwitchedOn(switches, catalog, moduleId, topicId, item)) {
+      addEntry(item, p.box);
+    }
+  }
+
+  // 2. Unseen / generated items in this topic
+  if (entries.length < count) {
+    if (catalog.isOpenTopic(moduleId, topicId)) {
+      const easiestLevel = levels[0];
+      if (easiestLevel !== undefined) {
+        const exclude = new Set<string>([
+          ...savedSumIds(progress, topicId),
+          ...pickedIds,
+        ]);
+        const generated = generateItems(
+          topicId as RekenenTopicId,
+          easiestLevel,
+          count - entries.length,
+          rng,
+          { skills, exclude },
+        );
+        for (const item of generated) {
+          addEntry(item, 0);
+        }
+      }
+    } else {
+      const fixed = switchedOnFixedItems(switches, catalog, moduleId, topicId, levels);
+      for (const item of fixed) {
+        if (entries.length >= count) break;
+        const box = progressByItem.get(item.id)?.box ?? 0;
+        if (box === 0) addEntry(item, 0);
+      }
+      // 3. Fill with any remaining seen items in this topic
+      for (const item of fixed) {
+        if (entries.length >= count) break;
+        const box = progressByItem.get(item.id)?.box ?? 0;
+        addEntry(item, box);
+      }
+    }
+  }
+
+  return entries;
+}
+
+function formatGivenResponse(item: Item, response: Response): string {
+  switch (response.type) {
+    case 'choice':
+      return item.type === 'choice' ? (item.options[response.index] ?? String(response.index)) : String(response.index);
+    case 'find-error':
+      if (response.index === -1) return 'geen fout';
+      return item.type === 'find-error' ? (item.words[response.index] ?? String(response.index)) : String(response.index);
+    case 'type':
+      return response.text;
+    case 'punctuate':
+      return response.gaps.join(',');
+  }
+}
+
+export function createPracticeFlow(options: PracticeFlowOptions): PracticeFlow {
+  const clock = options.clock ?? systemClock;
+  const rng = options.rng ?? createRng(0x70726163);
   const cleanups: Array<() => void> = [];
+  let screenView: BreakScreen | null = null;
+  let activeState: SessionState | null = null;
+  let activeModuleId = '';
+  let activeTopicId = '';
+  let activeSessionId = '';
+  let shopCount = 0;
 
-  const host = el('div', { class: 'practice-host', attrs: { role: 'dialog', 'aria-label': 'Extra oefenen', 'data-screen-id': 'practice' } });
-  const bar = el('div', { class: 'practice-bar' });
-  const stop = el('button', { class: 'lesboek-back', text: 'Stoppen', attrs: { type: 'button', 'data-practice': 'stop' } });
-  bar.append(stop);
-  const stage = el('div', { class: 'practice-stage' });
-  host.append(bar, stage);
-  const closeScreen = screens.open('learn', host);
-  cleanups.push(onTap(stop, close));
-
-  function close(): void {
-    if (closed) return;
-    closed = true;
-    screen?.destroy();
-    screen = null;
-    for (const c of [...chooserCleanup, ...cleanups]) c();
-    chooserCleanup = [];
-    // The pause menu below reads its points again when this screen closes. So close after the last
-    // commit, when there is one on its way, so the total it reads is the real one.
-    if (pendingCommits === 0) closeScreen();
-    else void chain.then(closeScreen);
+  function clearCleanups() {
+    while (cleanups.length > 0) {
+      cleanups.pop()?.();
+    }
   }
 
-  function note(text: string): void {
-    stage.replaceChildren(el('p', { class: 'lesboek-note', text, attrs: { role: 'status' } }));
+  function clearScreen() {
+    clearCleanups();
+    if (screenView) {
+      screenView.destroy();
+      screenView = null;
+    }
+    activeState = null;
   }
 
-  function showChooser(catalog: Catalog, switches: Switches): void {
-    const mods = practiceModules(catalog, switches);
-    if (mods.length === 0) return note(MSG_EMPTY);
-    const buttons = mods.map((m) => {
-      const b = el('button', { class: 'lesboek-topic practice-module', text: m.title, attrs: { type: 'button', 'data-practice-module': m.id } });
-      chooserCleanup.push(
-        onTap(b, () => {
-          if (busy || closed) return;
-          busy = true;
-          void startRound(catalog, switches, m.id).catch(() => {
-            busy = false;
-            if (!closed) note(MSG_PRACTICE_ERROR);
+  function lessonForItem(moduleId: string, item: Item): Lesson | undefined {
+    const catalog = options.getCatalog?.();
+    if (!catalog) return undefined;
+    const tId = catalog.topicOfItem(moduleId, item.id) || activeTopicId;
+    if (!tId) return undefined;
+    return catalog.getTopic(moduleId, tId)?.lesson;
+  }
+
+  function canAffordEgg(pointsTotal: number): boolean {
+    const cheapest = SHOP_KINDS[0]?.price ?? 20;
+    return shopCount < MAX_SHOP_DINOS && pointsTotal >= cheapest;
+  }
+
+  async function processPracticeEffects(state: SessionState, effects: readonly SessionEffect[]) {
+    const catalog = options.getCatalog?.();
+    const answerCorrectByItem = new Map<string, boolean>();
+    for (const ef of effects) {
+      if (ef.type === 'answer') {
+        answerCorrectByItem.set(ef.itemId, ef.correct);
+      }
+    }
+
+    for (const ef of effects) {
+      if (ef.type === 'answer' && options.logStore) {
+        const entry = state.entries.find((e) => e.item.id === ef.itemId);
+        const item = entry?.item ?? catalog?.getItem(activeModuleId, ef.itemId);
+        const topic = catalog?.topicOfItem(activeModuleId, ef.itemId) ?? activeTopicId;
+        await options.logStore.appendAnswer({
+          ts: ef.at,
+          day: state.day,
+          context: 'practice',
+          sessionId: activeSessionId,
+          moduleId: activeModuleId,
+          topic,
+          skill: item?.skill ?? '',
+          level: item?.level ?? 'M6',
+          itemId: ef.itemId,
+          try: ef.try,
+          correct: ef.correct,
+          given: item ? formatGivenResponse(item, ef.response) : '',
+          ms: ef.ms,
+        });
+      } else if (ef.type === 'box' && options.progressStore) {
+        const entry = state.entries.find((e) => e.item.id === ef.itemId);
+        const item = entry?.item ?? catalog?.getItem(activeModuleId, ef.itemId);
+        const topic = catalog?.topicOfItem(activeModuleId, ef.itemId) ?? activeTopicId;
+        const firstTryRight = answerCorrectByItem.get(ef.itemId) ?? ef.box > 1;
+        await saveProgressWithCap(options.progressStore, {
+          moduleId: activeModuleId,
+          itemId: ef.itemId,
+          topic,
+          skill: item?.skill ?? '',
+          level: item?.level ?? 'M6',
+          box: ef.box,
+          due: ef.due,
+          firstTryRight,
+          at: clock.now(),
+        });
+      } else if (ef.type === 'points' && options.records) {
+        await options.records.put('economy', state.economy);
+        if (ef.applied !== 0 && options.logStore) {
+          await options.logStore.appendLedger({
+            ts: clock.now(),
+            day: state.day,
+            delta: ef.applied,
+            reason: 'practice',
           });
-        }),
-      );
-      return b;
-    });
-    stage.replaceChildren(
-      el('h2', { class: 'lesboek-title', text: 'Extra oefenen' }),
-      el('p', { class: 'lesboek-note', text: 'Kies waar je mee wilt oefenen.' }),
-      el('div', { class: 'lesboek-grid' }, buttons),
-    );
+        }
+      }
+    }
   }
 
-  async function startRound(catalog: Catalog, switches: Switches, moduleId: string): Promise<void> {
-    const records = env.records;
-    const db = env.db;
-    const rng = deps.rng ?? createRng((Math.random() * 4294967296) >>> 0);
-    const at = env.clock.now();
-    const day = dayKey(at);
-    const [settings, economy, rotation, progress] = await Promise.all([
-      records ? records.get('settings').catch(() => defaultKv('settings')) : defaultKv('settings'),
-      records ? records.get('economy').catch(() => defaultKv('economy')) : defaultKv('economy'),
-      records ? records.get('rotation').catch(() => defaultKv('rotation')) : defaultKv('rotation'),
-      db ? createProgressStore(db).list().catch(() => []) : Promise.resolve([]),
+  async function dispatchPractice(event: SessionEvent) {
+    if (!activeState) return;
+    const stepResult = reduce(activeState, event);
+    activeState = stepResult.state;
+    await processPracticeEffects(activeState, stepResult.effects);
+
+    if (activeState.phase === 'done') {
+      clearScreen();
+      options.screens.showWorld();
+      return;
+    }
+    screenView?.render(activeState);
+  }
+
+  function handleAction(action: BreakScreenAction) {
+    const at = clock.now();
+    switch (action.type) {
+      case 'lessonDone':
+        void dispatchPractice({ type: 'lessonDone', at });
+        break;
+      case 'answer':
+        void dispatchPractice({ type: 'answer', response: action.response, q: action.q, at });
+        break;
+      case 'next':
+        void dispatchPractice({ type: 'next', q: action.q, at });
+        break;
+      case 'understood':
+        void dispatchPractice({ type: 'understood', q: action.q, at });
+        break;
+      case 'finish':
+        void dispatchPractice({ type: 'finish', at });
+        break;
+    }
+  }
+
+  async function startTopic(moduleId: string, topicId: string) {
+    clearScreen();
+    const catalog = options.getCatalog?.();
+    if (!catalog || !options.records || !options.progressStore) {
+      options.screens.showWorld();
+      return;
+    }
+
+    const [settings, switches, economy, dinos, allProgress] = await Promise.all([
+      options.records.get('settings'),
+      options.records.get('switches'),
+      options.records.get('economy'),
+      options.records.get('dinos'),
+      options.progressStore.list(),
     ]);
-    if (closed) return;
-    const picked = selectQuestions({
+
+    shopCount = shopDinoCount(
+      (dinos.dinos ?? []) as { golden?: boolean }[],
+      (dinos.eggs ?? []) as { golden?: boolean }[],
+    );
+    const clockDay = today(clock);
+    const lastSeenDay = (settings as { lastSeenDay?: string }).lastSeenDay ?? null;
+    const effDay = effectiveDay(clockDay, lastSeenDay);
+    const count = Math.max(1, settings.questionsPerBreak || 5);
+
+    const entries = selectPracticeTopicItems({
       catalog,
       switches,
+      progress: allProgress,
       moduleId,
-      count: Math.max(1, Math.floor(settings.questionsPerBreak) || 5),
-      progress,
-      rotation,
-      today: day,
-      newAllowed: settings.newLessonsEnabled !== false,
-      asked: [],
+      topicId,
+      count,
+      today: effDay,
+      lastSeenDay: effDay,
       rng,
     });
-    let nextRotation = picked.rotation;
-    let lessonTopic: string | null = null;
-    if (picked.newTopicId && picked.newCount > 0 && !hasSeenLesson(nextRotation, moduleId, picked.newTopicId)) {
-      lessonTopic = picked.newTopicId;
-      nextRotation = markLessonSeen(nextRotation, moduleId, picked.newTopicId);
-    }
-    const started = startSession({ mode: 'practice', entries: picked.entries, economy, day, lessonFirst: lessonTopic !== null, at });
-    const sessionId = `p${at}`;
-    // Only the rotation is written here. The `session` record is not touched.
-    if (db) await commitStep(db, { rotation: nextRotation }).catch(() => undefined);
-    if (closed) return;
 
-    const topicOf = (item: Item): string => topicOfItem(catalog, moduleId, item);
-    const lessonOf = (item: Item): Lesson | undefined => catalog.topic(moduleId, topicOf(item))?.lesson;
-    const onStep = (state: SessionState, effects: SessionEffect[]): void => {
-      deps.onState?.(state);
-      if (db) {
-        const write = stepWrite({
-          state,
-          effects,
-          context: 'practice',
-          ledgerReason: 'practice',
-          sessionId,
-          moduleId,
-          topicOf,
-          isOpen: (topic) => catalog.isOpen(moduleId, topic),
-          now: env.clock.now(),
-          session: null,
-        });
-        delete write.session; // leave the saved session alone: a practice round is never a saved break
-        pendingCommits++;
-        chain = chain
-          .then(() => commitStep(db, write))
-          .catch(() => undefined)
-          .then(() => { pendingCommits--; });
-      }
-      if (state.phase === 'done') queueMicrotask(close);
-    };
-    const s = createBreakScreen({
-      state: started.state,
-      lesson: lessonTopic ? catalog.topic(moduleId, lessonTopic)?.lesson : undefined,
-      lessonOf,
-      now: () => env.clock.now(),
-      sound: { play: (name) => env.sound.play(name) },
-      onStep,
+    const now = clock.now();
+    const started = startSession({
+      mode: 'practice',
+      entries,
+      economy,
+      day: effDay,
+      lessonFirst: false,
+      at: now,
     });
-    screen = s;
-    deps.onState?.(started.state);
-    stage.replaceChildren(s.element);
-    for (const c of chooserCleanup) c();
-    chooserCleanup = [];
-    host.classList.add('practice-running');
-    if (__E2E__) registerHook('practiceState', () => JSON.parse(JSON.stringify(s.getState())) as never);
+
+    activeModuleId = moduleId;
+    activeTopicId = topicId;
+    activeSessionId = `practice-${now}-${Math.floor(rng.next() * 1_000_000)}`;
+    activeState = started.state;
+
+    // If the daily practice cap was already reached before starting, keep the cap message visible
+    if (practiceCapReached(economy, effDay)) {
+      activeState = {
+        ...activeState,
+        message: MSG_ENOUGH_PRACTICE,
+      };
+    }
+
+    const topicLesson = catalog.getTopic(moduleId, topicId)?.lesson;
+    screenView = createBreakScreen({
+      state: activeState,
+      lesson: topicLesson,
+      lessonForItem: (item) => lessonForItem(moduleId, item),
+      canAffordEgg,
+      sound: options.sound,
+      onAction: handleAction,
+      now: options.now ?? (() => clock.now()),
+    });
+    options.screens.showLearn(screenView.element);
   }
 
-  note('Even laden...');
-  const loadCatalog = deps.catalog ?? loadBreakCatalog;
-  Promise.all([loadCatalog(), loadSwitches(env.records)]).then(
-    ([catalog, switches]) => {
-      if (!closed) showChooser(catalog, switches);
-    },
-    () => {
-      if (!closed) note(MSG_PRACTICE_ERROR);
-    },
-  );
+  async function renderPicker() {
+    clearScreen();
+    const catalog = options.getCatalog?.();
+    const [settings, switches, economy] = options.records
+      ? await Promise.all([
+          options.records.get('settings'),
+          options.records.get('switches'),
+          options.records.get('economy'),
+        ])
+      : [null, { modules: {} } as SwitchesRecord, { points: 0, practicePointsToday: 0, practiceDay: '' }];
 
-  return close;
+    const clockDay = today(clock);
+    const lastSeenDay = (settings as { lastSeenDay?: string } | null)?.lastSeenDay ?? null;
+    const effDay = effectiveDay(clockDay, lastSeenDay);
+    const earnedToday = practiceEarnedToday(economy, effDay);
+    const capHit = practiceCapReached(economy, effDay);
+
+    const closeBtn = el('button', {
+      class: 'pause-btn pause-btn-primary',
+      text: 'Terug naar de wereld',
+      attrs: { type: 'button' },
+    });
+    cleanups.push(
+      onTap(
+        closeBtn,
+        () => {
+          clearScreen();
+          options.screens.showWorld();
+        },
+        { now: options.now },
+      ),
+    );
+
+    const header = el('div', { class: 'lesboek-header pause-header' }, [
+      el('h2', { class: 'lesboek-title pause-title', text: 'Extra oefenen' }),
+      el('div', { class: 'lesboek-badges' }, [
+        el('span', {
+          class: 'lesboek-pill',
+          text: `\u{1FA99} ${economy.points} ${economy.points === 1 ? 'punt' : 'punten'}`,
+        }),
+        el('span', {
+          class: 'lesboek-pill',
+          text: `Vandaag: ${earnedToday} / ${PRACTICE_DAY_CAP} extra`,
+        }),
+      ]),
+      closeBtn,
+    ]);
+
+    const bodyChildren: HTMLElement[] = [header];
+
+    if (capHit) {
+      bodyChildren.push(
+        el('p', {
+          class: 'lesboek-cap-banner',
+          text: MSG_ENOUGH_PRACTICE,
+          attrs: { 'data-testid': 'practice-cap-banner' },
+        }),
+      );
+    } else {
+      bodyChildren.push(
+        el('p', {
+          text: 'Kies een onderwerp om extra vragen te oefenen en munten te verdienen!',
+        }),
+      );
+    }
+
+    if (options.onStartBreakRound) {
+      const breakBtn = el(
+        'button',
+        {
+          class: 'lesboek-override-btn',
+          attrs: { type: 'button', 'data-testid': 'practice-start-break-now' },
+        },
+        [
+          el('span', { text: '\u{1FA99} Start nu een volledige leerpauze (onbeperkt munten verdienen!)' }),
+          el('span', { text: 'Start \u{27A1}' }),
+        ],
+      );
+      cleanups.push(
+        onTap(
+          breakBtn,
+          () => {
+            clearScreen();
+            void options.onStartBreakRound?.();
+          },
+          { now: options.now },
+        ),
+      );
+      bodyChildren.push(breakBtn);
+    }
+
+    const grid = el('div', { class: 'lesboek-topics-grid pause-actions' });
+    let count = 0;
+
+    if (catalog) {
+      for (const bundle of catalog.modules()) {
+        if (!isModuleOn(switches, catalog, bundle.module.id)) continue;
+        for (const topic of bundle.topics) {
+          if (!isTopicOn(switches, catalog, bundle.module.id, topic.id)) continue;
+          count++;
+          const btn = el(
+            'button',
+            {
+              class: 'lesboek-topic-btn pause-btn',
+              attrs: {
+                type: 'button',
+                'data-practice-topic': `${bundle.module.id}:${topic.id}`,
+              },
+            },
+            [
+              el('span', {
+                class: 'lesboek-topic-subject',
+                text: subjectLabel(bundle.module.subject),
+              }),
+              el('span', {
+                class: 'lesboek-topic-name',
+                text: topic.title,
+              }),
+            ],
+          );
+          cleanups.push(
+            onTap(
+              btn,
+              () => {
+                void startTopic(bundle.module.id, topic.id);
+              },
+              { now: options.now },
+            ),
+          );
+          grid.append(btn);
+        }
+      }
+    }
+
+    if (count === 0) {
+      grid.append(
+        el('p', {
+          class: 'lesboek-empty',
+          text: 'Kies een onderwerp om extra punten te verdienen.',
+        }),
+      );
+    }
+
+    bodyChildren.push(grid);
+
+    const card = el(
+      'div',
+      {
+        class: 'lesboek-card pause-card',
+        attrs: { role: 'dialog', 'aria-label': 'Extra oefenen' },
+      },
+      bodyChildren,
+    );
+    const backdrop = el('div', { class: 'lesboek-backdrop pause-backdrop' }, [card]);
+    options.screens.showKidOverlay(backdrop);
+  }
+
+  return {
+    open() {
+      void renderPicker();
+    },
+    startTopic,
+    destroy() {
+      clearScreen();
+    },
+  };
 }

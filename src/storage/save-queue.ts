@@ -19,16 +19,6 @@ export interface SaveQueue {
   markDirty(name: KvName): void;
   /** Writes all dirty records now, in one transaction. */
   flushNow(): Promise<void>;
-  /**
-   * Runs `fn` alone on the queue's write chain. No flush starts or reads records while it runs.
-   * Flushes asked for meanwhile wait, then read fresh values. Do not call flushNow inside `fn`.
-   */
-  hold<T>(fn: () => Promise<T>): Promise<T>;
-  /**
-   * Stops the queue for good: pending marks are dropped, and no timer, flushNow, hide or pagehide writes again.
-   * Used right before the page reloads on a full replace.
-   */
-  stop(): void;
   /** Flushes when the page is hidden (not after simulateKill). Returns a detach function. */
   attachPageListeners(doc?: Document, win?: Window): () => void;
   /** Test only: stops flushing on hide, like iOS killing the app. */
@@ -44,11 +34,9 @@ export function createSaveQueue(options: SaveQueueOptions): SaveQueue {
   const dirty = new Set<KvName>();
   let timer: unknown = null;
   let killed = false;
-  let stopped = false;
   let chain: Promise<void> = Promise.resolve();
 
   function flushOnce(): Promise<void> {
-    if (stopped) return Promise.resolve();
     if (timer !== null) {
       clearTimer(timer);
       timer = null;
@@ -76,18 +64,11 @@ export function createSaveQueue(options: SaveQueueOptions): SaveQueue {
     return chain;
   }
 
-  function hold<T>(fn: () => Promise<T>): Promise<T> {
-    const run = chain.then(fn);
-    chain = run.then(() => undefined, () => undefined);
-    return run;
-  }
-
   const queue: SaveQueue = {
     register(name, read) {
       readers.set(name, read);
     },
     markDirty(name) {
-      if (stopped) return;
       dirty.add(name);
       if (timer === null && !killed) {
         timer = setTimer(() => {
@@ -97,14 +78,13 @@ export function createSaveQueue(options: SaveQueueOptions): SaveQueue {
       }
     },
     flushNow,
-    hold,
     attachPageListeners(doc = document, win = window) {
       const onHide = () => {
-        if (killed || stopped) return;
+        if (killed) return;
         if (doc.visibilityState === 'hidden') void flushNow();
       };
       const onPageHide = () => {
-        if (!killed && !stopped) void flushNow();
+        if (!killed) void flushNow();
       };
       doc.addEventListener('visibilitychange', onHide);
       win.addEventListener('pagehide', onPageHide);
@@ -112,14 +92,6 @@ export function createSaveQueue(options: SaveQueueOptions): SaveQueue {
         doc.removeEventListener('visibilitychange', onHide);
         win.removeEventListener('pagehide', onPageHide);
       };
-    },
-    stop() {
-      stopped = true;
-      dirty.clear();
-      if (timer !== null) {
-        clearTimer(timer);
-        timer = null;
-      }
     },
     simulateKill() {
       killed = true;

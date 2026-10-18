@@ -7,15 +7,12 @@ export interface ProgressRecord {
   box: number;
   /** Local calendar day, "2026-10-18". */
   due: string;
-  level: string; // level name, for example M6
+  level: string | number;
   topic: string;
   skill: string;
   seen: number;
-  /**
-   * When the record was first saved, in ms since 1970 (a plain number sorts and compares cheaply and
-   * needs no time zone). Set once, never changed by later updates. Missing means oldest (AC126).
-   */
-  added?: number;
+  /** Timestamp (ms) when a generated sum was saved, for keeping the 200 newest per topic (AC126). */
+  savedAt?: number;
 }
 
 export const progressKey = (moduleId: string, itemId: string): string => `${moduleId}|${itemId}`;
@@ -28,8 +25,6 @@ function moduleRange(moduleId: string): IDBKeyRange {
 export interface ProgressStore {
   get(moduleId: string, itemId: string): Promise<ProgressRecord | undefined>;
   put(record: ProgressRecord): Promise<void>;
-  /** Removes one record. Nothing happens when it does not exist. */
-  delete(moduleId: string, itemId: string): Promise<void>;
   /** All records of one module, or of every module when omitted. */
   list(moduleId?: string): Promise<ProgressRecord[]>;
   /** Returns how many records were removed. */
@@ -44,20 +39,9 @@ export function createProgressStore(db: IDBDatabase): ProgressStore {
         request<ProgressRecord | undefined>(tx.objectStore('progress').get(progressKey(moduleId, itemId))),
       ),
     async put(record) {
-      await transact(db, 'progress', 'readwrite', async (tx) => {
-        const store = tx.objectStore('progress');
-        const key = progressKey(record.moduleId, record.itemId);
-        const old = await request<ProgressRecord | undefined>(store.get(key));
-        const next: ProgressRecord = { ...record };
-        if (old) {
-          if (old.added === undefined) delete next.added;
-          else next.added = old.added;
-        }
-        await request(store.put(next, key));
-      });
-    },
-    async delete(moduleId, itemId) {
-      await transact(db, 'progress', 'readwrite', (tx) => request(tx.objectStore('progress').delete(progressKey(moduleId, itemId))));
+      await transact(db, 'progress', 'readwrite', (tx) =>
+        request(tx.objectStore('progress').put(record, progressKey(record.moduleId, record.itemId))),
+      );
     },
     list: (moduleId) =>
       transact(db, 'progress', 'readonly', (tx) =>

@@ -1,11 +1,10 @@
 // Saves and restores the world (changed blocks) and the player (spot, look, hotbar, mode).
 import type { SaveQueue } from '../storage/save-queue';
 import type { Records } from '../storage/records';
-import { WORLD_VERSION, type PlayerRecord, type WorldRecord } from '../storage/schema';
+import type { PlayerRecord } from '../storage/schema';
 import { isPlaceable } from '../world/blocks';
 import { CELL_COUNT, WORLD_HEIGHT, WORLD_SIZE } from '../world/terrain';
 import { HOTBAR_SIZE } from './build-controller';
-import { settlePlayer } from './player-controller';
 import type { Game } from './game';
 
 export interface WorldSaveOptions {
@@ -106,24 +105,15 @@ export function createWorldSave(options: WorldSaveOptions): WorldSave {
       yaw: game.player.yaw, pitch: game.player.pitch,
       hotbar: [...b.hotbar], selectedSlot: b.selected,
       mode: b.mode === 'bouwen' ? 'build' : 'mine',
-      floating: game.player.isFloating(),
     };
   }
 
-  queue.register('world', () => ({
-    diff: game.world.diff(),
-    worldVersion: WORLD_VERSION,
-    size: WORLD_SIZE,
-    height: WORLD_HEIGHT,
-  }));
+  queue.register('world', () => ({ diff: game.world.diff() }));
   queue.register('player', readPlayer);
+  game.dinoStore?.attachPersistence(records, queue);
 
   function restoreWorld(raw: unknown): void {
-    const rec = raw as Partial<WorldRecord> | null;
-    if (!rec || rec.worldVersion !== WORLD_VERSION || rec.size !== WORLD_SIZE || rec.height !== WORLD_HEIGHT) {
-      return;
-    }
-    const diff = cleanDiff(rec.diff);
+    const diff = cleanDiff((raw as { diff?: unknown } | null)?.diff);
     if (diff.length === 0) return;
     game.world.applyDiff(diff);
     game.renderer.setWorld(game.world);
@@ -137,13 +127,10 @@ export function createWorldSave(options: WorldSaveOptions): WorldSave {
       ...(hotbarOk && Number.isInteger(r.selectedSlot) ? { selected: r.selectedSlot } : {}),
     });
     // The empty default has y = 0. A real save always stands above the floor.
-    const inside = isNum(r.x) && isNum(r.y) && isNum(r.z) && r.y > 0;
+    const inside = isNum(r.x) && isNum(r.y) && isNum(r.z) && r.x >= 0 && r.x < WORLD_SIZE && r.z >= 0 && r.z < WORLD_SIZE && r.y > 0 && r.y < WORLD_HEIGHT;
     if (inside) {
       const p = game.player.player;
       p.x = r.x; p.y = r.y; p.z = r.z; p.vy = 0; p.onGround = false;
-      // Clamp into the world. A saved spot inside a block becomes a spot on the ground, and then no floating.
-      const moved = settlePlayer(game.world, p);
-      game.player.setFloating(r.floating === true && !moved);
       if (isNum(r.yaw)) game.player.yaw = r.yaw;
       if (isNum(r.pitch)) game.player.pitch = Math.max(-1.5, Math.min(1.5, r.pitch));
     }
@@ -166,6 +153,15 @@ export function createWorldSave(options: WorldSaveOptions): WorldSave {
     } catch {
       /* a broken player record: start at home */
     }
+    try {
+      if (cancelled) return;
+      await game.dinoStore?.load();
+      if (!cancelled && game.dinoStore) {
+        game.renderer.syncDinos?.(game.dinoStore.dinos(), game.dinoStore.eggs());
+      }
+    } catch {
+      /* broken dinos record: start with no dinos */
+    }
   }
 
   function start(): () => void {
@@ -173,7 +169,7 @@ export function createWorldSave(options: WorldSaveOptions): WorldSave {
     let last = '';
     const signature = () => {
       const p = game.player.player;
-      return [p.x, p.y, p.z, game.player.yaw, game.player.pitch].map((n) => n.toFixed(2)).join(',') + (game.player.isFloating() ? ',f' : '');
+      return [p.x, p.y, p.z, game.player.yaw, game.player.pitch].map((n) => n.toFixed(2)).join(',');
     };
     last = signature();
     const timer = setInterval(() => {
@@ -184,7 +180,12 @@ export function createWorldSave(options: WorldSaveOptions): WorldSave {
       }
     }, pollMs);
     // Listeners are added in this order: first mark the spot dirty, then the queue flushes (not after a simulated kill).
-    const onHide = () => queue.markDirty('player');
+    const onHide = () => {
+      queue.markDirty('player');
+      if (game.dinoStore && (game.dinoStore.dinos().length > 0 || game.dinoStore.eggs().length > 0)) {
+        queue.markDirty('dinos');
+      }
+    };
     doc.addEventListener('visibilitychange', onHide);
     win.addEventListener('pagehide', onHide);
     const detach = queue.attachPageListeners(doc, win);

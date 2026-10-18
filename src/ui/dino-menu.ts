@@ -1,127 +1,184 @@
-// The menu that opens when the kid taps a dino (AC16): Volg mij, Blijf hier, Naam geven, Knuffel.
-// Naam geven swaps the panel for the naming screen (src/ui/name-screen.ts). Styles: src/styles/dino-menu.css.
+// Dino interaction menu when tapping a dino in the world (T45, AC16, AC18, AC23).
+// Actions: Volg mij, Blijf hier, Naam geven (opens NameScreen), Knuffel (hearts + chirp), Sluiten.
+
 import '../styles/dino-menu.css';
-import type { PointerRouter } from '../input/pointer-router';
 import type { DinoMode } from '../dinos/dino-ai';
-import { DINO_KINDS, type DinoKindId } from '../dinos/kinds';
+import type { WorldDino } from '../dinos/dino-store';
+import { DINO_KINDS } from '../dinos/kinds';
 import { el } from './dom';
 import { createNameScreen, type NameScreen } from './name-screen';
 import { onTap } from './tap';
 
-export interface DinoMenuTarget {
-  id: number;
-  kind: DinoKindId;
-  name: string;
-  mode: DinoMode;
-}
-
 export interface DinoMenuOptions {
-  container: HTMLElement;
-  router: PointerRouter;
-  onMode: (id: number, mode: DinoMode) => void;
-  /** The kid finished a name. The owner stores it (the store trims it to 12 characters). */
-  onRename?: (id: number, name: string) => void;
-  /** Knuffel: the owner shows hearts at the dino and plays a happy sound. The menu closes after it. */
-  onHug?: (id: number) => void;
-  /** Called after the menu closed, so the game can go on. */
-  onClose?: () => void;
+  dino: WorldDino;
+  onModeChange: (mode: DinoMode) => void;
+  onNameSave: (name: string) => void;
+  onKnuffel: () => void;
+  onClose: () => void;
+  now?: () => number;
 }
 
 export interface DinoMenu {
-  readonly root: HTMLElement;
-  open(target: DinoMenuTarget): void;
-  close(): void;
-  isOpen(): boolean;
+  readonly element: HTMLElement;
   destroy(): void;
 }
 
 export function createDinoMenu(options: DinoMenuOptions): DinoMenu {
   const cleanups: Array<() => void> = [];
-  let current: DinoMenuTarget | null = null;
-  let naming: NameScreen | null = null;
+  let activeNameScreen: NameScreen | null = null;
+  let currentMode: DinoMode = options.dino.mode;
+  let currentName: string = options.dino.name;
+  let feedbackText: string | null = null;
 
-  const button = (label: string, handler: () => void): HTMLButtonElement => {
-    const b = el('button', { class: 'dino-btn', text: label, attrs: { type: 'button' } });
-    cleanups.push(onTap(b, handler));
-    return b;
-  };
-  const title = el('div', { class: 'dino-menu-title' });
-  const follow = button('Volg mij', () => choose('follow'));
-  const stay = button('Blijf hier', () => choose('stay'));
-  const name = button('Naam geven', () => openNaming());
-  const hug = button('Knuffel', () => {
-    if (!current) return;
-    options.onHug?.(current.id);
-    close();
-  });
-  const back = button('Terug naar de wereld', () => close());
-  const panel = el('div', { class: 'dino-menu-panel' }, [title, follow, stay, name, hug, back]);
-  const root = el('div', { class: 'dino-menu', attrs: { role: 'dialog', 'aria-label': 'Dino' } }, [panel]);
-  setShown(false);
-  cleanups.push(options.router.addIgnoreZone(root));
-  options.container.append(root);
+  const speciesName = DINO_KINDS[options.dino.kind].name;
+  const host = el('div', { class: 'dino-menu-host' });
 
-  /** The hidden attribute alone loses against display:flex in old browsers, so the display is set too. */
-  function setShown(shown: boolean): void {
-    root.hidden = !shown;
-    root.style.display = shown ? '' : 'none';
+  function clearMenuCleanups() {
+    while (cleanups.length > 0) {
+      cleanups.pop()?.();
+    }
+    if (activeNameScreen) {
+      activeNameScreen.destroy();
+      activeNameScreen = null;
+    }
   }
-  function choose(mode: DinoMode): void {
-    if (!current) return;
-    options.onMode(current.id, mode);
-    current = { ...current, mode };
-    refresh();
-  }
-  function refresh(): void {
-    if (!current) return;
-    title.textContent = current.name !== '' ? current.name : DINO_KINDS[current.kind].name;
-    follow.setAttribute('aria-pressed', String(current.mode === 'follow'));
-    stay.setAttribute('aria-pressed', String(current.mode === 'stay'));
-  }
-  function closeNaming(): void {
-    if (!naming) return;
-    naming.destroy();
-    naming = null;
-    panel.hidden = false;
-  }
-  function openNaming(): void {
-    if (!current || naming) return;
-    const id = current.id;
-    naming = createNameScreen({
-      initial: current.name,
-      onDone(value) {
-        options.onRename?.(id, value);
-        if (current) current = { ...current, name: value };
-        closeNaming();
-        refresh();
+
+  function openNameEditor() {
+    clearMenuCleanups();
+    host.replaceChildren();
+    activeNameScreen = createNameScreen({
+      initialName: currentName,
+      speciesName,
+      now: options.now,
+      onSave: (name) => {
+        currentName = name;
+        options.onNameSave(name);
+        feedbackText = `Je dino heet nu ${name}!`;
+        renderMainMenu();
       },
-      onCancel: closeNaming,
+      onCancel: () => {
+        renderMainMenu();
+      },
     });
-    panel.hidden = true;
-    root.append(naming.root);
+    host.append(activeNameScreen.element);
   }
-  function close(): void {
-    if (root.hidden) return;
-    closeNaming();
-    setShown(false);
-    current = null;
-    options.onClose?.();
+
+  function renderMainMenu() {
+    clearMenuCleanups();
+    host.replaceChildren();
+
+    const titleText = currentName ? `${currentName} (${speciesName})` : speciesName;
+    const headerChildren: HTMLElement[] = [
+      el('h2', { class: 'dino-menu-title', text: titleText }),
+    ];
+    if (options.dino.golden) {
+      headerChildren.push(
+        el('div', { class: 'dino-menu-badge', text: '\u{2B50} Gouden dino' }),
+      );
+    }
+    const header = el('div', { class: 'dino-menu-header' }, headerChildren);
+
+    const status = el('p', {
+      class: 'dino-menu-status',
+      text:
+        feedbackText ??
+        (currentMode === 'follow'
+          ? 'Volgt jou overal door de wereld!'
+          : 'Blijft rustig op deze plek wachten.'),
+    });
+
+    const followBtn = el('button', {
+      class: 'dino-menu-btn',
+      text: 'Volg mij',
+      attrs: {
+        type: 'button',
+        'aria-pressed': String(currentMode === 'follow'),
+      },
+    });
+    const stayBtn = el('button', {
+      class: 'dino-menu-btn',
+      text: 'Blijf hier',
+      attrs: {
+        type: 'button',
+        'aria-pressed': String(currentMode === 'stay'),
+      },
+    });
+    const nameBtn = el('button', {
+      class: 'dino-menu-btn',
+      text: 'Naam geven',
+      attrs: { type: 'button' },
+    });
+    const knuffelBtn = el('button', {
+      class: 'dino-menu-btn dino-menu-btn-knuffel',
+      text: '\u{2764}\u{FE0F} Knuffel',
+      attrs: { type: 'button' },
+    });
+    const closeBtn = el('button', {
+      class: 'dino-menu-btn dino-menu-btn-close',
+      text: 'Sluiten',
+      attrs: { type: 'button' },
+    });
+
+    cleanups.push(
+      onTap(
+        followBtn,
+        () => {
+          currentMode = 'follow';
+          feedbackText = null;
+          options.onModeChange('follow');
+          renderMainMenu();
+        },
+        { now: options.now },
+      ),
+      onTap(
+        stayBtn,
+        () => {
+          currentMode = 'stay';
+          feedbackText = null;
+          options.onModeChange('stay');
+          renderMainMenu();
+        },
+        { now: options.now },
+      ),
+      onTap(nameBtn, () => openNameEditor(), { now: options.now }),
+      onTap(
+        knuffelBtn,
+        () => {
+          feedbackText = '\u{2764}\u{FE0F} Wat een fijne knuffel!';
+          options.onKnuffel();
+          renderMainMenu();
+        },
+        { now: options.now },
+      ),
+      onTap(closeBtn, () => options.onClose(), { now: options.now }),
+    );
+
+    const grid = el('div', { class: 'dino-menu-grid' }, [
+      followBtn,
+      stayBtn,
+      nameBtn,
+      knuffelBtn,
+    ]);
+
+    const card = el(
+      'div',
+      {
+        class: 'dino-menu-card',
+        attrs: { role: 'dialog', 'aria-label': 'Dino menu' },
+      },
+      [header, status, grid, closeBtn],
+    );
+    const backdrop = el('div', { class: 'dino-menu-backdrop' }, [card]);
+    host.append(backdrop);
   }
+
+  renderMainMenu();
 
   return {
-    root,
-    open(target) {
-      closeNaming();
-      current = target;
-      refresh();
-      setShown(true);
-    },
-    close,
-    isOpen: () => !root.hidden,
+    element: host,
     destroy() {
-      closeNaming();
-      for (const c of cleanups) c();
-      root.remove();
+      clearMenuCleanups();
+      host.remove();
     },
   };
 }

@@ -1,67 +1,98 @@
-// Summary screen of a break (AC34, AC116): "K van de N goed!", the points of this break, the new
-// total, the egg hint, and "Terug naar de wereld". Texts are set with textContent only.
-import '../../styles/break.css';
+// Summary card at the end of a learning break or Extra oefenen round (T36, AC34, AC116).
 import type { SessionSummary } from '../../learning/break-session';
 import { el } from '../dom';
 import { onTap } from '../tap';
 
-export const MSG_HARD = 'Dit was lastig. Volgende keer gaat het vast beter!';
-export const MSG_EGG = 'Je kunt een ei kopen in de Dinowinkel!';
-
-export const pointsText = (n: number): string => `${n} ${Math.abs(n) === 1 ? 'punt' : 'punten'}`;
-
-export interface SummaryOptions {
+export interface SummaryViewOptions {
   summary: SessionSummary;
-  /** Preview (Probeer) earns nothing, so no points lines. */
-  showPoints?: boolean;
-  /** True when the new total pays for an egg the kid can buy. */
-  canBuyEgg?: boolean;
-  /** A cap message such as "Genoeg geoefend voor vandaag..." */
-  message?: string | null;
-  onDone: () => void;
+  /** True when the kid has enough points for at least one egg and is under the 12 shop dino cap (AC34). */
+  canAffordEgg?: boolean;
+  /** Optional cap message from Extra oefenen (AC120). */
+  capMessage?: string | null;
+  buttonLabel?: string;
+  onFinish: () => void;
   now?: () => number;
 }
 
 export interface SummaryView {
-  element: HTMLElement;
+  readonly element: HTMLElement;
   destroy(): void;
 }
 
-export function createSummary(options: SummaryOptions): SummaryView {
-  const s = options.summary;
-  const showPoints = options.showPoints !== false;
-  const root = el('section', { class: 'break-summary', attrs: { 'aria-label': 'Klaar' } });
+function formatEarned(earned: number): string {
+  if (earned > 0) return earned === 1 ? '+1 punt verdiend' : `+${earned} punten verdiend`;
+  if (earned < 0) return earned === -1 ? '-1 punt' : `${earned} punten`;
+  return '0 punten erbij';
+}
 
-  if (s.hard) {
-    root.append(el('h2', { class: 'summary-score summary-hard', text: MSG_HARD }));
-  } else {
-    root.append(el('h2', { class: 'summary-score', text: `${s.right} van de ${s.total} goed!` }));
-  }
+export function createSummaryView(options: SummaryViewOptions): SummaryView {
+  const { summary } = options;
+  const root = el('section', { class: 'break-summary', attrs: { 'aria-label': 'Samenvatting' } });
 
-  if (showPoints) {
-    const lines = el('div', { class: 'summary-lines' });
-    if (!s.hard) {
-      lines.append(el('p', { class: 'summary-earned', text: `Verdiend in deze pauze: ${pointsText(s.earned)}` }));
-      if (s.bonus > 0) lines.append(el('p', { class: 'summary-bonus', text: `Bonus voor alles goed: +${s.bonus}` }));
+  if (summary.hard) {
+    // AC116: 0 right answers -> kind message and total, no plus points, no bonus.
+    root.append(
+      el('h2', {
+        class: 'summary-title',
+        text: 'Dit was lastig. Volgende keer gaat het vast beter!',
+      }),
+    );
+    if (summary.earned < 0) {
+      root.append(el('p', { class: 'summary-points', text: formatEarned(summary.earned) }));
     }
-    lines.append(el('p', { class: 'summary-total', text: `Je hebt nu ${pointsText(s.pointsTotal)}` }));
-    root.append(lines);
-    if (options.message) root.append(el('p', { class: 'summary-note', text: options.message }));
-    if (options.canBuyEgg) root.append(el('p', { class: 'summary-egg', text: MSG_EGG }));
+  } else {
+    // AC34: K van de N goed, points earned, bonus if any, and new total.
+    root.append(
+      el('h2', {
+        class: 'summary-title',
+        text: `${summary.right} van de ${summary.total} goed!`,
+      }),
+    );
+    const pointsText =
+      summary.bonus > 0
+        ? `${formatEarned(summary.earned)} (inclusief +${summary.bonus} bonus!)`
+        : formatEarned(summary.earned);
+    root.append(el('p', { class: 'summary-points', text: pointsText }));
   }
 
-  const button = el('button', { class: 'break-button', text: 'Terug naar de wereld', attrs: { type: 'button' } });
+  root.append(
+    el('p', {
+      class: 'summary-total',
+      text: `Totaal: ${summary.pointsTotal} ${summary.pointsTotal === 1 ? 'punt' : 'punten'}`,
+    }),
+  );
+
+  if (options.capMessage) {
+    root.append(el('p', { class: 'break-cap-note', text: options.capMessage }));
+  }
+
+  if (options.canAffordEgg) {
+    root.append(
+      el('p', {
+        class: 'summary-egg-hint',
+        text: 'Je kunt een ei kopen in de Dinowinkel!',
+      }),
+    );
+  }
+
+  const button = el('button', {
+    class: 'summary-done-btn',
+    text: options.buttonLabel ?? 'Terug naar de wereld',
+    attrs: { type: 'button' },
+  });
   root.append(button);
-  let done = false;
+
+  let acted = false;
   const off = onTap(
     button,
     () => {
-      if (done) return;
-      done = true;
-      options.onDone();
+      if (acted) return;
+      acted = true;
+      options.onFinish();
     },
     { now: options.now },
   );
+
   return {
     element: root,
     destroy() {

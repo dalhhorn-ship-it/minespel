@@ -1,35 +1,154 @@
-/* Dino menu and name screen. Big targets, no hover rules. */
-.dino-menu, .name-screen {
-  position: fixed; inset: 0; z-index: 20; box-sizing: border-box;
-  display: flex; align-items: center; justify-content: center;
-  padding: var(--safe-top) var(--safe-right) var(--safe-bottom) var(--safe-left);
-  background: rgb(31 45 61 / 0.35);
-  touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;
-  font-family: var(--font-stack); color: var(--ink);
-}
-.dino-menu[hidden], .name-screen[hidden] { display: none; }
-.dino-menu-panel, .name-panel {
-  box-sizing: border-box; background: var(--paper); border: 4px solid var(--ink); border-radius: var(--radius);
-  padding: 16px; display: flex; flex-direction: column; gap: var(--gap);
-}
-.dino-menu-panel { min-width: 320px; }
-.dino-menu-title { font-size: var(--font-title); font-weight: 800; text-align: center; overflow-wrap: anywhere; }
-.dino-btn {
-  box-sizing: border-box; min-height: 64px; min-width: var(--touch-min); padding: 0 16px;
-  font: inherit; font-size: var(--font-large); font-weight: 700;
-  border: 3px solid var(--ink); border-radius: var(--radius); background: var(--right-bg); color: var(--ink);
-  touch-action: manipulation; -webkit-tap-highlight-color: transparent;
-}
-.dino-btn:active { background: var(--sky); }
-.dino-btn[aria-pressed='true'] { background: var(--grass); color: var(--on-grass); }
+/* Dino interaction menu & naming screen (T45, AC16, AC18, AC23). */
 
-.name-panel { max-width: 100%; align-items: center; max-height: 100%; overflow: hidden; }
-.name-prompt { font-size: var(--font-large); font-weight: 800; text-align: center; }
-.name-field { min-height: 64px; }
-.name-count { font-size: var(--font-body); font-weight: 700; }
-.name-panel .kid-keyboard { gap: 6px; }
-.name-panel .kb-key { height: 56px; }
-.name-back { align-self: center; }
-/* Inside the dino menu the name screen shares the backdrop. */
-.dino-menu .name-screen { position: static; inset: auto; padding: 0; background: none; }
-.dino-menu-panel[hidden], .name-panel[hidden] { display: none; }
+.dino-menu-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  background: rgba(15, 24, 36, 0.72);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
+.dino-menu-card {
+  width: min(560px, 94vw);
+  max-height: 92vh;
+  background: #fffdf7;
+  border: 4px solid #1f2d3d;
+  border-radius: 28px;
+  padding: 24px 28px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  color: #1f2d3d;
+  font-family: var(--font-stack);
+  font-size: calc(var(--font-body, 20px) * var(--kid-scale, 1));
+}
+
+.dino-menu-card-wide {
+  width: min(780px, 96vw);
+}
+
+.dino-menu-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.dino-menu-title {
+  margin: 0;
+  font-size: calc(28px * var(--kid-scale, 1));
+  font-weight: 800;
+  color: #1f2d3d;
+}
+
+.dino-menu-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: #fff3b0;
+  border: 2px solid #e0a000;
+  color: #5c3d00;
+  font-weight: 800;
+  font-size: calc(16px * var(--kid-scale, 1));
+}
+
+.dino-menu-status {
+  margin: 0;
+  padding: 10px 14px;
+  border-radius: 14px;
+  background: #eef6ff;
+  border: 2px solid #90caf9;
+  color: #133b63;
+  font-weight: 700;
+  text-align: center;
+}
+
+.dino-menu-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.dino-menu-btn {
+  min-height: 60px;
+  padding: 12px 18px;
+  border-radius: 16px;
+  border: 3px solid #1f2d3d;
+  background: #f4efe3;
+  color: #1f2d3d;
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+  touch-action: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.dino-menu-btn[aria-pressed='true'] {
+  background: #2e7d32;
+  border-color: #1b5e20;
+  color: #ffffff;
+}
+
+.dino-menu-btn-knuffel {
+  background: #ffeef2;
+  border-color: #c2185b;
+  color: #880e4f;
+}
+
+.dino-menu-btn-close {
+  background: #1f2d3d;
+  color: #ffffff;
+}
+
+/* Name screen */
+.name-screen-subtitle {
+  margin: 0;
+  font-weight: 700;
+  color: #415468;
+  text-align: center;
+}
+
+.name-screen-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 64px;
+  padding: 12px 20px;
+  border-radius: 16px;
+  border: 3px solid #1f2d3d;
+  background: #ffffff;
+}
+
+.name-screen-value {
+  font-size: calc(26px * var(--kid-scale, 1));
+  font-weight: 800;
+  color: #1f2d3d;
+  letter-spacing: 0.02em;
+}
+
+.name-screen-placeholder {
+  font-size: calc(20px * var(--kid-scale, 1));
+  font-weight: 700;
+  color: #6b7c93;
+}
+
+.name-screen-counter {
+  font-size: calc(16px * var(--kid-scale, 1));
+  font-weight: 800;
+  color: #415468;
+  font-variant-numeric: tabular-nums;
+}

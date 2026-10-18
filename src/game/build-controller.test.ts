@@ -1,9 +1,9 @@
 import { describe, expect, it, vi } from 'vitest';
-import { AIR, GRAS, OERSTEEN, STEEN, WOL_ROOD } from '../world/blocks';
+import { AIR, GRAS, OBSIDIAAN, OERSTEEN, STEEN, VUUR, WOL_ROOD } from '../world/blocks';
 import { WORLD_HEIGHT, WORLD_SIZE } from '../world/terrain';
 import { World } from '../world/world';
 import { EYE_HEIGHT, createPlayer } from '../world/physics';
-import { DEFAULT_HOTBAR, aimFromScreen, createBuildController } from './build-controller';
+import { DEFAULT_HOTBAR, aimFromScreen, createBuildController, tryLightObsidianGate } from './build-controller';
 
 const FLOOR = 4; // floor top at y = 5
 function flatWorld(): World {
@@ -186,39 +186,24 @@ describe('build controller', () => {
     expect(c.getState().hotbar).toEqual([1, 2, 3, 4, 5, 6, 7, 8]);
     expect(c.getState().selected).toBe(5);
   });
-});
 
-describe('build controller with dinos', () => {
-  function withDinos(extra: { tapFirst?: () => boolean; isOccupied?: () => boolean }) {
-    const world = flatWorld();
-    const p = createPlayer(20.5, 5, 20.5);
-    const ctrl = { player: p, yaw: 0, pitch: -0.5, pose: () => ({ x: p.x, y: p.y + EYE_HEIGHT, z: p.z, yaw: 0, pitch: -0.5 }) };
-    const onBlockChanged = vi.fn();
-    const c = createBuildController({
-      world, player: ctrl as never, onBlockChanged, effects: { pop: vi.fn() }, sound: { play: vi.fn() },
-      viewport: () => ({ width: 1000, height: 700 }), ...extra,
-    });
-    return { world, c, onBlockChanged };
-  }
+  it('CR2: lights the inner gate floor with VUUR when 4 obsidian floor blocks have left and right pillars', () => {
+    const w = flatWorld();
+    const changed: Array<[number, number]> = [];
+    // 4 obsidian blocks on the ground at y = 5, x = 10..13, z = 20
+    for (let x = 10; x <= 13; x++) w.set(x, 5, 20, OBSIDIAAN);
+    // Left pillar (x=10) and right pillar (x=13) built up 2 blocks high (y=6, 7)
+    w.set(10, 6, 20, OBSIDIAAN);
+    w.set(10, 7, 20, OBSIDIAAN);
+    w.set(13, 6, 20, OBSIDIAAN);
+    w.set(13, 7, 20, OBSIDIAAN);
+    // Place fire on one inner floor block (x=11, y=6, z=20)
+    w.set(11, 6, 20, VUUR);
 
-  it('a tap taken by a dino mines nothing (AC104)', () => {
-    const tapFirst = vi.fn(() => true);
-    const s = withDinos({ tapFirst });
-    s.c.tap(500, 350);
-    expect(tapFirst).toHaveBeenCalledTimes(1);
-    expect(s.onBlockChanged).not.toHaveBeenCalled();
-  });
-
-  it('a tap no dino wants still mines', () => {
-    const s = withDinos({ tapFirst: () => false });
-    s.c.tap(500, 350);
-    expect(s.onBlockChanged).toHaveBeenCalledTimes(1);
-  });
-
-  it('building where a dino or egg is does nothing (AC6)', () => {
-    const s = withDinos({ isOccupied: () => true });
-    s.c.setMode('bouwen');
-    s.c.tap(500, 350);
-    expect(s.onBlockChanged).not.toHaveBeenCalled();
+    const lit = tryLightObsidianGate(w, 11, 6, 20, (x, z) => changed.push([x, z]));
+    expect(lit).toBe(true);
+    expect(w.get(11, 6, 20)).toBe(VUUR);
+    expect(w.get(12, 6, 20)).toBe(VUUR);
+    expect(changed).toContainEqual([12, 20]);
   });
 });

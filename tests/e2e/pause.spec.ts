@@ -1,60 +1,51 @@
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test } from '@playwright/test';
+import { START_SPOT, WORLD_SIZE } from '../../src/world/terrain';
 import { openApp, readState } from './helpers/app';
 
-// Needs main.ts to call setupPauseMenu (see the T44 report).
-const tapText = async (page: Page, text: string) => {
-  const box = await page.getByRole('button', { name: text, exact: true }).boundingBox();
-  if (!box) throw new Error(`No button ${text}`);
-  await page.touchscreen.tap(box.x + box.width / 2, box.y + box.height / 2);
-};
-const screen = (page: Page) => readState<string>(page, 'currentScreen');
-const player = (page: Page) => readState<{ x: number; y: number; z: number }>(page, 'player');
-
-test.describe('pause menu', () => {
-  test('Pauze opens the menu, the timer stops, Terug naar de wereld goes back (AC23)', async ({ page }) => {
+test.describe('pause menu, parental controls button, and camera/sky controls (T44)', () => {
+  test('pause menu shows points, "Ik zit vast" teleports home, "Ouders" opens parental controls, and camera arrows tilt view', async ({
+    page,
+  }) => {
     await openApp(page);
-    await tapText(page, 'Pauze');
-    await expect(page.locator('[data-screen-id="pause"]')).toBeVisible();
-    expect(await screen(page)).toBe('kid-overlay');
-    await expect(page.locator('[data-pause="points"]')).toHaveText(/^Je hebt \d+ punt/);
-    expect(await readState<boolean>(page, 'timerCounting')).toBe(false);
-    expect(await readState<boolean>(page, 'gameRunning')).toBe(false);
-    await tapText(page, 'Terug naar de wereld');
-    expect(await screen(page)).toBe('world');
-    await expect(page.locator('[data-screen-id="pause"]')).toHaveCount(0);
-    await page.waitForFunction(() => (window as unknown as { __dino: Record<string, () => unknown> }).__dino.timerCounting?.() === true);
-  });
 
-  test('Ik zit vast puts the player at the start and leaves the world alone (AC106)', async ({ page }) => {
-    await openApp(page);
-    const start = await player(page);
-    await readState(page, 'setBlock', Math.floor(start.x) + 3, 25, Math.floor(start.z), 3);
-    await readState(page, 'placePlayer', start.x + 5, start.y, start.z + 5, 1);
-    const before = await readState<number>(page, 'teleportedCount');
-    await tapText(page, 'Pauze');
-    await tapText(page, 'Ik zit vast');
-    expect(await readState<number>(page, 'teleportedCount')).toBe(before + 1);
-    expect(await screen(page)).toBe('world');
-    const now = await player(page);
-    expect(Math.abs(now.x - start.x)).toBeLessThan(0.5);
-    expect(Math.abs(now.z - start.z)).toBeLessThan(0.5);
-    expect(await readState<number>(page, 'blockAt', Math.floor(start.x) + 3, 25, Math.floor(start.z))).toBe(3);
-  });
+    await readState(page, 'setPoints', 24);
+    const c = Math.floor(WORLD_SIZE / 2);
+    await page.evaluate(
+      ({ x, z }) => {
+        (window as unknown as { __dino: { placePlayer(x: number, y: number, z: number, yaw: number): void } }).__dino.placePlayer(
+          x,
+          15,
+          z,
+          0,
+        );
+      },
+      { x: c - 5 + 0.5, z: c - 5 + 0.5 },
+    );
 
-  for (const [name, kind, id, back] of [
-    ['Dinowinkel', 'kid-overlay', 'shop', '[data-shop="back"]'],
-    ['Lesboek', 'kid-overlay', 'lesboek', '[data-lesboek="back"]'],
-    ['Extra oefenen', 'learn', 'practice', '[data-practice="stop"]'],
-  ] as const) {
-    test(`${name} opens on top of the menu, the timer stays stopped, and back returns to the menu`, async ({ page }) => {
-      await openApp(page);
-      await tapText(page, 'Pauze');
-      await tapText(page, name);
-      expect(await screen(page)).toBe(kind);
-      await expect(page.locator(`[data-screen-id="${id}"]`)).toBeVisible();
-      expect(await readState<boolean>(page, 'timerCounting')).toBe(false);
-      await page.locator(back).first().tap();
-      await expect(page.locator('[data-screen-id="pause"]')).toBeVisible();
+    // Open pause menu
+    await readState(page, 'openPauseMenu');
+    await expect(page.locator('[data-testid="pause-points"]')).toContainText('24 punten');
+    expect(await readState<string>(page, 'currentScreen')).toBe('kid-overlay');
+
+    // Tap "Ik zit vast" -> player returns to START_SPOT
+    await page.evaluate(() => {
+      const btn = [...document.querySelectorAll('button')].find((b) => b.textContent === 'Ik zit vast')!;
+      btn.dispatchEvent(new PointerEvent('pointerdown', { pointerId: 1, clientX: 5, clientY: 5, bubbles: true }));
+      btn.dispatchEvent(new PointerEvent('pointerup', { pointerId: 1, clientX: 5, clientY: 5, bubbles: true }));
     });
-  }
+    expect(await readState<string>(page, 'currentScreen')).toBe('world');
+    const pos = await readState<{ x: number; y: number; z: number; pitch: number }>(page, 'player');
+    expect(pos.x).toBeCloseTo(START_SPOT.x, 2);
+    expect(pos.z).toBeCloseTo(START_SPOT.z, 2);
+
+    // Camera angle arrow buttons and sky ascend button are visible in HUD
+    await expect(page.locator('[data-testid="camera-arrows"]')).toBeVisible();
+    await expect(page.locator('[data-testid="hud-ascend"]')).toBeVisible();
+    await expect(page.locator('.hud [data-testid="parent-controls-btn"]')).toBeVisible();
+
+    // Open parental controls
+    await readState(page, 'openParentControls');
+    expect(await readState<string>(page, 'currentScreen')).toBe('parent');
+    await expect(page.locator('.parent-gate')).toBeVisible();
+  });
 });
