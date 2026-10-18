@@ -1,5 +1,6 @@
 // The app's own keyboard (AC57). Buttons only: no input element, so the iPad keyboard never opens.
 // One tap types one character. Shift is one shot: it capitalises the next letter, then switches off.
+import '../../styles/mc-menu.css';
 import '../../styles/keyboard.css';
 import { el } from '../dom';
 import { onTap, TAP_MOVE_LIMIT } from '../tap';

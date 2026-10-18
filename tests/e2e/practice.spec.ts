@@ -29,6 +29,7 @@ test.describe('lesboek, extra oefenen, and countdown override (T46, AC51, AC52, 
 
     // Click "Nu oefenen 🪙" on HUD countdown to immediately start exercises
     await nowBtn.click();
-    expect(await readState<boolean>(page, 'isBreakActive')).toBe(true);
+    // The break starts async (it reads the saved state first), so poll.
+    await expect.poll(() => readState<boolean>(page, 'isBreakActive')).toBe(true);
   });
 });

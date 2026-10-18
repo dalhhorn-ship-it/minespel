@@ -42,6 +42,7 @@ test.describe('pause menu, parental controls button, and camera/sky controls (T4
     await expect(page.locator('[data-testid="camera-arrows"]')).toBeVisible();
     await expect(page.locator('[data-testid="hud-ascend"]')).toBeVisible();
     await expect(page.locator('.hud [data-testid="parent-controls-btn"]')).toBeVisible();
+    await expect(page.locator('.hud [data-testid="parent-controls-btn"]')).toHaveText('\u{1F512}');
 
     // Open parental controls
     await readState(page, 'openParentControls');

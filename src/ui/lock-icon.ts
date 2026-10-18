@@ -1,4 +1,4 @@
-// Parental controls button ("Ouders" with lock icon, T48b, AC127).
+// Parental controls entry: a small grey lock, shown only on the world HUD (decision 53, PRD 4.12).
 // Registers with PointerRouter.addIgnoreZone when mounted in the 3D world HUD so a touch never moves the camera.
 
 import '../styles/parent.css';
@@ -9,7 +9,6 @@ import { onTap } from './tap';
 export interface LockIconOptions {
   onOpenParent: () => void;
   router?: PointerRouter;
-  floating?: boolean;
   now?: () => number;
 }
 
@@ -20,24 +19,18 @@ export interface LockIcon {
 
 export function createLockIcon(options: LockIconOptions): LockIcon {
   const cleanups: Array<() => void> = [];
-  const cls = ['lock-icon-btn', options.floating ? 'lock-icon-btn-floating' : '']
-    .filter(Boolean)
-    .join(' ');
 
   const btn = el(
     'button',
     {
-      class: cls,
+      class: 'lock-icon-btn',
       attrs: {
         type: 'button',
         'aria-label': 'Ouders',
         'data-testid': 'parent-controls-btn',
       },
     },
-    [
-      el('span', { text: '\u{1F512}', attrs: { 'aria-hidden': 'true' } }),
-      el('span', { text: 'Ouders' }),
-    ],
+    [el('span', { text: '\u{1F512}', attrs: { 'aria-hidden': 'true' } })],
   );
 
   cleanups.push(onTap(btn, options.onOpenParent, { now: options.now }));

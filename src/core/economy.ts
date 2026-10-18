@@ -10,8 +10,10 @@ export const POINTS_TEACH = -1;
 export const POINTS_BONUS = 3;
 export const MAX_SHOP_DINOS = 12;
 export const PRACTICE_DAY_CAP = 10;
+export const MAX_CHICKENS = 10;
 
 export const MSG_CAP_REACHED = "Je hebt al 12 dino's! Wat een kudde.";
+export const MSG_COOP_FULL = 'Het kippenhok is vol!';
 export const MSG_ENOUGH_PRACTICE = 'Genoeg geoefend voor vandaag, ga lekker bouwen!';
 
 export type SessionMode = 'break' | 'practice' | 'preview';
@@ -58,8 +60,16 @@ export interface PointsResult {
 /**
  * Apply one points change from a session. Preview (Probeer) changes nothing. Break: no cap.
  * Practice: no malus and no bonus, plus points count toward the day cap of 10.
+ * Early break (started with Nu oefenen, decision 56): the plus points and the +3 bonus share
+ * that same day cap, a plus that does not fit gives the part that fits, and there is no malus.
  */
-export function applyPoints(eco: EconomyRecord, mode: SessionMode, delta: number, day: string): PointsResult {
+export function applyPoints(
+  eco: EconomyRecord,
+  mode: SessionMode,
+  delta: number,
+  day: string,
+  early = false,
+): PointsResult {
   const same = (capHit: boolean): PointsResult => ({
     economy: { ...eco },
     applied: 0,
@@ -68,12 +78,12 @@ export function applyPoints(eco: EconomyRecord, mode: SessionMode, delta: number
   });
   if (mode === 'preview' || !Number.isFinite(delta) || delta === 0) return same(false);
 
-  if (mode === 'break') {
+  if (mode === 'break' && !early) {
     const points = addPoints(eco.points, delta);
     return { economy: { ...eco, points }, applied: points - clean(eco.points), capHit: false, message: null };
   }
 
-  // practice: no malus, no bonus
+  // practice or early break: no malus
   if (delta < 0) return same(false);
   const earned = practiceEarnedToday(eco, day);
   const room = Math.max(0, PRACTICE_DAY_CAP - earned);
@@ -111,7 +121,7 @@ export function canReceiveGolden(): boolean {
   return true;
 }
 
-export type BuyBlock = 'cap' | 'points';
+export type BuyBlock = 'cap' | 'points' | 'coop';
 
 export interface BuyState {
   kind: DinoKindId;
@@ -136,6 +146,24 @@ export function buyState(points: number, shopCount: number, kind: DinoKindId): B
   return { kind, price, canBuy: true, blocked: null, note: null };
 }
 
+/** Chickens in the world. They never count toward the 12 dinos (decision 55). */
+export function chickenCount(dinos: { kind?: string }[]): number {
+  return dinos.filter((d) => d.kind === 'kip').length;
+}
+
+/** A chicken costs 5 points, at most 10 live in the world. More than 10 in an old save are kept. */
+export function chickenBuyState(points: number, chickens: number): BuyState {
+  const price = DINO_KINDS.kip.price;
+  if (chickens >= MAX_CHICKENS) {
+    return { kind: 'kip', price, canBuy: false, blocked: 'coop', note: MSG_COOP_FULL };
+  }
+  const have = clean(points);
+  if (have < price) {
+    return { kind: 'kip', price, canBuy: false, blocked: 'points', note: pointsNeededText(price - have) };
+  }
+  return { kind: 'kip', price, canBuy: true, blocked: null, note: null };
+}
+
 export type PurchaseResult =
   | { ok: true; economy: EconomyRecord; kind: DinoKindId; price: number }
   | { ok: false; reason: BuyBlock; economy: EconomyRecord; note: string };
@@ -148,4 +176,11 @@ export function purchaseEgg(eco: EconomyRecord, shopCount: number, kind: DinoKin
   const s = buyState(eco.points, shopCount, kind);
   if (!s.canBuy) return { ok: false, reason: s.blocked as BuyBlock, economy: { ...eco }, note: s.note ?? '' };
   return { ok: true, economy: { ...eco, points: addPoints(eco.points, -s.price) }, kind, price: s.price };
+}
+
+/** Buy one chicken. Checks the coop and the points again, so fast repeated taps buy exactly one. */
+export function purchaseChicken(eco: EconomyRecord, chickens: number): PurchaseResult {
+  const s = chickenBuyState(eco.points, chickens);
+  if (!s.canBuy) return { ok: false, reason: s.blocked as BuyBlock, economy: { ...eco }, note: s.note ?? '' };
+  return { ok: true, economy: { ...eco, points: addPoints(eco.points, -s.price) }, kind: 'kip', price: s.price };
 }

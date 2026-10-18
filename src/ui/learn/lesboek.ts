@@ -28,7 +28,7 @@ export interface LesboekView {
 export function createLesboek(options: LesboekOptions): LesboekView {
   const cleanups: Array<() => void> = [];
   const card = el('div', {
-    class: 'lesboek-card pause-card',
+    class: 'lesboek-card pause-card scrollable',
     attrs: { role: 'dialog', 'aria-label': 'Lesboek' },
   });
   const root = el('div', { class: 'lesboek-backdrop pause-backdrop' }, [card]);

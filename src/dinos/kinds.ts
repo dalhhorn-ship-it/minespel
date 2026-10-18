@@ -19,7 +19,7 @@ export const DINO_KINDS: Record<DinoKindId, DinoKind> = {
   triceratops: { id: 'triceratops', name: 'Triceratops', price: 40, size: { w: 1, h: 1, l: 1.6 } },
   stegosaurus: { id: 'stegosaurus', name: 'Stegosaurus', price: 40, size: { w: 1, h: 1.2, l: 1.8 } },
   brachiosaurus: { id: 'brachiosaurus', name: 'Brachiosaurus', price: 80, size: { w: 1.2, h: 2.4, l: 2 } },
-  kip: { id: 'kip', name: 'Kip', price: 0, size: { w: 0.5, h: 0.7, l: 0.7 } },
+  kip: { id: 'kip', name: 'Kip', price: 5, size: { w: 0.5, h: 0.7, l: 0.7 } },
 };
 
 /** Shop dino egg order, cheapest first. */

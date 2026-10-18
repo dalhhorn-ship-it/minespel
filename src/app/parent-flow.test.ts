@@ -3,6 +3,7 @@ import 'fake-indexeddb/auto';
 import { describe, expect, it } from 'vitest';
 import { createFakeClock } from '../core/clock';
 import { createRng } from '../core/rng';
+import { makeResetQuestion } from '../gate/reset-question';
 import { openDb } from '../storage/db';
 import { createLogStore } from '../storage/log-store';
 import { createProgressStore } from '../storage/progress-store';
@@ -58,11 +59,20 @@ describe('parental controls flow (T48a, T48b, T49, T50)', () => {
       await parentFlow.open();
       expect(screens.current()).toBe('parent');
 
-      // Enter 4 digits ("1", "2", "3", "4") to set PIN on first open
-      for (const digit of ['1', '2', '3', '4']) {
-        const key = host.querySelector(`[data-key="${digit}"]`)!;
-        tap(key);
-        clock.advance(400);
+      // First PIN: a grown up sum first (decision 52), then choose and confirm 1234.
+      const question = makeResetQuestion(createRng(99));
+      expect(host.querySelector('[data-key="1"]')).toBeNull();
+      const input = host.querySelector<HTMLInputElement>('input.parent-input')!;
+      input.value = String(question.answer);
+      tap(host.querySelector('.parent-btn-primary')!);
+      await new Promise((r) => setTimeout(r, 20));
+      for (let round = 0; round < 2; round++) {
+        for (const digit of ['1', '2', '3', '4']) {
+          const key = host.querySelector(`[data-key="${digit}"]`)!;
+          tap(key);
+          clock.advance(400);
+        }
+        await new Promise((r) => setTimeout(r, 20));
       }
 
       // Wait for async unlock & shell load

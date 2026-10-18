@@ -13,7 +13,8 @@ test.describe('play countdown & timer matrix (T41)', () => {
 
     // Set remaining play time to 25s -> warning class becomes active
     await readState(page, 'setPlayRemainingMs', 25_000);
-    await expect(countdown).toContainText('Leerpauze over 0:25');
+    // The clock keeps running while we look, so allow a few seconds of drift below 0:25.
+    await expect(countdown).toContainText(/Leerpauze over 0:(2[0-5]|1\d)/);
     await expect(countdown).toHaveClass(/countdown-warning/);
 
     // Open pause menu -> play timer stops running
@@ -22,7 +23,8 @@ test.describe('play countdown & timer matrix (T41)', () => {
       b.dispatchEvent(new PointerEvent('pointerdown', { pointerId: 1, clientX: 5, clientY: 5, bubbles: true }));
       b.dispatchEvent(new PointerEvent('pointerup', { pointerId: 1, clientX: 5, clientY: 5, bubbles: true }));
     });
-    expect(await readState<boolean>(page, 'isPlayRunning')).toBe(false);
+    // The pause menu opens async (it reads the points first), so poll.
+    await expect.poll(() => readState<boolean>(page, 'isPlayRunning')).toBe(false);
 
     // Return to world and advance countdown to 0 -> break starts
     await page.evaluate(() => {

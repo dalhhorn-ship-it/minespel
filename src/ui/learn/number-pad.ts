@@ -1,4 +1,5 @@
 // The number pad for Rekenen: digits, one comma, backspace and Klaar. No dot, minus or space (AC121).
+import '../../styles/mc-menu.css';
 import '../../styles/keyboard.css';
 import { el } from '../dom';
 import { onTap } from '../tap';

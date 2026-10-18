@@ -12,7 +12,7 @@ import { createShopFlow, type ShopFlow } from './app/shop-flow';
 import { createTimerDriver, type TimerDriver } from './app/timer-driver';
 import { createSound } from './audio/sound';
 import { createCatalog, type Catalog } from './content/catalog';
-import { systemClock } from './core/clock';
+import { systemClock, today } from './core/clock';
 import { createRng } from './core/rng';
 import { registerHook } from './dev/e2e-hooks';
 import type { WorldDino } from './dinos/dino-store';
@@ -33,7 +33,6 @@ import { createCountdownView } from './ui/countdown';
 import { createDinoMenu, type DinoMenu } from './ui/dino-menu';
 import { el } from './ui/dom';
 import { createLesboek } from './ui/learn/lesboek';
-import { createLockIcon } from './ui/lock-icon';
 import { createPauseMenu, type PauseMenu } from './ui/pause-menu';
 
 installLockdown();
@@ -66,7 +65,7 @@ const countdownView = createCountdownView({
   initialMs: 5 * 60_000,
   warningEnabled: true,
   onStartNow: () => {
-    void breakFlow?.startBreak();
+    void breakFlow?.startBreak({ early: true });
   },
 });
 
@@ -179,19 +178,6 @@ if (app) {
     },
   });
 
-  // Floating parental controls lock button visible during kid overlays/breaks so parents can always enter the gate.
-  const floatingLock = createLockIcon({
-    floating: true,
-    onOpenParent: () => {
-      void parentFlow?.open();
-    },
-  });
-  floatingLock.element.hidden = true;
-  app.append(floatingLock.element);
-  screens.subscribe((kind) => {
-    floatingLock.element.hidden = kind === 'world' || kind === 'parent';
-  });
-
   // The real renderer. The e2e build may fall back to a renderer that draws nothing when WebGL is missing.
   let rendererFactory: RendererFactory = createWebGlRenderer;
   if (__E2E__) {
@@ -297,7 +283,7 @@ const booted = game
             clock: systemClock,
             sound,
             onEarnCoins: () => {
-              void breakFlow?.startBreak();
+              void breakFlow?.startBreak({ early: true });
             },
           });
           practiceFlow = createPracticeFlow({
@@ -310,7 +296,7 @@ const booted = game
             getCatalog: () => catalog,
             sound,
             onStartBreakRound: async () => {
-              await breakFlow?.startBreak();
+              await breakFlow?.startBreak({ early: true });
             },
           });
           parentFlow = createParentFlow({
@@ -356,6 +342,15 @@ if (__E2E__) {
   registerHook('setPoints', async (pts: number) => {
     if (records) {
       await records.update('economy', (e) => ({ ...e, points: pts }));
+    }
+  });
+  registerHook('setPracticeUsed', async (n: number) => {
+    if (records) {
+      await records.update('economy', (e) => ({
+        ...e,
+        practicePointsToday: n,
+        practiceDay: today(systemClock),
+      }));
     }
   });
   registerHook('breaksLog', async () => {

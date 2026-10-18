@@ -1,38 +1,43 @@
-/* Calm full screen for learning breaks, Extra oefenen and Probeer (T36, PRD 8). */
+/* Calm full screen for learning breaks, Extra oefenen and Probeer (T36, PRD 8).
+   Minecraft look: block texture background (set as --mc-bg by mc-background.ts) under a dark wash,
+   stone panels on top (see mc-menu.css). Everything fits in 1024x768 without scrolling. */
 .break-screen {
   position: fixed;
   inset: 0;
   z-index: 20;
   display: flex;
   flex-direction: column;
+  box-sizing: border-box;
   padding: calc(var(--safe-top) + var(--gap)) calc(var(--safe-right) + var(--gap) * 2) calc(var(--safe-bottom) + var(--gap)) calc(var(--safe-left) + var(--gap) * 2);
-  background: var(--sand);
-  color: var(--ink);
+  background:
+    linear-gradient(var(--mc-wash), var(--mc-wash)),
+    var(--mc-bg, none) 0 0 / 100% auto no-repeat,
+    #3b3b40;
+  image-rendering: pixelated;
+  color: var(--mc-text);
   font-family: var(--font-stack);
   font-size: var(--font-body);
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   user-select: none;
   -webkit-user-select: none;
   -webkit-touch-callout: none;
 }
 
 .break-header {
+  flex: none;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--gap);
   margin-bottom: var(--gap);
-  padding-right: calc(var(--touch-min) + var(--gap)); /* room for the lock icon */
 }
 
 .dino-juf {
   display: flex;
   align-items: center;
   gap: var(--gap);
-  background: var(--paper);
-  border: 3px solid var(--ink);
-  border-radius: var(--radius);
-  padding: 8px 14px;
+  padding: 6px 14px;
 }
 
 .dino-juf-avatar {
@@ -41,8 +46,9 @@
   justify-content: center;
   width: 44px;
   height: 44px;
-  border-radius: 50%;
-  background: var(--grass);
+  border-radius: 0;
+  border: 3px solid var(--mc-edge);
+  background: var(--mc-green);
   color: var(--on-grass);
   font-weight: 800;
   font-size: 24px;
@@ -63,13 +69,14 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  padding: 10px 14px;
 }
 
 .break-dot {
   width: 18px;
   height: 18px;
-  border-radius: 50%;
-  border: 3px solid var(--ink);
+  border-radius: 0;
+  border: 3px solid var(--mc-edge);
   background: var(--paper);
 }
 
@@ -79,27 +86,36 @@
 }
 
 .break-dot-done {
-  background: var(--grass);
+  background: var(--mc-green-light);
 }
 
 .break-body {
-  flex: 1;
+  flex: 1 1 0;
+  min-height: 0;
   display: flex;
   flex-direction: column;
-  justify-content: center;
   max-width: 820px;
   width: 100%;
   margin: 0 auto;
   gap: var(--gap);
 }
 
+/* Centre when there is room, start at the top when there is not (flex centring would cut the top off). */
+.break-body > :first-child {
+  margin-top: auto;
+}
+
+.break-body > :last-child {
+  margin-bottom: auto;
+}
+
 .break-banner {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 12px 16px;
-  border-radius: var(--radius);
-  border: 3px solid var(--ink);
+  padding: 10px 16px;
+  border-radius: 0;
+  border: var(--mc-step) solid var(--mc-edge);
   font-weight: 800;
   font-size: var(--font-large);
 }
@@ -117,7 +133,8 @@
 .break-cap-note {
   margin: 0;
   padding: 10px 14px;
-  border-radius: var(--radius);
+  border-radius: 0;
+  border: 3px solid var(--mc-edge);
   background: var(--sky-light);
   color: var(--ink);
   font-weight: 700;
@@ -126,9 +143,6 @@
 .break-feedback-card,
 .break-summary,
 .break-empty {
-  background: var(--paper);
-  border: 3px solid var(--ink);
-  border-radius: var(--radius);
   padding: calc(var(--gap) * 2);
   display: flex;
   flex-direction: column;
@@ -141,10 +155,6 @@
   min-width: var(--touch-min);
   min-height: var(--touch-min);
   padding: 0 calc(var(--gap) * 2);
-  border: 3px solid var(--ink);
-  border-radius: var(--radius);
-  background: var(--grass);
-  color: var(--on-grass);
   font: inherit;
   font-size: var(--font-large);
   font-weight: 800;
@@ -166,7 +176,49 @@
 
 .summary-egg-hint {
   padding: 10px 14px;
-  border-radius: var(--radius);
+  border-radius: 0;
+  border: 3px solid var(--mc-edge);
   background: var(--right-bg);
   color: var(--right);
 }
+
+/* A Safari tab is only about 690 high: tighten the header. */
+@media (max-height: 740px) {
+  .break-screen {
+    padding-top: calc(var(--safe-top) + 8px);
+    padding-bottom: calc(var(--safe-bottom) + 8px);
+  }
+  .break-header {
+    margin-bottom: 8px;
+  }
+  .dino-juf {
+    padding: 2px 12px;
+  }
+  .dino-juf-avatar {
+    width: 40px;
+    height: 40px;
+  }
+  .break-body {
+    gap: 8px;
+  }
+  .summary-title {
+    font-size: calc(34px * var(--kid-scale));
+  }
+}
+
+/* Stoppen in Extra oefenen (decision 51): top right of the header, at least 56 high. */
+.break-stop-btn {
+  flex: none;
+  min-width: 112px;
+  min-height: 56px;
+  padding: 0 20px;
+  border: 3px solid var(--ink, #22201c);
+  border-radius: var(--radius, 12px);
+  background: var(--paper, #fff);
+  color: var(--ink, #22201c);
+  font: inherit;
+  font-size: 18px;
+  font-weight: 800;
+  touch-action: manipulation;
+}
+.break-stop-btn[hidden] { display: none; }

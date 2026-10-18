@@ -4,27 +4,27 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  min-width: 56px;
-  min-height: 56px;
-  padding: 0 16px;
-  border-radius: 14px;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0;
+  border-radius: 10px;
   border: 2px solid rgba(255, 255, 255, 0.35);
-  background: rgba(20, 32, 48, 0.72);
-  color: #ffffff;
+  background: rgba(90, 90, 90, 0.55);
+  color: #d8d8d8;
   font: inherit;
-  font-size: 16px;
-  font-weight: 800;
+  font-size: 20px;
+  line-height: 1;
   cursor: pointer;
   user-select: none;
   -webkit-user-select: none;
+  touch-action: none;
 }
 
-.lock-icon-btn-floating {
-  position: fixed;
-  top: calc(10px + var(--safe-top, 0px));
-  right: calc(10px + var(--safe-right, 0px));
-  z-index: 80;
+.lock-icon-btn span {
+  filter: grayscale(1);
+  opacity: 0.85;
 }
 
 .parent {
@@ -141,7 +141,7 @@
 .parent-sidebar {
   background: #eae3d2;
   border-right: 2px solid #d4cbb8;
-  padding: 16px;
+  padding: 16px 16px calc(var(--safe-bottom, 0px) + 16px);
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -174,7 +174,7 @@
 
 .parent-close-btn {
   margin-top: auto;
-  min-height: 48px;
+  min-height: 56px;
   padding: 10px 14px;
   border-radius: 12px;
   border: 2px solid #14502b;
@@ -264,13 +264,13 @@
 
 .parent-level-pills {
   display: inline-flex;
-  gap: 6px;
+  gap: 8px;
   flex-wrap: wrap;
 }
 
 .parent-level-pill {
-  min-height: 38px;
-  padding: 4px 12px;
+  min-height: 44px;
+  padding: 4px 14px;
   border-radius: 999px;
   border: 2px solid #bfb39c;
   background: #f5f0e4;

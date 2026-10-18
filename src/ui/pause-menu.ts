@@ -62,7 +62,7 @@ export function createPauseMenu(options: PauseMenuOptions): PauseMenu {
   }
 
   const actions = el('div', { class: 'pause-actions' }, buttons);
-  const card = el('div', { class: 'pause-card', attrs: { role: 'dialog', 'aria-label': 'Pauze' } }, [
+  const card = el('div', { class: 'pause-card scrollable', attrs: { role: 'dialog', 'aria-label': 'Pauze' } }, [
     header,
     actions,
   ]);

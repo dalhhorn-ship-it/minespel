@@ -51,6 +51,11 @@ export interface SessionSummary {
 
 export interface SessionState {
   mode: SessionMode;
+  /**
+   * Early break (started with Nu oefenen): plus points share the Extra oefenen day limit and there
+   * is no malus. Missing means a normal break (older saved sessions).
+   */
+  early?: boolean;
   /** Effective local day, "2026-10-18", for the Extra oefenen cap. */
   day: string;
   entries: SessionEntry[];
@@ -112,6 +117,8 @@ export type SessionEffect =
 
 export interface SessionConfig {
   mode: SessionMode;
+  /** True for a break started with Nu oefenen (decision 56). */
+  early?: boolean;
   entries: SessionEntry[];
   economy: EconomyRecord;
   day: string;
@@ -128,6 +135,7 @@ export interface StepResult {
 export function startSession(config: SessionConfig): StepResult {
   const base: SessionState = {
     mode: config.mode,
+    ...(config.early ? { early: true } : {}),
     day: config.day,
     entries: config.entries.map((e) => ({ ...e })),
     results: config.entries.map(() => null),
@@ -169,7 +177,7 @@ function applyDelta(
   effects: SessionEffect[],
 ): SessionState {
   if (state.mode === 'preview') return state;
-  const r = applyPoints(state.economy, state.mode, delta, state.day);
+  const r = applyPoints(state.economy, state.mode, delta, state.day, state.early === true);
   if (r.applied !== 0 || r.message) {
     effects.push({ type: 'points', delta, applied: r.applied, total: r.economy.points, reason, message: r.message });
   }

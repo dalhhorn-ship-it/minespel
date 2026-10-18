@@ -8,6 +8,18 @@ function tap(el: Element) {
 }
 
 describe('pause menu (T44)', () => {
+  it('the card can be scrolled by finger on a short screen', () => {
+    const menu = createPauseMenu({
+      points: 1,
+      onResume: vi.fn(),
+      onTeleportHome: vi.fn(),
+      onShop: vi.fn(),
+      onLesboek: vi.fn(),
+      onPractice: vi.fn(),
+    });
+    expect(menu.element.querySelector('.pause-card')?.classList.contains('scrollable')).toBe(true);
+  });
+
   it('shows points total and triggers callbacks for Terug naar de wereld, Ik zit vast, Dinowinkel, Lesboek, Extra oefenen, and Ouders', () => {
     const onResume = vi.fn();
     const onTeleportHome = vi.fn();

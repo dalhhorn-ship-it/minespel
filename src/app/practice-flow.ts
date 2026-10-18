@@ -283,6 +283,7 @@ export function createPracticeFlow(options: PracticeFlowOptions): PracticeFlow {
     const stepResult = reduce(activeState, event);
     activeState = stepResult.state;
     await processPracticeEffects(activeState, stepResult.effects);
+    if (!activeState) return; // Stoppen was tapped while saving; points are saved already.
 
     if (activeState.phase === 'done') {
       clearScreen();
@@ -290,6 +291,12 @@ export function createPracticeFlow(options: PracticeFlowOptions): PracticeFlow {
       return;
     }
     screenView?.render(activeState);
+  }
+
+  /** Stoppen (decision 51): points are already saved per step, so just close and go back to the world. */
+  function stopSession() {
+    clearScreen();
+    options.screens.showWorld();
   }
 
   function handleAction(action: BreakScreenAction) {
@@ -381,6 +388,7 @@ export function createPracticeFlow(options: PracticeFlowOptions): PracticeFlow {
       canAffordEgg,
       sound: options.sound,
       onAction: handleAction,
+      onStop: stopSession,
       now: options.now ?? (() => clock.now()),
     });
     options.screens.showLearn(screenView.element);
@@ -460,7 +468,7 @@ export function createPracticeFlow(options: PracticeFlowOptions): PracticeFlow {
           attrs: { type: 'button', 'data-testid': 'practice-start-break-now' },
         },
         [
-          el('span', { text: '\u{1FA99} Start nu een volledige leerpauze (onbeperkt munten verdienen!)' }),
+          el('span', { text: '\u{1FA99} Start nu een volledige leerpauze' }),
           el('span', { text: 'Start \u{27A1}' }),
         ],
       );

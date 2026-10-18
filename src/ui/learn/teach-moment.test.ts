@@ -67,4 +67,14 @@ describe('teach moment', () => {
     const tm = createTeachMoment({ answer: 'a', explain: 'b', onDone: () => {} });
     expect(tm.element.querySelector('.teach-lesson')).toBeNull();
   });
+
+  it('keeps Ik snap het in a footer outside the scrolling lesson part (F5)', () => {
+    const tm = createTeachMoment({ answer: 'a', explain: 'b', teaching: { kind: 'example', example: { title: 't', steps: ['1', '2'] } }, onDone: () => {} });
+    const scroll = tm.element.querySelector('.teach-scroll');
+    expect(scroll?.classList.contains('scrollable')).toBe(true);
+    expect(scroll?.querySelector('.teach-lesson')).not.toBeNull();
+    expect(scroll?.querySelector('.teach-done')).toBeNull();
+    expect(tm.element.querySelector('.teach-footer .teach-done')).not.toBeNull();
+    expect(tm.element.querySelector('.teach-footer .teach-malus')).not.toBeNull();
+  });
 });

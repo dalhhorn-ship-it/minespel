@@ -1,5 +1,6 @@
 // Choice view: a prompt, an optional sentence and 2 to 4 big answer buttons (AC53).
 // It only collects the answer. The caller scores it. Only the first tap counts (AC117).
+import '../../styles/mc-menu.css';
 import '../../styles/questions.css';
 import type { ChoiceItem } from '../../content/format';
 import type { Response } from '../../learning/answer-check';

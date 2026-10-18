@@ -32,6 +32,18 @@ describe('lockdown', () => {
     expect(fire(inner, 'touchmove').defaultPrevented).toBe(false);
   });
 
+  it('lets a finger scroll kid screens that are marked scrollable, like the Lesboek and Extra oefenen', () => {
+    remove = installLockdown(document);
+    for (const cls of ['scrollable', 'lesboek-card']) {
+      const card = document.createElement('div');
+      card.className = cls;
+      const inner = document.createElement('p');
+      card.append(inner);
+      document.body.append(card);
+      expect(fire(inner, 'touchmove').defaultPrevented, cls).toBe(false);
+    }
+  });
+
   it('lets inputs keep their context menu and stops after removal', () => {
     remove = installLockdown(document);
     const input = document.createElement('input');

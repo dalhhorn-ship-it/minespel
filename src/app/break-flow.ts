@@ -78,7 +78,11 @@ export interface BreakFlowOptions {
 }
 
 export interface BreakFlow {
-  startBreak(): Promise<void>;
+  /**
+   * Start a break. `early: true` is a break the kid started with Nu oefenen: its plus points share
+   * the Extra oefenen day limit and there is no malus. A break from the countdown is never early.
+   */
+  startBreak(opts?: { early?: boolean }): Promise<void>;
   resumeBreak(saved: PersistedBreakSession): Promise<void>;
   endBreakByParent(): Promise<void>;
   isActive(): boolean;
@@ -336,7 +340,7 @@ export function createBreakFlow(options: BreakFlowOptions): BreakFlow {
   }
 
   const flow: BreakFlow = {
-    async startBreak() {
+    async startBreak(opts) {
       if (active) return;
       const catalog = options.getCatalog();
       const [settings, switches, rotation, economy, dinos, allProgress] = await Promise.all([
@@ -425,6 +429,7 @@ export function createBreakFlow(options: BreakFlowOptions): BreakFlow {
       const now = options.clock.now();
       const started = startSession({
         mode: 'break',
+        early: opts?.early === true,
         entries,
         economy,
         day: effDay,
@@ -486,6 +491,7 @@ export function createBreakFlow(options: BreakFlowOptions): BreakFlow {
 
   if (__E2E__) {
     registerHook('startBreakNow', () => flow.startBreak());
+    registerHook('startEarlyBreak', () => flow.startBreak({ early: true }));
     registerHook('endBreakByParent', () => flow.endBreakByParent());
     registerHook('isBreakActive', () => flow.isActive());
     registerHook('breakState', () => flow.currentState());

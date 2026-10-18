@@ -105,4 +105,49 @@ describe('lesboek and practice-flow (T46, AC51, AC52, AC120)', () => {
     flow.destroy();
     db.close();
   });
+
+  it('Stoppen ends an Extra oefenen session, keeps the points earned and goes back to the world (decision 51)', async () => {
+    const db = await openDb({ name: `practice-stop-${Math.random()}` });
+    const records = createRecords(db);
+    const host = document.createElement('div');
+    const screens = createScreenManager({ host });
+    const flow = createPracticeFlow({
+      screens,
+      clock: { now: () => Date.parse('2026-10-17T12:00:00Z') },
+      rng: createRng(5),
+      records,
+      progressStore: createProgressStore(db),
+      logStore: createLogStore(db),
+      getCatalog: () => createCatalog(),
+    });
+
+    await flow.startTopic(REKENEN_MODULE_ID, 'optellen');
+    expect(screens.current()).toBe('learn');
+    const stop = host.querySelector<HTMLButtonElement>('[data-testid="practice-stop"]');
+    expect(stop).not.toBeNull();
+    expect(stop?.hidden).toBe(false);
+
+    // Answer the first sum right: +2 points, saved per step.
+    const m = /(\d+) \+ (\d+)/.exec(host.querySelector('.q-prompt')?.textContent ?? '');
+    expect(m).not.toBeNull();
+    const answer = String(Number(m?.[1]) + Number(m?.[2]));
+    for (const ch of answer) {
+      tap(Array.from(host.querySelectorAll('.kb-char')).find((b) => b.textContent === ch));
+    }
+    tap(host.querySelector('.kb-done'));
+    await new Promise((r) => setTimeout(r, 30));
+    expect(host.textContent).toContain('Goed');
+    // Stoppen is also there on the feedback step.
+    expect(host.querySelector<HTMLButtonElement>('[data-testid="practice-stop"]')?.hidden).toBe(false);
+
+    tap(host.querySelector('[data-testid="practice-stop"]'));
+    await new Promise((r) => setTimeout(r, 30));
+    expect(screens.current()).toBe('world');
+    expect(host.querySelector('.break-screen')).toBeNull();
+    const economy = await records.get('economy');
+    expect(economy.points).toBe(2);
+
+    flow.destroy();
+    db.close();
+  });
 });

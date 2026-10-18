@@ -269,3 +269,92 @@ describe('break-session', () => {
     expect(JSON.stringify(state)).toBe(copy);
   });
 });
+
+describe('early break (decision 56)', () => {
+  const eco = (used: number) => ({ points: 10, practicePointsToday: used, practiceDay: DAY });
+  const allFirst = (n: number): SessionEvent[] => {
+    const ev: SessionEvent[] = [];
+    for (let i = 0; i < n; i++) {
+      ev.push(ans(2000 + i * 10, right), { type: 'next', at: 2001 + i * 10 });
+    }
+    return ev;
+  };
+
+  it('0 used: all plus points and the +3 bonus count, then 10 is used up', () => {
+    const { state } = startSession(config(5, { early: true, economy: eco(0) }));
+    const r = run(state, allFirst(5));
+    expect(r.state.earned).toBe(10);
+    expect(r.state.bonus).toBe(0);
+    expect(r.state.economy.points).toBe(20);
+    expect(r.state.economy.practicePointsToday).toBe(10);
+    expect(r.state.message).not.toBeNull();
+  });
+
+  it('8 used: the +2 fits, the rest gives nothing and the friendly message shows', () => {
+    const { state } = startSession(config(3, { early: true, economy: eco(8) }));
+    const r = run(state, allFirst(3));
+    expect(r.state.earned).toBe(2);
+    expect(r.state.economy.points).toBe(12);
+    expect(r.state.summary?.bonus).toBe(0);
+    expect(r.state.message).toBe("Genoeg geoefend voor vandaag, ga lekker bouwen!");
+  });
+
+  it('9 used: a +2 gives only 1', () => {
+    const { state } = startSession(config(1, { early: true, economy: eco(9) }));
+    const r = run(state, [ans(2000, right)]);
+    expect(r.state.earned).toBe(1);
+    expect(r.state.economy.practicePointsToday).toBe(10);
+  });
+
+  it('the +3 bonus gives only what fits', () => {
+    // 3 questions: 3 x +2 would be 6, plus bonus 3. With 4 used: 2+2+... fills to 10 before the bonus.
+    const { state } = startSession(config(2, { early: true, economy: eco(5) }));
+    const r = run(state, allFirst(2));
+    // 5 + 2 + 2 = 9, bonus 3 cut to 1
+    expect(r.state.earned).toBe(5);
+    expect(r.state.bonus).toBe(1);
+    expect(r.state.economy.practicePointsToday).toBe(10);
+  });
+
+  it('the +3 bonus gives nothing at the limit', () => {
+    const { state } = startSession(config(2, { early: true, economy: eco(10) }));
+    const r = run(state, allFirst(2));
+    expect(r.state.earned).toBe(0);
+    expect(r.state.summary?.bonus).toBe(0);
+    expect(r.state.economy.points).toBe(10);
+  });
+
+  it('has no malus after a teach moment', () => {
+    const { state } = startSession(config(1, { early: true, economy: eco(0) }));
+    const r = run(state, [ans(2000, wrong), ans(2100, wrong)]);
+    expect(r.state.phase).toBe('teach');
+    expect(r.state.earned).toBe(0);
+    expect(r.state.economy.points).toBe(10);
+  });
+
+  it('a timed break keeps full points, the bonus and the malus', () => {
+    const { state } = startSession(config(5, { economy: eco(10) }));
+    expect(state.early).toBeUndefined();
+    const r = run(state, allFirst(5));
+    expect(r.state.earned).toBe(13);
+    const t = startSession(config(1, { economy: eco(10) }));
+    expect(run(t.state, [ans(2000, wrong), ans(2100, wrong)]).state.earned).toBe(-1);
+  });
+
+  it('the early flag survives a JSON round trip and a missing flag means normal', () => {
+    const { state } = startSession(config(2, { early: true, economy: eco(9) }));
+    const back = JSON.parse(JSON.stringify(state)) as SessionState;
+    expect(back.early).toBe(true);
+    const r = run(back, [ans(2000, right)]);
+    expect(r.state.earned).toBe(1);
+    const old = JSON.parse(JSON.stringify(startSession(config(1, { economy: eco(10) })).state)) as SessionState;
+    expect(run(old, [ans(2000, right)]).state.earned).toBe(2);
+  });
+
+  it('next day the limit starts again', () => {
+    const { state } = startSession(
+      config(1, { early: true, day: '2026-10-18', economy: { points: 0, practicePointsToday: 10, practiceDay: DAY } }),
+    );
+    expect(run(state, [ans(2000, right)]).state.earned).toBe(2);
+  });
+});

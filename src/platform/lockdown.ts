@@ -1,7 +1,7 @@
 // Makes the page feel like an app: no zoom gestures, no callout menu, no scrolling in game areas (AC10).
 
 /** Elements inside these may scroll and select. The parent area uses .parent. */
-export const SCROLL_SELECTOR = '.parent, .scrollable';
+export const SCROLL_SELECTOR = '.parent, .scrollable, .lesboek-card';
 
 function insideScrollArea(target: EventTarget | null): boolean {
   return target instanceof Element && target.closest(SCROLL_SELECTOR) !== null;
