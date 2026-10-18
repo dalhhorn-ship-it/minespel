@@ -3,7 +3,7 @@ import { AIR, STEEN } from '../world/blocks';
 import { EYE_HEIGHT, MAX_PLAYER_Y, PLAYER_HEIGHT, collides } from '../world/physics';
 import { START_SPOT, WORLD_HEIGHT, WORLD_SIZE } from '../world/terrain';
 import { World } from '../world/world';
-import { createPlayerController, settlePlayer, stickToWorld } from './player-controller';
+import { LOOK_TAP_MAX_MS, MAX_PITCH, createPlayerController, settlePlayer, stickToWorld } from './player-controller';
 
 const FLOOR = 4;
 
@@ -339,5 +339,140 @@ describe('flying (G4)', () => {
     expect(q.x).toBe(0.5);
     expect(q.z).toBe(WORLD_SIZE - 0.5);
     expect(q.y).toBeLessThanOrEqual(MAX_PLAYER_Y);
+  });
+});
+
+describe('camera arrows (G5)', () => {
+  const deg = (r: number) => (r * 180) / Math.PI;
+  function run(c: ReturnType<typeof setup>['c'], seconds: number, fps: number) {
+    const n = Math.round(seconds * fps);
+    for (let i = 0; i < n; i++) c.update(1 / fps);
+  }
+  /** What the arrow button code in G6 does: a hold starts only after 200 ms, a shorter press is a tap. */
+  function press(c: ReturnType<typeof setup>['c'], x: number, y: number, ms: number, fps = 60) {
+    if (ms < LOOK_TAP_MAX_MS) {
+      run(c, ms / 1000, fps);
+      c.tapLook(x, y);
+      return;
+    }
+    run(c, LOOK_TAP_MAX_MS / 1000, fps);
+    c.setLookInput(x, y);
+    run(c, (ms - LOOK_TAP_MAX_MS) / 1000, fps);
+    c.setLookInput(0, 0);
+  }
+
+  it('AC171: a tap left turns 15 degrees, over more than one frame', () => {
+    const { c } = setup();
+    const y0 = c.yaw;
+    c.tapLook(-1, 0);
+    c.update(1 / 60);
+    expect(deg(c.yaw - y0)).toBeGreaterThan(0);
+    expect(deg(c.yaw - y0)).toBeLessThan(15);
+    run(c, 0.5, 60);
+    expect(deg(c.yaw - y0)).toBeGreaterThan(14.9);
+    expect(deg(c.yaw - y0)).toBeLessThan(15.1);
+    run(c, 1, 60);
+    expect(deg(c.yaw - y0)).toBeLessThan(15.1);
+  });
+  it('a tap is the same 15 degrees at 30 fps', () => {
+    const { c } = setup();
+    const y0 = c.yaw;
+    c.tapLook(1, 0);
+    run(c, 0.6, 30);
+    expect(deg(y0 - c.yaw)).toBeCloseTo(15, 1);
+  });
+  it('a tap up tilts 15 degrees', () => {
+    const { c } = setup();
+    c.tapLook(0, 1);
+    run(c, 0.6, 60);
+    expect(deg(c.pitch)).toBeCloseTo(15, 1);
+  });
+  it('AC171: hold right for 2 s turns about 180 degrees, keeps turning a little after release, then stops', () => {
+    const { c } = setup();
+    const y0 = c.yaw;
+    c.setLookInput(1, 0);
+    run(c, 2, 60);
+    const atRelease = deg(y0 - c.yaw);
+    expect(atRelease).toBeGreaterThan(160);
+    expect(atRelease).toBeLessThan(200);
+    c.setLookInput(0, 0);
+    run(c, 1, 60);
+    const extra = deg(y0 - c.yaw) - atRelease;
+    expect(extra).toBeGreaterThan(5);
+    expect(extra).toBeLessThan(25);
+    const settled = c.yaw;
+    run(c, 1, 60);
+    expect(c.yaw).toBe(settled);
+  });
+  it('the same hold at 30 and 60 fps ends within 2 degrees', () => {
+    const a = setup().c;
+    const b = setup().c;
+    a.setLookInput(1, 0);
+    b.setLookInput(1, 0);
+    run(a, 2, 60);
+    run(b, 2, 30);
+    a.setLookInput(0, 0);
+    b.setLookInput(0, 0);
+    run(a, 1, 60);
+    run(b, 1, 30);
+    expect(Math.abs(deg(a.yaw - b.yaw))).toBeLessThan(2);
+  });
+  it('AC172: holding up for 5 s stops at MAX_PITCH, holding down at minus MAX_PITCH', () => {
+    const { c } = setup();
+    c.setLookInput(0, 1);
+    run(c, 5, 60);
+    expect(c.pitch).toBe(MAX_PITCH);
+    c.setLookInput(0, -1);
+    run(c, 5, 60);
+    expect(c.pitch).toBe(-MAX_PITCH);
+  });
+  it('left and right together do not turn, up and left together both apply', () => {
+    const { c } = setup();
+    const y0 = c.yaw;
+    c.setLookInput(-1 + 1, 0);
+    run(c, 1, 60);
+    expect(c.yaw).toBe(y0);
+    c.setLookInput(-1, 1);
+    run(c, 1, 60);
+    expect(c.yaw).toBeGreaterThan(y0);
+    expect(c.pitch).toBeGreaterThan(0);
+  });
+  it('AC172: stick and arrow at the same time walk and turn', () => {
+    const { c, stick } = setup();
+    const z0 = c.player.z;
+    const y0 = c.yaw;
+    stick.v = { x: 0, y: -1 };
+    c.setLookInput(1, 0);
+    run(c, 0.5, 60);
+    expect(c.player.z).toBeGreaterThan(z0);
+    expect(c.yaw).toBeLessThan(y0);
+  });
+  it('drag look still works with the arrows idle', () => {
+    const { c, lookDelta } = setup();
+    lookDelta.dx = 100;
+    c.update(1 / 60);
+    expect(c.yaw).toBeCloseTo(-0.6);
+  });
+  it('a short press is only a tap and a long press is only a hold (they never add up)', () => {
+    const tapOnly = setup().c;
+    press(tapOnly, 1, 0, 100);
+    run(tapOnly, 1, 60);
+    expect(deg(-tapOnly.yaw)).toBeCloseTo(15, 1);
+    const hold = setup().c;
+    press(hold, 1, 0, 1000);
+    run(hold, 1, 60);
+    // 0.8 s of hold, 90 deg/s, minus the ease in, plus the ease out: 90 * 0.8 = 72.
+    expect(deg(-hold.yaw)).toBeGreaterThan(70);
+    expect(deg(-hold.yaw)).toBeLessThan(74);
+  });
+  it('reset stops all arrow turning', () => {
+    const { c } = setup();
+    c.setLookInput(1, 1);
+    c.tapLook(1, 0);
+    run(c, 0.1, 60);
+    c.reset();
+    run(c, 1, 60);
+    expect(c.yaw).toBe(0);
+    expect(c.pitch).toBe(0);
   });
 });

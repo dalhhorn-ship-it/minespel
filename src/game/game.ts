@@ -63,6 +63,9 @@ export interface Game {
   setAscending(on: boolean): void;
   setDescending(on: boolean): void;
   isFloating(): boolean;
+  /** Camera arrows for G6. Tap (press under 200 ms) calls `tapLook`; a longer press calls `setLookInput` once 200 ms have passed. */
+  setLookInput(turnX: number, tiltY: number): void;
+  tapLook(turnX: number, tiltY: number): void;
   /** Puts the player back on the start spot and says so with `teleported`. */
   teleportHome(): void;
   /** Puts every block back to the start world, saves that, and puts the player on the start spot. */
@@ -305,6 +308,8 @@ export function createGame(options: GameOptions): Game {
     setAscending: (on) => player.setAscending(on),
     setDescending: (on) => player.setDescending(on),
     isFloating: () => player.isFloating(),
+    setLookInput: (turnX, tiltY) => player.setLookInput(turnX, tiltY),
+    tapLook: (turnX, tiltY) => player.tapLook(turnX, tiltY),
     teleportHome,
     resetWorld() {
       world.reset();
