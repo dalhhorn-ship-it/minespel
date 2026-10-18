@@ -147,7 +147,8 @@ test.describe('walkable world', () => {
       { c, stone: STEEN },
     );
     await place(page, c + 0.5, 10, c + 0.5, 0);
-    expect((await player(page)).onGround).toBe(true);
+    // The player lands on the next physics step; on a busy CI machine that can take longer than 150 ms.
+    await expect.poll(async () => (await player(page)).onGround).toBe(true);
     await touch(page, 'pointerdown', 1, 150, 600);
     await touch(page, 'pointermove', 1, 150, 540);
     await page.waitForTimeout(250);
