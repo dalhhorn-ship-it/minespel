@@ -95,6 +95,58 @@ describe('game screens', () => {
   });
 });
 
+describe('held HUD controls', () => {
+  const press = (node: Element, type: string, id = 3) => {
+    const e = new MouseEvent(type, { bubbles: true });
+    Object.defineProperty(e, 'pointerId', { value: id });
+    node.dispatchEvent(e);
+  };
+  const setupHeld = () => {
+    const s = setup();
+    const up = s.container.querySelector('.hud-fly-up')!;
+    const arrow = s.container.querySelector('.hud-arrow-right')!;
+    const asc = vi.spyOn(s.game.player, 'setAscending');
+    const look = vi.spyOn(s.game.player, 'setLookInput');
+    return { ...s, up, arrow, asc, look };
+  };
+  it('the Omhoog button drives the player', () => {
+    const s = setupHeld();
+    press(s.up, 'pointerdown');
+    expect(s.asc).toHaveBeenLastCalledWith(true);
+    press(s.up, 'pointerup');
+    expect(s.asc).toHaveBeenLastCalledWith(false);
+  });
+  it('opening a screen on top lets go of a held Omhoog and a held arrow', async () => {
+    vi.useFakeTimers();
+    try {
+      const s = setupHeld();
+      press(s.up, 'pointerdown', 3);
+      press(s.arrow, 'pointerdown', 4);
+      vi.advanceTimersByTime(250);
+      expect(s.look).toHaveBeenLastCalledWith(1, 0);
+      s.asc.mockClear();
+      s.look.mockClear();
+      s.screens.open('kid-overlay');
+      expect(s.asc).toHaveBeenCalledWith(false);
+      expect(s.look).toHaveBeenLastCalledWith(0, 0);
+      expect(s.up.getAttribute('data-held')).toBeNull();
+      press(s.up, 'pointerup', 3); // the late pointerup finds nothing held
+      expect(s.asc.mock.calls.filter((c) => c[0] === false).length).toBe(2); // once from the HUD, once from the game's own release
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+  it('pause lets go of fly and look holds', () => {
+    const s = setupHeld();
+    press(s.up, 'pointerdown');
+    s.asc.mockClear();
+    s.game.pause();
+    expect(s.asc).toHaveBeenCalledWith(false);
+    expect(s.look).toHaveBeenCalledWith(0, 0);
+    expect(s.up.getAttribute('data-held')).toBeNull();
+  });
+});
+
 describe('game', () => {
   it('mounts a sized canvas, the hud and the stick, and draws frames', () => {
     const s = setup();

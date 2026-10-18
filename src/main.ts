@@ -142,7 +142,7 @@ if (__E2E__) {
     const env = envHost.env;
     registerHook('player', () => ({
       x: g.player.player.x, y: g.player.player.y, z: g.player.player.z,
-      onGround: g.player.player.onGround, yaw: g.player.yaw, pitch: g.player.pitch,
+      onGround: g.player.player.onGround, floating: g.player.isFloating(), yaw: g.player.yaw, pitch: g.player.pitch,
     }));
     registerHook('gameRunning', () => g.isRunning());
     registerHook('frameCount', () => g.frameCount());

@@ -143,6 +143,12 @@ export function createGame(options: GameOptions): Game {
       emitChanged('build');
     },
     onPause: () => {}, // the pause menu comes with T41
+    onAscend: (on) => player.setAscending(on),
+    onDescend: (on) => player.setDescending(on),
+    onLookTap: (x, y) => player.tapLook(x, y),
+    onLook: (x, y) => player.setLookInput(x, y),
+    win,
+    doc,
   });
   const build = createBuildController({
     world,
@@ -277,6 +283,17 @@ export function createGame(options: GameOptions): Game {
   doc.addEventListener('visibilitychange', update);
   update();
 
+  // A held fly or look control must never outlive the moment the world stops (a stuck Omhoog flies the kid to the top).
+  function releaseHolds() {
+    hud.releaseAll();
+    player.setAscending(false);
+    player.setDescending(false);
+    player.setLookInput(0, 0);
+  }
+  const unsubscribeScreens = options.screens?.subscribe((kind) => {
+    if (kind !== 'world') releaseHolds();
+  });
+
   function teleportHome() {
     player.reset();
     const p = player.player;
@@ -292,6 +309,7 @@ export function createGame(options: GameOptions): Game {
     dinos,
     openDinoMenu,
     pause() {
+      releaseHolds();
       manualPause = true;
       update();
     },
@@ -326,6 +344,7 @@ export function createGame(options: GameOptions): Game {
     dispose() {
       loop.stop();
       unsubscribe();
+      unsubscribeScreens?.();
       doc.removeEventListener('visibilitychange', update);
       win.removeEventListener('resize', resize);
       win.removeEventListener('orientationchange', resize);

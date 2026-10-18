@@ -31,7 +31,9 @@
   * PRD aligned with `GEMINI_TASKS.md` (no malus in early breaks) and signed off (`docs/PRD.approved`).
   * **G0 done:** `WORLD_HEIGHT = 64` (sky above 24 is air), `WORLD_VERSION = 2` with `worldVersion`, `size`, `height` on `WorldRecord` (drops old world diff when mismatched while keeping player/hotbar/dinos/points/progress), per-chunk `highestNonAirY` tracked in `World` and used in `buildChunkData` (`y <= highestNonAirY + 1`), layer 64 = y index 63 documented in `docs/ARCHITECTURE.md`.
   * **G1 done:** 16 new blocks (ids 18 to 33: obsidiaan, vuur, lava, mossteen, zandsteen, graniet, marmer, basalt, diepsteen, vuursteen, goudsteen, diamant, water, ijs, sneeuw, wol oranje), `BLOCK_GRID_ROWS` and `PLACEABLE_BLOCKS` in PRD 4.1 order (32 blocks), textures in `src/render/atlas.ts` (water, ijs and vuur with cutout alpha 0 holes), colours in `src/render/effects.ts`, full brightness (1.0) for glowing lava and vuur in `src/render/chunk-mesh.ts`. All 94 unit test files (860 tests) pass.
-  * **Remaining in `docs/GEMINI_TASKS.md`:** G2 to G13.
+  * **G2 to G6 done** (operator with developer agents, PR #2): Alle blokken with a slot chooser, the obsidiaan gate near the start, flying with Omhoog and Omlaag (saved, never through blocks or above the top), camera arrows (tap 15 degrees, hold 90 degrees a second), and the right side HUD buttons that let go on every exit. 98 unit test files (955 tests) pass; e2e in sandbox Chromium 74 of 76 (the 2 known sandbox failures).
+  * **Founder iPad check:** fly up and down, use the arrows, finish and light the gate, and check that no button gets stuck.
+  * **Remaining in `docs/GEMINI_TASKS.md`:** G7 to G13 (ground spot below a flyer, chickens, richer shop, early breaks, Nu oefenen, backup, docs).
 
 ## Notes
 * Biggest risk is 3D performance in iPad Safari. The T32 speed spike decides whether the plan holds.

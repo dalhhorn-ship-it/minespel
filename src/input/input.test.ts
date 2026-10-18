@@ -127,7 +127,7 @@ describe('hud', () => {
     });
     s.root.append(hud.root);
     expect(hud.slots).toHaveLength(8);
-    const buttons = [...hud.root.querySelectorAll('button')];
+    const buttons = [...hud.root.querySelectorAll('button')].filter((b) => !b.classList.contains('hud-fly') && !b.classList.contains('hud-arrow'));
     expect(buttons.map((b) => b.textContent)).toEqual(['Pauze', 'Hakken', 'Bouwen', 'Spring']);
     const find = (t: string) => buttons.find((b) => b.textContent === t)!;
     let id = 10;

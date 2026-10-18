@@ -20,11 +20,11 @@ Written by the operator on 2026-10-18 after an architect and a qa review of the 
 |---|---|---|---|---|
 | G0 | **DONE** (`775b5dd`) | World 64 high, world save version, faster mesher | | `src/world/terrain.ts`, `src/world/world.ts`, `src/storage/schema.ts`, `src/storage/records.ts`, `src/game/world-save.ts`, `src/render/chunk-mesh.ts` |
 | G1 | **DONE** (`b913881`) | 16 new blocks with textures | G0 | `src/world/blocks.ts`, `src/render/atlas.ts`, `src/render/effects.ts`, `src/render/chunk-mesh.ts` |
-| G2 | TODO | Alle blokken with a slot chooser | G1 | `src/ui/block-grid.ts`, `src/styles/hotbar.css` |
-| G3 | TODO | The obsidiaan gate | G1 | `src/world/terrain.ts`, `src/world/gate.ts` (new), `src/game/build-controller.ts` |
-| G4 | TODO | Flying: physics, controller, save | G0 | `src/world/physics.ts`, `src/game/player-controller.ts`, `src/game/world-save.ts`, `src/storage/schema.ts` |
-| G5 | TODO | Camera arrows | G4 | `src/game/player-controller.ts` |
-| G6 | TODO | Right side HUD buttons and release on every exit | G4, G5 | `src/ui/hud.ts`, `src/styles/hud.css`, `src/game/game.ts` |
+| G2 | **DONE** (`d5d793d`) | Alle blokken with a slot chooser | G1 | `src/ui/block-grid.ts`, `src/styles/hotbar.css` |
+| G3 | **DONE** (`3603e25`) | The obsidiaan gate | G1 | `src/world/terrain.ts`, `src/world/gate.ts` (new), `src/game/build-controller.ts` |
+| G4 | **DONE** (`1520552`) | Flying: physics, controller, save | G0 | `src/world/physics.ts`, `src/game/player-controller.ts`, `src/game/world-save.ts`, `src/storage/schema.ts` |
+| G5 | **DONE** (`9dde56e`) | Camera arrows | G4 | `src/game/player-controller.ts` |
+| G6 | **DONE** | Right side HUD buttons and release on every exit | G4, G5 | `src/ui/hud.ts`, `src/styles/hud.css`, `src/game/game.ts` |
 | G7 | TODO | Ground spot below a floating player | G4 | `src/game/dino-system.ts`, `src/dinos/dino-ai.ts`, `src/game/game.ts` |
 | G8 | TODO | Chickens: data, economy, model | G7 | `src/dinos/kinds.ts`, `src/core/economy.ts`, `src/dinos/dino-store.ts`, `src/render/dino-models.ts`, `src/app/purchase.ts` |
 | G9 | TODO | Richer Dinowinkel with Kippenhok and Mijn dino's | G8 | `src/ui/shop.ts`, `src/app/shop-flow.ts`, `src/styles/shop.css` |

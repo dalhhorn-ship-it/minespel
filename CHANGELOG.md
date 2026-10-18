@@ -10,6 +10,8 @@ Written so kids can read it too.
 * 16 new blocks to build with: obsidiaan, vuur, lava, mossteen, zandsteen, graniet, marmer, basalt, diepsteen, vuursteen, goudsteen, diamant, water, ijs, sneeuw and wol oranje (32 building blocks in total).
 * Alle blokken shows all 32 blocks on one screen with your 8 hotbar slots on top: tap a slot, tap a block, and it lands in that slot.
 * Near the start there is now a gate to finish: build two tall obsidiaan pillars, put vuur in the middle, and the whole gate lights up with a whoosh.
+* You can fly! Hold Omhoog to float up into the sky, let go to stay floating, and hold Omlaag to come back down.
+* Four arrow buttons turn your view: tap for a small turn, hold to keep turning.
 
 ### M3: dinos and the Dinowinkel
 

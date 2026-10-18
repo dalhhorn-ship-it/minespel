@@ -46,15 +46,17 @@
 .hud-jump {
   right: calc(var(--safe-right) + var(--gap) * 2);
   bottom: calc(var(--safe-bottom) + var(--touch-min) + var(--gap) * 4);
-  min-width: 96px;
-  min-height: 96px;
+  box-sizing: border-box;
+  width: 96px;
+  height: 96px;
+  padding: 0;
   border-radius: 50%;
 }
 .hud-hotbar {
   pointer-events: auto;
   left: 50%;
   transform: translateX(-50%);
-  bottom: calc(var(--safe-bottom) + var(--gap));
+  bottom: calc(var(--safe-bottom) + var(--gap) * 2); /* 24px, so the bottom row is clear of the edge */
   display: flex;
   gap: 6px;
 }
@@ -87,3 +89,44 @@
   background: var(--paper);
   border: 3px solid var(--ink);
 }
+
+/* Right side controls (G6). Jump: 96px circle, right 24px, bottom 24+56+... see --hud-jump-bottom.
+   Fly column: 64px wide, just left of jump, same bottom. Arrows: plus cluster of 56px tiles above them. */
+.hud {
+  --hud-jump-bottom: calc(var(--safe-bottom) + var(--touch-min) + var(--gap) * 4);
+  --hud-right: calc(var(--safe-right) + var(--gap) * 2);
+  --hud-fly-w: 76px;
+  --hud-arrow: var(--touch-min);
+  --hud-arrow-gap: 4px;
+}
+.hud-fly-column {
+  right: calc(var(--hud-right) + 96px + 8px);
+  bottom: var(--hud-jump-bottom);
+  width: var(--hud-fly-w);
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
+}
+.hud-fly {
+  width: var(--hud-fly-w);
+  height: var(--touch-min);
+  padding: 0;
+  font-size: 0.7em;
+  line-height: 1.1;
+  white-space: normal;
+}
+.hud-arrows {
+  right: var(--hud-right);
+  /* above the fly column (two buttons and their gaps) */
+  bottom: calc(var(--hud-jump-bottom) + var(--touch-min) * 2 + var(--gap) * 2);
+  display: grid;
+  grid-template-columns: repeat(3, var(--hud-arrow));
+  grid-template-rows: repeat(3, var(--hud-arrow));
+  gap: var(--hud-arrow-gap);
+}
+.hud-arrow { padding: 0; width: var(--hud-arrow); height: var(--hud-arrow); }
+.hud-arrow-up { grid-column: 2; grid-row: 1; }
+.hud-arrow-left { grid-column: 1; grid-row: 2; }
+.hud-arrow-right { grid-column: 3; grid-row: 2; }
+.hud-arrow-down { grid-column: 2; grid-row: 3; }
+.hud-btn[data-held='true'] { background: var(--grass); color: var(--on-grass); }

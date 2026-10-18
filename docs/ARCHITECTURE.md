@@ -155,7 +155,7 @@ src/
   ui/
     dom.ts                  el(), text only helpers
     tap.ts                  onTap(): pointer based tap, acts once, ignores repeats
-    hud.ts                  stick, jump, mode buttons, hotbar slot, countdown slot, pause button
+    hud.ts                  stick, jump, Omhoog/Omlaag, camera arrows, mode buttons, hotbar slot, countdown slot, pause button, releaseAll()
     countdown.ts            "Leerpauze over 4:12", pulse, tick
     hotbar.ts, block-grid.ts, pause-menu.ts, shop.ts, dino-menu.ts, name-screen.ts, lock-icon.ts
     broken-save-screen.ts
@@ -373,3 +373,12 @@ Rules: every task adds tests that fail without its change. Pure logic is tested 
 * Terrain flattens x `MID - 3` to `MID + 2`, z `MID + 3` to `MID + 5` to the start height and keeps trunks and leaves out of it. Fixed world version stays 2.
 * `world/gate.ts` is pure. `gateFill` needs F1 to F4 as obsidiaan and unbroken obsidiaan pillars at least 2 high (from G+1) above F1 and F4. The opening is the cells above F2 and F3 from G+1 to the lower pillar's height. If one opening cell holds vuur it returns every AIR opening cell that `isOccupied` does not flag.
 * `game/build-controller.ts` calls it after a successful place, only when the placed cell is in a gate column. It writes the vuur, calls `onBlockChanged` once per touched chunk (the gate straddles the chunk border at x 32, so at most 2 calls) and plays `whoosh`. The controller adds the player box to the dino and egg `isOccupied`. Mining never lights.
+
+## Right side HUD buttons (G6)
+
+All in `src/ui/hud.ts` and `src/styles/hud.css`. Every button is a router ignore zone. Positions (landscape, safe area added to each edge offset, 1024 x 768 shown):
+* Jump: 96 px circle, right 24 px, bottom 24 + 56 + 24 = 104 px offset (`--hud-jump-bottom` is safe bottom + 56 + 48).
+* Omhoog (top) and Omlaag: one column, 76 x 56 px each, 12 px gap, same bottom as jump, 8 px left of jump (x 824 to 900).
+* Camera arrows: plus cluster of four 56 px tiles (4 px gap) in a 3 x 3 grid, right edge level with jump, 12 px above the fly column (x 832 to 1000, y about 376 to 544).
+* Hotbar: bottom 24 px, ends near x 827 and sits below the fly column. Mode buttons end at y about 192, far above the arrows. At 1180 x 820 and 1366 x 1024 the same offsets hold (all anchored right and bottom). `tests/e2e/hud-buttons.spec.ts` checks size, viewport, overlap and a 20 px bottom margin at all three.
+* Release: every held control (Omhoog, Omlaag, arrows) lets go on pointerup, pointercancel, lostpointercapture, window blur, page hidden, orientationchange or a resize that flips orientation, and `hud.releaseAll()` runs when `game.pause()` is called or any screen opens (`screens.subscribe` in `game.ts`). Arrows: under 200 ms (`LOOK_TAP_MAX_MS`) and released by pointerup is one `tapLook`; past 200 ms `setLookInput` gets the sum of the arrows that passed 200 ms. A press cut short by a system event is neither tap nor hold.
