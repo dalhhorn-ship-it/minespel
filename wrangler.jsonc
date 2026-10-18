@@ -9,6 +9,9 @@
   "assets": {
     "directory": "./dist"
   },
+  // Cloudflare Workers Builds runs `npx wrangler preview` for PR branches, which needs this block,
+  // even empty. main still deploys with `wrangler deploy`. preview_urls stays false: no extra public address.
+  "previews": {},
   "workers_dev": true,
   "preview_urls": false
 }
