@@ -113,4 +113,26 @@ describe('chunk mesher', () => {
     expect(chunksTouchedBy(CHUNK_SIZE, 5)).toEqual([[1, 0], [0, 0]]);
     expect(chunksTouchedBy(WORLD_SIZE - 1, WORLD_SIZE - 1)).toEqual([[CHUNKS_PER_SIDE - 1, CHUNKS_PER_SIDE - 1]]);
   });
+
+  it('produces identical mesh data with highestNonAirY before and after placing and mining at y = 60 (G0)', () => {
+    const world = new World();
+    const unoptimized: WorldView = {
+      get: (x, y, z) => world.get(x, y, z),
+      inBounds: (x, y, z) => world.inBounds(x, y, z),
+    };
+    const initial = buildChunkData(world, 0, 0);
+    expect(initial).toEqual(buildChunkData(unoptimized, 0, 0));
+
+    world.set(5, 60, 5, STEEN);
+    expect(world.highestNonAirY(0, 0)).toBe(60);
+    const withSkyBlock = buildChunkData(world, 0, 0);
+    expect(withSkyBlock).toEqual(buildChunkData(unoptimized, 0, 0));
+    expect(withSkyBlock.faceCount).toBe(initial.faceCount + 6);
+
+    world.set(5, 60, 5, AIR);
+    expect(world.highestNonAirY(0, 0)).toBeLessThan(32);
+    const afterMine = buildChunkData(world, 0, 0);
+    expect(afterMine).toEqual(initial);
+    expect(afterMine).toEqual(buildChunkData(unoptimized, 0, 0));
+  });
 });

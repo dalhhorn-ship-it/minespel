@@ -97,7 +97,7 @@ describe('world save', () => {
     expect(Array.from((await records.get('world')).diff)).toEqual([]);
   });
 
-  it('restores the v1 fixture (an old M1 save)', async () => {
+  it('drops the world diff for a pre-change save (missing or old worldVersion) while keeping the player record (G0)', async () => {
     const { db, records, queue } = await setupDb();
     await transact(db, 'kv', 'readwrite', async (tx) => {
       const store = tx.objectStore('kv');
@@ -106,11 +106,30 @@ describe('world save', () => {
     });
     const game = makeGame();
     await createWorldSave({ game, queue, records }).restore();
-    expect(game.world.get(32, 28, 32)).toBe(STEEN);
-    expect(game.world.get(10, 5, 10)).toBe(AIR);
+    expect(game.world.diff().length).toBe(0);
+    expect(game.world.get(32, 28, 32)).toBe(AIR);
     expect(game.player.player.x).toBe(20.5);
     expect(game.player.yaw).toBe(1.25);
     expect(game.getBuildState()).toEqual({ mode: 'bouwen', hotbar: fixture.kv.player.hotbar, selected: 3 });
+  });
+
+  it('keeps the world diff when worldVersion, size and height match current (G0)', async () => {
+    const { db, records, queue } = await setupDb();
+    await transact(db, 'kv', 'readwrite', async (tx) => {
+      const store = tx.objectStore('kv');
+      await request(
+        store.put(
+          { diff: Uint32Array.from(fixture.kv.world.diff), worldVersion: 2, size: 64, height: 64 },
+          'world',
+        ),
+      );
+      await request(store.put(fixture.kv.player, 'player'));
+    });
+    const game = makeGame();
+    await createWorldSave({ game, queue, records }).restore();
+    expect(game.world.get(32, 28, 32)).toBe(STEEN);
+    expect(game.world.get(10, 5, 10)).toBe(AIR);
+    expect(game.player.player.x).toBe(20.5);
   });
 
   it('ignores a corrupt save and still boots', async () => {

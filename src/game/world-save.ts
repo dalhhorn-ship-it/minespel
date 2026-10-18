@@ -1,7 +1,7 @@
 // Saves and restores the world (changed blocks) and the player (spot, look, hotbar, mode).
 import type { SaveQueue } from '../storage/save-queue';
 import type { Records } from '../storage/records';
-import type { PlayerRecord } from '../storage/schema';
+import { WORLD_VERSION, type PlayerRecord, type WorldRecord } from '../storage/schema';
 import { isPlaceable } from '../world/blocks';
 import { CELL_COUNT, WORLD_HEIGHT, WORLD_SIZE } from '../world/terrain';
 import { HOTBAR_SIZE } from './build-controller';
@@ -108,11 +108,20 @@ export function createWorldSave(options: WorldSaveOptions): WorldSave {
     };
   }
 
-  queue.register('world', () => ({ diff: game.world.diff() }));
+  queue.register('world', () => ({
+    diff: game.world.diff(),
+    worldVersion: WORLD_VERSION,
+    size: WORLD_SIZE,
+    height: WORLD_HEIGHT,
+  }));
   queue.register('player', readPlayer);
 
   function restoreWorld(raw: unknown): void {
-    const diff = cleanDiff((raw as { diff?: unknown } | null)?.diff);
+    const rec = raw as Partial<WorldRecord> | null;
+    if (!rec || rec.worldVersion !== WORLD_VERSION || rec.size !== WORLD_SIZE || rec.height !== WORLD_HEIGHT) {
+      return;
+    }
+    const diff = cleanDiff(rec.diff);
     if (diff.length === 0) return;
     game.world.applyDiff(diff);
     game.renderer.setWorld(game.world);

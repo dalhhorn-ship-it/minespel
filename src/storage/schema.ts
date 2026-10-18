@@ -75,9 +75,14 @@ export interface PlayerRecord {
   selectedSlot: number;
   mode: 'mine' | 'build';
 }
+export const WORLD_VERSION = 2;
+
 export interface WorldRecord {
   /** Changed cells as cellIndex * 256 + blockId. */
   diff: Uint32Array;
+  worldVersion?: number;
+  size?: number;
+  height?: number;
 }
 export interface DinosRecord {
   dinos: Record<string, unknown>[];
@@ -147,7 +152,7 @@ export const KV_DEFAULTS: { [K in KvName]: () => KvRecords[K] } = {
     soundEffectsEnabled: true,
   }),
   player: () => ({ x: 0, y: 0, z: 0, yaw: 0, pitch: 0, hotbar: [], selectedSlot: 0, mode: 'mine' }),
-  world: () => ({ diff: new Uint32Array(0) }),
+  world: () => ({ diff: new Uint32Array(0), worldVersion: WORLD_VERSION, size: 64, height: 64 }),
   dinos: () => ({ dinos: [], eggs: [] }),
   economy: () => ({ points: 0, practicePointsToday: 0, practiceDay: '' }),
   timers: () => ({ playMsLeft: null, examMsLeft: null }),

@@ -3,7 +3,7 @@ import { AARDE, AIR, BLADEREN, BOOMSTAM, GRAS, KEISTEEN, OERSTEEN, STEEN, ZAND }
 
 /** Blocks wide and deep. The speed spike may change this to 48. Tests read this constant. */
 export const WORLD_SIZE = 64;
-export const WORLD_HEIGHT = 32;
+export const WORLD_HEIGHT = 64;
 export const CHUNK_SIZE = 16;
 export const WORLD_SEED = 20261017;
 
@@ -90,7 +90,7 @@ export function generateTerrain(seed: number = WORLD_SEED): Uint8Array {
 
   for (let z = 0; z < WORLD_SIZE; z++) {
     for (let x = 0; x < WORLD_SIZE; x++) {
-      const top = Math.min(height[z * WORLD_SIZE + x] ?? BASE_HEIGHT, WORLD_HEIGHT - 8);
+      const top = Math.min(height[z * WORLD_SIZE + x] ?? BASE_HEIGHT, 24);
       height[z * WORLD_SIZE + x] = top;
       blocks[cellIndex(x, 0, z)] = OERSTEEN;
       for (let y = 1; y <= top; y++) {
