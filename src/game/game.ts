@@ -59,6 +59,10 @@ export interface Game {
   /** Mode, the 8 hotbar blocks and the selected slot. T37 saves these. */
   getBuildState(): BuildState;
   setBuildState(state: Partial<BuildState>): void;
+  /** Omhoog and Omlaag, for the buttons that come with G6. */
+  setAscending(on: boolean): void;
+  setDescending(on: boolean): void;
+  isFloating(): boolean;
   /** Puts the player back on the start spot and says so with `teleported`. */
   teleportHome(): void;
   /** Puts every block back to the start world, saves that, and puts the player on the start spot. */
@@ -298,6 +302,9 @@ export function createGame(options: GameOptions): Game {
       build.setState(state);
       refreshHotbar();
     },
+    setAscending: (on) => player.setAscending(on),
+    setDescending: (on) => player.setDescending(on),
+    isFloating: () => player.isFloating(),
     teleportHome,
     resetWorld() {
       world.reset();

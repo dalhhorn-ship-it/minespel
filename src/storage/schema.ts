@@ -74,6 +74,8 @@ export interface PlayerRecord {
   hotbar: number[];
   selectedSlot: number;
   mode: 'mine' | 'build';
+  /** True when the player floats in the air. Missing means false. */
+  floating?: boolean;
 }
 export const WORLD_VERSION = 2;
 

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { AIR, LAVA, STEEN, VUUR, WATER } from './blocks';
 import {
-  PLAYER_HEIGHT, PLAYER_WIDTH, collides, createPlayer, stepPlayer, type PlayerInput, type PlayerState,
+  FLY_SPEED, MAX_PLAYER_Y, PLAYER_HEIGHT, PLAYER_WIDTH, collides, createPlayer, stepPlayer, type PlayerInput, type PlayerState,
 } from './physics';
 import { WORLD_HEIGHT, WORLD_SIZE } from './terrain';
 import { World } from './world';
@@ -171,5 +171,39 @@ describe('player physics', () => {
     const p = createPlayer(10.5, FLOOR + 1, 10.5);
     run(w, p, none, 60, 60);
     expect(w.diff()).toEqual(before);
+  });
+
+  it('G4: floating has no gravity and moves at FLY_SPEED up and down', () => {
+    const w = flatWorld();
+    const p = createPlayer(10.5, FLOOR + 10, 10.5);
+    const fly = (flyY: number, sec: number) => run(w, p, { ...none, floating: true, flyY }, sec, 60);
+    fly(0, 2);
+    expect(p.y).toBeCloseTo(FLOOR + 10, 5);
+    fly(1, 1);
+    expect(p.y).toBeCloseTo(FLOOR + 10 + FLY_SPEED, 3);
+    fly(-1, 1);
+    expect(p.y).toBeCloseTo(FLOOR + 10, 3);
+  });
+
+  it('G4: floating up snaps flush under a ceiling and the world top', () => {
+    const w = flatWorld();
+    w.set(10, FLOOR + 7, 10, STEEN);
+    const p = createPlayer(10.5, FLOOR + 1, 10.5);
+    run(w, p, { ...none, floating: true, flyY: 1 }, 3, 60);
+    expect(p.y + PLAYER_HEIGHT).toBeLessThanOrEqual(FLOOR + 7);
+    expect(p.y + PLAYER_HEIGHT).toBeGreaterThan(FLOOR + 7 - 1e-3);
+    const top = createPlayer(20.5, FLOOR + 1, 20.5);
+    run(w, top, { ...none, floating: true, flyY: 1 }, 30, 60);
+    expect(top.y).toBeLessThanOrEqual(MAX_PLAYER_Y);
+    expect(top.y + PLAYER_HEIGHT).toBeLessThanOrEqual(WORLD_HEIGHT);
+    expect(top.y + PLAYER_HEIGHT).toBeGreaterThan(WORLD_HEIGHT - 1e-3);
+  });
+
+  it('G4: floating down lands flush on a floor and ignores a jump', () => {
+    const w = flatWorld();
+    const p = createPlayer(10.5, FLOOR + 5, 10.5);
+    run(w, p, { ...none, floating: true, flyY: -1, jump: true }, 3, 60);
+    expect(p.y).toBeCloseTo(FLOOR + 1, 5);
+    expect(p.onGround).toBe(true);
   });
 });
