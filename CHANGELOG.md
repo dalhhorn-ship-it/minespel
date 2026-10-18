@@ -4,10 +4,11 @@ Written so kids can read it too.
 
 ## Unreleased
 
-### Change of 2026-10-18 (G0, G1)
+### Change of 2026-10-18
 
 * The sky is now 64 blocks high so there is lots of room above the hills and trees.
 * 16 new blocks to build with: obsidiaan, vuur, lava, mossteen, zandsteen, graniet, marmer, basalt, diepsteen, vuursteen, goudsteen, diamant, water, ijs, sneeuw and wol oranje (32 building blocks in total).
+* Alle blokken shows all 32 blocks on one screen with your 8 hotbar slots on top: tap a slot, tap a block, and it lands in that slot.
 
 ### M3: dinos and the Dinowinkel
 

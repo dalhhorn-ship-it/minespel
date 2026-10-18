@@ -172,8 +172,9 @@ export function createGame(options: GameOptions): Game {
   });
   const grid = createBlockGrid({
     router,
-    onPick: (block) => {
-      build.setSlotBlock(build.getState().selected, block);
+    getState: () => build.getState(),
+    onPick: (slot, block) => {
+      build.setSlotBlock(slot, block);
       refreshHotbar();
       emitChanged('build');
     },
