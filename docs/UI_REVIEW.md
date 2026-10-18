@@ -2,6 +2,8 @@
 
 > Screenshots are not in git (44 MB). Run `npx playwright test ui-review` to regenerate them in `docs/screenshots/ui-review/`.
 
+> **Status 2026-10-18:** all 14 findings are fixed (commits 0dbde85, 879b8ad and the next one). F1 and F13 follow founder decisions 51 to 54. `tests/e2e/ui-review.spec.ts` now asserts every check with no fixmes; the one allowance is decision 54 (shop and Lesboek may scroll in a Safari tab). Lesson and teach moment text scroll inside their own panel on purpose. Still to check on a real iPad: finger scrolling.
+
 Reviewer: Kids Game UI Reviewer. Date: 2026-10-18.
 Seen like an 8 to 10 year old on an iPad, in landscape.
 

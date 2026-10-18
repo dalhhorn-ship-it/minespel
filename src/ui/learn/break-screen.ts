@@ -36,6 +36,8 @@ export interface BreakScreenOptions {
   canAffordEgg?: (pointsTotal: number) => boolean;
   sound?: Pick<Sound, 'play'>;
   finishLabel?: string;
+  /** Extra oefenen only (decision 51): shows a "Stoppen" button top right. Real learning breaks never pass this. */
+  onStop?: () => void;
   onAction: (action: BreakScreenAction) => void;
   now?: () => number;
 }
@@ -77,7 +79,22 @@ export function createBreakScreen(options: BreakScreenOptions): BreakScreen {
   applyMcBackground(root);
   const juf = createDinoJuf('Tijd voor een leerpauze!');
   const dotsWrap = el('div', { class: 'break-dots', attrs: { 'aria-label': 'Voortgang' } });
-  const header = el('header', { class: 'break-header' }, [juf.element, dotsWrap]);
+  const stopBtn = options.onStop
+    ? el('button', {
+        class: 'break-stop-btn',
+        text: 'Stoppen',
+        attrs: { type: 'button', 'data-testid': 'practice-stop' },
+      })
+    : null;
+  const stopOff =
+    stopBtn && options.onStop
+      ? onTap(stopBtn, () => options.onStop?.(), { now: options.now })
+      : null;
+  const header = el('header', { class: 'break-header' }, [
+    juf.element,
+    dotsWrap,
+    ...(stopBtn ? [stopBtn] : []),
+  ]);
   const body = el('div', { class: 'break-body' });
   root.append(header, body);
 
@@ -121,6 +138,8 @@ export function createBreakScreen(options: BreakScreenOptions): BreakScreen {
   function render(state: SessionState) {
     clearChild();
     renderDots(state);
+    // The summary has its own finish button, so Stoppen is only for the steps before it.
+    if (stopBtn) stopBtn.hidden = state.phase === 'summary';
 
     if (state.phase === 'empty') {
       juf.say('Even geen vragen.');
@@ -279,6 +298,7 @@ export function createBreakScreen(options: BreakScreenOptions): BreakScreen {
     element: root,
     render,
     destroy() {
+      stopOff?.();
       clearChild();
       root.remove();
     },

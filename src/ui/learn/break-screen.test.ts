@@ -163,4 +163,31 @@ describe('break-screen (T36)', () => {
     expect(screen.element.textContent).toContain('Totaal: 4 punten');
     screen.destroy();
   });
+
+  it('has no Stoppen in a real learning break, and a 56px Stoppen only when asked for (decisions 51, 53)', () => {
+    const entries: SessionEntry[] = [{ item: choiceItem1, box: 0 }];
+    const { state } = startSession({
+      mode: 'break',
+      entries,
+      economy: defaultKv('economy'),
+      day: '2026-10-17',
+      lessonFirst: false,
+      at: 1000,
+    });
+    const plain = createBreakScreen({ state, onAction: () => undefined });
+    expect(plain.element.querySelector('.break-stop-btn')).toBeNull();
+    expect(plain.element.textContent).not.toContain('Stoppen');
+    expect(plain.element.textContent).not.toContain('Ouders');
+    expect(plain.element.querySelector('.lock-icon-btn')).toBeNull();
+    plain.destroy();
+
+    let stopped = 0;
+    const withStop = createBreakScreen({ state, onAction: () => undefined, onStop: () => stopped++ });
+    const btn = withStop.element.querySelector<HTMLButtonElement>('.break-stop-btn');
+    expect(btn?.textContent).toBe('Stoppen');
+    expect(btn?.closest('.break-header')).not.toBeNull();
+    tap(btn!);
+    expect(stopped).toBe(1);
+    withStop.destroy();
+  });
 });

@@ -1,4 +1,5 @@
 import type { BrowserContext, Page } from '@playwright/test';
+import { numberToDutch } from '../../../src/core/dutch-numbers';
 
 /** Opens the app and waits until the e2e build says it is ready. */
 export async function openApp(page: Page): Promise<void> {
@@ -61,4 +62,23 @@ export async function asInsecure(page: Page): Promise<void> {
       Object.defineProperty(navigator.storage, 'persist', { value: undefined, configurable: true });
     }
   });
+}
+
+/** Solves the grown up sum in words ("Neem negen keer zeven en trek daar ... van af."). Same words as src/gate/reset-question.ts. */
+export function solveGateQuestion(text: string): number {
+  const words = new Map<string, number>();
+  for (let n = 0; n <= 999; n++) words.set(numberToDutch(n), n);
+  const nums = (text.match(/[a-zë]+/g) ?? []).filter((w) => words.has(w)).map((w) => words.get(w) as number);
+  const [a = 0, b = 0, c = 0] = nums;
+  if (text.includes('trek daar')) return a * b - c;
+  if (text.includes('tel daar')) return a * b + c;
+  return (a + b) * c; // "Tel A en B bij elkaar op en neem dat dan C keer."
+}
+
+/** Answers the grown up sum shown by the PIN gate (no PIN yet, or PIN vergeten). */
+export async function answerGateQuestion(page: Page, wrong = false): Promise<void> {
+  const text = await page.locator('.parent-gate-card p').first().innerText();
+  const answer = solveGateQuestion(text) + (wrong ? 1 : 0);
+  await page.locator('.parent-input').fill(String(answer));
+  await page.locator('.parent-gate-footer .parent-btn-primary').click();
 }

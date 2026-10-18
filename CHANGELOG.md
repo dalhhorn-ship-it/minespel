@@ -4,6 +4,11 @@ Written so kids can read it too.
 
 ## Unreleased
 
+### Stoppen, a small lock and a grown up check
+
+* In Extra oefenen you can now tap "Stoppen" any time, and you keep the points you already earned.
+* The parent lock is now a small grey lock that only shows in the world, and the first time a grown up must answer a sum before choosing a pincode.
+
 ### Minecraft look and fit on the iPad
 
 * The questions and lessons now look like a Minecraft menu, with grass, dirt, stone and diamonds behind them.

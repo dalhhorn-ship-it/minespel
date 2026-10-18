@@ -3,18 +3,18 @@
 // inside the viewport and the safe area, at least 44 x 44, at least 8 points between neighbours,
 // not covered by another element, text not clipped, no horizontal scroll, a way back, back in 2 taps.
 //
-// Known bugs are listed in KNOWN. Each one is filtered out of the main test and has its own
-// test.fixme with the full check, so the check comes back to life when the bug is fixed.
-// The numbers (F1, F2, ...) match docs/UI_REVIEW.md.
+// Every finding F1 to F14 in docs/UI_REVIEW.md is fixed, so nothing is filtered out any more.
+// The one allowance (ALLOWED) is decision 54: in a Safari tab (1024x690) the shop and Lesboek may scroll.
 //
 import { expect, test, type Page } from '@playwright/test';
 import { EGG_HATCH_SECONDS } from '../../src/dinos/egg';
-import { openApp, readState } from './helpers/app';
+import { answerGateQuestion, openApp, readState } from './helpers/app';
 import apostrofTopic from '../../docs/modules/cito-taalverzorging/apostrof.json' with { type: 'json' };
 import kommaTopic from '../../docs/modules/cito-taalverzorging/komma.json' with { type: 'json' };
 
 /** Screenshots go here. Playwright creates the folder. Run from the repo root. */
 const OUT = 'docs/screenshots/ui-review';
+const SHOTS = OUT;
 
 /** The three target iPads, plus a Safari tab with its toolbars (about 70 points are gone). */
 const SIZES = [
@@ -324,6 +324,9 @@ async function typePin(page: Page, pin: string): Promise<void> {
 /** First start: no PIN yet, so the gate asks for a new one. Then the shell opens. */
 async function openShell(page: Page, section?: string): Promise<void> {
   await openGate(page);
+  await answerGateQuestion(page);
+  await page.locator('.parent-gate-key[data-key="1"]').waitFor();
+  await typePin(page, '1234');
   await typePin(page, '1234');
   await page.locator('[data-testid="parent-shell"]').waitFor();
   if (section) {
@@ -594,12 +597,28 @@ const SCREENS: ScreenDef[] = [
   },
   // ---- the parent gate and the parent area
   {
+    id: 'ouders-pincode-vraag',
+    group: 'ouders',
+    kidText: false,
+    back: 'button:has-text("Terug")',
+    open: async (page) => {
+      await openGate(page);
+      await page.locator('.parent-input').waitFor();
+    },
+    backTaps: async (page) => {
+      await tapText(page, 'Terug');
+    },
+  },
+  {
     id: 'ouders-pincode-kiezen',
     group: 'ouders',
     kidText: false,
     back: '.parent-gate-key[data-key="Sluiten"]',
     open: async (page) => {
       await openGate(page);
+      await answerGateQuestion(page);
+      await page.locator('.parent-gate-key[data-key="1"]').waitFor();
+      await settle(page);
     },
     backTaps: async (page) => {
       await tapCenter(page, '.parent-gate-key[data-key="Sluiten"]');
@@ -705,49 +724,21 @@ const SCREENS: ScreenDef[] = [
 
 /** Screens that need several steps (a whole practice session). Handled by their own tests below. */
 
-// ---------------------------------------------------------------- known bugs
+// ---------------------------------------------------------------- allowed
 
-interface Known {
-  id: string;
-  /** Which screens (regex on screen id) and sizes (regex on size name). */
+interface Allowed {
   screen: RegExp;
-  size?: RegExp;
+  size: RegExp;
   kind: Kind;
-  /** Optional regex on the element description. */
-  el?: RegExp;
-  /** Screen id used by the fixme check, when the first match is not the right one. */
-  on?: string;
   reason: string;
 }
 
-// Filled in from the first full run. See docs/UI_REVIEW.md.
-const KNOWN: Known[] = [
-  { id: 'F1', screen: /^(wereld|ouders-pincode)/, kind: 'covered', el: /Pauze|Ouders/, reason: 'the floating Ouders button is always visible and covers Pauze (lock-icon display overrides hidden)' },
-  { id: 'F1', screen: /^wereld/, kind: 'too-close', el: /lock-icon/, reason: 'the floating Ouders button overlaps the HUD Ouders and Pauze buttons' },
-  { id: 'F1', screen: /dinowinkel-kippenhok/, kind: 'too-close', el: /lock-icon/, reason: 'the floating Ouders button sits on top of shop content' },
-  { id: 'F2', screen: /^dinowinkel/, kind: 'outside-viewport', el: /Kopen/, reason: 'the right column of egg cards is cut off, so Kopen is cut off' },
-  { id: 'F3', screen: /^dinowinkel/, kind: 'outside-viewport', el: /loslaten/, reason: 'Kippenhok buttons are below the fold and need scrolling' },
-  { id: 'F3', screen: /^dinowinkel/, kind: 'text-clipped', reason: 'Kippenhok and collection are below the fold' },
-  { id: 'F4', screen: /^dinowinkel-kippenhok/, kind: 'outside-viewport', el: /Sluiten|Nu oefenen/, reason: 'Sluiten scrolls out of sight with the shop content' },
-  { id: 'F5', screen: /uitleg-les$/, kind: 'outside-viewport', reason: 'teach moment: Ik snap het is below the screen' },
-  { id: 'F5', screen: /uitleg-les$/, kind: 'covered', reason: 'teach moment: Ik snap het is under the lesson text' },
-  { id: 'F5', screen: /uitleg-les$/, kind: 'text-clipped', reason: 'teach moment: content runs off the screen' },
-  { id: 'F6', screen: /^lesboek-les$/, kind: 'outside-viewport', el: /Volgende/, reason: 'Lesboek lesson: Volgende touches the bottom edge' },
-  { id: 'F6', screen: /^lesboek-les$/, kind: 'text-clipped', reason: 'Lesboek lesson: Volgende touches the bottom edge' },
-  { id: 'F7', screen: /^(leerpauze|oefenen-.*)-(fout-opnieuw|vraag-number|vraag-type)$/, kind: 'outside-safe-area', reason: 'keyboard keys sit under the home indicator' },
-  { id: 'F7', screen: /^(leerpauze|oefenen-.*)-(fout-opnieuw|vraag-number|vraag-type)$/, kind: 'outside-viewport', reason: 'keyboard does not fit in a Safari tab (1024x690)' },
-  { id: 'F7', screen: /^(leerpauze|oefenen-.*)-(fout-opnieuw|vraag-number|vraag-type)$/, kind: 'text-clipped', reason: 'keyboard does not fit in a Safari tab (1024x690)' },
-  { id: 'F8', screen: /.*/, kind: 'small-text', reason: 'text under 17 points on kid screens' },
-  { id: 'F9', screen: /.*/, kind: 'too-close', reason: 'neighbouring buttons are only 4 to 6 points apart (need 8)' },
-  { id: 'F10', screen: /^ouders-/, on: 'ouders-inhoud-kiezen', kind: 'too-small', reason: 'level pills are 56x38' },
-  { id: 'F11', screen: /.*/, kind: 'main-too-small', reason: 'main buttons under 56 points (Ja, Nee, Nu oefenen, Sluiten)' },
-  { id: 'F12', screen: /^ouders-/, on: 'ouders-instellingen', kind: 'outside-safe-area', el: /parent-close-btn/, reason: 'Sluiten sits 16 points from the bottom, under the home indicator' },
+const ALLOWED: Allowed[] = [
+  { screen: /^(dinowinkel|lesboek)/, size: /safari/, kind: 'text-clipped', reason: 'decision 54: in a Safari tab the shop and Lesboek may scroll' },
 ];
 
-function isKnown(screenId: string, sizeName: string, f: Finding): Known | undefined {
-  return KNOWN.find(
-    (k) => k.screen.test(screenId) && (!k.size || k.size.test(sizeName)) && k.kind === f.kind && (!k.el || k.el.test(f.el)),
-  );
+function isKnown(screenId: string, sizeName: string, f: Finding): Allowed | undefined {
+  return ALLOWED.find((k) => k.screen.test(screenId) && k.size.test(sizeName) && k.kind === f.kind);
 }
 
 // ---------------------------------------------------------------- running a screen
@@ -763,7 +754,8 @@ async function prepare(page: Page): Promise<void> {
 async function auditNow(page: Page, def: Pick<ScreenDef, 'scope' | 'scrollOk' | 'main' | 'kidText'>): Promise<{ findings: Finding[]; tappables: Array<Record<string, unknown>> }> {
   return page.evaluate(auditInPage, {
     scope: def.scope ?? null,
-    scrollOk: def.scrollOk ?? [],
+    // Lesson and teach moment text scroll on purpose inside their own panel; the main button stays outside (F5, F6).
+    scrollOk: [...(def.scrollOk ?? []), '.teach-scroll', '.lesson-body'],
     main: def.main ?? '',
     kidText: def.kidText ?? true,
     safe: SAFE,
@@ -814,21 +806,6 @@ for (const size of SIZES) {
         }
       });
     }
-  });
-}
-
-// One fixme per known bug. The body is the full check: it opens the first matching screen at 1024x768 and
-// expects that kind of problem to be gone. Remove the KNOWN line and the fixme when the bug is fixed.
-for (const k of KNOWN) {
-  const target = SCREENS.find((d) => (k.on ? d.id === k.on : k.screen.test(d.id)));
-  if (!target) continue; // session screens are covered by the explicit fixmes at the bottom
-  test.fixme(`${k.id} ${target.id} ${k.kind}: ${k.reason}`, async ({ page }) => {
-    await page.setViewportSize({ width: 1024, height: 768 });
-    await prepare(page);
-    await target.open(page, { size: SIZES[0] });
-    const { findings } = await auditNow(page, target);
-    const mine = findings.filter((f) => f.kind === k.kind && (!k.el || k.el.test(f.el)));
-    expect(mine).toEqual([]);
   });
 }
 
@@ -1132,7 +1109,6 @@ test.describe('UI review real taps', () => {
 
   test('a finger on Pauze in the world opens the pause menu', async ({ page }) => {
     await prepare(page);
-    test.fixme(true, 'F1 the floating Ouders button covers Pauze, so this tap opens the parent gate');
     await tapCenter(page, '.hud-pause');
     await settle(page, 500);
     expect(await screen(page)).toBe('kid-overlay');
@@ -1140,20 +1116,45 @@ test.describe('UI review real taps', () => {
 
   test('a finger on Ouders in the world opens the parent gate', async ({ page }) => {
     await prepare(page);
-    await tapCenter(page, '.hud-parent');
+    await tapCenter(page, '[data-testid="parent-controls-btn"]');
     await page.locator('.parent-gate').waitFor();
     expect(await screen(page)).toBe('parent');
   });
 
+  test('the world lock is small and grey, not covering Pauze or the countdown, and only the world has it (decision 53)', async ({ page }) => {
+    await prepare(page);
+    const lock = page.locator('.hud [data-testid="parent-controls-btn"]');
+    await expect(lock).toHaveText('\u{1F512}');
+    const box = (await lock.boundingBox())!;
+    expect(box.width).toBeGreaterThanOrEqual(44);
+    expect(box.height).toBeGreaterThanOrEqual(44);
+    expect(box.x + box.width).toBeLessThanOrEqual(1024 - SAFE.right);
+    expect(box.y).toBeGreaterThanOrEqual(SAFE.top);
+    for (const sel of ['.hud-pause', '.hud-countdown']) {
+      const other = (await page.locator(sel).boundingBox())!;
+      const overlap = box.x < other.x + other.width && other.x < box.x + box.width && box.y < other.y + other.height && other.y < box.y + box.height;
+      expect(overlap, `lock overlaps ${sel}`).toBe(false);
+    }
+    // No lock on a break screen, the pause menu overlay or the shop.
+    await readState(page, 'startBreakNow');
+    await page.locator('.break-screen').waitFor();
+    // The HUD lock stays in the page under the break screen, so check that a finger cannot reach it.
+    const reachable = await page.evaluate(() => {
+      const r = document.querySelector('[data-testid="parent-controls-btn"]')!.getBoundingClientRect();
+      const top = document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2);
+      return !!top?.closest('[data-testid="parent-controls-btn"]');
+    });
+    expect(reachable).toBe(false);
+    await expect(page.locator('.break-screen [data-testid="parent-controls-btn"], .lock-icon-btn-floating')).toHaveCount(0);
+  });
+
   test('a finger drag on the teach moment is allowed, so it can scroll to Ik snap het', async ({ page }) => {
-    test.fixme(true, 'F14 lockdown.ts cancels every touchmove outside .parent and .scrollable, so kid screens cannot scroll');
     await prepare(page);
     await reachTeachMoment(page);
     expect(await dragIsCancelled(page, '.teach-moment')).toBe(false);
   });
 
   test('a finger drag on the Extra oefenen list is allowed', async ({ page }) => {
-    test.fixme(true, 'F14 lockdown.ts cancels every touchmove outside .parent and .scrollable, so the topic list cannot scroll');
     await prepare(page);
     await readState(page, 'openPractice');
     await page.getByRole('dialog', { name: 'Extra oefenen' }).waitFor();
@@ -1161,7 +1162,6 @@ test.describe('UI review real taps', () => {
   });
 
   test('a finger drag on the Dinowinkel is allowed', async ({ page }) => {
-    test.fixme(true, 'F14 lockdown.ts cancels every touchmove outside .parent and .scrollable, so the shop cannot scroll');
     await prepare(page);
     await openShopWithPoints(page, 200);
     expect(await dragIsCancelled(page, '.shop-grid')).toBe(false);
@@ -1179,24 +1179,40 @@ test.describe('UI review real taps', () => {
   });
 
   test('the teach moment shows Ik snap het without scrolling', async ({ page }) => {
-    test.fixme(true, 'F5 Ik snap het is below the screen at 1024x768 and 1180x820 for long lessons');
     await prepare(page);
     await reachTeachMoment(page);
     const box = await page.locator('.teach-done').boundingBox();
     expect(box && box.y + box.height <= 768 - SAFE.bottom).toBe(true);
   });
 
-  test('Extra oefenen sessions have a visible way to stop', async ({ page }) => {
-    test.fixme(true, 'F13 no Stoppen or Terug button during a practice session');
+  test('Extra oefenen sessions have a big Stoppen that goes back to the world, a real break has none', async ({ page }) => {
     await prepare(page);
     await readState(page, 'openPractice');
     await tapCenter(page, '[data-practice-topic="rekenen-basis:optellen"]');
     await page.locator('.break-screen').waitFor();
-    await expect(page.locator('.break-screen button', { hasText: /Stop|Terug|Sluiten|Naar de wereld/ }).first()).toBeVisible();
+    const stop = page.locator('[data-testid="practice-stop"]');
+    await expect(stop).toBeVisible();
+    const box = (await stop.boundingBox())!;
+    expect(box.height).toBeGreaterThanOrEqual(56);
+    await page.screenshot({ path: `${SHOTS}/oefenen-stoppen.png` });
+    await tapCenter(page, '[data-testid="practice-stop"]');
+    await settle(page, 500);
+    expect(await screen(page)).toBe('world');
+    await readState(page, 'startBreakNow');
+    await page.locator('.break-screen').waitFor();
+    await expect(page.locator('[data-testid="practice-stop"]')).toHaveCount(0);
+  });
+
+  test('screenshots of the world lock and the first PIN grown up question', async ({ page }) => {
+    await prepare(page);
+    await page.screenshot({ path: `${SHOTS}/wereld-slot.png` });
+    await readState(page, 'openParentControls');
+    await page.locator('.parent-input').waitFor();
+    await settle(page);
+    await page.screenshot({ path: `${SHOTS}/eerste-pin-vraag.png` });
   });
 
   test('Dinowinkel Kippenhok buttons are reachable without scrolling', async ({ page }) => {
-    test.fixme(true, 'F3 Kippenhok is below the egg cards and needs a scroll');
     await prepare(page);
     await openShopWithPoints(page, 200);
     const box = await page.locator('[data-testid="shop-deploy-chicken"]').boundingBox();

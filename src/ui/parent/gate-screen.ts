@@ -1,5 +1,6 @@
 // Parent PIN gate screen (T48b, AC73, AC74, AC75):
-// - First time (no PIN set yet): lets the parent choose a 4-digit PIN.
+// - First time (no PIN set yet): a grown up sum in words first (same as PIN vergeten, shared lockout,
+//   decision 52), then the parent chooses a 4-digit PIN and types it a second time to confirm.
 // - Existing PIN: checks the 4-digit PIN with 3-wrong-tries 1-minute lockout.
 // - "PIN vergeten?": asks a fresh Dutch word arithmetic question (`makeResetQuestion`),
 //   with 2-wrong-tries 10-minute lockout, then lets the parent choose a new 4-digit PIN.
@@ -37,13 +38,19 @@ export interface GateScreen {
   destroy(): void;
 }
 
-type GateMode = 'enter-pin' | 'set-pin' | 'reset-question';
+type GateMode = 'enter-pin' | 'set-pin' | 'confirm-pin' | 'reset-question';
 
 export function createGateScreen(options: GateScreenOptions): GateScreen {
   let record: GateRecord = { ...options.initialRecord };
-  let mode: GateMode =
-    options.forceSetPin || !hasPin(record) ? 'set-pin' : 'enter-pin';
+  // forceSetPin comes from Instellingen, so the parent already passed the gate. A first PIN needs the sum.
+  const firstPin = !options.forceSetPin && !hasPin(record);
+  let mode: GateMode = options.forceSetPin
+    ? 'set-pin'
+    : !hasPin(record)
+      ? 'reset-question'
+      : 'enter-pin';
   let digits = '';
+  let firstDigits = '';
   let statusMsg: string | null = null;
   let resetQuestion: ResetQuestion | null = null;
   let cleanups: Array<() => void> = [];
@@ -80,6 +87,23 @@ export function createGateScreen(options: GateScreenOptions): GateScreen {
     if (!isValidPin(digits)) return;
 
     if (mode === 'set-pin') {
+      firstDigits = digits;
+      digits = '';
+      mode = 'confirm-pin';
+      statusMsg = null;
+      render();
+      return;
+    }
+
+    if (mode === 'confirm-pin') {
+      if (digits !== firstDigits) {
+        digits = '';
+        firstDigits = '';
+        mode = 'set-pin';
+        statusMsg = 'De twee pincodes zijn niet hetzelfde. Kies je pincode nog een keer.';
+        render();
+        return;
+      }
       const next = setPin(record, digits, options.rng);
       await saveGateRecord(next);
       options.onUnlocked();
@@ -136,7 +160,10 @@ export function createGateScreen(options: GateScreenOptions): GateScreen {
         resetQuestion = makeResetQuestion(options.rng);
       }
       const q = resetQuestion;
-      const title = el('h2', { class: 'parent-gate-title', text: 'Pincode vergeten' });
+      const title = el('h2', {
+        class: 'parent-gate-title',
+        text: firstPin && !hasPin(record) ? 'Eerst een vraag voor grote mensen' : 'Pincode vergeten',
+      });
       const prompt = el('p', { text: q.text });
       const input = el('input', {
         class: 'parent-input',
@@ -198,8 +225,12 @@ export function createGateScreen(options: GateScreenOptions): GateScreen {
         onTap(
           backBtn,
           () => {
-            mode = hasPin(record) ? 'enter-pin' : 'set-pin';
             statusMsg = null;
+            if (!hasPin(record)) {
+              options.onCancel();
+              return;
+            }
+            mode = 'enter-pin';
             render();
           },
           { now: () => options.clock.now() },
@@ -216,7 +247,9 @@ export function createGateScreen(options: GateScreenOptions): GateScreen {
     const titleText =
       mode === 'set-pin'
         ? 'Kies een pincode voor ouders (4 cijfers)'
-        : 'Ouderscherm — Voer pincode in';
+        : mode === 'confirm-pin'
+          ? 'Typ dezelfde pincode nog een keer'
+          : 'Ouderscherm — Voer pincode in';
     const title = el('h2', { class: 'parent-gate-title', text: titleText });
 
     const dots = el(

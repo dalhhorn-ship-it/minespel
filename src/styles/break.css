@@ -31,7 +31,6 @@
   justify-content: space-between;
   gap: var(--gap);
   margin-bottom: var(--gap);
-  padding-right: calc(var(--touch-min) + var(--gap)); /* room for the lock icon */
 }
 
 .dino-juf {
@@ -206,3 +205,20 @@
     font-size: calc(34px * var(--kid-scale));
   }
 }
+
+/* Stoppen in Extra oefenen (decision 51): top right of the header, at least 56 high. */
+.break-stop-btn {
+  flex: none;
+  min-width: 112px;
+  min-height: 56px;
+  padding: 0 20px;
+  border: 3px solid var(--ink, #22201c);
+  border-radius: var(--radius, 12px);
+  background: var(--paper, #fff);
+  color: var(--ink, #22201c);
+  font: inherit;
+  font-size: 18px;
+  font-weight: 800;
+  touch-action: manipulation;
+}
+.break-stop-btn[hidden] { display: none; }

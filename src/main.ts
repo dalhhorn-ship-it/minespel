@@ -33,7 +33,6 @@ import { createCountdownView } from './ui/countdown';
 import { createDinoMenu, type DinoMenu } from './ui/dino-menu';
 import { el } from './ui/dom';
 import { createLesboek } from './ui/learn/lesboek';
-import { createLockIcon } from './ui/lock-icon';
 import { createPauseMenu, type PauseMenu } from './ui/pause-menu';
 
 installLockdown();
@@ -177,19 +176,6 @@ if (app) {
       worldActiveFromScreen = active;
       syncGamePauseState();
     },
-  });
-
-  // Floating parental controls lock button visible during kid overlays/breaks so parents can always enter the gate.
-  const floatingLock = createLockIcon({
-    floating: true,
-    onOpenParent: () => {
-      void parentFlow?.open();
-    },
-  });
-  floatingLock.element.hidden = true;
-  app.append(floatingLock.element);
-  screens.subscribe((kind) => {
-    floatingLock.element.hidden = kind === 'world' || kind === 'parent';
   });
 
   // The real renderer. The e2e build may fall back to a renderer that draws nothing when WebGL is missing.

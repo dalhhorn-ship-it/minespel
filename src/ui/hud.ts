@@ -4,6 +4,7 @@
 import '../styles/hud.css';
 import { el } from './dom';
 import { onTap } from './tap';
+import { createLockIcon } from './lock-icon';
 import type { PointerRouter } from '../input/pointer-router';
 
 export type BuildMode = 'hakken' | 'bouwen';
@@ -14,7 +15,7 @@ export interface HudOptions {
   onJump: () => void;
   onMode: (mode: BuildMode) => void;
   onPause: () => void;
-  /** Optional parental controls button handler ("Ouders"). */
+  /** Optional parental entry (small grey lock, world HUD only, decision 53). */
   onParent?: () => void;
   /** Optional sky-ascend hold/tap handler ("Omhoog") to float higher into the sky. */
   onAscend?: (active: boolean) => void;
@@ -70,13 +71,11 @@ export function createHud(options: HudOptions): Hud {
 
   const topRightChildren: HTMLElement[] = [];
   if (options.onParent) {
-    const parentBtn = button('\u{1F512} Ouders', 'hud-parent', options.onParent, {
-      'aria-label': 'Ouders',
-      'data-testid': 'parent-controls-btn',
-    });
-    topRightChildren.push(parentBtn);
+    const lock = createLockIcon({ onOpenParent: options.onParent, router: options.router });
+    cleanups.push(() => lock.destroy());
+    topRightChildren.push(lock.element);
   }
-  topRightChildren.push(pause);
+  topRightChildren.unshift(pause);
 
   const topBar = el('div', { class: 'hud-top' }, [
     countdownSlot,
