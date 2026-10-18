@@ -136,7 +136,9 @@ test.describe('dinos in the world', () => {
     // Put the egg straight in front of the player, so it projects onto the screen.
     // Beside the player it would sit on the eye plane and project to infinity.
     const placed = (await state(page)).eggs[0]!;
-    await readState(page, 'placeEgg', placed.id, C + 0.5, GROUND + 1, C + 2.5);
+    // On the ground like the player: one block higher it floats until the next game step settles it,
+    // and a tap before that step finds the cell free (WebKit in CI).
+    await readState(page, 'placeEgg', placed.id, C + 0.5, GROUND, C + 2.5);
     const egg = (await state(page)).eggs[0]!;
     await readState(page, 'setBuildState', { mode: 'bouwen', selected: 0 });
     // Tap the top of the ground cell the egg lies on from the player's eye.
