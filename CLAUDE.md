@@ -13,6 +13,7 @@ The audience for apps built here is the founder and their kids. Fun, safe and si
 | `architect` | opus | Stack, structure, task graph, code review at milestones | `docs/ARCHITECTURE.md`, `docs/PLAN.md` |
 | `developer` | sonnet | Implements one task at a time, with tests | source code, unit tests |
 | `qa` | sonnet | Acceptance tests, plays the app, finds bugs, kid safety check | `tests/`, `docs/TEST_REPORT.md` |
+| `kid-ui-reviewer` | sonnet | Opens every screen on iPad sizes: buttons fit and are big enough, every screen has a way back, flows make sense for a kid | `docs/UI_REVIEW.md`, `tests/e2e/ui-review.spec.ts`, screenshots |
 | `scribe` | haiku | Keeps README, CHANGELOG and docs in sync with the code | docs |
 
 Why these models: Opus is used only where a mistake is expensive (what to build, how to build it, final review). Sonnet does the volume work. Haiku does the cheap, mechanical work. If a task feels too hard for its agent after 2 attempts, escalate one model tier for that single task and note it in `docs/STATUS.md`.
