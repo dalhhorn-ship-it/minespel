@@ -27,6 +27,11 @@
   * T25 dino AI and eggs, T26 dino models, T42 dinos and eggs in the world.
   * T45 dino menu and naming, T47 Dinowinkel with egg purchase, T46 Lesboek and Extra oefenen.
   * T38b saved sums by age, T43b app wiring, T43c one save per break step.
+* Change requests of 2026-10-18 (`docs/GEMINI_TASKS.md`, branch `gemini/g0-g1`):
+  * PRD aligned with `GEMINI_TASKS.md` (no malus in early breaks) and signed off (`docs/PRD.approved`).
+  * **G0 done:** `WORLD_HEIGHT = 64` (sky above 24 is air), `WORLD_VERSION = 2` with `worldVersion`, `size`, `height` on `WorldRecord` (drops old world diff when mismatched while keeping player/hotbar/dinos/points/progress), per-chunk `highestNonAirY` tracked in `World` and used in `buildChunkData` (`y <= highestNonAirY + 1`), layer 64 = y index 63 documented in `docs/ARCHITECTURE.md`.
+  * **G1 done:** 16 new blocks (ids 18 to 33: obsidiaan, vuur, lava, mossteen, zandsteen, graniet, marmer, basalt, diepsteen, vuursteen, goudsteen, diamant, water, ijs, sneeuw, wol oranje), `BLOCK_GRID_ROWS` and `PLACEABLE_BLOCKS` in PRD 4.1 order (32 blocks), textures in `src/render/atlas.ts` (water, ijs and vuur with cutout alpha 0 holes), colours in `src/render/effects.ts`, full brightness (1.0) for glowing lava and vuur in `src/render/chunk-mesh.ts`. All 94 unit test files (860 tests) pass.
+  * **Remaining in `docs/GEMINI_TASKS.md`:** G2 to G13.
 
 ## Notes
 * Biggest risk is 3D performance in iPad Safari. The T32 speed spike decides whether the plan holds.

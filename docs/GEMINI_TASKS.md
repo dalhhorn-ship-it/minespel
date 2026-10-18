@@ -16,22 +16,22 @@ Written by the operator on 2026-10-18 after an architect and a qa review of the 
 
 ## Order and dependencies
 
-| Task | What | Needs | Main files |
-|---|---|---|---|
-| G0 | World 64 high, world save version, faster mesher | | `src/world/terrain.ts`, `src/storage/schema.ts`, `src/game/world-save.ts`, `src/render/chunk-mesh.ts` |
-| G1 | 16 new blocks with textures | G0 | `src/world/blocks.ts`, `src/render/atlas.ts`, `src/render/effects.ts`, `src/render/chunk-mesh.ts` |
-| G2 | Alle blokken with a slot chooser | G1 | `src/ui/block-grid.ts`, `src/styles/hotbar.css` |
-| G3 | The obsidiaan gate | G1 | `src/world/terrain.ts`, `src/world/gate.ts` (new), `src/game/build-controller.ts` |
-| G4 | Flying: physics, controller, save | G0 | `src/world/physics.ts`, `src/game/player-controller.ts`, `src/game/world-save.ts`, `src/storage/schema.ts` |
-| G5 | Camera arrows | G4 | `src/game/player-controller.ts` |
-| G6 | Right side HUD buttons and release on every exit | G4, G5 | `src/ui/hud.ts`, `src/styles/hud.css`, `src/game/game.ts` |
-| G7 | Ground spot below a floating player | G4 | `src/game/dino-system.ts`, `src/dinos/dino-ai.ts`, `src/game/game.ts` |
-| G8 | Chickens: data, economy, model | G7 | `src/dinos/kinds.ts`, `src/core/economy.ts`, `src/dinos/dino-store.ts`, `src/render/dino-models.ts`, `src/app/purchase.ts` |
-| G9 | Richer Dinowinkel with Kippenhok and Mijn dino's | G8 | `src/ui/shop.ts`, `src/app/shop-flow.ts`, `src/styles/shop.css` |
-| G10 | Early break points and the shared daily cap | | `src/core/economy.ts`, `src/app/break-flow.ts`, `src/storage/schema.ts`, `src/storage/log-store.ts` |
-| G11 | Nu oefenen button and its question | G10, G9 | `src/ui/countdown.ts`, `src/app/screens.ts`, `src/app/break-flow.ts`, `src/ui/learn/lesboek.ts`, `src/ui/shop.ts` |
-| G12 | Backup and old saves | all above | `src/storage/migrate.ts`, `tests/e2e/` fixtures |
-| G13 | Docs, CHANGELOG and the speed spike note | all above | `README.md`, `CHANGELOG.md`, `docs/ARCHITECTURE.md`, `docs/PLAN.md`, `docs/STATUS.md` |
+| Task | Status | What | Needs | Main files |
+|---|---|---|---|---|
+| G0 | **DONE** (`775b5dd`) | World 64 high, world save version, faster mesher | | `src/world/terrain.ts`, `src/world/world.ts`, `src/storage/schema.ts`, `src/storage/records.ts`, `src/game/world-save.ts`, `src/render/chunk-mesh.ts` |
+| G1 | **DONE** (`b913881`) | 16 new blocks with textures | G0 | `src/world/blocks.ts`, `src/render/atlas.ts`, `src/render/effects.ts`, `src/render/chunk-mesh.ts` |
+| G2 | TODO | Alle blokken with a slot chooser | G1 | `src/ui/block-grid.ts`, `src/styles/hotbar.css` |
+| G3 | TODO | The obsidiaan gate | G1 | `src/world/terrain.ts`, `src/world/gate.ts` (new), `src/game/build-controller.ts` |
+| G4 | TODO | Flying: physics, controller, save | G0 | `src/world/physics.ts`, `src/game/player-controller.ts`, `src/game/world-save.ts`, `src/storage/schema.ts` |
+| G5 | TODO | Camera arrows | G4 | `src/game/player-controller.ts` |
+| G6 | TODO | Right side HUD buttons and release on every exit | G4, G5 | `src/ui/hud.ts`, `src/styles/hud.css`, `src/game/game.ts` |
+| G7 | TODO | Ground spot below a floating player | G4 | `src/game/dino-system.ts`, `src/dinos/dino-ai.ts`, `src/game/game.ts` |
+| G8 | TODO | Chickens: data, economy, model | G7 | `src/dinos/kinds.ts`, `src/core/economy.ts`, `src/dinos/dino-store.ts`, `src/render/dino-models.ts`, `src/app/purchase.ts` |
+| G9 | TODO | Richer Dinowinkel with Kippenhok and Mijn dino's | G8 | `src/ui/shop.ts`, `src/app/shop-flow.ts`, `src/styles/shop.css` |
+| G10 | TODO | Early break points and the shared daily cap | | `src/core/economy.ts`, `src/app/break-flow.ts`, `src/storage/schema.ts`, `src/storage/log-store.ts` |
+| G11 | TODO | Nu oefenen button and its question | G10, G9 | `src/ui/countdown.ts`, `src/app/screens.ts`, `src/app/break-flow.ts`, `src/ui/learn/lesboek.ts`, `src/ui/shop.ts` |
+| G12 | TODO | Backup and old saves | all above | `src/storage/migrate.ts`, `tests/e2e/` fixtures |
+| G13 | TODO | Docs, CHANGELOG and the speed spike note | all above | `README.md`, `CHANGELOG.md`, `docs/ARCHITECTURE.md`, `docs/PLAN.md`, `docs/STATUS.md` |
 
 G0 to G3, G10 can start in parallel only if they touch different files. G0 and G3 both touch `terrain.ts`, so G3 waits for G0. G4, G5 and G6 all touch the player controller or the HUD: build them one by one.
 
