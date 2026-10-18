@@ -51,8 +51,8 @@ describe('block grid', () => {
     expect(grid.isOpen()).toBe(false);
     grid.open();
     const buttons = grid.root.querySelectorAll('button.grid-block');
-    expect(buttons).toHaveLength(16);
-    expect(PLACEABLE_BLOCKS).toHaveLength(16);
+    expect(buttons).toHaveLength(32);
+    expect(PLACEABLE_BLOCKS).toHaveLength(32);
     expect(zones).toContain(grid.root); // AC104: a touch here never turns the view
     tap(buttons[4]!);
     expect(onPick).toHaveBeenCalledWith(PLACEABLE_BLOCKS[4]);

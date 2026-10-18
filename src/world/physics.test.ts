@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { AIR, STEEN } from './blocks';
+import { AIR, LAVA, STEEN, VUUR, WATER } from './blocks';
 import {
   PLAYER_HEIGHT, PLAYER_WIDTH, collides, createPlayer, stepPlayer, type PlayerInput, type PlayerState,
 } from './physics';
@@ -149,5 +149,27 @@ describe('player physics', () => {
     stepPlayer(w, p, { moveX: NaN, moveZ: Infinity, jump: false }, 1 / 60);
     stepPlayer(w, p, none, -1);
     expect(Number.isFinite(p.x) && Number.isFinite(p.z)).toBe(true);
+  });
+
+  it('AC157: player cannot walk into a cell holding water, lava or vuur (G1)', () => {
+    for (const id of [WATER, LAVA, VUUR]) {
+      const w = flatWorld();
+      w.set(10, FLOOR + 1, 10, id);
+      const p = createPlayer(8.5, FLOOR + 1, 10.5);
+      run(w, p, { moveX: 1, moveZ: 0, jump: false }, 2, 60);
+      expect(p.x + PLAYER_WIDTH / 2).toBeLessThanOrEqual(10);
+      expect(collides(w, p.x, p.y, p.z)).toBe(false);
+    }
+  });
+
+  it('AC158: after placing water, lava and vuur and stepping for 60s, no other cell changes (G1)', () => {
+    const w = flatWorld();
+    w.set(12, FLOOR + 1, 10, WATER);
+    w.set(14, FLOOR + 1, 10, LAVA);
+    w.set(16, FLOOR + 1, 10, VUUR);
+    const before = w.diff();
+    const p = createPlayer(10.5, FLOOR + 1, 10.5);
+    run(w, p, none, 60, 60);
+    expect(w.diff()).toEqual(before);
   });
 });

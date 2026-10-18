@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { AIR, GLAS, OERSTEEN, STEEN } from '../world/blocks';
+import { AIR, GLAS, LAVA, OERSTEEN, STEEN, VUUR, WATER } from '../world/blocks';
 import { CHUNK_SIZE, WORLD_HEIGHT, WORLD_SIZE } from '../world/terrain';
 import { World } from '../world/world';
 import { CHUNKS_PER_SIDE, buildChunkData, chunksTouchedBy, toGeometry, type WorldView } from './chunk-mesh';
@@ -134,5 +134,19 @@ describe('chunk mesher', () => {
     const afterMine = buildChunkData(world, 0, 0);
     expect(afterMine).toEqual(initial);
     expect(afterMine).toEqual(buildChunkData(unoptimized, 0, 0));
+  });
+
+  it('gives lava and vuur faces full brightness, and hides shared face between two water blocks (G1)', () => {
+    for (const id of [LAVA, VUUR]) {
+      const w = emptyWorld();
+      w.set(5, 5, 5, id);
+      const d = buildChunkData(w, 0, 0);
+      expect(d.faceCount).toBe(6);
+      expect(Array.from(d.colors).every((c) => c === 1.0)).toBe(true);
+    }
+    const w = emptyWorld();
+    w.set(5, 5, 5, WATER);
+    w.set(6, 5, 5, WATER);
+    expect(buildChunkData(w, 0, 0).faceCount).toBe(10);
   });
 });

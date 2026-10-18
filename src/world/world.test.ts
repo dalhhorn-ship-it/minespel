@@ -81,9 +81,9 @@ describe('World', () => {
     expect(new World().diff()).toHaveLength(0);
   });
 
-  it('all 16 placeable blocks can be set and read back', () => {
+  it('all 32 placeable blocks can be set and read back', () => {
     const w = new World();
-    expect(PLACEABLE_BLOCKS).toHaveLength(16);
+    expect(PLACEABLE_BLOCKS).toHaveLength(32);
     PLACEABLE_BLOCKS.forEach((id, i) => {
       expect(w.set(i, WORLD_HEIGHT - 1, 0, id)).toBe(true);
       expect(w.get(i, WORLD_HEIGHT - 1, 0)).toBe(id);
