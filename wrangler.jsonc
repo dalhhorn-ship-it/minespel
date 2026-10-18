@@ -4,11 +4,22 @@
 // Never put an account id or a token in this file. Deploying is a founder action at /ship.
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
-  "name": "dino-blokwereld",
+  "name": "minespel",
   "compatibility_date": "2026-10-17",
   "assets": {
     "directory": "./dist"
   },
+  // Request logs in the founder's own Cloudflare dashboard (Workers Logs). No app data is sent.
+  "observability": {
+    "logs": {
+      "enabled": true,
+      "invocation_logs": true,
+      "persist": true
+    }
+  },
+  // Cloudflare Workers Builds runs `npx wrangler preview` for non-main branches (PR previews),
+  // which needs this block, even empty. main deploys with `wrangler deploy`.
+  "previews": {},
   "workers_dev": true,
   "preview_urls": false
 }

@@ -381,3 +381,32 @@ Small:
 * Main chunk 666 KB. Fine offline after the first visit, but lazy load the learn screens if `test:dist` gets near its budget.
 
 No founder decisions come from this review. iPad check for M3: buy an egg and press the home button right after Ja, reopen, and check the egg and the points; then open the dino menu with 10 seconds left on the countdown and watch that it stops (it does not today, must fix 2).
+
+## PRD change of 2026-10-18 (product)
+
+Product, 2026-10-18. The founder put the change requests from the side branch in v1 (decisions 50 to 52). Folded into `docs/PRD.md` as F16 to F18. Status set back to DRAFT; the founder signs again.
+* Changed: summary, 4.0, 4.1 (64 high world, 32 blocks, all solid, nothing flows or burns), 4.2 (button layout, flying, camera arrows, block grid with slot chooser), 4.3 (trait lines, size chips, progress bars, Mijn dino's tab, chickens at 5 points, max 10), 4.4 timer matrix, 4.5, 4.7 (shared cap, partial plus), 4.15, 4.16 ("zelf gestart"), 4.17, 4.18 (older saves), new 4.20 (obsidiaan gate) and 4.21 (Nu oefenen), section 5, flows 11 and 12, sections 8 to 11.
+* Updated ACs: AC1, AC7, AC23, AC101, AC143, AC151. New ACs: AC155 to AC181. AC20, AC110, AC149 and AC150 are unchanged.
+* Kept: the small grey lock icon, not a labelled "Ouders" button. The default hotbar. No "3 kippen" button.
+* Not reviewed by architect or qa yet. The architect should check the T32 spike plan with the 64 high world.
+
+## Gemini handoff on `docs/GEMINI_TASKS.md` (2026-10-18, branch `gemini/g0-g1`)
+
+Stopped cleanly after completing **G0** and **G1** due to session token limits. All 94 unit test files (860 tests), `npm run lint` and `npm run typecheck` pass.
+
+### Completed
+1. **PRD signoff & early break malus alignment (`ee62e34`):**
+   * Founder confirmed `docs/GEMINI_TASKS.md` wins where it differed from `docs/PRD.md` (no malus in early breaks, matching Extra oefenen F14). Updated `docs/PRD.md` (4.21, AC176, section 11) and stamped `docs/PRD.approved` via `./scripts/signoff.sh "Founder"`.
+2. **G0 — World 64 high, world save version, faster mesher (`775b5dd`):**
+   * `WORLD_HEIGHT = 64` in `src/world/terrain.ts` (generated terrain height capped at 24 so y >= 32 is open sky; `cellIndex` unchanged for y < 32).
+   * Added `WORLD_VERSION = 2` and `worldVersion`, `size`, `height` to `WorldRecord` in `src/storage/schema.ts`. `withDefaults` in `src/storage/records.ts` preserves missing `worldVersion` on older stored `world` records so `createWorldSave.restore()` in `src/game/world-save.ts` drops only the world diff when `worldVersion`, `size` or `height` differs, while keeping player/hotbar/dinos/points/progress.
+   * `World` (`src/world/world.ts`) tracks per-chunk `highestNonAirY(cx, cz)` and updates it on `set`, `applyDiff` and `reset`. `buildChunkData` (`src/render/chunk-mesh.ts`) loops only up to `highestNonAirY(cx, cz) + 1`.
+   * Documented `WORLD_HEIGHT = 64` and "layer 64 = y index 63" in `docs/ARCHITECTURE.md`.
+3. **G1 — 16 new blocks with textures (`b913881`):**
+   * Added block ids 18 to 33 in `src/world/blocks.ts` (`OBSIDIAAN` to `WOL_ORANJE`), `BLOCK_GRID_ROWS` (Natuur, Steen, Bouwen, Kleur), `PLACEABLE_BLOCKS` in the exact PRD 4.1 table order (32 blocks), `MAX_BLOCK_ID = 33`, and `isGlowing(id)` (`LAVA` and `VUUR`).
+   * Added 16x16 procedural tiles in `src/render/atlas.ts` (fixed `vuur` cutout pattern so top flame gaps have alpha 0; logged in `docs/FRICTION.md`) and flat colours in `src/render/effects.ts`.
+   * Updated `buildChunkData` in `src/render/chunk-mesh.ts` so glowing blocks (`lava`, `vuur`) get full brightness (`1.0`) on all faces.
+   * Added all G0 and G1 unit tests in `src/world/world.test.ts`, `src/world/blocks.test.ts`, `src/world/build.test.ts`, `src/world/physics.test.ts`, `src/render/atlas.test.ts`, `src/render/chunk-mesh.test.ts`, `src/game/world-save.test.ts`.
+
+### Next for Claude
+* Continue from **G2** (`Alle blokken with a slot chooser`, which can use `BLOCK_GRID_ROWS` already exported from `src/world/blocks.ts`) through **G13** in `docs/GEMINI_TASKS.md`.

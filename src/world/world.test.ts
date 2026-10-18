@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { AIR, GRAS, BLADEREN, BOOMSTAM, KEISTEEN, OERSTEEN, PLACEABLE_BLOCKS, ZAND, isSolid } from './blocks';
-import { CELL_COUNT, START_SPOT, WORLD_HEIGHT, WORLD_SIZE, generateTerrain } from './terrain';
+import { CELL_COUNT, START_SPOT, WORLD_HEIGHT, WORLD_SIZE, cellIndex, generateTerrain } from './terrain';
 import { World } from './world';
 
 function topSolid(w: World, x: number, z: number): number {
@@ -9,6 +9,29 @@ function topSolid(w: World, x: number, z: number): number {
 }
 
 describe('terrain', () => {
+  it('has WORLD_HEIGHT = 64, CELL_COUNT = 64 x 64 x 64, and cellIndex unchanged for y < 32 (G0)', () => {
+    expect(WORLD_HEIGHT).toBe(64);
+    expect(CELL_COUNT).toBe(64 * 64 * 64);
+    for (let y = 0; y < 32; y++) {
+      for (const z of [0, 15, 63]) {
+        for (const x of [0, 31, 63]) {
+          expect(cellIndex(x, y, z)).toBe((y * 64 + z) * 64 + x);
+        }
+      }
+    }
+  });
+
+  it('generated terrain has nothing but air above the old top height 32 (G0)', () => {
+    const w = new World();
+    for (let z = 0; z < WORLD_SIZE; z++) {
+      for (let x = 0; x < WORLD_SIZE; x++) {
+        for (let y = 32; y < WORLD_HEIGHT; y++) {
+          expect(w.get(x, y, z)).toBe(AIR);
+        }
+      }
+    }
+  });
+
   it('is the same for the same seed and differs for another', () => {
     expect(generateTerrain(5)).toEqual(generateTerrain(5));
     expect(generateTerrain(5)).not.toEqual(generateTerrain(6));
@@ -58,9 +81,9 @@ describe('World', () => {
     expect(new World().diff()).toHaveLength(0);
   });
 
-  it('all 16 placeable blocks can be set and read back', () => {
+  it('all 32 placeable blocks can be set and read back', () => {
     const w = new World();
-    expect(PLACEABLE_BLOCKS).toHaveLength(16);
+    expect(PLACEABLE_BLOCKS).toHaveLength(32);
     PLACEABLE_BLOCKS.forEach((id, i) => {
       expect(w.set(i, WORLD_HEIGHT - 1, 0, id)).toBe(true);
       expect(w.get(i, WORLD_HEIGHT - 1, 0)).toBe(id);

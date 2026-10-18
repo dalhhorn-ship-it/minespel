@@ -1,5 +1,5 @@
 import { BufferAttribute, BufferGeometry } from 'three';
-import { AIR, isCutout } from '../world/blocks';
+import { AIR, isCutout, isGlowing } from '../world/blocks';
 import { CHUNK_SIZE, WORLD_HEIGHT, WORLD_SIZE } from '../world/terrain';
 import { tileFor, tileUv, type FaceKind } from './atlas';
 
@@ -7,6 +7,8 @@ import { tileFor, tileUv, type FaceKind } from './atlas';
 export interface WorldView {
   get(x: number, y: number, z: number): number;
   inBounds(x: number, y: number, z: number): boolean;
+  /** Highest y index in chunk (cx, cz) with a non-air block, or -1 when all air. */
+  highestNonAirY?(cx: number, cz: number): number;
 }
 
 export interface MeshData {
@@ -62,11 +64,15 @@ export function buildChunkData(world: WorldView, cx: number, cz: number): MeshDa
   const z0 = cz * CHUNK_SIZE;
   let faces = 0;
 
-  for (let y = 0; y < WORLD_HEIGHT; y++) {
+  const topY = world.highestNonAirY ? world.highestNonAirY(cx, cz) : WORLD_HEIGHT - 1;
+  const yLimit = topY < 0 ? 0 : Math.min(WORLD_HEIGHT, topY + 2);
+
+  for (let y = 0; y < yLimit; y++) {
     for (let z = z0; z < z0 + CHUNK_SIZE; z++) {
       for (let x = x0; x < x0 + CHUNK_SIZE; x++) {
         const id = world.get(x, y, z);
         if (id === AIR) continue;
+        const glowing = isGlowing(id);
         for (const face of FACES) {
           const [dx, dy, dz] = face.dir;
           if (!faceVisible(world, id, x + dx, y + dy, z + dz)) continue;
@@ -75,10 +81,11 @@ export function buildChunkData(world: WorldView, cx: number, cz: number): MeshDa
           const { u0, u1, v0, v1 } = tileUv(tile);
           const base = positions.length / 3;
           const uvCorners = [u0, v0, u1, v0, u1, v1, u0, v1];
+          const shade = glowing ? 1.0 : face.shade;
           face.corners.forEach((c, i) => {
             positions.push(x + c[0], y + c[1], z + c[2]);
             uvs.push(uvCorners[i * 2] ?? 0, uvCorners[i * 2 + 1] ?? 0);
-            colors.push(face.shade, face.shade, face.shade);
+            colors.push(shade, shade, shade);
           });
           indices.push(base, base + 1, base + 2, base, base + 2, base + 3);
           faces++;

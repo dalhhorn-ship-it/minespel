@@ -161,4 +161,16 @@ describe('placeBlock', () => {
     const r = placeBlock(w, { ox: 5, oy: 5.5, oz: 0.5, dx: -1, dy: 0, dz: 0 }, GRAS, player);
     expect(r.ok).toBe(false);
   });
+
+  it('AC157: each of the 16 new blocks (ids 18 to 33) can be placed and mined (G1)', () => {
+    const w = flatWorld();
+    for (let id = 18; id <= 33; id++) {
+      const placed = placeBlock(w, down(25.5, 8, 25.5), id, player);
+      expect(placed).toEqual({ ok: true, x: 25, y: 5, z: 25, block: id });
+      expect(w.get(25, 5, 25)).toBe(id);
+      const mined = mineBlock(w, down(25.5, 8, 25.5));
+      expect(mined).toEqual({ ok: true, x: 25, y: 5, z: 25, block: id });
+      expect(w.get(25, 5, 25)).toBe(AIR);
+    }
+  });
 });

@@ -1,7 +1,9 @@
 import { CanvasTexture, NearestFilter, SRGBColorSpace } from 'three';
 import {
-  AARDE, BAKSTEEN, BLADEREN, BOOMSTAM, GLAS, GRAS, KEISTEEN, OERSTEEN, PLANKEN, STEEN, WOL_BLAUW,
-  WOL_GEEL, WOL_GROEN, WOL_PAARS, WOL_ROOD, WOL_WIT, ZAND,
+  AARDE, BAKSTEEN, BASALT, BLADEREN, BOOMSTAM, DIAMANT, DIEPSTEEN, GLAS, GOUDSTEEN, GRANIET, GRAS,
+  IJS, KEISTEEN, LAVA, MARMER, MOSSTEEN, OBSIDIAAN, OERSTEEN, PLANKEN, SNEEUW, STEEN, VUUR,
+  VUURSTEEN, WATER, WOL_BLAUW, WOL_GEEL, WOL_GROEN, WOL_ORANJE, WOL_PAARS, WOL_ROOD, WOL_WIT,
+  ZAND, ZANDSTEEN,
 } from '../world/blocks';
 
 export const TILE_SIZE = 16;
@@ -80,6 +82,75 @@ export const TILES: readonly TileSpec[] = [
   wool('wol-groen', [70, 190, 86]),
   wool('wol-paars', [158, 84, 210]),
   { name: 'oersteen', base: [56, 52, 66], speckle: 14 },
+  {
+    name: 'obsidiaan', base: [26, 16, 44], speckle: 10,
+    pattern: (x, y) => ((x * 5 + y * 9) % 13 === 0 ? [112, 48, 178, 255] : (x + y) % 7 === 0 ? [14, 8, 26, 255] : null),
+  },
+  {
+    name: 'vuur', base: [255, 132, 28], speckle: 14,
+    pattern: (x, y) => {
+      const tongue = Math.abs((x % 5) - 2) + Math.floor(y / 2);
+      if (y < 4 && tongue >= 2) return [0, 0, 0, 0];
+      if (y > 11) return [255, 232, 82, 255];
+      if (y > 6 && (x + y) % 2 === 0) return [255, 186, 42, 255];
+      return null;
+    },
+  },
+  {
+    name: 'lava', base: [244, 104, 24], speckle: 12,
+    pattern: (x, y) => {
+      const wave = (x + (y >> 1) * 3) % 7;
+      if (wave === 0) return [255, 214, 52, 255];
+      if (wave === 1) return [255, 152, 32, 255];
+      return null;
+    },
+  },
+  {
+    name: 'mossteen', base: [118, 124, 118], speckle: 14,
+    pattern: (x, y) => ((x * 3 + y * 5) % 7 === 0 ? [72, 152, 58, 255] : y % 5 === 0 ? [82, 92, 82, 255] : null),
+  },
+  {
+    name: 'zandsteen', base: [224, 198, 128], speckle: 8,
+    pattern: (_x, y) => (y === 3 || y === 9 ? [196, 168, 98, 255] : y < 3 ? [238, 216, 152, 255] : null),
+  },
+  {
+    name: 'graniet', base: [168, 108, 92], speckle: 20,
+    pattern: (x, y) => ((x * 11 + y * 7) % 9 === 0 ? [212, 164, 148, 255] : null),
+  },
+  {
+    name: 'marmer', base: [236, 236, 242], speckle: 6,
+    pattern: (x, y) => ((x + y * 2) % 9 === 0 ? [184, 188, 202, 255] : null),
+  },
+  {
+    name: 'basalt', base: [64, 64, 72], speckle: 12,
+    pattern: (x) => (x % 3 === 0 ? [44, 44, 52, 255] : null),
+  },
+  {
+    name: 'diepsteen', base: [78, 82, 94], speckle: 10,
+    pattern: (x, y) => (y % 4 === 0 || (x + (y >> 2) * 4) % 8 === 0 ? [50, 54, 64, 255] : null),
+  },
+  {
+    name: 'vuursteen', base: [92, 74, 68], speckle: 14,
+    pattern: (x, y) => ((x * 7 + y * 5) % 11 === 0 ? [255, 132, 36, 255] : null),
+  },
+  {
+    name: 'goudsteen', base: [244, 196, 48], speckle: 12,
+    pattern: (x, y) => (x === 0 || y === 0 || x === 15 || y === 15 ? [198, 146, 20, 255] : (x + y) === 6 ? [255, 244, 164, 255] : null),
+  },
+  {
+    name: 'diamant', base: [74, 226, 236], speckle: 10,
+    pattern: (x, y) => (x === 0 || y === 0 || x === 15 || y === 15 ? [38, 174, 192, 255] : (x + y) === 7 ? [224, 255, 255, 255] : null),
+  },
+  {
+    name: 'water', base: [68, 156, 244], speckle: 8,
+    pattern: (x, y) => ((x + y) % 9 === 0 ? [0, 0, 0, 0] : y % 4 === 0 ? [116, 192, 255, 255] : null),
+  },
+  {
+    name: 'ijs', base: [164, 218, 252], speckle: 6,
+    pattern: (x, y) => ((x * 5 + y * 3) % 13 === 0 ? [0, 0, 0, 0] : x + y === 12 ? [232, 248, 255, 255] : null),
+  },
+  { name: 'sneeuw', base: [246, 250, 255], speckle: 6 },
+  wool('wol-oranje', [245, 130, 32]),
 ];
 
 const TILE_INDEX = new Map(TILES.map((t, i) => [t.name, i]));
@@ -103,6 +174,22 @@ function tileName(block: number, face: FaceKind): string | null {
     case WOL_GROEN: return 'wol-groen';
     case WOL_PAARS: return 'wol-paars';
     case OERSTEEN: return 'oersteen';
+    case OBSIDIAAN: return 'obsidiaan';
+    case VUUR: return 'vuur';
+    case LAVA: return 'lava';
+    case MOSSTEEN: return 'mossteen';
+    case ZANDSTEEN: return 'zandsteen';
+    case GRANIET: return 'graniet';
+    case MARMER: return 'marmer';
+    case BASALT: return 'basalt';
+    case DIEPSTEEN: return 'diepsteen';
+    case VUURSTEEN: return 'vuursteen';
+    case GOUDSTEEN: return 'goudsteen';
+    case DIAMANT: return 'diamant';
+    case WATER: return 'water';
+    case IJS: return 'ijs';
+    case SNEEUW: return 'sneeuw';
+    case WOL_ORANJE: return 'wol-oranje';
     default: return null;
   }
 }

@@ -3,9 +3,12 @@ import type { Effects } from '../render/effects';
 import type { BuildMode } from '../ui/hud';
 import type { Sound } from '../audio/sound';
 import {
-  AARDE, BAKSTEEN, BOOMSTAM, GLAS, GRAS, PLANKEN, STEEN, WOL_ROOD, isPlaceable,
+  AARDE, BAKSTEEN, BOOMSTAM, GLAS, GRAS, PLANKEN, STEEN, VUUR, WOL_ROOD, isPlaceable,
 } from '../world/blocks';
 import { mineBlock, placeBlock, type Aim, type IsOccupied } from '../world/build';
+import { gateFill, isGateColumn } from '../world/gate';
+import { playerBox } from '../world/physics';
+import { CHUNK_SIZE } from '../world/terrain';
 import type { CameraPose } from '../render/renderer';
 import type { World } from '../world/world';
 import type { PlayerController } from './player-controller';
@@ -99,9 +102,28 @@ export function createBuildController(options: BuildControllerOptions): BuildCon
         p.y = r.liftPlayerTo;
         p.vy = 0;
       }
-      options.onBlockChanged(r.x, r.z);
+      // Chunks touched by this tap, as x,z of one cell each: one change per chunk (the gate fill is one change).
+      const touched = new Map<string, [number, number]>();
+      const touch = (cx: number, cz: number) => touched.set(`${Math.floor(cx / CHUNK_SIZE)},${Math.floor(cz / CHUNK_SIZE)}`, [cx, cz]);
+      touch(r.x, r.z);
+      let lit = false;
+      if (isGateColumn(r.x, r.z)) {
+        const free = (box: [number, number, number, number, number, number]) => {
+          const pb = playerBox(p);
+          const onPlayer = box[0] < pb[3] && box[3] > pb[0] && box[1] < pb[4] && box[4] > pb[1] && box[2] < pb[5] && box[5] > pb[2];
+          return onPlayer || (options.isOccupied?.(box) ?? false);
+        };
+        const cells = gateFill(options.world, free);
+        for (const c of cells) {
+          options.world.set(c.x, c.y, c.z, VUUR);
+          touch(c.x, c.z);
+        }
+        lit = cells.length > 0;
+      }
+      for (const [cx, cz] of touched.values()) options.onBlockChanged(cx, cz);
       options.effects.pop(x, y, r.block);
       options.sound.play('thunk');
+      if (lit) options.sound.play('whoosh');
     },
     getState: () => ({ mode, hotbar: [...hotbar], selected }),
     setState(state) {

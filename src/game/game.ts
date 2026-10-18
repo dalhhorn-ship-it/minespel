@@ -59,6 +59,13 @@ export interface Game {
   /** Mode, the 8 hotbar blocks and the selected slot. T37 saves these. */
   getBuildState(): BuildState;
   setBuildState(state: Partial<BuildState>): void;
+  /** Omhoog and Omlaag, for the buttons that come with G6. */
+  setAscending(on: boolean): void;
+  setDescending(on: boolean): void;
+  isFloating(): boolean;
+  /** Camera arrows for G6. Tap (press under 200 ms) calls `tapLook`; a longer press calls `setLookInput` once 200 ms have passed. */
+  setLookInput(turnX: number, tiltY: number): void;
+  tapLook(turnX: number, tiltY: number): void;
   /** Puts the player back on the start spot and says so with `teleported`. */
   teleportHome(): void;
   /** Puts every block back to the start world, saves that, and puts the player on the start spot. */
@@ -136,6 +143,12 @@ export function createGame(options: GameOptions): Game {
       emitChanged('build');
     },
     onPause: () => {}, // the pause menu comes with T41
+    onAscend: (on) => player.setAscending(on),
+    onDescend: (on) => player.setDescending(on),
+    onLookTap: (x, y) => player.tapLook(x, y),
+    onLook: (x, y) => player.setLookInput(x, y),
+    win,
+    doc,
   });
   const build = createBuildController({
     world,
@@ -172,8 +185,9 @@ export function createGame(options: GameOptions): Game {
   });
   const grid = createBlockGrid({
     router,
-    onPick: (block) => {
-      build.setSlotBlock(build.getState().selected, block);
+    getState: () => build.getState(),
+    onPick: (slot, block) => {
+      build.setSlotBlock(slot, block);
       refreshHotbar();
       emitChanged('build');
     },
@@ -269,6 +283,17 @@ export function createGame(options: GameOptions): Game {
   doc.addEventListener('visibilitychange', update);
   update();
 
+  // A held fly or look control must never outlive the moment the world stops (a stuck Omhoog flies the kid to the top).
+  function releaseHolds() {
+    hud.releaseAll();
+    player.setAscending(false);
+    player.setDescending(false);
+    player.setLookInput(0, 0);
+  }
+  const unsubscribeScreens = options.screens?.subscribe((kind) => {
+    if (kind !== 'world') releaseHolds();
+  });
+
   function teleportHome() {
     player.reset();
     const p = player.player;
@@ -284,6 +309,7 @@ export function createGame(options: GameOptions): Game {
     dinos,
     openDinoMenu,
     pause() {
+      releaseHolds();
       manualPause = true;
       update();
     },
@@ -297,6 +323,11 @@ export function createGame(options: GameOptions): Game {
       build.setState(state);
       refreshHotbar();
     },
+    setAscending: (on) => player.setAscending(on),
+    setDescending: (on) => player.setDescending(on),
+    isFloating: () => player.isFloating(),
+    setLookInput: (turnX, tiltY) => player.setLookInput(turnX, tiltY),
+    tapLook: (turnX, tiltY) => player.tapLook(turnX, tiltY),
     teleportHome,
     resetWorld() {
       world.reset();
@@ -313,6 +344,7 @@ export function createGame(options: GameOptions): Game {
     dispose() {
       loop.stop();
       unsubscribe();
+      unsubscribeScreens?.();
       doc.removeEventListener('visibilitychange', update);
       win.removeEventListener('resize', resize);
       win.removeEventListener('orientationchange', resize);
