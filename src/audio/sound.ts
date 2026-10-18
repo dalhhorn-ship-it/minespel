@@ -12,7 +12,8 @@ export type SoundName =
   | 'crack'
   | 'chirp'
   | 'fanfare'
-  | 'tick';
+  | 'tick'
+  | 'whoosh';
 
 export const SOUND_NAMES: readonly SoundName[] = [
   'pop',
@@ -24,6 +25,7 @@ export const SOUND_NAMES: readonly SoundName[] = [
   'chirp',
   'fanfare',
   'tick',
+  'whoosh',
 ];
 
 export interface SoundOptions {
@@ -145,6 +147,11 @@ const RECIPES: Record<SoundName, (c: Ctx, out: AudioNode, t: number) => void> = 
   },
   // Countdown tick: tiny and quiet.
   tick: (c, o, t) => tone(c, o, t, { type: 'square', from: 1000, dur: 0.03, gain: 0.12 }),
+  // The obsidiaan gate lights: a soft airy rush that rises a little.
+  whoosh: (c, o, t) => {
+    noise(c, o, t, 0, 0.45, 500, 0.35);
+    tone(c, o, t, { from: 200, to: 420, dur: 0.4, gain: 0.15 });
+  },
 };
 
 export function createSound(options: SoundOptions): Sound {

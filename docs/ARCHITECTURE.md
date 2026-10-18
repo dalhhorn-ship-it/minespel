@@ -71,6 +71,7 @@ src/
   world/                    pure voxel logic
     blocks.ts               block ids, Dutch names, flags (solid, cutout, minable, placeable)
     terrain.ts              fixed seed world generation, WORLD_SIZE constant (64 or 48)
+    gate.ts                 the obsidiaan gate rule: gateFill(world, isOccupied) returns the vuur cells to add
     world.ts                World: get and set blocks, diff against the start world, (de)serialize
     raycast.ts              voxel ray walk (Amanatides and Woo) for taps
     physics.ts              player box movement, gravity, jump, edge walls, step rules
@@ -365,3 +366,10 @@ Rules: every task adds tests that fail without its change. Pure logic is tested 
 | Large plan (71 tasks) | Pure logic first and in parallel, stubs for menus, milestones playable early. |
 | Share sheet in home screen mode | Fallback new view (PRD 4.15), checked on the real iPad at M5. |
 | Taal content mistakes | Validator checks plus the human check (T65). |
+
+## The obsidiaan gate (G3, PRD 4.20)
+
+* Fixed spot, set in `terrain.ts` (yaw 0 looks toward +z, so the kid's right is -x). Let G be the start ground height (`GROUND_Y`, the y index of the top grass block at the start). F1 to F4 are obsidiaan at y = G, z = `MID + 4`, x = `MID + 1`, `MID`, `MID - 1`, `MID - 2` (`GATE_Z`, `GATE_FLOOR_X`). Their top is level with the grass.
+* Terrain flattens x `MID - 3` to `MID + 2`, z `MID + 3` to `MID + 5` to the start height and keeps trunks and leaves out of it. Fixed world version stays 2.
+* `world/gate.ts` is pure. `gateFill` needs F1 to F4 as obsidiaan and unbroken obsidiaan pillars at least 2 high (from G+1) above F1 and F4. The opening is the cells above F2 and F3 from G+1 to the lower pillar's height. If one opening cell holds vuur it returns every AIR opening cell that `isOccupied` does not flag.
+* `game/build-controller.ts` calls it after a successful place, only when the placed cell is in a gate column. It writes the vuur, calls `onBlockChanged` once per touched chunk (the gate straddles the chunk border at x 32, so at most 2 calls) and plays `whoosh`. The controller adds the player box to the dino and egg `isOccupied`. Mining never lights.
