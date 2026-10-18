@@ -1,6 +1,6 @@
 # PRD: Dino Blokwereld (working title)
 
-Status: DRAFT (first approved by the Founder on 2026-10-17; the change of 2026-10-18 in 4.1 to 4.5, 4.20 and 4.21 waits for a new signoff)
+Status: APPROVED by Founder on 2026-10-18
 
 ## 1. Summary
 Dino Blokwereld is a small 3D block world on the iPad where a kid explores, mines, builds and flies with Minecraft style blocks. Every few minutes the game pauses for a short learning break in Rekenen or Taal. Right answers earn dino points. In the Dinowinkel the kid buys dino eggs and chickens with those points, and the eggs hatch into friendly blocky dinos that walk around in the world. A passed practice exam gives a golden dino.
@@ -392,13 +392,13 @@ The kid can choose to do the next learning break now.
 * **Where:** a **Nu oefenen** button on the countdown pill, in the Dinowinkel and in the Lesboek. Each has a tap area of at least 44 x 44 points.
 * **Not shown** during a learning break, an exam (including its end screen and review), Extra oefenen, the parent gate or the parent area.
 * Tapping it asks "Nu een leerpauze doen?" with "Ja" and "Nee". "Nee" goes back to where the kid was. "Ja" starts a learning break right away. The question stops the play timer while it is open.
-* **It is a normal learning break** (4.5, 4.6): the next module in turn, the same question picking, lessons, retry, teach moment, malus, +3 bonus and summary. It moves the spaced repetition boxes and the module turn like any break. A parent can end it with "Pauze nu beëindigen". If the app is closed during it, it resumes like any break and stays an early break.
+* **It is a normal learning break** (4.5, 4.6): the next module in turn, the same question picking, lessons, retry, teach moment, +3 bonus and summary. It moves the spaced repetition boxes and the module turn like any break. A parent can end it with "Pauze nu beëindigen". If the app is closed during it, it resumes like any break and stays an early break.
 * **After it** the kid taps "Terug naar de wereld" and is back in the world (also when it was started from the Dinowinkel or the Lesboek). The play countdown starts again from the full interval set by the parent.
 * **Every break started with Nu oefenen is an early break.** A break that starts because the countdown reached 0 is never an early break.
 * **Points in an early break (F17):**
   * Plus points (+2, +1 and the +3 bonus) count toward the same 10 extra points per calendar day cap as Extra oefenen (4.7). Early breaks and Extra oefenen together give at most 10 plus points a day.
   * A plus that does not fully fit gives only the part that fits. Example: with 9 of the 10 used, a +2 gives +1.
-  * The malus (-1 after a teach moment) works as in a normal break. It lowers the total (never below 0) but does not change the cap count: it neither uses up the cap nor gives room back.
+  * There is no malus in early breaks (like Extra oefenen, F14), so a capped early break never loses points.
   * Once the cap is reached, Nu oefenen still works. Learning is always fine. Right answers still show the green check and "Goed zo!", but no plus points, and the summary shows "Genoeg geoefend voor vandaag, ga lekker bouwen!" next to the score.
   * The cap starts again the next calendar day. Normal timed breaks never count toward the cap and are never limited by it.
 * The parent setting "Tijd tussen leerpauzes" still decides the interval. Nu oefenen does not change it.
@@ -737,7 +737,7 @@ Nu oefenen
 * **AC173:** Given the world, the Dinowinkel or the Lesboek, then a Nu oefenen button shows. Given a break, an exam (with its end screen and review), Extra oefenen, the parent gate or the parent area, then no Nu oefenen button shows. Given "Nu oefenen" then "Nee", then nothing changes and the play timer did not count down while the question was open.
 * **AC174:** Given 3:12 left on the countdown, when the kid taps "Nu oefenen" and "Ja" in the Dinowinkel, then a normal learning break of the next module in turn starts. After the summary, "Terug naar de wereld" goes to the world and the countdown shows the full interval (5:00 by default, 10:00 when the parent set 10 minutes). Resultaten Pauzes marks it "zelf gestart".
 * **AC175 (F17):** Given 0 extra points used today, when the kid does an early break with 5 questions all right on the first try, then they get 10 points (+2 x 5 = 10, and the +3 bonus does not fit), and the summary shows "Genoeg geoefend voor vandaag, ga lekker bouwen!". Given 9 of 10 used, when a first try is right, then the total goes up by 1. Given the cap is reached by early breaks, then Extra oefenen gives no plus points that day either, and the other way round.
-* **AC176 (F17):** Given the cap is reached, when the kid does another early break, then it runs fully, right answers show a green check with no plus points, a teach moment still takes 1 point (never below 0), and the cap count stays at 10. Given the next calendar day, then the cap starts again. Given a normal timed break when the cap is reached, then it gives its full points as in 4.5.
+* **AC176 (F17):** Given the cap is reached, when the kid does another early break, then it runs fully, right answers show a green check with no plus points, a teach moment takes 0 points (no malus in early breaks), and the cap count stays at 10. Given the next calendar day, then the cap starts again. Given a normal timed break when the cap is reached, then it gives its full points as in 4.5.
 
 Chickens and the richer Dinowinkel
 * **AC177 (F18):** Given 9 points and 0 chickens, when the kid taps "Kip kopen" and "Ja" 5 times within 1 second, then exactly one chicken is bought and the total is 4. Given "Nee", then nothing changes. Given the kid returns to the world, then the chicken stands next to the player and is on Volg mij. Given the app is killed right after "Ja", when it reopens, then the chicken is there and the 5 points were taken exactly once.
@@ -820,7 +820,7 @@ Choices made by product inside F16 to F18, which the founder sees when signing a
 * The gate works only at the fixed spot. It lights when the frame (4 floor blocks, pillars at least 2 high, no top bar) is complete and any vuur is in the opening, in either order. The opening is as high as the lower pillar.
 * Flying speed about 4 blocks a second. The jump button does nothing while floating. Floating is saved. Eggs and chickens never appear in the air.
 * Camera arrows: a tap turns about 15 degrees, holding turns about 90 degrees a second with easing.
-* Nu oefenen asks "Nu een leerpauze doen?" first, so a stray tap does not start a break. It always returns to the world. A plus that does not fully fit under the cap gives only the part that fits (this is how Extra oefenen already works). The +3 bonus counts under the cap. The malus does not touch the cap count. Early breaks are marked "zelf gestart" for the parent.
+* Nu oefenen asks "Nu een leerpauze doen?" first, so a stray tap does not start a break. It always returns to the world. A plus that does not fully fit under the cap gives only the part that fits (this is how Extra oefenen already works). The +3 bonus counts under the cap. There is no malus in early breaks. Early breaks are marked "zelf gestart" for the parent.
 * Chickens cost 5 points, are bought one at a time (no "3 kippen" button), get the same menu as dinos and start on Volg mij.
 * The Dinowinkel gets two tabs, Winkel and Mijn dino's, so the screen stays calm.
 * The parent lock stays a small grey lock icon (4.12), not a labelled "Ouders" button, so the kid is not invited to tap it.
