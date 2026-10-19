@@ -27,6 +27,14 @@
   gap: var(--gap);
   pointer-events: auto;
 }
+.hud-btn.hud-pause, .hud-btn.hud-winkel {
+  /* One fixed size for both, so Winkel and Pauze match even with the larger font setting. */
+  width: 168px;
+  padding-left: 0;
+  padding-right: 0;
+  min-height: var(--touch-min);
+  white-space: nowrap;
+}
 .hud-countdown { min-height: var(--touch-min); min-width: var(--touch-min); }
 .hud-btn {
   pointer-events: auto;

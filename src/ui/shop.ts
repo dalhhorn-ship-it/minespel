@@ -41,7 +41,8 @@ export interface ShopViewState {
 }
 
 export interface ShopViewOptions {
-  state: ShopViewState;
+  /** null while the points are still being read. The view opens at once with a placeholder and no Kopen (AC164). */
+  state: ShopViewState | null;
   onBuy: (kind: DinoKindId) => Promise<void> | void;
   onClose: () => void;
   /** Optional shortcut to override the countdown and earn coins immediately. */
@@ -84,7 +85,9 @@ export const SPECIES_META: Record<DinoKindId, SpeciesMeta> = {
 };
 
 export function createShopView(options: ShopViewOptions): ShopView {
-  let state: ShopViewState = options.state;
+  const emptyState: ShopViewState = { points: 0, dinos: [], eggs: [] };
+  let loaded = options.state !== null;
+  let state: ShopViewState = options.state ?? emptyState;
   let confirmingKind: DinoKindId | null = null;
   let purchaseInFlight = false;
   const cleanups: Array<() => void> = [];
@@ -126,7 +129,7 @@ export function createShopView(options: ShopViewOptions): ShopView {
     withBar: boolean,
   ): HTMLElement[] {
     const bottomChildren: HTMLElement[] = [];
-    if (!bState.canBuy && bState.note) {
+    if (loaded && !bState.canBuy && bState.note) {
       const note = el('p', {
         class: 'shop-card-note',
         text: bState.note,
@@ -145,7 +148,7 @@ export function createShopView(options: ShopViewOptions): ShopView {
     }
 
     // Kopen button or Ja/Nee confirmation (AC20, AC110)
-    if (confirmingKind === kindId && bState.canBuy) {
+    if (loaded && confirmingKind === kindId && bState.canBuy) {
       const yesBtn = el('button', {
         class: 'shop-confirm-yes',
         text: 'Ja',
@@ -216,8 +219,8 @@ export function createShopView(options: ShopViewOptions): ShopView {
           'aria-label': `Koop ${name} voor ${price} punten`,
         },
       });
-      buyBtn.disabled = !bState.canBuy;
-      if (bState.canBuy) {
+      buyBtn.disabled = !loaded || !bState.canBuy;
+      if (loaded && bState.canBuy) {
         cleanups.push(
           onTap(
             buyBtn,
@@ -237,6 +240,7 @@ export function createShopView(options: ShopViewOptions): ShopView {
   function renderView() {
     clearCleanups();
     modal.replaceChildren();
+    root.dataset.loading = String(!loaded);
 
     const shopCount = shopDinoCount([...state.dinos], [...state.eggs]);
     const goldenCount =
@@ -247,13 +251,16 @@ export function createShopView(options: ShopViewOptions): ShopView {
     const walletBar = el('div', { class: 'shop-wallet-bar' }, [
       el('div', {
         class: 'shop-wallet-pill pause-points',
-        text: `\u{1FA99} ${state.points} ${state.points === 1 ? 'punt' : 'punten'}`,
+        text: loaded
+          ? `\u{1FA99} ${state.points} ${state.points === 1 ? 'punt' : 'punten'}`
+          : '\u{1FA99} \u{2026} punten',
         attrs: { 'data-testid': 'shop-points' },
       }),
       el('div', {
         class: 'shop-herd-pill',
-        text:
-          goldenCount > 0
+        text: !loaded
+          ? `\u{1F995} \u{2026} dino's`
+          : goldenCount > 0
             ? `\u{1F995} ${shopCount} / ${MAX_SHOP_DINOS} dino's (\u{2B50} +${goldenCount} gouden)`
             : `\u{1F995} ${shopCount} / ${MAX_SHOP_DINOS} dino's`,
         attrs: { 'data-testid': 'shop-herd-count' },
@@ -475,6 +482,7 @@ export function createShopView(options: ShopViewOptions): ShopView {
     element: root,
     render(nextState) {
       state = nextState;
+      loaded = true;
       renderView();
     },
     destroy() {

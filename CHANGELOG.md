@@ -10,6 +10,9 @@ Written so kids can read it too.
 * Pass the exam and a golden dino hatches in the world!
 * A grown up can stop an exam with the small grey lock on the exam screen. The kid goes back to the world and there is no golden egg.
 * If the app closes during an exam, it continues where you were.
+* New "🥚 Winkel" button next to Pauze. It opens the Dinowinkel straight from the world.
+* Pauze and the Dinowinkel now open right away. The points show "…" for a moment and fill in when they are loaded. You cannot buy anything until the points are known.
+* Pauze and Winkel also work when your finger rolls a little while tapping.
 
 ## 0.1.0 (2026-10-19)
 

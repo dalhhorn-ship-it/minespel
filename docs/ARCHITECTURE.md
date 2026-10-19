@@ -154,7 +154,7 @@ src/
   ui/
     dom.ts                  el(), text only helpers
     tap.ts                  onTap(): pointer based tap, acts once, ignores repeats
-    hud.ts                  stick, jump, mode buttons, hotbar slot, countdown slot, pause button
+    hud.ts                  stick, jump, mode buttons, hotbar slot, countdown slot, pause button, Winkel button (T51e)
     countdown.ts            "Leerpauze over 4:12", pulse, tick
     hotbar.ts, block-grid.ts, pause-menu.ts, shop.ts, dino-menu.ts, name-screen.ts, lock-icon.ts
     broken-save-screen.ts

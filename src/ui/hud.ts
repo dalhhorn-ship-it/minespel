@@ -3,7 +3,7 @@
 // Every button is an ignore zone, so a touch on it never looks or taps the world (AC104, AC127).
 import '../styles/hud.css';
 import { el } from './dom';
-import { onTap } from './tap';
+import { HUD_TAP_MOVE_LIMIT, onTap } from './tap';
 import { createLockIcon } from './lock-icon';
 import type { PointerRouter } from '../input/pointer-router';
 
@@ -15,6 +15,8 @@ export interface HudOptions {
   onJump: () => void;
   onMode: (mode: BuildMode) => void;
   onPause: () => void;
+  /** Optional shortcut to the Dinowinkel ("🥚 Winkel", world HUD only, AC160). */
+  onShop?: () => void;
   /** Optional parental entry (small grey lock, world HUD only, decision 53). */
   onParent?: () => void;
   /** Optional sky-ascend hold/tap handler ("Omhoog") to float higher into the sky. */
@@ -49,18 +51,28 @@ export function createHud(options: HudOptions): Hud {
     cls: string,
     handler: () => void,
     extraAttrs?: Record<string, string>,
+    moveLimit?: number,
   ) => {
     const b = el('button', {
       class: `hud-btn ${cls}`,
       text,
       attrs: { type: 'button', ...(extraAttrs ?? {}) },
     });
-    cleanups.push(onTap(b, handler));
+    cleanups.push(onTap(b, handler, moveLimit ? { moveLimit } : {}));
     return zone(b);
   };
 
   const jump = button('Spring', 'hud-jump', options.onJump);
-  const pause = button('Pauze', 'hud-pause', options.onPause);
+  const pause = button('Pauze', 'hud-pause', options.onPause, { 'data-testid': 'hud-pause' }, HUD_TAP_MOVE_LIMIT);
+  const winkel = options.onShop
+    ? button(
+        '\u{1F95A} Winkel',
+        'hud-winkel',
+        options.onShop,
+        { 'data-testid': 'hud-winkel', 'aria-label': 'Dinowinkel' },
+        HUD_TAP_MOVE_LIMIT,
+      )
+    : null;
   const hakken = button('Hakken', 'hud-mode', () => select('hakken'));
   const bouwen = button('Bouwen', 'hud-mode', () => select('bouwen'));
   const countdownSlot = zone(el('div', { class: 'hud-countdown' }));
@@ -75,7 +87,7 @@ export function createHud(options: HudOptions): Hud {
     cleanups.push(() => lock.destroy());
     topRightChildren.push(lock.element);
   }
-  topRightChildren.unshift(pause);
+  topRightChildren.unshift(...(winkel ? [winkel, pause] : [pause]));
 
   const topBar = el('div', { class: 'hud-top' }, [
     countdownSlot,

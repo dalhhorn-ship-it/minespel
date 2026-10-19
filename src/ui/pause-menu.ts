@@ -6,7 +6,8 @@ import { el } from './dom';
 import { onTap } from './tap';
 
 export interface PauseMenuOptions {
-  points: number;
+  /** null while the points are still being read: a placeholder shows (AC163). */
+  points: number | null;
   onResume: () => void;
   onTeleportHome: () => void;
   onShop: () => void;
@@ -18,11 +19,12 @@ export interface PauseMenuOptions {
 
 export interface PauseMenu {
   readonly element: HTMLElement;
-  setPoints(points: number): void;
+  setPoints(points: number | null): void;
   destroy(): void;
 }
 
-function pointsLabel(points: number): string {
+function pointsLabel(points: number | null): string {
+  if (points === null) return '\u{2026} punten';
   return `${points} ${points === 1 ? 'punt' : 'punten'}`;
 }
 
