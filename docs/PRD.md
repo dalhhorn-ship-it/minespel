@@ -1,6 +1,6 @@
 # PRD: Dino Blokwereld (working title)
 
-Status: READY FOR SIGNOFF
+Status: APPROVED by Founder on 2026-10-19
 
 First approved by the founder on 2026-10-17. Recut on 2026-10-19 by decision 57: the live build is v1 (0.1.0), and everything not built yet moved to small releases in section 5. The recut changes the PRD, so the founder approves it again. On 2026-10-19 the founder picked v2 Gouden ei as the next release (decision 59). Its section is in 12. This signoff covers the recut and v2.
 
