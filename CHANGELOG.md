@@ -4,6 +4,8 @@ Written so kids can read it too.
 
 ## Unreleased
 
+* Exams now run in the app: the kid does the exam on a calm screen, sees the score, can look at the mistakes, and a pass hatches a golden egg. If the app closes during an exam, it continues where you were.
+
 ## 0.1.0 (2026-10-19)
 
 The first version! Everything below is what you can already play.

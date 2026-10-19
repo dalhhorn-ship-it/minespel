@@ -2,7 +2,7 @@ import './styles/tokens.css';
 import './styles/base.css';
 import { createBreakFlow, type BreakFlow } from './app/break-flow';
 import { loadCatalog } from './app/content-loader';
-import { createExamFlow } from './app/exam-flow';
+import { createExamFlow, type ExamFlow } from './app/exam-flow';
 import { createParentFlow, type ParentFlow } from './app/parent-flow';
 import { createPracticeFlow, type PracticeFlow } from './app/practice-flow';
 import { resumeSessionIfAny } from './app/resume';
@@ -52,6 +52,7 @@ let breakFlow: BreakFlow | null = null;
 let parentFlow: ParentFlow | null = null;
 let shopFlow: ShopFlow | null = null;
 let practiceFlow: PracticeFlow | null = null;
+let examFlow: ExamFlow | null = null;
 let activePauseMenu: PauseMenu | null = null;
 let activeDinoMenu: DinoMenu | null = null;
 
@@ -65,6 +66,7 @@ const countdownView = createCountdownView({
   initialMs: 5 * 60_000,
   warningEnabled: true,
   onStartNow: () => {
+    if (examFlow?.isActive()) return;
     void breakFlow?.startBreak({ early: true });
   },
 });
@@ -241,7 +243,6 @@ const booted = game
         const [settings, timers] = await Promise.all([recs.get('settings'), recs.get('timers')]);
 
         if (screens) {
-          const examFlow = createExamFlow();
           breakFlow = createBreakFlow({
             clock: systemClock,
             rng,
@@ -268,6 +269,8 @@ const booted = game
             initialPlayMsLeft: timers.playMsLeft,
             initialWarningEnabled: settings.breakWarningEnabled !== false,
             onBreakDue: () => {
+              // The play timer does not run during an exam, but never start a break over one (AC66).
+              if (examFlow?.isActive()) return;
               void breakFlow?.startBreak();
             },
           });
@@ -299,6 +302,23 @@ const booted = game
               await breakFlow?.startBreak({ early: true });
             },
           });
+          const exams = createExamFlow({
+            clock: systemClock,
+            rng,
+            screens,
+            records: recs,
+            progressStore,
+            logStore,
+            sessionStore,
+            timerDriver,
+            dinoStore: game?.dinoStore ?? null,
+            getCatalog: () => catalog,
+            onLock: () => {
+              void parentFlow?.openExamStop();
+            },
+            sound,
+          });
+          examFlow = exams;
           parentFlow = createParentFlow({
             clock: systemClock,
             rng,
@@ -309,6 +329,12 @@ const booted = game
             getCatalog: () => catalog,
             breakFlow,
             timerDriver,
+            exams: {
+              isActive: () => exams.isActive(),
+              plan: (m, e) => exams.plan(m, e),
+              start: (m, e) => exams.start(m, e),
+              stop: () => exams.stop(),
+            },
             sound,
             onResetWorld: () => {
               game?.resetWorld();
@@ -319,7 +345,7 @@ const booted = game
             sessionStore,
             records: recs,
             breakFlow,
-            examFlow,
+            examFlow: exams,
           });
         }
 

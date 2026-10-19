@@ -3,7 +3,7 @@
 import type { Records } from '../storage/records';
 import type { SessionStore } from '../storage/session-store';
 import { isPersistedBreakSession, type BreakFlow } from './break-flow';
-import type { ExamFlow } from './exam-flow';
+import { isPersistedExamSession, type ExamFlow } from './exam-flow';
 
 export interface ResumeOptions {
   sessionStore: SessionStore;
@@ -21,9 +21,9 @@ export async function resumeSessionIfAny(
       await options.breakFlow.resumeBreak(saved);
       return 'break';
     }
-    if (saved.kind === 'exam' && options.examFlow?.resumeExam) {
-      await options.examFlow.resumeExam(saved);
-      return 'exam';
+    if (saved.kind === 'exam' && options.examFlow && isPersistedExamSession(saved)) {
+      // An exam comes before the play timer check, so a break never starts over a running exam (AC66).
+      if (await options.examFlow.resumeExam(saved)) return 'exam';
     }
     await options.sessionStore.clear();
   }
