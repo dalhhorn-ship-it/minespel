@@ -2,7 +2,8 @@
 // The parent route through Examens is tests/e2e/exam-parent.spec.ts (T51d).
 import { expect, test, type Page } from '@playwright/test';
 import { DB_NAME } from '../../src/storage/schema';
-import { answerGateQuestion, killApp, openApp, readState } from './helpers/app';
+import { killApp, openApp, readState } from './helpers/app';
+import { setupPin } from './helpers/gate';
 
 const TAAL = 'cito-taalverzorging';
 const TAAL_EXAM = 'examen-m6';
@@ -67,18 +68,6 @@ async function savedExamMs(page: Page): Promise<number | null> {
       }),
     DB_NAME,
   );
-}
-
-/** First start: answer the grown up sum and choose the pincode 1234, then close the parent area. */
-async function setupPin(page: Page): Promise<void> {
-  await readState(page, 'openParentControls');
-  await page.locator('.parent-gate').waitFor();
-  await answerGateQuestion(page);
-  await page.locator('.parent-gate-key[data-key="1"]').waitFor();
-  for (const d of '12341234') await page.locator(`.parent-gate-key[data-key="${d}"]`).tap();
-  await page.locator('[data-testid="parent-shell"]').waitFor();
-  await page.locator('.parent-close-btn').tap();
-  await expect(page.locator('[data-testid="parent-shell"]')).toBeHidden();
 }
 
 test.describe('kid exam (T51b, v2)', () => {

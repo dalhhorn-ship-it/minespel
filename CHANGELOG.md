@@ -4,7 +4,12 @@ Written so kids can read it too.
 
 ## Unreleased
 
-* Exams now run in the app: the kid does the exam on a calm screen, sees the score, can look at the mistakes, and a pass hatches a golden egg. If the app closes during an exam, it continues where you were.
+### 0.2.0: the golden egg exam
+
+* A grown up can now start a practice exam from Examens in the parent area. The kid does it on a calm screen with no hints, sees the score, and can tap "Bekijk je fouten" to learn from the mistakes.
+* Pass the exam and a golden dino hatches in the world!
+* A grown up can stop an exam with the small grey lock on the exam screen. The kid goes back to the world and there is no golden egg.
+* If the app closes during an exam, it continues where you were.
 
 ## 0.1.0 (2026-10-19)
 
