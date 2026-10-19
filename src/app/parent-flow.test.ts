@@ -66,19 +66,22 @@ describe('parental controls flow (T48a, T48b, T49, T50)', () => {
       const input = host.querySelector<HTMLInputElement>('input.parent-input')!;
       input.value = String(question.answer);
       tap(host.querySelector('.parent-btn-primary')!);
-      await new Promise((r) => setTimeout(r, 20));
+      const gateTitles = ['Kies een pincode', 'Typ dezelfde pincode'];
       for (let round = 0; round < 2; round++) {
+        await vi.waitFor(() =>
+          expect(host.querySelector('.parent-gate-title')?.textContent).toContain(gateTitles[round]),
+        );
         for (const digit of ['1', '2', '3', '4']) {
           const key = host.querySelector(`[data-key="${digit}"]`)!;
           tap(key);
           clock.advance(400);
         }
-        await new Promise((r) => setTimeout(r, 20));
       }
 
       // Wait for async unlock & shell load
-      await new Promise((r) => setTimeout(r, 20));
-      expect(host.querySelector('[data-testid="parent-shell"]')).not.toBeNull();
+      await vi.waitFor(() =>
+        expect(host.querySelector('[data-testid="parent-shell"]')).not.toBeNull(),
+      );
 
       // Switch to "Inhoud kiezen" tab and apply Groep 7 midden preset
       const inhoudBtn = host.querySelector('[data-section="inhoud"]')!;
@@ -88,13 +91,14 @@ describe('parental controls flow (T48a, T48b, T49, T50)', () => {
       tap(presetBtn);
       clock.advance(400);
 
-      await new Promise((r) => setTimeout(r, 20));
-      const switches = await records.get('switches');
-      expect((switches.modules['rekenen-basis'] as { levels?: string[] }).levels).toEqual([
-        'M6',
-        'E6',
-        'M7',
-      ]);
+      await vi.waitFor(async () => {
+        const switches = await records.get('switches');
+        expect((switches.modules['rekenen-basis'] as { levels?: string[] }).levels).toEqual([
+          'M6',
+          'E6',
+          'M7',
+        ]);
+      });
 
       // Close parent screen -> back to world
       const closeBtn = host.querySelector('[data-testid="parent-close-btn"]')!;
@@ -148,7 +152,8 @@ describe('parental controls flow (T48a, T48b, T49, T50)', () => {
         tap(host.querySelector(`[data-key="${d}"]`)!);
         clock.advance(400);
       }
-      await new Promise((r) => setTimeout(r, 20));
+      // Settled when the pad has no filled dots left, or the gate made way for the next view.
+      await vi.waitFor(() => expect(host.querySelector('.parent-gate-dot.filled')).toBeNull());
     };
     return { db, host, screens, examNode, exams, parentFlow, typePin, breakFlow };
   }
@@ -159,12 +164,15 @@ describe('parental controls flow (T48a, T48b, T49, T50)', () => {
       await t.parentFlow.openExamStop();
       expect(t.screens.current()).toBe('parent');
       await t.typePin('1234');
+      await vi.waitFor(() =>
+        expect(t.host.querySelector('[data-testid="exam-stop-card"]')).not.toBeNull(),
+      );
       expect(t.host.querySelector('[data-testid="parent-shell"]')).toBeNull();
-      expect(t.host.querySelector('[data-testid="exam-stop-card"]')).not.toBeNull();
       tap(t.host.querySelector('[data-testid="exam-stop-confirm"]')!);
-      await new Promise((r) => setTimeout(r, 20));
-      expect(t.exams.stop).toHaveBeenCalledTimes(1);
-      expect(t.host.querySelector('[data-testid="exam-stop-card"]')).toBeNull();
+      await vi.waitFor(() => expect(t.exams.stop).toHaveBeenCalledTimes(1));
+      await vi.waitFor(() =>
+        expect(t.host.querySelector('[data-testid="exam-stop-card"]')).toBeNull(),
+      );
     } finally {
       t.parentFlow.destroy();
       t.breakFlow.destroy();
@@ -184,6 +192,9 @@ describe('parental controls flow (T48a, T48b, T49, T50)', () => {
 
       await t.parentFlow.openExamStop();
       await t.typePin('1234');
+      await vi.waitFor(() =>
+        expect(t.host.querySelector('[data-testid="exam-stop-back"]')).not.toBeNull(),
+      );
       tap(t.host.querySelector('[data-testid="exam-stop-back"]')!);
       expect(t.exams.stop).not.toHaveBeenCalled();
       expect(t.host.contains(t.examNode)).toBe(true);
@@ -218,16 +229,19 @@ describe('parental controls flow (T48a, T48b, T49, T50)', () => {
     try {
       await t.parentFlow.open('examens');
       await t.typePin('1234');
-      await new Promise((r) => setTimeout(r, 20));
+      await vi.waitFor(() => expect(t.host.querySelector('[data-exam]')).not.toBeNull());
       const btn = t.host.querySelector('[data-exam]')!;
       tap(btn);
-      await new Promise((r) => setTimeout(r, 20));
-      expect(t.exams.start).toHaveBeenCalledTimes(1);
+      await vi.waitFor(() => expect(t.exams.start).toHaveBeenCalledTimes(1));
       expect(t.host.querySelector('[data-testid="parent-shell"]')).toBeNull();
       // While an exam is active, Pauze nu starten is disabled in Instellingen.
       await t.parentFlow.open('instellingen');
       await t.typePin('1234');
-      await new Promise((r) => setTimeout(r, 20));
+      await vi.waitFor(() =>
+        expect(
+          [...t.host.querySelectorAll('button')].find((b) => b.textContent === 'Pauze nu starten'),
+        ).toBeDefined(),
+      );
       const pause = [...t.host.querySelectorAll('button')].find((b) => b.textContent === 'Pauze nu starten')!;
       expect(pause.disabled).toBe(true);
     } finally {

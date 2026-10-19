@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { createCatalog, REKENEN_MODULE_ID } from '../content/catalog';
 import { MSG_ENOUGH_PRACTICE } from '../core/economy';
 import { createRng } from '../core/rng';
@@ -92,15 +92,13 @@ describe('lesboek and practice-flow (T46, AC51, AC52, AC120)', () => {
     });
 
     flow.open();
-    await new Promise((r) => setTimeout(r, 20));
-    expect(host.textContent).toContain(MSG_ENOUGH_PRACTICE);
+    await vi.waitFor(() => expect(host.textContent).toContain(MSG_ENOUGH_PRACTICE));
 
     // Next day resets the cap (AC120)
     currentDay = '2026-10-18';
     flow.open();
-    await new Promise((r) => setTimeout(r, 20));
+    await vi.waitFor(() => expect(host.textContent).toContain('Vandaag: 0 / 10 extra'));
     expect(host.textContent).not.toContain(MSG_ENOUGH_PRACTICE);
-    expect(host.textContent).toContain('Vandaag: 0 / 10 extra');
 
     flow.destroy();
     db.close();
@@ -135,17 +133,17 @@ describe('lesboek and practice-flow (T46, AC51, AC52, AC120)', () => {
       tap(Array.from(host.querySelectorAll('.kb-char')).find((b) => b.textContent === ch));
     }
     tap(host.querySelector('.kb-done'));
-    await new Promise((r) => setTimeout(r, 30));
-    expect(host.textContent).toContain('Goed');
+    await vi.waitFor(() => expect(host.textContent).toContain('Goed'));
     // Stoppen is also there on the feedback step.
     expect(host.querySelector<HTMLButtonElement>('[data-testid="practice-stop"]')?.hidden).toBe(false);
 
     tap(host.querySelector('[data-testid="practice-stop"]'));
-    await new Promise((r) => setTimeout(r, 30));
-    expect(screens.current()).toBe('world');
+    await vi.waitFor(() => expect(screens.current()).toBe('world'));
     expect(host.querySelector('.break-screen')).toBeNull();
-    const economy = await records.get('economy');
-    expect(economy.points).toBe(2);
+    await vi.waitFor(async () => {
+      const economy = await records.get('economy');
+      expect(economy.points).toBe(2);
+    });
 
     flow.destroy();
     db.close();
