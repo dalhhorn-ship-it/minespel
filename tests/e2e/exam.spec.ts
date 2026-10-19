@@ -200,7 +200,7 @@ test.describe('kid exam (T51b, v2)', () => {
     await answerAll(page, Array.from({ length: 30 }, (_, i) => i < 26));
     await expect(page.locator('[data-testid="exam-result"]')).toHaveText('Geslaagd!');
     await page.locator('[data-testid="exam-review-open"]').tap();
-    await expect(page.getByText('Uitleg', { exact: false }).first()).toBeVisible();
+    await expect(page.locator('.teach-heading', { hasText: 'Fout 1 van 4' })).toBeVisible();
     await expect(page.locator(LAYER_LOCK)).toHaveCount(0);
     await expect.poll(async () => (await examState(page))?.phase).toBe('review');
 
@@ -269,7 +269,7 @@ test.describe('kid exam (T51b, v2)', () => {
     await readState(page, 'endBreakByParent');
     await expect.poll(() => screen(page)).toBe('world');
     await readState(page, 'openPractice');
-    await expect(page.locator('.screen-layer-kid-overlay')).toBeVisible();
+    await expect(page.getByRole('dialog', { name: 'Extra oefenen' })).toBeVisible();
     await expect(page.locator(LAYER_LOCK)).toHaveCount(0);
   });
 });
