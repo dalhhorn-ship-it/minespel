@@ -1,0 +1,337 @@
+{
+  "id": "woorden-maken",
+  "title": "Lange woorden: -heid, -lijk, -teit, -tie en -age",
+  "groups": [
+    6
+  ],
+  "lesson": {
+    "pages": [
+      {
+        "title": "-heid",
+        "text": "Van een woord als vrij of snel maak je een nieuw woord met -heid: vrijheid, snelheid. -Heid schrijf je altijd met ei en een d aan het eind.",
+        "examples": [
+          {
+            "good": "Opa let goed op zijn gezondheid.",
+            "bad": "Opa let goed op zijn gezondhijt.",
+            "why": "-heid: altijd ei en een d."
+          }
+        ],
+        "tip": "Heid begint met een h en eindigt met een d.",
+        "skill": "heid"
+      },
+      {
+        "title": "-lijk",
+        "text": "Hoor je luk aan het eind van een woord? Dan schrijf je -lijk, altijd met ij.",
+        "examples": [
+          {
+            "good": "Het is een vrolijk feest.",
+            "bad": "Het is een vroleik feest.",
+            "why": "-lijk schrijf je met ij."
+          },
+          {
+            "good": "Deze som is moeilijk.",
+            "bad": "Deze som is moeiluk."
+          }
+        ],
+        "tip": "Vrolijk, eerlijk, moeilijk, gevaarlijk: allemaal -lijk.",
+        "skill": "lijk"
+      },
+      {
+        "title": "-teit",
+        "text": "Woorden op -teit komen vaak uit het Frans: activiteit, kwaliteit, elektriciteit. -Teit schrijf je met ei en een t aan het eind.",
+        "examples": [
+          {
+            "good": "Zwemmen is een leuke activiteit.",
+            "bad": "Zwemmen is een leuke activiteid.",
+            "why": "-teit eindigt op een t."
+          }
+        ],
+        "tip": "Teit begint met een t en eindigt ook met een t.",
+        "skill": "teit"
+      },
+      {
+        "title": "-tie en -sie",
+        "text": "Hoor je tsie aan het eind? Dan schrijf je -tie: vakantie, informatie, presentatie. Hoor je zie? Dan schrijf je -sie: televisie.",
+        "examples": [
+          {
+            "good": "We gaan op vakantie.",
+            "bad": "We gaan op vakansie.",
+            "why": "Je hoort tsie, dus -tie."
+          },
+          {
+            "good": "We kijken televisie.",
+            "bad": "We kijken televitie.",
+            "why": "Je hoort zie, dus -sie."
+          }
+        ],
+        "tip": "Tsie wordt -tie. Zie wordt -sie.",
+        "skill": "tie"
+      },
+      {
+        "title": "-age",
+        "text": "Hoor je aazje aan het eind? Dan schrijf je -age. De g klinkt hier als zj.",
+        "examples": [
+          {
+            "good": "De auto staat in de garage.",
+            "bad": "De auto staat in de garaazje.",
+            "why": "Je hoort aazje, dus -age."
+          }
+        ],
+        "tip": "Garage, bagage, massage, etalage: allemaal -age.",
+        "skill": "age"
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "e6-wm-001",
+      "type": "choice",
+      "level": "M6",
+      "skill": "heid",
+      "prompt": "Welk woord moet op de stippen?",
+      "sentence": "Opa let goed op zijn ... .",
+      "options": [
+        "gezondheid",
+        "gezondhijd",
+        "gezondheit",
+        "gezondhijt"
+      ],
+      "answer": 0,
+      "explain": "Gezond plus heid is gezondheid. -Heid schrijf je met ei en een d."
+    },
+    {
+      "id": "e6-wm-002",
+      "type": "type",
+      "level": "M6",
+      "skill": "heid",
+      "prompt": "Welke letters moeten op de stippen?",
+      "sentence": "Met grote snel... rent de raptor weg.",
+      "answer": [
+        "heid"
+      ],
+      "explain": "Snel plus heid is snelheid. -Heid schrijf je met ei en een d."
+    },
+    {
+      "id": "e6-wm-003",
+      "type": "choice",
+      "level": "M6",
+      "skill": "lijk",
+      "prompt": "Welk woord moet op de stippen?",
+      "sentence": "Het is een ... feest met veel muziek.",
+      "options": [
+        "vrolijk",
+        "vroleik",
+        "vrolluk",
+        "vrolek"
+      ],
+      "answer": 0,
+      "explain": "-lijk schrijf je altijd met ij: vrolijk, eerlijk, moeilijk."
+    },
+    {
+      "id": "e6-wm-004",
+      "type": "find-error",
+      "level": "M6",
+      "skill": "lijk",
+      "prompt": "Welk woord is fout geschreven?",
+      "words": [
+        "Deze",
+        "som",
+        "is",
+        "heel",
+        "moeileik."
+      ],
+      "answer": 4,
+      "correction": "moeilijk.",
+      "explain": "Moeilijk eindigt op -lijk. Dat schrijf je altijd met ij."
+    },
+    {
+      "id": "e6-wm-005",
+      "type": "choice",
+      "level": "M6",
+      "skill": "tie",
+      "prompt": "Welk woord moet op de stippen?",
+      "sentence": "We gaan deze zomer op ... naar zee.",
+      "options": [
+        "vakantie",
+        "vakansie",
+        "vakantsie",
+        "vakanzie"
+      ],
+      "answer": 0,
+      "explain": "Hoor je tsie aan het eind? Dan schrijf je -tie: vakantie."
+    },
+    {
+      "id": "e6-wm-006",
+      "type": "type",
+      "level": "M6",
+      "skill": "tie",
+      "prompt": "Welke letters moeten op de stippen?",
+      "sentence": "Bij de ingang hangt veel informa... over dino's.",
+      "answer": [
+        "tie"
+      ],
+      "explain": "Je hoort tsie, dus je schrijft -tie: informatie."
+    },
+    {
+      "id": "e6-wm-007",
+      "type": "choice",
+      "level": "M6",
+      "skill": "age",
+      "prompt": "Welk woord moet op de stippen?",
+      "sentence": "Papa zet de auto in de ... .",
+      "options": [
+        "garage",
+        "garaazje",
+        "garasje",
+        "garaje"
+      ],
+      "answer": 0,
+      "explain": "Hoor je aazje aan het eind? Dan schrijf je -age: garage."
+    },
+    {
+      "id": "e6-wm-008",
+      "type": "choice",
+      "level": "E6",
+      "skill": "teit",
+      "prompt": "Welk woord moet op de stippen?",
+      "sentence": "Zwemmen is mijn favoriete ... .",
+      "options": [
+        "activiteit",
+        "activiteid",
+        "aktivitijt",
+        "activitijd"
+      ],
+      "answer": 0,
+      "explain": "-Teit schrijf je met ei en een t, zoals activiteit en kwaliteit."
+    },
+    {
+      "id": "e6-wm-009",
+      "type": "type",
+      "level": "E6",
+      "skill": "teit",
+      "prompt": "Welke letters moeten op de stippen?",
+      "sentence": "Deze stoel is van goede kwali... .",
+      "answer": [
+        "teit"
+      ],
+      "explain": "Kwaliteit eindigt op -teit: ei en een t aan het eind."
+    },
+    {
+      "id": "e6-wm-010",
+      "type": "find-error",
+      "level": "E6",
+      "skill": "teit",
+      "prompt": "Welk woord is fout geschreven?",
+      "words": [
+        "Zonder",
+        "elektriciteid",
+        "werkt",
+        "de",
+        "lamp",
+        "niet."
+      ],
+      "answer": 1,
+      "correction": "elektriciteit",
+      "explain": "-Teit eindigt altijd op een t: elektriciteit."
+    },
+    {
+      "id": "e6-wm-011",
+      "type": "choice",
+      "level": "E6",
+      "skill": "age",
+      "prompt": "Welk woord moet op de stippen?",
+      "sentence": "Onze ... past niet meer in de auto.",
+      "options": [
+        "bagage",
+        "bagaazje",
+        "bagasje",
+        "bagaze"
+      ],
+      "answer": 0,
+      "explain": "Je hoort aazje aan het eind. Dan schrijf je -age: bagage."
+    },
+    {
+      "id": "e6-wm-012",
+      "type": "type",
+      "level": "E6",
+      "skill": "age",
+      "prompt": "Welke letters moeten op de stippen?",
+      "sentence": "Na het sporten krijgt mama een mass... .",
+      "answer": [
+        "age"
+      ],
+      "explain": "Je hoort aazje aan het eind, dus -age: massage."
+    },
+    {
+      "id": "e6-wm-013",
+      "type": "choice",
+      "level": "E6",
+      "skill": "tie",
+      "prompt": "Welk woord moet op de stippen?",
+      "sentence": "We kijken samen naar de ... .",
+      "options": [
+        "televisie",
+        "televitie",
+        "televizie",
+        "televisje"
+      ],
+      "answer": 0,
+      "explain": "Hoor je zie aan het eind? Dan schrijf je -sie: televisie. Bij tsie schrijf je -tie."
+    },
+    {
+      "id": "e6-wm-014",
+      "type": "choice",
+      "level": "E6",
+      "skill": "tie",
+      "prompt": "Welk woord moet op de stippen?",
+      "sentence": "De juf geeft een ... over de planeten.",
+      "options": [
+        "presentatie",
+        "presentasie",
+        "presentatsie",
+        "presentaatsie"
+      ],
+      "answer": 0,
+      "explain": "Je hoort tsie aan het eind, dus -tie: presentatie."
+    },
+    {
+      "id": "e6-wm-015",
+      "type": "find-error",
+      "level": "E6",
+      "skill": "heid",
+      "prompt": "Welk woord is fout geschreven?",
+      "words": [
+        "Er",
+        "was",
+        "veel",
+        "gezelligheit",
+        "op",
+        "het",
+        "feest."
+      ],
+      "answer": 3,
+      "correction": "gezelligheid",
+      "explain": "-Heid eindigt altijd op een d: gezelligheid."
+    },
+    {
+      "id": "e6-wm-016",
+      "type": "find-error",
+      "level": "E6",
+      "skill": "heid",
+      "prompt": "Welk woord is fout geschreven?",
+      "words": [
+        "Uit",
+        "nieuwsgierigheid",
+        "kijkt",
+        "de",
+        "dino",
+        "in",
+        "het",
+        "hol."
+      ],
+      "answer": -1,
+      "correction": null,
+      "explain": "Alles is goed. Nieuwsgierigheid eindigt op -heid, met ei en een d."
+    }
+  ]
+}

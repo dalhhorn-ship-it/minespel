@@ -8,6 +8,7 @@
 * **2026-10-18: Gemini's build is the truth** (decision 50). `main` holds the Gemini2 code, live on Cloudflare Worker `minespel`. Claude's G0 to G6 branch is set aside (commit `4067f07` in history).
 * Brainstorm: concept chosen (free 3D Minecraft world with dinos, learning breaks, Dutch, age 8 to 10).
 * Cito taalverzorging module for groep 6 and 7: 10 topics, 288 questions, 4 exams in `docs/modules/cito-taalverzorging/`. Passes `docs/modules/validate.py` (T2).
+* **2026-10-19: modules are reusable.** Every folder in `docs/modules/` loads by itself (`src/content/folder-modules.ts`). New `/module` skill turns workbook photos into lessons, questions and exams. First one: **Taal E6** (`docs/modules/taal-e6/`, 6 topics, 105 questions, 4 exams) from the founder's Leerling in beeld + IEP E6 photos.
 * PRD drafted, reviewed by architect and qa (1 round), all founder decisions F1 to F15 answered.
 * PRD approved by the founder in chat on 2026-10-17.
 * Dedicated Shop PRD written in `docs/SHOP_PRD.md` specifying the compelling Dinowinkel, coin economy, species cards, affordability meters, and live collection showcase.
@@ -44,5 +45,6 @@
 
 ## Notes
 * Biggest risk is 3D performance in iPad Safari. The T32 speed spike decides whether the plan holds.
-* The Taal content still needs a human spelling check by the founder or a teacher (AC124).
+* The Taal content (also the new Taal E6 module) still needs a human spelling check by the founder or a teacher (AC124).
+* The exam screens (T39, T51a, T51b) are not built yet. Module exams are ready as blueprints in `module.json` and will show up once those tasks are done.
 * Safari can clear the saves of a site not opened for a while. Tell the founder to play from the home screen app.

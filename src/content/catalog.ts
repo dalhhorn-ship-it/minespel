@@ -14,6 +14,7 @@ import {
   skillsOfTopic as rekenenSkillsOfTopic,
 } from './rekenen/module';
 import type { RekenenTopicId } from './rekenen/module';
+import { folderBundles } from './folder-modules';
 import { TAAL_MODULE_ID, taalBundle } from './taal';
 
 export { REKENEN_MODULE_ID, TAAL_MODULE_ID };
@@ -41,7 +42,7 @@ export function subjectLabel(subject: string): string {
 }
 
 export interface Catalog {
-  /** Every module bundle in display order: Rekenen, Taal, then own modules. */
+  /** Every module bundle in display order: Rekenen, Taal, other built in folder modules, then own modules. */
   modules(): readonly ModuleBundle[];
   getModule(moduleId: string): ModuleBundle | undefined;
   isBuiltIn(moduleId: string): boolean;
@@ -75,13 +76,13 @@ export interface Catalog {
 }
 
 export function createCatalog(ownModules: readonly ModuleBundle[] = []): Catalog {
-  const all: ModuleBundle[] = [
+  const builtIn: ModuleBundle[] = [
     rekenenBundle,
     taalBundle,
-    ...ownModules.filter(
-      (m) => m.module.id !== REKENEN_MODULE_ID && m.module.id !== TAAL_MODULE_ID,
-    ),
+    ...folderBundles.filter((b) => b.module.id !== TAAL_MODULE_ID),
   ];
+  const builtInIds = new Set(builtIn.map((b) => b.module.id));
+  const all: ModuleBundle[] = [...builtIn, ...ownModules.filter((m) => !builtInIds.has(m.module.id))];
   const byId = new Map<string, ModuleBundle>(all.map((b) => [b.module.id, b]));
 
   function getTopic(moduleId: string, topicId: string): Topic | undefined {
@@ -187,7 +188,7 @@ export function createCatalog(ownModules: readonly ModuleBundle[] = []): Catalog
   return {
     modules: () => all,
     getModule: (moduleId) => byId.get(moduleId),
-    isBuiltIn: (moduleId) => moduleId === REKENEN_MODULE_ID || moduleId === TAAL_MODULE_ID,
+    isBuiltIn: (moduleId) => builtInIds.has(moduleId),
     subjects() {
       const seen = new Set<string>();
       const out: string[] = [];

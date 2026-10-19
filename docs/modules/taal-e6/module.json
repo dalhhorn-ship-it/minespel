@@ -1,0 +1,91 @@
+{
+  "id": "taal-e6",
+  "title": "Taal E6 (Leerling in beeld en IEP stijl)",
+  "subject": "taal",
+  "version": 1,
+  "language": "nl",
+  "description": "Spelling van lastige woorden, meervoud, ontleden, hoofdletters en leestekens en werkwoordspelling voor eind groep 6. Met lessen, oefenvragen en oefentoetsen in de stijl van de Cito Leerling in beeld en IEP toetsen.",
+  "levels": [
+    "M6",
+    "E6"
+  ],
+  "topics": [
+    "lastige-klanken",
+    "woorden-maken",
+    "meervoud",
+    "ontleden",
+    "hoofdletters-leestekens",
+    "werkwoordspelling"
+  ],
+  "exams": [
+    {
+      "id": "toets-e6-deel-1",
+      "title": "Oefentoets E6 deel 1: spelling en ontleden",
+      "levels": [
+        "M6",
+        "E6"
+      ],
+      "questionCount": 25,
+      "timeLimitMinutes": 30,
+      "passPercent": 70,
+      "mix": {
+        "lastige-klanken": 2,
+        "woorden-maken": 2,
+        "meervoud": 1,
+        "ontleden": 1
+      }
+    },
+    {
+      "id": "toets-e6-deel-2",
+      "title": "Oefentoets E6 deel 2: leestekens en werkwoorden",
+      "levels": [
+        "M6",
+        "E6"
+      ],
+      "questionCount": 25,
+      "timeLimitMinutes": 30,
+      "passPercent": 70,
+      "mix": {
+        "hoofdletters-leestekens": 2,
+        "werkwoordspelling": 3
+      }
+    },
+    {
+      "id": "toets-m6",
+      "title": "Oefentoets M6",
+      "levels": [
+        "M6"
+      ],
+      "questionCount": 20,
+      "timeLimitMinutes": 25,
+      "passPercent": 70,
+      "mix": {
+        "lastige-klanken": 1,
+        "woorden-maken": 1,
+        "meervoud": 1,
+        "ontleden": 1,
+        "hoofdletters-leestekens": 1,
+        "werkwoordspelling": 2
+      }
+    },
+    {
+      "id": "eindtoets-e6",
+      "title": "Eindtoets E6",
+      "levels": [
+        "M6",
+        "E6"
+      ],
+      "questionCount": 40,
+      "timeLimitMinutes": 45,
+      "passPercent": 70,
+      "mix": {
+        "lastige-klanken": 1,
+        "woorden-maken": 1,
+        "meervoud": 1,
+        "ontleden": 1,
+        "hoofdletters-leestekens": 1,
+        "werkwoordspelling": 2
+      }
+    }
+  ]
+}

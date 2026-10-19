@@ -109,6 +109,15 @@ describe('switches (T35)', () => {
     expect(effectiveLevels(s, catalog, TAAL_MODULE_ID, 'komma')).toEqual(['M6', 'E6', 'M7']);
   });
 
+  it('applies a preset to other built in folder modules, only with the levels they have', () => {
+    const catalog = createCatalog();
+    let s = applyPreset(defaultKv('switches'), catalog, 'groep-6-midden');
+    expect(moduleLevels(s, catalog, 'taal-e6')).toEqual(['M6']);
+    s = applyPreset(s, catalog, 'groep-7-eind');
+    expect(moduleLevels(s, catalog, 'taal-e6')).toEqual(['M6', 'E6']);
+    expect(isModuleOn(s, catalog, 'taal-e6')).toBe(true);
+  });
+
   it('clamps Vakverdeling weights to 1..5 and counts mastered (beheerst) items', () => {
     const catalog = createCatalog();
     let s = defaultKv('switches');

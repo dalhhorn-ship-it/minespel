@@ -49,11 +49,12 @@ const customModule: ModuleBundle = {
 };
 
 describe('catalog (T35)', () => {
-  it('includes both built in modules and any own modules', () => {
+  it('includes the built in modules and any own modules', () => {
     const catalog = createCatalog([customModule]);
     expect(catalog.modules().map((m) => m.module.id)).toEqual([
       REKENEN_MODULE_ID,
       TAAL_MODULE_ID,
+      'taal-e6',
       'own-engels',
     ]);
     expect(catalog.isBuiltIn(REKENEN_MODULE_ID)).toBe(true);

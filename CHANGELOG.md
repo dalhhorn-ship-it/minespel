@@ -4,6 +4,11 @@ Written so kids can read it too.
 
 ## Unreleased
 
+### New lessons: Taal E6
+
+* A new Taal pack for the end of groep 6 with 6 lessons and 105 new questions: tricky sounds (au or ou, ei or ij), long words like vrijheid and garage, plurals like auto's, finding the lidwoord and the persoonsvorm, capitals and ! and ?, and verbs in tt, vt and vd.
+* It has 4 practice tests, just like the workbook: deel 1, deel 2, a short M6 test and a big Eindtoets E6.
+
 ### Chickens and Nu oefenen
 
 * Chickens now cost 5 points each and the coop holds 10 (they do not count toward the 12 dinos). You buy them like an egg, with Ja or Nee.
