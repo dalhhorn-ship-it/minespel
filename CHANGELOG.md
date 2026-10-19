@@ -4,6 +4,10 @@ Written so kids can read it too.
 
 ## Unreleased
 
+## 0.1.0 (2026-10-19)
+
+The first version! Everything below is what you can already play.
+
 ### Chickens and Nu oefenen
 
 * Chickens now cost 5 points each and the coop holds 10 (they do not count toward the 12 dinos). You buy them like an egg, with Ja or Nee.
