@@ -1,0 +1,342 @@
+{
+  "id": "punt",
+  "title": "De punt",
+  "groups": [
+    6
+  ],
+  "lesson": {
+    "pages": [
+      {
+        "title": "Punt aan het eind van een zin",
+        "text": "Een zin is een heel stukje dat je vertelt. Aan het eind van de zin zet je een punt. Lees de tekst hardop: waar je stopt en iets nieuws begint, komt een punt.",
+        "examples": [
+          {
+            "good": "Ik eet een appel. Daarna ga ik buiten spelen.",
+            "bad": "Ik eet een appel daarna ga ik buiten spelen.",
+            "why": "Na appel stopt de eerste zin. Daar komt een punt."
+          }
+        ],
+        "tip": "Lees hardop. Zak je stem omlaag en stop je? Dan staat daar een punt.",
+        "skill": "punt-einde"
+      },
+      {
+        "title": "Na een punt een hoofdletter",
+        "text": "Na een punt begint een nieuwe zin. Het eerste woord van de nieuwe zin krijgt een hoofdletter.",
+        "examples": [
+          {
+            "good": "Ik ben jarig. Vandaag word ik negen.",
+            "bad": "Ik ben jarig. vandaag word ik negen.",
+            "why": "Vandaag is het eerste woord van een nieuwe zin."
+          }
+        ],
+        "tip": "Punt gezet? Dan een hoofdletter erna.",
+        "skill": "hoofdletter-na-punt"
+      },
+      {
+        "title": "Punt of vraagteken?",
+        "text": "Vertel je iets? Dan zet je een punt. Vraag je iets? Dan zet je een vraagteken.",
+        "examples": [
+          {
+            "good": "Mijn hond heet Max."
+          },
+          {
+            "good": "Weet jij waar mijn schoen is?"
+          }
+        ],
+        "tip": "Kun je erop antwoorden? Dan is het een vraag.",
+        "skill": "punt-of-vraag"
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "ls-pt-001",
+      "type": "punctuate",
+      "level": "M6",
+      "skill": "punt-einde",
+      "prompt": "Tik waar een punt moet.",
+      "mark": ".",
+      "words": [
+        "Ik",
+        "eet",
+        "een",
+        "appel",
+        "Daarna",
+        "ga",
+        "ik",
+        "buiten",
+        "spelen."
+      ],
+      "answer": [
+        3
+      ],
+      "explain": "Na appel stopt de eerste zin. Daar komt een punt."
+    },
+    {
+      "id": "ls-pt-002",
+      "type": "punctuate",
+      "level": "M6",
+      "skill": "punt-einde",
+      "prompt": "Tik waar een punt moet.",
+      "mark": ".",
+      "words": [
+        "De",
+        "dino",
+        "slaapt",
+        "in",
+        "de",
+        "grot",
+        "Hij",
+        "is",
+        "heel",
+        "moe."
+      ],
+      "answer": [
+        5
+      ],
+      "explain": "Na grot stopt de zin. Hij begint een nieuwe zin."
+    },
+    {
+      "id": "ls-pt-003",
+      "type": "punctuate",
+      "level": "M6",
+      "skill": "punt-einde",
+      "prompt": "Tik waar een punt moet.",
+      "mark": ".",
+      "words": [
+        "Het",
+        "regent",
+        "Wij",
+        "blijven",
+        "binnen",
+        "en",
+        "spelen",
+        "een",
+        "spel."
+      ],
+      "answer": [
+        1
+      ],
+      "explain": "Het regent is een hele zin. Daarna komt een punt."
+    },
+    {
+      "id": "ls-pt-004",
+      "type": "choice",
+      "level": "M6",
+      "skill": "punt-einde",
+      "prompt": "In welke zin staan de punten goed?",
+      "options": [
+        "Tom bouwt een hut. Zijn zus helpt hem.",
+        "Tom bouwt. Een hut zijn zus helpt hem.",
+        "Tom bouwt een hut zijn. Zus helpt hem.",
+        "Tom. Bouwt een hut zijn zus helpt hem."
+      ],
+      "answer": 0,
+      "explain": "Tom bouwt een hut is de eerste zin. Daarna komt de punt."
+    },
+    {
+      "id": "ls-pt-005",
+      "type": "choice",
+      "level": "M6",
+      "skill": "punt-of-vraag",
+      "prompt": "Welk leesteken moet aan het eind?",
+      "sentence": "Mijn hond heet Max",
+      "options": [
+        "een punt (.)",
+        "een vraagteken (?)",
+        "een uitroepteken (!)",
+        "een komma (,)"
+      ],
+      "answer": 0,
+      "explain": "Je vertelt iets, je vraagt niets. Dan komt er een punt."
+    },
+    {
+      "id": "ls-pt-006",
+      "type": "punctuate",
+      "level": "M6",
+      "skill": "punt-einde",
+      "prompt": "Tik waar een punt moet.",
+      "mark": ".",
+      "words": [
+        "Ik",
+        "heb",
+        "een",
+        "kat",
+        "Ze",
+        "heet",
+        "Pluis",
+        "Ze",
+        "is",
+        "wit."
+      ],
+      "answer": [
+        3,
+        6
+      ],
+      "explain": "Er staan drie zinnen. Na kat en na Pluis komt een punt."
+    },
+    {
+      "id": "ls-pt-007",
+      "type": "choice",
+      "level": "M6",
+      "skill": "hoofdletter-na-punt",
+      "prompt": "Welke zin is goed?",
+      "options": [
+        "Wij gaan naar zee. Daar bouwen we een zandkasteel.",
+        "Wij gaan naar zee. daar bouwen we een zandkasteel.",
+        "Wij gaan naar zee daar. Bouwen we een zandkasteel.",
+        "wij gaan naar zee. Daar bouwen we een zandkasteel."
+      ],
+      "answer": 0,
+      "explain": "Een zin begint met een hoofdletter. Na de punt begint de nieuwe zin met Daar."
+    },
+    {
+      "id": "ls-pt-008",
+      "type": "punctuate",
+      "level": "E6",
+      "skill": "punt-einde",
+      "prompt": "Tik waar een punt moet.",
+      "mark": ".",
+      "words": [
+        "Na",
+        "school",
+        "ging",
+        "Fien",
+        "naar",
+        "de",
+        "bieb",
+        "Ze",
+        "leende",
+        "drie",
+        "boeken",
+        "over",
+        "dino's."
+      ],
+      "answer": [
+        6
+      ],
+      "explain": "Na bieb stopt de eerste zin. Ze begint een nieuwe zin."
+    },
+    {
+      "id": "ls-pt-009",
+      "type": "punctuate",
+      "level": "E6",
+      "skill": "punt-einde",
+      "prompt": "Tik waar een punt moet.",
+      "mark": ".",
+      "words": [
+        "De",
+        "raptor",
+        "rent",
+        "snel",
+        "De",
+        "T-rex",
+        "is",
+        "groter",
+        "Wie",
+        "wint",
+        "de",
+        "race?"
+      ],
+      "answer": [
+        3,
+        7
+      ],
+      "explain": "Na snel en na groter stopt een zin. Daar komt een punt."
+    },
+    {
+      "id": "ls-pt-010",
+      "type": "choice",
+      "level": "E6",
+      "skill": "punt-einde",
+      "prompt": "In welke tekst staan de punten goed?",
+      "options": [
+        "Lisa heeft een nieuwe fiets. Hij is rood. Ze rijdt er elke dag op.",
+        "Lisa heeft een nieuwe fiets hij. Is rood. Ze rijdt er elke dag op.",
+        "Lisa heeft een nieuwe fiets. Hij is rood ze. Rijdt er elke dag op.",
+        "Lisa heeft. Een nieuwe fiets hij is rood. Ze rijdt er elke dag op."
+      ],
+      "answer": 0,
+      "explain": "Lees hardop. Er staan drie zinnen: over de fiets, de kleur en het rijden."
+    },
+    {
+      "id": "ls-pt-011",
+      "type": "punctuate",
+      "level": "E6",
+      "skill": "punt-einde",
+      "prompt": "Tik waar een punt moet.",
+      "mark": ".",
+      "words": [
+        "Opa",
+        "vertelt",
+        "een",
+        "verhaal",
+        "Wij",
+        "luisteren",
+        "heel",
+        "stil."
+      ],
+      "answer": [
+        3
+      ],
+      "explain": "Na verhaal stopt de eerste zin. Daar komt een punt."
+    },
+    {
+      "id": "ls-pt-012",
+      "type": "choice",
+      "level": "E6",
+      "skill": "punt-of-vraag",
+      "prompt": "Welk leesteken moet aan het eind?",
+      "sentence": "Weet jij waar mijn schoen is",
+      "options": [
+        "een punt (.)",
+        "een vraagteken (?)",
+        "een uitroepteken (!)",
+        "een komma (,)"
+      ],
+      "answer": 1,
+      "explain": "Je vraagt iets. Een vraag eindigt met een vraagteken, niet met een punt."
+    },
+    {
+      "id": "ls-pt-013",
+      "type": "punctuate",
+      "level": "E6",
+      "skill": "punt-einde",
+      "prompt": "Tik waar een punt moet.",
+      "mark": ".",
+      "words": [
+        "Ik",
+        "zie",
+        "een",
+        "vogel",
+        "en",
+        "een",
+        "vlinder",
+        "in",
+        "de",
+        "tuin."
+      ],
+      "answer": [],
+      "explain": "Dit is maar één zin. Er hoeft binnenin geen punt."
+    },
+    {
+      "id": "ls-pt-014",
+      "type": "find-error",
+      "level": "E6",
+      "skill": "hoofdletter-na-punt",
+      "prompt": "Welk woord is fout geschreven?",
+      "words": [
+        "Ik",
+        "ben",
+        "jarig.",
+        "vandaag",
+        "word",
+        "ik",
+        "negen."
+      ],
+      "answer": 3,
+      "correction": "Vandaag",
+      "explain": "Na een punt begint een nieuwe zin. Die begint met een hoofdletter."
+    }
+  ]
+}

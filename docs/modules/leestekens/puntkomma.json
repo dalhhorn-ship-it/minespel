@@ -1,0 +1,293 @@
+{
+  "id": "puntkomma",
+  "title": "De puntkomma",
+  "groups": [
+    6
+  ],
+  "lesson": {
+    "pages": [
+      {
+        "title": "Wat is een puntkomma?",
+        "text": "Een puntkomma ziet er zo uit: ;. Je zet hem tussen twee zinnen die heel goed bij elkaar horen. Het is een rustpunt: langer dan een komma, korter dan een punt.",
+        "examples": [
+          {
+            "good": "Sara is ziek; ze blijft in bed.",
+            "why": "Ze blijft in bed hoort bij Sara is ziek."
+          },
+          {
+            "good": "Het is laat; we gaan naar huis."
+          }
+        ],
+        "tip": "Twee zinnen die bij elkaar horen? Een puntkomma mag ertussen.",
+        "skill": "twee-zinnen"
+      },
+      {
+        "title": "Na een puntkomma een kleine letter",
+        "text": "Een puntkomma is geen punt. De zin gaat gewoon verder. Daarom komt er na een puntkomma een kleine letter.",
+        "examples": [
+          {
+            "good": "De kat slaapt; hij is heel moe.",
+            "bad": "De kat slaapt; Hij is heel moe.",
+            "why": "Na een puntkomma geen hoofdletter."
+          }
+        ],
+        "tip": "Puntkomma? Kleine letter erna. Punt? Hoofdletter erna.",
+        "skill": "kleine-letter"
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "ls-pk-001",
+      "type": "punctuate",
+      "level": "M6",
+      "skill": "twee-zinnen",
+      "prompt": "Tik waar een puntkomma moet.",
+      "mark": ";",
+      "words": [
+        "Het",
+        "regent",
+        "hard",
+        "het",
+        "is",
+        "koud",
+        "buiten."
+      ],
+      "answer": [
+        2
+      ],
+      "explain": "Het regent hard en het is koud buiten zijn twee zinnen die bij elkaar horen."
+    },
+    {
+      "id": "ls-pk-002",
+      "type": "punctuate",
+      "level": "M6",
+      "skill": "twee-zinnen",
+      "prompt": "Tik waar een puntkomma moet.",
+      "mark": ";",
+      "words": [
+        "De",
+        "dino",
+        "is",
+        "moe",
+        "hij",
+        "gaat",
+        "slapen."
+      ],
+      "answer": [
+        3
+      ],
+      "explain": "De dino is moe is de eerste zin. Hij gaat slapen hoort erbij."
+    },
+    {
+      "id": "ls-pk-003",
+      "type": "punctuate",
+      "level": "M6",
+      "skill": "twee-zinnen",
+      "prompt": "Tik waar een puntkomma moet.",
+      "mark": ";",
+      "words": [
+        "Ik",
+        "hou",
+        "van",
+        "de",
+        "zomer",
+        "dan",
+        "kan",
+        "ik",
+        "zwemmen."
+      ],
+      "answer": [
+        4
+      ],
+      "explain": "Na zomer eindigt de eerste zin. De tweede zin hoort erbij."
+    },
+    {
+      "id": "ls-pk-004",
+      "type": "choice",
+      "level": "M6",
+      "skill": "twee-zinnen",
+      "prompt": "In welke zin staat de puntkomma goed?",
+      "options": [
+        "Sara is ziek; ze blijft in bed.",
+        "Sara; is ziek ze blijft in bed.",
+        "Sara is; ziek ze blijft in bed.",
+        "Sara is ziek ze; blijft in bed."
+      ],
+      "answer": 0,
+      "explain": "De puntkomma staat tussen de twee zinnen: Sara is ziek en ze blijft in bed."
+    },
+    {
+      "id": "ls-pk-005",
+      "type": "choice",
+      "level": "M6",
+      "skill": "kleine-letter",
+      "prompt": "Welke zin is goed geschreven?",
+      "options": [
+        "Het is laat; we gaan naar huis.",
+        "Het is laat; We gaan naar huis.",
+        "Het is laat; we gaan naar huis",
+        "het is laat; we gaan naar huis."
+      ],
+      "answer": 0,
+      "explain": "Na een puntkomma komt een kleine letter. Aan het eind staat een punt."
+    },
+    {
+      "id": "ls-pk-006",
+      "type": "find-error",
+      "level": "M6",
+      "skill": "kleine-letter",
+      "prompt": "Welk woord is fout geschreven?",
+      "words": [
+        "De",
+        "kat",
+        "slaapt;",
+        "Hij",
+        "is",
+        "heel",
+        "moe."
+      ],
+      "answer": 3,
+      "correction": "hij",
+      "explain": "Na een puntkomma komt een kleine letter: hij."
+    },
+    {
+      "id": "ls-pk-007",
+      "type": "punctuate",
+      "level": "E6",
+      "skill": "twee-zinnen",
+      "prompt": "Tik waar een puntkomma moet.",
+      "mark": ";",
+      "words": [
+        "Tim",
+        "houdt",
+        "van",
+        "voetbal",
+        "zijn",
+        "zus",
+        "houdt",
+        "van",
+        "hockey."
+      ],
+      "answer": [
+        3
+      ],
+      "explain": "Twee zinnen die bij elkaar horen: Tim en zijn zus. Na voetbal komt de puntkomma."
+    },
+    {
+      "id": "ls-pk-008",
+      "type": "punctuate",
+      "level": "E6",
+      "skill": "twee-zinnen",
+      "prompt": "Tik waar een puntkomma moet.",
+      "mark": ";",
+      "words": [
+        "De",
+        "bus",
+        "was",
+        "te",
+        "laat",
+        "wij",
+        "kwamen",
+        "te",
+        "laat",
+        "op",
+        "school."
+      ],
+      "answer": [
+        4
+      ],
+      "explain": "Na de bus was te laat komt de puntkomma. De tweede zin is het gevolg."
+    },
+    {
+      "id": "ls-pk-009",
+      "type": "punctuate",
+      "level": "E6",
+      "skill": "twee-zinnen",
+      "prompt": "Tik waar een puntkomma moet.",
+      "mark": ";",
+      "words": [
+        "Het",
+        "museum",
+        "is",
+        "groot",
+        "je",
+        "kunt",
+        "er",
+        "de",
+        "hele",
+        "dag",
+        "kijken."
+      ],
+      "answer": [
+        3
+      ],
+      "explain": "Na groot eindigt de eerste zin. De tweede zin hoort erbij."
+    },
+    {
+      "id": "ls-pk-010",
+      "type": "choice",
+      "level": "E6",
+      "skill": "twee-zinnen",
+      "prompt": "In welke zin staat de puntkomma goed?",
+      "options": [
+        "Opa is jarig; we bakken een taart.",
+        "Opa is jarig we; bakken een taart.",
+        "Opa; is jarig we bakken een taart.",
+        "Opa is jarig we bakken; een taart."
+      ],
+      "answer": 0,
+      "explain": "De puntkomma staat tussen opa is jarig en we bakken een taart."
+    },
+    {
+      "id": "ls-pk-011",
+      "type": "choice",
+      "level": "E6",
+      "skill": "twee-zinnen",
+      "prompt": "Welk teken is een puntkomma?",
+      "options": [
+        ";",
+        ":",
+        ",",
+        "."
+      ],
+      "answer": 0,
+      "explain": "Een puntkomma is een punt met een komma eronder: ;"
+    },
+    {
+      "id": "ls-pk-012",
+      "type": "find-error",
+      "level": "E6",
+      "skill": "kleine-letter",
+      "prompt": "Welk woord is fout geschreven?",
+      "words": [
+        "Mijn",
+        "broer",
+        "leest",
+        "graag;",
+        "Hij",
+        "heeft",
+        "veel",
+        "boeken."
+      ],
+      "answer": 4,
+      "correction": "hij",
+      "explain": "Na een puntkomma komt een kleine letter: hij."
+    },
+    {
+      "id": "ls-pk-013",
+      "type": "choice",
+      "level": "E6",
+      "skill": "twee-zinnen",
+      "prompt": "Wanneer zet je een puntkomma?",
+      "options": [
+        "Tussen twee zinnen die bij elkaar horen.",
+        "Aan het eind van een vraag.",
+        "Voor wat iemand zegt.",
+        "Na het laatste woord van een tekst."
+      ],
+      "answer": 0,
+      "explain": "Een puntkomma zet je tussen twee zinnen die heel goed bij elkaar horen."
+    }
+  ]
+}

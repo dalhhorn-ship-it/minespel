@@ -1,0 +1,312 @@
+{
+  "id": "dubbele-punt",
+  "title": "De dubbele punt",
+  "groups": [
+    6
+  ],
+  "lesson": {
+    "pages": [
+      {
+        "title": "Dubbele punt voor wat iemand zegt",
+        "text": "Zegt iemand iets en staat wie het zegt vooraan? Dan komt er een dubbele punt (:) na zegt, roept of vraagt. Wat iemand zegt staat tussen aanhalingstekens en begint met een hoofdletter.",
+        "examples": [
+          {
+            "good": "Juf zegt: \"Pak je boek maar.\"",
+            "bad": "Juf zegt \"Pak je boek maar.\"",
+            "why": "Na zegt komt een dubbele punt."
+          },
+          {
+            "good": "\"Kom binnen\", zegt oma.",
+            "why": "Staat wie het zegt achteraan? Dan komt er een komma, geen dubbele punt."
+          }
+        ],
+        "tip": "Zegger vooraan: dubbele punt. Zegger achteraan: komma.",
+        "skill": "wat-iemand-zegt"
+      },
+      {
+        "title": "Dubbele punt voor een rijtje",
+        "text": "Kondig je een rijtje aan? Dan zet je een dubbele punt voor het rijtje. Na de dubbele punt gaat het verder met een kleine letter.",
+        "examples": [
+          {
+            "good": "Neem mee: een handdoek, een badpak en water.",
+            "bad": "Neem mee een handdoek: een badpak en water.",
+            "why": "De dubbele punt staat voor het hele rijtje."
+          }
+        ],
+        "tip": "Eerst zeg je dat er iets komt, dan de dubbele punt, dan het rijtje.",
+        "skill": "rijtje"
+      },
+      {
+        "title": "Dubbele punt voor een uitleg",
+        "text": "Komt er na de zin een uitleg of de reden? Dan kun je een dubbele punt zetten.",
+        "examples": [
+          {
+            "good": "Ik weet waarom de dino huilt: hij is zijn ei kwijt."
+          }
+        ],
+        "tip": "Een dubbele punt zegt: let op, nu komt het.",
+        "skill": "uitleg"
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "ls-dp-001",
+      "type": "punctuate",
+      "level": "M6",
+      "skill": "wat-iemand-zegt",
+      "prompt": "Tik waar een dubbele punt moet.",
+      "mark": ":",
+      "words": [
+        "Juf",
+        "zegt",
+        "\"Pak",
+        "je",
+        "boek",
+        "maar.\""
+      ],
+      "answer": [
+        1
+      ],
+      "explain": "Na zegt komt een dubbele punt. Dan volgt wat juf zegt."
+    },
+    {
+      "id": "ls-dp-002",
+      "type": "punctuate",
+      "level": "M6",
+      "skill": "wat-iemand-zegt",
+      "prompt": "Tik waar een dubbele punt moet.",
+      "mark": ":",
+      "words": [
+        "Mama",
+        "roept",
+        "\"Het",
+        "eten",
+        "is",
+        "klaar!\""
+      ],
+      "answer": [
+        1
+      ],
+      "explain": "Na roept komt een dubbele punt. Dan volgt wat mama roept."
+    },
+    {
+      "id": "ls-dp-003",
+      "type": "punctuate",
+      "level": "M6",
+      "skill": "wat-iemand-zegt",
+      "prompt": "Tik waar een dubbele punt moet.",
+      "mark": ":",
+      "words": [
+        "Opa",
+        "vraagt",
+        "\"Wie",
+        "wil",
+        "er",
+        "ijs?\""
+      ],
+      "answer": [
+        1
+      ],
+      "explain": "Na vraagt komt een dubbele punt. Dan volgt de vraag van opa."
+    },
+    {
+      "id": "ls-dp-004",
+      "type": "punctuate",
+      "level": "M6",
+      "skill": "rijtje",
+      "prompt": "Tik waar een dubbele punt moet.",
+      "mark": ":",
+      "words": [
+        "Neem",
+        "mee",
+        "een",
+        "handdoek,",
+        "een",
+        "badpak",
+        "en",
+        "een",
+        "flesje",
+        "water."
+      ],
+      "answer": [
+        1
+      ],
+      "explain": "Neem mee kondigt een rijtje aan. Daarna komt de dubbele punt."
+    },
+    {
+      "id": "ls-dp-005",
+      "type": "choice",
+      "level": "M6",
+      "skill": "wat-iemand-zegt",
+      "prompt": "In welke zin staat de dubbele punt goed?",
+      "options": [
+        "De dino zegt: \"Ik heb honger.\"",
+        "De dino: zegt \"Ik heb honger.\"",
+        "De dino zegt \"Ik: heb honger.\"",
+        "De: dino zegt \"Ik heb honger.\""
+      ],
+      "answer": 0,
+      "explain": "De dubbele punt komt na zegt, voor wat de dino zegt."
+    },
+    {
+      "id": "ls-dp-006",
+      "type": "choice",
+      "level": "M6",
+      "skill": "wat-iemand-zegt",
+      "prompt": "Welk leesteken hoort na zegt?",
+      "sentence": "Tim zegt \"Kom snel kijken!\"",
+      "options": [
+        "een punt (.)",
+        "een komma (,)",
+        "een dubbele punt (:)",
+        "een puntkomma (;)"
+      ],
+      "answer": 2,
+      "explain": "Wie het zegt staat vooraan. Dan komt er een dubbele punt na zegt."
+    },
+    {
+      "id": "ls-dp-007",
+      "type": "punctuate",
+      "level": "E6",
+      "skill": "rijtje",
+      "prompt": "Tik waar een dubbele punt moet.",
+      "mark": ":",
+      "words": [
+        "In",
+        "mijn",
+        "tas",
+        "zitten",
+        "drie",
+        "dingen",
+        "een",
+        "boek,",
+        "een",
+        "appel",
+        "en",
+        "een",
+        "pen."
+      ],
+      "answer": [
+        5
+      ],
+      "explain": "Drie dingen kondigt het rijtje aan. Daarna komt de dubbele punt."
+    },
+    {
+      "id": "ls-dp-008",
+      "type": "punctuate",
+      "level": "E6",
+      "skill": "uitleg",
+      "prompt": "Tik waar een dubbele punt moet.",
+      "mark": ":",
+      "words": [
+        "Ik",
+        "weet",
+        "waarom",
+        "de",
+        "dino",
+        "huilt",
+        "hij",
+        "is",
+        "zijn",
+        "ei",
+        "kwijt."
+      ],
+      "answer": [
+        5
+      ],
+      "explain": "Na huilt komt de uitleg. Daarvoor zet je een dubbele punt."
+    },
+    {
+      "id": "ls-dp-009",
+      "type": "punctuate",
+      "level": "E6",
+      "skill": "rijtje",
+      "prompt": "Tik waar een dubbele punt moet.",
+      "mark": ":",
+      "words": [
+        "Voor",
+        "de",
+        "taart",
+        "heb",
+        "je",
+        "nodig",
+        "meel,",
+        "eieren,",
+        "suiker",
+        "en",
+        "boter."
+      ],
+      "answer": [
+        5
+      ],
+      "explain": "Heb je nodig kondigt het rijtje aan. Daarna komt de dubbele punt."
+    },
+    {
+      "id": "ls-dp-010",
+      "type": "choice",
+      "level": "E6",
+      "skill": "rijtje",
+      "prompt": "In welke zin staat de dubbele punt goed?",
+      "options": [
+        "Op mijn lijstje staat: melk, kaas en brood.",
+        "Op mijn: lijstje staat melk, kaas en brood.",
+        "Op mijn lijstje staat melk: kaas en brood.",
+        "Op: mijn lijstje staat melk, kaas en brood."
+      ],
+      "answer": 0,
+      "explain": "De dubbele punt staat voor het hele rijtje: melk, kaas en brood."
+    },
+    {
+      "id": "ls-dp-011",
+      "type": "choice",
+      "level": "E6",
+      "skill": "wat-iemand-zegt",
+      "prompt": "Welke zin is goed geschreven?",
+      "options": [
+        "Juf vraagt: \"Wie weet het antwoord?\"",
+        "Juf vraagt: \"wie weet het antwoord?\"",
+        "Juf vraagt \"Wie weet: het antwoord?\"",
+        "Juf vraagt, \"Wie weet het antwoord\"?"
+      ],
+      "answer": 0,
+      "explain": "Na vraagt komt een dubbele punt. Wat juf zegt begint met een hoofdletter."
+    },
+    {
+      "id": "ls-dp-012",
+      "type": "punctuate",
+      "level": "E6",
+      "skill": "wat-iemand-zegt",
+      "prompt": "Tik waar een dubbele punt moet.",
+      "mark": ":",
+      "words": [
+        "\"Kom",
+        "binnen\",",
+        "zegt",
+        "oma."
+      ],
+      "answer": [],
+      "explain": "Oma staat achteraan. Dan komt er een komma na de aanhalingstekens, geen dubbele punt."
+    },
+    {
+      "id": "ls-dp-013",
+      "type": "punctuate",
+      "level": "E6",
+      "skill": "wat-iemand-zegt",
+      "prompt": "Tik waar een dubbele punt moet.",
+      "mark": ":",
+      "words": [
+        "Papa",
+        "zegt",
+        "tegen",
+        "de",
+        "hond",
+        "\"Zit!\""
+      ],
+      "answer": [
+        4
+      ],
+      "explain": "Na zegt tegen de hond komt wat papa zegt. Daarvoor staat de dubbele punt."
+    }
+  ]
+}

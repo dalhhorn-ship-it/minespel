@@ -4,6 +4,11 @@ Written so kids can read it too.
 
 ## Unreleased
 
+### New lessons: leestekens and 't kofschip
+
+* Leestekens: learn where the punt, the komma, the dubbele punt and the puntkomma go, and when you write an apostrof. 5 lessons, 69 questions and 2 tests.
+* 't Kofschip: te or de, t or d? 3 lessons with 51 questions about the verleden tijd and the voltooid deelwoord, and 2 tests.
+
 ### New lessons: Taal E6
 
 * A new Taal pack for the end of groep 6 with 6 lessons and 105 new questions: tricky sounds (au or ou, ei or ij), long words like vrijheid and garage, plurals like auto's, finding the lidwoord and the persoonsvorm, capitals and ! and ?, and verbs in tt, vt and vd.

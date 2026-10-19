@@ -1,0 +1,277 @@
+{
+  "id": "voltooid-deelwoord",
+  "title": "Voltooid deelwoord met 't kofschip",
+  "groups": [
+    6
+  ],
+  "lesson": {
+    "pages": [
+      {
+        "title": "Ge plus stam plus t of d",
+        "text": "Het voltooid deelwoord staat bij heeft, hebben, is of zijn. Je maakt het zo: ge, dan de stam, dan een t of een d. Zit de laatste letter van de stam in 't kofschip? Dan t. Anders d.",
+        "examples": [
+          {
+            "good": "Ik heb gefietst.",
+            "bad": "Ik heb gefietsd.",
+            "why": "Fiets eindigt op s. Die zit in 't kofschip, dus t."
+          },
+          {
+            "good": "Wij hebben gespeeld.",
+            "bad": "Wij hebben gespeelt.",
+            "why": "Speel eindigt op l. Die zit niet in 't kofschip, dus d."
+          }
+        ],
+        "tip": "Twijfel? Maak het langer: de gefietste route, de geplakte foto. Hoor je een t? Schrijf een t.",
+        "skill": "kofschip-vd"
+      },
+      {
+        "title": "Geen ge bij be, ge, ver, her en ont",
+        "text": "Begint het werkwoord al met be, ge, ver, her of ont? Dan zet je er geen ge voor. De t of d kies je weer met 't kofschip.",
+        "examples": [
+          {
+            "good": "Papa heeft betaald.",
+            "bad": "Papa heeft gebetaald.",
+            "why": "Betalen begint met be. Dus geen ge."
+          },
+          {
+            "good": "Wij hebben het ontdekt.",
+            "bad": "Wij hebben het geontdekt."
+          }
+        ],
+        "tip": "Be, ge, ver, her, ont: het begin is er al.",
+        "skill": "zonder-ge"
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "kf-vd-001",
+      "type": "type",
+      "level": "M6",
+      "skill": "kofschip-vd",
+      "prompt": "Schrijf het voltooid deelwoord.",
+      "sentence": "Wij hebben de hele dag buiten (spelen).",
+      "answer": [
+        "gespeeld"
+      ],
+      "explain": "Ge plus speel plus d. De l zit niet in 't kofschip, dus d: gespeeld."
+    },
+    {
+      "id": "kf-vd-002",
+      "type": "type",
+      "level": "M6",
+      "skill": "kofschip-vd",
+      "prompt": "Schrijf het voltooid deelwoord.",
+      "sentence": "De dino heeft hard (werken).",
+      "answer": [
+        "gewerkt"
+      ],
+      "explain": "Ge plus werk plus t. De k zit in 't kofschip, dus t: gewerkt."
+    },
+    {
+      "id": "kf-vd-003",
+      "type": "type",
+      "level": "M6",
+      "skill": "kofschip-vd",
+      "prompt": "Schrijf het voltooid deelwoord.",
+      "sentence": "Mama heeft vanavond soep (koken).",
+      "answer": [
+        "gekookt"
+      ],
+      "explain": "Ge plus kook plus t. De k zit in 't kofschip, dus t: gekookt."
+    },
+    {
+      "id": "kf-vd-004",
+      "type": "type",
+      "level": "M6",
+      "skill": "kofschip-vd",
+      "prompt": "Schrijf het voltooid deelwoord.",
+      "sentence": "Ik heb de bal uit de sloot (pakken).",
+      "answer": [
+        "gepakt"
+      ],
+      "explain": "Ge plus pak plus t. De k zit in 't kofschip, dus t: gepakt."
+    },
+    {
+      "id": "kf-vd-005",
+      "type": "type",
+      "level": "M6",
+      "skill": "kofschip-vd",
+      "prompt": "Schrijf het voltooid deelwoord.",
+      "sentence": "Wij hebben naar mooie muziek (luisteren).",
+      "answer": [
+        "geluisterd"
+      ],
+      "explain": "Ge plus luister plus d. De r zit niet in 't kofschip, dus d: geluisterd."
+    },
+    {
+      "id": "kf-vd-006",
+      "type": "choice",
+      "level": "M6",
+      "skill": "kofschip-vd",
+      "prompt": "Welk woord moet op de stippen?",
+      "sentence": "Op het feest hebben wij ... .",
+      "options": [
+        "gedanst",
+        "gedansd",
+        "gedanste"
+      ],
+      "answer": 0,
+      "explain": "Ge plus dans plus t. De s zit in 't kofschip, dus t: gedanst."
+    },
+    {
+      "id": "kf-vd-007",
+      "type": "choice",
+      "level": "M6",
+      "skill": "kofschip-vd",
+      "prompt": "Welk voltooid deelwoord is goed?",
+      "options": [
+        "gebeld",
+        "gebelt",
+        "gebelld"
+      ],
+      "answer": 0,
+      "explain": "Ge plus bel plus d. De l zit niet in 't kofschip, dus d: gebeld."
+    },
+    {
+      "id": "kf-vd-008",
+      "type": "find-error",
+      "level": "M6",
+      "skill": "kofschip-vd",
+      "prompt": "Welk woord is fout geschreven?",
+      "words": [
+        "Ik",
+        "heb",
+        "mijn",
+        "tanden",
+        "gepoetsd."
+      ],
+      "answer": 4,
+      "correction": "gepoetst.",
+      "explain": "Ge plus poets plus t. De s zit in 't kofschip, dus t: gepoetst."
+    },
+    {
+      "id": "kf-vd-009",
+      "type": "type",
+      "level": "E6",
+      "skill": "zonder-ge",
+      "prompt": "Schrijf het voltooid deelwoord.",
+      "sentence": "Mijn kapotte fiets is (repareren).",
+      "answer": [
+        "gerepareerd"
+      ],
+      "explain": "Ge plus repareer plus d. De r zit niet in 't kofschip, dus d: gerepareerd."
+    },
+    {
+      "id": "kf-vd-010",
+      "type": "type",
+      "level": "E6",
+      "skill": "zonder-ge",
+      "prompt": "Schrijf het voltooid deelwoord.",
+      "sentence": "Wij hebben een geheime grot (ontdekken).",
+      "answer": [
+        "ontdekt"
+      ],
+      "explain": "Ontdekken begint met ont, dus geen ge. De k zit in 't kofschip, dus t: ontdekt."
+    },
+    {
+      "id": "kf-vd-011",
+      "type": "type",
+      "level": "E6",
+      "skill": "zonder-ge",
+      "prompt": "Schrijf het voltooid deelwoord.",
+      "sentence": "Papa heeft het ijsje (betalen).",
+      "answer": [
+        "betaald"
+      ],
+      "explain": "Betalen begint met be, dus geen ge. De l zit niet in 't kofschip, dus d: betaald."
+    },
+    {
+      "id": "kf-vd-012",
+      "type": "type",
+      "level": "E6",
+      "skill": "zonder-ge",
+      "prompt": "Schrijf het voltooid deelwoord.",
+      "sentence": "De dino heeft zich (vergissen).",
+      "answer": [
+        "vergist"
+      ],
+      "explain": "Vergissen begint met ver, dus geen ge. De s zit in 't kofschip, dus t: vergist."
+    },
+    {
+      "id": "kf-vd-013",
+      "type": "choice",
+      "level": "E6",
+      "skill": "zonder-ge",
+      "prompt": "Welk woord moet op de stippen?",
+      "sentence": "De taart is al ... .",
+      "options": [
+        "versierd",
+        "versiert",
+        "geversierd",
+        "versierdt"
+      ],
+      "answer": 0,
+      "explain": "Ver staat er al, dus geen ge. De r zit niet in 't kofschip, dus d: versierd."
+    },
+    {
+      "id": "kf-vd-014",
+      "type": "choice",
+      "level": "E6",
+      "skill": "kofschip-vd",
+      "prompt": "Welke zin is goed geschreven?",
+      "options": [
+        "Ik heb de hele dag gefietst.",
+        "Ik heb de hele dag gefietsd.",
+        "Ik heb de hele dag gefiets.",
+        "Ik heb de hele dag fietst."
+      ],
+      "answer": 0,
+      "explain": "Ge plus fiets plus t. De s zit in 't kofschip, dus t: gefietst."
+    },
+    {
+      "id": "kf-vd-015",
+      "type": "find-error",
+      "level": "E6",
+      "skill": "kofschip-vd",
+      "prompt": "Welk woord is fout geschreven?",
+      "words": [
+        "Mijn",
+        "broer",
+        "heeft",
+        "de",
+        "kast",
+        "geschildert."
+      ],
+      "answer": 5,
+      "correction": "geschilderd.",
+      "explain": "Ge plus schilder plus d. De r zit niet in 't kofschip, dus d: geschilderd."
+    },
+    {
+      "id": "kf-vd-016",
+      "type": "type",
+      "level": "E6",
+      "skill": "kofschip-vd",
+      "prompt": "Schrijf het voltooid deelwoord.",
+      "sentence": "De baby heeft de hele nacht (huilen).",
+      "answer": [
+        "gehuild"
+      ],
+      "explain": "Ge plus huil plus d. De l zit niet in 't kofschip, dus d: gehuild."
+    },
+    {
+      "id": "kf-vd-017",
+      "type": "choice",
+      "level": "E6",
+      "skill": "kofschip-vd",
+      "prompt": "Welk voltooid deelwoord is goed?",
+      "options": [
+        "geplakt",
+        "geplakd",
+        "geplackt"
+      ],
+      "answer": 0,
+      "explain": "Ge plus plak plus t. De k zit in 't kofschip, dus t: geplakt."
+    }
+  ]
+}

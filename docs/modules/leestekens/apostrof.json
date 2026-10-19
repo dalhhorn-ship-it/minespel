@@ -1,0 +1,284 @@
+{
+  "id": "apostrof",
+  "title": "De apostrof",
+  "groups": [
+    6
+  ],
+  "lesson": {
+    "pages": [
+      {
+        "title": "Meervoud met 's",
+        "text": "Eindigt een woord op a, i, o, u of y? Dan schrijf je in het meervoud 's. Zonder apostrof zou je het anders lezen: autos lees je met een korte o.",
+        "examples": [
+          {
+            "good": "Wij eten twee pizza's.",
+            "bad": "Wij eten twee pizzas."
+          },
+          {
+            "good": "Op de wei staan zes pony's."
+          }
+        ],
+        "tip": "A, i, o, u, y aan het eind? Meervoud met 's.",
+        "skill": "meervoud-apostrof"
+      },
+      {
+        "title": "Van wie is het?",
+        "text": "Is iets van iemand? Dan zet je een s achter de naam: Toms fiets. Eindigt de naam op a, i, o, u of y? Dan wordt het 's: Anna's fiets. Eindigt de naam op een s? Dan alleen een apostrof: Joris' fiets.",
+        "examples": [
+          {
+            "good": "Dit is Anna's fiets.",
+            "bad": "Dit is Annas fiets."
+          },
+          {
+            "good": "Dat is Toms dino.",
+            "bad": "Dat is Tom's dino.",
+            "why": "Tom eindigt niet op a, i, o, u of y. Dus alleen een s."
+          }
+        ],
+        "tip": "Naam op a, i, o, u, y: 's. Naam op s: alleen '. Anders: s.",
+        "skill": "van-wie"
+      },
+      {
+        "title": "Een letter weg: 's morgens",
+        "text": "In 's morgens, 's middags, 's avonds en 's nachts is een stukje van een oud woord weggelaten. Daar staat de apostrof voor. Begint de zin ermee? Dan krijgt het woord erna de hoofdletter: 's Middags.",
+        "examples": [
+          {
+            "good": "Wij spelen 's middags buiten.",
+            "bad": "Wij spelen s'middags buiten."
+          },
+          {
+            "good": "'s Avonds lees ik een boek.",
+            "bad": "'S avonds lees ik een boek."
+          }
+        ],
+        "tip": "Eerst het streepje, dan de s, dan een spatie.",
+        "skill": "letter-weg"
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "ls-ap-001",
+      "type": "type",
+      "level": "M6",
+      "skill": "meervoud-apostrof",
+      "prompt": "Schrijf het meervoud van het woord tussen haakjes.",
+      "sentence": "Wij eten twee grote (pizza).",
+      "answer": [
+        "pizza's"
+      ],
+      "explain": "Pizza eindigt op een a. Dan schrijf je 's: pizza's."
+    },
+    {
+      "id": "ls-ap-002",
+      "type": "type",
+      "level": "M6",
+      "skill": "meervoud-apostrof",
+      "prompt": "Schrijf het meervoud van het woord tussen haakjes.",
+      "sentence": "Mijn opa heeft vier oude (radio).",
+      "answer": [
+        "radio's"
+      ],
+      "explain": "Radio eindigt op een o. Dan schrijf je 's: radio's."
+    },
+    {
+      "id": "ls-ap-003",
+      "type": "choice",
+      "level": "M6",
+      "skill": "van-wie",
+      "prompt": "Welk woord moet op de stippen?",
+      "sentence": "Dit is ... fiets.",
+      "options": [
+        "Anna's",
+        "Annas",
+        "Anna,s",
+        "Annas'"
+      ],
+      "answer": 0,
+      "explain": "Anna eindigt op een a. Is iets van Anna? Dan schrijf je Anna's."
+    },
+    {
+      "id": "ls-ap-004",
+      "type": "choice",
+      "level": "M6",
+      "skill": "letter-weg",
+      "prompt": "Welk woord moet op de stippen?",
+      "sentence": "... eten wij een broodje.",
+      "options": [
+        "'s Middags",
+        "S'middags",
+        "'S middags",
+        "Smiddags"
+      ],
+      "answer": 0,
+      "explain": "Begint de zin met 's? Dan krijgt het woord erna de hoofdletter: 's Middags."
+    },
+    {
+      "id": "ls-ap-005",
+      "type": "find-error",
+      "level": "M6",
+      "skill": "meervoud-apostrof",
+      "prompt": "Welk woord is fout geschreven?",
+      "words": [
+        "Ik",
+        "heb",
+        "drie",
+        "kiwis",
+        "gegeten."
+      ],
+      "answer": 3,
+      "correction": "kiwi's",
+      "explain": "Kiwi eindigt op een i. In het meervoud schrijf je 's: kiwi's."
+    },
+    {
+      "id": "ls-ap-006",
+      "type": "choice",
+      "level": "M6",
+      "skill": "meervoud-apostrof",
+      "prompt": "Welke zin is goed?",
+      "options": [
+        "De baby's slapen in de wieg.",
+        "De babys slapen in de wieg.",
+        "De baby,s slapen in de wieg.",
+        "De babies slapen in de wieg."
+      ],
+      "answer": 0,
+      "explain": "Baby eindigt op een y. In het meervoud schrijf je 's: baby's."
+    },
+    {
+      "id": "ls-ap-007",
+      "type": "type",
+      "level": "M6",
+      "skill": "meervoud-apostrof",
+      "prompt": "Schrijf het meervoud van het woord tussen haakjes.",
+      "sentence": "Op de wei staan zes (pony).",
+      "answer": [
+        "pony's"
+      ],
+      "explain": "Pony eindigt op een y. Dan schrijf je 's: pony's."
+    },
+    {
+      "id": "ls-ap-008",
+      "type": "choice",
+      "level": "E6",
+      "skill": "van-wie",
+      "prompt": "Welk woord moet op de stippen?",
+      "sentence": "Dat is ... tekening.",
+      "options": [
+        "Joris'",
+        "Joris's",
+        "Jorises",
+        "Joriss"
+      ],
+      "answer": 0,
+      "explain": "Joris eindigt al op een s. Dan zet je alleen een apostrof: Joris'."
+    },
+    {
+      "id": "ls-ap-009",
+      "type": "choice",
+      "level": "E6",
+      "skill": "letter-weg",
+      "prompt": "Welk woord moet op de stippen?",
+      "sentence": "In de winter is het ... al vroeg donker.",
+      "options": [
+        "'s avonds",
+        "s'avonds",
+        "savonds",
+        "'s Avonds"
+      ],
+      "answer": 0,
+      "explain": "Midden in een zin schrijf je 's avonds met een kleine letter."
+    },
+    {
+      "id": "ls-ap-010",
+      "type": "type",
+      "level": "E6",
+      "skill": "meervoud-apostrof",
+      "prompt": "Schrijf het meervoud van het woord tussen haakjes.",
+      "sentence": "Mijn zus heeft twee leuke (hobby).",
+      "answer": [
+        "hobby's"
+      ],
+      "explain": "Hobby eindigt op een y. Dan schrijf je 's: hobby's."
+    },
+    {
+      "id": "ls-ap-011",
+      "type": "find-error",
+      "level": "E6",
+      "skill": "letter-weg",
+      "prompt": "Welk woord is fout geschreven?",
+      "words": [
+        "Wij",
+        "gaan",
+        "smorgens",
+        "naar",
+        "school."
+      ],
+      "answer": 2,
+      "correction": "'s morgens",
+      "explain": "Je schrijft 's morgens: apostrof, s, spatie, morgens."
+    },
+    {
+      "id": "ls-ap-012",
+      "type": "choice",
+      "level": "E6",
+      "skill": "meervoud-apostrof",
+      "prompt": "Waarom staat er een apostrof in auto's?",
+      "options": [
+        "Anders lees je autos met een korte o.",
+        "Omdat het een naam is.",
+        "Omdat het van iemand is.",
+        "Dat hoort bij elk meervoud."
+      ],
+      "answer": 0,
+      "explain": "Auto eindigt op een o. Met 's blijft de o lang."
+    },
+    {
+      "id": "ls-ap-013",
+      "type": "find-error",
+      "level": "E6",
+      "skill": "van-wie",
+      "prompt": "Welk woord is fout geschreven?",
+      "words": [
+        "Oma's",
+        "taart",
+        "is",
+        "lekkerder",
+        "dan",
+        "opa's",
+        "soep."
+      ],
+      "answer": -1,
+      "correction": null,
+      "explain": "Alles is goed. Oma en opa eindigen op een a, dus 's."
+    },
+    {
+      "id": "ls-ap-014",
+      "type": "type",
+      "level": "E6",
+      "skill": "meervoud-apostrof",
+      "prompt": "Schrijf het meervoud van het woord tussen haakjes.",
+      "sentence": "In de dierentuin wonen drie (gorilla).",
+      "answer": [
+        "gorilla's"
+      ],
+      "explain": "Gorilla eindigt op een a. Dan schrijf je 's: gorilla's."
+    },
+    {
+      "id": "ls-ap-015",
+      "type": "choice",
+      "level": "E6",
+      "skill": "van-wie",
+      "prompt": "Welk woord moet op de stippen?",
+      "sentence": "Dat is ... nieuwe dino.",
+      "options": [
+        "Toms",
+        "Tom's",
+        "Toms'",
+        "Tom,s"
+      ],
+      "answer": 0,
+      "explain": "Tom eindigt niet op a, i, o, u of y. Dan komt er alleen een s achter: Toms."
+    }
+  ]
+}

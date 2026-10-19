@@ -1,0 +1,50 @@
+{
+  "id": "kofschip",
+  "title": "'t Kofschip: verleden tijd en voltooid deelwoord",
+  "subject": "taal",
+  "version": 1,
+  "language": "nl",
+  "description": "Te of de? T of d? Met 't kofschip schrijf je de verleden tijd en het voltooid deelwoord goed. Lessen, oefenvragen en toetsen voor groep 6.",
+  "levels": [
+    "M6",
+    "E6"
+  ],
+  "topics": [
+    "verleden-tijd",
+    "voltooid-deelwoord",
+    "lastige-gevallen"
+  ],
+  "exams": [
+    {
+      "id": "toets-kofschip-m6",
+      "title": "Toets 't kofschip M6",
+      "levels": [
+        "M6"
+      ],
+      "questionCount": 15,
+      "timeLimitMinutes": 15,
+      "passPercent": 70,
+      "mix": {
+        "verleden-tijd": 1,
+        "voltooid-deelwoord": 1,
+        "lastige-gevallen": 1
+      }
+    },
+    {
+      "id": "toets-kofschip-e6",
+      "title": "Toets 't kofschip E6",
+      "levels": [
+        "M6",
+        "E6"
+      ],
+      "questionCount": 30,
+      "timeLimitMinutes": 30,
+      "passPercent": 70,
+      "mix": {
+        "verleden-tijd": 1,
+        "voltooid-deelwoord": 1,
+        "lastige-gevallen": 1
+      }
+    }
+  ]
+}

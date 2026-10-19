@@ -1,0 +1,295 @@
+{
+  "id": "verleden-tijd",
+  "title": "Verleden tijd met 't kofschip",
+  "groups": [
+    6
+  ],
+  "lesson": {
+    "pages": [
+      {
+        "title": "Stam plus te of de",
+        "text": "Is het al gebeurd? Neem de stam: ik werk, ik speel. Kijk naar de laatste letter van de stam. Zit die in 't kofschip (t, k, f, s, ch, p)? Dan komt er te achter. Anders de.",
+        "examples": [
+          {
+            "good": "Ik werkte in de tuin.",
+            "bad": "Ik werkde in de tuin.",
+            "why": "Werk eindigt op k. De k zit in 't kofschip, dus te."
+          },
+          {
+            "good": "Ik speelde met blokken.",
+            "bad": "Ik speelte met blokken.",
+            "why": "Speel eindigt op l. De l zit niet in 't kofschip, dus de."
+          }
+        ],
+        "tip": "'t kofschip: t, k, f, s, ch en p. Zit de laatste letter van de stam in het schip? Dan te of t.",
+        "skill": "kofschip-vt"
+      },
+      {
+        "title": "Meer dan één: ten of den",
+        "text": "Doen meer mensen of dieren het? Dan komt er nog een n achter: ten of den.",
+        "examples": [
+          {
+            "good": "Wij bouwden een toren.",
+            "bad": "Wij bouwde een toren.",
+            "why": "Wij is meer dan één, dus den."
+          },
+          {
+            "good": "De kinderen lachten om de clown."
+          }
+        ],
+        "tip": "Meer dan één? Plak er een n achter.",
+        "skill": "meervoud-vt"
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "kf-vt-001",
+      "type": "type",
+      "level": "M6",
+      "skill": "kofschip-vt",
+      "prompt": "Schrijf het werkwoord in de verleden tijd.",
+      "sentence": "Gisteren (pakken) ik mijn tas.",
+      "answer": [
+        "pakte"
+      ],
+      "explain": "Stam pak. De k zit in 't kofschip, dus te: pakte."
+    },
+    {
+      "id": "kf-vt-002",
+      "type": "type",
+      "level": "M6",
+      "skill": "kofschip-vt",
+      "prompt": "Schrijf het werkwoord in de verleden tijd.",
+      "sentence": "Gisteren (stoppen) de bus bij school.",
+      "answer": [
+        "stopte"
+      ],
+      "explain": "Stam stop. De p zit in 't kofschip, dus te: stopte."
+    },
+    {
+      "id": "kf-vt-003",
+      "type": "type",
+      "level": "M6",
+      "skill": "kofschip-vt",
+      "prompt": "Schrijf het werkwoord in de verleden tijd.",
+      "sentence": "Vorige week (hopen) Sam op sneeuw.",
+      "answer": [
+        "hoopte"
+      ],
+      "explain": "Stam hoop. De p zit in 't kofschip, dus te: hoopte."
+    },
+    {
+      "id": "kf-vt-004",
+      "type": "type",
+      "level": "M6",
+      "skill": "meervoud-vt",
+      "prompt": "Schrijf het werkwoord in de verleden tijd.",
+      "sentence": "Gisteren (bouwen) wij een grote toren.",
+      "answer": [
+        "bouwden"
+      ],
+      "explain": "Stam bouw. De w zit niet in 't kofschip, dus de. Wij is meer dan één: bouwden."
+    },
+    {
+      "id": "kf-vt-005",
+      "type": "choice",
+      "level": "M6",
+      "skill": "kofschip-vt",
+      "prompt": "Welk woord moet op de stippen?",
+      "sentence": "Mama ... een taart voor mijn verjaardag.",
+      "options": [
+        "bakte",
+        "bakde",
+        "bakten"
+      ],
+      "answer": 0,
+      "explain": "Stam bak. De k zit in 't kofschip, dus te. Mama is één: bakte."
+    },
+    {
+      "id": "kf-vt-006",
+      "type": "type",
+      "level": "M6",
+      "skill": "meervoud-vt",
+      "prompt": "Schrijf het werkwoord in de verleden tijd.",
+      "sentence": "Vorige zomer (wonen) wij in een tent.",
+      "answer": [
+        "woonden"
+      ],
+      "explain": "Stam woon. De n zit niet in 't kofschip, dus de. Wij: woonden."
+    },
+    {
+      "id": "kf-vt-007",
+      "type": "choice",
+      "level": "M6",
+      "skill": "kofschip-vt",
+      "prompt": "Welke letter zit in 't kofschip?",
+      "options": [
+        "l",
+        "n",
+        "p",
+        "r"
+      ],
+      "answer": 2,
+      "explain": "In 't kofschip zitten t, k, f, s, ch en p. De p zit erin."
+    },
+    {
+      "id": "kf-vt-008",
+      "type": "find-error",
+      "level": "M6",
+      "skill": "kofschip-vt",
+      "prompt": "Welk woord is fout geschreven?",
+      "words": [
+        "Ik",
+        "speelte",
+        "gisteren",
+        "met",
+        "mijn",
+        "dino."
+      ],
+      "answer": 1,
+      "correction": "speelde",
+      "explain": "Stam speel. De l zit niet in 't kofschip, dus de: speelde."
+    },
+    {
+      "id": "kf-vt-009",
+      "type": "type",
+      "level": "M6",
+      "skill": "kofschip-vt",
+      "prompt": "Schrijf het werkwoord in de verleden tijd.",
+      "sentence": "De kat (krabben) aan de bank.",
+      "answer": [
+        "krabde"
+      ],
+      "explain": "Stam krab. De b zit niet in 't kofschip, dus de: krabde."
+    },
+    {
+      "id": "kf-vt-010",
+      "type": "type",
+      "level": "E6",
+      "skill": "meervoud-vt",
+      "prompt": "Schrijf het werkwoord in de verleden tijd.",
+      "sentence": "De kinderen (lachen) om de clown.",
+      "answer": [
+        "lachten"
+      ],
+      "explain": "Stam lach. De ch zit in 't kofschip, dus te. Meer kinderen: lachten."
+    },
+    {
+      "id": "kf-vt-011",
+      "type": "type",
+      "level": "E6",
+      "skill": "meervoud-vt",
+      "prompt": "Schrijf het werkwoord in de verleden tijd.",
+      "sentence": "Gisteren (fietsen) wij naar het strand.",
+      "answer": [
+        "fietsten"
+      ],
+      "explain": "Stam fiets. De s zit in 't kofschip, dus te. Wij: fietsten."
+    },
+    {
+      "id": "kf-vt-012",
+      "type": "choice",
+      "level": "E6",
+      "skill": "meervoud-vt",
+      "prompt": "Welke zin is goed geschreven?",
+      "options": [
+        "Wij poetsten onze tanden.",
+        "Wij poetsden onze tanden.",
+        "Wij poetste onze tanden.",
+        "Wij poetsde onze tanden."
+      ],
+      "answer": 0,
+      "explain": "Stam poets. De s zit in 't kofschip, dus te. Wij: poetsten."
+    },
+    {
+      "id": "kf-vt-013",
+      "type": "type",
+      "level": "E6",
+      "skill": "kofschip-vt",
+      "prompt": "Schrijf het werkwoord in de verleden tijd.",
+      "sentence": "Vorige week (regenen) het elke dag.",
+      "answer": [
+        "regende"
+      ],
+      "explain": "Stam regen. De n zit niet in 't kofschip, dus de: regende."
+    },
+    {
+      "id": "kf-vt-014",
+      "type": "find-error",
+      "level": "E6",
+      "skill": "meervoud-vt",
+      "prompt": "Welk woord is fout geschreven?",
+      "words": [
+        "De",
+        "dino's",
+        "stampte",
+        "door",
+        "het",
+        "bos."
+      ],
+      "answer": 2,
+      "correction": "stampten",
+      "explain": "Stam stamp: te. Meer dino's, dus ten: stampten."
+    },
+    {
+      "id": "kf-vt-015",
+      "type": "type",
+      "level": "E6",
+      "skill": "kofschip-vt",
+      "prompt": "Schrijf het werkwoord in de verleden tijd.",
+      "sentence": "Toen ik klein was, (huilen) ik vaak.",
+      "answer": [
+        "huilde"
+      ],
+      "explain": "Stam huil. De l zit niet in 't kofschip, dus de: huilde."
+    },
+    {
+      "id": "kf-vt-016",
+      "type": "choice",
+      "level": "E6",
+      "skill": "meervoud-vt",
+      "prompt": "Welk woord moet op de stippen?",
+      "sentence": "Jullie ... gisteren heel hard.",
+      "options": [
+        "werkten",
+        "werkte",
+        "werkden"
+      ],
+      "answer": 0,
+      "explain": "Stam werk: te. Jullie is meer dan één: werkten."
+    },
+    {
+      "id": "kf-vt-017",
+      "type": "type",
+      "level": "E6",
+      "skill": "kofschip-vt",
+      "prompt": "Schrijf het werkwoord in de verleden tijd.",
+      "sentence": "Opa (kloppen) zacht op de deur.",
+      "answer": [
+        "klopte"
+      ],
+      "explain": "Stam klop. De p zit in 't kofschip, dus te: klopte."
+    },
+    {
+      "id": "kf-vt-018",
+      "type": "find-error",
+      "level": "E6",
+      "skill": "meervoud-vt",
+      "prompt": "Welk woord is fout geschreven?",
+      "words": [
+        "Wij",
+        "plakten",
+        "de",
+        "foto's",
+        "in",
+        "een",
+        "groot",
+        "boek."
+      ],
+      "answer": -1,
+      "correction": null,
+      "explain": "Alles is goed. Stam plak: te. Wij: plakten."
+    }
+  ]
+}

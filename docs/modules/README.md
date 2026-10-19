@@ -8,6 +8,8 @@ Every folder here with a `module.json` is a built in module. The game loads them
 |---|---|---|
 | `cito-taalverzorging/` | Taalverzorging (Cito en IEP stijl), groep 6 and 7 | M6, E6, M7, E7 |
 | `taal-e6/` | Taal E6: lastige woorden, meervoud, ontleden, leestekens, werkwoorden | M6, E6 |
+| `leestekens/` | Leestekens: punt, komma, dubbele punt, puntkomma en apostrof | M6, E6 |
+| `kofschip/` | 't Kofschip: verleden tijd en voltooid deelwoord | M6, E6 |
 
 A folder may also hold a `COVERAGE.md` that says which source the content is based on. The validator and the game only read the `.json` files.
 
