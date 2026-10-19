@@ -4,7 +4,9 @@ Written so kids can read it too.
 
 ## Unreleased
 
-### 0.2.0: the golden egg exam
+## 0.2.0 (2026-10-19)
+
+### The golden egg exam
 
 * A grown up can now start a practice exam from Examens in the parent area. The kid does it on a calm screen with no hints, sees the score, and can tap "Bekijk je fouten" to learn from the mistakes.
 * Pass the exam and a golden dino hatches in the world!

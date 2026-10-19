@@ -65,6 +65,8 @@ test.describe('parent starts and stops an exam (T51d, v2)', () => {
   });
 
   test('AC72: every built in exam starts without a warning', async ({ page }) => {
+    // Loops over every exam of every module (16 since the folder modules), about 3 s each.
+    test.setTimeout(180_000);
     await openApp(page);
     await setupPin(page);
     await loginAsParent(page);
