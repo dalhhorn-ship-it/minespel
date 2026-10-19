@@ -2,7 +2,7 @@
 
 Status: READY FOR SIGNOFF
 
-First approved by the founder on 2026-10-17. Recut on 2026-10-19 by decision 57: the live build is v1 (0.1.0), and everything not built yet moved to small releases in section 5. The recut changes the PRD, so the founder approves it again.
+First approved by the founder on 2026-10-17. Recut on 2026-10-19 by decision 57: the live build is v1 (0.1.0), and everything not built yet moved to small releases in section 5. The recut changes the PRD, so the founder approves it again. On 2026-10-19 the founder picked v2 Gouden ei as the next release (decision 59). Its section is in 12. This signoff covers the recut and v2.
 
 ## 1. Summary
 Dino Blokwereld is a small 3D block world on the iPad where a kid explores, mines and builds with Minecraft style blocks. Every few minutes the game pauses for a short learning break in Rekenen or Taal. Right answers earn dino points. In the Dinowinkel the kid buys dino eggs with those points, and the eggs hatch into friendly blocky dinos that walk around in the world. A passed practice exam gives a golden dino.
@@ -79,8 +79,8 @@ v1 is the build that runs today on `main` and on the Cloudflare Worker `minespel
 * **Stoppen in Extra oefenen** (decision 51). Every Extra oefenen question has a Stoppen button. Points earned so far stay. Learning breaks still cannot be stopped by the kid.
 * **Chickens** (decision 55). The Kippenhok in the Dinowinkel sells one chicken at a time for 5 points, bought with Ja or Nee like an egg, points and chicken saved together. At most 10 chickens. They do not count toward the 12 dinos.
 * **Shop layout** (decision 49, `docs/SHOP_PRD.md`). Species cards, progress bars toward the price, the herd counter and the "Mijn Dino-verzameling" list.
-* **First pincode** (decision 52). Before the first pincode can be set, a grown up sum in words must be answered, like PIN vergeten. A kid tapping the lock cannot set it. The first start flow in 4.19 is not built (see v4 and founder decision D2 in 11).
-* **Lock only in the world** (decision 53). A small grey lock shows in the world only. No lock on break, exam or overlay screens. No labelled "Ouders" button. This replaces "on every kid screen" in 4.12.
+* **First pincode** (decision 52). Before the first pincode can be set, a grown up sum in words must be answered, like PIN vergeten. A kid tapping the lock cannot set it. The first start flow in 4.19 is not built. The founder kept it as a new task in v4 (decision 60).
+* **Lock only in the world** (decision 53). A small grey lock shows in the world only. No lock on break, exam or overlay screens. No labelled "Ouders" button. This replaces "on every kid screen" in 4.12. From v2 the same small lock also shows on the exam screen, only to stop the exam (decision 61). Learning breaks stay without a lock.
 * **Home screen first** (decision 54). The design floor is the home screen app at 1024 x 768. In a Safari tab (about 690 high) tall kid screens may scroll inside their card.
 
 ### 4.1 The world
@@ -279,13 +279,13 @@ A small module where the questions are made by the app, so there are always new 
 * **Review:** below the score a button "Bekijk je fouten" opens a review of every question the kid got wrong or left open, one per page: the question, the kid's answer (or "niet beantwoord"), the right answer and the item's `explain` text. The kid pages through with "Volgende" and closes with "Klaar". With no mistakes the button is not shown and the screen says "Alles goed!". The review shows no points and no malus.
 * The same details stay in the parent area (4.16, Examens).
 * An exam counts as a learning break: after it, play resumes with a full play timer.
-* The kid cannot leave an exam. The parent can stop it through the parent gate. A stopped exam is saved as "gestopt", gives no egg and shows no review.
+* The kid cannot leave an exam. The parent can stop it through the parent gate: a small grey lock on the exam screen opens the gate, and after the right pincode the parent can stop the exam (decision 61, details in 12). A stopped exam is saved as "gestopt", gives no egg and shows no review.
 * If the app is closed during an exam, reopening continues the exam with the same questions and the same time left. If it is closed on the end screen or in the review, reopening shows the end screen again.
 
 ### 4.12 Parent gate (F3, F4)
-**Status: v1**, with the grown up question before the first pincode (decision 52) and the lock in the world only (decision 53). The automated test of every route moves to v5 (see section 5).
+**Status: v1**, with the grown up question before the first pincode (decision 52) and the lock in the world only (decision 53). From v2 the lock also shows on the exam screen, only to stop the exam (decision 61). The automated test of every route moves to v5 (see section 5).
 * At first start the parent sets a 4 digit pincode (typed twice).
-* A lock icon sits in the top right corner on every kid screen (world, break, exam). It looks small and grey, but its tap area is at least 44 x 44 points, inside the safe area and outside the look drag zone. Tapping it asks for the pincode.
+* A lock icon sits in the top right corner of the world, and from v2 on the exam screen (decisions 53 and 61). There is no lock on learning breaks or overlay screens. It looks small and grey, but its tap area is at least 44 x 44 points, inside the safe area and outside the look drag zone. Tapping it asks for the pincode.
 * Three wrong codes block the gate for 1 minute. The wrong try count and the block are saved, so a reload or closing the app does not reset them.
 * The pincode is stored as a hash made with a small built in function, so the gate also works on plain http on the home network. This only hides the code from casual eyes; a 4 digit code is not real security.
 * **PIN vergeten:** shows a fresh two step grown up question in words each time (for example "Neem zeven keer acht en trek daar negentien van af. Schrijf het antwoord in cijfers."). A right answer lets the parent set a new pincode. After 2 wrong answers, PIN vergeten is blocked for 10 minutes. Wrong tries here and on the pin pad share one saved lockout, so switching between them does not reset anything.
@@ -372,7 +372,7 @@ A small module where the questions are made by the app, so there are always new 
 * The app asks Safari for persistent storage where possible. The parent area shows a gentle note if the app is not added to the home screen, and a reminder to make a backup if the last backup is older than 30 days.
 
 ### 4.19 App basics
-**Status: v1 core**: home screen manifest and icons, window too small, 3D view lost, hosting, fps counter. Moved to v4 (see section 5): offline play, plain http notes, one window, and the first start flow (founder decision D2 in 11).
+**Status: v1 core**: home screen manifest and icons, window too small, 3D view lost, hosting, fps counter. Moved to v4 (see section 5): offline play, plain http notes, one window, and the first start flow (kept as a new v4 task by decision 60).
 * Installable as a home screen app (manifest, icons, `apple-mobile-web-app-capable`).
 * Works fully offline after the first visit (browser service worker caches the app and both built in modules).
 * **Plain http:** on the home network (`npm run dev -- --host`) Safari blocks some features (service worker, share sheet with files, persistent storage). The app still runs without errors and the parent sees a note where a feature is missing.
@@ -385,11 +385,11 @@ A small module where the questions are made by the app, so there are always new 
 
 ## 5. Release backlog
 
-v1 is live. After it come small releases, one at a time. Each release gives the kids (or the parent) one thing they can feel, holds at most 5 plan tasks, and ships on its own. The founder picks the next one at `/release`; only then it gets a section in 12.
+v1 is live. After it come small releases, one at a time. Each release gives the kids (or the parent) one thing they can feel, holds at most 5 plan tasks, and ships on its own. The founder picks the next one at `/release`; only then it gets a section in 12. Order picked by the founder (decision 59): v2 Gouden ei first, as 0.2.0, then v3 Dino's veilig.
 
 * **Release ids and versions.** The id (v2, v3, ...) is a fixed name in this backlog, so the tags in section 7 stay valid. The version number is given in shipping order: the first release shipped after v1 is 0.2.0, the next 0.3.0, and so on, whichever id it is.
 * **Ranking.** Value for the kids against size. There is no kid feedback or kid bug logged yet. When there is, it goes first.
-* **Status.** `shipped`: live. `candidate`: can be picked next, all its plan dependencies are done or can be pointed at the live build. `later`: waits for an earlier release.
+* **Status.** `shipped`: live. `next`: picked by the founder, has its section in 12, built next. `candidate`: can be picked next, all its plan dependencies are done or can be pointed at the live build. `later`: waits for an earlier release.
 * **Size.** S: about one session. M: two or three sessions. L: four or more.
 * Every release ends with a real iPad check of what it adds (CLAUDE.md), and the kid safety rules in 9 hold for every release.
 
@@ -398,23 +398,23 @@ v1 is live. After it come small releases, one at a time. Each release gives the 
 | Rank | Release | What the kids or the parent feel | Size | Value for the kids | Plan tasks | Status |
 |---|---|---|---|---|---|---|
 | | **v1** | The block world with dinos, learning breaks, the Dinowinkel and chickens (4.0) | | | every task marked done in `docs/PLAN.md` | shipped |
-| 1 | **v2 Gouden ei** | The parent starts a practice exam. Pass it and a golden dino hatches. | M | High. A new big goal, and the only reward still missing. | T39, T51a, T51b | candidate |
-| 2 | **v3 Dino's veilig** | A backup file keeps the world, dinos and points safe, even on a wiped or new iPad. | M | High, as insurance. Losing a herd of dinos would hurt the most. | T18, T19, T53a, T55 | candidate |
+| 1 | **v2 Gouden ei** | The parent starts a practice exam. Pass it and a golden dino hatches. | M | High. A new big goal, and the only reward still missing. | T39, T51a, T51b | next (0.2.0) |
+| 2 | **v3 Dino's veilig** | A backup file keeps the world, dinos and points safe, even on a wiped or new iPad. | M | High, as insurance. Losing a herd of dinos would hurt the most. | T18, T19, T53a, T55 | candidate, right after v2 (decision 59) |
 | 3 | **v4 Altijd spelen** | The game starts without internet, never shows a blank screen, and two open tabs never fight over the save. | M | Medium to high. Protects saves, and the kids notice when it is missing. | T52, T22, new first start task | later (after v3) |
 | 4 | **v5 Veilig en juist** | The Taal words are spelled right, nothing reaches the internet, everything fits with the big font, and the game is smooth on the family iPad. | M | Medium. Mostly invisible, but it protects what the kids learn and see. | T63, T65, T62, T32, T64 | candidate |
 | 5 | **v6 Wat heb ik geleerd** | The parent sees progress per topic, over 12 weeks, the hardest questions and every exam. | M | Medium. Through the parent, who can then switch on what is hard. | T21, T56, T61 | later (after v2) |
 | 6 | **v7 Eigen woorden** | The parent types this week's spelling words, tries them with Probeer, and the kid gets them in breaks. | L | Medium. The kid practises what school asks this week. | T40, T54, T57, T59 | candidate |
 | 7 | **v8 Modules delen** | The parent exports and imports modules, loads content made elsewhere, and writes own exams for a golden egg. | M | Low to medium. A parent tool. | T53b, T20, T58, T60 | later (after v3 and v7) |
 
-The 25 open plan tasks are all in v2 to v8. v4 adds one new task the architect writes into the plan: the first start flow from 4.19, if the founder keeps it (D2 in 11).
+The 25 open plan tasks are all in v2 to v8. v4 adds one new task the architect writes into the plan: the first start flow from 4.19, which the founder kept (decision 60).
 
-### v2 Gouden ei
+### v2 Gouden ei (next, 0.2.0)
 * **Goal:** a practice exam the parent starts, a calm exam screen for the kid, and a golden egg for a pass.
-* **In:** 4.11 in full. The golden dino from 4.3. The exam timer from 4.4. Exam answers move the boxes (4.6). The four Taal exams (4.9) and four Rekentoets exams (4.10). The parent Examens screen with the "te weinig vragen" warning and stop. "Pauze nu starten" greyed during an exam.
-* **Out:** the Examens list in Resultaten (v6). Own exams (v8).
-* **Size:** M. **Tasks:** T39 (exam logic), T51a (kid exam screen, review, golden egg), T51b (parent Examens screen).
-* **Criteria:** AC64 to AC72, AC111, AC112, AC115, AC125 (exam part), AC153.
-* **Needs first:** founder decision D3 in 11 (how the parent stops an exam when the lock is only in the world).
+* **In:** 4.11 in full. The golden dino from 4.3. The exam timer from 4.4. Exam answers move the boxes (4.6). The four Taal exams (4.9) and four Rekentoets exams (4.10). The parent Examens screen with the "te weinig vragen" warning. "Pauze nu starten" greyed during an exam. The small grey lock on the exam screen to stop the exam (decision 61).
+* **Out:** the Examens list in Resultaten (v6). Own exams (v8). A lock on learning breaks.
+* **Size:** M. **Tasks:** T39 (exam logic), T51a (kid exam screen, review, golden egg, exam lock), T51b (parent Examens screen, stop after the gate).
+* **Criteria:** AC64 to AC72, AC111, AC112, AC115, AC125 (exam part), AC153, and the new AC155 to AC159 in 12.
+* **Decided:** the parent stops an exam with a small grey lock on the exam screen only (decision 61). Full section in 12.
 
 ### v3 Dino's veilig
 * **Goal:** the parent can make a backup file and put it back, so nothing the kid built or earned is ever lost for good.
@@ -425,7 +425,7 @@ The 25 open plan tasks are all in v2 to v8. v4 adds one new task the architect w
 
 ### v4 Altijd spelen
 * **Goal:** the game always starts and never loses or mixes up a save.
-* **In:** 4.18 broken save screen, storage full note, persistent storage, home screen note, backup reminder. 4.19 offline play, plain http notes, one window, and the first start flow (if kept, D2). The "geen vragen" warning from 4.13.
+* **In:** 4.18 broken save screen, storage full note, persistent storage, home screen note, backup reminder. 4.19 offline play, plain http notes, one window, and the first start flow (kept by decision 60). The "geen vragen" warning from 4.13.
 * **Out:** nothing else. The flight mode check on the real iPad (AC97) is done in this release's own iPad check, or in T64 if v5 comes later.
 * **Size:** M. **Tasks:** T52 (robustness), T22 (offline service worker), new task for the first start flow.
 * **Criteria:** AC73, AC97, AC114, AC129, AC137, AC138 (update at start), AC139, AC140, AC144.
@@ -438,7 +438,7 @@ The 25 open plan tasks are all in v2 to v8. v4 adds one new task the architect w
 * **Size:** M, mostly qa and founder time. **Tasks:** T63 (safety suite), T65 (content check), T62 (accessibility audit), T32 (speed spike), T64 (real iPad checks).
 * **Criteria:** AC76 (route test), AC98, AC99, AC101, AC102, AC107, AC124, AC141 (full audit), AC143, AC154 (audit).
 * **Plan note:** in `docs/PLAN.md`, T62, T63 and T65 wait for every feature task. The architect points them at the live build, so this release can ship before v6 to v8.
-* **Why it should not wait long:** the kids already learn from the Taal content, and it has not had its human spelling check (AC124). The founder could pull T65 into whichever release is next, since it is mostly reading (D1 option).
+* **Why it should not wait long:** the kids already learn from the Taal content, and it has not had its human spelling check (AC124). Decision 59 picked v2 without T65, so T65 stays in v5 for now. It is mostly reading, so the founder can still pull it into any release at `/release`.
 
 ### v6 Wat heb ik geleerd
 * **Goal:** the parent sees what the kid knows and what is hard.
@@ -488,7 +488,7 @@ Not planned in any release. Each would need the founder to pick it first.
 
 ## 6. User flows
 
-Flows 2 to 5 and 7 are v1. Flow 1 is v4 (D2), Flow 6 is v2, Flow 8 is v7 (step 5 is v8), Flow 9 is v6 and Flow 10 is v3. In v1 the first pincode is set the first time a grown up taps the lock, after the grown up question (decision 52).
+Flows 2 to 5 and 7 are v1. Flow 1 is v4 (kept by decision 60), Flows 6 and 6b are v2, Flow 8 is v7 (step 5 is v8), Flow 9 is v6 and Flow 10 is v3. In v1 the first pincode is set the first time a grown up taps the lock, after the grown up question (decision 52).
 
 ### Flow 1: first start (parent) (v4)
 1. Parent opens the app on the iPad and sees "Welkom bij Dino Blokwereld".
@@ -538,6 +538,12 @@ Flows 2 to 5 and 7 are v1. Flow 1 is v4 (D2), Flow 6 is v2, Flow 8 is v7 (step 5
 5. I tap "Bekijk je fouten" and see my 3 mistakes, each with the right answer and why. I tap "Klaar".
 6. Back in the world the egg hatches into a golden triceratops that follows me.
 
+### Flow 6b: parent stops an exam (v2)
+1. Dinner is ready, but I am on "Vraag 9 van 30". Papa taps the small grey lock in the corner of the exam screen.
+2. Papa types the code. The time does not run while he types.
+3. Papa sees "Examen stoppen?" and taps "Stoppen".
+4. I am back in the world. There is no golden egg this time. The countdown starts again.
+
 ### Flow 7: parent picks what gets asked
 1. Parent opens the parent area and goes to Inhoud kiezen.
 2. Parent switches off Rekenen > tafels > tafel-1 and tafel-2, and switches on only M7 for the komma topic.
@@ -568,7 +574,7 @@ Times in these criteria are play time with the app visible, unless stated otherw
 
 **Release tags (decision 57).** A criterion with no tag is v1. A tag like **(v2)** means the criterion belongs to that release in section 5. A tag like **(v1, test in v3)** means the behaviour is in v1 and the named part comes in that release. Numbers never change.
 
-**v1 readings.** For v1, read these criteria with the changes in 4.0: AC1 has a world 64 high, not 32. AC7 and AC151 have 32 building blocks, not 16. AC20 and AC149 count no chickens toward the 12. In AC120, plus points from a break started with Nu oefenen do count toward the 10 point cap and give no malus (decision 56); only timed breaks stay outside the cap. AC52 holds with a Stoppen button on every question (decision 51). AC127 is the lock in the world only.
+**v1 readings.** For v1, read these criteria with the changes in 4.0: AC1 has a world 64 high, not 32. AC7 and AC151 have 32 building blocks, not 16. AC20 and AC149 count no chickens toward the 12. In AC120, plus points from a break started with Nu oefenen do count toward the 10 point cap and give no malus (decision 56); only timed breaks stay outside the cap. AC52 holds with a Stoppen button on every question (decision 51). AC127 is the lock in the world only. From v2, AC127 also holds for the exam screen lock (AC155).
 
 ### World and controls
 * **AC1:** Given a new game, when the world loads, then it is 64 x 64 blocks wide and 32 high (or 48 x 48 if the spike says so) with hills, trees, sand and stone, and it is identical every time a new game starts.
@@ -752,7 +758,7 @@ Times in these criteria are play time with the app visible, unless stated otherw
 * **AC143 (iPad) (v1, iPad check in v5):** Given the reference iPad, then the stick, jump button, hotbar, countdown and lock icon sit inside the safe area, and the hotbar sits high enough that using it never triggers the home swipe.
 * **AC144 (v4):** Given a wiped iPad (empty storage), when the app opens, then the first start flow shows, and after "Geef de iPad aan je kind" the world loads with no errors.
 
-**Count:** AC1 to AC154, of which 6 are removed (AC13, AC14, AC15, AC19, AC32, AC33). 148 active criteria. 106 are v1 (some with a part in a later release). 42 belong to a later release: v2 has 13, v3 has 5, v4 has 8, v5 has 2, v6 has 5, v7 has 4, v8 has 5.
+**Count:** AC1 to AC154 here, plus AC155 to AC159 for v2 in section 12. 6 are removed (AC13, AC14, AC15, AC19, AC32, AC33). 153 active criteria. 106 are v1 (some with a part in a later release). 47 belong to a later release: v2 has 18 (13 here, 5 in 12), v3 has 5, v4 has 8, v5 has 2, v6 has 5, v7 has 4, v8 has 5.
 
 ## 8. Look, sound and feel
 * **Style:** bright, friendly Minecraft style pixel blocks with 16 x 16 pixel textures. Dinos are chunky and cute with big eyes, made of boxes. Eggs are spotted and wobble. Soft, still fog at the edge (no flicker). No blood, no scary sounds, no angry dinos.
@@ -774,7 +780,7 @@ Times in these criteria are play time with the app visible, unless stated otherw
 * **Tracking, ads, chat:** none. No analytics, no cookies for tracking, no third party scripts or fonts from other servers.
 * **Purchases:** none with real money. The Dinowinkel only uses dino points earned by learning. There is no payment code, no store link and no way to buy points.
 * **External links:** none. Text in imported modules is shown as plain text and is never a link.
-* **Parent gate:** a 4 digit pincode protects settings, content choice, own modules, import, export, backup, results, ending a break and stopping an exam. The lockout survives reloads. PIN vergeten uses a fresh two step grown up question with a 10 minute block after 2 wrong tries, sharing the lockout with the pin pad (F3, F4). The first pincode can only be set after the same kind of grown up question (decision 52). The lock shows only in the world (decision 53).
+* **Parent gate:** a 4 digit pincode protects settings, content choice, own modules, import, export, backup, results, ending a break and stopping an exam. The lockout survives reloads. PIN vergeten uses a fresh two step grown up question with a 10 minute block after 2 wrong tries, sharing the lockout with the pin pad (F3, F4). The first pincode can only be set after the same kind of grown up question (decision 52). The lock shows only in the world (decision 53). From v2 it also shows on the exam screen, only to stop the exam (decision 61). Learning breaks have no lock.
 * **Content:** all questions and lessons are original and kid friendly (dinos, nature, school, family). Nothing scary or violent. Taal content gets a human spelling check before release (AC124).
 * **Breaks and malus:** the break is firm but kind. It has no time pressure, every question gets a second try, and a second mistake leads to a short lesson, not a scolding. The malus is 1 point, shown in soft grey, and the total never goes below 0. Mistakes never take away blocks, dinos or eggs.
 * **Accessibility:** touch targets at least 44 points, readable text with good contrast, an optional bigger font, never only colour to show right or wrong (always a check or a cross icon too), works without sound and with the mute switch on, respects reduced motion.
@@ -793,7 +799,7 @@ Times in these criteria are play time with the app visible, unless stated otherw
 ## 11. Risks and decisions
 
 ### Decided
-The decisions F1 to F15 are answered. Details are in `docs/DECISIONS.md` (rows 8 to 22). Three new questions for the recut are open, see "Open founder decisions" below.
+The decisions F1 to F15 are answered. Details are in `docs/DECISIONS.md` (rows 8 to 22). The recut questions D1 to D3 are answered too (rows 59 to 61). There is no open founder question.
 
 | # | Question | Founder's answer | Where in this PRD |
 |---|---|---|---|
@@ -812,26 +818,18 @@ The decisions F1 to F15 are answered. Details are in `docs/DECISIONS.md` (rows 8
 | F13 | Small scope changes | "Snel geklikt" mark in v1. "Groter lettertype" stays in v1. | 4.16, 4.17, AC92, AC154 |
 | F14 | Malus in Extra oefenen | No malus in Extra oefenen. Malus only in learning breaks. | 4.7, AC52 |
 | F15 | Dino kinds and prices | Compy 20, Triceratops 40, Stegosaurus 40, Brachiosaurus 80 | 4.3, AC149 |
+| D1 | Which release comes next (row 59) | v2 Gouden ei is next and ships as 0.2.0. Then v3 Dino's veilig. T65 was not pulled in. | 5, 12 |
+| D2 | The first start flow (row 60) | Keep it as a new task in v4 Altijd spelen. | 4.19, 5 v4, Flow 1 |
+| D3 | How the parent stops an exam (row 61) | A small grey lock on the exam screen only opens the parent gate to stop the exam. Learning breaks stay without a lock. This narrows decision 53 for exams. | 4.0, 4.11, 4.12, 9, 12, AC155 to AC158 |
 
 Choices made by product inside these answers, which the founder sees when signing: the point values (+2, +1, -1, +3 bonus) and egg prices (20, 40, 40, 80); a fourth small dino kind (Compy) so there is a cheap first egg (confirmed by the founder, F15); no malus in Extra oefenen (founder, F14); only the first try counts for spaced repetition; exams give no points; "Wereld opnieuw beginnen" keeps dinos and points.
 
-**Decided during the build** (`docs/DECISIONS.md` rows 44 to 57, all built into v1 as listed in 4.0): sky height 64 and camera arrows (44), visible countdown (45), floating with Omhoog and Omlaag (47), Nu oefenen (48, 56), the shop layout (49), Gemini's build is the truth (50), Stoppen in Extra oefenen (51), grown up question before the first pincode (52), lock in the world only (53, replaces 46), home screen first (54), chickens for 5 points, at most 10 (55), and the v1 recut (57). The founder requests CR1 to CR4 (32 blocks, the obsidiaan gate, chickens, lava) are listed in `docs/STATUS.md` but have no decision row. Signing this PRD confirms them as part of v1.
+**Decided during the build** (`docs/DECISIONS.md` rows 44 to 57, all built into v1 as listed in 4.0): sky height 64 and camera arrows (44), visible countdown (45), floating with Omhoog and Omlaag (47), Nu oefenen (48, 56), the shop layout (49), Gemini's build is the truth (50), Stoppen in Extra oefenen (51), grown up question before the first pincode (52), lock in the world only (53, replaces 46), home screen first (54), chickens for 5 points, at most 10 (55), and the v1 recut (57). The founder requests CR1 to CR4 (32 blocks, the obsidiaan gate, chickens, lava) are recorded as decision row 58. Signing this PRD confirms them as part of v1.
+
+**Decided for the recut and v2** (rows 59 to 61): see D1 to D3 in the table above.
 
 ### Open founder decisions
-* **D1: which release comes next (0.2.0).**
-  * A: v2 Gouden ei. A new big goal for the kids and the exams for the parent. Size M.
-  * B: v3 Dino's veilig. Backup first, so nothing the kids built or earned can be lost. Size M.
-  * C: v5 Veilig en juist. Prove the live game is safe and spelled right, and measure the speed. Size M, mostly qa and founder time.
-  * Option for any of them: pull T65 (the human Taal content check) in alongside, since it is mostly reading and the kids already learn from that content.
-  * **Recommendation: A, then B straight after.** The kids feel A the most, and it adds the only reward still missing. The kids play from the home screen (decision 54), which keeps Safari from wiping the saves, so a backup can follow one release later. If the kids sometimes play in a Safari tab, pick B first.
-* **D2: the first start flow (4.19, Flow 1).** Decision 52 covers who sets the first pincode, but the welcome, the groep preset and the note about the home screen and backups are not built.
-  * A: keep it as a new task in v4, next to the home screen note and the backup reminder.
-  * B: drop it. The parent finds the preset in Inhoud kiezen and the notes in the parent area.
-  * **Recommendation: A.** The home screen and backup note is what keeps saves safe, and it is small.
-* **D3: how the parent stops an exam (v2).** 4.11 says the parent stops an exam through the gate, but decision 53 shows the lock only in the world. An exam runs up to 30 minutes.
-  * A: the same small grey lock on the exam screen only.
-  * B: no lock. The parent waits for the end or closes the app; reopening continues the exam.
-  * **Recommendation: A.** It matches the small lock in the world, and the kid cannot pass the pincode. Decide this when v2 is picked.
+None.
 
 ### Risks
 | Risk | Effect | What we do |
@@ -851,3 +849,50 @@ Choices made by product inside these answers, which the founder sees when signin
 | Share sheet behaves differently in home screen mode | Backup or export fails | Test on the real iPad on the deployed address. Fallback: open the file in a new view and share from there. |
 | Scope was large (one v1, about 70 tasks) | Long build, nothing shipped | Recut by decision 57: the live build is v1, the 25 open tasks are 7 small releases in section 5, shipped one at a time. |
 | 3D speed on the iPad was never measured | Stutter with many dinos | The speed spike (T32) is in v5. The kids already play, so stutter they notice moves v5 up. |
+
+## 12. Releases
+
+One section per release the founder picked at `/release`. Each one ships on its own.
+
+### v2 Gouden ei (0.2.0)
+
+**Status:** next. Picked by the founder (decision 59). Ships as 0.2.0.
+
+**Goal:** "Pass a practice exam and a golden dino hatches next to me."
+
+**In:**
+* Exams as in 4.11: the parent starts one, the kid sees the calm exam screen, the end screen and "Bekijk je fouten".
+* The golden egg and golden dino from 4.3. Golden dinos do not count toward the 12 (F7).
+* The exam timer from the timer matrix in 4.4.
+* Exam answers move the boxes, with one try only (4.6).
+* The four Taal practice exams (4.9) and the four Rekentoets exams (4.10), from the exam definitions that already exist in the modules.
+* The parent Examens screen: pick a module and an exam, the "te weinig vragen" warning, "Beëindig eerst de pauze" during a break.
+* "Pauze nu starten" greyed out during an exam (4.17).
+* New (decision 61): a small grey lock on the exam screen only. It opens the parent gate, and after the right pincode the parent can stop the exam.
+* Version 0.2.0 and a kid readable entry in `CHANGELOG.md`.
+
+**Out:**
+* A lock on learning breaks, lessons, summaries, overlays, the exam end screen or the review. Decision 53 still holds there.
+* The Examens list in Resultaten (v6). The result is saved now (AC69), so v6 can show it later.
+* Own exams for parent made modules (v8).
+* Exams across modules, timed learning breaks (Later).
+
+**How the exam lock works (decision 61):**
+* The lock looks like the lock in the world: small, grey, top right, a tap area of at least 44 x 44 points inside the safe area.
+* It shows only while exam questions are on screen.
+* Tapping it opens the same pin pad, with the same shared lockout and PIN vergeten (4.12). The exam timer stops while the gate is open (4.4).
+* After the right pincode the parent sees a small card "Examen stoppen?" with "Stoppen" and "Terug naar het examen". The rest of the parent area is not reachable from here. The parent uses the lock in the world for that.
+* "Stoppen" saves the exam as "gestopt", gives no egg, shows no review and takes the kid back to the world with a full play timer.
+* "Terug naar het examen", or "Terug" on the pin pad, returns to the same question with the same answer typed so far and the same time left.
+
+**Plan tasks:** T39 (exam logic), T51a (kid exam screen, end screen, review, golden egg, and the exam lock with its pin pad hook), T51b (parent Examens screen, the "Examen stoppen?" card and the stop). The architect may split the lock into its own task T51c if T51a gets too big. That is 3 or 4 tasks.
+
+**Acceptance criteria.** The existing v2 criteria in section 7 hold as written: AC64, AC65, AC66, AC67, AC68, AC69, AC70, AC71, AC72, AC111, AC112, AC115, AC153, and the exam part of AC125. AC127 also holds for the exam lock. New for v2:
+
+* **AC155 (v2):** Given an exam is running with a question on screen, then a small grey lock shows in the top right corner, with a tap area of at least 44 x 44 points fully inside the safe area. When the kid or parent taps it, then the pin pad of the parent gate opens.
+* **AC156 (v2):** Given a learning break, a lesson, a break summary, Extra oefenen, the exam start screen, the exam end screen or the review is on screen, then no lock and no parent button shows. Given the world, then the lock shows as in v1.
+* **AC157 (v2):** Given the pin pad was opened from the exam lock, when the right pincode is typed and the parent taps "Stoppen", then the exam is saved as "gestopt", no golden egg appears, no review shows, and the kid is in the world with the play timer at the full interval. Given the app is closed and reopened after that, then the world shows, not the exam.
+* **AC158 (v2):** Given an exam on question 9 with 20:00 left and an answer typed but not checked, when the pin pad is opened from the exam lock and then closed with "Terug", or the right pincode is typed and "Terug naar het examen" is tapped, then the exam shows question 9 with the same typed answer and 20:00 left, plus or minus 1 second, however long the gate was open. Given 3 wrong codes, then the gate blocks for 1 minute with the same shared lockout as the world lock (AC74), and the exam stays on question 9 with no time lost.
+* **AC159 (v2):** Given the v2 build, then `package.json` has version 0.2.0 and `CHANGELOG.md` has a 0.2.0 entry in kid readable words that names the exams and the golden dino.
+
+**Check before shipping:** a real iPad check of one full Taal exam and one Rekentoets in home screen mode: the lock is easy for a parent to find and hard to hit by accident, the golden egg hatches in the world, and closing the app mid exam continues it (AC71).
