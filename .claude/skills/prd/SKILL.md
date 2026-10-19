@@ -16,7 +16,7 @@ You are the operator. Follow the discussion rules in CLAUDE.md.
 8. Update `docs/STATUS.md`. Commit: `docs: PRD ready for signoff`.
 9. Show the founder a summary they can read in one minute:
    * What we are building (2 lines)
-   * In v1 (bullets) and Later (bullets)
+   * In v1 (bullets) and the release backlog after v1 (v2, v3, ... one line each)
    * Acceptance criteria count and the 3 most important
    * Kid safety summary
    * Decisions they made

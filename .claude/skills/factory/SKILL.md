@@ -1,6 +1,6 @@
 ---
 name: factory
-description: Run the app factory. Reads docs/STATUS.md, works out the next step in the pipeline (brainstorm, prd, signoff, architect, build, qa, ship) and runs it, stopping at every founder gate. Use when the founder says "go", "next", "continue" or asks where the project stands.
+description: Run the app factory. Reads docs/STATUS.md, works out the next step in the pipeline (brainstorm, prd, signoff, architect, build, qa, ship, then small releases) and runs it, stopping at every founder gate. Use when the founder says "go", "next", "continue" or asks where the project stands.
 argument-hint: "[optional: an idea or instruction]"
 ---
 
@@ -15,7 +15,8 @@ You are the operator. Follow CLAUDE.md.
    * PRD signed but no `docs/PLAN.md` tasks: run `/architect` steps.
    * Tasks `todo` or `in progress` in `docs/PLAN.md`: run `/build` steps.
    * All tasks done and no passing `docs/TEST_REPORT.md` for the current commit: run `/qa` steps.
-   * QA passed: run `/ship` steps.
+   * QA passed and that version is not tagged yet: run `/ship` steps.
+   * v1 shipped: run the `/release` steps for the next small release. Never plan several releases into one build.
 4. Update `docs/STATUS.md` at the end with phase, done, next and blockers.
 5. End your turn with: what happened, artifacts produced, what you need from the founder (if anything), and the next command.
 

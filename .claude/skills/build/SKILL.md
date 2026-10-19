@@ -13,7 +13,7 @@ You are the operator. Follow the execution loop in CLAUDE.md.
    * Otherwise: one at a time.
    * Give each agent only: the task id, the PRD AC numbers, and the files it may touch.
 4. **Verify every result yourself.** Read the diff. Run `./scripts/check.sh`. Check the task's acceptance criteria. Do not trust a "done" report without evidence.
-5. On failure: send the exact error back to a `developer` agent with the task. Up to 3 attempts. If still failing, mark the task `blocked` in `docs/PLAN.md`, add a `NEEDS FOUNDER` decision with options (simplify the task, change approach, cut from v1), and ask the founder.
+5. On failure: send the exact error back to a `developer` agent with the task. Up to 3 attempts. If still failing, mark the task `blocked` in `docs/PLAN.md`, add a `NEEDS FOUNDER` decision with options (simplify the task, change approach, move it to a later release), and ask the founder.
 6. On success: mark the task `done` in `docs/PLAN.md`, commit with message `feat(T<id>): <title>` (include tests and docs in the same commit).
 7. **Scope guard.** If any agent reports the PRD is wrong or something new is needed, ask `product` whether it is in scope. If not, it is a founder decision. Do not build it before the founder says yes and the PRD is updated and approved again.
 8. **At each milestone** (M1, M2, ...):
@@ -23,3 +23,5 @@ You are the operator. Follow the execution loop in CLAUDE.md.
    * Commit, then tell the founder something is playable and how to try it on the iPad: start `npm run dev -- --host` and give the local network address to open in Safari, plus a screenshot.
 9. If something failed and was fixed in a way worth remembering, add a line to Lessons learned in CLAUDE.md.
 10. When every task is `done`, update `docs/STATUS.md` and suggest `/qa`.
+
+During a `/release`, work only on the tasks with that release's milestone (`vN`). The release is its own milestone: one architect review, one scribe pass.

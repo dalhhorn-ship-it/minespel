@@ -39,7 +39,10 @@ The founder starts an app by copying the template into a new repo and opening Cl
 
 ```
 /brainstorm  ->  /prd  ->  [FOUNDER APPROVES IN CHAT]  ->  /architect  ->  /build  ->  /qa  ->  /ship  ->  /retro
+then, one at a time:  /release  (pick, approve in chat, build, check, ship, learn)
 ```
+
+**Small releases.** v1 is the smallest version the kids can play. Everything else goes in the release backlog in `docs/PRD.md` as small releases (v2, v3, ...). After v1 ships, `/release` runs one short loop per release: at most 5 tasks, one thing the kids can feel, shipped before the next one starts. Kid feedback from each release decides what comes next. Never batch several releases into one big build.
 
 `/factory` looks at `docs/STATUS.md` and runs the next step, stopping at every gate.
 
@@ -117,7 +120,7 @@ Apps are hosted on Cloudflare Workers, serving the built site as static assets.
 |---|---|
 | `docs/STATUS.md` | Current phase, what is next, blockers. The operator keeps it current. |
 | `docs/IDEA.md` | Output of brainstorming |
-| `docs/PRD.md` | The product spec the founder approves |
+| `docs/PRD.md` | The product spec the founder approves, with the release backlog and one section per release |
 | `docs/PRD.approved` | Approval stamp. Written only by the approval hook, after the founder says yes in chat. |
 | `docs/ARCHITECTURE.md` | Stack, structure, key choices |
 | `docs/PLAN.md` | Task graph |

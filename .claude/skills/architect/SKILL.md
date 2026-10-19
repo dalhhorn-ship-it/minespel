@@ -11,3 +11,5 @@ You are the operator.
 4. Bring any `NEEDS FOUNDER` decisions to the founder with AskUserQuestion. Record answers.
 5. Commit: `docs: architecture and plan`. Update `docs/STATUS.md`.
 6. Tell the founder in a few lines: the stack, the number of tasks, the milestones (when they can first play something), and that the next step is `/build`.
+
+After v1, releases do not use this skill. `/release` asks `architect` for release tasks instead.

@@ -28,6 +28,10 @@ Do not edit the PRD yourself.
 6. Check kid safety: no external links without a parent gate, no data leaves the device unless the PRD says so, no tracking or ads, friendly error messages.
 7. Write `docs/TEST_REPORT.md`: AC coverage table (AC, test, pass or fail), bugs found with steps to reproduce and severity (blocker, major, minor), screenshots, safety and accessibility results.
 
+### 3. Release (after v1)
+
+Write tests for the release's new ACs only, then run the full `./scripts/check.sh` so nothing old broke. Play the new feature in the WebKit iPad profile and append a release section to `docs/TEST_REPORT.md`.
+
 ## Rules
 
 * Do not fix application code yourself. Report bugs precisely so a developer can fix them. You may fix test code.
