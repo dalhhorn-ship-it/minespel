@@ -1,0 +1,95 @@
+/* Exam screens (T51a): calm Minecraft look like break.css. Cards, big buttons, the small grey lock top right. */
+.exam-body > .exam-card,
+.exam-body > .exam-review {
+  max-width: 720px;
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.exam-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: calc(var(--gap) * 1.5);
+  padding: calc(var(--gap) * 3);
+  text-align: center;
+  background: var(--mc-panel);
+  color: var(--mc-text);
+  border: var(--mc-step) solid var(--mc-edge);
+  border-radius: 0;
+  box-shadow: inset var(--mc-step) var(--mc-step) 0 var(--mc-light), inset calc(var(--mc-step) * -1) calc(var(--mc-step) * -1) 0 var(--mc-shade);
+}
+
+.exam-title {
+  margin: 0;
+  font-size: var(--font-title);
+}
+
+.exam-score,
+.exam-perfect {
+  margin: 0;
+  font-size: var(--font-large);
+  font-weight: 800;
+}
+
+.exam-sub {
+  margin: 0;
+  font-size: var(--font-body);
+  font-weight: 700;
+}
+
+.exam-btn {
+  min-width: 220px;
+  min-height: 56px;
+  padding: 0 calc(var(--gap) * 2);
+  font: inherit;
+  font-size: var(--font-large);
+  font-weight: 800;
+  background: var(--mc-btn);
+  color: var(--mc-text);
+  border: var(--mc-step) solid var(--mc-edge);
+  border-radius: 0;
+  box-shadow: inset var(--mc-step) var(--mc-step) 0 var(--mc-light), inset calc(var(--mc-step) * -1) calc(var(--mc-step) * -1) 0 var(--mc-shade);
+  touch-action: manipulation;
+}
+.exam-btn:active {
+  background: var(--mc-btn-down);
+}
+
+/* Question number on the left, time left on the right (the lock sits above the corner). */
+.exam-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--gap);
+  padding: 8px 14px;
+  margin-right: 56px;
+  background: var(--mc-panel);
+  color: var(--mc-text);
+  border: 3px solid var(--mc-edge);
+  font-size: var(--font-large);
+  font-weight: 800;
+}
+.exam-clock[hidden] {
+  display: none;
+}
+
+/* Small grey lock, top right, fully inside the safe area (AC155). 44 x 44 comes from .lock-icon-btn. */
+.exam-lock {
+  position: fixed;
+  top: calc(var(--safe-top, env(safe-area-inset-top, 0px)) + 8px);
+  right: calc(var(--safe-right, env(safe-area-inset-right, 0px)) + 8px);
+  z-index: 30;
+}
+
+.exam-review-prompt {
+  margin: 0;
+  font-size: var(--font-large);
+  font-weight: 800;
+}
+.exam-review-given,
+.exam-review-right {
+  margin: 0;
+  font-weight: 700;
+}

@@ -79,3 +79,14 @@ describe('punctuate view', () => {
     expect(gaps()[0]!.getAttribute('aria-pressed')).toBe('false');
   });
 });
+
+describe('punctuate view getMarked (exam draft)', () => {
+  it('returns the marked gaps sorted without tapping Klaar', () => {
+    const { v, gaps, got } = setup();
+    expect(v.getMarked()).toEqual([]);
+    tap(gaps()[2]!);
+    tap(gaps()[0]!);
+    expect(v.getMarked()).toEqual([0, 2]);
+    expect(got).toHaveLength(0);
+  });
+});

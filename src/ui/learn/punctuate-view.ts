@@ -8,7 +8,12 @@ import { el } from '../dom';
 import { onTap } from '../tap';
 import type { QuestionView, QuestionViewOptions } from './choice-view';
 
-export function createPunctuateView(options: QuestionViewOptions<PunctuateItem>): QuestionView {
+export interface PunctuateView extends QuestionView {
+  /** Gaps marked so far, sorted (an exam time out checks this as given). */
+  getMarked(): number[];
+}
+
+export function createPunctuateView(options: QuestionViewOptions<PunctuateItem>): PunctuateView {
   const { item, onAnswer, doc } = options;
   const cleanups: Array<() => void> = [];
   const marked = new Set<number>();
@@ -60,6 +65,7 @@ export function createPunctuateView(options: QuestionViewOptions<PunctuateItem>)
 
   return {
     element,
+    getMarked: () => [...marked].sort((a, b) => a - b),
     destroy() {
       for (const c of cleanups) c();
       element.remove();

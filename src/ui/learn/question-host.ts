@@ -16,11 +16,20 @@ export interface QuestionHostOptions {
   doc?: Document;
 }
 
+/** An answer typed or marked but not yet sent with Klaar (exam time out, AC67). */
+export type Draft = { type: 'type'; text: string } | { type: 'punctuate'; gaps: number[] };
+
 export interface QuestionHost {
   readonly element: HTMLElement;
   /** Current typed text for `type` or numeric items (empty for others). */
   getTypedText(): string;
+  /** Typed text, or marked gaps, or null when nothing was entered yet. */
+  getDraft(): Draft | null;
   destroy(): void;
+}
+
+function draftOf(text: string): Draft | null {
+  return text.trim() === '' ? null : { type: 'type', text };
 }
 
 export function createQuestionHost(options: QuestionHostOptions): QuestionHost {
@@ -29,15 +38,23 @@ export function createQuestionHost(options: QuestionHostOptions): QuestionHost {
   switch (item.type) {
     case 'choice': {
       const view = createChoiceView({ item, onAnswer, doc });
-      return { element: view.element, getTypedText: () => '', destroy: () => view.destroy() };
+      return { element: view.element, getTypedText: () => '', getDraft: () => null, destroy: () => view.destroy() };
     }
     case 'find-error': {
       const view = createFindErrorView({ item, onAnswer, doc });
-      return { element: view.element, getTypedText: () => '', destroy: () => view.destroy() };
+      return { element: view.element, getTypedText: () => '', getDraft: () => null, destroy: () => view.destroy() };
     }
     case 'punctuate': {
       const view = createPunctuateView({ item, onAnswer, doc });
-      return { element: view.element, getTypedText: () => '', destroy: () => view.destroy() };
+      return {
+        element: view.element,
+        getTypedText: () => '',
+        getDraft: () => {
+          const gaps = view.getMarked();
+          return gaps.length > 0 ? { type: 'punctuate', gaps } : null;
+        },
+        destroy: () => view.destroy(),
+      };
     }
     case 'type': {
       const promptNode = el('p', { class: 'q-prompt', text: item.prompt }, [], doc);
@@ -50,6 +67,7 @@ export function createQuestionHost(options: QuestionHostOptions): QuestionHost {
         return {
           element: wrap,
           getTypedText: () => view.getText(),
+          getDraft: () => draftOf(view.getText()),
           destroy: () => {
             view.destroy();
             wrap.remove();
@@ -64,6 +82,7 @@ export function createQuestionHost(options: QuestionHostOptions): QuestionHost {
       return {
         element: wrap,
         getTypedText: () => view.getText(),
+        getDraft: () => draftOf(view.getText()),
         destroy: () => {
           view.destroy();
           wrap.remove();
