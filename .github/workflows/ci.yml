@@ -5,15 +5,29 @@ on:
 jobs:
   check:
     runs-on: ubuntu-latest
+    env:
+      # Content release path: a change with only learning modules or docs skips e2e
+      # (scripts/check-scope.sh). main always runs everything.
+      CHECK_BASE: ${{ github.event_name == 'pull_request' && format('origin/{0}', github.base_ref) || 'origin/main' }}
+      CHECK_FULL: ${{ github.ref == 'refs/heads/main' && '1' || '0' }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: 22
       - name: PRD signoff matches
         run: |
           if [ -d src ] || [ -f package.json ]; then ./scripts/signoff.sh --check; fi
+      - name: Scope
+        id: scope
+        run: |
+          if [ "$CHECK_FULL" = "1" ]; then scope=full; else scope=$(./scripts/check-scope.sh); fi
+          echo "scope=$scope" >> "$GITHUB_OUTPUT"
+          echo "Check scope: $scope"
       - name: Install Playwright browsers if used
+        if: steps.scope.outputs.scope == 'full'
         run: |
           if [ -f package.json ] && grep -q '"@playwright/test"' package.json; then
             npm install --no-audit --no-fund && npx playwright install --with-deps webkit

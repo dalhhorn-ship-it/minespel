@@ -103,6 +103,10 @@ Apps are hosted on Cloudflare Workers, serving the built site as static assets.
 * Never commit Cloudflare tokens or account ids. Deploys from CI use the repo secrets `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`, which only the founder adds.
 * Every deploy is a founder decision (Gate 2). For a private test, prefer `wrangler dev` on the local network, or protect the Worker with Cloudflare Access (founder sets it up).
 
+## Content releases (learning modules)
+
+A new or changed learning module that stays inside the format in `docs/modules/README.md` is content, not a feature. Make it with `/module`. It takes a quick path: `./scripts/check.sh` sees that only module JSON and docs changed (`scripts/check-scope.sh`) and runs just the validator, the module unit tests and the build, without e2e. CI does the same. Anything else in the same change (code, tests, `validate.py`) makes it a normal release with the full check. `main` and deploys always run everything.
+
 ## Rules for everyone
 
 * Tests ship with code. Every feature task includes tests. `./scripts/check.sh` must pass before a task is done.

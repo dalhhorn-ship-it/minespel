@@ -45,7 +45,7 @@ In `module.json` add one exam per book section (same parts as the source, for ex
 
 1. `python3 docs/modules/validate.py docs/modules/<module-id>` until it says OK. Fix the content, never the validator.
 2. Read every item once more as a teacher: is the answer really right, is only one option right, is the Dutch spelling right (woordenlijst.org)? Ambiguous items get rewritten or removed.
-3. Run `./scripts/check.sh`. `src/content/folder-modules.test.ts` validates every folder with the in app rules too. If a test pins the list of modules (for example `src/content/catalog.test.ts`), update it in the same commit.
+3. Run `./scripts/check.sh`. When only `docs/modules/<module-id>/` and docs changed, it takes the content release path by itself (validator, module unit tests, build, no e2e, under a minute). `src/content/folder-modules.test.ts` validates every folder with the in app rules too. If it says "full", something outside the content changed: find out what, and keep it out of a content release.
 
 ## 6. Record and hand over
 
@@ -53,4 +53,11 @@ In `module.json` add one exam per book section (same parts as the source, for ex
 2. Update `docs/modules/README.md` (list of modules), `CHANGELOG.md` (kid readable line) and `docs/STATUS.md`. Log the content choices in `docs/DECISIONS.md`.
 3. Commit. Tell the founder in a few short lines: the topics, how many questions, the exams, and that a teacher or parent should check the content once (AC124). Ask if the module should be on by default for the kids.
 
-A new module is a scope change only when it needs new item types or new screens. Then stop and bring it to the founder (Gate 2) before writing code.
+## Quick release path
+
+A module that stays inside the format is content, not a feature. It ships with the quick path:
+* Only files in `docs/modules/<module-id>/` plus docs (`CHANGELOG.md`, `docs/STATUS.md`, `docs/DECISIONS.md`, `docs/modules/README.md`) change. No code, no tests, no `validate.py`.
+* `./scripts/check.sh` takes the content path, and CI does the same on the pull request: no e2e run.
+* No PRD signoff round and no `/release` loop are needed. A deploy is still a founder decision (Gate 2), and `main` and deploys always run the full check.
+
+Leave the quick path, and run the normal `/release` loop with the full check, when the module needs anything the format does not have: a new item type, a new screen, a new field, a code change or a change to `validate.py`. Bring that to the founder first (Gate 2). Never mix a feature into a content release.

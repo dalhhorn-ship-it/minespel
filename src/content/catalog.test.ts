@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { APP_NAME, FORMAT_VERSION, type ModuleBundle } from './format';
 import { createCatalog, REKENEN_MODULE_ID, subjectLabel, TAAL_MODULE_ID } from './catalog';
+import { folderBundles } from './folder-modules';
 
 const customModule: ModuleBundle = {
   app: APP_NAME,
@@ -51,16 +52,21 @@ const customModule: ModuleBundle = {
 describe('catalog (T35)', () => {
   it('includes the built in modules and any own modules', () => {
     const catalog = createCatalog([customModule]);
+    // Folder modules are content: adding one must not need a code change, so derive them here.
+    const otherFolderIds = folderBundles
+      .map((b) => b.module.id)
+      .filter((id) => id !== TAAL_MODULE_ID);
     expect(catalog.modules().map((m) => m.module.id)).toEqual([
       REKENEN_MODULE_ID,
       TAAL_MODULE_ID,
-      'taal-e6',
+      ...otherFolderIds,
       'own-engels',
     ]);
     expect(catalog.isBuiltIn(REKENEN_MODULE_ID)).toBe(true);
     expect(catalog.isBuiltIn(TAAL_MODULE_ID)).toBe(true);
     expect(catalog.isBuiltIn('own-engels')).toBe(false);
-    expect(catalog.subjects()).toEqual(['rekenen', 'taal', 'engels']);
+    const folderSubjects = folderBundles.map((b) => b.module.subject.toLowerCase());
+    expect(catalog.subjects()).toEqual([...new Set(['rekenen', 'taal', ...folderSubjects, 'engels'])]);
     expect(subjectLabel('rekenen')).toBe('Rekenen');
     expect(subjectLabel('taal')).toBe('Taal');
     expect(subjectLabel('engels')).toBe('Engels');
