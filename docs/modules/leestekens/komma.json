@@ -1,0 +1,353 @@
+{
+  "id": "komma",
+  "title": "De komma",
+  "groups": [
+    6
+  ],
+  "lesson": {
+    "pages": [
+      {
+        "title": "Komma in een rijtje",
+        "text": "Noem je een rijtje dingen op? Zet dan een komma tussen de dingen. Voor en of of komt geen komma.",
+        "examples": [
+          {
+            "good": "Ik koop appels, peren en bananen.",
+            "bad": "Ik koop appels, peren, en bananen.",
+            "why": "Voor en komt geen komma."
+          }
+        ],
+        "tip": "Tussen elk paar dingen een komma, behalve bij en.",
+        "skill": "opsomming"
+      },
+      {
+        "title": "Komma voor want en maar",
+        "text": "Zitten er twee zinnen aan elkaar met want of maar? Dan zet je een komma voor want of maar.",
+        "examples": [
+          {
+            "good": "Ik blijf thuis, want ik ben ziek."
+          },
+          {
+            "good": "Ik wil een hond, maar mama wil een kat."
+          }
+        ],
+        "tip": "Want of maar tussen twee zinnen? Komma ervoor.",
+        "skill": "want-maar"
+      },
+      {
+        "title": "Komma na ja, nee en een naam",
+        "text": "Na ja en nee zet je een komma. Spreek je iemand aan met zijn naam? Dan komt er ook een komma na de naam.",
+        "examples": [
+          {
+            "good": "Ja, ik wil graag mee."
+          },
+          {
+            "good": "Sem, kom je buiten spelen?",
+            "bad": "Sem kom je buiten spelen?"
+          }
+        ],
+        "tip": "Ja, nee of een naam vooraan? Komma erachter.",
+        "skill": "ja-nee-naam"
+      },
+      {
+        "title": "Komma tussen twee werkwoorden",
+        "text": "Begint de zin met als, toen of omdat? Dan staan er vaak twee werkwoorden naast elkaar. Daartussen komt een komma.",
+        "examples": [
+          {
+            "good": "Als het regent, blijven wij binnen.",
+            "why": "Regent en blijven staan naast elkaar. Daartussen komt de komma."
+          }
+        ],
+        "tip": "Twee werkwoorden naast elkaar? Komma ertussen.",
+        "skill": "twee-werkwoorden"
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "ls-km-001",
+      "type": "punctuate",
+      "level": "M6",
+      "skill": "opsomming",
+      "prompt": "Tik waar een komma moet.",
+      "mark": ",",
+      "words": [
+        "Ik",
+        "koop",
+        "appels",
+        "peren",
+        "en",
+        "bananen."
+      ],
+      "answer": [
+        2
+      ],
+      "explain": "Tussen appels en peren komt een komma. Voor en niet."
+    },
+    {
+      "id": "ls-km-002",
+      "type": "punctuate",
+      "level": "M6",
+      "skill": "opsomming",
+      "prompt": "Tik waar een komma moet.",
+      "mark": ",",
+      "words": [
+        "Wij",
+        "zien",
+        "een",
+        "koe",
+        "een",
+        "paard",
+        "en",
+        "een",
+        "geit."
+      ],
+      "answer": [
+        3
+      ],
+      "explain": "Na een koe komt een komma. Voor en komt geen komma."
+    },
+    {
+      "id": "ls-km-003",
+      "type": "punctuate",
+      "level": "M6",
+      "skill": "ja-nee-naam",
+      "prompt": "Tik waar een komma moet.",
+      "mark": ",",
+      "words": [
+        "Ja",
+        "ik",
+        "wil",
+        "graag",
+        "mee",
+        "naar",
+        "het",
+        "zwembad."
+      ],
+      "answer": [
+        0
+      ],
+      "explain": "Na ja komt een komma."
+    },
+    {
+      "id": "ls-km-004",
+      "type": "punctuate",
+      "level": "M6",
+      "skill": "ja-nee-naam",
+      "prompt": "Tik waar een komma moet.",
+      "mark": ",",
+      "words": [
+        "Nee",
+        "dat",
+        "is",
+        "mijn",
+        "dino",
+        "niet."
+      ],
+      "answer": [
+        0
+      ],
+      "explain": "Na nee komt een komma."
+    },
+    {
+      "id": "ls-km-005",
+      "type": "punctuate",
+      "level": "M6",
+      "skill": "want-maar",
+      "prompt": "Tik waar een komma moet.",
+      "mark": ",",
+      "words": [
+        "Ik",
+        "blijf",
+        "thuis",
+        "want",
+        "ik",
+        "ben",
+        "ziek."
+      ],
+      "answer": [
+        2
+      ],
+      "explain": "Voor want komt een komma."
+    },
+    {
+      "id": "ls-km-006",
+      "type": "punctuate",
+      "level": "M6",
+      "skill": "ja-nee-naam",
+      "prompt": "Tik waar een komma moet.",
+      "mark": ",",
+      "words": [
+        "Sem",
+        "kom",
+        "je",
+        "buiten",
+        "spelen?"
+      ],
+      "answer": [
+        0
+      ],
+      "explain": "Je spreekt Sem aan. Na de naam komt een komma."
+    },
+    {
+      "id": "ls-km-007",
+      "type": "choice",
+      "level": "M6",
+      "skill": "opsomming",
+      "prompt": "In welke zin staan de komma's goed?",
+      "options": [
+        "Ik heb rood, geel en blauw nodig.",
+        "Ik heb rood, geel, en blauw nodig.",
+        "Ik heb, rood geel en blauw nodig.",
+        "Ik heb rood geel, en blauw nodig."
+      ],
+      "answer": 0,
+      "explain": "Tussen rood en geel komt een komma. Voor en niet."
+    },
+    {
+      "id": "ls-km-008",
+      "type": "punctuate",
+      "level": "E6",
+      "skill": "opsomming",
+      "prompt": "Tik waar een komma moet.",
+      "mark": ",",
+      "words": [
+        "In",
+        "de",
+        "kist",
+        "zitten",
+        "blokken",
+        "stenen",
+        "schatten",
+        "en",
+        "een",
+        "kaart."
+      ],
+      "answer": [
+        4,
+        5
+      ],
+      "explain": "Een rijtje: blokken, stenen, schatten en een kaart. Voor en geen komma."
+    },
+    {
+      "id": "ls-km-009",
+      "type": "punctuate",
+      "level": "E6",
+      "skill": "twee-werkwoorden",
+      "prompt": "Tik waar een komma moet.",
+      "mark": ",",
+      "words": [
+        "Als",
+        "het",
+        "morgen",
+        "regent",
+        "gaan",
+        "wij",
+        "naar",
+        "het",
+        "museum."
+      ],
+      "answer": [
+        3
+      ],
+      "explain": "Regent en gaan staan naast elkaar. Daartussen komt een komma."
+    },
+    {
+      "id": "ls-km-010",
+      "type": "punctuate",
+      "level": "E6",
+      "skill": "twee-werkwoorden",
+      "prompt": "Tik waar een komma moet.",
+      "mark": ",",
+      "words": [
+        "Toen",
+        "de",
+        "bel",
+        "ging",
+        "renden",
+        "alle",
+        "kinderen",
+        "naar",
+        "buiten."
+      ],
+      "answer": [
+        3
+      ],
+      "explain": "Ging en renden staan naast elkaar. Daartussen komt een komma."
+    },
+    {
+      "id": "ls-km-011",
+      "type": "punctuate",
+      "level": "E6",
+      "skill": "want-maar",
+      "prompt": "Tik waar een komma moet.",
+      "mark": ",",
+      "words": [
+        "Ik",
+        "wil",
+        "een",
+        "hond",
+        "maar",
+        "mama",
+        "wil",
+        "een",
+        "kat."
+      ],
+      "answer": [
+        3
+      ],
+      "explain": "Voor maar komt een komma."
+    },
+    {
+      "id": "ls-km-012",
+      "type": "punctuate",
+      "level": "E6",
+      "skill": "ja-nee-naam",
+      "prompt": "Tik waar een komma moet.",
+      "mark": ",",
+      "words": [
+        "Mama",
+        "mag",
+        "ik",
+        "een",
+        "koekje?"
+      ],
+      "answer": [
+        0
+      ],
+      "explain": "Je spreekt mama aan. Daarna komt een komma."
+    },
+    {
+      "id": "ls-km-013",
+      "type": "punctuate",
+      "level": "E6",
+      "skill": "opsomming",
+      "prompt": "Tik waar een komma moet.",
+      "mark": ",",
+      "words": [
+        "De",
+        "dino",
+        "eet",
+        "bladeren",
+        "en",
+        "takken."
+      ],
+      "answer": [],
+      "explain": "Er staan maar twee dingen met en ertussen. Dan komt er geen komma."
+    },
+    {
+      "id": "ls-km-014",
+      "type": "choice",
+      "level": "E6",
+      "skill": "ja-nee-naam",
+      "prompt": "Welke zin is goed?",
+      "options": [
+        "Juf, mag ik naar de wc?",
+        "Juf mag, ik naar de wc?",
+        "Juf mag ik, naar de wc?",
+        "Juf mag ik naar, de wc?"
+      ],
+      "answer": 0,
+      "explain": "Je spreekt juf aan. Na juf komt een komma."
+    }
+  ]
+}
