@@ -3,6 +3,7 @@
     "allow": [
       "Bash(./scripts/check.sh)",
       "Bash(./scripts/signoff.sh --check)",
+      "Bash(./scripts/verify.sh:*)",
       "Bash(git status:*)",
       "Bash(git diff:*)",
       "Bash(git log:*)",

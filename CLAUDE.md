@@ -15,6 +15,7 @@ The audience for apps built here is the founder and their kids. Fun, safe and si
 | `qa` | sonnet | Acceptance tests, plays the app, finds bugs, kid safety check | `tests/`, `docs/TEST_REPORT.md` |
 | `kid-ui-reviewer` | sonnet | Opens every screen on iPad sizes: buttons fit and are big enough, every screen has a way back, flows make sense for a kid | `docs/UI_REVIEW.md`, `tests/e2e/ui-review.spec.ts`, screenshots |
 | `scribe` | haiku | Keeps README, CHANGELOG and docs in sync with the code | docs |
+| `verifier` | haiku | Independent, read only check of another agent's work against the ACs | nothing, returns a verdict |
 
 Why these models: Opus is used only where a mistake is expensive (what to build, how to build it, final review). Sonnet does the volume work. Haiku does the cheap, mechanical work. If a task feels too hard for its agent after 2 attempts, escalate one model tier for that single task and note it in `docs/STATUS.md`.
 
@@ -26,7 +27,7 @@ Why these models: Opus is used only where a mistake is expensive (what to build,
 2. **Agents.** Spin up the specialist agent for each step. Do not spawn agents you do not need.
 3. **Execution.** Each agent works on its own task with only the context it needs: task spec, relevant files, success criteria.
 4. **Artifacts.** Every task returns something concrete: files, test results, screenshots, commands run, plus a short summary.
-5. **Verification.** Run the code and the tests before marking anything done. A task is done only when it actually works.
+5. **Verification.** Run the code and the tests before marking anything done. A task is done only when it actually works. Work is never verified only by the agent that made it. See "Independent verification" below.
 6. **Feedback.** On failure: read the error, fix the real cause, retry up to 3 times, then escalate to the founder with options. Record the lesson in the Lessons section below so it does not repeat, and log the event in `docs/FRICTION.md`.
 7. **Completion.** Run the completion checklist in `/ship` before calling the app finished.
 8. **Retro.** `/retro` looks back, keeps app lessons here and sends factory learnings back to the factory repo, so every app makes the next one better.
@@ -73,11 +74,30 @@ Append each round to `docs/DISCUSSION.md` (short: who said what, what changed). 
 
 1. Read `docs/PLAN.md` and pick every task whose dependencies are done.
 2. Run independent tasks in parallel (several `developer` agents in one message) only when they touch different files. Otherwise run them one by one.
-3. Verify each result: run `./scripts/check.sh`, read the diff, check the task's acceptance criteria.
+3. Verify each batch independently: `./scripts/verify.sh task <ids>` first, then one `verifier` agent for the batch if the script passed.
 4. Fix and retry on failure (max 3), then escalate.
 5. Commit each completed task with a clear message. Update `docs/PLAN.md` and `docs/STATUS.md`.
 6. At each milestone, ask `architect` for a code review and `scribe` to update docs.
 7. Continue until every task is done, then hand over to `/qa`.
+
+## Independent verification
+
+No agent checks its own work. Checks run cheapest first, and a more expensive check runs only when the cheaper one passed.
+
+| Work by | Checked by | How |
+|---|---|---|
+| `developer` | `scripts/verify.sh task`, then `verifier` (haiku) | Script: files stay in the task, a test changed, no skipped or deleted tests, no tracking, `check.sh` green. Verifier: reads only the diff and the task's ACs |
+| `qa` | `scripts/verify.sh acs`, then `verifier` spot check | Every AC has a test named after it. Verifier reads 3 of those tests against their ACs |
+| `scribe` | `scripts/verify.sh docs` | Only docs changed, every `npm run` in the README exists |
+| `product`, `architect` | review rounds (see How agents discuss) | Already reviewed by other agents and the founder |
+
+Keep it economical:
+* The script is free. Never launch an agent to review work that fails it.
+* One `verifier` per batch of tasks, not per task. Skip it for docs only changes.
+* Give the verifier the task ids and the script output only. Never the author's summary, so it judges the work and stays cheap.
+* Haiku by default. Rerun once on Sonnet only when it says UNSURE or the batch changed more than 400 lines.
+* The Opus architect review stays at milestones only, and skips what the verifier already passed.
+* `scripts/verify.sh` is protected by the PRD gate hook, so no agent can loosen the checks on its own work. Changes to it come from the factory.
 
 ## Target device: iPad browser
 
@@ -133,6 +153,7 @@ Apps are hosted on Cloudflare Workers, serving the built site as static assets.
 | `.factory` | Which factory repo this app came from and the date it started |
 | `CHANGELOG.md` | What changed, in kid readable words |
 | `scripts/check.sh` | The one command that lints and tests everything. CI runs it too. |
+| `scripts/verify.sh` | Free, independent checks of another agent's work. Runs before any `verifier` agent. |
 
 ## Lessons learned
 

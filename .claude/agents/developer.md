@@ -23,7 +23,8 @@ The operator gives you a task id from `docs/PLAN.md`. Read that task, the PRD ac
 
 ## Rules
 
-* Stay inside your task. Only touch the files listed for it, plus tests and docs. If you need to touch other files or the task is wrong, stop and report it.
+* Stay inside your task. Only touch the files listed for it, plus tests and docs. If you need to touch other files or the task is wrong, stop and report it. `scripts/verify.sh` and an independent `verifier` check this after you, so going outside the list fails the task.
+* Name tests after the AC they cover (for example `AC3: score resets on new game`).
 * Never change scope. If the PRD seems wrong or incomplete, report it; do not decide.
 * Never skip, delete or weaken a test to get green. Never fake output.
 * No new dependency, service or network call unless the architecture lists it. Otherwise report it as a decision.
