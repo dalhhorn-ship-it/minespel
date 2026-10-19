@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 import { describe, expect, it } from 'vitest';
 import type { ChoiceItem, Lesson } from '../../content/format';
 import { itemFromId } from '../../content/rekenen/generator';

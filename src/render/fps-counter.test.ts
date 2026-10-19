@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 import { describe, expect, it } from 'vitest';
 import { WARMUP_MS, computeFrameStats, createFpsCounter, isFpsEnabled, noFpsCounter } from './fps-counter';
 

@@ -310,9 +310,13 @@ On plain http (the dev server on the home network) Safari has no service worker,
 `./scripts/check.sh` runs everything, in this order:
 1. `validate.py` on every folder in `docs/modules/` (fails if python3 is missing).
 2. `npm ci`, `npm run lint` (ESLint), `npm run typecheck` (`tsc --noEmit`).
-3. `npm test`: Vitest unit tests (`src/**/*.test.ts`, `tests/unit/**/*.test.ts`).
+3. `npm test`: Vitest unit tests (`src/**/*.test.ts`, `tests/unit/**/*.test.ts`). They run in plain Node by default, which is twice as fast. A test file that needs a page (`document`, `window`, `HTMLElement`) starts with `// @vitest-environment jsdom`.
 4. `npm run build`, then `npm run test:dist` (`scripts/check-dist.mjs`: `dist/index.html`, manifest, icons and service worker exist, no test hooks, total size under 5 MB).
 5. `npx playwright install webkit` (with `--with-deps` when running as root, as in the cloud sandbox), then `npm run test:e2e`: Playwright WebKit. Its `webServer` runs `npm run build:e2e` (output `dist-e2e/`, with test hooks) and `vite preview` on it.
+
+`CHECK_E2E=0 ./scripts/check.sh` runs steps 1 to 4 only.
+
+**CI** (`.github/workflows/ci.yml`) runs once per commit: on every push (pull requests from a fork get their own run). A newer push to the same branch cancels the older run, except on `main`. Two parts run at the same time: `check` (`CHECK_E2E=0 ./scripts/check.sh`) and `e2e`, split in 4 shards (`npx playwright test --shard=N/4`) inside the `mcr.microsoft.com/playwright` image, which already holds WebKit. When `@playwright/test` is updated, update the image tag in `ci.yml` to the same version.
 
 Playwright projects: `ipad-landscape` (iPad (gen 6) landscape, main), `ipad-portrait` (only the "Draai je iPad" specs), `ipad-pro-landscape` (layout specs). All have `hasTouch`. Fake time uses Playwright's `page.clock`. Multi touch uses synthetic `PointerEvent`s with `pointerType: "touch"` dispatched in the page.
 
@@ -334,7 +338,7 @@ Rules: every task adds tests that fail without its change. Pure logic is tested 
 
 * Worker name `dino-blokwereld`, static assets from `./dist`, `compatibility_date` 2026-10-17, see `wrangler.jsonc`. No Worker script, no KV, D1 or R2. `preview_urls` is off so no extra public addresses appear.
 * Address: `https://dino-blokwereld.<account subdomain>.workers.dev` (F9, public).
-* `npm run deploy` (build, then `wrangler deploy`) on the founder's machine after `npx wrangler login`, or the manual "Deploy to Cloudflare Workers" GitHub workflow with the repo secrets `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`, which only the founder adds.
+* `npm run deploy` (build, then `wrangler deploy`) on the founder's machine after `npx wrangler login`, or the manual "Deploy to Cloudflare Workers" GitHub workflow (it does not rerun the tests; it refuses a commit without a green CI run, then builds and deploys) with the repo secrets `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`, which only the founder adds.
 * Every deploy is a founder decision. The ship checklist confirms Cloudflare Web Analytics is off for this Worker (AC98).
 * `public/_headers` sets `Cache-Control: no-cache` for `/service-worker.js` and `/index.html`, and long caching for hashed files in `/assets/`.
 

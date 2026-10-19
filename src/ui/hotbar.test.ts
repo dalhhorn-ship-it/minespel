@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 import { describe, expect, it, vi } from 'vitest';
 import { PLACEABLE_BLOCKS } from '../world/blocks';
 import { createBlockGrid } from './block-grid';

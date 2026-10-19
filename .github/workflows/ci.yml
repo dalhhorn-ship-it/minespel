@@ -1,22 +1,52 @@
 name: CI
+# Runs once per commit. Pushes to any branch run it. A pull request from a branch in this repo
+# already gets the push run's checks, so pull_request runs only for forks.
+# A newer push to the same branch cancels the older run. Runs on main are never cancelled.
 on:
   push:
   pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: ci-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 jobs:
   check:
+    name: lint, types, unit, build
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.repository
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+          cache: npm
       - name: PRD signoff matches
         run: |
           if [ -d src ] || [ -f package.json ]; then ./scripts/signoff.sh --check; fi
-      - name: Install Playwright browsers if used
-        run: |
-          if [ -f package.json ] && grep -q '"@playwright/test"' package.json; then
-            npm install --no-audit --no-fund && npx playwright install --with-deps webkit
-          fi
-      - name: Check
-        run: ./scripts/check.sh
+      - name: Check without e2e
+        run: CHECK_E2E=0 ./scripts/check.sh
+
+  e2e:
+    name: e2e ${{ matrix.shard }}/4
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.repository
+    runs-on: ubuntu-latest
+    # The Playwright image already holds WebKit and its system libraries, so nothing is downloaded.
+    # Keep the tag equal to the installed @playwright/test version (package-lock.json).
+    container:
+      image: mcr.microsoft.com/playwright:v1.64.1-noble
+      options: --ipc=host
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - name: WebKit e2e, shard ${{ matrix.shard }} of 4
+        run: npx playwright test --shard=${{ matrix.shard }}/4

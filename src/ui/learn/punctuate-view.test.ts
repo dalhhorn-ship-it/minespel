@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { PunctuateItem } from '../../content/format';
 import type { Response } from '../../learning/answer-check';

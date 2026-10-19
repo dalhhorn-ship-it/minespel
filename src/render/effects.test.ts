@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { GRAS, PLACEABLE_BLOCKS } from '../world/blocks';
 import { BLOCK_COLORS, MAX_BITS, POP_BITS, POP_MS, createEffects } from './effects';

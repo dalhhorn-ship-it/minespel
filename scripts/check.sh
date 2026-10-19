@@ -31,7 +31,10 @@ if [[ -f package.json ]]; then
   npm test
   npm run build
   npm run test:dist
-  if grep -q '"@playwright/test"' package.json; then
+  # CHECK_E2E=0 skips the browser tests. CI does that in its fast job and runs e2e in parallel shards.
+  if [[ "${CHECK_E2E:-1}" == "0" ]]; then
+    echo "check.sh: e2e skipped (CHECK_E2E=0)."
+  elif grep -q '"@playwright/test"' package.json; then
     # Installs the WebKit browser once. Fast when it is already there.
     # As root (cloud sandbox, CI containers) also install the Linux system libraries.
     if [[ "$(id -u)" -eq 0 ]]; then

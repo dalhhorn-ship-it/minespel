@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { GuardState } from '../platform/screen-guard';
 import { createNullRenderer, type GameRenderer } from '../render/renderer';
