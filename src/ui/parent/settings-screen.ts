@@ -7,6 +7,8 @@ import { onTap } from '../tap';
 export interface SettingsScreenOptions {
   settings: SettingsRecord;
   isBreakActive: boolean;
+  /** An exam is running: "Pauze nu starten" is greyed out (AC115). */
+  isExamActive?: boolean;
   onUpdateSettings: (next: SettingsRecord) => Promise<void> | void;
   onStartBreakNow: () => Promise<void> | void;
   onEndBreakNow: () => Promise<void> | void;
@@ -125,11 +127,16 @@ export function createSettingsScreen(options: SettingsScreenOptions): SettingsSc
     const startBreakBtn = el('button', {
       class: 'parent-btn parent-btn-primary',
       text: 'Pauze nu starten',
-      attrs: { type: 'button' },
+      attrs: {
+        type: 'button',
+        ...(options.isExamActive ? { disabled: 'disabled' } : {}),
+      },
     });
-    cleanups.push(
-      onTap(startBreakBtn, () => void options.onStartBreakNow(), { now: options.now }),
-    );
+    if (!options.isExamActive) {
+      cleanups.push(
+        onTap(startBreakBtn, () => void options.onStartBreakNow(), { now: options.now }),
+      );
+    }
 
     const endBreakBtn = el('button', {
       class: 'parent-btn',

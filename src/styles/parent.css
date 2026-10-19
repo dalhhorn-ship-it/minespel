@@ -283,3 +283,22 @@
   border-color: #14502b;
   color: #ffffff;
 }
+
+.parent-notice {
+  background: #fff4d6;
+  border-color: #d9b24a;
+  font-weight: 700;
+}
+
+.parent-exam-stop {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right))
+    max(16px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+}
+
+.parent-exam-stop-card {
+  max-width: 520px;
+  width: 100%;
+}

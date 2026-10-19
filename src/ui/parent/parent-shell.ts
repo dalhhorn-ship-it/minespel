@@ -8,6 +8,7 @@ import type { SettingsRecord, StatsRecord, SwitchesRecord } from '../../storage/
 import { el } from '../dom';
 import { onTap } from '../tap';
 import { createContentScreen } from './content-screen';
+import { createExamsScreen, type ExamPlanInfo } from './exams-screen';
 import { createSettingsScreen } from './settings-screen';
 
 export type ParentSectionId =
@@ -35,6 +36,9 @@ export interface ParentShellOptions {
   breaks?: readonly BreakRecord[];
   stats?: StatsRecord;
   isBreakActive: boolean;
+  isExamActive?: boolean;
+  planFor?: (moduleId: string, examId: string) => ExamPlanInfo;
+  onStartExam?: (moduleId: string, examId: string) => Promise<void> | void;
   initialSection?: ParentSectionId;
   onUpdateSettings: (next: SettingsRecord) => Promise<void> | void;
   onUpdateSwitches: (next: SwitchesRecord) => Promise<void> | void;
@@ -122,6 +126,7 @@ export function createParentShell(options: ParentShellOptions): ParentShell {
       const view = createSettingsScreen({
         settings: currentSettings,
         isBreakActive: options.isBreakActive,
+        isExamActive: options.isExamActive,
         onUpdateSettings: async (next) => {
           currentSettings = next;
           await options.onUpdateSettings(next);
@@ -146,6 +151,23 @@ export function createParentShell(options: ParentShellOptions): ParentShell {
           currentSwitches = next;
           await options.onUpdateSwitches(next);
         },
+        now: options.now,
+      });
+      main.append(view.element);
+      sectionCleanup = () => view.destroy();
+      return;
+    }
+
+    if (activeSection === 'examens') {
+      const { planFor, onStartExam } = options;
+      const view = createExamsScreen({
+        catalog: options.catalog,
+        isBreakActive: options.isBreakActive,
+        planFor: planFor ?? ((m, e) => {
+          const n = options.catalog.getExam(m, e)?.questionCount ?? 0;
+          return { wanted: n, real: n };
+        }),
+        onStartExam: onStartExam ?? (() => undefined),
         now: options.now,
       });
       main.append(view.element);
