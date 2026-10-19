@@ -414,7 +414,7 @@ The 25 open plan tasks are all in v2 to v8. v4 adds one new task the architect w
 * **Out:** the Examens list in Resultaten (v6). Own exams (v8).
 * **Size:** M. **Tasks:** T39 (exam logic), T51a (kid exam screen, review, golden egg), T51b (parent Examens screen).
 * **Criteria:** AC64 to AC72, AC111, AC112, AC115, AC125 (exam part), AC153.
-* **Needs first:** founder decision D4 in 11 (how the parent stops an exam when the lock is only in the world).
+* **Needs first:** founder decision D3 in 11 (how the parent stops an exam when the lock is only in the world).
 
 ### v3 Dino's veilig
 * **Goal:** the parent can make a backup file and put it back, so nothing the kid built or earned is ever lost for good.
@@ -793,7 +793,7 @@ Times in these criteria are play time with the app visible, unless stated otherw
 ## 11. Risks and decisions
 
 ### Decided
-All founder decisions are answered. Details are in `docs/DECISIONS.md` (rows 8 to 22).
+The decisions F1 to F15 are answered. Details are in `docs/DECISIONS.md` (rows 8 to 22). Three new questions for the recut are open, see "Open founder decisions" below.
 
 | # | Question | Founder's answer | Where in this PRD |
 |---|---|---|---|
@@ -815,12 +815,30 @@ All founder decisions are answered. Details are in `docs/DECISIONS.md` (rows 8 t
 
 Choices made by product inside these answers, which the founder sees when signing: the point values (+2, +1, -1, +3 bonus) and egg prices (20, 40, 40, 80); a fourth small dino kind (Compy) so there is a cheap first egg (confirmed by the founder, F15); no malus in Extra oefenen (founder, F14); only the first try counts for spaced repetition; exams give no points; "Wereld opnieuw beginnen" keeps dinos and points.
 
+**Decided during the build** (`docs/DECISIONS.md` rows 44 to 57, all built into v1 as listed in 4.0): sky height 64 and camera arrows (44), visible countdown (45), floating with Omhoog and Omlaag (47), Nu oefenen (48, 56), the shop layout (49), Gemini's build is the truth (50), Stoppen in Extra oefenen (51), grown up question before the first pincode (52), lock in the world only (53, replaces 46), home screen first (54), chickens for 5 points, at most 10 (55), and the v1 recut (57). The founder requests CR1 to CR4 (32 blocks, the obsidiaan gate, chickens, lava) are listed in `docs/STATUS.md` but have no decision row. Signing this PRD confirms them as part of v1.
+
+### Open founder decisions
+* **D1: which release comes next (0.2.0).**
+  * A: v2 Gouden ei. A new big goal for the kids and the exams for the parent. Size M.
+  * B: v3 Dino's veilig. Backup first, so nothing the kids built or earned can be lost. Size M.
+  * C: v5 Veilig en juist. Prove the live game is safe and spelled right, and measure the speed. Size M, mostly qa and founder time.
+  * Option for any of them: pull T65 (the human Taal content check) in alongside, since it is mostly reading and the kids already learn from that content.
+  * **Recommendation: A, then B straight after.** The kids feel A the most, and it adds the only reward still missing. The kids play from the home screen (decision 54), which keeps Safari from wiping the saves, so a backup can follow one release later. If the kids sometimes play in a Safari tab, pick B first.
+* **D2: the first start flow (4.19, Flow 1).** Decision 52 covers who sets the first pincode, but the welcome, the groep preset and the note about the home screen and backups are not built.
+  * A: keep it as a new task in v4, next to the home screen note and the backup reminder.
+  * B: drop it. The parent finds the preset in Inhoud kiezen and the notes in the parent area.
+  * **Recommendation: A.** The home screen and backup note is what keeps saves safe, and it is small.
+* **D3: how the parent stops an exam (v2).** 4.11 says the parent stops an exam through the gate, but decision 53 shows the lock only in the world. An exam runs up to 30 minutes.
+  * A: the same small grey lock on the exam screen only.
+  * B: no lock. The parent waits for the end or closes the app; reopening continues the exam.
+  * **Recommendation: A.** It matches the small lock in the world, and the kid cannot pass the pincode. Decide this when v2 is picked.
+
 ### Risks
 | Risk | Effect | What we do |
 |---|---|---|
 | 3D is too slow on the reference iPad | Stutter, the game is not fun | Speed spike as the first world task, measured on the real iPad with a go or no go. Small world, merged faces, no shadows. Fallback 48 x 48. |
 | Safari drops the 3D view after the background | Black screen | Rebuild the view on context loss (AC109). |
-| Safari wipes the storage or iOS kills the app | Lost world, dinos and progress | Eager small saves, safe writes, home screen install, persistent storage, backup file, reminder after 30 days. |
+| Safari wipes the storage or iOS kills the app | Lost world, dinos and progress | v1: eager small saves, safe writes, home screen install. v3: backup file. v4: persistent storage, broken save screen, reminder after 30 days. Until v3 ships there is no way back after a wipe. |
 | Features missing on plain http | Gate, sharing or offline fail in local tests | Built in pincode hash, fallbacks with a parent note, real checks on the deployed HTTPS address. |
 | The iPad keyboard autocorrects spelling | Typing questions become useless | Own on screen keyboard (4.8). |
 | Forced breaks make the kid angry | Kid stops playing | Short breaks, no time pressure, a second try, kind words, a clear goal (the next egg), the parent can tune interval and question count. |
@@ -831,4 +849,5 @@ Choices made by product inside these answers, which the founder sees when signin
 | The Taal content has mistakes | Wrong spelling is taught | Validator with content checks, human check by QA and the founder (AC124), the parent can switch off any skill. |
 | The parent editor is fiddly on an iPad | The parent gives up on own modules | One column forms, Probeer preview, import of JSON made elsewhere as a backup path. Built late in the suggested order. |
 | Share sheet behaves differently in home screen mode | Backup or export fails | Test on the real iPad on the deployed address. Fallback: open the file in a new view and share from there. |
-| Scope is large (one v1, about 60 tasks) | Long build | Suggested build order in 4.0: the risky 3D spike and the learning engine come before the parent tools and any world polish. |
+| Scope was large (one v1, about 70 tasks) | Long build, nothing shipped | Recut by decision 57: the live build is v1, the 25 open tasks are 7 small releases in section 5, shipped one at a time. |
+| 3D speed on the iPad was never measured | Stutter with many dinos | The speed spike (T32) is in v5. The kids already play, so stutter they notice moves v5 up. |
