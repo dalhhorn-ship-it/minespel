@@ -1,8 +1,10 @@
 # Status
 
-**Phase:** build, milestone M3 complete (ready for M4 remaining tasks: exams & golden egg T39, T51a, T51b, and settings actions T55)
-**Next step:** Build M4 remaining tasks (Exam session logic T39, Kid exam screen & golden egg T51a, Parent Examens screen T51b, Settings actions T55), or run the T32 speed spike on the founder's iPad.
-**Blockers:** For live Cloudflare test deploy, the founder must add the repo secrets `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`.
+**Phase:** small releases. v1 (0.1.0) is the live build (decision 57). v2 Gouden ei (0.2.0) is built and in CI, then it ships to main.
+**Current release:** v2 Gouden ei: practice exams with a golden dino, plus the Winkel button and an instant Pauze (decision 73). Tasks T39, T51a, T51b, T51c, T51d, T51e are done.
+**Next step:** CI green, ship 0.2.0 (merge to main), founder iPad checks (one Taal exam, one Rekentoets, Pauze and Winkel from the home screen icon). Then the architect's simplification review the founder asked for.
+**Next in the backlog:** v3 Dino's veilig (backup and restore). On hold: the save on refresh fix (decision 72).
+**Blockers:** none. Note: this cloud session cannot push tags or to main directly (HTTP 403), so main is updated through a pull request; tag v0.1.0 is local only.
 
 ## Done
 * **2026-10-18: Gemini's build is the truth** (decision 50). `main` holds the Gemini2 code, live on Cloudflare Worker `minespel`. Claude's G0 to G6 branch is set aside (commit `4067f07` in history).
