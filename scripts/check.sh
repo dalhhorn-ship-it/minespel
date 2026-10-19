@@ -5,6 +5,15 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
+# 0. Content release path. Only learning modules or docs changed against the base (see
+#    scripts/check-scope.sh)? Then run the quick content check, without e2e.
+#    CHECK_FULL=1 always runs everything (main, deploys, and when in doubt).
+if [[ "${CHECK_FULL:-0}" != "1" && "$(./scripts/check-scope.sh)" == "content" ]]; then
+  echo "check.sh: only learning content or docs changed, taking the content release path."
+  echo "check.sh: set CHECK_FULL=1 to run everything."
+  exec ./scripts/check-content.sh
+fi
+
 # 1. Learning content. Every module folder in docs/modules must validate (AC59, AC122, AC123).
 #    No python3 means a failure, never a silent skip.
 if ! command -v python3 >/dev/null 2>&1; then

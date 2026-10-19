@@ -21,6 +21,8 @@ jobs:
       - name: Install dependencies and Playwright WebKit
         run: npm install --no-audit --no-fund && npx playwright install --with-deps webkit
       - name: Check
+        env:
+          CHECK_FULL: '1'
         run: ./scripts/check.sh
       - name: Deploy
         env:

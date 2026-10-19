@@ -1,0 +1,377 @@
+{
+  "id": "werkwoordspelling",
+  "title": "Werkwoordspelling: stam, tt, vt en vd",
+  "groups": [
+    6
+  ],
+  "lesson": {
+    "pages": [
+      {
+        "title": "De stam",
+        "text": "De stam vind je zo: neem het hele werkwoord en haal -en eraf. Ziet het er raar uit? Pas het aan: twee dezelfde letters aan het eind worden één, een lange klank krijgt twee letters, en v wordt f, z wordt s.",
+        "examples": [
+          {
+            "good": "lachen: de stam is lach"
+          },
+          {
+            "good": "zwemmen: de stam is zwem",
+            "bad": "zwemmen: de stam is zwemm"
+          },
+          {
+            "good": "graven: de stam is graaf",
+            "bad": "graven: de stam is grav"
+          }
+        ],
+        "tip": "Ik + werkwoord = de stam. Ik lach, ik zwem, ik graaf.",
+        "skill": "stam"
+      },
+      {
+        "title": "Tegenwoordige tijd (tt)",
+        "text": "Ik: de stam. Jij, hij, zij en het: stam plus t. Wij, jullie en zij (meer): het hele werkwoord. Staat jij achter het werkwoord? Dan komt er geen t.",
+        "examples": [
+          {
+            "good": "De dino rent door het bos.",
+            "why": "De dino is hij. Stam ren plus t."
+          },
+          {
+            "good": "Mijn zus rijdt op een pony.",
+            "bad": "Mijn zus rijd op een pony.",
+            "why": "Stam rijd plus t. Je hoort de t niet, maar hij hoort er wel bij."
+          },
+          {
+            "good": "Ga jij mee?",
+            "bad": "Gaat jij mee?",
+            "why": "Jij staat achter het werkwoord, dus geen t."
+          }
+        ],
+        "tip": "Twijfel? Zet er lopen voor in de plaats: hij loopt. Hoor je een t? Schrijf dan ook stam plus t.",
+        "skill": "tt-t"
+      },
+      {
+        "title": "Verleden tijd (vt)",
+        "text": "Neem de stam. Zit de laatste letter in 't kofschip (t, k, f, s, ch, p)? Dan komt er te achter. Anders de. Meer dan één? Dan ten of den. Kijk naar het hele werkwoord: verhuizen heeft een z, dus verhuisde.",
+        "examples": [
+          {
+            "good": "Papa kookte soep.",
+            "bad": "Papa kookde soep.",
+            "why": "Kook: de k zit in 't kofschip, dus te."
+          },
+          {
+            "good": "Oma belde ons op.",
+            "bad": "Oma belte ons op.",
+            "why": "Bel: de l zit niet in 't kofschip, dus de."
+          },
+          {
+            "good": "De kinderen dansten.",
+            "bad": "De kinderen danste.",
+            "why": "Meer kinderen, dus ten."
+          }
+        ],
+        "tip": "'t kofschip: t, k, f, s, ch, p. Letter in het schip? Dan te.",
+        "skill": "vt-kofschip"
+      },
+      {
+        "title": "Voltooid deelwoord (vd)",
+        "text": "Het voltooid deelwoord staat bij heeft, hebben, is of zijn. Je maakt het met ge plus stam plus t of d. Kofschip letter: t. Anders: d. Begint het werkwoord met be, ge, ver, her of ont? Dan komt er geen ge voor.",
+        "examples": [
+          {
+            "good": "Ik heb mijn kamer gepoetst.",
+            "bad": "Ik heb mijn kamer gepoetsd.",
+            "why": "Poets: de s zit in 't kofschip, dus t."
+          },
+          {
+            "good": "Het dorp is versierd.",
+            "bad": "Het dorp is geversierd.",
+            "why": "Ver- staat er al, dus geen ge."
+          }
+        ],
+        "tip": "Twijfel tussen t en d? Maak het woord langer: de versierde straat. Hoor je een d? Dan schrijf je een d.",
+        "skill": "vd"
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "e6-ww-001",
+      "type": "choice",
+      "level": "M6",
+      "skill": "stam",
+      "prompt": "Wat is de stam van zwemmen?",
+      "options": [
+        "zwem",
+        "zwemm",
+        "zwemt",
+        "zwemmen"
+      ],
+      "answer": 0,
+      "explain": "Haal -en eraf: zwemm. Twee keer een m aan het eind kan niet, dus de stam is zwem."
+    },
+    {
+      "id": "e6-ww-002",
+      "type": "choice",
+      "level": "M6",
+      "skill": "stam",
+      "prompt": "Wat is de stam van lachen?",
+      "options": [
+        "lach",
+        "lacht",
+        "lachen",
+        "lache"
+      ],
+      "answer": 0,
+      "explain": "Haal -en eraf: lach. Ik lach, dus de stam is lach."
+    },
+    {
+      "id": "e6-ww-003",
+      "type": "type",
+      "level": "M6",
+      "skill": "tt-t",
+      "prompt": "Schrijf het werkwoord in de tegenwoordige tijd.",
+      "sentence": "De dino (rennen) door het bos.",
+      "answer": [
+        "rent"
+      ],
+      "explain": "De dino is hij. Hij: stam plus t. Ren plus t is rent."
+    },
+    {
+      "id": "e6-ww-004",
+      "type": "type",
+      "level": "M6",
+      "skill": "tt-t",
+      "prompt": "Schrijf het werkwoord in de tegenwoordige tijd.",
+      "sentence": "Ik (bouwen) een hut van takken.",
+      "answer": [
+        "bouw"
+      ],
+      "explain": "Bij ik schrijf je alleen de stam: ik bouw."
+    },
+    {
+      "id": "e6-ww-005",
+      "type": "type",
+      "level": "M6",
+      "skill": "tt-meervoud",
+      "prompt": "Schrijf het werkwoord in de tegenwoordige tijd.",
+      "sentence": "Wij (schaatsen) op het ijs.",
+      "answer": [
+        "schaatsen"
+      ],
+      "explain": "Wij is meer dan één. Dan schrijf je het hele werkwoord: schaatsen."
+    },
+    {
+      "id": "e6-ww-006",
+      "type": "type",
+      "level": "M6",
+      "skill": "vt-kofschip",
+      "prompt": "Schrijf het werkwoord in de verleden tijd.",
+      "sentence": "Gisteren (koken) papa soep.",
+      "answer": [
+        "kookte"
+      ],
+      "explain": "Stam kook. De k zit in 't kofschip, dus te: kookte."
+    },
+    {
+      "id": "e6-ww-007",
+      "type": "type",
+      "level": "M6",
+      "skill": "vt-kofschip",
+      "prompt": "Schrijf het werkwoord in de verleden tijd.",
+      "sentence": "Vorige week (bellen) oma ons op.",
+      "answer": [
+        "belde"
+      ],
+      "explain": "Stam bel. De l zit niet in 't kofschip, dus de: belde."
+    },
+    {
+      "id": "e6-ww-008",
+      "type": "type",
+      "level": "M6",
+      "skill": "vd",
+      "prompt": "Schrijf het voltooid deelwoord.",
+      "sentence": "Ik heb mijn kamer (poetsen).",
+      "answer": [
+        "gepoetst"
+      ],
+      "explain": "Ge plus poets plus t. De s zit in 't kofschip, dus een t: gepoetst."
+    },
+    {
+      "id": "e6-ww-009",
+      "type": "choice",
+      "level": "M6",
+      "skill": "tt-t",
+      "prompt": "Welk woord moet op de stippen?",
+      "sentence": "... jij morgen mee naar het strand?",
+      "options": [
+        "Ga",
+        "Gaat"
+      ],
+      "answer": 0,
+      "explain": "Staat jij achter het werkwoord? Dan komt er geen t: Ga jij?"
+    },
+    {
+      "id": "e6-ww-010",
+      "type": "type",
+      "level": "M6",
+      "skill": "vd",
+      "prompt": "Schrijf het voltooid deelwoord.",
+      "sentence": "Mijn opa heeft de hele dag (werken).",
+      "answer": [
+        "gewerkt"
+      ],
+      "explain": "Ge plus werk plus t. De k zit in 't kofschip, dus een t: gewerkt."
+    },
+    {
+      "id": "e6-ww-011",
+      "type": "type",
+      "level": "E6",
+      "skill": "tt-t",
+      "prompt": "Schrijf het werkwoord in de tegenwoordige tijd.",
+      "sentence": "Mijn zus (rijden) op een pony.",
+      "answer": [
+        "rijdt"
+      ],
+      "explain": "Stam rijd plus t is rijdt. Je hoort de t niet, maar hij hoort er wel bij."
+    },
+    {
+      "id": "e6-ww-012",
+      "type": "type",
+      "level": "E6",
+      "skill": "tt-t",
+      "prompt": "Schrijf het werkwoord in de tegenwoordige tijd.",
+      "sentence": "De juf (vinden) mijn tekening mooi.",
+      "answer": [
+        "vindt"
+      ],
+      "explain": "De juf is zij. Stam vind plus t is vindt."
+    },
+    {
+      "id": "e6-ww-013",
+      "type": "type",
+      "level": "E6",
+      "skill": "tt-t",
+      "prompt": "Schrijf het werkwoord in de tegenwoordige tijd.",
+      "sentence": "Elke ochtend (zingen) de merel in de tuin.",
+      "answer": [
+        "zingt"
+      ],
+      "explain": "Wie zingt? De merel, dat is hij. Dus stam plus t: zingt."
+    },
+    {
+      "id": "e6-ww-014",
+      "type": "type",
+      "level": "E6",
+      "skill": "vt-meervoud",
+      "prompt": "Schrijf het werkwoord in de verleden tijd.",
+      "sentence": "De kinderen (dansen) op het schoolfeest.",
+      "answer": [
+        "dansten"
+      ],
+      "explain": "Stam dans. De s zit in 't kofschip, dus te. Meer kinderen, dus ten: dansten."
+    },
+    {
+      "id": "e6-ww-015",
+      "type": "type",
+      "level": "E6",
+      "skill": "vt-kofschip",
+      "prompt": "Schrijf het werkwoord in de verleden tijd.",
+      "sentence": "Vorig jaar (verhuizen) mijn vriendin naar Zeeland.",
+      "answer": [
+        "verhuisde"
+      ],
+      "explain": "Kijk naar het hele werkwoord: verhuizen heeft een z. De z zit niet in 't kofschip, dus de: verhuisde."
+    },
+    {
+      "id": "e6-ww-016",
+      "type": "choice",
+      "level": "E6",
+      "skill": "vt-meervoud",
+      "prompt": "Welke zin is goed geschreven?",
+      "options": [
+        "Noor en Bas wandelden door het bos.",
+        "Noor en Bas wandelde door het bos.",
+        "Noor en Bas wandelten door het bos.",
+        "Noor en Bas wandelte door het bos."
+      ],
+      "answer": 0,
+      "explain": "Stam wandel. De l zit niet in 't kofschip, dus de. Noor en Bas zijn met z'n tweeën, dus den."
+    },
+    {
+      "id": "e6-ww-017",
+      "type": "type",
+      "level": "E6",
+      "skill": "vd",
+      "prompt": "Schrijf het voltooid deelwoord.",
+      "sentence": "Het hele dorp is (versieren) voor het feest.",
+      "answer": [
+        "versierd"
+      ],
+      "explain": "Ver- staat er al, dus geen ge. De r zit niet in 't kofschip, dus een d: versierd."
+    },
+    {
+      "id": "e6-ww-018",
+      "type": "type",
+      "level": "E6",
+      "skill": "vd",
+      "prompt": "Schrijf het voltooid deelwoord.",
+      "sentence": "Mijn broertje heeft zich (verstoppen) achter de bank.",
+      "answer": [
+        "verstopt"
+      ],
+      "explain": "Ver- staat er al, dus geen ge. De p zit in 't kofschip, dus een t: verstopt."
+    },
+    {
+      "id": "e6-ww-019",
+      "type": "type",
+      "level": "E6",
+      "skill": "vd",
+      "prompt": "Schrijf het voltooid deelwoord.",
+      "sentence": "Wij hebben vandaag heel veel (leren).",
+      "answer": [
+        "geleerd"
+      ],
+      "explain": "Ge plus leer plus d. De r zit niet in 't kofschip, dus een d: geleerd."
+    },
+    {
+      "id": "e6-ww-020",
+      "type": "choice",
+      "level": "E6",
+      "skill": "tt-t",
+      "prompt": "Welk woord moet op de stippen?",
+      "sentence": "Hoe laat ... de bus naar het zwembad?",
+      "options": [
+        "vertrekt",
+        "vertrek",
+        "vertrekd",
+        "vertrekken"
+      ],
+      "answer": 0,
+      "explain": "Wie vertrekt? De bus, dat is hij. Dus stam plus t, ook in een vraag."
+    },
+    {
+      "id": "e6-ww-021",
+      "type": "type",
+      "level": "E6",
+      "skill": "tt-t",
+      "prompt": "Schrijf het werkwoord in de tegenwoordige tijd.",
+      "sentence": "Wij tekenen graag. Mijn zus (tekenen) elke dag.",
+      "answer": [
+        "tekent"
+      ],
+      "explain": "Mijn zus is zij. Stam teken plus t: tekent."
+    },
+    {
+      "id": "e6-ww-022",
+      "type": "choice",
+      "level": "E6",
+      "skill": "stam",
+      "prompt": "Wat is de stam van graven?",
+      "options": [
+        "graaf",
+        "grav",
+        "graav",
+        "graaft"
+      ],
+      "answer": 0,
+      "explain": "Ik graaf. De lange a krijgt twee a's en de v wordt een f: graaf."
+    }
+  ]
+}

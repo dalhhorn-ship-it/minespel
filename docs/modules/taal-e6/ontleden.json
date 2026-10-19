@@ -1,0 +1,361 @@
+{
+  "id": "ontleden",
+  "title": "Ontleden: woordsoorten en zinsdelen",
+  "groups": [
+    6
+  ],
+  "lesson": {
+    "pages": [
+      {
+        "title": "Lidwoord",
+        "text": "De, het en een zijn lidwoorden. Ze staan voor een zelfstandig naamwoord. Meer lidwoorden zijn er niet.",
+        "examples": [
+          {
+            "good": "Het ei ligt in de grot.",
+            "why": "Het en de zijn lidwoorden."
+          },
+          {
+            "good": "Ik zie een dino.",
+            "why": "Een is een lidwoord."
+          }
+        ],
+        "tip": "Lidwoorden: de, het, een. Dat is alles.",
+        "skill": "lidwoord"
+      },
+      {
+        "title": "Zelfstandig naamwoord",
+        "text": "Een zelfstandig naamwoord is een woord voor een mens, dier, ding of plek. Test: kun je de, het of een ervoor zetten? Dan is het een zelfstandig naamwoord.",
+        "examples": [
+          {
+            "good": "De raptor rent naar de boom.",
+            "why": "De raptor en de boom: raptor en boom zijn zelfstandige naamwoorden."
+          }
+        ],
+        "tip": "Zet er de, het of een voor. Klinkt het goed? Zelfstandig naamwoord!",
+        "skill": "zelfstandig-naamwoord"
+      },
+      {
+        "title": "Bijvoeglijk naamwoord",
+        "text": "Een bijvoeglijk naamwoord zegt hoe iets is: groot, groen, lief, spannend. Het staat vaak tussen het lidwoord en het zelfstandig naamwoord.",
+        "examples": [
+          {
+            "good": "Ik bouw een hoge toren.",
+            "why": "Hoe is de toren? Hoog. Hoge is het bijvoeglijk naamwoord."
+          }
+        ],
+        "tip": "Vraag: hoe is het? Het antwoord is het bijvoeglijk naamwoord.",
+        "skill": "bijvoeglijk-naamwoord"
+      },
+      {
+        "title": "Werkwoord",
+        "text": "Een werkwoord zegt wat iemand doet: lopen, bouwen, slapen. Test: kun je er ik of wij voor zetten? Wij bouwen, ik slaap.",
+        "examples": [
+          {
+            "good": "Mijn kat slaapt op de bank.",
+            "why": "Slaapt is wat de kat doet. Dat is het werkwoord."
+          }
+        ],
+        "tip": "Zet er wij voor: wij slapen. Klinkt het goed? Werkwoord!",
+        "skill": "werkwoord"
+      },
+      {
+        "title": "Persoonsvorm",
+        "text": "De persoonsvorm is het werkwoord dat verandert als je de zin in een andere tijd zet. In een vraag staat de persoonsvorm helemaal vooraan.",
+        "examples": [
+          {
+            "good": "Tim speelt met blokken.",
+            "why": "Gisteren speelde Tim. Speelt verandert, dus speelt is de persoonsvorm."
+          },
+          {
+            "good": "Lisa moet haar kamer opruimen.",
+            "why": "Lisa moest... Moet verandert, dus moet is de persoonsvorm."
+          }
+        ],
+        "tip": "Zet de zin in de verleden tijd. Het woord dat verandert is de persoonsvorm.",
+        "skill": "persoonsvorm"
+      },
+      {
+        "title": "Onderwerp",
+        "text": "Zoek eerst de persoonsvorm. Vraag dan: wie of wat plus de persoonsvorm? Het antwoord is het onderwerp. Het onderwerp staat niet altijd vooraan.",
+        "examples": [
+          {
+            "good": "Morgen gaat mijn oma naar de markt.",
+            "why": "Wie gaat? Mijn oma. Dat is het onderwerp."
+          }
+        ],
+        "tip": "Wie of wat + persoonsvorm = onderwerp.",
+        "skill": "onderwerp"
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "e6-on-001",
+      "type": "choice",
+      "level": "M6",
+      "skill": "lidwoord",
+      "prompt": "Welk woord is een lidwoord?",
+      "sentence": "Het kleine ei ligt in het nest.",
+      "options": [
+        "Het",
+        "kleine",
+        "ei",
+        "ligt"
+      ],
+      "answer": 0,
+      "explain": "Het is een lidwoord. De, het en een zijn de lidwoorden."
+    },
+    {
+      "id": "e6-on-002",
+      "type": "choice",
+      "level": "M6",
+      "skill": "zelfstandig-naamwoord",
+      "prompt": "Welk woord is een zelfstandig naamwoord?",
+      "sentence": "De snelle raptor rent hard.",
+      "options": [
+        "De",
+        "snelle",
+        "raptor",
+        "rent"
+      ],
+      "answer": 2,
+      "explain": "Raptor is een dier. Je kunt zeggen: de raptor. Dus het is een zelfstandig naamwoord."
+    },
+    {
+      "id": "e6-on-003",
+      "type": "choice",
+      "level": "M6",
+      "skill": "bijvoeglijk-naamwoord",
+      "prompt": "Welk woord is een bijvoeglijk naamwoord?",
+      "sentence": "Ik bouw een hoge toren.",
+      "options": [
+        "bouw",
+        "een",
+        "hoge",
+        "toren"
+      ],
+      "answer": 2,
+      "explain": "Hoe is de toren? Hoog. Hoge zegt hoe iets is, dus een bijvoeglijk naamwoord."
+    },
+    {
+      "id": "e6-on-004",
+      "type": "choice",
+      "level": "M6",
+      "skill": "werkwoord",
+      "prompt": "Welk woord is een werkwoord?",
+      "sentence": "Mijn kat slaapt op de bank.",
+      "options": [
+        "kat",
+        "slaapt",
+        "op",
+        "bank"
+      ],
+      "answer": 1,
+      "explain": "Slaapt is wat de kat doet. Een werkwoord zegt wat iemand doet."
+    },
+    {
+      "id": "e6-on-005",
+      "type": "choice",
+      "level": "M6",
+      "skill": "persoonsvorm",
+      "prompt": "Welk woord is de persoonsvorm?",
+      "sentence": "Tim speelt elke dag met blokken.",
+      "options": [
+        "Tim",
+        "speelt",
+        "elke",
+        "blokken"
+      ],
+      "answer": 1,
+      "explain": "Zet de zin in de verleden tijd: Tim speelde. Speelt verandert, dus dat is de persoonsvorm."
+    },
+    {
+      "id": "e6-on-006",
+      "type": "choice",
+      "level": "M6",
+      "skill": "onderwerp",
+      "prompt": "Welk deel is het onderwerp?",
+      "sentence": "De dino eet een blad.",
+      "options": [
+        "De dino",
+        "eet",
+        "een blad"
+      ],
+      "answer": 0,
+      "explain": "Wie eet? De dino. Dat is het onderwerp."
+    },
+    {
+      "id": "e6-on-007",
+      "type": "choice",
+      "level": "M6",
+      "skill": "lidwoord",
+      "prompt": "Welk woord is een lidwoord?",
+      "sentence": "Sara vindt een mooie steen.",
+      "options": [
+        "Sara",
+        "vindt",
+        "een",
+        "steen"
+      ],
+      "answer": 2,
+      "explain": "Een is een lidwoord. Het staat voor het zelfstandig naamwoord."
+    },
+    {
+      "id": "e6-on-008",
+      "type": "choice",
+      "level": "M6",
+      "skill": "zelfstandig-naamwoord",
+      "prompt": "Welk woord is geen zelfstandig naamwoord?",
+      "options": [
+        "boom",
+        "fiets",
+        "springen",
+        "appel"
+      ],
+      "answer": 2,
+      "explain": "Je kunt niet zeggen: de springen. Springen is een werkwoord. De rest zijn zelfstandige naamwoorden."
+    },
+    {
+      "id": "e6-on-009",
+      "type": "choice",
+      "level": "E6",
+      "skill": "bijvoeglijk-naamwoord",
+      "prompt": "Welk woord is een bijvoeglijk naamwoord?",
+      "sentence": "Op het plein staat een grote, grijze olifant.",
+      "options": [
+        "plein",
+        "staat",
+        "grijze",
+        "olifant"
+      ],
+      "answer": 2,
+      "explain": "Hoe is de olifant? Grijs. Grijze is het bijvoeglijk naamwoord."
+    },
+    {
+      "id": "e6-on-010",
+      "type": "choice",
+      "level": "E6",
+      "skill": "zelfstandig-naamwoord",
+      "prompt": "Welk woord is een zelfstandig naamwoord?",
+      "sentence": "Wij zwemmen vrolijk in het warme meer.",
+      "options": [
+        "zwemmen",
+        "vrolijk",
+        "warme",
+        "meer"
+      ],
+      "answer": 3,
+      "explain": "Je kunt zeggen: het meer. Dus meer is hier een zelfstandig naamwoord."
+    },
+    {
+      "id": "e6-on-011",
+      "type": "choice",
+      "level": "E6",
+      "skill": "persoonsvorm",
+      "prompt": "Welk woord is de persoonsvorm?",
+      "sentence": "Lisa moet morgen haar kamer opruimen.",
+      "options": [
+        "Lisa",
+        "moet",
+        "morgen",
+        "opruimen"
+      ],
+      "answer": 1,
+      "explain": "Er staan twee werkwoorden. Moet verandert in de verleden tijd: moest. Dus moet is de persoonsvorm."
+    },
+    {
+      "id": "e6-on-012",
+      "type": "choice",
+      "level": "E6",
+      "skill": "persoonsvorm",
+      "prompt": "Welk woord is de persoonsvorm?",
+      "sentence": "Ga jij vanmiddag naar de bieb?",
+      "options": [
+        "Ga",
+        "jij",
+        "vanmiddag",
+        "bieb"
+      ],
+      "answer": 0,
+      "explain": "In een vraag staat de persoonsvorm vooraan. Ging jij? Ga verandert, dus ga is de persoonsvorm."
+    },
+    {
+      "id": "e6-on-013",
+      "type": "choice",
+      "level": "E6",
+      "skill": "onderwerp",
+      "prompt": "Welk deel is het onderwerp?",
+      "sentence": "Morgen gaat mijn oma naar de markt.",
+      "options": [
+        "Morgen",
+        "gaat",
+        "mijn oma",
+        "naar de markt"
+      ],
+      "answer": 2,
+      "explain": "Wie gaat? Mijn oma. Het onderwerp hoeft niet vooraan te staan."
+    },
+    {
+      "id": "e6-on-014",
+      "type": "choice",
+      "level": "E6",
+      "skill": "onderwerp",
+      "prompt": "Welk deel is het onderwerp?",
+      "sentence": "In de grot slapen drie kleine vleermuizen.",
+      "options": [
+        "In de grot",
+        "slapen",
+        "drie kleine vleermuizen"
+      ],
+      "answer": 2,
+      "explain": "Wie slapen? Drie kleine vleermuizen. Dat is het onderwerp."
+    },
+    {
+      "id": "e6-on-015",
+      "type": "choice",
+      "level": "E6",
+      "skill": "werkwoord",
+      "prompt": "Welk woord is geen werkwoord?",
+      "options": [
+        "lopen",
+        "bouwen",
+        "snel",
+        "graven"
+      ],
+      "answer": 2,
+      "explain": "Je kunt niet zeggen: wij snel. Snel zegt hoe iets is. De rest zijn werkwoorden."
+    },
+    {
+      "id": "e6-on-016",
+      "type": "choice",
+      "level": "E6",
+      "skill": "lidwoord",
+      "prompt": "Welk woord is een lidwoord?",
+      "sentence": "Daar vliegt een gele vlinder over de wei.",
+      "options": [
+        "Daar",
+        "een",
+        "gele",
+        "wei"
+      ],
+      "answer": 1,
+      "explain": "Een is een lidwoord. Gele is een bijvoeglijk naamwoord en wei een zelfstandig naamwoord."
+    },
+    {
+      "id": "e6-on-017",
+      "type": "choice",
+      "level": "E6",
+      "skill": "bijvoeglijk-naamwoord",
+      "prompt": "Welk woord is een bijvoeglijk naamwoord?",
+      "sentence": "De kinderen vonden het een gezellige middag.",
+      "options": [
+        "kinderen",
+        "vonden",
+        "gezellige",
+        "middag"
+      ],
+      "answer": 2,
+      "explain": "Hoe was de middag? Gezellig. Gezellige is het bijvoeglijk naamwoord."
+    }
+  ]
+}

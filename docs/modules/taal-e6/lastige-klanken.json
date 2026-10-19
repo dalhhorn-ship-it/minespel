@@ -1,0 +1,367 @@
+{
+  "id": "lastige-klanken",
+  "title": "Lastige klanken: au of ou, ei of ij, c of k",
+  "groups": [
+    6
+  ],
+  "lesson": {
+    "pages": [
+      {
+        "title": "au of ou",
+        "text": "Au en ou klinken precies hetzelfde. Je moet het woord dus kennen. Denk aan een woord uit dezelfde familie: bouwen, gebouw en bouwvakker hebben allemaal ou.",
+        "examples": [
+          {
+            "good": "Opa bouwt een hok van hout.",
+            "bad": "Opa bauwt een hok van haut.",
+            "why": "Bouwen en hout schrijf je met ou."
+          },
+          {
+            "good": "De pauw heeft een blauwe staart.",
+            "bad": "De pouw heeft een blouwe staart.",
+            "why": "Pauw en blauw schrijf je met au."
+          }
+        ],
+        "tip": "Ou: oud, koud, goud, hout, zout, bouwen, vrouw. Au: blauw, pauw, saus, auto, kauwen.",
+        "skill": "au-ou"
+      },
+      {
+        "title": "ei of ij",
+        "text": "Ei en ij klinken ook hetzelfde. Ook dit moet je onthouden. Twee handige regels: -heid schrijf je altijd met ei, en -lijk schrijf je altijd met ij.",
+        "examples": [
+          {
+            "good": "De geit staat bij de trein.",
+            "bad": "De gijt staat bij de trijn.",
+            "why": "Geit en trein schrijf je met ei."
+          },
+          {
+            "good": "Wij eten een ijsje.",
+            "bad": "Wei eten een eisje.",
+            "why": "Wij en ijs schrijf je met ij."
+          }
+        ],
+        "tip": "Ei: ei, klei, geit, trein, plein, reis. IJ: ijs, tijd, wij, mijn, blij, vijver.",
+        "skill": "ei-ij"
+      },
+      {
+        "title": "c of k",
+        "text": "In gewone Nederlandse woorden schrijf je een k. Sommige woorden komen uit een andere taal. Die houden hun c. Voor a, o, u klinkt de c als k. Voor e en i klinkt de c als s.",
+        "examples": [
+          {
+            "good": "Een cactus heeft stekels.",
+            "bad": "Een kaktus heeft stekels.",
+            "why": "Cactus is een leenwoord met twee keer een c."
+          },
+          {
+            "good": "Wij gaan naar het circus.",
+            "bad": "Wij gaan naar het sirkus.",
+            "why": "In circus klinkt de eerste c als s en de tweede als k."
+          }
+        ],
+        "tip": "Cactus, circus, cirkel, computer, camping: leer ze uit je hoofd.",
+        "skill": "c-of-k"
+      },
+      {
+        "title": "Je hoort ts, je schrijft t",
+        "text": "In sommige woorden klinkt de t als ts of als sj. Je schrijft toch gewoon een t.",
+        "examples": [
+          {
+            "good": "De politie helpt ons.",
+            "bad": "De polietsie helpt ons.",
+            "why": "Po-li-tie: je hoort ts, je schrijft t."
+          },
+          {
+            "good": "De trein staat op het station.",
+            "bad": "De trein staat op het stasjon."
+          }
+        ],
+        "tip": "Politie, station, informatie, vakantie: allemaal met een t.",
+        "skill": "t-klinkt-anders"
+      },
+      {
+        "title": "Je hoort ie, je schrijft i",
+        "text": "Leenwoorden zoals taxi, ski, kiwi, safari en salami eindigen op een i. Je hoort ie, maar je schrijft alleen een i.",
+        "examples": [
+          {
+            "good": "Oma pakt de taxi.",
+            "bad": "Oma pakt de taxie.",
+            "why": "Taxi is een leenwoord en eindigt op i."
+          },
+          {
+            "good": "Ik eet een kiwi.",
+            "bad": "Ik eet een kiwie."
+          }
+        ],
+        "tip": "Is het een woord uit een andere taal? Dan is het vaak alleen een i.",
+        "skill": "ie-of-i"
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "e6-kl-001",
+      "type": "choice",
+      "level": "M6",
+      "skill": "au-ou",
+      "prompt": "Welk woord moet op de stippen?",
+      "sentence": "Ik doe ... op mijn friet.",
+      "options": [
+        "saus",
+        "sous",
+        "souws"
+      ],
+      "answer": 0,
+      "explain": "Saus schrijf je met au. Dat woord moet je onthouden."
+    },
+    {
+      "id": "e6-kl-002",
+      "type": "type",
+      "level": "M6",
+      "skill": "au-ou",
+      "prompt": "Welke letters moeten op de stippen? Kies au of ou.",
+      "sentence": "Het is vandaag erg k...d buiten.",
+      "answer": [
+        "ou"
+      ],
+      "explain": "Koud schrijf je met ou, net als oud en goud."
+    },
+    {
+      "id": "e6-kl-003",
+      "type": "choice",
+      "level": "M6",
+      "skill": "ei-ij",
+      "prompt": "Welk woord moet op de stippen?",
+      "sentence": "De ... staat in de wei.",
+      "options": [
+        "geit",
+        "gijt",
+        "geid"
+      ],
+      "answer": 0,
+      "explain": "Geit schrijf je met ei en een t: een geit, twee geiten."
+    },
+    {
+      "id": "e6-kl-004",
+      "type": "type",
+      "level": "M6",
+      "skill": "ei-ij",
+      "prompt": "Welke letters moeten op de stippen? Kies ei of ij.",
+      "sentence": "Na het zwemmen eten wij een ...sje.",
+      "answer": [
+        "ij"
+      ],
+      "explain": "IJs schrijf je met ij. Dat moet je onthouden."
+    },
+    {
+      "id": "e6-kl-005",
+      "type": "find-error",
+      "level": "M6",
+      "skill": "ei-ij",
+      "prompt": "Welk woord is fout geschreven?",
+      "words": [
+        "De",
+        "dino",
+        "rijdt",
+        "in",
+        "een",
+        "rode",
+        "trijn."
+      ],
+      "answer": 6,
+      "correction": "trein.",
+      "explain": "Trein schrijf je met ei."
+    },
+    {
+      "id": "e6-kl-006",
+      "type": "choice",
+      "level": "M6",
+      "skill": "c-of-k",
+      "prompt": "Welk woord moet op de stippen?",
+      "sentence": "Een ... heeft scherpe stekels.",
+      "options": [
+        "cactus",
+        "kaktus",
+        "kactus",
+        "caktus"
+      ],
+      "answer": 0,
+      "explain": "Cactus is een leenwoord. Je schrijft het met twee keer een c."
+    },
+    {
+      "id": "e6-kl-007",
+      "type": "choice",
+      "level": "M6",
+      "skill": "c-of-k",
+      "prompt": "Welk woord moet op de stippen?",
+      "sentence": "Wij gaan naar het ... met clowns.",
+      "options": [
+        "circus",
+        "sirkus",
+        "circes",
+        "cirkus"
+      ],
+      "answer": 0,
+      "explain": "Circus komt uit een andere taal. De eerste c klinkt als s, de tweede als k."
+    },
+    {
+      "id": "e6-kl-008",
+      "type": "choice",
+      "level": "M6",
+      "skill": "ie-of-i",
+      "prompt": "Welk woord moet op de stippen?",
+      "sentence": "Oma gaat met de ... naar het station.",
+      "options": [
+        "taxi",
+        "taxie",
+        "taksie"
+      ],
+      "answer": 0,
+      "explain": "Taxi is een leenwoord. Je hoort ie, maar je schrijft alleen een i."
+    },
+    {
+      "id": "e6-kl-009",
+      "type": "find-error",
+      "level": "M6",
+      "skill": "au-ou",
+      "prompt": "Welk woord is fout geschreven?",
+      "words": [
+        "De",
+        "pauw",
+        "heeft",
+        "een",
+        "blouwe",
+        "staart."
+      ],
+      "answer": 4,
+      "correction": "blauwe",
+      "explain": "Blauw schrijf je met au, net als pauw."
+    },
+    {
+      "id": "e6-kl-010",
+      "type": "choice",
+      "level": "E6",
+      "skill": "au-ou",
+      "prompt": "Welk woord moet op de stippen?",
+      "sentence": "In de stad staat een hoog ... .",
+      "options": [
+        "gebouw",
+        "gebauw",
+        "gebou",
+        "gebau"
+      ],
+      "answer": 0,
+      "explain": "Gebouw komt van bouwen. Dat schrijf je met ouw."
+    },
+    {
+      "id": "e6-kl-011",
+      "type": "type",
+      "level": "E6",
+      "skill": "ei-ij",
+      "prompt": "Welke letters moeten op de stippen? Kies ei of ij.",
+      "sentence": "De dino zwemt in de v...ver bij het bos.",
+      "answer": [
+        "ij"
+      ],
+      "explain": "Vijver schrijf je met ij."
+    },
+    {
+      "id": "e6-kl-012",
+      "type": "choice",
+      "level": "E6",
+      "skill": "c-of-k",
+      "prompt": "Welk woord moet op de stippen?",
+      "sentence": "Papa werkt achter de ... .",
+      "options": [
+        "computer",
+        "komputer",
+        "compjoeter",
+        "kompjoeter"
+      ],
+      "answer": 0,
+      "explain": "Computer komt uit het Engels. Je schrijft een c en een u."
+    },
+    {
+      "id": "e6-kl-013",
+      "type": "type",
+      "level": "E6",
+      "skill": "t-klinkt-anders",
+      "prompt": "Welke letter moet op de stippen?",
+      "sentence": "De poli...ie helpt bij een ongeluk.",
+      "answer": [
+        "t"
+      ],
+      "explain": "Politie schrijf je met een t. Je hoort ts, maar je schrijft t."
+    },
+    {
+      "id": "e6-kl-014",
+      "type": "choice",
+      "level": "E6",
+      "skill": "t-klinkt-anders",
+      "prompt": "Welk woord moet op de stippen?",
+      "sentence": "Wij wachten op het ... op de trein.",
+      "options": [
+        "station",
+        "stasjon",
+        "statsion",
+        "stazion"
+      ],
+      "answer": 0,
+      "explain": "In station klinkt de t als sj. Je schrijft toch een t."
+    },
+    {
+      "id": "e6-kl-015",
+      "type": "choice",
+      "level": "E6",
+      "skill": "ie-of-i",
+      "prompt": "Welk woord moet op de stippen?",
+      "sentence": "Wij maken een ... en zien leeuwen.",
+      "options": [
+        "safari",
+        "safarie",
+        "safaari",
+        "saffarie"
+      ],
+      "answer": 0,
+      "explain": "Safari eindigt op een i. Je hoort ie, maar je schrijft i, net als taxi en ski."
+    },
+    {
+      "id": "e6-kl-016",
+      "type": "find-error",
+      "level": "E6",
+      "skill": "ie-of-i",
+      "prompt": "Welk woord is fout geschreven?",
+      "words": [
+        "Ik",
+        "eet",
+        "een",
+        "groene",
+        "kiwie",
+        "bij",
+        "het",
+        "ontbijt."
+      ],
+      "answer": 4,
+      "correction": "kiwi",
+      "explain": "Kiwi is een leenwoord. Het eindigt op een i, niet op ie."
+    },
+    {
+      "id": "e6-kl-017",
+      "type": "find-error",
+      "level": "E6",
+      "skill": "ei-ij",
+      "prompt": "Welk woord is fout geschreven?",
+      "words": [
+        "Mijn",
+        "broertje",
+        "is",
+        "heel",
+        "blij",
+        "met",
+        "zijn",
+        "fiets."
+      ],
+      "answer": -1,
+      "correction": null,
+      "explain": "Alles is goed. Mijn, blij en zijn schrijf je met ij."
+    }
+  ]
+}
