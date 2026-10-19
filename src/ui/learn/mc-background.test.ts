@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 import { describe, expect, it } from 'vitest';
 import { TILE_SIZE, paintTile, tileFor } from '../../render/atlas';
 import { DIAMANT, GOUDSTEEN, GRAS } from '../../world/blocks';

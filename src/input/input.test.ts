@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 import { describe, expect, it } from 'vitest';
 import { createPointerRouter } from './pointer-router';
 import { createStick } from './stick';

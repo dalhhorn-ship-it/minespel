@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 import { describe, expect, it, vi } from 'vitest';
 import { get, openDb } from './db';
 import { createSaveQueue } from './save-queue';

@@ -77,6 +77,7 @@ export interface GameOptions {
   audioUnlock?: AudioUnlock;
   sound?: Sound;
   onPausePressed?: () => void;
+  onShopPressed?: () => void;
   onParentPressed?: () => void;
   onDinoTapped?: (dino: WorldDino, screenX: number, screenY: number) => void;
   onBlockGridOpenChange?: (open: boolean) => void;
@@ -142,6 +143,7 @@ export function createGame(options: GameOptions): Game {
       emitChanged('build');
     },
     onPause: () => options.onPausePressed?.(),
+    onShop: options.onShopPressed ? () => options.onShopPressed?.() : undefined,
     onParent: options.onParentPressed ? () => options.onParentPressed?.() : undefined,
   });
   const build = createBuildController({

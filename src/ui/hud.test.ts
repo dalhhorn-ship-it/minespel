@@ -35,3 +35,55 @@ describe('world HUD parent lock (decision 53)', () => {
     hud.destroy();
   });
 });
+
+describe('world HUD Winkel button (AC160, AC161)', () => {
+  it('shows a "Winkel" button next to Pauze with the same classes and size rule, and opens the shop on a tap', () => {
+    const onShop = vi.fn();
+    const hud = createHud({ router, onJump: vi.fn(), onMode: vi.fn(), onPause: vi.fn(), onShop, onParent: vi.fn() });
+    const winkel = hud.root.querySelector<HTMLElement>('[data-testid="hud-winkel"]');
+    expect(winkel).not.toBeNull();
+    expect(winkel?.classList.contains('hud-winkel')).toBe(true);
+    expect(winkel?.classList.contains('hud-btn')).toBe(true);
+    expect(winkel?.textContent).toBe('\u{1F95A} Winkel');
+    const pause = hud.root.querySelector<HTMLElement>('.hud-pause');
+    expect(pause).not.toBeNull();
+    // Same group, Winkel directly before Pauze.
+    expect(winkel?.parentElement).toBe(pause?.parentElement);
+    expect(winkel?.nextElementSibling).toBe(pause);
+    tap(winkel!);
+    expect(onShop).toHaveBeenCalledTimes(1);
+    hud.destroy();
+  });
+
+  it('is an ignore zone, so a touch on it never looks or taps the world', () => {
+    const zones: Element[] = [];
+    const r = { addIgnoreZone: (z: Element) => (zones.push(z), () => undefined) } as unknown as PointerRouter;
+    const hud = createHud({ router: r, onJump: vi.fn(), onMode: vi.fn(), onPause: vi.fn(), onShop: vi.fn() });
+    expect(zones).toContain(hud.root.querySelector('[data-testid="hud-winkel"]'));
+    hud.destroy();
+  });
+
+  it('shows no Winkel button without a shop handler', () => {
+    const hud = createHud({ router, onJump: vi.fn(), onMode: vi.fn(), onPause: vi.fn() });
+    expect(hud.root.querySelector('[data-testid="hud-winkel"]')).toBeNull();
+    hud.destroy();
+  });
+
+  it('Pauze and Winkel still act when the finger rolls 15 points, Spring does not (iPad finger roll)', () => {
+    const onPause = vi.fn();
+    const onShop = vi.fn();
+    const onJump = vi.fn();
+    const hud = createHud({ router, onJump, onMode: vi.fn(), onPause, onShop });
+    const roll = (el: Element) => {
+      el.dispatchEvent(new PointerEvent('pointerdown', { pointerId: 1, clientX: 5, clientY: 5, bubbles: true }));
+      el.dispatchEvent(new PointerEvent('pointerup', { pointerId: 1, clientX: 20, clientY: 5, bubbles: true }));
+    };
+    roll(hud.root.querySelector('.hud-pause')!);
+    roll(hud.root.querySelector('.hud-winkel')!);
+    expect(onPause).toHaveBeenCalledTimes(1);
+    expect(onShop).toHaveBeenCalledTimes(1);
+    roll(hud.root.querySelector('.hud-jump')!);
+    expect(onJump).not.toHaveBeenCalled();
+    hud.destroy();
+  });
+});

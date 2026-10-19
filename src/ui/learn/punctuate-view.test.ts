@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { PunctuateItem } from '../../content/format';
 import type { Response } from '../../learning/answer-check';
@@ -76,5 +77,16 @@ describe('punctuate view', () => {
     tap(done, 2);
     expect(got).toEqual([{ type: 'punctuate', gaps: [2] }]);
     expect(gaps()[0]!.getAttribute('aria-pressed')).toBe('false');
+  });
+});
+
+describe('punctuate view getMarked (exam draft)', () => {
+  it('returns the marked gaps sorted without tapping Klaar', () => {
+    const { v, gaps, got } = setup();
+    expect(v.getMarked()).toEqual([]);
+    tap(gaps()[2]!);
+    tap(gaps()[0]!);
+    expect(v.getMarked()).toEqual([0, 2]);
+    expect(got).toHaveLength(0);
   });
 });

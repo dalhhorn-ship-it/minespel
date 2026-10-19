@@ -9,12 +9,21 @@ import type { Rng } from '../core/rng';
 import type { LogStore } from '../storage/log-store';
 import type { ProgressStore } from '../storage/progress-store';
 import type { Records } from '../storage/records';
+import { createExamStopCard, type ExamStopCard } from '../ui/parent/exam-stop-card';
 import { createGateScreen, type GateScreen } from '../ui/parent/gate-screen';
 import { createParentShell, type ParentSectionId, type ParentShell } from '../ui/parent/parent-shell';
 import type { BreakFlow } from './break-flow';
 import type { ScreenManager } from './screens';
 import { applySettingsToRuntime } from './settings-apply';
 import type { TimerDriver } from './timer-driver';
+
+/** Structural view of the exam flow, so this file never imports exam-flow.ts. */
+export interface ParentExams {
+  isActive(): boolean;
+  plan(moduleId: string, examId: string): { wanted: number; real: number };
+  start(moduleId: string, examId: string): Promise<void> | void;
+  stop(): Promise<void> | void;
+}
 
 export interface ParentFlowOptions {
   clock: Clock;
@@ -26,12 +35,15 @@ export interface ParentFlowOptions {
   getCatalog: () => Catalog;
   breakFlow: BreakFlow;
   timerDriver?: TimerDriver;
+  exams?: ParentExams;
   sound?: Sound;
   onResetWorld?: () => Promise<void> | void;
 }
 
 export interface ParentFlow {
   open(initialSection?: ParentSectionId): Promise<void>;
+  /** Exam lock route: pin pad, then only the "Examen stoppen?" card (AC157, AC158). */
+  openExamStop(): Promise<void>;
   close(): void;
   isOpen(): boolean;
   destroy(): void;
@@ -40,6 +52,7 @@ export interface ParentFlow {
 export function createParentFlow(options: ParentFlowOptions): ParentFlow {
   let gateView: GateScreen | null = null;
   let shellView: ParentShell | null = null;
+  let stopCard: ExamStopCard | null = null;
   let openState = false;
 
   function clearViews() {
@@ -50,6 +63,10 @@ export function createParentFlow(options: ParentFlowOptions): ParentFlow {
     if (shellView) {
       shellView.destroy();
       shellView = null;
+    }
+    if (stopCard) {
+      stopCard.destroy();
+      stopCard = null;
     }
   }
 
@@ -98,6 +115,14 @@ export function createParentFlow(options: ParentFlowOptions): ParentFlow {
       breaks,
       stats,
       isBreakActive: options.breakFlow.isActive(),
+      isExamActive: options.exams?.isActive() ?? false,
+      planFor: options.exams ? (m, e) => options.exams!.plan(m, e) : undefined,
+      onStartExam: options.exams
+        ? async (m, e) => {
+            close();
+            await options.exams!.start(m, e);
+          }
+        : undefined,
       initialSection,
       onUpdateSettings: async (next) => {
         await options.records.put('settings', next);
@@ -137,7 +162,37 @@ export function createParentFlow(options: ParentFlowOptions): ParentFlow {
     options.screens.showParent(shellView.element);
   }
 
+  async function openExamStop() {
+    clearViews();
+    openState = true;
+    const gateRecord = await options.records.get('gate');
+    gateView = createGateScreen({
+      records: options.records,
+      clock: options.clock,
+      rng: options.rng,
+      initialRecord: gateRecord,
+      onUnlocked: () => {
+        clearViews();
+        stopCard = createExamStopCard({
+          onStop: () => {
+            void (async () => {
+              await options.exams?.stop();
+              close();
+            })();
+          },
+          onBack: () => close(),
+          now: () => options.clock.now(),
+        });
+        options.screens.showParent(stopCard.element);
+      },
+      // Only the parent layer closes, so the exam layer stays as it was.
+      onCancel: () => close(),
+    });
+    options.screens.showParent(gateView.element);
+  }
+
   return {
+    openExamStop,
     async open(initialSection) {
       await openGate(false, initialSection);
     },

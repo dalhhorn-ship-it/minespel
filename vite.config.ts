@@ -8,7 +8,7 @@ export default defineConfig(({ mode }) => ({
   server: { host: true },
   build: { target: 'safari15' },
   test: {
-    environment: 'jsdom',
+    environment: 'node',
     include: ['src/**/*.test.ts', 'tests/unit/**/*.test.ts'],
     setupFiles: ['tests/setup/vitest.setup.ts'],
     define: { __E2E__: false },

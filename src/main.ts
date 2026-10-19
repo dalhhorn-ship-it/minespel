@@ -2,7 +2,7 @@ import './styles/tokens.css';
 import './styles/base.css';
 import { createBreakFlow, type BreakFlow } from './app/break-flow';
 import { loadCatalog } from './app/content-loader';
-import { createExamFlow } from './app/exam-flow';
+import { createExamFlow, type ExamFlow } from './app/exam-flow';
 import { createParentFlow, type ParentFlow } from './app/parent-flow';
 import { createPracticeFlow, type PracticeFlow } from './app/practice-flow';
 import { resumeSessionIfAny } from './app/resume';
@@ -34,6 +34,7 @@ import { createDinoMenu, type DinoMenu } from './ui/dino-menu';
 import { el } from './ui/dom';
 import { createLesboek } from './ui/learn/lesboek';
 import { createPauseMenu, type PauseMenu } from './ui/pause-menu';
+import { createShopView, type ShopView } from './ui/shop';
 
 installLockdown();
 const guard = startScreenGuard();
@@ -52,8 +53,16 @@ let breakFlow: BreakFlow | null = null;
 let parentFlow: ParentFlow | null = null;
 let shopFlow: ShopFlow | null = null;
 let practiceFlow: PracticeFlow | null = null;
+let examFlow: ExamFlow | null = null;
 let activePauseMenu: PauseMenu | null = null;
 let activeDinoMenu: DinoMenu | null = null;
+// The Dinowinkel placeholder shown when it was tapped before boot made the shop flow (AC164).
+let waitingShop: ShopView | null = null;
+// Resolves when boot has opened storage and made `records`. Pause and shop fill their points from it.
+let recordsReadyResolve: (r: Records) => void = () => {};
+const recordsReady = new Promise<Records>((resolve) => {
+  recordsReadyResolve = resolve;
+});
 
 let teleported = 0;
 let rendererFactoryIsReal = true;
@@ -65,6 +74,7 @@ const countdownView = createCountdownView({
   initialMs: 5 * 60_000,
   warningEnabled: true,
   onStartNow: () => {
+    if (examFlow?.isActive()) return;
     void breakFlow?.startBreak({ early: true });
   },
 });
@@ -105,15 +115,50 @@ function openDinoMenu(dino: WorldDino, screenX?: number, screenY?: number) {
   screens.showKidOverlay(menu.element);
 }
 
-async function openPauseMenu() {
-  if (!screens || !game) return;
+/**
+ * Opens the Dinowinkel at once. With the shop flow ready it shows a placeholder and fills in the points when read.
+ * Without it (boot not finished) a waiting card shows and the real shop opens as soon as the flow exists (AC164).
+ */
+function openShop() {
+  if (!screens) return;
+  activePauseMenu?.destroy();
+  activePauseMenu = null;
+  waitingShop?.destroy();
+  waitingShop = null;
+  if (shopFlow) {
+    void shopFlow.open();
+    return;
+  }
+  const waiting = createShopView({
+    state: null,
+    onBuy: () => {},
+    onClose: () => {
+      waitingShop?.destroy();
+      waitingShop = null;
+      screens?.showWorld();
+    },
+  });
+  waitingShop = waiting;
+  screens.showKidOverlay(waiting.element);
+}
+
+/** Called by boot when the shop flow exists: a waiting card, if the kid is looking at one, becomes the real shop. */
+function shopFlowReady() {
+  if (!waitingShop) return;
+  waitingShop.destroy();
+  waitingShop = null;
+  void shopFlow?.open();
+}
+
+/** Opens the pause menu at once. The points show a placeholder until read (AC163). Resolves when the points are filled in. */
+async function openPauseMenu(): Promise<void> {
+  if (!screens) return;
   if (activePauseMenu) {
     activePauseMenu.destroy();
     activePauseMenu = null;
   }
-  const economy = records ? await records.get('economy') : { points: 0 };
   const menu = createPauseMenu({
-    points: economy.points,
+    points: null,
     onResume: () => {
       activePauseMenu?.destroy();
       activePauseMenu = null;
@@ -125,11 +170,7 @@ async function openPauseMenu() {
       activePauseMenu = null;
       screens?.showWorld();
     },
-    onShop: () => {
-      activePauseMenu?.destroy();
-      activePauseMenu = null;
-      void shopFlow?.open();
-    },
+    onShop: openShop,
     onLesboek: () => {
       void (async () => {
         const switches = records ? await records.get('switches') : { modules: {} };
@@ -161,6 +202,12 @@ async function openPauseMenu() {
   });
   activePauseMenu = menu;
   screens.showKidOverlay(menu.element);
+  try {
+    const economy = await (await recordsReady).get('economy');
+    if (activePauseMenu === menu) menu.setPoints(economy.points);
+  } catch {
+    // The placeholder stays. Every other button still works.
+  }
 }
 
 if (app) {
@@ -198,6 +245,7 @@ if (app) {
       onPausePressed: () => {
         void openPauseMenu();
       },
+      onShopPressed: openShop,
       onParentPressed: () => {
         void parentFlow?.open();
       },
@@ -233,6 +281,7 @@ const booted = game
         queue = q;
         const recs = createRecords(db);
         records = recs;
+        recordsReadyResolve(recs);
         const progressStore = createProgressStore(db);
         const logStore = createLogStore(db);
         const sessionStore = createSessionStore(db);
@@ -241,7 +290,6 @@ const booted = game
         const [settings, timers] = await Promise.all([recs.get('settings'), recs.get('timers')]);
 
         if (screens) {
-          const examFlow = createExamFlow();
           breakFlow = createBreakFlow({
             clock: systemClock,
             rng,
@@ -268,6 +316,8 @@ const booted = game
             initialPlayMsLeft: timers.playMsLeft,
             initialWarningEnabled: settings.breakWarningEnabled !== false,
             onBreakDue: () => {
+              // The play timer does not run during an exam, but never start a break over one (AC66).
+              if (examFlow?.isActive()) return;
               void breakFlow?.startBreak();
             },
           });
@@ -286,6 +336,7 @@ const booted = game
               void breakFlow?.startBreak({ early: true });
             },
           });
+          shopFlowReady();
           practiceFlow = createPracticeFlow({
             screens,
             clock: systemClock,
@@ -299,6 +350,23 @@ const booted = game
               await breakFlow?.startBreak({ early: true });
             },
           });
+          const exams = createExamFlow({
+            clock: systemClock,
+            rng,
+            screens,
+            records: recs,
+            progressStore,
+            logStore,
+            sessionStore,
+            timerDriver,
+            dinoStore: game?.dinoStore ?? null,
+            getCatalog: () => catalog,
+            onLock: () => {
+              void parentFlow?.openExamStop();
+            },
+            sound,
+          });
+          examFlow = exams;
           parentFlow = createParentFlow({
             clock: systemClock,
             rng,
@@ -309,6 +377,12 @@ const booted = game
             getCatalog: () => catalog,
             breakFlow,
             timerDriver,
+            exams: {
+              isActive: () => exams.isActive(),
+              plan: (m, e) => exams.plan(m, e),
+              start: (m, e) => exams.start(m, e),
+              stop: () => exams.stop(),
+            },
             sound,
             onResetWorld: () => {
               game?.resetWorld();
@@ -319,7 +393,7 @@ const booted = game
             sessionStore,
             records: recs,
             breakFlow,
-            examFlow,
+            examFlow: exams,
           });
         }
 

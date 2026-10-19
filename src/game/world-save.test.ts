@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import fixture from '../../tests/fixtures/saves/v1-world.json';
 import { openDb, transact, request } from '../storage/db';

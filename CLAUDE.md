@@ -165,3 +165,4 @@ Add a line here whenever something went wrong and was fixed, so it does not happ
 
 * 2026-10-17: With several developers in parallel, a scoped test run can pass while the full suite fails (a slow test, a type change in a shared file). Run the full `npm test` and `npm run typecheck` before every commit; typecheck with the in-flight file excluded if one is mid edit.
 * 2026-10-17: Linux WebKit in CI drops iOS only CSS like -webkit-touch-callout from computed style. Test the shipped stylesheet rule instead.
+* 2026-10-19: Every push queues a full CI run, so a push after each small docs commit piles up the CI queue. Commit often, but push at task boundaries (a finished task, a signoff, the end of a turn).

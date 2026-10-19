@@ -4,6 +4,7 @@
 
 import { today, type Clock } from '../core/clock';
 import {
+  createExamTimer,
   createHeartbeat,
   createPlayTimer,
   HEARTBEAT_INTERVAL_MS,
@@ -45,6 +46,27 @@ export interface TimerDriver {
   setBreakEveryMinutes(minutes: number): void;
   setBreakWarningEnabled(enabled: boolean): void;
   isPlayRunning(): boolean;
+  /**
+   * Start the exam countdown (v2, AC66, AC112). `limitMinutes` null means no limit: there is no
+   * countdown and `remainingExamMs()` is null. `savedMs` is `timers.examMsLeft` when resuming.
+   * It counts only on screen `exam` (never while the parent layer is open, in portrait, in a too
+   * small window or in the background), is saved to `timers.examMsLeft` every tick, and never
+   * moves the play timer. `onExpire` runs once when it reaches 0 (also at once if `savedMs` <= 0).
+   * `onTick` gets the time left after every change (for the exam screen).
+   */
+  startExamTimer(
+    limitMinutes: number | null,
+    savedMs: number | null,
+    onExpire: () => void,
+    onTick?: (msLeft: number) => void,
+  ): void;
+  /** The last answer is given or the exam was stopped: the exam timer is gone and the saved time is cleared. */
+  stopExamTimer(): void;
+  /** Time left on the exam countdown, or null when there is none. */
+  remainingExamMs(): number | null;
+  /** Advance the exam countdown by `ms` when it can run, or always when `force` is true. */
+  advanceExamMs(ms: number, force?: boolean): void;
+  isExamRunning(): boolean;
   /** Run one heartbeat check. */
   step(): void;
   /** Wait for any pending store writes to settle. */
@@ -60,6 +82,11 @@ export function createTimerDriver(options: TimerDriverOptions): TimerDriver {
   let warningEnabled = options.initialWarningEnabled;
   let playTimer: Countdown = createPlayTimer(breakEveryMinutes, options.initialPlayMsLeft);
   const heartbeat = createHeartbeat(options.clock);
+  let examTimer: Countdown | null = null;
+  let examFinished = false;
+  let examExpiredFired = false;
+  let onExamExpire: () => void = () => undefined;
+  let onExamTick: ((ms: number) => void) | undefined;
 
   let screen: ScreenKind = options.screens.current();
   let guardState: GuardState = options.guard.state();
@@ -77,14 +104,42 @@ export function createTimerDriver(options: TimerDriverOptions): TimerDriver {
   options.countdownView?.setWarningEnabled(warningEnabled);
   options.countdownView?.update(playTimer.remainingMs());
 
-  function isPlayRunning(): boolean {
-    const runs = timerMatrix({
+  function runs() {
+    return timerMatrix({
       screen,
       portrait: guardState.portrait,
       tooSmall: guardState.tooSmall,
       visible: pageVisible,
+      examFinished,
     });
-    return runs.play;
+  }
+
+  function isPlayRunning(): boolean {
+    return runs().play;
+  }
+
+  function isExamRunning(): boolean {
+    return examTimer !== null && !examTimer.expired() && runs().exam;
+  }
+
+  function anyRunning(): boolean {
+    return isPlayRunning() || isExamRunning();
+  }
+
+  function persistExamMs(ms: number | null) {
+    enqueueWrite(() => options.records.update('timers', (curr) => ({ ...curr, examMsLeft: ms })));
+  }
+
+  function applyElapsedExamMs(deltaMs: number) {
+    if (!examTimer || deltaMs <= 0 || examTimer.expired()) return;
+    const justExpired = examTimer.advance(deltaMs);
+    const after = examTimer.remainingMs();
+    persistExamMs(after);
+    onExamTick?.(after);
+    if ((justExpired || after <= 0) && !examExpiredFired) {
+      examExpiredFired = true;
+      onExamExpire();
+    }
   }
 
   function persistPlayMs(ms: number) {
@@ -132,13 +187,16 @@ export function createTimerDriver(options: TimerDriverOptions): TimerDriver {
   }
 
   function step() {
-    if (!isPlayRunning()) {
+    const playRuns = isPlayRunning();
+    const examRuns = isExamRunning();
+    if (!playRuns && !examRuns) {
       heartbeat.reset();
       return;
     }
     const delta = heartbeat.tick();
     if (delta > 0) {
-      applyElapsedPlayMs(delta);
+      if (playRuns) applyElapsedPlayMs(delta);
+      if (examRuns) applyElapsedExamMs(delta);
     }
   }
 
@@ -146,7 +204,7 @@ export function createTimerDriver(options: TimerDriverOptions): TimerDriver {
     if (next !== screen) {
       screen = next;
       heartbeat.reset();
-      if (isPlayRunning()) {
+      if (anyRunning()) {
         heartbeat.tick();
       }
     }
@@ -156,7 +214,7 @@ export function createTimerDriver(options: TimerDriverOptions): TimerDriver {
     if (next.portrait !== guardState.portrait || next.tooSmall !== guardState.tooSmall) {
       guardState = next;
       heartbeat.reset();
-      if (isPlayRunning()) {
+      if (anyRunning()) {
         heartbeat.tick();
       }
     }
@@ -167,7 +225,7 @@ export function createTimerDriver(options: TimerDriverOptions): TimerDriver {
     if (nextVisible !== pageVisible) {
       pageVisible = nextVisible;
       heartbeat.reset();
-      if (isPlayRunning()) {
+      if (anyRunning()) {
         heartbeat.tick();
       }
     }
@@ -179,7 +237,7 @@ export function createTimerDriver(options: TimerDriverOptions): TimerDriver {
   const onFocus = () => {
     pageVisible = doc ? doc.visibilityState !== 'hidden' : true;
     heartbeat.reset();
-    if (isPlayRunning()) {
+    if (anyRunning()) {
       heartbeat.tick();
     }
   };
@@ -191,7 +249,7 @@ export function createTimerDriver(options: TimerDriverOptions): TimerDriver {
   win?.addEventListener('focus', onFocus);
 
   // Prime the heartbeat if play is currently running.
-  if (isPlayRunning()) {
+  if (anyRunning()) {
     heartbeat.tick();
   }
 
@@ -225,7 +283,7 @@ export function createTimerDriver(options: TimerDriverOptions): TimerDriver {
       breakTriggeredForCycle = false;
       lastTickSecond = null;
       heartbeat.reset();
-      if (isPlayRunning()) {
+      if (anyRunning()) {
         heartbeat.tick();
       }
       options.countdownView?.update(playTimer.remainingMs());
@@ -244,6 +302,41 @@ export function createTimerDriver(options: TimerDriverOptions): TimerDriver {
       options.countdownView?.setWarningEnabled(enabled);
     },
     isPlayRunning,
+    startExamTimer(limitMinutes, savedMs, onExpire, onTick) {
+      examTimer = createExamTimer(limitMinutes, savedMs);
+      examFinished = false;
+      examExpiredFired = false;
+      onExamExpire = onExpire;
+      onExamTick = onTick;
+      heartbeat.reset();
+      if (!examTimer) {
+        persistExamMs(null);
+        return;
+      }
+      persistExamMs(examTimer.remainingMs());
+      onExamTick?.(examTimer.remainingMs());
+      if (examTimer.expired()) {
+        examExpiredFired = true;
+        onExpire();
+        return;
+      }
+      if (anyRunning()) heartbeat.tick();
+    },
+    stopExamTimer() {
+      examTimer = null;
+      examFinished = true;
+      examExpiredFired = true;
+      onExamTick = undefined;
+      heartbeat.reset();
+      persistExamMs(null);
+    },
+    remainingExamMs: () => (examTimer ? examTimer.remainingMs() : null),
+    advanceExamMs(ms, force = false) {
+      if (!examTimer) return;
+      if (!force && !isExamRunning()) return;
+      applyElapsedExamMs(ms);
+    },
+    isExamRunning,
     step,
     flush: async () => {
       await pendingWrite;
@@ -268,6 +361,8 @@ export function createTimerDriver(options: TimerDriverOptions): TimerDriver {
     registerHook('advancePlayMs', (ms: number, force = false) => driver.advancePlayMs(ms, force));
     registerHook('resetPlayTimer', (m?: number) => driver.resetPlayTimer(m));
     registerHook('isPlayRunning', () => driver.isPlayRunning());
+    registerHook('remainingExamMs', () => driver.remainingExamMs());
+    registerHook('advanceExamMs', (ms: number, force = false) => driver.advanceExamMs(ms, force));
     registerHook('stepTimer', () => driver.step());
   }
 

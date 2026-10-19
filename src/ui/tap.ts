@@ -3,14 +3,19 @@
 
 export const TAP_MOVE_LIMIT = 10; // points
 export const REPEAT_MS = 350;
+/** A bigger slide allowed for the HUD Pauze and Winkel buttons: a kid's finger on an iPad often rolls more than 10 points. */
+export const HUD_TAP_MOVE_LIMIT = 24;
 
 export interface TapOptions {
   /** Clock, injectable for tests. */
   now?: () => number;
+  /** How far (in points) a finger may slide and still count as a tap. Default TAP_MOVE_LIMIT. */
+  moveLimit?: number;
 }
 
 export function onTap(target: HTMLElement, handler: (event: PointerEvent) => void, options: TapOptions = {}): () => void {
   const now = options.now ?? (() => performance.now());
+  const moveLimit = options.moveLimit ?? TAP_MOVE_LIMIT;
   let activeId: number | null = null;
   let startX = 0;
   let startY = 0;
@@ -25,7 +30,7 @@ export function onTap(target: HTMLElement, handler: (event: PointerEvent) => voi
   const up = (e: PointerEvent) => {
     if (e.pointerId !== activeId) return;
     activeId = null;
-    if (Math.hypot(e.clientX - startX, e.clientY - startY) > TAP_MOVE_LIMIT) return;
+    if (Math.hypot(e.clientX - startX, e.clientY - startY) > moveLimit) return;
     const t = now();
     if (t - lastActed < REPEAT_MS) return;
     lastActed = t;

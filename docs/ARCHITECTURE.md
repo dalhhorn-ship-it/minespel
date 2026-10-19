@@ -154,7 +154,7 @@ src/
   ui/
     dom.ts                  el(), text only helpers
     tap.ts                  onTap(): pointer based tap, acts once, ignores repeats
-    hud.ts                  stick, jump, mode buttons, hotbar slot, countdown slot, pause button
+    hud.ts                  stick, jump, mode buttons, hotbar slot, countdown slot, pause button, Winkel button (T51e)
     countdown.ts            "Leerpauze over 4:12", pulse, tick
     hotbar.ts, block-grid.ts, pause-menu.ts, shop.ts, dino-menu.ts, name-screen.ts, lock-icon.ts
     broken-save-screen.ts
@@ -207,6 +207,8 @@ Unit tests live next to the code: `src/world/raycast.test.ts` tests `src/world/r
 **A learning break.** `break-flow` asks `rotation` for the module, `selection` for N items (using `srs`, `switches`, `catalog`, `generated-items`), and starts a `break-session`. The session is a state machine: `lesson`, `question(try 1)`, `feedback`, `question(try 2)`, `teach`, `summary`. Each answer goes through `answer-check`. Every state change goes to `session-store` (so a reopen resumes at the same try, AC37), every answer goes to `log-store`, box changes go to the progress store, point changes go through `economy` and the ledger. The kid screen (`ui/learn/break-screen.ts`) only renders the session state and sends taps back. The session ignores input that does not fit its current state, which is the real guard against double taps (AC117).
 
 The same `break-session` runs three modes: `break` (malus and bonus), `practice` (no malus, no bonus, day cap, AC52 and AC120) and `preview` (Probeer: no points, no boxes, no logs). `exam-session` is a separate, simpler machine: one try, no feedback, a timer.
+
+**An exam (v2).** The parent starts it from Examens. A reopen continues it through `resume.ts`. `exam-flow` asks `exam-session` for a plan and the items (by the `mix` weights, switches ignored), shows the `ui/learn/exam-screen.ts` screens on the `exam` layer and saves every step to `session-store` as kind `exam` with a `phase`. The exam countdown lives in `timer-driver.ts` next to the play timer, so the timer matrix stops it for the parent layer, portrait, a small window and the background. The small grey lock on the question screen goes to `parentFlow.openExamStop()`: the same pin pad, then only the "Examen stoppen?" card. The gate and card sit on the parent layer above the exam, so the question and the typed answer stay as they were. At the end: answers to `log-store` (context `exam`), boxes to the progress store, the result through `saveExam`, a golden egg through `dinoStore.addEgg(kind, true)` on a pass, and back in the world a full play timer. Points never change.
 
 **Rendering details.** Chunks of 16 x 16 x 32. Only faces next to air or a cut out block are built. Each face gets a fixed brightness (top 1.0, sides 0.8 and 0.6, bottom 0.5) as vertex colour, so there are no lights and no shadows. One `MeshBasicMaterial` with the atlas and `alphaTest` for glass and leaves. Linear fog hides the edge. Pixel ratio is `min(devicePixelRatio, 2)`; the spike may lower it to 1.5. Dinos are boxes grouped per dino; golden dinos use a gold colour. At most 12 shop dinos plus golden dinos, about 5 meshes each.
 
@@ -310,9 +312,13 @@ On plain http (the dev server on the home network) Safari has no service worker,
 `./scripts/check.sh` runs everything, in this order:
 1. `validate.py` on every folder in `docs/modules/` (fails if python3 is missing).
 2. `npm ci`, `npm run lint` (ESLint), `npm run typecheck` (`tsc --noEmit`).
-3. `npm test`: Vitest unit tests (`src/**/*.test.ts`, `tests/unit/**/*.test.ts`).
+3. `npm test`: Vitest unit tests (`src/**/*.test.ts`, `tests/unit/**/*.test.ts`). They run in plain Node by default, which is twice as fast. A test file that needs a page (`document`, `window`, `HTMLElement`) starts with `// @vitest-environment jsdom`.
 4. `npm run build`, then `npm run test:dist` (`scripts/check-dist.mjs`: `dist/index.html`, manifest, icons and service worker exist, no test hooks, total size under 5 MB).
 5. `npx playwright install webkit` (with `--with-deps` when running as root, as in the cloud sandbox), then `npm run test:e2e`: Playwright WebKit. Its `webServer` runs `npm run build:e2e` (output `dist-e2e/`, with test hooks) and `vite preview` on it.
+
+`CHECK_E2E=0 ./scripts/check.sh` runs steps 1 to 4 only.
+
+**CI** (`.github/workflows/ci.yml`) runs once per commit: on every push (pull requests from a fork get their own run). A newer push to the same branch cancels the older run, except on `main`. Two parts run at the same time: `check` (`CHECK_E2E=0 ./scripts/check.sh`) and `e2e`, split in 4 shards (`npx playwright test --shard=N/4`) inside the `mcr.microsoft.com/playwright` image, which already holds WebKit. When `@playwright/test` is updated, update the image tag in `ci.yml` to the same version.
 
 **Content release path.** First `check.sh` asks `scripts/check-scope.sh` what changed against the base (`origin/main`, or `$CHECK_BASE`), including uncommitted and untracked files. When every change is learning content or docs (`docs/**` except `docs/modules/validate.py`, `.claude/**`, `CHANGELOG.md`, `README.md`), it runs `scripts/check-content.sh` instead: `validate.py` on every module, the unit tests that load modules (`src/content`, `src/learning`, `src/app`, `tests/unit`), `npm run build` and `npm run test:dist`. No lint, typecheck or e2e, because no code changed. Any code change, a change to the module format, an unknown base, `main` or a deploy (`CHECK_FULL=1`) runs everything. CI skips the WebKit install on the content path.
 
@@ -336,7 +342,7 @@ Rules: every task adds tests that fail without its change. Pure logic is tested 
 
 * Worker name `dino-blokwereld`, static assets from `./dist`, `compatibility_date` 2026-10-17, see `wrangler.jsonc`. No Worker script, no KV, D1 or R2. `preview_urls` is off so no extra public addresses appear.
 * Address: `https://dino-blokwereld.<account subdomain>.workers.dev` (F9, public).
-* `npm run deploy` (build, then `wrangler deploy`) on the founder's machine after `npx wrangler login`, or the manual "Deploy to Cloudflare Workers" GitHub workflow with the repo secrets `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`, which only the founder adds.
+* `npm run deploy` (build, then `wrangler deploy`) on the founder's machine after `npx wrangler login`, or the manual "Deploy to Cloudflare Workers" GitHub workflow (it does not rerun the tests; it refuses a commit without a green CI run, then builds and deploys) with the repo secrets `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`, which only the founder adds.
 * Every deploy is a founder decision. The ship checklist confirms Cloudflare Web Analytics is off for this Worker (AC98).
 * `public/_headers` sets `Cache-Control: no-cache` for `/service-worker.js` and `/index.html`, and long caching for hashed files in `/assets/`.
 

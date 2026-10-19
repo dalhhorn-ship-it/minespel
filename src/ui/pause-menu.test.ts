@@ -64,3 +64,23 @@ describe('pause menu (T44)', () => {
     menu.destroy();
   });
 });
+
+describe('pause menu points placeholder (AC163)', () => {
+  it('shows a placeholder while the points are unknown, then the real total', () => {
+    const menu = createPauseMenu({
+      points: null,
+      onResume: vi.fn(),
+      onTeleportHome: vi.fn(),
+      onShop: vi.fn(),
+      onLesboek: vi.fn(),
+      onPractice: vi.fn(),
+    });
+    const badge = () => menu.element.querySelector('[data-testid="pause-points"]')?.textContent;
+    expect(badge()).toContain('\u{2026}');
+    expect(badge()).not.toMatch(/\d/);
+    // Every button is there and works before the points are known.
+    expect(menu.element.querySelectorAll('.pause-btn').length).toBeGreaterThanOrEqual(5);
+    menu.setPoints(7);
+    expect(badge()).toContain('7 punten');
+  });
+});

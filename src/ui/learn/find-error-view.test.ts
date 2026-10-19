@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 import { describe, expect, it } from 'vitest';
 import type { FindErrorItem } from '../../content/format';
 import type { Response } from '../../learning/answer-check';

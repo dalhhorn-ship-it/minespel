@@ -1,14 +1,16 @@
 # Status
 
-**Phase:** build, milestone M3 complete (ready for M4 remaining tasks: exams & golden egg T39, T51a, T51b, and settings actions T55)
-**Next step:** Build M4 remaining tasks (Exam session logic T39, Kid exam screen & golden egg T51a, Parent Examens screen T51b, Settings actions T55), or run the T32 speed spike on the founder's iPad.
-**Blockers:** For live Cloudflare test deploy, the founder must add the repo secrets `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`.
+**Phase:** small releases. v1 (0.1.0) is the live build (decision 57). v2 Gouden ei (0.2.0) is built and in CI, then it ships to main.
+**Current release:** v2 Gouden ei: practice exams with a golden dino, plus the Winkel button and an instant Pauze (decision 73). Tasks T39, T51a, T51b, T51c, T51d, T51e are done.
+**Next step:** CI green, ship 0.2.0 (merge to main), founder iPad checks (one Taal exam, one Rekentoets, Pauze and Winkel from the home screen icon). Then the architect's simplification review the founder asked for.
+**Next in the backlog:** v3 Dino's veilig (backup and restore). On hold: the save on refresh fix (decision 72).
+**Blockers:** none. Note: this cloud session cannot push tags or to main directly (HTTP 403), so main is updated through a pull request; tag v0.1.0 is local only.
 
 ## Done
 * **2026-10-18: Gemini's build is the truth** (decision 50). `main` holds the Gemini2 code, live on Cloudflare Worker `minespel`. Claude's G0 to G6 branch is set aside (commit `4067f07` in history).
 * Brainstorm: concept chosen (free 3D Minecraft world with dinos, learning breaks, Dutch, age 8 to 10).
 * Cito taalverzorging module for groep 6 and 7: 10 topics, 288 questions, 4 exams in `docs/modules/cito-taalverzorging/`. Passes `docs/modules/validate.py` (T2).
-* **2026-10-19: modules are reusable.** Every folder in `docs/modules/` loads by itself (`src/content/folder-modules.ts`). New `/module` skill turns workbook photos into lessons, questions and exams. Content only changes take a quick release path (validator, module unit tests, build, no e2e; decision 59). Modules so far: **Taal E6**, **Leestekens** (`docs/modules/leestekens/`, 5 topics, 69 questions) and **'t Kofschip** (`docs/modules/kofschip/`, 3 topics, 51 questions). First one: **Taal E6** (`docs/modules/taal-e6/`, 6 topics, 105 questions, 4 exams) from the founder's Leerling in beeld + IEP E6 photos.
+* **2026-10-19: modules are reusable.** Every folder in `docs/modules/` loads by itself (`src/content/folder-modules.ts`). New `/module` skill turns workbook photos into lessons, questions and exams. Content only changes take a quick release path (validator, module unit tests, build, no e2e; decision 76). Modules so far: **Taal E6**, **Leestekens** (`docs/modules/leestekens/`, 5 topics, 69 questions) and **'t Kofschip** (`docs/modules/kofschip/`, 3 topics, 51 questions). First one: **Taal E6** (`docs/modules/taal-e6/`, 6 topics, 105 questions, 4 exams) from the founder's Leerling in beeld + IEP E6 photos.
 * PRD drafted, reviewed by architect and qa (1 round), all founder decisions F1 to F15 answered.
 * PRD approved by the founder in chat on 2026-10-17.
 * Dedicated Shop PRD written in `docs/SHOP_PRD.md` specifying the compelling Dinowinkel, coin economy, species cards, affordability meters, and live collection showcase.

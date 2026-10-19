@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 import { describe, expect, it } from 'vitest';
 import { el } from '../ui/dom';
 import { createScreenManager, type ScreenKind } from './screens';

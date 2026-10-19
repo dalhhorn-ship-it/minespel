@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 import { describe, expect, it, vi } from 'vitest';
 import type { TypeItem } from '../../content/format';
 import { createKidKeyboard, LETTER_ROWS, SPECIAL_KEYS } from './kid-keyboard';

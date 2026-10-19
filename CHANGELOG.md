@@ -4,6 +4,18 @@ Written so kids can read it too.
 
 ## Unreleased
 
+## 0.2.0 (2026-10-19)
+
+### The golden egg exam
+
+* A grown up can now start a practice exam from Examens in the parent area. The kid does it on a calm screen with no hints, sees the score, and can tap "Bekijk je fouten" to learn from the mistakes.
+* Pass the exam and a golden dino hatches in the world!
+* A grown up can stop an exam with the small grey lock on the exam screen. The kid goes back to the world and there is no golden egg.
+* If the app closes during an exam, it continues where you were.
+* New "🥚 Winkel" button next to Pauze. It opens the Dinowinkel straight from the world.
+* Pauze and the Dinowinkel now open right away. The points show "…" for a moment and fill in when they are loaded. You cannot buy anything until the points are known.
+* Pauze and Winkel also work when your finger rolls a little while tapping.
+
 ### New lessons: leestekens and 't kofschip
 
 * Leestekens: learn where the punt, the komma, the dubbele punt and the puntkomma go, and when you write an apostrof. 5 lessons, 69 questions and 2 tests.
@@ -13,6 +25,10 @@ Written so kids can read it too.
 
 * A new Taal pack for the end of groep 6 with 6 lessons and 105 new questions: tricky sounds (au or ou, ei or ij), long words like vrijheid and garage, plurals like auto's, finding the lidwoord and the persoonsvorm, capitals and ! and ?, and verbs in tt, vt and vd.
 * It has 4 practice tests, just like the workbook: deel 1, deel 2, a short M6 test and a big Eindtoets E6.
+
+## 0.1.0 (2026-10-19)
+
+The first version! Everything below is what you can already play.
 
 ### Chickens and Nu oefenen
 

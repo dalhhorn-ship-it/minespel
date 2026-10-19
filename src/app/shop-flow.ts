@@ -241,11 +241,11 @@ export function createShopFlow(options: ShopFlowOptions): ShopFlow {
   }
 
   const flow: ShopFlow = {
+    /** Opens at once with a placeholder, then fills in the points and Kopen buttons once read (AC164). */
     async open() {
       clear();
-      const initialState = await readViewState();
-      activeView = createShopView({
-        state: initialState,
+      const view = createShopView({
+        state: null,
         now: options.now,
         onBuy: async (kind) => {
           await buyEgg(kind);
@@ -261,7 +261,14 @@ export function createShopFlow(options: ShopFlowOptions): ShopFlow {
           options.screens.showWorld();
         },
       });
-      options.screens.showKidOverlay(activeView.element);
+      activeView = view;
+      options.screens.showKidOverlay(view.element);
+      try {
+        const loaded = await readViewState();
+        if (activeView === view) view.render(loaded);
+      } catch {
+        // The placeholder stays and "Sluiten" still works. No buying without known points.
+      }
     },
     buyEgg,
     buyChicken: () => buyEgg('kip'),
