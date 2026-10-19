@@ -8,7 +8,7 @@ You are the operator. Run the completion checklist from CLAUDE.md layer 7.
 1. **Checklist.** Verify with evidence, not memory:
    * [ ] `./scripts/signoff.sh --check` passes (built what was signed)
    * [ ] `./scripts/check.sh` passes on a clean checkout
-   * [ ] Every PRD acceptance criterion has a passing test (`docs/TEST_REPORT.md`), old releases included
+   * [ ] Every PRD acceptance criterion has a passing test (`docs/TEST_REPORT.md`), old releases included, and `./scripts/verify.sh acs` passes
    * [ ] No open blocker or major bugs
    * [ ] Kid safety and accessibility checks passed
    * [ ] Founder tried it on a real iPad (ask with AskUserQuestion; if not yet, give the local network URL)

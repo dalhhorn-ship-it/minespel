@@ -14,6 +14,16 @@ Written so kids can read it too.
 * Pauze and the Dinowinkel now open right away. The points show "…" for a moment and fill in when they are loaded. You cannot buy anything until the points are known.
 * Pauze and Winkel also work when your finger rolls a little while tapping.
 
+### New lessons: leestekens and 't kofschip
+
+* Leestekens: learn where the punt, the komma, the dubbele punt and the puntkomma go, and when you write an apostrof. 5 lessons, 69 questions and 2 tests.
+* 't Kofschip: te or de, t or d? 3 lessons with 51 questions about the verleden tijd and the voltooid deelwoord, and 2 tests.
+
+### New lessons: Taal E6
+
+* A new Taal pack for the end of groep 6 with 6 lessons and 105 new questions: tricky sounds (au or ou, ei or ij), long words like vrijheid and garage, plurals like auto's, finding the lidwoord and the persoonsvorm, capitals and ! and ?, and verbs in tt, vt and vd.
+* It has 4 practice tests, just like the workbook: deel 1, deel 2, a short M6 test and a big Eindtoets E6.
+
 ## 0.1.0 (2026-10-19)
 
 The first version! Everything below is what you can already play.

@@ -1,0 +1,356 @@
+{
+  "id": "hoofdletters-leestekens",
+  "title": "Hoofdletters en leestekens",
+  "groups": [
+    6
+  ],
+  "lesson": {
+    "pages": [
+      {
+        "title": "Hoofdletter en punt",
+        "text": "Een zin begint met een hoofdletter en eindigt met een punt. Namen van mensen, dieren en plaatsen krijgen ook een hoofdletter. Dagen en maanden niet.",
+        "examples": [
+          {
+            "good": "Lars voert de eendjes. Ze zwemmen naar hem toe.",
+            "bad": "Lars voert de eendjes ze. Zwemmen naar hem toe.",
+            "why": "Lees hardop. Waar je stopt en iets nieuws begint, komt de punt."
+          },
+          {
+            "good": "Op woensdag gaat Daan naar Gouda.",
+            "bad": "Op Woensdag gaat daan naar Gouda."
+          }
+        ],
+        "tip": "Lees de zinnen hardop. Elke zin moet een heel stukje zijn.",
+        "skill": "hoofdletter-punt"
+      },
+      {
+        "title": "Komma voor want en maar",
+        "text": "Zitten er twee zinnen aan elkaar met want of maar? Dan komt er een komma voor want of maar. Voor en komt meestal geen komma.",
+        "examples": [
+          {
+            "good": "Ik neem een jas mee, want het is koud."
+          },
+          {
+            "good": "Ik wil buiten spelen, maar het regent."
+          }
+        ],
+        "tip": "Want en maar? Zet er een komma voor.",
+        "skill": "komma-want-maar"
+      },
+      {
+        "title": "Vraagteken en uitroepteken",
+        "text": "Een vraag eindigt met een vraagteken. Roept iemand iets, of is iemand blij, boos of bang? Dan zet je een uitroepteken.",
+        "examples": [
+          {
+            "good": "Hoe laat begint de film?"
+          },
+          {
+            "good": "Hoera! We gaan naar de dierentuin."
+          },
+          {
+            "good": "Pas op, daar komt een T-rex aan!"
+          }
+        ],
+        "tip": "Vraag? Vraagteken. Roepen? Uitroepteken.",
+        "skill": "vraag-uitroep"
+      },
+      {
+        "title": "Iemand zegt iets",
+        "text": "Wat iemand precies zegt, staat tussen aanhalingstekens. Staat wie het zegt vooraan? Dan komt er een dubbele punt voor de aanhalingstekens. Staat wie het zegt achteraan? Dan komt er een komma na de aanhalingstekens.",
+        "examples": [
+          {
+            "good": "Juf zegt: \"Pak je schrift maar.\""
+          },
+          {
+            "good": "\"Ik heb honger\", zegt de dino."
+          }
+        ],
+        "tip": "Zegger vooraan: dubbele punt. Zegger achteraan: komma.",
+        "skill": "aanhalingstekens"
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "e6-hl-001",
+      "type": "choice",
+      "level": "M6",
+      "skill": "hoofdletter-punt",
+      "prompt": "In welke zin staan de hoofdletters en punten goed?",
+      "options": [
+        "Lars voert de eendjes. Ze zwemmen naar hem toe.",
+        "Lars voert de eendjes ze. Zwemmen naar hem toe.",
+        "lars voert de eendjes. ze zwemmen naar hem toe.",
+        "Lars voert de eendjes, Ze zwemmen naar hem toe."
+      ],
+      "answer": 0,
+      "explain": "Elke zin begint met een hoofdletter en eindigt met een punt. Lars is een naam, dus ook een hoofdletter."
+    },
+    {
+      "id": "e6-hl-002",
+      "type": "punctuate",
+      "level": "M6",
+      "skill": "komma-want-maar",
+      "prompt": "Tik waar een komma moet.",
+      "mark": ",",
+      "words": [
+        "Ik",
+        "neem",
+        "een",
+        "jas",
+        "mee",
+        "want",
+        "het",
+        "is",
+        "koud."
+      ],
+      "answer": [
+        4
+      ],
+      "explain": "Voor want komt een komma."
+    },
+    {
+      "id": "e6-hl-003",
+      "type": "choice",
+      "level": "M6",
+      "skill": "vraag-uitroep",
+      "prompt": "Welk leesteken moet aan het eind?",
+      "sentence": "Waar heb jij mijn dino gelegd",
+      "options": [
+        "een punt (.)",
+        "een vraagteken (?)",
+        "een uitroepteken (!)",
+        "een komma (,)"
+      ],
+      "answer": 1,
+      "explain": "Het is een vraag. Een vraag eindigt met een vraagteken."
+    },
+    {
+      "id": "e6-hl-004",
+      "type": "punctuate",
+      "level": "M6",
+      "skill": "vraag-uitroep",
+      "prompt": "Tik waar een uitroepteken moet.",
+      "mark": "!",
+      "words": [
+        "Hoera",
+        "We",
+        "gaan",
+        "naar",
+        "de",
+        "dierentuin."
+      ],
+      "answer": [
+        0
+      ],
+      "explain": "Hoera roep je blij. Daarom komt er een uitroepteken achter."
+    },
+    {
+      "id": "e6-hl-005",
+      "type": "choice",
+      "level": "M6",
+      "skill": "vraag-uitroep",
+      "prompt": "Welk leesteken moet aan het eind?",
+      "sentence": "Pas op, daar komt een grote T-rex aan",
+      "options": [
+        "een punt (.)",
+        "een vraagteken (?)",
+        "een uitroepteken (!)",
+        "een komma (,)"
+      ],
+      "answer": 2,
+      "explain": "Iemand roept iets of waarschuwt. Dan zet je een uitroepteken."
+    },
+    {
+      "id": "e6-hl-006",
+      "type": "punctuate",
+      "level": "M6",
+      "skill": "komma-want-maar",
+      "prompt": "Tik waar een komma moet.",
+      "mark": ",",
+      "words": [
+        "Ik",
+        "wil",
+        "buiten",
+        "spelen",
+        "maar",
+        "het",
+        "regent."
+      ],
+      "answer": [
+        3
+      ],
+      "explain": "Voor maar komt een komma."
+    },
+    {
+      "id": "e6-hl-007",
+      "type": "choice",
+      "level": "M6",
+      "skill": "hoofdletter-punt",
+      "prompt": "Welke zin is goed geschreven?",
+      "options": [
+        "Wij gaan met Noor naar Utrecht.",
+        "Wij gaan met noor naar Utrecht.",
+        "Wij gaan met Noor naar utrecht.",
+        "wij gaan met Noor naar Utrecht."
+      ],
+      "answer": 0,
+      "explain": "Een zin begint met een hoofdletter. Namen van mensen en plaatsen ook: Noor en Utrecht."
+    },
+    {
+      "id": "e6-hl-008",
+      "type": "choice",
+      "level": "E6",
+      "skill": "hoofdletter-punt",
+      "prompt": "In welke zin staan de hoofdletters en punten goed?",
+      "options": [
+        "Fenna bakt een taart voor opa. Hij is morgen jarig.",
+        "Fenna bakt een taart. Voor opa hij is morgen jarig.",
+        "Fenna bakt een taart voor opa hij. Is morgen jarig.",
+        "Fenna bakt een taart voor opa. hij is morgen jarig."
+      ],
+      "answer": 0,
+      "explain": "Lees hardop: Fenna bakt een taart voor opa. Daar stopt de zin. Hij begint met een hoofdletter."
+    },
+    {
+      "id": "e6-hl-009",
+      "type": "choice",
+      "level": "E6",
+      "skill": "aanhalingstekens",
+      "prompt": "In welke zin staan de leestekens goed?",
+      "options": [
+        "Juf zegt: \"Pak je schrift maar.\"",
+        "Juf zegt \"Pak je schrift maar:\"",
+        "Juf: zegt \"Pak je schrift maar.\"",
+        "Juf zegt, \"Pak je schrift: maar.\""
+      ],
+      "answer": 0,
+      "explain": "Staat wie het zegt vooraan? Dan een dubbele punt, en wat juf zegt tussen aanhalingstekens."
+    },
+    {
+      "id": "e6-hl-010",
+      "type": "choice",
+      "level": "E6",
+      "skill": "aanhalingstekens",
+      "prompt": "In welke zin staan de leestekens goed?",
+      "options": [
+        "\"Ik heb honger\", zegt de dino.",
+        "\"Ik heb honger, zegt de dino.\"",
+        "\"Ik heb honger\" zegt, de dino.",
+        "Ik heb honger: \"zegt de dino.\""
+      ],
+      "answer": 0,
+      "explain": "Staat wie het zegt achteraan? Dan komt er een komma na de aanhalingstekens."
+    },
+    {
+      "id": "e6-hl-011",
+      "type": "punctuate",
+      "level": "E6",
+      "skill": "komma-want-maar",
+      "prompt": "Tik waar een komma moet.",
+      "mark": ",",
+      "words": [
+        "De",
+        "dino",
+        "is",
+        "moe",
+        "want",
+        "hij",
+        "heeft",
+        "de",
+        "hele",
+        "dag",
+        "gerend."
+      ],
+      "answer": [
+        3
+      ],
+      "explain": "Er zitten twee zinnen aan elkaar met want. Voor want komt een komma."
+    },
+    {
+      "id": "e6-hl-012",
+      "type": "choice",
+      "level": "E6",
+      "skill": "vraag-uitroep",
+      "prompt": "Welk leesteken moet aan het eind?",
+      "sentence": "Kijk eens, wat een prachtige regenboog",
+      "options": [
+        "een punt (.)",
+        "een vraagteken (?)",
+        "een uitroepteken (!)",
+        "een komma (,)"
+      ],
+      "answer": 2,
+      "explain": "Iemand is blij verrast en roept het. Dan zet je een uitroepteken."
+    },
+    {
+      "id": "e6-hl-013",
+      "type": "punctuate",
+      "level": "E6",
+      "skill": "vraag-uitroep",
+      "prompt": "Tik waar een uitroepteken moet.",
+      "mark": "!",
+      "words": [
+        "Stop",
+        "Je",
+        "staat",
+        "op",
+        "mijn",
+        "toren."
+      ],
+      "answer": [
+        0
+      ],
+      "explain": "Stop roep je hard. Daarom komt er een uitroepteken achter."
+    },
+    {
+      "id": "e6-hl-014",
+      "type": "punctuate",
+      "level": "E6",
+      "skill": "komma-want-maar",
+      "prompt": "Tik waar een komma moet.",
+      "mark": ",",
+      "words": [
+        "Ik",
+        "eet",
+        "een",
+        "appel",
+        "en",
+        "een",
+        "peer."
+      ],
+      "answer": [],
+      "explain": "Voor en komt geen komma. Hier hoeft niets bij."
+    },
+    {
+      "id": "e6-hl-015",
+      "type": "choice",
+      "level": "E6",
+      "skill": "vraag-uitroep",
+      "prompt": "Welke zin is goed?",
+      "options": [
+        "Hoe laat begint de film?",
+        "Hoe laat begint de film.",
+        "Hoe laat begint de film!",
+        "Hoe laat, begint de film?"
+      ],
+      "answer": 0,
+      "explain": "Het is een vraag. Een vraag eindigt met een vraagteken."
+    },
+    {
+      "id": "e6-hl-016",
+      "type": "choice",
+      "level": "E6",
+      "skill": "hoofdletter-punt",
+      "prompt": "Welke zin is goed geschreven?",
+      "options": [
+        "Op woensdag gaat Daan naar zwemles in Gouda.",
+        "Op Woensdag gaat Daan naar zwemles in Gouda.",
+        "Op woensdag gaat daan naar zwemles in Gouda.",
+        "op woensdag gaat Daan naar Zwemles in Gouda."
+      ],
+      "answer": 0,
+      "explain": "Namen van mensen en plaatsen krijgen een hoofdletter. Dagen van de week niet."
+    }
+  ]
+}

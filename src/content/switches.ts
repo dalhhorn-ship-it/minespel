@@ -5,7 +5,7 @@ import type { Item, Level } from './format';
 import { isMastered } from '../learning/srs';
 import type { ProgressRecord } from '../storage/progress-store';
 import type { SwitchesRecord } from '../storage/schema';
-import { REKENEN_MODULE_ID, TAAL_MODULE_ID, type Catalog } from './catalog';
+import type { Catalog } from './catalog';
 
 export type PresetId = 'groep-6-midden' | 'groep-6-eind' | 'groep-7-midden' | 'groep-7-eind';
 
@@ -260,9 +260,10 @@ export function effectiveLevels(
 // ---- presets (AC79) ----
 
 /**
- * Applies a groep preset to both built in modules (Rekenen and Taal): switches on the preset's
- * levels and turns higher levels off, clears topic level overrides on them, and ensures both
- * built in modules and their subjects are switched on.
+ * Applies a groep preset to every built in module (Rekenen, Taal and the other folder modules):
+ * switches on the preset's levels that the module has and turns higher levels off, clears topic
+ * level overrides, and switches the modules and their subjects on. A built in module with none of
+ * the preset's levels is left as it is.
  */
 export function applyPreset(
   record: SwitchesRecord,
@@ -271,14 +272,17 @@ export function applyPreset(
 ): SwitchesRecord {
   const preset = PRESETS.find((p) => p.id === presetId);
   if (!preset) return cloneSwitches(record);
-  let next = setSubjectOn(record, 'rekenen', true);
-  next = setSubjectOn(next, 'taal', true);
-  for (const moduleId of [REKENEN_MODULE_ID, TAAL_MODULE_ID]) {
-    if (!catalog.getModule(moduleId)) continue;
+  let next = cloneSwitches(record);
+  for (const bundle of catalog.modules()) {
+    const moduleId = bundle.module.id;
+    if (!catalog.isBuiltIn(moduleId)) continue;
+    const levels = preset.levels.filter((lv) => bundle.module.levels.includes(lv));
+    if (levels.length === 0) continue;
+    next = setSubjectOn(next, bundle.module.subject.toLowerCase(), true);
     next = withModuleEntry(next, moduleId, (e) => ({
       ...e,
       enabled: true,
-      levels: [...preset.levels],
+      levels,
       topicLevels: {},
     }));
   }

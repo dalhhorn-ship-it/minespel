@@ -2,6 +2,8 @@ name: CI
 # Runs once per commit. Pushes to any branch run it. A pull request from a branch in this repo
 # already gets the push run's checks, so pull_request runs only for forks.
 # A newer push to the same branch cancels the older run. Runs on main are never cancelled.
+# Content release path: a change with only learning modules or docs skips e2e
+# (scripts/check-scope.sh). main always runs everything.
 on:
   push:
   pull_request:
@@ -11,6 +13,9 @@ permissions:
 concurrency:
   group: ci-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+env:
+  CHECK_BASE: ${{ github.event_name == 'pull_request' && format('origin/{0}', github.base_ref) || 'origin/main' }}
+  CHECK_FULL: ${{ github.ref == 'refs/heads/main' && '1' || '0' }}
 jobs:
   check:
     name: lint, types, unit, build
@@ -18,6 +23,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -43,10 +50,22 @@ jobs:
         shard: [1, 2, 3, 4]
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Scope
+        id: scope
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          if [ "$CHECK_FULL" = "1" ]; then scope=full; else scope=$(./scripts/check-scope.sh); fi
+          echo "scope=$scope" >> "$GITHUB_OUTPUT"
+          echo "Check scope: $scope"
       - uses: actions/setup-node@v4
+        if: steps.scope.outputs.scope == 'full'
         with:
           node-version: 22
           cache: npm
-      - run: npm ci --no-audit --no-fund
+      - if: steps.scope.outputs.scope == 'full'
+        run: npm ci --no-audit --no-fund
       - name: WebKit e2e, shard ${{ matrix.shard }} of 4
+        if: steps.scope.outputs.scope == 'full'
         run: npx playwright test --shard=${{ matrix.shard }}/4

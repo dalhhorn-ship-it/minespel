@@ -1,0 +1,56 @@
+{
+  "id": "leestekens",
+  "title": "Leestekens: punt, komma, dubbele punt, puntkomma en apostrof",
+  "subject": "taal",
+  "version": 1,
+  "language": "nl",
+  "description": "Waar zet je een punt, een komma, een dubbele punt of een puntkomma? En wanneer schrijf je een apostrof? Lessen, oefenvragen en toetsen voor groep 6.",
+  "levels": [
+    "M6",
+    "E6"
+  ],
+  "topics": [
+    "punt",
+    "komma",
+    "dubbele-punt",
+    "puntkomma",
+    "apostrof"
+  ],
+  "exams": [
+    {
+      "id": "toets-leestekens-m6",
+      "title": "Toets leestekens M6",
+      "levels": [
+        "M6"
+      ],
+      "questionCount": 20,
+      "timeLimitMinutes": 20,
+      "passPercent": 70,
+      "mix": {
+        "punt": 1,
+        "komma": 1,
+        "dubbele-punt": 1,
+        "puntkomma": 1,
+        "apostrof": 1
+      }
+    },
+    {
+      "id": "toets-leestekens-e6",
+      "title": "Toets leestekens E6",
+      "levels": [
+        "M6",
+        "E6"
+      ],
+      "questionCount": 30,
+      "timeLimitMinutes": 30,
+      "passPercent": 70,
+      "mix": {
+        "punt": 1,
+        "komma": 2,
+        "dubbele-punt": 1,
+        "puntkomma": 1,
+        "apostrof": 1
+      }
+    }
+  ]
+}

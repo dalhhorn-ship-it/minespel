@@ -13,7 +13,7 @@ rel="${file#"$root"/}"
 rel="${rel#./}"
 
 case "$rel" in
-  docs/PRD.approved|scripts/signoff.sh|.claude/hooks/*|.claude/settings.json)
+  docs/PRD.approved|scripts/signoff.sh|scripts/verify.sh|.claude/hooks/*|.claude/settings.json)
     echo "Blocked: $rel is protected. The approval stamp is written only by scripts/signoff.sh after the founder approves in chat." >&2
     exit 2 ;;
   docs/*|.claude/*|CLAUDE.md|README.md|CHANGELOG.md|scripts/check.sh)

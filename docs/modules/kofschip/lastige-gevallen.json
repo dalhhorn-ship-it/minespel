@@ -1,0 +1,271 @@
+{
+  "id": "lastige-gevallen",
+  "title": "Lastige gevallen: v, z, t en d",
+  "groups": [
+    6
+  ],
+  "lesson": {
+    "pages": [
+      {
+        "title": "Kijk naar het hele werkwoord",
+        "text": "Bij verven en reizen is de stam verf en reis. Maar in het hele werkwoord staat een v of een z. Die zitten niet in 't kofschip. Daarom wordt het de en d.",
+        "examples": [
+          {
+            "good": "Papa verfde het hek.",
+            "bad": "Papa verfte het hek.",
+            "why": "Verven heeft een v. De v zit niet in 't kofschip, dus de."
+          },
+          {
+            "good": "Wij zijn gereisd.",
+            "bad": "Wij zijn gereist.",
+            "why": "Reizen heeft een z, dus d."
+          }
+        ],
+        "tip": "Kijk naar het hele werkwoord: v of z? Dan de of d.",
+        "skill": "v-z"
+      },
+      {
+        "title": "Stam op t of d",
+        "text": "Eindigt de stam al op een t of een d? Plak er in de verleden tijd toch te of de achter: zet plus te is zette, land plus de is landde. In het voltooid deelwoord komt er niets meer bij: gezet, geland.",
+        "examples": [
+          {
+            "good": "Het vliegtuig landde.",
+            "bad": "Het vliegtuig lande.",
+            "why": "Land plus de: twee keer een d."
+          },
+          {
+            "good": "Ik heb gewacht.",
+            "bad": "Ik heb gewachtt.",
+            "why": "Wacht eindigt al op t. Er komt geen t meer bij."
+          }
+        ],
+        "tip": "Vt: plak er altijd te of de achter. Vd: nooit twee t's of d's aan het eind.",
+        "skill": "t-d-stam"
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "kf-lg-001",
+      "type": "type",
+      "level": "M6",
+      "skill": "v-z",
+      "prompt": "Schrijf het werkwoord in de verleden tijd.",
+      "sentence": "Papa (verven) het hek groen.",
+      "answer": [
+        "verfde"
+      ],
+      "explain": "Verven heeft een v. De v zit niet in 't kofschip, dus de: verfde."
+    },
+    {
+      "id": "kf-lg-002",
+      "type": "type",
+      "level": "M6",
+      "skill": "v-z",
+      "prompt": "Schrijf het werkwoord in de verleden tijd.",
+      "sentence": "Wij (reizen) met de trein naar oma.",
+      "answer": [
+        "reisden"
+      ],
+      "explain": "Reizen heeft een z. De z zit niet in 't kofschip, dus de. Wij: reisden."
+    },
+    {
+      "id": "kf-lg-003",
+      "type": "type",
+      "level": "M6",
+      "skill": "t-d-stam",
+      "prompt": "Schrijf het werkwoord in de verleden tijd.",
+      "sentence": "Ik (zetten) de beker op tafel.",
+      "answer": [
+        "zette"
+      ],
+      "explain": "Stam zet. De t zit in 't kofschip, dus te. Zet plus te is zette."
+    },
+    {
+      "id": "kf-lg-004",
+      "type": "type",
+      "level": "M6",
+      "skill": "t-d-stam",
+      "prompt": "Schrijf het werkwoord in de verleden tijd.",
+      "sentence": "Het vliegtuig (landen) in de regen.",
+      "answer": [
+        "landde"
+      ],
+      "explain": "Stam land. De d zit niet in 't kofschip, dus de. Land plus de is landde."
+    },
+    {
+      "id": "kf-lg-005",
+      "type": "choice",
+      "level": "M6",
+      "skill": "t-d-stam",
+      "prompt": "Welk woord moet op de stippen?",
+      "sentence": "Mijn zus ... de hele avond met oma.",
+      "options": [
+        "praatte",
+        "praatten",
+        "prate",
+        "praatde"
+      ],
+      "answer": 0,
+      "explain": "Stam praat. De t zit in 't kofschip, dus te. Mijn zus is één: praatte."
+    },
+    {
+      "id": "kf-lg-006",
+      "type": "choice",
+      "level": "M6",
+      "skill": "v-z",
+      "prompt": "Welke zin is goed?",
+      "options": [
+        "De dino's leefden lang geleden.",
+        "De dino's leefte lang geleden.",
+        "De dino's leefde lang geleden.",
+        "De dino's leeften lang geleden."
+      ],
+      "answer": 0,
+      "explain": "Leven heeft een v, dus de. Meer dino's, dus den: leefden."
+    },
+    {
+      "id": "kf-lg-007",
+      "type": "find-error",
+      "level": "M6",
+      "skill": "v-z",
+      "prompt": "Welk woord is fout geschreven?",
+      "words": [
+        "Gisteren",
+        "verfte",
+        "ik",
+        "mijn",
+        "kamer",
+        "geel."
+      ],
+      "answer": 1,
+      "correction": "verfde",
+      "explain": "Verven heeft een v. De v zit niet in 't kofschip, dus de: verfde."
+    },
+    {
+      "id": "kf-lg-008",
+      "type": "type",
+      "level": "E6",
+      "skill": "v-z",
+      "prompt": "Schrijf het voltooid deelwoord.",
+      "sentence": "Opa heeft het hek blauw (verven).",
+      "answer": [
+        "geverfd"
+      ],
+      "explain": "Verven heeft een v, dus d. Ge plus verf plus d: geverfd."
+    },
+    {
+      "id": "kf-lg-009",
+      "type": "type",
+      "level": "E6",
+      "skill": "v-z",
+      "prompt": "Schrijf het voltooid deelwoord.",
+      "sentence": "Wij hebben door heel Europa (reizen).",
+      "answer": [
+        "gereisd"
+      ],
+      "explain": "Reizen heeft een z, dus d. Ge plus reis plus d: gereisd."
+    },
+    {
+      "id": "kf-lg-010",
+      "type": "type",
+      "level": "E6",
+      "skill": "t-d-stam",
+      "prompt": "Schrijf het voltooid deelwoord.",
+      "sentence": "Ik heb het boek op de plank (zetten).",
+      "answer": [
+        "gezet"
+      ],
+      "explain": "Ge plus zet. De stam eindigt al op een t, er komt niets meer bij: gezet."
+    },
+    {
+      "id": "kf-lg-011",
+      "type": "type",
+      "level": "E6",
+      "skill": "t-d-stam",
+      "prompt": "Schrijf het voltooid deelwoord.",
+      "sentence": "Het vliegtuig is net (landen).",
+      "answer": [
+        "geland"
+      ],
+      "explain": "Ge plus land. De stam eindigt al op een d, er komt niets meer bij: geland."
+    },
+    {
+      "id": "kf-lg-012",
+      "type": "type",
+      "level": "E6",
+      "skill": "t-d-stam",
+      "prompt": "Schrijf het voltooid deelwoord.",
+      "sentence": "Wij hebben lang op de bus (wachten).",
+      "answer": [
+        "gewacht"
+      ],
+      "explain": "Ge plus wacht. De stam eindigt al op een t, er komt niets meer bij: gewacht."
+    },
+    {
+      "id": "kf-lg-013",
+      "type": "find-error",
+      "level": "E6",
+      "skill": "v-z",
+      "prompt": "Welk woord is fout geschreven?",
+      "words": [
+        "Wij",
+        "hebben",
+        "het",
+        "hele",
+        "verhaal",
+        "geloofd."
+      ],
+      "answer": -1,
+      "correction": null,
+      "explain": "Alles is goed. Geloven heeft een v, dus d: geloofd."
+    },
+    {
+      "id": "kf-lg-014",
+      "type": "choice",
+      "level": "E6",
+      "skill": "v-z",
+      "prompt": "Welk woord moet op de stippen?",
+      "sentence": "Mijn vriendin is vorig jaar ... .",
+      "options": [
+        "verhuisd",
+        "verhuist",
+        "geverhuisd",
+        "verhuizd"
+      ],
+      "answer": 0,
+      "explain": "Verhuizen heeft een z, dus d. Ver staat er al, dus geen ge: verhuisd."
+    },
+    {
+      "id": "kf-lg-015",
+      "type": "type",
+      "level": "E6",
+      "skill": "t-d-stam",
+      "prompt": "Schrijf het werkwoord in de verleden tijd.",
+      "sentence": "De kinderen (praten) heel zacht in de bieb.",
+      "answer": [
+        "praatten"
+      ],
+      "explain": "Stam praat plus te, en meer kinderen dus ten: praatten."
+    },
+    {
+      "id": "kf-lg-016",
+      "type": "find-error",
+      "level": "E6",
+      "skill": "t-d-stam",
+      "prompt": "Welk woord is fout geschreven?",
+      "words": [
+        "Ik",
+        "heb",
+        "heel",
+        "lang",
+        "op",
+        "jou",
+        "gewachtt."
+      ],
+      "answer": 6,
+      "correction": "gewacht.",
+      "explain": "Wacht eindigt al op een t. In het voltooid deelwoord komt er geen t bij: gewacht."
+    }
+  ]
+}

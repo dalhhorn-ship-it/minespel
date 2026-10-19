@@ -1,0 +1,332 @@
+{
+  "id": "meervoud",
+  "title": "Meervoud en 's middags",
+  "groups": [
+    6
+  ],
+  "lesson": {
+    "pages": [
+      {
+        "title": "-en of -s",
+        "text": "Meestal krijgt het meervoud -en: boek, boeken. Eindigt een woord op -el, -em, -en, -er of -je? Dan komt er alleen een s achter: tafel, tafels; meisje, meisjes.",
+        "examples": [
+          {
+            "good": "Wij hebben twee tafels.",
+            "bad": "Wij hebben twee tafelen."
+          },
+          {
+            "good": "Er zitten tien meisjes in de klas."
+          }
+        ],
+        "tip": "Zeg het woord hardop. Klinkt -s mooi? Dan is het vaak -s.",
+        "skill": "meervoud-en-s"
+      },
+      {
+        "title": "'s na a, i, o, u en y",
+        "text": "Eindigt een woord op a, i, o, u of y? Dan schrijf je 's in het meervoud: auto's, kiwi's, oma's, pony's. Zo blijft de klank lang. Eindigt het op een e? Dan alleen een s: tantes.",
+        "examples": [
+          {
+            "good": "In de straat rijden veel auto's.",
+            "bad": "In de straat rijden veel autos.",
+            "why": "Zonder 's zou je auto-s anders lezen."
+          },
+          {
+            "good": "Mijn tantes hebben pony's."
+          }
+        ],
+        "tip": "A, i, o, u, y aan het eind? Dan 's.",
+        "skill": "meervoud-apostrof"
+      },
+      {
+        "title": "f wordt v, s wordt z",
+        "text": "Bij sommige woorden verandert de laatste letter in het meervoud. De f wordt een v en de s wordt een z: brief, brieven; huis, huizen.",
+        "examples": [
+          {
+            "good": "Ik schrijf twee brieven.",
+            "bad": "Ik schrijf twee briefen."
+          },
+          {
+            "good": "Daar staan oude huizen.",
+            "bad": "Daar staan oude huisen."
+          }
+        ],
+        "tip": "Zeg het meervoud hardop. Hoor je een v of een z? Schrijf die dan ook.",
+        "skill": "f-v-s-z"
+      },
+      {
+        "title": "Eén klinker of twee?",
+        "text": "Een lange klank aan het eind van een klankgroep schrijf je met één letter: boom, bo-men; muur, mu-ren. Een korte klank krijgt twee medeklinkers: kip, kip-pen.",
+        "examples": [
+          {
+            "good": "In de tuin staan twee bomen.",
+            "bad": "In de tuin staan twee boomen."
+          },
+          {
+            "good": "Er lopen vier kippen.",
+            "bad": "Er lopen vier kipen."
+          }
+        ],
+        "tip": "Hak het woord in stukjes. Eindigt een stukje met een lange klank? Dan één letter.",
+        "skill": "klankgroep"
+      },
+      {
+        "title": "'s middags",
+        "text": "'s Morgens, 's middags, 's avonds en 's nachts: je schrijft een apostrof, een s, een spatie en dan het woord. Begint de zin ermee? Dan krijgt het woord erna de hoofdletter: 's Avonds.",
+        "examples": [
+          {
+            "good": "Wij spelen 's middags buiten.",
+            "bad": "Wij spelen s'middags buiten."
+          },
+          {
+            "good": "'s Nachts slaapt de dino.",
+            "bad": "'S nachts slaapt de dino."
+          }
+        ],
+        "tip": "Eerst het streepje, dan de s.",
+        "skill": "s-middags"
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "e6-mv-001",
+      "type": "type",
+      "level": "M6",
+      "skill": "meervoud-apostrof",
+      "prompt": "Schrijf het meervoud van het woord tussen haakjes.",
+      "sentence": "In de straat rijden veel (auto).",
+      "answer": [
+        "auto's"
+      ],
+      "explain": "Auto eindigt op een o. Dan schrijf je 's: auto's."
+    },
+    {
+      "id": "e6-mv-002",
+      "type": "type",
+      "level": "M6",
+      "skill": "klankgroep",
+      "prompt": "Schrijf het meervoud van het woord tussen haakjes.",
+      "sentence": "Op de boerderij lopen vier (kip).",
+      "answer": [
+        "kippen"
+      ],
+      "explain": "Kip heeft een korte i. Dan schrijf je twee p's: kippen."
+    },
+    {
+      "id": "e6-mv-003",
+      "type": "choice",
+      "level": "M6",
+      "skill": "meervoud-en-s",
+      "prompt": "Welk woord moet op de stippen?",
+      "sentence": "Wij hebben twee ... in de klas.",
+      "options": [
+        "tafels",
+        "tafelen",
+        "tafel's"
+      ],
+      "answer": 0,
+      "explain": "Tafel eindigt op -el. Dan komt er alleen een s achter: tafels."
+    },
+    {
+      "id": "e6-mv-004",
+      "type": "choice",
+      "level": "M6",
+      "skill": "meervoud-apostrof",
+      "prompt": "Welk woord moet op de stippen?",
+      "sentence": "Oma koopt drie ... op de markt.",
+      "options": [
+        "kiwi's",
+        "kiwis",
+        "kiwies"
+      ],
+      "answer": 0,
+      "explain": "Kiwi eindigt op een i. Dan schrijf je 's: kiwi's."
+    },
+    {
+      "id": "e6-mv-005",
+      "type": "type",
+      "level": "M6",
+      "skill": "f-v-s-z",
+      "prompt": "Schrijf het meervoud van het woord tussen haakjes.",
+      "sentence": "Ik schrijf twee (brief) aan mijn opa.",
+      "answer": [
+        "brieven"
+      ],
+      "explain": "Brief wordt brieven. De f wordt een v."
+    },
+    {
+      "id": "e6-mv-006",
+      "type": "choice",
+      "level": "M6",
+      "skill": "f-v-s-z",
+      "prompt": "Welk woord moet op de stippen?",
+      "sentence": "In onze straat staan oude ... .",
+      "options": [
+        "huizen",
+        "huisen",
+        "huizzen"
+      ],
+      "answer": 0,
+      "explain": "Huis wordt huizen. De s wordt een z."
+    },
+    {
+      "id": "e6-mv-007",
+      "type": "choice",
+      "level": "M6",
+      "skill": "s-middags",
+      "prompt": "Welke zin is goed geschreven?",
+      "options": [
+        "Wij spelen 's middags buiten.",
+        "Wij spelen s'middags buiten.",
+        "Wij spelen smiddags buiten.",
+        "Wij spelen 'smiddags buiten."
+      ],
+      "answer": 0,
+      "explain": "Je schrijft 's middags: apostrof, s, spatie, middags."
+    },
+    {
+      "id": "e6-mv-008",
+      "type": "type",
+      "level": "M6",
+      "skill": "klankgroep",
+      "prompt": "Schrijf het meervoud van het woord tussen haakjes.",
+      "sentence": "Ik zie twee (boom) in de tuin.",
+      "answer": [
+        "bomen"
+      ],
+      "explain": "Boom wordt bo-men. De lange o staat aan het eind van de klankgroep, dus één o."
+    },
+    {
+      "id": "e6-mv-009",
+      "type": "type",
+      "level": "E6",
+      "skill": "meervoud-apostrof",
+      "prompt": "Schrijf het meervoud van het woord tussen haakjes.",
+      "sentence": "De kinderen dragen gekke (pyjama).",
+      "answer": [
+        "pyjama's"
+      ],
+      "explain": "Pyjama eindigt op een a. Dan schrijf je 's: pyjama's."
+    },
+    {
+      "id": "e6-mv-010",
+      "type": "choice",
+      "level": "E6",
+      "skill": "klankgroep",
+      "prompt": "Welk woord moet op de stippen?",
+      "sentence": "Wij verven de ... van mijn kamer.",
+      "options": [
+        "muren",
+        "muuren",
+        "murren"
+      ],
+      "answer": 0,
+      "explain": "Muur wordt mu-ren. De lange u staat aan het eind van een klankgroep, dus één u."
+    },
+    {
+      "id": "e6-mv-011",
+      "type": "type",
+      "level": "E6",
+      "skill": "f-v-s-z",
+      "prompt": "Schrijf het meervoud van het woord tussen haakjes.",
+      "sentence": "In het bos wonen veel (wolf).",
+      "answer": [
+        "wolven"
+      ],
+      "explain": "Wolf wordt wolven. De f wordt een v."
+    },
+    {
+      "id": "e6-mv-012",
+      "type": "choice",
+      "level": "E6",
+      "skill": "f-v-s-z",
+      "prompt": "Welk woord moet op de stippen?",
+      "sentence": "Op het dak zitten veel ... .",
+      "options": [
+        "duiven",
+        "duifen",
+        "duiven's",
+        "duivven"
+      ],
+      "answer": 0,
+      "explain": "Duif wordt duiven. De f wordt een v."
+    },
+    {
+      "id": "e6-mv-013",
+      "type": "type",
+      "level": "E6",
+      "skill": "f-v-s-z",
+      "prompt": "Schrijf het meervoud van het woord tussen haakjes.",
+      "sentence": "Ik koop een bos (roos) voor mama.",
+      "answer": [
+        "rozen"
+      ],
+      "explain": "Roos wordt ro-zen. De s wordt een z, en de lange o staat aan het eind: één o."
+    },
+    {
+      "id": "e6-mv-014",
+      "type": "find-error",
+      "level": "E6",
+      "skill": "meervoud-apostrof",
+      "prompt": "Welk woord is fout geschreven?",
+      "words": [
+        "Mijn",
+        "tantes",
+        "hebben",
+        "twee",
+        "baby's",
+        "en",
+        "drie",
+        "pony's."
+      ],
+      "answer": -1,
+      "correction": null,
+      "explain": "Alles is goed. Baby en pony eindigen op een y, dus 's. Tante eindigt op een e, dus alleen s."
+    },
+    {
+      "id": "e6-mv-015",
+      "type": "find-error",
+      "level": "E6",
+      "skill": "s-middags",
+      "prompt": "Welk woord is fout geschreven?",
+      "words": [
+        "Wij",
+        "gaan",
+        "savonds",
+        "naar",
+        "het",
+        "dinomuseum."
+      ],
+      "answer": 2,
+      "correction": "'s avonds",
+      "explain": "Je schrijft 's avonds: apostrof, s, spatie, avonds."
+    },
+    {
+      "id": "e6-mv-016",
+      "type": "choice",
+      "level": "E6",
+      "skill": "s-middags",
+      "prompt": "Welke zin is goed geschreven?",
+      "options": [
+        "'s Nachts slaapt de dino in zijn hol.",
+        "S'nachts slaapt de dino in zijn hol.",
+        "'S nachts slaapt de dino in zijn hol.",
+        "Snachts slaapt de dino in zijn hol."
+      ],
+      "answer": 0,
+      "explain": "Begint de zin met 's? Dan krijgt het woord erna de hoofdletter: 's Nachts."
+    },
+    {
+      "id": "e6-mv-017",
+      "type": "type",
+      "level": "E6",
+      "skill": "meervoud-en-s",
+      "prompt": "Schrijf het meervoud van het woord tussen haakjes.",
+      "sentence": "In de klas zitten tien (meisje).",
+      "answer": [
+        "meisjes"
+      ],
+      "explain": "Meisje eindigt op -je. Dan komt er alleen een s achter: meisjes."
+    }
+  ]
+}
