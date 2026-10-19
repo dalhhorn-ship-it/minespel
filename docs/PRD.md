@@ -1,8 +1,10 @@
 # PRD: Dino Blokwereld (working title)
 
-Status: APPROVED by Founder on 2026-10-19
+Status: READY FOR SIGNOFF
 
 First approved by the founder on 2026-10-17. Recut on 2026-10-19 by decision 57: the live build is v1 (0.1.0), and everything not built yet moved to small releases in section 5. The recut changes the PRD, so the founder approves it again. On 2026-10-19 the founder picked v2 Gouden ei as the next release (decision 59). Its section is in 12. This signoff covers the recut and v2.
+
+This signoff adds the Winkel button and the Pauze fix to v2 (decision 73, see also 72).
 
 ## 1. Summary
 Dino Blokwereld is a small 3D block world on the iPad where a kid explores, mines and builds with Minecraft style blocks. Every few minutes the game pauses for a short learning break in Rekenen or Taal. Right answers earn dino points. In the Dinowinkel the kid buys dino eggs with those points, and the eggs hatch into friendly blocky dinos that walk around in the world. A passed practice exam gives a golden dino.
@@ -398,7 +400,7 @@ v1 is live. After it come small releases, one at a time. Each release gives the 
 | Rank | Release | What the kids or the parent feel | Size | Value for the kids | Plan tasks | Status |
 |---|---|---|---|---|---|---|
 | | **v1** | The block world with dinos, learning breaks, the Dinowinkel and chickens (4.0) | | | every task marked done in `docs/PLAN.md` | shipped |
-| 1 | **v2 Gouden ei** | The parent starts a practice exam. Pass it and a golden dino hatches. | M | High. A new big goal, and the only reward still missing. | T39, T51a, T51b | next (0.2.0) |
+| 1 | **v2 Gouden ei** | The parent starts a practice exam. Pass it and a golden dino hatches. | M | High. A new big goal, and the only reward still missing. | T39, T51a, T51b, T51e | next (0.2.0) |
 | 2 | **v3 Dino's veilig** | A backup file keeps the world, dinos and points safe, even on a wiped or new iPad. | M | High, as insurance. Losing a herd of dinos would hurt the most. | T18, T19, T53a, T55 | candidate, right after v2 (decision 59) |
 | 3 | **v4 Altijd spelen** | The game starts without internet, never shows a blank screen, and two open tabs never fight over the save. | M | Medium to high. Protects saves, and the kids notice when it is missing. | T52, T22, new first start task | later (after v3) |
 | 4 | **v5 Veilig en juist** | The Taal words are spelled right, nothing reaches the internet, everything fits with the big font, and the game is smooth on the family iPad. | M | Medium. Mostly invisible, but it protects what the kids learn and see. | T63, T65, T62, T32, T64 | candidate |
@@ -410,10 +412,10 @@ The 25 open plan tasks are all in v2 to v8. v4 adds one new task the architect w
 
 ### v2 Gouden ei (next, 0.2.0)
 * **Goal:** a practice exam the parent starts, a calm exam screen for the kid, and a golden egg for a pass.
-* **In:** 4.11 in full. The golden dino from 4.3. The exam timer from 4.4. Exam answers move the boxes (4.6). The four Taal exams (4.9) and four Rekentoets exams (4.10). The parent Examens screen with the "te weinig vragen" warning. "Pauze nu starten" greyed during an exam. The small grey lock on the exam screen to stop the exam (decision 61).
+* **In:** 4.11 in full. The golden dino from 4.3. The exam timer from 4.4. Exam answers move the boxes (4.6). The four Taal exams (4.9) and four Rekentoets exams (4.10). The parent Examens screen with the "te weinig vragen" warning. "Pauze nu starten" greyed during an exam. The small grey lock on the exam screen to stop the exam (decision 61). A Winkel button next to Pauze and a Pauze that opens at once (decision 73).
 * **Out:** the Examens list in Resultaten (v6). Own exams (v8). A lock on learning breaks.
-* **Size:** M. **Tasks:** T39 (exam logic), T51a (kid exam screen, review, golden egg, exam lock), T51b (parent Examens screen, stop after the gate).
-* **Criteria:** AC64 to AC72, AC111, AC112, AC115, AC125 (exam part), AC153, and the new AC155 to AC159 in 12.
+* **Size:** M. **Tasks:** T39 (exam logic), T51a (kid exam screen, review, golden egg, exam lock), T51b (parent Examens screen, stop after the gate), T51e (Winkel button and instant Pauze).
+* **Criteria:** AC64 to AC72, AC111, AC112, AC115, AC125 (exam part), AC153, and the new AC155 to AC165 in 12.
 * **Decided:** the parent stops an exam with a small grey lock on the exam screen only (decision 61). Full section in 12.
 
 ### v3 Dino's veilig
@@ -758,7 +760,7 @@ Times in these criteria are play time with the app visible, unless stated otherw
 * **AC143 (iPad) (v1, iPad check in v5):** Given the reference iPad, then the stick, jump button, hotbar, countdown and lock icon sit inside the safe area, and the hotbar sits high enough that using it never triggers the home swipe.
 * **AC144 (v4):** Given a wiped iPad (empty storage), when the app opens, then the first start flow shows, and after "Geef de iPad aan je kind" the world loads with no errors.
 
-**Count:** AC1 to AC154 here, plus AC155 to AC159 for v2 in section 12. 6 are removed (AC13, AC14, AC15, AC19, AC32, AC33). 153 active criteria. 106 are v1 (some with a part in a later release). 47 belong to a later release: v2 has 18 (13 here, 5 in 12), v3 has 5, v4 has 8, v5 has 2, v6 has 5, v7 has 4, v8 has 5.
+**Count:** AC1 to AC154 here, plus AC155 to AC165 for v2 in section 12. 6 are removed (AC13, AC14, AC15, AC19, AC32, AC33). 159 active criteria. 106 are v1 (some with a part in a later release). 53 belong to a later release: v2 has 24 (13 here, 11 in 12), v3 has 5, v4 has 8, v5 has 2, v6 has 5, v7 has 4, v8 has 5.
 
 ## 8. Look, sound and feel
 * **Style:** bright, friendly Minecraft style pixel blocks with 16 x 16 pixel textures. Dinos are chunky and cute with big eyes, made of boxes. Eggs are spotted and wobble. Soft, still fog at the edge (no flicker). No blood, no scary sounds, no angry dinos.
@@ -858,7 +860,7 @@ One section per release the founder picked at `/release`. Each one ships on its 
 
 **Status:** next. Picked by the founder (decision 59). Ships as 0.2.0.
 
-**Goal:** "Pass a practice exam and a golden dino hatches next to me."
+**Goal:** "Pass a practice exam and a golden dino hatches next to me. And I can open the Dinowinkel with one tap, and Pauze always works."
 
 **In:**
 * Exams as in 4.11: the parent starts one, the kid sees the calm exam screen, the end screen and "Bekijk je fouten".
@@ -869,6 +871,8 @@ One section per release the founder picked at `/release`. Each one ships on its 
 * The parent Examens screen: pick a module and an exam, the "te weinig vragen" warning, "Beëindig eerst de pauze" during a break.
 * "Pauze nu starten" greyed out during an exam (4.17).
 * New (decision 61): a small grey lock on the exam screen only. It opens the parent gate, and after the right pincode the parent can stop the exam.
+* New (decision 73): a Winkel button "🥚 Winkel" in the world top bar, next to Pauze and the same size. It opens the Dinowinkel directly. The Dinowinkel stays in the pause menu too.
+* New (decision 73, bug the kids hit): Pauze and Winkel open at once on a tap, without waiting for saved data. The points fill in when they are read.
 * Version 0.2.0 and a kid readable entry in `CHANGELOG.md`.
 
 **Out:**
@@ -885,7 +889,7 @@ One section per release the founder picked at `/release`. Each one ships on its 
 * "Stoppen" saves the exam as "gestopt", gives no egg, shows no review and takes the kid back to the world with a full play timer.
 * "Terug naar het examen", or "Terug" on the pin pad, returns to the same question with the same answer typed so far and the same time left.
 
-**Plan tasks:** T39 (exam logic), T51a (kid exam screen, end screen, review, golden egg, and the exam lock with its pin pad hook), T51b (parent Examens screen, the "Examen stoppen?" card and the stop). The architect may split the lock into its own task T51c if T51a gets too big. That is 3 or 4 tasks.
+**Plan tasks:** T39 (exam logic), T51a (kid exam screen, end screen, review, golden egg, and the exam lock with its pin pad hook), T51b (parent Examens screen, the "Examen stoppen?" card and the stop). The architect may split the lock into its own task T51c if T51a gets too big. T51e (Winkel button and instant Pauze, decision 73). That is 4 or 5 tasks.
 
 **Acceptance criteria.** The existing v2 criteria in section 7 hold as written: AC64, AC65, AC66, AC67, AC68, AC69, AC70, AC71, AC72, AC111, AC112, AC115, AC153, and the exam part of AC125. AC127 also holds for the exam lock. New for v2:
 
@@ -894,5 +898,11 @@ One section per release the founder picked at `/release`. Each one ships on its 
 * **AC157 (v2):** Given the pin pad was opened from the exam lock, when the right pincode is typed and the parent taps "Stoppen", then the exam is saved as "gestopt", no golden egg appears, no review shows, and the kid is in the world with the play timer at the full interval. Given the app is closed and reopened after that, then the world shows, not the exam.
 * **AC158 (v2):** Given an exam on question 9 with 20:00 left and an answer typed but not checked, when the pin pad is opened from the exam lock and then closed with "Terug", or the right pincode is typed and "Terug naar het examen" is tapped, then the exam shows question 9 with the same typed answer and 20:00 left, plus or minus 1 second, however long the gate was open. Given 3 wrong codes, then the gate blocks for 1 minute with the same shared lockout as the world lock (AC74), and the exam stays on question 9 with no time lost.
 * **AC159 (v2):** Given the v2 build, then `package.json` has version 0.2.0 and `CHANGELOG.md` has a 0.2.0 entry in kid readable words that names the exams and the golden dino.
+* **AC160 (v2):** Given the world is on screen, then a "🥚 Winkel" button shows in the top bar next to Pauze, with the same size as Pauze and a tap area of at least 44 x 44 points. Given a learning break, a lesson, a break summary, Extra oefenen, an exam screen, the pause menu, the pin pad, the parent area or any other overlay is on screen, then the Winkel button does not show.
+* **AC161 (v2):** Given the world, when the kid taps "🥚 Winkel", then the Dinowinkel opens directly. When the kid closes the Dinowinkel, then the world shows again, not the pause menu. Given the pause menu, then the Dinowinkel can still be opened from there as in v1.
+* **AC162 (v2):** Given the world at 1024 x 768, 1180 x 820 and a 1024 x 690 Safari tab, in landscape, then the Winkel button does not overlap the countdown, the Pauze button or the small lock, and all of them sit inside the safe area.
+* **AC163 (v2):** Given the world and saved data that is slow (takes 3 seconds or more) or not available, when the kid taps Pauze once with one finger, then the pause menu opens within 300 ms. The points show a placeholder until they are read and then show the real total.
+* **AC164 (v2):** Given the world and saved data that is slow or not available, when the kid taps "🥚 Winkel" once with one finger, then the Dinowinkel opens within 300 ms with a placeholder for the points. Its points and buy buttons fill in when the data is read. Given the points are not read yet, then no "Kopen" button can be tapped and no egg can be bought.
+* **AC165 (iPad) (v2):** Given the founder's iPad with the game opened from the home screen icon, when the kid taps Pauze, then the pause menu opens, and when the kid taps "🥚 Winkel", then the Dinowinkel opens. Both work on the first tap.
 
-**Check before shipping:** a real iPad check of one full Taal exam and one Rekentoets in home screen mode: the lock is easy for a parent to find and hard to hit by accident, the golden egg hatches in the world, and closing the app mid exam continues it (AC71).
+**Check before shipping:** a real iPad check of one full Taal exam and one Rekentoets in home screen mode: the lock is easy for a parent to find and hard to hit by accident, the golden egg hatches in the world, and closing the app mid exam continues it (AC71). The founder also checks on the real iPad, from the home screen icon, that Pauze and Winkel open on the first tap (AC165).
