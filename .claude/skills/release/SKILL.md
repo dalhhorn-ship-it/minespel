@@ -13,6 +13,18 @@ You are the operator. A release is a small slice of value the kids can feel. It 
 * Every release is playable and shippable by itself. No half features behind it.
 * Fixes for bugs the kids found count as a release too, and go first.
 
+## Fast lane (3 tasks or fewer)
+
+Most releases are this small. Then keep it lean, because every extra agent and every push costs time and tokens:
+* No architect. The operator writes the tasks in `docs/PLAN.md` itself. Call `architect` only if the design must change.
+* One `developer` does the tasks one after another, so nothing collides and nothing needs merging.
+* `qa` writes tests only for the new ACs and runs `./scripts/check.sh` once at the end.
+* No scribe. The operator adds the CHANGELOG line and updates `docs/STATUS.md` in the same commit as the code.
+
+## One push per release
+
+Commit locally after each task, but do not push. Push once, when the whole release passes `./scripts/check.sh`, and open one pull request (or push to `main` if this session may). That is one CI run instead of one per commit. Never push docs only commits on their own during a release.
+
 ## 1. Pick
 
 1. Read `docs/BACKLOG.md` (the release backlog, not signed), `docs/RETRO.md`, `docs/FRICTION.md`, the CHANGELOG and $ARGUMENTS.
@@ -27,8 +39,8 @@ You are the operator. A release is a small slice of value the kids can feel. It 
 
 ## 3. Plan and build
 
-1. Launch `architect` in release mode. It adds the release tasks to `docs/PLAN.md` with milestone `vN`. No redesign unless the release needs it.
-2. Run the `/build` steps for these tasks only.
+1. Fast lane: the operator adds the tasks to `docs/PLAN.md` with milestone `vN`. Bigger releases: launch `architect` in release mode for this. No redesign unless the release needs it.
+2. Run the `/build` steps for these tasks only. Commit locally, do not push yet.
 
 ## 4. Check
 
@@ -36,7 +48,7 @@ Run the `/qa` steps in release mode: tests for the new ACs, the full `./scripts/
 
 ## 5. Ship
 
-Run the `/ship` steps for a release: the next minor version (v2 is `0.2.0`, v3 is `0.3.0`), CHANGELOG, deploy decision, tag.
+Push the release once (see One push per release). Then run the `/ship` steps for a release: the next minor version (v2 is `0.2.0`, v3 is `0.3.0`), CHANGELOG, deploy decision, tag.
 
 ## 6. Learn
 

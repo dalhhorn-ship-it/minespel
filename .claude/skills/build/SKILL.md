@@ -28,4 +28,4 @@ You are the operator. Follow the execution loop in CLAUDE.md.
 9. If something failed and was fixed in a way worth remembering, add a line to Lessons learned in CLAUDE.md.
 10. When every task is `done`, update `docs/STATUS.md` and suggest `/qa`.
 
-During a `/release`, work only on the tasks with that release's milestone (`vN`). The release is its own milestone: one architect review, one scribe pass.
+During a `/release`, work only on the tasks with that release's milestone (`vN`). Commit locally and push once at the end of the release, not per task. In the fast lane (3 tasks or fewer) use one developer, skip the architect review and the scribe, and write the CHANGELOG and STATUS lines yourself.
