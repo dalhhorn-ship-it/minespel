@@ -198,6 +198,8 @@ Unit tests live next to the code: `src/world/raycast.test.ts` tests `src/world/r
 4. Open IndexedDB, run migrations, load all records. Unreadable: broken save screen (AC137).
 5. No PIN yet: first start flow (Flow 1). Otherwise: resume a running exam or break if the session store has one, else the world.
 
+**Ready signal (refactor round R1, decision 78).** `main.ts` makes the world and HUD at once. `app/boot.ts` opens storage and builds records, stores, catalog and every flow, and gives one `Promise<App>`. Every button that needs a flow goes through `whenReady(action)`: ready means the action runs now; not ready means one shared waiting card (`ui/waiting-card.ts`) with Terug, and the action runs when the app is ready. Pauze and Winkel open at once with placeholders and read the points from the same promise. New buttons in later releases use `whenReady` too, never `flow?.open()`.
+
 **Play.** `game/loop.ts` runs on `requestAnimationFrame`. Each frame: `player-controller` reads stick and look, `physics` moves the player, `dino-system` steps dinos, `renderer` draws. Steps use real elapsed time, capped at 100 ms per frame so a hiccup never tunnels the player through a block.
 
 **A tap in the world.** `pointer-router` gives the pointer to the look zone. On release, `touch-classify` says tap or drag. A tap goes to `build-controller`: it casts a ray from the camera through the finger. First `dino-system` tests dinos and eggs within 6 blocks; a hit opens the dino menu (AC104). Otherwise `raycast` finds the block and face, `build.ts` decides, `world.set()` changes the block, `chunk-mesh` rebuilds that chunk (and a neighbour on an edge), `world-save` marks the diff dirty.
@@ -317,6 +319,8 @@ On plain http (the dev server on the home network) Safari has no service worker,
 5. `npx playwright install webkit` (with `--with-deps` when running as root, as in the cloud sandbox), then `npm run test:e2e`: Playwright WebKit. Its `webServer` runs `npm run build:e2e` (output `dist-e2e/`, with test hooks) and `vite preview` on it.
 
 `CHECK_E2E=0 ./scripts/check.sh` runs steps 1 to 4 only.
+
+**Local e2e in Chromium (R1a).** The cloud container cannot download WebKit. `npm run test:e2e:local -- <spec>` sets `E2E_LOCAL=1`, which runs the same projects in the Chromium already on disk (`/opt/pw-browsers/chromium`, or `E2E_CHROMIUM`). Run the specs you touched before every push. CI keeps WebKit as the truth.
 
 **CI** (`.github/workflows/ci.yml`) runs once per commit: on every push (pull requests from a fork get their own run). A newer push to the same branch cancels the older run, except on `main`. Two parts run at the same time: `check` (`CHECK_E2E=0 ./scripts/check.sh`) and `e2e`, split in 4 shards (`npx playwright test --shard=N/4`) inside the `mcr.microsoft.com/playwright` image, which already holds WebKit. When `@playwright/test` is updated, update the image tag in `ci.yml` to the same version.
 
