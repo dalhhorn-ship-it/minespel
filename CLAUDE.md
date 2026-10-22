@@ -43,7 +43,7 @@ The founder starts an app by copying the template into a new repo and opening Cl
 then, one at a time:  /release  (pick, approve in chat, build, check, ship, learn)
 ```
 
-**Small releases.** v1 is the smallest version the kids can play. Everything else goes in the release backlog in `docs/BACKLOG.md` as small releases (v2, v3, ...). The next release gets its section in `docs/PRD.md` section 12 and is signed there; when it ships, the backlog marks it shipped and its section later moves to `docs/releases/vN.md`. After v1 ships, `/release` runs one short loop per release: at most 5 tasks, one thing the kids can feel, shipped before the next one starts. Kid feedback from each release decides what comes next. Never batch several releases into one big build.
+**Small releases.** v1 is the smallest version the kids can play. Everything else goes in the release backlog in `docs/BACKLOG.md` as small releases (v2, v3, ...). The next release gets its section in `docs/PRD.md` section 12 and is signed there; when it ships, the backlog marks it shipped and its section later moves to `docs/releases/vN.md`. After v1 ships, `/release` runs one short loop per release: at most 5 tasks, one thing the kids can feel, shipped before the next one starts. Kid feedback from each release decides what comes next. Never batch several releases into one big build. A release of 3 tasks or fewer takes the fast lane: one developer, no architect review, no scribe. Every release is pushed once, at the end, so CI runs once.
 
 `/factory` looks at `docs/STATUS.md` and runs the next step, stopping at every gate.
 
