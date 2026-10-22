@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { EconomyRecord } from '../storage/schema';
 import {
-  addPoints, answerPoints, applyPoints, bonusPoints, buyState, canReceiveGolden, capReached,
+  addPoints, answerPoints, canAffordEgg, applyPoints, bonusPoints, buyState, canReceiveGolden, capReached,
   purchaseEgg, purchaseChicken, chickenBuyState, chickenCount, MAX_CHICKENS, MSG_COOP_FULL, shopDinoCount, practiceCapReached, MSG_CAP_REACHED, MSG_ENOUGH_PRACTICE,
 } from './economy';
 
@@ -12,7 +12,7 @@ const D = '2026-10-17';
 
 describe('points', () => {
   it('uses +2, +1, -1', () => {
-    expect([answerPoints('first'), answerPoints('retry'), answerPoints('teach')]).toEqual([2, 1, -1]);
+    expect([answerPoints('first'), answerPoints('retry'), answerPoints('teach')]).toEqual([2, 1, 0]);
   });
   it('never goes below 0 (AC147)', () => {
     expect(addPoints(0, -1)).toBe(0);
@@ -153,9 +153,10 @@ describe('early break points (decision 56)', () => {
     expect(r.applied).toBe(0);
     expect(r.economy.points).toBe(5);
   });
-  it('a normal break keeps full points and its malus', () => {
+  it('a normal break keeps full points and a teach moment changes nothing', () => {
     expect(applyPoints(eco(5, 10), 'break', 3, D).applied).toBe(3);
-    expect(applyPoints(eco(5, 10), 'break', -1, D).applied).toBe(-1);
+    expect(applyPoints(eco(5, 10), 'break', answerPoints('teach'), D).applied).toBe(0);
+    expect(answerPoints('teach')).toBe(0);
   });
   it('is shared with Extra oefenen', () => {
     const afterEarly = early(eco(0, 0), 6).economy;
@@ -211,5 +212,14 @@ describe('Kippenhok (decision 55)', () => {
     expect(purchaseChicken(eco(10), chickenCount(dinos)).ok).toBe(true);
     // eggs never count against chickens
     expect(chickenCount([{ kind: 'compy' }])).toBe(0);
+  });
+});
+
+describe('canAffordEgg (AC169, AC34)', () => {
+  it('AC169: needs the cheapest egg price and room under the 12 dino cap', () => {
+    expect(canAffordEgg(19, 0)).toBe(false);
+    expect(canAffordEgg(20, 0)).toBe(true);
+    expect(canAffordEgg(500, 11)).toBe(true);
+    expect(canAffordEgg(500, 12)).toBe(false);
   });
 });

@@ -145,13 +145,6 @@
   line-height: 1.5;
 }
 
-.teach-malus {
-  margin: 0;
-  text-align: center;
-  color: #3a3a3a;
-  font-size: var(--font-body);
-}
-
 .teach-lesson .lesson-title {
   font-size: var(--font-large);
 }

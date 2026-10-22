@@ -1,5 +1,30 @@
 # Test report
 
+## v9 Eerlijke punten (0.3.0)
+
+Result: pass in Chromium. WebKit runs in CI.
+
+| AC | Test | Result |
+|---|---|---|
+| AC166 | `tests/e2e/points-v9.spec.ts` (Extra oefenen and Nu oefenen break past the limit) | pass |
+| AC167 | `tests/e2e/points-v9.spec.ts` (1 point left, +1 punt, bonus that fits) | pass |
+| AC168 | `tests/e2e/points-v9.spec.ts` (note only when cut, timed break keeps +2, +1, +3) | pass |
+| AC169 | `tests/e2e/points-v9.spec.ts` (11 shop dinos plus golden and chickens: hint after break and Extra oefenen, Kopen for Compy; 12: never) | pass |
+| AC170 | `tests/e2e/points-v9.spec.ts` (wrong twice in all three modes, 4 right and 1 teach gives 8) | pass |
+| AC171 | `tests/unit/release-v9.test.ts` | pass (unit) |
+
+What ran: the new spec plus break, practice and winkel specs, 24 tests, twice in a row, all green. Real finger taps, no fixed sleeps. The spec answers Rekenen sums from the screen and Taal choice or typing questions from the break state.
+
+Only checked in Chromium (container cannot download WebKit): all of the above, on the iPad gen 6 landscape size. Not run: portrait, iPad Pro, full `./scripts/check.sh`.
+
+Break tests ask only Rekenen sums: `onlyRekenen` switches Taal off in storage before each break, and `expectOnlySums` fails the test if any other question type shows up.
+
+`./scripts/verify.sh acs`: AC166 to AC171 each have a test. It still reports FAIL for about 50 older ACs that have no test named after them (AC11, AC12, AC21, AC27, AC38 and others, listed by the script), and warns that most ACs are missing from this report. These are from before v9.
+
+### Founder iPad check for 0.3.0 (home screen mode)
+1. Earn the 10 extra points of the day in Extra oefenen, then play one more Extra oefenen round. Right answers must say "Goed!" with no number, the total must not change, and the end shows "Genoeg geoefend voor vandaag".
+2. Answer one question wrong twice. The "Zo zit het:" card shows no points line, no minus shows anywhere, and the total stays the same.
+
 ## v2 Gouden ei (0.2.0)
 
 Written by QA on 2026-10-19. Result: **PASS with 1 minor note**. The WebKit e2e suite could not run here (no WebKit download), so the e2e specs are "written, not run here". GitHub CI runs them. Everything else ran and passed.

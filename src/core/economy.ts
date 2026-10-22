@@ -2,11 +2,11 @@
 // return new records and never touch storage or the clock. The total is never below 0.
 
 import type { EconomyRecord } from '../storage/schema';
-import { DINO_KINDS, type DinoKindId } from '../dinos/kinds';
+import { DINO_KINDS, SHOP_KINDS, type DinoKindId } from '../dinos/kinds';
 
 export const POINTS_FIRST_TRY = 2;
 export const POINTS_RETRY = 1;
-export const POINTS_TEACH = -1;
+export const POINTS_TEACH = 0;
 export const POINTS_BONUS = 3;
 export const MAX_SHOP_DINOS = 12;
 export const PRACTICE_DAY_CAP = 10;
@@ -28,7 +28,7 @@ export function addPoints(points: number, delta: number): number {
   return Math.max(0, clean(points) + (Number.isFinite(delta) ? Math.trunc(delta) : 0));
 }
 
-/** Points for one answer before any cap: +2, +1 or -1. */
+/** Points for one answer before any cap: +2, +1 or 0 (a teach moment changes nothing). */
 export function answerPoints(outcome: AnswerOutcome): number {
   return outcome === 'first' ? POINTS_FIRST_TRY : outcome === 'retry' ? POINTS_RETRY : POINTS_TEACH;
 }
@@ -49,7 +49,7 @@ export function practiceCapReached(eco: EconomyRecord, day: string): boolean {
 
 export interface PointsResult {
   economy: EconomyRecord;
-  /** The change that really happened to the total (can be 0 or negative). */
+  /** The change that really happened to the total (never negative). */
   applied: number;
   /** True when a plus was cut or removed by the Extra oefenen day cap. */
   capHit: boolean;
@@ -144,6 +144,15 @@ export function buyState(points: number, shopCount: number, kind: DinoKindId): B
     return { kind, price, canBuy: false, blocked: 'points', note: pointsNeededText(price - have) };
   }
   return { kind, price, canBuy: true, blocked: null, note: null };
+}
+
+/**
+ * The egg hint after a break or Extra oefenen: true when the cheapest shop egg can be bought now.
+ * Same rule as the Dinowinkel (cap of 12 shop dinos, golden dinos and chickens do not count).
+ */
+export function canAffordEgg(points: number, shopCount: number): boolean {
+  const cheapest = SHOP_KINDS[0];
+  return cheapest !== undefined && buyState(points, shopCount, cheapest.id).canBuy;
 }
 
 /** Chickens in the world. They never count toward the 12 dinos (decision 55). */

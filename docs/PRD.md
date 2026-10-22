@@ -1,19 +1,17 @@
 # PRD: Dino Blokwereld (working title)
 
-Status: APPROVED by Founder on 2026-10-19
+Status: APPROVED by Founder on 2026-10-22
 
-First approved by the founder on 2026-10-17. Recut on 2026-10-19 by decision 57: the live build is v1 (0.1.0), and everything not built yet moved to small releases in section 5. The recut changes the PRD, so the founder approves it again. On 2026-10-19 the founder picked v2 Gouden ei as the next release (decision 59). Its section is in 12. This signoff covers the recut and v2.
-
-This signoff adds the Winkel button and the Pauze fix to v2 (decision 73, see also 72).
+This signoff covers the PRD split (decision 80) and dropping v7 and v8 (decision 79). It also scopes the next release, v9 Eerlijke punten (0.3.0, decision 87), in section 12.
 
 ## 1. Summary
 Dino Blokwereld is a small 3D block world on the iPad where a kid explores, mines and builds with Minecraft style blocks. Every few minutes the game pauses for a short learning break in Rekenen or Taal. Right answers earn dino points. In the Dinowinkel the kid buys dino eggs with those points, and the eggs hatch into friendly blocky dinos that walk around in the world. A passed practice exam gives a golden dino.
 
-The parent decides what gets asked, can write their own lessons and questions, starts practice exams and follows progress. Everything stays on the iPad.
+The parent decides what gets asked, starts practice exams and follows progress. New lessons and questions are added as modules with the `/module` skill (decision 79). Everything stays on the iPad.
 
 ## 2. Users
 * **Player:** one kid, age 8 to 10 (groep 5 to 7), plays alone. Reads Dutch at about groep 5 level.
-* **Parent:** sets up the app, picks the learning content, writes own modules, starts exams, reads the results. Uses the same iPad, behind a parent gate.
+* **Parent:** sets up the app, picks the learning content, starts exams, reads the results. Uses the same iPad, behind a parent gate.
 * **Language:** all text in Dutch, for kid and parent screens.
 * **Device:** iPad in Safari, added to the home screen. Touch only. Reference device: an iPad from 2018 or newer on iPadOS 16 or newer (F10).
 * **Orientation:** landscape only, for both the game and the parent area. In portrait the app shows a big "Draai je iPad" picture and nothing else. iOS ignores the manifest orientation, so this message is the only mechanism.
@@ -23,15 +21,15 @@ The founder will feel it worked when:
 1. The kid asks to play again the next day, on most days of the first two weeks.
 2. The kid finishes at least 4 out of 5 learning breaks without a parent having to step in.
 3. After 4 weeks the parent screen shows the percentage right going up for at least half of the topics the kid practised.
-4. The parent can add a new set of questions (for example this week's spelling words) in under 10 minutes, without help.
+4. A new set of questions (for example this week's spelling words) becomes a module with `/module` in one short session.
 5. The parent opens the results screen at least once a week because it is useful, not because they have to.
 6. The kid saves up for a dino on their own and talks about which egg to buy next.
 7. The game feels smooth on the family iPad: no stutter while walking, no lost saves.
 
-## 4. Scope for v1 (0.1.0, the live build)
+## 4. What the app is today (v1 0.1.0 and v2 0.2.0)
 
-### 4.0 What v1 is (decision 57)
-v1 is the build that runs today on `main` and on the Cloudflare Worker `minespel`. It ships as version 0.1.0. Decision 57 replaces F1 ("everything ships together"). Features that are not built yet moved to small releases in section 5. Their text stays below so nothing is lost. Each moved part is marked "Moved to vN (see section 5)".
+### 4.0 What is live (decisions 57 and 80)
+The live build is v1 (0.1.0) plus v2 Gouden ei (0.2.0), on `main` and on the Cloudflare Worker `minespel`. Decision 57 replaces F1 ("everything ships together"). Features that are not built yet wait in small releases in `docs/BACKLOG.md`. Their text stays below so nothing is lost. Each waiting part is marked "Moved to vN". Parts the founder dropped are marked "Dropped (decision 79)". The shipped v2 section is archived in `docs/releases/v2.md`; its rules are in this section and its criteria in section 7.
 
 **v1 holds:**
 * The block world: fixed seed, 64 x 64 wide and 64 high, 32 free building blocks, the obsidiaan gate with vuur, and lava.
@@ -47,29 +45,35 @@ v1 is the build that runs today on `main` and on the Cloudflare Worker `minespel
 * App basics: home screen icons and manifest, "Draai je iPad", "Maak dit venster groter", 3D view rebuild, hosting on `workers.dev`, the fps counter.
 * Resultaten shows only a simple list of the last 20 breaks with the "snel geklikt" mark. The full results views come in v6.
 
+**v2 adds (0.2.0, decisions 59, 61 and 73):**
+* Exams as in 4.11, with the end screen and "Bekijk je fouten". The four Taal exams and the four Rekentoets exams.
+* The golden egg and golden dino (4.3), the exam timer (4.4), exam answers move the boxes (4.6).
+* The parent Examens screen with the "te weinig vragen" warning and "Beëindig eerst de pauze". "Pauze nu starten" is greyed out during an exam.
+* The exam lock, the Winkel button and the instant Pauze, with the rules below.
+
 **Where each subsection stands:**
 
 | Subsection | Status |
 |---|---|
-| 4.1 The world | v1 |
-| 4.2 Moving and building | v1 |
-| 4.3 Dinos, points, Dinowinkel | v1. The golden dino moved to v2. |
-| 4.4 Timers | v1. The exam timer moved to v2. |
-| 4.5 Learning break | v1 |
-| 4.6 Spaced repetition | v1. Exam answers moving boxes come with v2. |
-| 4.7 Lessons and practice | v1 |
-| 4.8 Answer types | v1 |
-| 4.9 Taal module | v1. The four exams moved to v2. The human content check moved to v5. |
-| 4.10 Rekenen module | v1. The four Rekentoets exams moved to v2. |
-| 4.11 Exams | Moved to v2 |
-| 4.12 Parent gate | v1. The full automated route test moved to v5. |
-| 4.13 Inhoud kiezen | v1. The "geen vragen" warning in the parent area moved to v4. |
-| 4.14 Eigen modules | Moved to v7. Own exams and the 10 000 item list moved to v8. |
-| 4.15 Import, export, backup | Backup moved to v3. Module import and export moved to v8. |
+| 4.1 The world | live (v1) |
+| 4.2 Moving and building | live (v1) |
+| 4.3 Dinos, points, Dinowinkel | live. The golden dino came with v2. |
+| 4.4 Timers | live. The exam timer came with v2. |
+| 4.5 Learning break | live (v1) |
+| 4.6 Spaced repetition | live. Exam answers move boxes since v2. |
+| 4.7 Lessons and practice | live (v1) |
+| 4.8 Answer types | live (v1) |
+| 4.9 Taal module | live, exams since v2. The human content check (T65) runs beside the next release (decision 81). |
+| 4.10 Rekenen module | live, Rekentoets exams since v2. |
+| 4.11 Exams | live (v2) |
+| 4.12 Parent gate | live. The full automated route test moved to v5. |
+| 4.13 Inhoud kiezen | live. The "geen vragen" warning in the parent area moved to v4. |
+| 4.14 Eigen modules | Dropped (decision 79) |
+| 4.15 Import, export, backup | Backup moved to v3. Module import and export dropped (decision 79). |
 | 4.16 Resultaten | Moved to v6 (v1 has the simple break list only) |
-| 4.17 Instellingen | v1 core. Volume, Alles wissen and the app version moved to v3. |
-| 4.18 Saving | v1 core. Broken save screen, storage notes and persistent storage moved to v4. |
-| 4.19 App basics | v1 core. Offline, one window, plain http notes and the first start flow moved to v4. |
+| 4.17 Instellingen | live core. Volume, Alles wissen and the app version moved to v3. |
+| 4.18 Saving | live core. Broken save screen, storage notes and persistent storage moved to v4. |
+| 4.19 App basics | live core. Offline, one window, plain http notes and the first start flow moved to v4. |
 
 **v1 changes since the 2026-10-17 PRD.** These founder decisions and requests are built and live. Where the text in 4.1 to 4.19 says something else, this list wins.
 * **Sky height 64** (decision 44). The world is 64 blocks high, not 32.
@@ -77,13 +81,19 @@ v1 is the build that runs today on `main` and on the Cloudflare Worker `minespel
 * **Obsidiaan gate** (CR2) and **lava** (CR4). Four obsidiaan blocks lie in front of the start spot, with steen and vuursteen beside them. Building obsidiaan up on the left and right and placing vuur lights the gate. The start hotbar holds obsidiaan, vuur and lava.
 * **Floating** (decision 47). Omhoog lifts the player into the sky. On release the player stays floating and can walk and build in the air. Omlaag goes down. Touching the ground ends floating. This replaces "No flying in v1" in 4.2.
 * **Camera arrows** (decision 44). Four buttons ▲ ▼ ◀ ▶ turn the view smoothly, next to the look drag.
-* **Nu oefenen** (decisions 48 and 56). A button on the countdown, in Extra oefenen, in the Lesboek and in the Dinowinkel starts a learning break right away. Its plus points (+2, +1, +3 bonus) share the 10 extra points a day with Extra oefenen. A plus that does not fit gives the part that fits. No malus. A break that starts from the timer keeps full points and the malus.
+* **Nu oefenen** (decisions 48 and 56). A button on the countdown, in Extra oefenen, in the Lesboek and in the Dinowinkel starts a learning break right away. Its plus points (+2, +1, +3 bonus) share the 10 extra points a day with Extra oefenen. A plus that does not fit gives the part that fits, and from v9 the banner shows that part, or "Goed!" with no number when nothing fits (decision 87). No malus. A break that starts from the timer keeps full points and is never capped. Until v9 ships, a timed break keeps the malus; from v9 there is no malus anywhere.
 * **Stoppen in Extra oefenen** (decision 51). Every Extra oefenen question has a Stoppen button. Points earned so far stay. Learning breaks still cannot be stopped by the kid.
 * **Chickens** (decision 55). The Kippenhok in the Dinowinkel sells one chicken at a time for 5 points, bought with Ja or Nee like an egg, points and chicken saved together. At most 10 chickens. They do not count toward the 12 dinos.
 * **Shop layout** (decision 49, `docs/SHOP_PRD.md`). Species cards, progress bars toward the price, the herd counter and the "Mijn Dino-verzameling" list.
 * **First pincode** (decision 52). Before the first pincode can be set, a grown up sum in words must be answered, like PIN vergeten. A kid tapping the lock cannot set it. The first start flow in 4.19 is not built. The founder kept it as a new task in v4 (decision 60).
 * **Lock only in the world** (decision 53). A small grey lock shows in the world only. No lock on break, exam or overlay screens. No labelled "Ouders" button. This replaces "on every kid screen" in 4.12. From v2 the same small lock also shows on the exam screen, only to stop the exam (decision 61). Learning breaks stay without a lock.
 * **Home screen first** (decision 54). The design floor is the home screen app at 1024 x 768. In a Safari tab (about 690 high) tall kid screens may scroll inside their card.
+* **Folder modules** (decisions 76 and 77). Every module folder in `docs/modules/` loads as a built in module, for example Taal E6, Leestekens and 't Kofschip. New lessons and questions come through the `/module` skill on the content release path (CLAUDE.md, decision 79). They follow the module format and `validate.py`, like 4.9.
+
+**v2 rules.** Built and live in 0.2.0. Where the text in 4.1 to 4.19 says something else, this list wins.
+* **Exam lock** (decision 61). It looks like the lock in the world: small, grey, top right, a tap area of at least 44 x 44 points inside the safe area. It shows only while exam questions are on screen. Tapping it opens the same pin pad, with the same shared lockout and PIN vergeten (4.12). The exam timer stops while the gate is open (4.4). After the right pincode the parent sees a small card "Examen stoppen?" with "Stoppen" and "Terug naar het examen". The rest of the parent area is not reachable from here. "Stoppen" saves the exam as "gestopt", gives no egg, shows no review and takes the kid back to the world with a full play timer. "Terug naar het examen", or "Terug" on the pin pad, returns to the same question with the same answer typed so far and the same time left. No lock on learning breaks, lessons, summaries, overlays, the exam end screen or the review.
+* **Winkel button** (decision 73). A "🥚 Winkel" button in the world top bar, next to Pauze and the same size, opens the Dinowinkel directly. Closing it returns to the world. The Dinowinkel stays in the pause menu too.
+* **Instant Pauze** (decision 73). Pauze and Winkel open at once on a tap, without waiting for saved data. The points fill in when they are read. No egg can be bought before the points are read.
 
 ### 4.1 The world
 **Status: v1.** With the changes in 4.0: 64 high, 32 blocks, the obsidiaan gate.
@@ -111,7 +121,7 @@ v1 is the build that runs today on `main` and on the Cloudflare Worker `minespel
 * **Ik zit vast:** a button in the pause menu moves the player to the start spot. Dinos set to Volg mij come along. Nothing else changes.
 
 ### 4.3 Dinos, dino points and the Dinowinkel (F5, F7)
-**Status: v1**, with chickens (4.0). The Gouden dino bullet is moved to v2 (see section 5).
+**Status: live**, with chickens (4.0). The Gouden dino bullet came with v2.
 All dinos are earned through learning. There are no wild dinos and no taming.
 
 * **Dino kinds:** four kinds, made of boxes, cute and Minecraft style, with big eyes:
@@ -127,18 +137,18 @@ All dinos are earned through learning. There are no wild dinos and no taming.
 * **Dinowinkel:** opened from the pause menu. It shows the four eggs with a picture of the dino, its name, its size and its price, and the kid's point total. The play timer stops while it is open.
   * An egg the kid can afford has a big "Kopen" button. Tapping it asks "Koop dit ei voor 40 punten?" with "Ja" and "Nee".
   * An egg the kid cannot afford is greyed out and says "Nog 12 punten nodig".
-  * When the kid has 12 dinos (eggs that have not hatched yet count too), every Kopen button is greyed out and the shop says "Je hebt al 12 dino's! Wat een kudde."
+  * When the kid has 12 shop dinos (eggs that have not hatched yet count too, golden dinos and chickens never count), every Kopen button is greyed out and the shop says "Je hebt al 12 dino's! Wat een kudde."
   * The shop uses only dino points. There is no real money, no payment screen and no link anywhere.
 * **Eggs:** after buying, the kid goes back to the world and the egg appears on the ground next to the player. It wobbles and hatches after 5 seconds of play into a baby sized version of that dino, which then grows to full size in 2 seconds. The new dino starts on **Volg mij**. A bought egg is saved right away, so closing the app never loses the egg or the points.
 * **Dino menu:** tapping a dino opens a small menu: **Volg mij**, **Blijf hier**, **Naam geven** (kid types a name with the in game keyboard, max 12 characters), **Knuffel** (hearts, no cost). The name screen says "Bedenk een leuke dinonaam" so the kid does not type their own name.
 * **Simple on purpose:** dinos walk straight toward their goal and can hop up one block. They never walk into or through any block. No path finding. A dino on Blijf hier idles and wanders a little within 3 blocks of where it was told to stay. A dino the kid walls in stays there (building a pen is fine). Dinos never hurt the kid and never break or place blocks.
 * **Following:** a dino on Volg mij walks toward the player. A following dino that is stuck for more than 5 seconds, or more than 8 blocks away for more than 5 seconds, pops next to the player with a little puff.
 * **At most 12 dinos** bought in the shop (hatched or still an egg).
-* **Gouden dino (moved to v2, see section 5):** passing a practice exam gives a golden egg. When the kid is back in the world, the egg appears next to the player and hatches like a normal egg into a golden version of a random dino kind (same model, gold colour). Golden dinos do not count toward the 12 (F7), so a passed exam always pays. Golden dinos have the same menu as other dinos.
-* Dinos are never taken away. No wrong answer, malus or reset removes a dino or an egg.
+* **Gouden dino:** passing a practice exam gives a golden egg. When the kid is back in the world, the egg appears next to the player and hatches like a normal egg into a golden version of a random dino kind (same model, gold colour). Golden dinos do not count toward the 12 (F7), so a passed exam always pays. Golden dinos have the same menu as other dinos.
+* Dinos are never taken away. No wrong answer or reset removes a dino or an egg.
 
 ### 4.4 Timers
-**Status: v1**, with Nu oefenen (4.0). The exam timer column is moved to v2 (see section 5).
+**Status: live**, with Nu oefenen (4.0). The exam timer column came with v2.
 * A countdown is always visible at the top of the screen during play: "Leerpauze over 4:12".
 * All timers are time based (real clock), not frame based.
 * In the last 30 seconds the countdown grows and pulses. In the last 10 seconds a soft tick plays (if sound is on).
@@ -161,38 +171,38 @@ All dinos are earned through learning. There are no wild dinos and no taming.
 * Background is detected with `visibilitychange`, `pagehide` and `blur`. As a safety net, a heartbeat ticks every second; if more than 5 seconds pass between two ticks, that gap is not counted.
 
 ### 4.5 The learning break (F2, F6)
-**Status: v1.** Breaks started with Nu oefenen follow the point rule in 4.0.
+**Status: live**, with the v9 changes below (decision 87): no malus, honest point banners, one egg hint rule. Breaks started with Nu oefenen follow the point rule in 4.0.
 * A calm full screen with a dino teacher character ("Dino Juf") and a progress row of dots, one per question. There is no break countdown.
 * Each break uses one module. Modules take turns by smooth weighted round robin on the parent's Vakverdeling weights (default: equal turns for Rekenen and Taal). The turn state is saved across restarts. A module with no usable items is skipped and the turn goes to the next module.
 * If a topic is new for the kid, the break starts with that topic's lesson (see 4.7), then the questions.
 * **Each question goes like this:**
-  1. The kid answers. **Right on the first try:** a green check, a happy sound, "+2 punten". The kid taps "Verder".
+  1. The kid answers. **Right on the first try:** a green check, a happy sound, "+2 punten". The kid taps "Verder". Every banner shows the points the kid really gets: under the day limit in 4.0 and 4.7 it shows the part that fits, and "Goed!" with no number when nothing fits (v9).
   2. **Wrong on the first try:** a soft orange cross and "Net niet. Probeer het nog een keer." The right answer is not shown. The same question shows again, cleared, and the kid answers once more.
   3. **Right on the retry:** a green check, "Goed zo! +1 punt". The kid taps "Verder".
   4. **Wrong on the retry:** a **teach moment**. The screen shows "Zo zit het:" with the right answer, the item's `explain` text, and a short piece of teaching:
      * For a Taal item or a parent made item: one page of the topic's lesson. If a lesson page is linked to the item's skill, that page shows; otherwise the first page of the topic lesson. The architect adds an optional `skill` field to lesson pages for this.
      * For a Rekenen item: a worked example of this exact sum, step by step, using the topic's strategy (for example 7 x 8 = 7 x 4 + 7 x 4 = 28 + 28 = 56).
-     * Below it: "-1 punt" in soft grey, never in red. The kid taps "Ik snap het" and the break moves on to the next question.
+     * No points line and no minus number (v9, decision 87). The kid taps "Ik snap het" and the break moves on to the next question.
 * **Points (F5, F6):**
 
 | What happens | Points |
 |---|---|
 | Right on the first try | +2 |
 | Right on the retry | +1 |
-| Teach moment (wrong twice) | -1 (malus) |
+| Teach moment (wrong twice) | 0 (no malus from v9, decision 87) |
 | Every question of the break right on the first try | +3 bonus |
 
-  * The total never goes below 0. A malus on a total of 0 leaves it at 0.
+  * The total never goes below 0. Nothing in the app takes points away except buying an egg or a chicken.
   * A break with 0 right answers (no right on the first try and none on the retry) gives no plus points.
 * Only the first tap or Klaar of each try counts. A double tap or two fingers on two buttons in the same moment count as one answer. "Verder", "Ik snap het", "Klaar" and "Terug naar de wereld" also act once.
-* **The break ends only when every question is done** (right on the first try, right on the retry, or after a teach moment). Nothing else ends it, except the parent with "Pauze nu beëindigen". Questions not done when the parent ends a break are logged as "niet beantwoord". They give no points, no malus and do not change the spaced repetition boxes.
-* **Summary screen:** the score ("4 van de 5 goed!", counting right on the first try or the retry), the points earned in this break and the new total. When the kid can now afford an egg, it adds "Je kunt een ei kopen in de Dinowinkel!".
+* **The break ends only when every question is done** (right on the first try, right on the retry, or after a teach moment). Nothing else ends it, except the parent with "Pauze nu beëindigen". Questions not done when the parent ends a break are logged as "niet beantwoord". They give no points and do not change the spaced repetition boxes.
+* **Summary screen:** the score ("4 van de 5 goed!", counting right on the first try or the retry), the points really earned in this break and the new total. When the day limit cut any points, it adds "Genoeg geoefend voor vandaag" (v9). When the kid can now buy an egg, it adds "Je kunt een ei kopen in de Dinowinkel!". **Egg hint rule (v9, decision 84):** the same rule after a break, after Extra oefenen and for the Kopen button: fewer than 12 shop dinos (hatched or still an egg) and enough points for at least one egg. Golden dinos and chickens never count.
   * With 0 right: a kind message ("Dit was lastig. Volgende keer gaat het vast beter!") and the total, with no plus points.
 * After the summary the kid taps "Terug naar de wereld" and play resumes with a full play timer.
 * If the app is closed during a break, reopening it continues the same break at the same question and the same try (first try, retry or teach moment), with the same questions.
 
 ### 4.6 Choosing the questions (spaced repetition)
-**Status: v1.** The exam rule in the last paragraph comes with v2.
+**Status: live.** The exam rule in the last paragraph came with v2.
 Every item has a box from 0 to 5. Box 0 means never seen.
 
 | Box | Next due |
@@ -214,7 +224,7 @@ For a break with N questions from module M, only items that the parent has switc
 3. If there are not enough new items, the remaining slots are filled with more due items, then with the not yet due items with the lowest box.
 4. If "Nieuwe lessen" is off in settings, step 2 is skipped.
 5. The question order inside the break is mixed. No question appears twice in one break, apart from its own retry.
-6. If no module has usable items, the break shows a friendly message for the parent ("Er staan geen vragen aan. Vraag papa of mama om vragen te kiezen.") and ends after 10 seconds with no points and no malus. The parent area shows a warning about this.
+6. If no module has usable items, the break shows a friendly message for the parent ("Er staan geen vragen aan. Vraag papa of mama om vragen te kiezen.") and ends after 10 seconds with no points. The parent area shows a warning about this.
 
 Answers in exams and in Extra oefenen also move the boxes the same way. Exams ignore the parent's switches (see 4.11). In an exam there is only one try.
 
@@ -223,7 +233,7 @@ Answers in exams and in Extra oefenen also move the boxes the same way. Exams ig
 * Every topic has a lesson: a few short pages with a title, a short text, good and wrong examples, and a tip. The kid swipes or taps "Volgende" through them. The last page has "Ik snap het!".
 * A lesson shows automatically in a break the first time new items of that topic are asked.
 * **Lesboek:** from the pause menu the kid can open any lesson of any switched on topic at any time. Reading the Lesboek does not change the timers or the points.
-* **Extra oefenen:** from the pause menu the kid can start a practice round of N questions from a module of their choice, picked with the same rules as 4.6. Each question works like in a break: retry, teach moment and the same points, but no malus (F14). Extra oefenen earns at most 10 plus points a calendar day (F6). After that the round still works but earns no plus points, and the kid sees "Genoeg geoefend voor vandaag, ga lekker bouwen!". The +3 bonus does not apply in Extra oefenen. It stops the play timer while open and does not reset it, so it never replaces a learning break.
+* **Extra oefenen:** from the pause menu the kid can start a practice round of N questions from a module of their choice, picked with the same rules as 4.6. Each question works like in a break: retry, teach moment and the same points, with no malus (F14, and from v9 nowhere). Extra oefenen earns at most 10 plus points a calendar day (F6). After that the round still works but earns no plus points, and the kid sees "Genoeg geoefend voor vandaag, ga lekker bouwen!". From v9 the banners and the summary show only the points really earned, as in 4.5. The egg hint follows the rule in 4.5. The +3 bonus does not apply in Extra oefenen. It stops the play timer while open and does not reset it, so it never replaces a learning break.
 
 ### 4.8 Answer types and input
 **Status: v1.**
@@ -237,7 +247,7 @@ All four item types from `docs/modules/README.md` are supported: `choice`, `find
 * On a retry the input is cleared, so the kid starts fresh.
 
 ### 4.9 Built in module: Taal, Taalverzorging (Cito en IEP stijl)
-**Status: v1.** The four practice exams are moved to v2 and the human check to v5 (see section 5). The content checks in `validate.py` are done.
+**Status: live.** The four practice exams came with v2. The human check (T65) runs beside the next release (decision 81, see `docs/BACKLOG.md`). The content checks in `validate.py` are done.
 * The module in `docs/modules/cito-taalverzorging/`, as written there. Ten topics in this teaching order: ww-tegenwoordig, ww-verleden, klanken, woordvormen, leenwoorden, trema-koppelteken, hoofdletters, komma, apostrof, leestekens.
 * Levels M6, E6, M7 and E7. Every topic has a lesson and at least 6 items per level.
 * Four practice exams: Oefenexamen M6, E6, M7 and E7, as defined in its `module.json`.
@@ -247,7 +257,7 @@ All four item types from `docs/modules/README.md` are supported: `choice`, `find
 * **Human check:** QA reads 5 items per topic against woordenlijst.org, and the founder (or a teacher) reads a sample of 20 items, also looking for commas that are optional in Dutch. The result goes in `docs/TEST_REPORT.md`.
 
 ### 4.10 Built in module: Rekenen basis (modest, generated) (F11)
-**Status: v1.** The four Rekentoets exams are moved to v2 (see section 5). The Rekentoets definitions already exist in the module.
+**Status: live.** The four Rekentoets exams came with v2.
 A small module where the questions are made by the app, so there are always new sums. All answers are typed with the number pad. It uses the same levels as Taal so the parent can pick one groep for both.
 
 | Topic | Skill | M6 | E6 | M7 | E7 |
@@ -269,23 +279,23 @@ A small module where the questions are made by the app, so there are always new 
 * The parent can see this module in the content tree and the results like any other, but cannot edit or copy it. Lesson texts are written during the build and can be read in the Lesboek.
 
 ### 4.11 Exams (parent started) (F8)
-**Status: Moved to v2 (see section 5).** The Examens section in the parent area is a placeholder in v1.
+**Status: live since v2.**
 * The parent starts an exam from the parent area: pick a module, pick one of its exams. The app checks there are enough items and warns if not ("Te weinig vragen voor dit examen, het examen krijgt er 22 in plaats van 30").
 * An exam cannot start while a learning break is running. The parent sees "Beëindig eerst de pauze".
 * Questions are picked per topic by the `mix` weights, from items at the exam `levels`. Parent switches for topics and skills are ignored in an exam, so the exam always matches its blueprint.
 * The kid sees a calm exam screen: question number ("Vraag 7 van 30"), the time left if there is a time limit, no right or wrong feedback during the exam, no retry, no teach moment, no going back. Exams keep their own time limit.
-* Exams give no dino points and no malus. The only reward is the golden egg.
+* Exams give no dino points and take none away. The only reward is the golden egg.
 * The play timer is stopped during the exam. No learning break interrupts an exam.
 * The exam ends when all questions are answered or the time runs out. Unanswered questions count as wrong. If the time runs out while the kid has typed or marked an answer but not tapped Klaar, that answer is checked as given.
 * **End screen:** the kid sees the score and a kind message. Passed: "Geslaagd!" and the golden egg (4.3). Not passed: "Goed geoefend! De vragen die nog lastig zijn komen terug in je pauzes."
-* **Review:** below the score a button "Bekijk je fouten" opens a review of every question the kid got wrong or left open, one per page: the question, the kid's answer (or "niet beantwoord"), the right answer and the item's `explain` text. The kid pages through with "Volgende" and closes with "Klaar". With no mistakes the button is not shown and the screen says "Alles goed!". The review shows no points and no malus.
+* **Review:** below the score a button "Bekijk je fouten" opens a review of every question the kid got wrong or left open, one per page: the question, the kid's answer (or "niet beantwoord"), the right answer and the item's `explain` text. The kid pages through with "Volgende" and closes with "Klaar". With no mistakes the button is not shown and the screen says "Alles goed!". The review shows no points.
 * The same details stay in the parent area (4.16, Examens).
 * An exam counts as a learning break: after it, play resumes with a full play timer.
-* The kid cannot leave an exam. The parent can stop it through the parent gate: a small grey lock on the exam screen opens the gate, and after the right pincode the parent can stop the exam (decision 61, details in 12). A stopped exam is saved as "gestopt", gives no egg and shows no review.
+* The kid cannot leave an exam. The parent can stop it through the parent gate: a small grey lock on the exam screen opens the gate, and after the right pincode the parent can stop the exam (decision 61, details in 4.0 under v2 rules). A stopped exam is saved as "gestopt", gives no egg and shows no review.
 * If the app is closed during an exam, reopening continues the exam with the same questions and the same time left. If it is closed on the end screen or in the review, reopening shows the end screen again.
 
 ### 4.12 Parent gate (F3, F4)
-**Status: v1**, with the grown up question before the first pincode (decision 52) and the lock in the world only (decision 53). From v2 the lock also shows on the exam screen, only to stop the exam (decision 61). The automated test of every route moves to v5 (see section 5).
+**Status: live**, with the grown up question before the first pincode (decision 52) and the lock in the world only (decision 53). Since v2 the lock also shows on the exam screen, only to stop the exam (decision 61). The automated test of every route moves to v5 (see `docs/BACKLOG.md`).
 * At first start the parent sets a 4 digit pincode (typed twice).
 * A lock icon sits in the top right corner of the world, and from v2 on the exam screen (decisions 53 and 61). There is no lock on learning breaks or overlay screens. It looks small and grey, but its tap area is at least 44 x 44 points, inside the safe area and outside the look drag zone. Tapping it asks for the pincode.
 * Three wrong codes block the gate for 1 minute. The wrong try count and the block are saved, so a reload or closing the app does not reset them.
@@ -295,8 +305,8 @@ A small module where the questions are made by the app, so there are always new 
 * No route reaches a parent screen without the gate: not the URL hash, the back button, a reload or the browser history.
 
 ### 4.13 Parent area: what gets asked (Inhoud kiezen)
-**Status: v1.** The "Er staan geen vragen aan" warning at the top of the parent area is moved to v4 (see section 5).
-* A tree: subject (Rekenen, Taal, own subjects) > module > topic > skill. Every node has an on/off switch. Switching a node off switches off everything under it.
+**Status: live.** The "Er staan geen vragen aan" warning at the top of the parent area is moved to v4 (see `docs/BACKLOG.md`).
+* A tree: subject (Rekenen, Taal) > module > topic > skill. Every node has an on/off switch. Switching a node off switches off everything under it.
 * Levels: a row of level checkboxes per module. A topic can override the module levels ("Eigen niveaus voor dit onderwerp").
 * Each line shows how many items are switched on and how many are beheerst, so the parent sees the effect right away.
 * If nothing is switched on, the top of the parent area shows a warning: "Er staan geen vragen aan. Je kind krijgt lege pauzes."
@@ -304,35 +314,21 @@ A small module where the questions are made by the app, so there are always new 
 * A quick preset at the top: "Groep 6 midden", "Groep 6 eind", "Groep 7 midden", "Groep 7 eind". A preset switches on that level and the levels below it for both built in modules.
 
 ### 4.14 Parent area: own modules (Eigen modules)
-**Status: Moved to v7 (see section 5).** The **Exams** bullet and the 10 000 item bullet are moved to v8. The Eigen modules section is a placeholder in v1.
-* **New module:** title, subject (Rekenen, Taal, or a new subject name the parent types, for example "Engels"), short description, levels (default M6, E6, M7, E7, the parent can rename, add or remove).
-* **Topics:** add, rename, reorder and delete. Each topic has a lesson editor: pages with title, text, examples (good, optional wrong and why), an optional tip and an optional skill (used by the teach moment).
-* **Items:** a form per type, with level, skill (pick an existing skill or type a new one), prompt and explain for every type.
-  * `choice`: optional sentence, 2 to 4 options, tap the right one.
-  * `find-error`: the parent types the sentence with the mistake in it, taps the wrong word (or "Geen fout") and types the correction.
-  * `type`: optional sentence and one or more accepted answers.
-  * `punctuate`: the parent types the sentence with commas in the right places. The app removes the commas and stores the gaps.
-* **Probeer:** every item and lesson can be previewed on the exact same screens the kid sees, including the retry and the teach moment. Probeer never changes points or boxes.
-* **Exams (moved to v8):** own modules can have exams with title, levels, question count, time limit (or none), pass percent and topic weights.
-* Ids are made by the app and never change, so progress is kept when an item is edited.
-* **Built in modules** are read only. "Kopie maken" makes an editable own copy with new ids, only for JSON modules like Taal. Rekenen is generated and has no Kopie maken. Progress is not copied.
-* **Delete** a module or topic asks to confirm and also deletes its progress. Points and dinos are never deleted this way.
-* The editor is fine with small modules: one topic with one item is valid. The "6 items per level" rule is only for built in content.
-* (Moved to v8.) The editor stays usable with a module of 10 000 items: the item list scrolls smoothly and opens within 2 seconds.
+**Status: Dropped (decision 79).** New lessons and questions come through `/module` as folder modules.
 
 ### 4.15 Parent area: import, export and backup
-**Status: Moved.** File header, sharing files, Backup maken and Backup terugzetten are moved to v3. Exporteer module, Importeer module, the id conflict choice and the bundle script are moved to v8 (see section 5). The Import & Export section is a placeholder in v1.
-* **Every backup and export file** holds the app name, a format version and the date it was made. A newer app version can read older files. A file from a newer app version is refused with "Dit bestand is van een nieuwere versie. Werk de app bij."
+**Status: Moved.** File header, sharing files, Backup maken and Backup terugzetten are moved to v3 (see `docs/BACKLOG.md`). The module parts are dropped (decision 79). The Import & Export section is a placeholder in the live build.
+* **Every backup file** holds the app name, a format version and the date it was made. A newer app version can read older files. A file from a newer app version is refused with "Dit bestand is van een nieuwere versie. Werk de app bij."
 * **Sharing files:** files go out through the iPad share sheet (save to Bestanden, AirDrop, mail). If the share sheet is not available (for example on plain http), the app opens the file in a new view where the parent uses the iPad share button. Both are fine for v1. If neither works, the parent sees a clear note.
-* **Exporteer module:** saves one module as a single `.json` file. The file holds the module and all its topics in the format of `docs/modules/README.md`, bundled in one file. The architect defines the exact bundle shape.
-* **Importeer module:** pick a `.json` file from Bestanden. The app checks it with the same rules the editor uses and shows clear Dutch errors ("Vraag komma-012: het goede antwoord ontbreekt"). Files over 2 MB are refused.
-* Importing a module with an id that already exists asks: "Vervangen" (progress for items with the same id is kept) or "Als nieuwe module toevoegen". A module with the id of a built in module can only be added as a new module.
-* The built in Taal module folder in `docs/modules/cito-taalverzorging/` can be bundled with a small script into an importable file, so new content written outside the app can be loaded.
-* **Backup maken:** one file with everything (settings, own modules, progress, results, world, hotbar, dinos, eggs, dino points), except the pincode.
+* **Exporteer module:** Dropped (decision 79).
+* **Importeer module:** Dropped (decision 79).
+* **Id conflict on import:** Dropped (decision 79).
+* **Bundle script:** Dropped (decision 79).
+* **Backup maken:** one file with everything (settings, progress, results, world, hotbar, dinos, eggs, dino points), except the pincode.
 * **Backup terugzetten:** pick a backup file, confirm, and everything is replaced. The whole file is checked first. The old data stays until the new data is fully written, then the app switches. A broken file changes nothing. The current pincode stays.
 
 ### 4.16 Parent area: results (Resultaten)
-**Status: Moved to v6 (see section 5).** v1 shows only a list of the last 20 breaks with date, module, score, points and the "snel geklikt" mark. The Examens list in Resultaten needs v2 first.
+**Status: Moved to v6 (see `docs/BACKLOG.md`).** The live build shows only a list of the last 20 breaks with date, module, score, points and the "snel geklikt" mark. Exam results are saved since v2, so v6 can list them.
 * **Overzicht:** today and this week: play time, number of breaks, questions answered, percent right on the first try, percent right after the retry, number of teach moments, dino points earned and spent.
 * **Pauzes:** a list of breaks with date, time, module, score, points, length and how it ended (klaar or door ouder beëindigd). A break where every first answer took less than 2 seconds gets a "snel geklikt" mark (F13), so the parent can spot guessing.
 * **Per onderdeel:** drill down subject > module > topic > skill, with a level filter. For each: answered, percent right on the first try in the last 30 days and all time, number beheerst out of total, and how many items are in each box.
@@ -342,7 +338,7 @@ A small module where the questions are made by the app, so there are always new 
 * History is kept for at least 12 months.
 
 ### 4.17 Parent area: settings (Instellingen)
-**Status: v1 core.** Volume, Alles wissen and the app version at the bottom are moved to v3 (see section 5). Greying out "Pauze nu starten" during an exam comes with v2.
+**Status: live core.** Volume, Alles wissen and the app version at the bottom are moved to v3 (see `docs/BACKLOG.md`). Greying out "Pauze nu starten" during an exam came with v2.
 | Setting | Range | Default |
 |---|---|---|
 | Tijd tussen leerpauzes | 1 to 30 minutes | 5 minutes |
@@ -363,7 +359,7 @@ A small module where the questions are made by the app, so there are always new 
 * The settings screen shows the app version at the bottom, so a stale cached version can be spotted.
 
 ### 4.18 Saving
-**Status: v1 core**: on the iPad only, world as changes, eager saves, safe writes, save versions. Moved to v4 (see section 5): the broken save screen, the storage full note, persistent storage, the home screen note and the backup reminder. Applying a new app version only at start comes with the offline service worker in v4.
+**Status: live core**: on the iPad only, world as changes, eager saves, safe writes, save versions. Moved to v4 (see `docs/BACKLOG.md`): the broken save screen, the storage full note, persistent storage, the home screen note and the backup reminder. Applying a new app version only at start comes with the offline service worker in v4.
 * All data is stored on the iPad only.
 * The world is saved as the changes against the fixed starting world, so saves stay small.
 * **Save eagerly:** every world change, answer, point change, purchase, dino change and timer step is saved within about 2 seconds, in small batched writes. A purchase and its points are saved together in one write. There is also a save when the app is hidden, and at the start of every break and exam. iOS can kill a home screen app without warning, so the app never relies on that last save alone.
@@ -374,7 +370,7 @@ A small module where the questions are made by the app, so there are always new 
 * The app asks Safari for persistent storage where possible. The parent area shows a gentle note if the app is not added to the home screen, and a reminder to make a backup if the last backup is older than 30 days.
 
 ### 4.19 App basics
-**Status: v1 core**: home screen manifest and icons, window too small, 3D view lost, hosting, fps counter. Moved to v4 (see section 5): offline play, plain http notes, one window, and the first start flow (kept as a new v4 task by decision 60).
+**Status: live core**: home screen manifest and icons, window too small, 3D view lost, hosting, fps counter. Moved to v4 (see `docs/BACKLOG.md`): offline play, plain http notes, one window, and the first start flow (kept as a new v4 task by decision 60).
 * Installable as a home screen app (manifest, icons, `apple-mobile-web-app-capable`).
 * Works fully offline after the first visit (browser service worker caches the app and both built in modules).
 * **Plain http:** on the home network (`npm run dev -- --host`) Safari blocks some features (service worker, share sheet with files, persistent storage). The app still runs without errors and the parent sees a note where a feature is missing.
@@ -386,111 +382,11 @@ A small module where the questions are made by the app, so there are always new 
 * A developer fps counter exists for the founder's iPad check. It is hidden from the kid by default.
 
 ## 5. Release backlog
-
-v1 is live. After it come small releases, one at a time. Each release gives the kids (or the parent) one thing they can feel, holds at most 5 plan tasks, and ships on its own. The founder picks the next one at `/release`; only then it gets a section in 12. Order picked by the founder (decision 59): v2 Gouden ei first, as 0.2.0, then v3 Dino's veilig.
-
-* **Release ids and versions.** The id (v2, v3, ...) is a fixed name in this backlog, so the tags in section 7 stay valid. The version number is given in shipping order: the first release shipped after v1 is 0.2.0, the next 0.3.0, and so on, whichever id it is.
-* **Ranking.** Value for the kids against size. There is no kid feedback or kid bug logged yet. When there is, it goes first.
-* **Status.** `shipped`: live. `next`: picked by the founder, has its section in 12, built next. `candidate`: can be picked next, all its plan dependencies are done or can be pointed at the live build. `later`: waits for an earlier release.
-* **Size.** S: about one session. M: two or three sessions. L: four or more.
-* Every release ends with a real iPad check of what it adds (CLAUDE.md), and the kid safety rules in 9 hold for every release.
-
-### Ranked backlog
-
-| Rank | Release | What the kids or the parent feel | Size | Value for the kids | Plan tasks | Status |
-|---|---|---|---|---|---|---|
-| | **v1** | The block world with dinos, learning breaks, the Dinowinkel and chickens (4.0) | | | every task marked done in `docs/PLAN.md` | shipped |
-| 1 | **v2 Gouden ei** | The parent starts a practice exam. Pass it and a golden dino hatches. | M | High. A new big goal, and the only reward still missing. | T39, T51a, T51b, T51e | next (0.2.0) |
-| 2 | **v3 Dino's veilig** | A backup file keeps the world, dinos and points safe, even on a wiped or new iPad. | M | High, as insurance. Losing a herd of dinos would hurt the most. | T18, T19, T53a, T55 | candidate, right after v2 (decision 59) |
-| 3 | **v4 Altijd spelen** | The game starts without internet, never shows a blank screen, and two open tabs never fight over the save. | M | Medium to high. Protects saves, and the kids notice when it is missing. | T52, T22, new first start task | later (after v3) |
-| 4 | **v5 Veilig en juist** | The Taal words are spelled right, nothing reaches the internet, everything fits with the big font, and the game is smooth on the family iPad. | M | Medium. Mostly invisible, but it protects what the kids learn and see. | T63, T65, T62, T32, T64 | candidate |
-| 5 | **v6 Wat heb ik geleerd** | The parent sees progress per topic, over 12 weeks, the hardest questions and every exam. | M | Medium. Through the parent, who can then switch on what is hard. | T21, T56, T61 | later (after v2) |
-| 6 | **v7 Eigen woorden** | The parent types this week's spelling words, tries them with Probeer, and the kid gets them in breaks. | L | Medium. The kid practises what school asks this week. | T40, T54, T57, T59 | candidate |
-| 7 | **v8 Modules delen** | The parent exports and imports modules, loads content made elsewhere, and writes own exams for a golden egg. | M | Low to medium. A parent tool. | T53b, T20, T58, T60 | later (after v3 and v7) |
-
-The 25 open plan tasks are all in v2 to v8. v4 adds one new task the architect writes into the plan: the first start flow from 4.19, which the founder kept (decision 60).
-
-### v2 Gouden ei (next, 0.2.0)
-* **Goal:** a practice exam the parent starts, a calm exam screen for the kid, and a golden egg for a pass.
-* **In:** 4.11 in full. The golden dino from 4.3. The exam timer from 4.4. Exam answers move the boxes (4.6). The four Taal exams (4.9) and four Rekentoets exams (4.10). The parent Examens screen with the "te weinig vragen" warning. "Pauze nu starten" greyed during an exam. The small grey lock on the exam screen to stop the exam (decision 61). A Winkel button next to Pauze and a Pauze that opens at once (decision 73).
-* **Out:** the Examens list in Resultaten (v6). Own exams (v8). A lock on learning breaks.
-* **Size:** M. **Tasks:** T39 (exam logic), T51a (kid exam screen, review, golden egg, exam lock), T51b (parent Examens screen, stop after the gate), T51e (Winkel button and instant Pauze).
-* **Criteria:** AC64 to AC72, AC111, AC112, AC115, AC125 (exam part), AC153, and the new AC155 to AC165 in 12.
-* **Decided:** the parent stops an exam with a small grey lock on the exam screen only (decision 61). Full section in 12.
-
-### v3 Dino's veilig
-* **Goal:** the parent can make a backup file and put it back, so nothing the kid built or earned is ever lost for good.
-* **In:** 4.15 file header, sharing files, Backup maken, Backup terugzetten. 4.17 Alles wissen, Volume and the app version. Tests for Pauze nu starten, Pauze nu beëindigen and Wereld opnieuw beginnen, which v1 already has.
-* **Out:** module import and export (v8). The backup reminder after 30 days (v4).
-* **Size:** M. **Tasks:** T18 (backup file), T19 (share and file pick helpers), T53a (backup in the parent area), T55 (settings actions). Volume and the app version are small leftovers of T49 that go with T55.
-* **Criteria:** AC87, AC93 (Volume part), AC94 and AC95 (tests), AC130, AC131 (backup part), AC133, AC135, AC152 (Alles wissen and restore part).
-
-### v4 Altijd spelen
-* **Goal:** the game always starts and never loses or mixes up a save.
-* **In:** 4.18 broken save screen, storage full note, persistent storage, home screen note, backup reminder. 4.19 offline play, plain http notes, one window, and the first start flow (kept by decision 60). The "geen vragen" warning from 4.13.
-* **Out:** nothing else. The flight mode check on the real iPad (AC97) is done in this release's own iPad check, or in T64 if v5 comes later.
-* **Size:** M. **Tasks:** T52 (robustness), T22 (offline service worker), new task for the first start flow.
-* **Criteria:** AC73, AC97, AC114, AC129, AC137, AC138 (update at start), AC139, AC140, AC144.
-* **Why not first:** T52 needs the backup file from v3 (the broken save screen offers "Backup terugzetten", the reminder reads the last backup date). The kids play from the home screen at home on wifi (decision 54), so offline matters less than a backup.
-
-### v5 Veilig en juist
-* **Goal:** prove the live game is safe, correct and smooth, and fix what the checks find.
-* **In:** the kid safety suite (no outside requests, no links, plain text, every parent route behind the gate, works with sound off). The human Taal content check. The accessibility and layout audit with Groter lettertype. The speed spike and the full real iPad check.
-* **Out:** checks of features that do not exist yet. Each later release re-runs the suites for what it adds.
-* **Size:** M, mostly qa and founder time. **Tasks:** T63 (safety suite), T65 (content check), T62 (accessibility audit), T32 (speed spike), T64 (real iPad checks).
-* **Criteria:** AC76 (route test), AC98, AC99, AC101, AC102, AC107, AC124, AC141 (full audit), AC143, AC154 (audit).
-* **Plan note:** in `docs/PLAN.md`, T62, T63 and T65 wait for every feature task. The architect points them at the live build, so this release can ship before v6 to v8.
-* **Why it should not wait long:** the kids already learn from the Taal content, and it has not had its human spelling check (AC124). Decision 59 picked v2 without T65, so T65 stays in v5 for now. It is mostly reading, so the founder can still pull it into any release at `/release`.
-
-### v6 Wat heb ik geleerd
-* **Goal:** the parent sees what the kid knows and what is hard.
-* **In:** 4.16 in full: Overzicht, Pauzes, Per onderdeel, Over tijd, Lastige vragen, Examens.
-* **Out:** nothing else.
-* **Size:** M. **Tasks:** T21 (results queries), T56 (Overzicht, Pauzes, Examens), T61 (Per onderdeel, Over tijd, Lastige vragen).
-* **Criteria:** AC89, AC90, AC91, AC92, AC134.
-* **Split if needed:** if v6 is wanted before v2, T56 can ship without its Examens tab and add it after v2.
-
-### v7 Eigen woorden
-* **Goal:** the parent makes an own module with lessons and all four question types, and checks each one with Probeer.
-* **In:** 4.14 apart from own exams and the 10 000 item list. Kopie maken for Taal. Delete with confirm.
-* **Out:** own exams and the big item list (v8). Import and export (v8).
-* **Size:** L. **Tasks:** T40 (own module store), T54 (module list, form, topics, lesson editor), T57 (item forms), T59 (Probeer).
-* **Criteria:** AC80, AC81, AC82, AC83, AC152 (module delete part).
-
-### v8 Modules delen
-* **Goal:** modules travel as files, and own modules can have exams.
-* **In:** 4.15 Exporteer module, Importeer module, the id conflict choice, the bundle script. 4.14 own exams and the 10 000 item list.
-* **Out:** sharing online, accounts or servers (Later).
-* **Size:** M. **Tasks:** T53b (module import and export), T20 (bundle script), T58 (virtual item list), T60 (own exams form).
-* **Criteria:** AC84, AC85, AC86, AC88, AC131 (export part), AC132.
-
-### Later
-Not planned in any release. Each would need the founder to pick it first.
-* Bigger world, more biomes, caves, flowing water and lava, day and night, weather. (Water and lava as plain blocks are in v1.)
-* More block types beyond the 32 in v1, crafting, tools, chests to store blocks, doors.
-* Wild dinos, taming with food, earning blocks.
-* Creative mode (floating is in v1), riding dinos, dino eggs found in the world, baby dinos that grow up over days, more dino kinds, dino skins, selling or swapping dinos.
-* Hidden treasures or quests in the world.
-* More Rekenen: klokkijken, breuken, geld, metriek stelsel, verhaaltjessommen, cijferen, delen met rest.
-* More Taal modules: begrijpend lezen, woordenschat, grammatica (ontleden), dictee with spoken words.
-* Read aloud (text to speech) for lessons and questions.
-* Parent settings for point values, egg prices or malus.
-* Pictures or sound in parent made lessons and questions.
-* Mixed modules inside one break.
-* Parent made exams across modules.
-* Daily play time limit and bedtime lock.
-* More than one kid profile.
-* Typing the correction in `find-error`, other punctuation marks in `punctuate`.
-* Long press actions in the world.
-* Background music.
-* Portrait mode.
-* Renaming the app from inside the app (the kid may pick the final name later, see F12).
-* Custom domain for the hosted app.
-* Sync between devices, sharing modules online, any account or server.
+The ranked backlog, release ids and versions, release statuses, dropped releases and the Later list live in `docs/BACKLOG.md`. That file is not signed, so editing it never closes the gate (decision 80).
 
 ## 6. User flows
 
-Flows 2 to 5 and 7 are v1. Flow 1 is v4 (kept by decision 60), Flows 6 and 6b are v2, Flow 8 is v7 (step 5 is v8), Flow 9 is v6 and Flow 10 is v3. In v1 the first pincode is set the first time a grown up taps the lock, after the grown up question (decision 52).
+Flows 2 to 5 and 7 are v1, and Flows 6 and 6b are v2. All of them are live. Flow 3 step 6 is the v9 rule (no malus). Flow 1 is v4 (kept by decision 60), Flow 9 is v6 and Flow 10 is v3. Flow 8 was dropped with v7 (decision 79). In v1 the first pincode is set the first time a grown up taps the lock, after the grown up question (decision 52).
 
 ### Flow 1: first start (parent) (v4)
 1. Parent opens the app on the iPad and sees "Welkom bij Dino Blokwereld".
@@ -513,7 +409,7 @@ Flows 2 to 5 and 7 are v1. Flow 1 is v4 (kept by decision 60), Flows 6 and 6b ar
 3. This topic is new, so I read three short lesson pages about the komma and tap "Ik snap het!".
 4. I get 5 questions. I tap where the comma goes and tap "Klaar". Green check, +2 punten.
 5. Next question, I get it wrong. "Net niet. Probeer het nog een keer." I try again and get it right. "Goed zo! +1 punt".
-6. Another one I get wrong twice. Dino Juf shows "Zo zit het:", the right answer, why, and one lesson page. It says -1 punt. I tap "Ik snap het".
+6. Another one I get wrong twice. Dino Juf shows "Zo zit het:", the right answer, why, and one lesson page. I lose no points. I tap "Ik snap het".
 7. After the last question I see "4 van de 5 goed!", "+6 punten" and "Je kunt een ei kopen in de Dinowinkel!".
 8. I tap "Terug naar de wereld" and play on. The countdown shows 5:00 again.
 
@@ -532,7 +428,7 @@ Flows 2 to 5 and 7 are v1. Flow 1 is v4 (kept by decision 60), Flows 6 and 6b ar
 4. I walled myself in. I tap the pause button and "Ik zit vast". I am back at the start and Pip is with me.
 5. I tap "Terug naar de wereld".
 
-### Flow 6: exam (v2)
+### Flow 6: exam
 1. Parent taps the lock icon, types the code, goes to Examens and starts "Oefenexamen M6".
 2. Parent gives me the iPad. I see "Examen: 30 vragen, 30 minuten" and tap "Begin".
 3. I answer each question. I do not see if it is right. I see "Vraag 12 van 30" and the time left.
@@ -540,7 +436,7 @@ Flows 2 to 5 and 7 are v1. Flow 1 is v4 (kept by decision 60), Flows 6 and 6b ar
 5. I tap "Bekijk je fouten" and see my 3 mistakes, each with the right answer and why. I tap "Klaar".
 6. Back in the world the egg hatches into a golden triceratops that follows me.
 
-### Flow 6b: parent stops an exam (v2)
+### Flow 6b: parent stops an exam
 1. Dinner is ready, but I am on "Vraag 9 van 30". Papa taps the small grey lock in the corner of the exam screen.
 2. Papa types the code. The time does not run while he types.
 3. Papa sees "Examen stoppen?" and taps "Stoppen".
@@ -552,12 +448,8 @@ Flows 2 to 5 and 7 are v1. Flow 1 is v4 (kept by decision 60), Flows 6 and 6b ar
 3. Parent sets Vakverdeling to Taal 2, Rekenen 1.
 4. Parent leaves the parent area. The next breaks follow the new choices.
 
-### Flow 8: parent makes a module (v7, step 5 in v8)
-1. Parent opens Eigen modules and taps "Nieuwe module". Title "Spellingwoorden week 12", subject Taal.
-2. Parent adds a topic "Woorden met au en ou" and writes a lesson page.
-3. Parent adds ten `type` items and two `find-error` items, and taps "Probeer" on one to check it.
-4. Parent switches the module on in Inhoud kiezen.
-5. Parent taps "Exporteer module" and saves the file to Bestanden to share with the other parent.
+### Flow 8: parent makes a module
+Dropped with v7 (decision 79). New modules come through `/module`.
 
 ### Flow 9: parent checks results (v6)
 1. Parent opens Resultaten and sees this week: 42 minutes played, 8 breaks, 40 questions, 78 percent right on the first try, 6 teach moments.
@@ -572,11 +464,11 @@ Flows 2 to 5 and 7 are v1. Flow 1 is v4 (kept by decision 60), Flows 6 and 6b ar
 3. Weeks later on a wiped iPad the parent goes through the first start, then taps "Backup terugzetten", picks the file, confirms, and the world, dinos, points and progress are back. The new pincode stays.
 
 ## 7. Acceptance criteria
-Times in these criteria are play time with the app visible, unless stated otherwise. Tests may use a fake clock. Criteria AC103 to AC144 were added in review round 1, and AC145 and up when the founder answered F1 to F13. They sit in their topic group. **(iPad)** marks a check the founder or QA does by hand on the reference iPad, because headless WebKit cannot measure it. Removed criteria keep their number so references stay valid.
+Times in these criteria are play time with the app visible, unless stated otherwise. Tests may use a fake clock. Criteria AC103 to AC144 were added in review round 1, AC145 to AC154 when the founder answered F1 to F13, and AC155 to AC165 with v2. They sit in their topic group. **(iPad)** marks a check the founder or QA does by hand on the reference iPad, because headless WebKit cannot measure it. Removed criteria keep their number so references stay valid.
 
-**Release tags (decision 57).** A criterion with no tag is v1. A tag like **(v2)** means the criterion belongs to that release in section 5. A tag like **(v1, test in v3)** means the behaviour is in v1 and the named part comes in that release. Numbers never change.
+**Release tags (decisions 57 and 80).** A criterion with no tag is in force in the live build (v1 or v2). A tag like **(v3)** means the criterion belongs to that release in `docs/BACKLOG.md`. A tag like **(v1, test in v3)** means the behaviour is live and the named part comes in that release. When a release ships, its tags are dropped here. Numbers never change and are never reused. Criteria dropped with v7 and v8 (decision 79) keep a one line note here; their text is in `docs/BACKLOG.md` under Dropped.
 
-**v1 readings.** For v1, read these criteria with the changes in 4.0: AC1 has a world 64 high, not 32. AC7 and AC151 have 32 building blocks, not 16. AC20 and AC149 count no chickens toward the 12. In AC120, plus points from a break started with Nu oefenen do count toward the 10 point cap and give no malus (decision 56); only timed breaks stay outside the cap. AC52 holds with a Stoppen button on every question (decision 51). AC127 is the lock in the world only. From v2, AC127 also holds for the exam screen lock (AC155).
+**v1 readings.** For v1, read these criteria with the changes in 4.0: AC1 has a world 64 high, not 32. AC7 and AC151 have 32 building blocks, not 16. AC20 and AC149 count no chickens toward the 12. In AC120, plus points from a break started with Nu oefenen do count toward the 10 point cap and give no malus (decision 56); only timed breaks stay outside the cap. AC52 holds with a Stoppen button on every question (decision 51). AC127 holds for the lock in the world and for the exam screen lock (AC155).
 
 ### World and controls
 * **AC1:** Given a new game, when the world loads, then it is 64 x 64 blocks wide and 32 high (or 48 x 48 if the spike says so) with hills, trees, sand and stone, and it is identical every time a new game starts.
@@ -611,10 +503,10 @@ Times in these criteria are play time with the app visible, unless stated otherw
 * **AC20:** Given the kid has 12 shop dinos (hatched or as eggs), when they open the Dinowinkel, then every Kopen button is greyed out, the "Je hebt al 12 dino's! Wat een kudde." message shows, and no points can be spent.
 * **AC21:** No dino ever damages the player, breaks or places a block, or ends up inside a block.
 * **AC110:** Given 45 points, when the kid taps "Kopen" and "Ja" on a 40 point egg 10 times within 1 second, then exactly one egg is bought, the total is 5, and the total never goes below 0.
-* **AC111 (F7) (v2):** Given the kid has 12 shop dinos, when they pass an exam, then the golden egg still hatches into a golden dino, and the Dinowinkel still blocks a 13th shop dino.
+* **AC111 (F7):** Given the kid has 12 shop dinos, when they pass an exam, then the golden egg still hatches into a golden dino, and the Dinowinkel still blocks a 13th shop dino.
 * **AC149:** Given the Dinowinkel, then it shows the Compy for 20, the Triceratops for 40, the Stegosaurus for 40 and the Brachiosaurus for 80 points, and the kid's total. Given 30 points, then the Compy can be bought and the others are greyed out with "Nog 10 punten nodig" and "Nog 50 punten nodig". Given "Kopen" then "Nee", then nothing changes. The shop has no link, no real money and no payment screen.
 * **AC150:** Given the kid bought an egg, when they return to the world, then the egg lies next to the player and after 5 seconds of play hatches into a dino of the bought kind on Volg mij. Given the app is killed right after "Ja", when it reopens, then the egg or the dino is there and the points were taken exactly once.
-* **AC152 (v1, Alles wissen and restore in v3, module delete in v7):** Given no wrong answer, malus, "Wereld opnieuw beginnen", module delete or restart, then no dino or egg is ever removed. Only "Alles wissen" and "Backup terugzetten" replace them.
+* **AC152 (v1, Alles wissen and restore in v3):** Given no wrong answer, "Wereld opnieuw beginnen" or restart, then no dino or egg is ever removed. Only "Alles wissen" and "Backup terugzetten" replace them.
 
 ### Timers
 * **AC22:** Given default settings, when play starts, then the top of the screen shows "Leerpauze over 5:00" and after 60 seconds of real time it shows 4:00, plus or minus 1 second, whatever the frame rate.
@@ -623,28 +515,28 @@ Times in these criteria are play time with the app visible, unless stated otherw
 * **AC25:** Given warnings are on, when 30 seconds are left, then the countdown grows and pulses, and in the last 10 seconds a tick plays if sound is on.
 * **AC26:** Given the play timer reaches 0, then the game saves, the world stops, and the learning break opens. There is no way for the kid to close it.
 * **AC27:** Given the parent sets "Tijd tussen leerpauzes" to 10 minutes, when the next play period starts, then the countdown starts at 10:00.
-* **AC112 (v2):** Given an exam with time left, when the parent gate or parent area is open, the iPad is in portrait, the window is too small, or the app is in the background, then the exam timer does not count down.
+* **AC112:** Given an exam with time left, when the parent gate or parent area is open, the iPad is in portrait, the window is too small, or the app is in the background, then the exam timer does not count down.
 * **AC113:** Given a fake clock that jumps 60 seconds between two heartbeats while the app is visible, then no timer loses those 60 seconds.
 * **AC114 (v4):** Given the app is open, when it is opened in a second tab or window, then the second shows "Dino Blokwereld is al open" and no saved data changes.
-* **AC115 (v2):** Given a break or an exam is running, then "Pauze nu starten" is greyed out. Given a break is running, when the parent tries to start an exam, then "Beëindig eerst de pauze" shows and no exam starts.
+* **AC115:** Given a break or an exam is running, then "Pauze nu starten" is greyed out. Given a break is running, when the parent tries to start an exam, then "Beëindig eerst de pauze" shows and no exam starts.
 
 ### Learning break
 * **AC28:** Given "Vragen per pauze" is 5, when a break starts, then 5 progress dots show and the kid gets 5 questions. No break countdown shows.
-* **AC29:** Given a right answer on the first try, then a green check, "+2 punten" and a happy sound (if sound is on) show, and the point total goes up by 2.
+* **AC29:** Given a right answer on the first try in a timed break, or in Extra oefenen or a Nu oefenen break while 2 or more points fit under the day limit, then a green check, "+2 punten" and a happy sound (if sound is on) show, and the point total goes up by 2.
 * **AC30:** Given a wrong answer on the first try, then "Net niet. Probeer het nog een keer." shows, the right answer is not shown, and the same question shows again with its input cleared.
 * **AC31:** Given a break, then it ends only after every question is done (right on the first try, right on the retry, or a teach moment). Given a fake clock that moves 30 minutes while a question is on screen, then the break is still on that question and nothing is logged as "niet beantwoord".
 * **AC32:** (removed, see F2: no break time limit, no "Laatste vraag")
 * **AC33:** (removed, see F2: no "Geen limiet" setting)
-* **AC34 (F6):** Given a break ends with K right out of N, with K from 1 to N, then the summary shows "K van de N goed!", the points earned in this break and the new total. Given the total now covers the price of an egg the kid can buy, then "Je kunt een ei kopen in de Dinowinkel!" shows.
-* **AC35:** Given every question of a break is right on the first try, then the kid gets 2 points per question plus a 3 point bonus (13 points for 5 questions).
+* **AC34 (F6) (v1, egg hint rule in v9):** Given a break ends with K right out of N, with K from 1 to N, then the summary shows "K van de N goed!", the points really earned in this break and the new total. Given the kid can now buy an egg by the rule in AC169, then "Je kunt een ei kopen in de Dinowinkel!" shows.
+* **AC35:** Given every question of a timed break is right on the first try, then the kid gets 2 points per question plus a 3 point bonus (13 points for 5 questions).
 * **AC36:** Given the summary, when the kid taps "Terug naar de wereld", then play resumes at the same spot and the play timer starts again at the full interval.
 * **AC37:** Given a break is on question 3 on the retry, when the app is closed and reopened, then the same break shows question 3 on the retry with the same questions, and the points so far are kept.
 * **AC38:** Given two modules are switched on with equal weight, when 10 breaks happen, then each module gets 5 breaks. Given weights 2 and 1, then over 9 breaks they get 6 and 3, also when the app is restarted between breaks. Given one module has no usable items, then its turn goes to the next module.
-* **AC39:** Given no items are switched on anywhere, when a break starts, then the friendly "Er staan geen vragen aan" message shows and the break ends after 10 seconds with no points and no malus.
+* **AC39:** Given no items are switched on anywhere, when a break starts, then the friendly "Er staan geen vragen aan" message shows and the break ends after 10 seconds with no points.
 * **AC116 (F6):** Given a break ends with 0 right (first try and retry), then the summary shows the kind "Dit was lastig" message, no plus points and no bonus.
 * **AC117:** Given a question, when the kid double taps an answer button, or two fingers hit two answer buttons in the same moment, then exactly one answer is logged for that try, the first one. Given a double tap on "Verder", "Ik snap het", "Klaar" or "Terug naar de wereld", then it acts once and no question or retry is skipped.
-* **AC145:** Given a wrong first try, when the retry is right, then a green check and "Goed zo! +1 punt" show and the total goes up by 1.
-* **AC146:** Given a wrong first try, when the retry is also wrong, then the teach moment shows "Zo zit het:", the right answer, the item's `explain` text and teaching: for a Taal or parent item the lesson page linked to the item's skill (or the first lesson page of the topic), for a Rekenen item a step by step worked example of that sum. It shows "-1 punt", the total goes down by 1, and "Ik snap het" moves to the next question.
+* **AC145:** Given a wrong first try in a timed break, or in Extra oefenen or a Nu oefenen break while 1 or more points fit under the day limit, when the retry is right, then a green check and "Goed zo! +1 punt" show and the total goes up by 1.
+* **AC146 (v1, no malus in v9):** Given a wrong first try, when the retry is also wrong, then the teach moment shows "Zo zit het:", the right answer, the item's `explain` text and teaching: for a Taal or parent item the lesson page linked to the item's skill (or the first lesson page of the topic), for a Rekenen item a step by step worked example of that sum. It shows no points line, the total does not change (AC170), and "Ik snap het" moves to the next question.
 * **AC147:** Given a total of 0 points, when a teach moment happens, then the total stays 0. The total is never below 0 anywhere in the app.
 
 ### Spaced repetition and selection
@@ -665,7 +557,7 @@ Times in these criteria are play time with the app visible, unless stated otherw
 * **AC49:** Given a break introduces the first new items of a topic, then the topic lesson shows first, page by page, ending with "Ik snap het!".
 * **AC50:** Given a topic's lesson was shown once, then it does not show automatically again at the start of a break. (A teach moment may still show one of its pages.)
 * **AC51:** Given the pause menu, when the kid opens Lesboek, then every switched on topic of every module is listed and each lesson opens page by page.
-* **AC52:** Given Extra oefenen with module Rekenen, then the kid gets N questions picked by the same rules, with the same retry, teach moment and points as a break, no malus, no +3 bonus, and the play timer is stopped while the round is open.
+* **AC52:** Given Extra oefenen with module Rekenen, then the kid gets N questions picked by the same rules, with the same retry, teach moment and points as a break, no +3 bonus, and the play timer is stopped while the round is open.
 * **AC120 (F6):** Given the kid earned 10 plus points from Extra oefenen today, when they answer more right in Extra oefenen, then they earn nothing more and "Genoeg geoefend voor vandaag, ga lekker bouwen!" shows. The next calendar day the cap starts again. Points from learning breaks never count toward this cap.
 
 ### Answer types
@@ -685,27 +577,41 @@ Times in these criteria are play time with the app visible, unless stated otherw
 * **AC63:** Given a generated plus sum answered wrong on the first try, then that exact sum comes back in the next Rekenen break. When it is then answered right on the first try, it moves to box 2 and follows the boxes, and it is never offered as a new sum.
 * **AC122:** Given `./scripts/check.sh`, then it runs `validate.py` on every module folder in `docs/modules/` and fails if any module fails or if python3 is missing. It never skips silently.
 * **AC123:** Given `validate.py`, then it also fails on: two equal options in a `choice` item, two items with the same prompt and sentence in one module, a `type` item without an accepted answer, a sentence over 15 words at M6 or E6, or over 20 words at M7 or E7.
-* **AC124 (v5):** Given the release, then `docs/TEST_REPORT.md` records the human content check: 5 items per Taal topic checked by QA against woordenlijst.org, and 20 items read by the founder or a teacher, with every problem found fixed.
-* **AC125 (v1, exam part in v2):** Given a Rekenen exam of 20 questions or a Rekenen break, then no question appears twice. Given the same seed, then the generator gives the same questions.
+* **AC124 (v5, runs early with T65 beside the next release, decision 81):** Given the release, then `docs/TEST_REPORT.md` records the human content check: 5 items per Taal topic checked by QA against woordenlijst.org, and 20 items read by the founder or a teacher, with every problem found fixed.
+* **AC125:** Given a Rekenen exam of 20 questions or a Rekenen break, then no question appears twice. Given the same seed, then the generator gives the same questions.
 * **AC126:** Given more than 200 wrong plus sums saved for optellen, then only the 200 newest are kept.
 
 ### Exams
-* **AC64 (v2):** Given the parent starts Oefenexamen M6, then the kid gets 30 questions at level M6, split over topics by the `mix` weights (largest remainder rounding), with a 30 minute countdown, whatever the parent's switches are.
-* **AC65 (v2):** Given an exam is running, then the kid sees no right or wrong feedback, gets no retry and no teach moment, cannot go back, and cannot leave without the pincode. The point total does not change during or after an exam.
-* **AC66 (v2):** Given an exam is running, then the play timer is stopped and no learning break starts.
-* **AC67 (v2):** Given the exam time runs out, then the exam ends and unanswered questions count as wrong. Given an answer was typed or marked but Klaar was not tapped, then that answer is checked as given.
-* **AC68 (v2):** Given the kid scores at or above `passPercent`, then "Geslaagd!" shows with the score, and back in the world a golden egg hatches into a golden dino. Given a lower score, then the score and the kind "Goed geoefend!" message show and there is no egg.
-* **AC69 (v2):** Given an exam ends, then the result is saved with date, module, exam, score, passed or not, and every question with the kid's answer.
-* **AC70 (v2):** Given the parent stops a running exam through the gate, then it is saved as "gestopt", gives no egg and shows no review.
-* **AC71 (v2):** Given an exam is on question 12 with 18:00 left, when the app is closed and reopened, then the exam continues at question 12 with between 18:00 and 18:05 left.
-* **AC72 (v2):** Given a module has too few items for an exam, when the parent starts it, then a warning shows the real question count before the exam begins.
-* **AC153 (F8) (v2):** Given an exam ended with 3 wrong and 1 unanswered question, when the kid taps "Bekijk je fouten", then 4 pages show, each with the question, the kid's answer (or "niet beantwoord"), the right answer and the `explain` text, and "Klaar" returns to the end screen. Given an exam with no mistakes, then "Alles goed!" shows and there is no review button. Given the app is closed during the review, then reopening shows the end screen again.
+* **AC64:** Given the parent starts Oefenexamen M6, then the kid gets 30 questions at level M6, split over topics by the `mix` weights (largest remainder rounding), with a 30 minute countdown, whatever the parent's switches are.
+* **AC65:** Given an exam is running, then the kid sees no right or wrong feedback, gets no retry and no teach moment, cannot go back, and cannot leave without the pincode. The point total does not change during or after an exam.
+* **AC66:** Given an exam is running, then the play timer is stopped and no learning break starts.
+* **AC67:** Given the exam time runs out, then the exam ends and unanswered questions count as wrong. Given an answer was typed or marked but Klaar was not tapped, then that answer is checked as given.
+* **AC68:** Given the kid scores at or above `passPercent`, then "Geslaagd!" shows with the score, and back in the world a golden egg hatches into a golden dino. Given a lower score, then the score and the kind "Goed geoefend!" message show and there is no egg.
+* **AC69:** Given an exam ends, then the result is saved with date, module, exam, score, passed or not, and every question with the kid's answer.
+* **AC70:** Given the parent stops a running exam through the gate, then it is saved as "gestopt", gives no egg and shows no review.
+* **AC71:** Given an exam is on question 12 with 18:00 left, when the app is closed and reopened, then the exam continues at question 12 with between 18:00 and 18:05 left.
+* **AC72:** Given a module has too few items for an exam, when the parent starts it, then a warning shows the real question count before the exam begins.
+* **AC153 (F8):** Given an exam ended with 3 wrong and 1 unanswered question, when the kid taps "Bekijk je fouten", then 4 pages show, each with the question, the kid's answer (or "niet beantwoord"), the right answer and the `explain` text, and "Klaar" returns to the end screen. Given an exam with no mistakes, then "Alles goed!" shows and there is no review button. Given the app is closed during the review, then reopening shows the end screen again.
+
+### Exam lock, Winkel button and instant Pauze
+These came with v2 (decisions 61 and 73). The release text is archived in `docs/releases/v2.md`.
+* **AC155:** Given an exam is running with a question on screen, then a small grey lock shows in the top right corner, with a tap area of at least 44 x 44 points fully inside the safe area. When the kid or parent taps it, then the pin pad of the parent gate opens.
+* **AC156:** Given a learning break, a lesson, a break summary, Extra oefenen, the exam start screen, the exam end screen or the review is on screen, then no lock and no parent button shows. Given the world, then the lock shows as in v1.
+* **AC157:** Given the pin pad was opened from the exam lock, when the right pincode is typed and the parent taps "Stoppen", then the exam is saved as "gestopt", no golden egg appears, no review shows, and the kid is in the world with the play timer at the full interval. Given the app is closed and reopened after that, then the world shows, not the exam.
+* **AC158:** Given an exam on question 9 with 20:00 left and an answer typed but not checked, when the pin pad is opened from the exam lock and then closed with "Terug", or the right pincode is typed and "Terug naar het examen" is tapped, then the exam shows question 9 with the same typed answer and 20:00 left, plus or minus 1 second, however long the gate was open. Given 3 wrong codes, then the gate blocks for 1 minute with the same shared lockout as the world lock (AC74), and the exam stays on question 9 with no time lost.
+* **AC159:** Given the v2 build, then `package.json` has version 0.2.0 and `CHANGELOG.md` has a 0.2.0 entry in kid readable words that names the exams and the golden dino.
+* **AC160:** Given the world is on screen, then a "🥚 Winkel" button shows in the top bar next to Pauze, with the same size as Pauze and a tap area of at least 44 x 44 points. Given a learning break, a lesson, a break summary, Extra oefenen, an exam screen, the pause menu, the pin pad, the parent area or any other overlay is on screen, then the Winkel button does not show.
+* **AC161:** Given the world, when the kid taps "🥚 Winkel", then the Dinowinkel opens directly. When the kid closes the Dinowinkel, then the world shows again, not the pause menu. Given the pause menu, then the Dinowinkel can still be opened from there as in v1.
+* **AC162:** Given the world at 1024 x 768, 1180 x 820 and a 1024 x 690 Safari tab, in landscape, then the Winkel button does not overlap the countdown, the Pauze button or the small lock, and all of them sit inside the safe area.
+* **AC163:** Given the world and saved data that is slow (takes 3 seconds or more) or not available, when the kid taps Pauze once with one finger, then the pause menu opens within 300 ms. The points show a placeholder until they are read and then show the real total.
+* **AC164:** Given the world and saved data that is slow or not available, when the kid taps "🥚 Winkel" once with one finger, then the Dinowinkel opens within 300 ms with a placeholder for the points. Its points and buy buttons fill in when the data is read. Given the points are not read yet, then no "Kopen" button can be tapped and no egg can be bought.
+* **AC165 (iPad):** Given the founder's iPad with the game opened from the home screen icon, when the kid taps Pauze, then the pause menu opens, and when the kid taps "🥚 Winkel", then the Dinowinkel opens. Both work on the first tap.
 
 ### Parent gate
 * **AC73 (v4):** Given first start, then the parent must set a 4 digit pincode, typed twice and matching, before the world opens.
 * **AC74:** Given the lock icon is tapped, when the right pincode is typed, then the parent area opens. When a wrong code is typed 3 times, then the gate is blocked for 1 minute, and the block still holds after a reload or after closing and reopening the app. Fast tapping on the pin pad types one digit per tap and never crashes.
 * **AC75 (F4):** Given "PIN vergeten", then a new two step question in words shows each time. When it is answered right, then the parent can set a new pincode. When it is answered wrong twice, then PIN vergeten is blocked for 10 minutes. Wrong tries here and on the pin pad share one saved lockout that survives a reload.
-* **AC76 (v1, full route test in v5):** Given the kid is on any kid screen, then no parent function (settings, content, results, import, export, backup, end break, stop exam) can be reached without passing the gate. An automated test tries every route: URL hash, back button, reload and browser history.
+* **AC76 (v1, full route test in v5):** Given the kid is on any kid screen, then no parent function (settings, content, results, backup, end break, stop exam) can be reached without passing the gate. An automated test tries every route: URL hash, back button, reload and browser history.
 * **AC127:** Given the lock icon, then its tap area is at least 44 x 44 points, fully inside the safe area, and a look drag that starts outside it never opens the gate.
 * **AC128:** Given the app runs over plain http (no secure context), then the pincode can be set and checked and the gate works.
 
@@ -715,19 +621,12 @@ Times in these criteria are play time with the app visible, unless stated otherw
 * **AC79:** Given the preset "Groep 7 midden", then levels M6, E6 and M7 are switched on and E7 off for both built in modules.
 * **AC129 (v4):** Given no items are switched on anywhere, when the parent opens the parent area, then the warning "Er staan geen vragen aan" shows at the top.
 
-### Parent: own modules, import, export and backup
-* **AC80 (v7):** Given the parent creates a module with one topic, one lesson page and one item of each of the four types, then the module validates, appears in Inhoud kiezen, and its items can show up in breaks.
-* **AC81 (v7):** Given the parent types the `punctuate` sentence "Ik zag een raptor, een T-rex en een ei.", then the stored item has the words without the comma and `answer` [3].
-* **AC82 (v7):** Given the parent edits the text of an item, then the item keeps its id and its box.
-* **AC83 (v7):** Given a built in module, then it cannot be edited. Given the Taal module, then "Kopie maken" creates an editable copy with new ids. Given Rekenen, then there is no "Kopie maken".
-* **AC84 (v8):** Given an exported module file, when it is imported on a fresh install, then the same module with the same content appears (automated). (iPad) Given "Exporteer module" on the reference iPad in home screen mode, then the share sheet opens with one `.json` file, or the file opens in a new view that can be shared.
-* **AC85 (v8):** Given an import file with errors, then nothing is imported and every error shows in Dutch with the item id. Given a file over 2 MB or not JSON, then it is refused with a friendly message. The test set includes text with `<script>`, `javascript:` and `https://`, a file just over 2 MB, and a file with 10 000 items.
-* **AC86 (v8):** Given an import with an id that exists, then the parent must choose "Vervangen" or "Als nieuwe module toevoegen". Vervangen keeps progress for item ids that still exist. Given the id of a built in module, then only "Als nieuwe module toevoegen" is offered.
-* **AC87 (v3):** Given "Backup maken" and then "Alles wissen", a new pincode, and "Backup terugzetten" with that file, then settings, own modules, progress, results, world, hotbar, dinos, eggs and dino points are all back as before, and the new pincode still works.
-* **AC88 (v8):** Given any text from an imported module (also text that looks like HTML or a web address), then it shows as plain text. No link is ever clickable and no script runs.
+### Parent: backup
+* AC80 to AC83: dropped with v7 (decision 79). Text in `docs/BACKLOG.md`.
+* AC84 to AC86, AC88 and AC132: dropped with v8 (decision 79). Text in `docs/BACKLOG.md`.
+* **AC87 (v3):** Given "Backup maken" and then "Alles wissen", a new pincode, and "Backup terugzetten" with that file, then settings, progress, results, world, hotbar, dinos, eggs and dino points are all back as before, and the new pincode still works.
 * **AC130 (v3):** Given a broken backup file (cut off, wrong JSON, wrong app name), when the parent restores it, then a friendly message shows and all current data is unchanged. Given a backup from a newer format version, then it is refused with "Dit bestand is van een nieuwere versie".
-* **AC131 (v3, export part in v8):** Given any backup or export file, then it holds the app name, a format version and the date. A backup from the previous format version (test fixture) restores correctly.
-* **AC132 (v8):** Given a module with 10 000 items, then the editor item list opens within 2 seconds and scrolls without freezing.
+* **AC131 (v3):** Given any backup file, then it holds the app name, a format version and the date. A backup from the previous format version (test fixture) restores correctly.
 * **AC133 (iPad) (v3):** Given "Backup maken" on the reference iPad in home screen mode, then the parent can save the file to Bestanden, by the share sheet or the new view fallback.
 
 ### Parent: results and settings
@@ -737,7 +636,7 @@ Times in these criteria are play time with the app visible, unless stated otherw
 * **AC92 (F13) (v6, v1 has the simple list with the mark):** Given Pauzes, then every break shows with date, module, score, points, length and how it ended. A break where every first answer took less than 2 seconds shows "snel geklikt". A break with one first answer of 2 seconds or more does not.
 * **AC93 (v1, Volume in v3):** Given every setting in the table in 4.17, then the parent can change it within its range, the change is saved, and it works as described.
 * **AC94 (v1, tests in v3):** Given "Wereld opnieuw beginnen", then the blocks and the player position reset to the fixed starting world, dinos and eggs stand at the start spot, and dino points, learning progress and results stay.
-* **AC95 (v1, tests in v3):** Given "Pauze nu beëindigen" during a break, then the break ends, the kid keeps the points and malus so far, open questions are logged as "niet beantwoord" with no box change, and the break is logged as "door ouder beëindigd".
+* **AC95 (v1, tests in v3):** Given "Pauze nu beëindigen" during a break, then the break ends, the kid keeps the points so far, open questions are logged as "niet beantwoord" with no box change, and the break is logged as "door ouder beëindigd".
 * **AC134 (v6):** Given Overzicht, then today and this week show play time, breaks, questions answered, percent right on the first try, percent right after the retry, teach moments, and points earned and spent, matching the log.
 * **AC135 (v3):** Given Instellingen, then the app version shows at the bottom.
 * **AC154 (F13) (v1, audit in v5):** Given "Groter lettertype" is on, then text on every kid screen is 25 percent bigger than with it off (question text at least 30 points), no text is cut off in landscape on the reference iPad size, and the parent area text does not change.
@@ -755,16 +654,16 @@ Times in these criteria are play time with the app visible, unless stated otherw
 * **AC138 (v1, update at start in v4):** Given a save from the previous app version (test fixture), when the new version opens it, then everything loads. Given a new version is waiting, then it is applied only at app start, never during a break or exam.
 * **AC139 (v4):** Given storage is full or refused (simulated), then the parent area shows a gentle note and play goes on without a crash.
 * **AC140 (v4):** Given the app runs over plain http, then it starts and plays without errors, and the parent sees a note where sharing or offline is not available.
-* **AC141 (v1, full audit in v5):** Given every kid screen, then normal text has a contrast of at least 4.5 to 1 and large text at least 3 to 1, also on the soft orange "wrong" colour, the grey malus text and the lock icon. Right and wrong always show an icon (check or cross) as well as a colour.
+* **AC141 (v1, full audit in v5):** Given every kid screen, then normal text has a contrast of at least 4.5 to 1 and large text at least 3 to 1, also on the soft orange "wrong" colour, the grey teach moment text and the lock icon. Right and wrong always show an icon (check or cross) as well as a colour.
 * **AC142:** Given the pulsing countdown and pop effects, then nothing flashes more than 2 times a second. Given `prefers-reduced-motion`, then the pulse is off and the countdown text still grows.
 * **AC143 (iPad) (v1, iPad check in v5):** Given the reference iPad, then the stick, jump button, hotbar, countdown and lock icon sit inside the safe area, and the hotbar sits high enough that using it never triggers the home swipe.
 * **AC144 (v4):** Given a wiped iPad (empty storage), when the app opens, then the first start flow shows, and after "Geef de iPad aan je kind" the world loads with no errors.
 
-**Count:** AC1 to AC154 here, plus AC155 to AC165 for v2 in section 12. 6 are removed (AC13, AC14, AC15, AC19, AC32, AC33). 159 active criteria. 106 are v1 (some with a part in a later release). 53 belong to a later release: v2 has 24 (13 here, 11 in 12), v3 has 5, v4 has 8, v5 has 2, v6 has 5, v7 has 4, v8 has 5.
+**Count:** AC1 to AC165 here, plus AC166 to AC171 for v9 in section 12. 6 are removed (AC13, AC14, AC15, AC19, AC32, AC33). 9 are dropped with v7 and v8 (AC80 to AC86, AC88, AC132; decision 79). 156 active criteria. 130 are in force in the live build: 106 from v1 (some with a part in a later release, AC34 and AC146 changed by v9) and 24 from v2. 26 belong to a later release: v9 has 6 (in 12), v3 has 5, v4 has 8, v5 has 2, v6 has 5. The release after v9 continues at AC172.
 
 ## 8. Look, sound and feel
 * **Style:** bright, friendly Minecraft style pixel blocks with 16 x 16 pixel textures. Dinos are chunky and cute with big eyes, made of boxes. Eggs are spotted and wobble. Soft, still fog at the edge (no flicker). No blood, no scary sounds, no angry dinos.
-* **Colours:** sky blue, grass green, warm sand. Right answers in green. Wrong answers in soft orange, never harsh red. The malus "-1 punt" is soft grey. Wool blocks are bright. Golden dinos shine gold. Text contrast as in AC141.
+* **Colours:** sky blue, grass green, warm sand. Right answers in green. Wrong answers in soft orange, never harsh red. No minus numbers anywhere. Wool blocks are bright. Golden dinos shine gold. Text contrast as in AC141.
 * **Motion:** the mining pop is a short burst of a few pixel bits, under half a second. The egg wobble and hatch take about 2 seconds. Nothing flashes more than 2 times a second. Reduced motion turns the pulse and the egg wobble off.
 * **Learning screens:** calm, white or soft paper background, one question at a time, big text, a small dino teacher ("Dino Juf") in the corner. Lots of space. The teach moment looks like a friendly lesson card, not a red mark.
 * **Exam screen:** even calmer: no dino animations, no sounds except a soft chime at the end. The review pages look like the teach moment card.
@@ -772,19 +671,19 @@ Times in these criteria are play time with the app visible, unless stated otherw
 * **Parent area:** plain and clear, grey and white, normal sized text, works like a settings app. Forms are one column, inputs are at least 16 points, and the active field scrolls into view above the iPad keyboard. The parent area is the one place where normal scrolling is allowed.
 * **Font:** one round, very readable font, bundled with the app so it works offline. Kid text at least 20 points, questions at least 24 points, and 25 percent bigger with Groter lettertype.
 * **Words:** Dutch, short sentences, groep 5 reading level on kid screens. Kind and encouraging: "Bijna!", "Goed zo!", "Wat knap!". Never "Fout!" on its own. A wrong first try says "Net niet. Probeer het nog een keer." The teach moment says "Zo zit het:".
-* **Sounds:** short and soft. A pop when mining, a thunk when placing, a chime for right, a gentle "hmm" for wrong, a coin clink when buying an egg, a crack and a happy chirp when an egg hatches, a fanfare for a passed exam. No sound for the malus. No music in v1.
+* **Sounds:** short and soft. A pop when mining, a thunk when placing, a chime for right, a gentle "hmm" for wrong, a coin clink when buying an egg, a crack and a happy chirp when an egg hatches, a fanfare for a passed exam. No music.
 
 ## 9. Kid safety and privacy
-* **Data stored and where:** only on this iPad, in Safari's storage for this app. Stored: settings, pincode (hashed), own modules, answer history, break and exam results, the world changes, the hotbar, dinos and eggs (with names the kid types), dino points. No real name, age, photo, location or contact data is asked for or stored. The dino name screen asks for a dino name, not the kid's name.
-* **v1 as it is live now:** the rules below all hold for v1. v1 makes no files at all (backup comes in v3, module export in v8). Without the offline service worker (v4), v1 needs the internet to start and loads only its own files from `workers.dev`. Chickens and eggs are bought only with dino points. The automated safety suite that proves these rules is in v5; until then they are checked by reading the code and by the UI review.
-* **Files:** backup and export files only leave the iPad when the parent shares them through the share sheet, behind the gate. Backups do not hold the pincode.
+* **Data stored and where:** only on this iPad, in Safari's storage for this app. Stored: settings, pincode (hashed), answer history, break and exam results, the world changes, the hotbar, dinos and eggs (with names the kid types), dino points. No real name, age, photo, location or contact data is asked for or stored. The dino name screen asks for a dino name, not the kid's name.
+* **The live build (v1 and v2):** the rules below all hold for it. It makes no files at all (backup comes in v3). Without the offline service worker (v4), it needs the internet to start and loads only its own files from `workers.dev`. Chickens and eggs are bought only with dino points. The automated safety suite that proves these rules is in v5; until then they are checked by reading the code and by the UI review.
+* **Files:** backup files only leave the iPad when the parent shares them through the share sheet, behind the gate. Backups do not hold the pincode.
 * **Network use:** only to load the app's own files from the public `workers.dev` address on first visit and for updates (F9). No other requests. No data is ever sent anywhere. The server holds only the app files, nothing about the kid. Cloudflare Web Analytics and any other Cloudflare injected script stay off.
 * **Tracking, ads, chat:** none. No analytics, no cookies for tracking, no third party scripts or fonts from other servers.
 * **Purchases:** none with real money. The Dinowinkel only uses dino points earned by learning. There is no payment code, no store link and no way to buy points.
-* **External links:** none. Text in imported modules is shown as plain text and is never a link.
-* **Parent gate:** a 4 digit pincode protects settings, content choice, own modules, import, export, backup, results, ending a break and stopping an exam. The lockout survives reloads. PIN vergeten uses a fresh two step grown up question with a 10 minute block after 2 wrong tries, sharing the lockout with the pin pad (F3, F4). The first pincode can only be set after the same kind of grown up question (decision 52). The lock shows only in the world (decision 53). From v2 it also shows on the exam screen, only to stop the exam (decision 61). Learning breaks have no lock.
+* **External links:** none. Module text is shown as plain text and is never a link.
+* **Parent gate:** a 4 digit pincode protects settings, content choice, backup, results, ending a break and stopping an exam. The lockout survives reloads. PIN vergeten uses a fresh two step grown up question with a 10 minute block after 2 wrong tries, sharing the lockout with the pin pad (F3, F4). The first pincode can only be set after the same kind of grown up question (decision 52). The lock shows only in the world (decision 53) and, since v2, on the exam screen, only to stop the exam (decision 61). Learning breaks have no lock.
 * **Content:** all questions and lessons are original and kid friendly (dinos, nature, school, family). Nothing scary or violent. Taal content gets a human spelling check before release (AC124).
-* **Breaks and malus:** the break is firm but kind. It has no time pressure, every question gets a second try, and a second mistake leads to a short lesson, not a scolding. The malus is 1 point, shown in soft grey, and the total never goes below 0. Mistakes never take away blocks, dinos or eggs.
+* **Breaks and points:** the break is firm but kind. It has no time pressure, every question gets a second try, and a second mistake leads to a short lesson, not a scolding. From v9 a mistake never costs points (decision 87), every number shown is the points the kid really gets, and the total never goes below 0. Mistakes never take away blocks, dinos or eggs.
 * **Accessibility:** touch targets at least 44 points, readable text with good contrast, an optional bigger font, never only colour to show right or wrong (always a check or a cross icon too), works without sound and with the mute switch on, respects reduced motion.
 
 ## 10. Constraints
@@ -801,12 +700,12 @@ Times in these criteria are play time with the app visible, unless stated otherw
 ## 11. Risks and decisions
 
 ### Decided
-The decisions F1 to F15 are answered. Details are in `docs/DECISIONS.md` (rows 8 to 22). The recut questions D1 to D3 are answered too (rows 59 to 61). There is no open founder question.
+The decisions F1 to F15 are answered. Details are in `docs/DECISIONS.md` (rows 8 to 22). The recut questions D1 to D3 are answered too (rows 59 to 61), and so are decisions 78 to 81, 84 and 87. There is no open founder question.
 
 | # | Question | Founder's answer | Where in this PRD |
 |---|---|---|---|
 | F1 | v1 size | Everything ships together in v1, no v1a or v1b split. Replaced by decision 57 on 2026-10-19. | 4.0 |
-| F2 | How a break ends | Only when all questions are done. Wrong: one retry. Wrong again: teach moment, malus, move on. No break time limit. Exams keep their time limit. | 4.4, 4.5, AC31, AC145 to AC148 |
+| F2 | How a break ends | Only when all questions are done. Wrong: one retry. Wrong again: teach moment, move on (the malus is gone from v9, decision 87). No break time limit. Exams keep their time limit. | 4.4, 4.5, AC31, AC145 to AC148 |
 | F3 | Parent gate type | 4 digit pincode | 4.12 |
 | F4 | PIN vergeten | Fresh two step grown up question, 10 minute block after 2 wrong tries, shared lockout | 4.12, AC75 |
 | F5 | Rewards | All dinos earned through learning: points buy eggs in the Dinowinkel, bigger dinos cost more. All blocks free from the start. No wild dinos, no taming. | 4.1, 4.3, 4.5 |
@@ -816,19 +715,25 @@ The decisions F1 to F15 are answered. Details are in `docs/DECISIONS.md` (rows 8
 | F9 | Hosting | Public `workers.dev` address. Deploying is a founder action at `/ship`. | 4.19, 10 |
 | F10 | Reference iPad | iPad 2018 or newer, iPadOS 16 or newer | 2, 10, AC101 |
 | F11 | Rekenen scope | Plus, minus, tafels, delen as in 4.10 | 4.10 |
-| F12 | App name | Dino Blokwereld as working title. The kid may rename it later. | Title, 5 |
+| F12 | App name | Dino Blokwereld as working title. The kid may rename it later. | Title, `docs/BACKLOG.md` Later |
 | F13 | Small scope changes | "Snel geklikt" mark in v1. "Groter lettertype" stays in v1. | 4.16, 4.17, AC92, AC154 |
-| F14 | Malus in Extra oefenen | No malus in Extra oefenen. Malus only in learning breaks. | 4.7, AC52 |
+| F14 | Malus in Extra oefenen | No malus in Extra oefenen. Malus only in learning breaks. From v9 no malus anywhere (decision 87). | 4.7, AC52, AC170 |
 | F15 | Dino kinds and prices | Compy 20, Triceratops 40, Stegosaurus 40, Brachiosaurus 80 | 4.3, AC149 |
-| D1 | Which release comes next (row 59) | v2 Gouden ei is next and ships as 0.2.0. Then v3 Dino's veilig. T65 was not pulled in. | 5, 12 |
-| D2 | The first start flow (row 60) | Keep it as a new task in v4 Altijd spelen. | 4.19, 5 v4, Flow 1 |
-| D3 | How the parent stops an exam (row 61) | A small grey lock on the exam screen only opens the parent gate to stop the exam. Learning breaks stay without a lock. This narrows decision 53 for exams. | 4.0, 4.11, 4.12, 9, 12, AC155 to AC158 |
+| D1 | Which release comes next (row 59) | v2 Gouden ei is next and ships as 0.2.0. Then v3 Dino's veilig. T65 was not pulled in. Shipped. | `docs/releases/v2.md` |
+| D2 | The first start flow (row 60) | Keep it as a new task in v4 Altijd spelen. | 4.19, `docs/BACKLOG.md` v4, Flow 1 |
+| D3 | How the parent stops an exam (row 61) | A small grey lock on the exam screen only opens the parent gate to stop the exam. Learning breaks stay without a lock. This narrows decision 53 for exams. | 4.0, 4.11, 4.12, 9, AC155 to AC158 |
+| 78 | What comes after 0.2.0 | Refactor round R1, then v3. Decision 87 puts v9 before R1. | `docs/BACKLOG.md` |
+| 79 | v7 and v8 | Both dropped. New lessons come through `/module`. | 4.14, 4.15, 7, `docs/BACKLOG.md` |
+| 80 | Split the PRD | This file is the signed core plus the next release. The backlog and shipped releases live outside it. | 5, 12 |
+| 81 | Other SIMPLIFY items | The Taal spelling check (T65) runs beside the next release. The rest stays as it is. | 4.9, AC124 |
+| 84 | Egg hint rule (architect) | Shop dinos only, golden dinos and chickens never count. Moves into v9. | 12, AC169 |
+| 87 | Points the kid trusts | v9 Eerlijke punten (0.3.0) before R1: honest banners, one egg hint rule, no malus. Breaks stay every 5 minutes. | 12, AC166 to AC171 |
 
-Choices made by product inside these answers, which the founder sees when signing: the point values (+2, +1, -1, +3 bonus) and egg prices (20, 40, 40, 80); a fourth small dino kind (Compy) so there is a cheap first egg (confirmed by the founder, F15); no malus in Extra oefenen (founder, F14); only the first try counts for spaced repetition; exams give no points; "Wereld opnieuw beginnen" keeps dinos and points.
+Choices made by product inside these answers, which the founder sees when signing: the point values (+2, +1, +3 bonus, no malus from v9) and egg prices (20, 40, 40, 80); a fourth small dino kind (Compy) so there is a cheap first egg (confirmed by the founder, F15); no malus in Extra oefenen (founder, F14) and from v9 nowhere (founder, decision 87); only the first try counts for spaced repetition; exams give no points; "Wereld opnieuw beginnen" keeps dinos and points.
 
 **Decided during the build** (`docs/DECISIONS.md` rows 44 to 57, all built into v1 as listed in 4.0): sky height 64 and camera arrows (44), visible countdown (45), floating with Omhoog and Omlaag (47), Nu oefenen (48, 56), the shop layout (49), Gemini's build is the truth (50), Stoppen in Extra oefenen (51), grown up question before the first pincode (52), lock in the world only (53, replaces 46), home screen first (54), chickens for 5 points, at most 10 (55), and the v1 recut (57). The founder requests CR1 to CR4 (32 blocks, the obsidiaan gate, chickens, lava) are recorded as decision row 58. Signing this PRD confirms them as part of v1.
 
-**Decided for the recut and v2** (rows 59 to 61): see D1 to D3 in the table above.
+**Decided for the recut and v2** (rows 59 to 61): see D1 to D3 in the table above. **Decided for the split and v9** (rows 78 to 81, 84, 87): see the table above.
 
 ### Open founder decisions
 None.
@@ -843,66 +748,49 @@ None.
 | The iPad keyboard autocorrects spelling | Typing questions become useless | Own on screen keyboard (4.8). |
 | Forced breaks make the kid angry | Kid stops playing | Short breaks, no time pressure, a second try, kind words, a clear goal (the next egg), the parent can tune interval and question count. |
 | A break with no time limit drags on | Kid feels stuck | Every question ends after at most two tries and a teach moment, so a break always moves forward. The parent can end a break. |
-| The malus feels unfair | Kid feels punished | Only 1 point, soft grey, never below 0, never takes dinos or blocks. Watch it in the first week. |
+| The malus feels unfair | Kid feels punished | It happened: the kid found the game too harsh (decision 87). v9 removes the malus and shows only points the kid really gets. |
 | Point values or egg prices feel off (too slow or too fast) | Boring or too easy | Values are in one place in the code. Changing them after playtesting is a small change the operator brings to the founder. |
 | Unlimited free blocks make building less special | Less reason to learn | The learning goal is now the dinos. Blocks are for creativity. |
 | The Taal content has mistakes | Wrong spelling is taught | Validator with content checks, human check by QA and the founder (AC124), the parent can switch off any skill. |
-| The parent editor is fiddly on an iPad | The parent gives up on own modules | One column forms, Probeer preview, import of JSON made elsewhere as a backup path. Built late in the suggested order. |
-| Share sheet behaves differently in home screen mode | Backup or export fails | Test on the real iPad on the deployed address. Fallback: open the file in a new view and share from there. |
-| Scope was large (one v1, about 70 tasks) | Long build, nothing shipped | Recut by decision 57: the live build is v1, the 25 open tasks are 7 small releases in section 5, shipped one at a time. |
+| Share sheet behaves differently in home screen mode | Backup fails | Test on the real iPad on the deployed address. Fallback: open the file in a new view and share from there. |
+| Scope was large (one v1, about 70 tasks) | Long build, nothing shipped | Recut by decision 57 into small releases, shipped one at a time. v7 and v8 dropped (decision 79). The backlog is in `docs/BACKLOG.md`. |
 | 3D speed on the iPad was never measured | Stutter with many dinos | The speed spike (T32) is in v5. The kids already play, so stutter they notice moves v5 up. |
 
 ## 12. Releases
 
-One section per release the founder picked at `/release`. Each one ships on its own.
+Only the next release has its section here, and it is signed with this file. When it ships, its section moves to `docs/releases/vN.md` and its criteria move into section 7. That happens together with scoping the release after it, so it is one signoff. Shipped releases: v2 in `docs/releases/v2.md`. The ranked backlog is in `docs/BACKLOG.md`.
 
-### v2 Gouden ei (0.2.0)
+### v9 Eerlijke punten (0.3.0)
 
-**Status:** next. Picked by the founder (decision 59). Ships as 0.2.0.
+**Status:** next. Picked by the founder (decision 87). Ships as 0.3.0, before refactor round R1. The id is v9 because ids are never reused (v7 and v8 were dropped).
 
-**Goal:** "Pass a practice exam and a golden dino hatches next to me. And I can open the Dinowinkel with one tap, and Pauze always works."
+**Goal:** "The points I see are the points I get. A mistake never costs me points."
+
+**Why:** the kid said the points do not add up and the game feels too harsh (decision 87). Today Extra oefenen and a Nu oefenen break can show "+2 punten" after the 10 points a day limit while the total stays the same. The egg hint after a break counts golden dinos and chickens, while Extra oefenen does not (decision 84). And a teach moment takes 1 point.
 
 **In:**
-* Exams as in 4.11: the parent starts one, the kid sees the calm exam screen, the end screen and "Bekijk je fouten".
-* The golden egg and golden dino from 4.3. Golden dinos do not count toward the 12 (F7).
-* The exam timer from the timer matrix in 4.4.
-* Exam answers move the boxes, with one try only (4.6).
-* The four Taal practice exams (4.9) and the four Rekentoets exams (4.10), from the exam definitions that already exist in the modules.
-* The parent Examens screen: pick a module and an exam, the "te weinig vragen" warning, "Beëindig eerst de pauze" during a break.
-* "Pauze nu starten" greyed out during an exam (4.17).
-* New (decision 61): a small grey lock on the exam screen only. It opens the parent gate, and after the right pincode the parent can stop the exam.
-* New (decision 73): a Winkel button "🥚 Winkel" in the world top bar, next to Pauze and the same size. It opens the Dinowinkel directly. The Dinowinkel stays in the pause menu too.
-* New (decision 73, bug the kids hit): Pauze and Winkel open at once on a tap, without waiting for saved data. The points fill in when they are read.
-* Version 0.2.0 and a kid readable entry in `CHANGELOG.md`.
+1. **Honest feedback.** Every right answer shows the points the kid really gets. The 10 points a day limit applies to Extra oefenen and to breaks started with Nu oefenen (4.0, 4.7). When it is reached, the banner shows the green check and "Goed!" with no number. When only part fits, the banner shows the part that fits ("+1 punt"). The summary shows the points really earned, and when the limit cut any points it says why: "Genoeg geoefend voor vandaag". Timed breaks never hit the limit and show +2, +1 and the +3 bonus as before.
+2. **One egg hint rule** (decision 84 moves into this release). "Je kunt een ei kopen in de Dinowinkel!" follows the same rule after a break, after Extra oefenen and for the Kopen button: the kid has fewer than 12 shop dinos (hatched or still an egg) and enough points for at least one egg. Golden dinos and chickens never count toward the 12.
+3. **No malus anywhere** (decision 87). A teach moment gives 0 points, in timed breaks, Nu oefenen breaks and Extra oefenen. No "-1 punt" and no minus number shows anywhere. The teach moment card shows no points line.
+4. Version 0.3.0 and a kid readable entry in `CHANGELOG.md`.
 
 **Out:**
-* A lock on learning breaks, lessons, summaries, overlays, the exam end screen or the review. Decision 53 still holds there.
-* The Examens list in Resultaten (v6). The result is saved now (AC69), so v6 can show it later.
-* Own exams for parent made modules (v8).
-* Exams across modules, timed learning breaks (Later).
+* The break interval. Breaks stay every 5 minutes by default, and the interval stays a parent setting (decision 87).
+* New point values, egg prices or a different day limit.
+* Refactor round R1 (right after this release) and the save on refresh fix (decision 72).
+* The results views (v6).
 
-**How the exam lock works (decision 61):**
-* The lock looks like the lock in the world: small, grey, top right, a tap area of at least 44 x 44 points inside the safe area.
-* It shows only while exam questions are on screen.
-* Tapping it opens the same pin pad, with the same shared lockout and PIN vergeten (4.12). The exam timer stops while the gate is open (4.4).
-* After the right pincode the parent sees a small card "Examen stoppen?" with "Stoppen" and "Terug naar het examen". The rest of the parent area is not reachable from here. The parent uses the lock in the world for that.
-* "Stoppen" saves the exam as "gestopt", gives no egg, shows no review and takes the kid back to the world with a full play timer.
-* "Terug naar het examen", or "Terug" on the pin pad, returns to the same question with the same answer typed so far and the same time left.
+**Core text changed with this release.** Signing this file also changes the rules in 4.0 (Nu oefenen), 4.3, 4.5, 4.7, 8, 9 and 11 and the criteria AC29, AC34, AC35, AC39, AC52, AC95, AC141, AC145, AC146 and AC152 to the new rules. Criteria whose behaviour changes carry "(v9)" in section 7. Until 0.3.0 ships, the live build still has the malus and the old banners.
 
-**Plan tasks:** T39 (exam logic), T51a (kid exam screen, end screen, review, golden egg, and the exam lock with its pin pad hook), T51b (parent Examens screen, the "Examen stoppen?" card and the stop). The architect may split the lock into its own task T51c if T51a gets too big. T51e (Winkel button and instant Pauze, decision 73). That is 4 or 5 tasks.
+**Plan tasks:** the architect cuts them, at most 5. Expected about 3: honest banners and summary line, one `canAffordEgg` for every egg hint (decision 84), and removing the malus.
 
-**Acceptance criteria.** The existing v2 criteria in section 7 hold as written: AC64, AC65, AC66, AC67, AC68, AC69, AC70, AC71, AC72, AC111, AC112, AC115, AC153, and the exam part of AC125. AC127 also holds for the exam lock. New for v2:
+**Acceptance criteria.** The changed criteria in section 7 hold as rewritten there: AC29, AC34, AC35, AC145 and AC146. New for v9:
 
-* **AC155 (v2):** Given an exam is running with a question on screen, then a small grey lock shows in the top right corner, with a tap area of at least 44 x 44 points fully inside the safe area. When the kid or parent taps it, then the pin pad of the parent gate opens.
-* **AC156 (v2):** Given a learning break, a lesson, a break summary, Extra oefenen, the exam start screen, the exam end screen or the review is on screen, then no lock and no parent button shows. Given the world, then the lock shows as in v1.
-* **AC157 (v2):** Given the pin pad was opened from the exam lock, when the right pincode is typed and the parent taps "Stoppen", then the exam is saved as "gestopt", no golden egg appears, no review shows, and the kid is in the world with the play timer at the full interval. Given the app is closed and reopened after that, then the world shows, not the exam.
-* **AC158 (v2):** Given an exam on question 9 with 20:00 left and an answer typed but not checked, when the pin pad is opened from the exam lock and then closed with "Terug", or the right pincode is typed and "Terug naar het examen" is tapped, then the exam shows question 9 with the same typed answer and 20:00 left, plus or minus 1 second, however long the gate was open. Given 3 wrong codes, then the gate blocks for 1 minute with the same shared lockout as the world lock (AC74), and the exam stays on question 9 with no time lost.
-* **AC159 (v2):** Given the v2 build, then `package.json` has version 0.2.0 and `CHANGELOG.md` has a 0.2.0 entry in kid readable words that names the exams and the golden dino.
-* **AC160 (v2):** Given the world is on screen, then a "🥚 Winkel" button shows in the top bar next to Pauze, with the same size as Pauze and a tap area of at least 44 x 44 points. Given a learning break, a lesson, a break summary, Extra oefenen, an exam screen, the pause menu, the pin pad, the parent area or any other overlay is on screen, then the Winkel button does not show.
-* **AC161 (v2):** Given the world, when the kid taps "🥚 Winkel", then the Dinowinkel opens directly. When the kid closes the Dinowinkel, then the world shows again, not the pause menu. Given the pause menu, then the Dinowinkel can still be opened from there as in v1.
-* **AC162 (v2):** Given the world at 1024 x 768, 1180 x 820 and a 1024 x 690 Safari tab, in landscape, then the Winkel button does not overlap the countdown, the Pauze button or the small lock, and all of them sit inside the safe area.
-* **AC163 (v2):** Given the world and saved data that is slow (takes 3 seconds or more) or not available, when the kid taps Pauze once with one finger, then the pause menu opens within 300 ms. The points show a placeholder until they are read and then show the real total.
-* **AC164 (v2):** Given the world and saved data that is slow or not available, when the kid taps "🥚 Winkel" once with one finger, then the Dinowinkel opens within 300 ms with a placeholder for the points. Its points and buy buttons fill in when the data is read. Given the points are not read yet, then no "Kopen" button can be tapped and no egg can be bought.
-* **AC165 (iPad) (v2):** Given the founder's iPad with the game opened from the home screen icon, when the kid taps Pauze, then the pause menu opens, and when the kid taps "🥚 Winkel", then the Dinowinkel opens. Both work on the first tap.
+* **AC166 (v9):** Given Extra oefenen or a break started with Nu oefenen, and the kid already earned 10 plus points from those today, when the kid answers right on the first try or on the retry, then the banner shows the green check and "Goed!" with no number, no "+2 punten" or "+1 punt" shows, and the total does not change.
+* **AC167 (v9):** Given Extra oefenen or a Nu oefenen break with 1 point left under the day limit, when the kid answers right on the first try, then the banner shows "+1 punt" and the total goes up by exactly 1. Given a Nu oefenen break with every first try right and less than 3 points left, then the bonus line shows only the points that fit, or no bonus line when none fit. Every number shown equals the change in the total.
+* **AC168 (v9):** Given a round of Extra oefenen or a Nu oefenen break where the day limit cut any points, then its summary shows the points really earned and the line "Genoeg geoefend voor vandaag". Given a round or break where the limit cut nothing, then that line does not show. Given a timed break, then the limit never applies and the banners show +2, +1 and +3 as in AC29, AC35 and AC145.
+* **AC169 (v9):** Given 11 shop dinos (hatched or as eggs), 2 golden dinos, 3 chickens and 20 points or more, when a break summary or the end of Extra oefenen shows, then "Je kunt een ei kopen in de Dinowinkel!" shows, and the Dinowinkel has a Kopen button for the Compy. Given 12 shop dinos, then the hint never shows after a break or after Extra oefenen, whatever the points. Given fewer than 12 shop dinos and fewer than 20 points, then the hint does not show. The break and Extra oefenen always agree.
+* **AC170 (v9):** Given a teach moment (wrong twice) in a timed break, a Nu oefenen break or Extra oefenen, then the total does not change, the teach moment card shows no points line, and no minus number shows anywhere in the app. Given a timed break of 5 questions with 4 right on the first try and 1 teach moment, then the kid gets 8 points.
+* **AC171 (v9):** Given the v9 build, then `package.json` has version 0.3.0 and `CHANGELOG.md` has a 0.3.0 entry in kid readable words that says the points now add up and a mistake never costs points.
 
-**Check before shipping:** a real iPad check of one full Taal exam and one Rekentoets in home screen mode: the lock is easy for a parent to find and hard to hit by accident, the golden egg hatches in the world, and closing the app mid exam continues it (AC71). The founder also checks on the real iPad, from the home screen icon, that Pauze and Winkel open on the first tap (AC165).
+**Check before shipping:** on the founder's iPad, from the home screen icon: play Extra oefenen past the 10 points limit and see "Goed!" with no number and the summary line; get a question wrong twice in a timed break and see the total stay the same; with golden dinos or chickens in the world, check the egg hint after a break and after Extra oefenen says the same thing.

@@ -8,9 +8,9 @@ import type { Catalog } from '../content/catalog';
 import type { Item, Lesson } from '../content/format';
 import { isModuleOn, isModuleUsable, moduleWeight } from '../content/switches';
 import { effectiveDay, today, type Clock } from '../core/clock';
+import { canAffordEgg, shopDinoCount } from '../core/economy';
 import type { Rng } from '../core/rng';
 import { registerHook } from '../dev/e2e-hooks';
-import { SHOP_KINDS } from '../dinos/kinds';
 import type { Response } from '../learning/answer-check';
 import {
   EMPTY_BREAK_MS,
@@ -36,8 +36,6 @@ import type { Records } from '../storage/records';
 import type { SessionState as StoredSessionRecord, SessionStore } from '../storage/session-store';
 import { createBreakScreen, type BreakScreen, type BreakScreenAction } from '../ui/learn/break-screen';
 import type { ScreenManager } from './screens';
-
-export const MAX_DINOS_AND_EGGS = 12;
 
 export interface PersistedBreakSession extends StoredSessionRecord {
   kind: 'break';
@@ -117,7 +115,7 @@ export function createBreakFlow(options: BreakFlowOptions): BreakFlow {
   let active: PersistedBreakSession | null = null;
   let screenView: BreakScreen | null = null;
   let emptyTimerId: number | null = null;
-  let dinoAndEggCount = 0;
+  let shopCount = 0;
   let processingQueue: Promise<void> = Promise.resolve();
 
   function clearEmptyTimer() {
@@ -147,11 +145,6 @@ export function createBreakFlow(options: BreakFlowOptions): BreakFlow {
     const topicId = catalog.topicOfItem(moduleId, item.id);
     if (!topicId) return undefined;
     return catalog.getTopic(moduleId, topicId)?.lesson;
-  }
-
-  function canAffordEgg(pointsTotal: number): boolean {
-    const cheapest = SHOP_KINDS[0]?.price ?? 20;
-    return dinoAndEggCount < MAX_DINOS_AND_EGGS && pointsTotal >= cheapest;
   }
 
   async function processEffects(
@@ -217,7 +210,7 @@ export function createBreakFlow(options: BreakFlowOptions): BreakFlow {
             ts: options.clock.now(),
             day: state.day,
             delta: ef.applied,
-            reason: ef.applied < 0 ? 'malus' : 'break',
+            reason: 'break',
           });
         }
       } else if (ef.type === 'unanswered') {
@@ -330,7 +323,7 @@ export function createBreakFlow(options: BreakFlowOptions): BreakFlow {
       state: persisted.session,
       lesson,
       lessonForItem: (item) => lessonForItem(persisted.moduleId, item),
-      canAffordEgg,
+      canAffordEgg: (pts) => canAffordEgg(pts, shopCount),
       sound: options.sound,
       onAction: handleScreenAction,
       now: () => options.clock.now(),
@@ -352,7 +345,7 @@ export function createBreakFlow(options: BreakFlowOptions): BreakFlow {
         options.progressStore.list(),
       ]);
 
-      dinoAndEggCount = (dinos.dinos?.length ?? 0) + (dinos.eggs?.length ?? 0);
+      shopCount = shopDinoCount(dinos.dinos ?? [], dinos.eggs ?? []);
       const clockDay = today(options.clock);
       const lastSeenDay = (settings as { lastSeenDay?: string }).lastSeenDay ?? null;
       const effDay = effectiveDay(clockDay, lastSeenDay);
@@ -454,7 +447,7 @@ export function createBreakFlow(options: BreakFlowOptions): BreakFlow {
 
     async resumeBreak(saved) {
       const dinos = await options.records.get('dinos');
-      dinoAndEggCount = (dinos.dinos?.length ?? 0) + (dinos.eggs?.length ?? 0);
+      shopCount = shopDinoCount(dinos.dinos ?? [], dinos.eggs ?? []);
       // Adjust emptyUntil if resuming an empty break
       if (saved.session.phase === 'empty' && saved.session.emptyUntil === null) {
         saved.session = {

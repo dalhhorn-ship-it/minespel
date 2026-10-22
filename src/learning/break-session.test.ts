@@ -95,11 +95,11 @@ describe('break-session', () => {
     expect(r.effects.filter((e) => e.type === 'answer')).toHaveLength(2);
   });
 
-  it('AC146: wrong retry goes to the teach moment with -1, Ik snap het moves on', () => {
+  it('AC146: wrong retry goes to the teach moment with no points lost, Ik snap het moves on', () => {
     const { state } = startSession(config(2));
     const r = run(state, [ans(2000, wrong), ans(3000, wrong)]);
     expect(r.state.phase).toBe('teach');
-    expect(r.state.economy.points).toBe(9);
+    expect(r.state.economy.points).toBe(10);
     expect(r.effects.filter((e) => e.type === 'box')).toHaveLength(1);
     const n = reduce(r.state, { type: 'understood', at: 4000 });
     expect(n.state.phase).toBe('question');
@@ -140,7 +140,7 @@ describe('break-session', () => {
     const { state } = startSession(config(2));
     const r = run(state, [ans(1, wrong), ans(2, right), { type: 'next', at: 3 }, ans(4, wrong), ans(5, wrong), { type: 'understood', at: 6 }]);
     expect(r.state.phase).toBe('summary');
-    expect(r.state.summary).toMatchObject({ total: 2, right: 1, bonus: 0, earned: 0, pointsTotal: 10, hard: false });
+    expect(r.state.summary).toMatchObject({ total: 2, right: 1, bonus: 0, earned: 1, pointsTotal: 11, hard: false });
   });
 
   it('AC116: zero right gives hard summary, no plus points, no bonus', () => {
@@ -332,13 +332,24 @@ describe('early break (decision 56)', () => {
     expect(r.state.economy.points).toBe(10);
   });
 
-  it('a timed break keeps full points, the bonus and the malus', () => {
+  it('AC170: 4 right on the first try plus 1 teach moment gives 8 points', () => {
+    const { state } = startSession(config(5, { economy: { points: 0, practicePointsToday: 0, practiceDay: '' } }));
+    const events: SessionEvent[] = [];
+    for (let i = 0; i < 4; i++) events.push(ans(10 + i * 2, right), { type: 'next', at: 11 + i * 2 });
+    events.push(ans(100, wrong), ans(101, wrong), { type: 'understood', at: 102 });
+    const r = run(state, events);
+    expect(r.state.phase).toBe('summary');
+    expect(r.state.earned).toBe(8);
+    expect(r.state.economy.points).toBe(8);
+  });
+
+  it('AC170: a timed break keeps full points and the bonus, a teach moment adds nothing', () => {
     const { state } = startSession(config(5, { economy: eco(10) }));
     expect(state.early).toBeUndefined();
     const r = run(state, allFirst(5));
     expect(r.state.earned).toBe(13);
     const t = startSession(config(1, { economy: eco(10) }));
-    expect(run(t.state, [ans(2000, wrong), ans(2100, wrong)]).state.earned).toBe(-1);
+    expect(run(t.state, [ans(2000, wrong), ans(2100, wrong)]).state.earned).toBe(0);
   });
 
   it('the early flag survives a JSON round trip and a missing flag means normal', () => {
@@ -356,5 +367,30 @@ describe('early break (decision 56)', () => {
       config(1, { early: true, day: '2026-10-18', economy: { points: 0, practicePointsToday: 10, practiceDay: DAY } }),
     );
     expect(run(state, [ans(2000, right)]).state.earned).toBe(2);
+  });
+});
+
+describe('honest points (v9, AC166, AC167)', () => {
+  const eco = (used: number) => ({ points: 10, practicePointsToday: used, practiceDay: DAY });
+
+  it('AC166: lastApplied is what the answer really added, a partial fit shows the part that fit', () => {
+    const { state } = startSession(config(2, { early: true, economy: eco(9) }));
+    const r = run(state, [ans(2000, right)]);
+    expect(r.state.lastApplied).toBe(1);
+    expect(r.state.capCut).toBe(true);
+  });
+
+  it('AC167: lastApplied is 0 at the day cap and capCut is set', () => {
+    const { state } = startSession(config(2, { early: true, economy: eco(10) }));
+    const r = run(state, [ans(2000, right)]);
+    expect(r.state.lastApplied).toBe(0);
+    expect(r.state.capCut).toBe(true);
+  });
+
+  it('AC167: landing exactly on 10 does not set capCut', () => {
+    const { state } = startSession(config(2, { early: true, economy: eco(8) }));
+    const r = run(state, [ans(2000, right)]);
+    expect(r.state.lastApplied).toBe(2);
+    expect(r.state.capCut).toBe(false);
   });
 });
