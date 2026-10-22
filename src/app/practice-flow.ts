@@ -18,7 +18,7 @@ import {
 } from '../content/switches';
 import { effectiveDay, systemClock, today, type Clock } from '../core/clock';
 import {
-  MAX_SHOP_DINOS,
+  canAffordEgg,
   MSG_ENOUGH_PRACTICE,
   PRACTICE_DAY_CAP,
   practiceCapReached,
@@ -26,7 +26,6 @@ import {
   shopDinoCount,
 } from '../core/economy';
 import { createRng, type Rng } from '../core/rng';
-import { SHOP_KINDS } from '../dinos/kinds';
 import type { Response } from '../learning/answer-check';
 import {
   reduce,
@@ -214,11 +213,6 @@ export function createPracticeFlow(options: PracticeFlowOptions): PracticeFlow {
     return catalog.getTopic(moduleId, tId)?.lesson;
   }
 
-  function canAffordEgg(pointsTotal: number): boolean {
-    const cheapest = SHOP_KINDS[0]?.price ?? 20;
-    return shopCount < MAX_SHOP_DINOS && pointsTotal >= cheapest;
-  }
-
   async function processPracticeEffects(state: SessionState, effects: readonly SessionEffect[]) {
     const catalog = options.getCatalog?.();
     const answerCorrectByItem = new Map<string, boolean>();
@@ -336,10 +330,7 @@ export function createPracticeFlow(options: PracticeFlowOptions): PracticeFlow {
       options.progressStore.list(),
     ]);
 
-    shopCount = shopDinoCount(
-      (dinos.dinos ?? []) as { golden?: boolean }[],
-      (dinos.eggs ?? []) as { golden?: boolean }[],
-    );
+    shopCount = shopDinoCount(dinos.dinos ?? [], dinos.eggs ?? []);
     const clockDay = today(clock);
     const lastSeenDay = (settings as { lastSeenDay?: string }).lastSeenDay ?? null;
     const effDay = effectiveDay(clockDay, lastSeenDay);
@@ -385,7 +376,7 @@ export function createPracticeFlow(options: PracticeFlowOptions): PracticeFlow {
       state: activeState,
       lesson: topicLesson,
       lessonForItem: (item) => lessonForItem(moduleId, item),
-      canAffordEgg,
+      canAffordEgg: (pts) => canAffordEgg(pts, shopCount),
       sound: options.sound,
       onAction: handleAction,
       onStop: stopSession,

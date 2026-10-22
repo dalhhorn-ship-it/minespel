@@ -60,9 +60,10 @@ describe('break flow & resume (T43)', () => {
       while (flow.currentState()?.phase === 'lesson') {
         const nextOrStart = host.querySelector('.lesson-next') as HTMLButtonElement | null;
         expect(nextOrStart).not.toBeNull();
-        tap(nextOrStart!);
+        const before = host.textContent;
         clock.advance(2000);
-        await new Promise((r) => setTimeout(r, 10));
+        tap(nextOrStart!);
+        await vi.waitFor(() => expect(host.textContent).not.toBe(before));
       }
 
       expect(flow.currentState()?.phase).toBe('question');

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { EconomyRecord } from '../storage/schema';
 import {
-  addPoints, answerPoints, applyPoints, bonusPoints, buyState, canReceiveGolden, capReached,
+  addPoints, answerPoints, canAffordEgg, applyPoints, bonusPoints, buyState, canReceiveGolden, capReached,
   purchaseEgg, purchaseChicken, chickenBuyState, chickenCount, MAX_CHICKENS, MSG_COOP_FULL, shopDinoCount, practiceCapReached, MSG_CAP_REACHED, MSG_ENOUGH_PRACTICE,
 } from './economy';
 
@@ -211,5 +211,14 @@ describe('Kippenhok (decision 55)', () => {
     expect(purchaseChicken(eco(10), chickenCount(dinos)).ok).toBe(true);
     // eggs never count against chickens
     expect(chickenCount([{ kind: 'compy' }])).toBe(0);
+  });
+});
+
+describe('canAffordEgg (AC169, AC34)', () => {
+  it('AC169: needs the cheapest egg price and room under the 12 dino cap', () => {
+    expect(canAffordEgg(19, 0)).toBe(false);
+    expect(canAffordEgg(20, 0)).toBe(true);
+    expect(canAffordEgg(500, 11)).toBe(true);
+    expect(canAffordEgg(500, 12)).toBe(false);
   });
 });

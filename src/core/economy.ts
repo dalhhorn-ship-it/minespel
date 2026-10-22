@@ -2,7 +2,7 @@
 // return new records and never touch storage or the clock. The total is never below 0.
 
 import type { EconomyRecord } from '../storage/schema';
-import { DINO_KINDS, type DinoKindId } from '../dinos/kinds';
+import { DINO_KINDS, SHOP_KINDS, type DinoKindId } from '../dinos/kinds';
 
 export const POINTS_FIRST_TRY = 2;
 export const POINTS_RETRY = 1;
@@ -144,6 +144,15 @@ export function buyState(points: number, shopCount: number, kind: DinoKindId): B
     return { kind, price, canBuy: false, blocked: 'points', note: pointsNeededText(price - have) };
   }
   return { kind, price, canBuy: true, blocked: null, note: null };
+}
+
+/**
+ * The egg hint after a break or Extra oefenen: true when the cheapest shop egg can be bought now.
+ * Same rule as the Dinowinkel (cap of 12 shop dinos, golden dinos and chickens do not count).
+ */
+export function canAffordEgg(points: number, shopCount: number): boolean {
+  const cheapest = SHOP_KINDS[0];
+  return cheapest !== undefined && buyState(points, shopCount, cheapest.id).canBuy;
 }
 
 /** Chickens in the world. They never count toward the 12 dinos (decision 55). */
