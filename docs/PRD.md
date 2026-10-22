@@ -1,6 +1,6 @@
 # PRD: Dino Blokwereld (working title)
 
-Status: READY FOR SIGNOFF
+Status: APPROVED by Founder on 2026-10-22
 
 This signoff covers the PRD split (decision 80) and dropping v7 and v8 (decision 79). It also scopes the next release, v9 Eerlijke punten (0.3.0, decision 87), in section 12.
 
