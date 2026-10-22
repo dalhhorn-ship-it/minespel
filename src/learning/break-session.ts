@@ -76,6 +76,10 @@ export interface SessionState {
   bonus: number;
   /** Last cap message ("Genoeg geoefend voor vandaag...") or null. */
   message: string | null;
+  /** Points the last answer really added (0 at the day cap). Missing in older saves and in preview. */
+  lastApplied?: number;
+  /** True once the day cap really cut a plus or the bonus. Missing in older saves. */
+  capCut?: boolean;
   summary: SessionSummary | null;
   endReason: EndReason | null;
 }
@@ -148,6 +152,7 @@ export function startSession(config: SessionConfig): StepResult {
     earned: 0,
     bonus: 0,
     message: null,
+    capCut: false,
     summary: null,
     endReason: null,
   };
@@ -187,6 +192,8 @@ function applyDelta(
     earned: state.earned + r.applied,
     bonus: reason === 'bonus' ? state.bonus + r.applied : state.bonus,
     message: r.message ?? state.message,
+    capCut: (state.capCut ?? false) || r.capHit,
+    ...(reason === 'answer' ? { lastApplied: r.applied } : {}),
   };
 }
 

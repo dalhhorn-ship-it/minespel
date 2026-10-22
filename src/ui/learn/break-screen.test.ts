@@ -192,3 +192,126 @@ describe('break-screen (T36)', () => {
     withStop.destroy();
   });
 });
+
+describe('honest points banner (v9, AC166, AC167)', () => {
+  const eco = (used: number) => ({ points: 10, practicePointsToday: used, practiceDay: '2026-10-17' });
+  function feedbackText(over: Record<string, unknown>, used: number, early = true): string {
+    let { state } = startSession({
+      mode: 'break',
+      early,
+      entries: [{ item: choiceItem1, box: 0 }, { item: { ...choiceItem1, id: 'q2' }, box: 0 }],
+      economy: eco(used),
+      day: '2026-10-17',
+      at: 1000,
+    });
+    state = reduce(state, { type: 'answer', response: { type: 'choice', index: 0 }, at: 1500 }).state;
+    state = { ...state, ...over };
+    const screen = createBreakScreen({ state, onAction: () => {} });
+    return screen.element.querySelector('.break-banner-right')!.textContent ?? '';
+  }
+
+  it('AC166: shows the points that really counted', () => {
+    expect(feedbackText({}, 0)).toContain('Goed! +2 punten');
+    expect(feedbackText({}, 9)).toContain('Goed! +1 punt');
+  });
+
+  it('AC167: shows no number when the day cap gave nothing', () => {
+    const t = feedbackText({}, 10);
+    expect(t).toContain('Goed!');
+    expect(t).not.toContain('+');
+  });
+
+  it('AC166: an old saved session without lastApplied shows the old text', () => {
+    expect(feedbackText({ lastApplied: undefined }, 0)).toContain('Goed! +2 punten');
+  });
+
+  it('AC167: the summary note shows only when the cap really cut points', () => {
+    const summaryText = (used: number) => {
+      let { state } = startSession({
+        mode: 'break',
+        early: true,
+        entries: [{ item: choiceItem1, box: 0 }],
+        economy: eco(used),
+        day: '2026-10-17',
+        at: 1000,
+      });
+      // wrong, then right on the retry: +1 and no bonus
+      state = reduce(state, { type: 'answer', response: { type: 'choice', index: 1 }, at: 1500 }).state;
+      state = reduce(state, { type: 'answer', response: { type: 'choice', index: 0 }, at: 1550 }).state;
+      state = reduce(state, { type: 'next', at: 1600 }).state;
+      return createBreakScreen({ state, onAction: () => {} }).element.textContent ?? '';
+    };
+    expect(summaryText(9)).not.toContain('Genoeg geoefend');
+    expect(summaryText(10)).toContain('Genoeg geoefend voor vandaag');
+  });
+});
+
+describe('honest points extra cases (v9, AC166, AC168)', () => {
+  const eco = (used: number) => ({ points: 10, practicePointsToday: used, practiceDay: '2026-10-17' });
+  const entries2 = () => [
+    { item: choiceItem1, box: 0 },
+    { item: { ...choiceItem1, id: 'q2' }, box: 0 },
+  ];
+  function allFirst(early: boolean, used: number, n = 2) {
+    let { state } = startSession({
+      mode: 'break',
+      early,
+      entries: Array.from({ length: n }, (_, i) => ({ item: { ...choiceItem1, id: `q${i}` }, box: 0 })),
+      economy: eco(used),
+      day: '2026-10-17',
+      at: 1000,
+    });
+    for (let i = 0; i < n; i++) {
+      state = reduce(state, { type: 'answer', response: { type: 'choice', index: 0 }, at: 1500 + i * 10 }).state;
+      state = reduce(state, { type: 'next', at: 1505 + i * 10 }).state;
+    }
+    return state;
+  }
+  const text = (s: ReturnType<typeof allFirst>) =>
+    createBreakScreen({ state: s, onAction: () => {} }).element.textContent ?? '';
+
+  it('AC166: a bonus that only partly fits shows the applied part, none when there is no room', () => {
+    expect(text(allFirst(true, 4))).toContain('(inclusief +2 bonus!)');
+    expect(text(allFirst(true, 5))).toContain('(inclusief +1 bonus!)');
+    expect(text(allFirst(true, 6))).not.toContain('bonus');
+  });
+
+  it('AC168: a timed break at the practice day limit still gives +2, +1 and the +3 bonus, capCut stays false', () => {
+    const s = allFirst(false, 10);
+    expect(s.capCut).toBe(false);
+    expect(s.summary?.bonus).toBe(3);
+    expect(s.summary?.earned).toBe(7);
+    expect(text(s)).toContain('(inclusief +3 bonus!)');
+    expect(text(s)).not.toContain('Genoeg geoefend');
+    let { state } = startSession({
+      mode: 'break',
+      entries: entries2(),
+      economy: eco(10),
+      day: '2026-10-17',
+      at: 1000,
+    });
+    state = reduce(state, { type: 'answer', response: { type: 'choice', index: 0 }, at: 1500 }).state;
+    expect(state.lastApplied).toBe(2);
+    expect(state.capCut).toBe(false);
+    const banner = createBreakScreen({ state, onAction: () => {} }).element.querySelector('.break-banner-right');
+    expect(banner?.textContent).toContain('Goed! +2 punten');
+  });
+
+  it('AC166: an old saved session without lastApplied and capCut survives a JSON round trip and shows the old text', () => {
+    let { state } = startSession({
+      mode: 'break',
+      entries: entries2(),
+      economy: eco(0),
+      day: '2026-10-17',
+      at: 1000,
+    });
+    state = reduce(state, { type: 'answer', response: { type: 'choice', index: 0 }, at: 1500 }).state;
+    const old = { ...state } as Record<string, unknown>;
+    delete old.lastApplied;
+    delete old.capCut;
+    const loaded = JSON.parse(JSON.stringify(old)) as typeof state;
+    expect(loaded.lastApplied).toBeUndefined();
+    const screen = createBreakScreen({ state: loaded, onAction: () => {} });
+    expect(screen.element.querySelector('.break-banner-right')?.textContent).toContain('Goed! +2 punten');
+  });
+});

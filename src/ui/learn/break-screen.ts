@@ -73,6 +73,20 @@ function buildTeaching(
   return undefined;
 }
 
+/** Banner text for a right answer, with the points that really counted (AC166, AC167). */
+export function rightBannerText(outcome: unknown, lastApplied: number | undefined): string {
+  const retry = outcome === 'retry';
+  const head = retry ? 'Goed zo!' : 'Goed!';
+  if (lastApplied === undefined) return retry ? 'Goed zo! +1 punt' : 'Goed! +2 punten';
+  if (lastApplied <= 0) return head;
+  return `${head} +${lastApplied} ${lastApplied === 1 ? 'punt' : 'punten'}`;
+}
+
+/** The day cap note: only when the cap really cut points. Older saves without capCut keep the message. */
+function capNote(state: SessionState): string | null {
+  return (state.capCut ?? true) ? state.message : null;
+}
+
 export function createBreakScreen(options: BreakScreenOptions): BreakScreen {
   const root = el('div', { class: 'break-screen', attrs: { role: 'main', 'aria-label': 'Leerpauze' } });
   root.classList.add('scrollable');
@@ -185,8 +199,9 @@ export function createBreakScreen(options: BreakScreenOptions): BreakScreen {
         juf.say(`Vraag ${state.index + 1} van ${state.entries.length}`);
       }
 
-      if (state.message) {
-        body.append(el('p', { class: 'break-cap-note', text: state.message }));
+      const note = capNote(state);
+      if (note) {
+        body.append(el('p', { class: 'break-cap-note', text: note }));
       }
 
       const qIndex = state.index;
@@ -206,7 +221,7 @@ export function createBreakScreen(options: BreakScreenOptions): BreakScreen {
       playOnce(`q-${state.index}-feedback`, 'chime');
 
       // AC29 (+2 punten on first try) and AC145 ("Goed zo! +1 punt" on retry).
-      const feedbackText = outcome === 'retry' ? 'Goed zo! +1 punt' : 'Goed! +2 punten';
+      const feedbackText = rightBannerText(outcome, state.lastApplied);
       juf.say(feedbackText);
 
       const banner = el(
@@ -230,8 +245,9 @@ export function createBreakScreen(options: BreakScreenOptions): BreakScreen {
       if (entry?.item.explain) {
         cardChildren.push(el('p', { class: 'break-explain', text: entry.item.explain }));
       }
-      if (state.message) {
-        cardChildren.push(el('p', { class: 'break-cap-note', text: state.message }));
+      const feedbackNote = capNote(state);
+      if (feedbackNote) {
+        cardChildren.push(el('p', { class: 'break-cap-note', text: feedbackNote }));
       }
 
       const qIndex = state.index;
@@ -282,7 +298,7 @@ export function createBreakScreen(options: BreakScreenOptions): BreakScreen {
       const summaryView = createSummaryView({
         summary: state.summary,
         canAffordEgg: options.canAffordEgg?.(state.summary.pointsTotal) ?? false,
-        capMessage: state.message,
+        capMessage: capNote(state),
         buttonLabel: options.finishLabel,
         onFinish: () => options.onAction({ type: 'finish' }),
         now: options.now,

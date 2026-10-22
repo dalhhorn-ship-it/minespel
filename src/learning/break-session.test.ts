@@ -358,3 +358,28 @@ describe('early break (decision 56)', () => {
     expect(run(state, [ans(2000, right)]).state.earned).toBe(2);
   });
 });
+
+describe('honest points (v9, AC166, AC167)', () => {
+  const eco = (used: number) => ({ points: 10, practicePointsToday: used, practiceDay: DAY });
+
+  it('AC166: lastApplied is what the answer really added, a partial fit shows the part that fit', () => {
+    const { state } = startSession(config(2, { early: true, economy: eco(9) }));
+    const r = run(state, [ans(2000, right)]);
+    expect(r.state.lastApplied).toBe(1);
+    expect(r.state.capCut).toBe(true);
+  });
+
+  it('AC167: lastApplied is 0 at the day cap and capCut is set', () => {
+    const { state } = startSession(config(2, { early: true, economy: eco(10) }));
+    const r = run(state, [ans(2000, right)]);
+    expect(r.state.lastApplied).toBe(0);
+    expect(r.state.capCut).toBe(true);
+  });
+
+  it('AC167: landing exactly on 10 does not set capCut', () => {
+    const { state } = startSession(config(2, { early: true, economy: eco(8) }));
+    const r = run(state, [ans(2000, right)]);
+    expect(r.state.lastApplied).toBe(2);
+    expect(r.state.capCut).toBe(false);
+  });
+});
