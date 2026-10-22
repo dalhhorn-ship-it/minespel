@@ -4,6 +4,14 @@ Written so kids can read it too.
 
 ## Unreleased
 
+## 0.3.0 (2026-10-22)
+
+### Eerlijke punten
+
+* The points now add up. What you see is what you get. At the day limit it just says "Goed!".
+* A wrong answer never takes points away anymore. A teach moment costs nothing.
+* The egg hint is the same everywhere: after a break and after Extra oefenen it follows the Dinowinkel.
+
 ## 0.2.0 (2026-10-19)
 
 ### The golden egg exam

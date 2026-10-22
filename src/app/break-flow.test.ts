@@ -163,3 +163,64 @@ describe('break flow & resume (T43)', () => {
     }
   });
 });
+
+describe('break flow ledger (V9c)', () => {
+  it('AC170: a wrong-twice answer writes no ledger row and every ledger row has reason break', async () => {
+    const db = await openDb({ name: `break-flow-ledger-${Math.random()}` });
+    try {
+      const catalog = await loadCatalog(db);
+      const records = createRecords(db);
+      const logStore = createLogStore(db);
+      const clock = createFakeClock(new Date('2026-10-17T14:00:00Z').getTime());
+      const host = document.createElement('div');
+      document.body.append(host);
+      await records.update('settings', (s) => ({ ...s, questionsPerBreak: 1 }));
+      const flow = createBreakFlow({
+        clock,
+        rng: createRng(42),
+        screens: createScreenManager({ host }),
+        records,
+        progressStore: createProgressStore(db),
+        logStore,
+        sessionStore: createSessionStore(db),
+        getCatalog: () => catalog,
+      });
+      await flow.startBreak();
+      while (flow.currentState()?.phase === 'lesson') {
+        clock.advance(2000);
+        const before = host.textContent;
+        tap(host.querySelector('.lesson-next')!);
+        await vi.waitFor(() => expect(host.textContent).not.toBe(before));
+      }
+      const st = flow.currentState()!;
+      expect(st.phase).toBe('question');
+      const item = st.entries[st.index]!.item;
+      const answerText = JSON.stringify(item);
+      const wrongTap = () => {
+        if (item.type === 'choice') {
+          tap(host.querySelectorAll('.q-option')[item.options.findIndex((_, i) => i !== item.answer)]!);
+        } else {
+          const key = [...host.querySelectorAll('.kb-char')].find((k) => !answerText.includes(`"${k.textContent}`))!;
+          tap(key);
+          tap(host.querySelector('.kb-done')!);
+        }
+      };
+      for (let i = 0; i < 2; i++) {
+        clock.advance(2000);
+        wrongTap();
+        await vi.waitFor(() => expect(i === 0 ? flow.currentState()?.try : flow.currentState()?.phase).toBe(i === 0 ? 2 : 'teach'));
+      }
+      expect(await logStore.listLedger()).toHaveLength(0);
+
+      clock.advance(2000);
+      tap(host.querySelector('.teach-done')!);
+      await vi.waitFor(() => expect(flow.isActive()).toBe(true));
+      await flow.endBreakByParent();
+      const rows = await logStore.listLedger();
+      expect(rows.every((r) => r.reason === 'break')).toBe(true);
+      host.remove();
+    } finally {
+      db.close();
+    }
+  });
+});

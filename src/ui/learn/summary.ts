@@ -21,7 +21,6 @@ export interface SummaryView {
 
 function formatEarned(earned: number): string {
   if (earned > 0) return earned === 1 ? '+1 punt verdiend' : `+${earned} punten verdiend`;
-  if (earned < 0) return earned === -1 ? '-1 punt' : `${earned} punten`;
   return '0 punten erbij';
 }
 
@@ -37,9 +36,6 @@ export function createSummaryView(options: SummaryViewOptions): SummaryView {
         text: 'Dit was lastig. Volgende keer gaat het vast beter!',
       }),
     );
-    if (summary.earned < 0) {
-      root.append(el('p', { class: 'summary-points', text: formatEarned(summary.earned) }));
-    }
   } else {
     // AC34: K van de N goed, points earned, bonus if any, and new total.
     root.append(

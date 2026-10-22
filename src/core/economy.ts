@@ -6,7 +6,7 @@ import { DINO_KINDS, SHOP_KINDS, type DinoKindId } from '../dinos/kinds';
 
 export const POINTS_FIRST_TRY = 2;
 export const POINTS_RETRY = 1;
-export const POINTS_TEACH = -1;
+export const POINTS_TEACH = 0;
 export const POINTS_BONUS = 3;
 export const MAX_SHOP_DINOS = 12;
 export const PRACTICE_DAY_CAP = 10;
@@ -28,7 +28,7 @@ export function addPoints(points: number, delta: number): number {
   return Math.max(0, clean(points) + (Number.isFinite(delta) ? Math.trunc(delta) : 0));
 }
 
-/** Points for one answer before any cap: +2, +1 or -1. */
+/** Points for one answer before any cap: +2, +1 or 0 (a teach moment changes nothing). */
 export function answerPoints(outcome: AnswerOutcome): number {
   return outcome === 'first' ? POINTS_FIRST_TRY : outcome === 'retry' ? POINTS_RETRY : POINTS_TEACH;
 }
@@ -49,7 +49,7 @@ export function practiceCapReached(eco: EconomyRecord, day: string): boolean {
 
 export interface PointsResult {
   economy: EconomyRecord;
-  /** The change that really happened to the total (can be 0 or negative). */
+  /** The change that really happened to the total (never negative). */
   applied: number;
   /** True when a plus was cut or removed by the Extra oefenen day cap. */
   capHit: boolean;

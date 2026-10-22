@@ -1,5 +1,5 @@
 // Teach moment card (AC146 view part): "Zo zit het:", the right answer, the explain text,
-// teaching (a lesson page or a worked example), "-1 punt" in soft grey and "Ik snap het".
+// teaching (a lesson page or a worked example) and "Ik snap het".
 // The point change itself is done by the caller. This only shows the card.
 import '../../styles/mc-menu.css';
 import '../../styles/lesson.css';
@@ -56,7 +56,7 @@ export function createTeachMoment(options: TeachMomentOptions): TeachMoment {
   }
 
   const button = el('button', { class: 'teach-done', text: 'Ik snap het', attrs: { type: 'button' } });
-  const footer = el('div', { class: 'teach-footer' }, [el('p', { class: 'teach-malus', text: '-1 punt' }), button]);
+  const footer = el('div', { class: 'teach-footer' }, [button]);
   root.append(scroll, footer);
 
   let done = false;

@@ -37,7 +37,7 @@ const choiceItem1: ChoiceItem = {
 const rekenenItem = itemFromId('tafels:7x8', 'E6')!;
 
 describe('break-screen (T36)', () => {
-  it('shows progress dots without a countdown, handles first-try right (+2), retry right (+1), teach moment (-1) and summary (AC28, AC29, AC30, AC34, AC145, AC146)', () => {
+  it('shows progress dots without a countdown, handles first-try right (+2), retry right (+1), teach moment (0) and summary (AC28, AC29, AC30, AC34, AC145, AC146)', () => {
     const entries: SessionEntry[] = [
       { item: choiceItem1, box: 0 },
       { item: { ...choiceItem1, id: 'q2' }, box: 0 },
@@ -106,7 +106,7 @@ describe('break-screen (T36)', () => {
     expect(screen.element.textContent).toContain('Goed zo! +1 punt');
     tap(screen.element.querySelector('.break-next-btn')!);
 
-    // Question 3 (Rekenen 7 x 8 = 56): wrong twice -> teach moment with worked example and "-1 punt" (AC146).
+    // Question 3 (Rekenen 7 x 8 = 56): wrong twice -> teach moment with worked example and no minus (AC146).
     const tapDigit = (d: string) => {
       const btn = [...screen.element.querySelectorAll('.kb-char')].find((b) => b.textContent === d)!;
       tap(btn);
@@ -122,22 +122,65 @@ describe('break-screen (T36)', () => {
     tapDigit('9');
     tapDone();
 
-    // Teach moment shows "Zo zit het:", the right answer "56", worked example steps, and "-1 punt" (AC146).
+    // Teach moment shows "Zo zit het:", the right answer "56", worked example steps, and no minus (AC146).
     expect(screen.element.textContent).toContain('Zo zit het:');
     expect(screen.element.textContent).toContain('56');
     expect(screen.element.textContent).toContain('Stap voor stap:');
-    expect(screen.element.textContent).toContain('-1 punt');
+    expect(screen.element.textContent).not.toContain('-1 punt');
     tap(screen.element.querySelector('.teach-done')!);
 
-    // Summary screen: 2 van de 3 goed, +2 punten verdiend, new total 20, egg hint shown (AC34).
+    // Summary screen: 2 van de 3 goed, +3 punten verdiend, new total 21, egg hint shown (AC34).
     expect(screen.element.textContent).toContain('2 van de 3 goed!');
-    expect(screen.element.textContent).toContain('+2 punten verdiend');
-    expect(screen.element.textContent).toContain('Totaal: 20 punten');
+    expect(screen.element.textContent).toContain('+3 punten verdiend');
+    expect(screen.element.textContent).toContain('Totaal: 21 punten');
     expect(screen.element.textContent).toContain('Je kunt een ei kopen in de Dinowinkel!');
 
     tap(screen.element.querySelector('.summary-done-btn')!);
     expect(state.phase).toBe('done');
     screen.destroy();
+  });
+
+  it('AC170: no minus number on screen in any phase of a timed break, an early break or Extra oefenen', () => {
+    const configs = [
+      { mode: 'break' as const },
+      { mode: 'break' as const, early: true },
+      { mode: 'practice' as const },
+    ];
+    for (const c of configs) {
+      let now = 1000;
+      let { state } = startSession({
+        ...c,
+        entries: [
+          { item: choiceItem1, box: 0 },
+          { item: { ...choiceItem1, id: 'q2' }, box: 0 },
+        ],
+        economy: { ...defaultKv('economy'), points: 5 },
+        day: '2026-10-17',
+        lessonFirst: true,
+        at: now,
+      });
+      const screen = createBreakScreen({ state, lesson: sampleLesson, lessonForItem: () => sampleLesson, onAction: () => {} });
+      const texts: string[] = [];
+      const step = (e: Parameters<typeof reduce>[1]) => {
+        state = reduce(state, e).state;
+        screen.render(state);
+        texts.push(`${state.phase}: ${screen.element.textContent ?? ''}`);
+      };
+      texts.push(`${state.phase}: ${screen.element.textContent ?? ''}`);
+      const wrong = { type: 'choice', index: 1 } as const;
+      const right = { type: 'choice', index: 0 } as const;
+      step({ type: 'lessonDone', at: (now += 500) });
+      step({ type: 'answer', response: wrong, at: (now += 500) }); // retry
+      step({ type: 'answer', response: wrong, at: (now += 500) }); // teach moment
+      step({ type: 'understood', at: (now += 500) });
+      step({ type: 'answer', response: right, at: (now += 500) });
+      step({ type: 'next', at: (now += 500) });
+      expect(state.phase).toBe('summary');
+      expect(texts.some((t) => t.startsWith('teach'))).toBe(true);
+      expect(texts.some((t) => t.startsWith('summary'))).toBe(true);
+      for (const t of texts) expect(t).not.toMatch(/-\d/);
+      screen.destroy();
+    }
   });
 
   it('shows the kind message with no plus points when 0 questions are right (AC116)', () => {
@@ -161,7 +204,7 @@ describe('break-screen (T36)', () => {
       'Dit was lastig. Volgende keer gaat het vast beter!',
     );
     expect(screen.element.textContent).not.toContain('+');
-    expect(screen.element.textContent).toContain('Totaal: 4 punten');
+    expect(screen.element.textContent).toContain('Totaal: 5 punten');
     screen.destroy();
   });
 

@@ -210,7 +210,7 @@ export function createBreakFlow(options: BreakFlowOptions): BreakFlow {
             ts: options.clock.now(),
             day: state.day,
             delta: ef.applied,
-            reason: ef.applied < 0 ? 'malus' : 'break',
+            reason: 'break',
           });
         }
       } else if (ef.type === 'unanswered') {

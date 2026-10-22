@@ -29,12 +29,13 @@ describe('pickLessonPage', () => {
 });
 
 describe('teach moment', () => {
-  it('shows Zo zit het, answer, explain, lesson page and -1 punt', () => {
+  it('shows Zo zit het, answer, explain, lesson page and no minus', () => {
     const page = pickLessonPage(lesson, 'komma-opsomming')!;
     const tm = createTeachMoment({ answer: 'Ik eet, drink en slaap.', explain: 'Na eet komt een komma.', teaching: { kind: 'page', page }, onDone: () => {} });
     const t = tm.element.textContent ?? '';
-    for (const s of ['Zo zit het:', 'Ik eet, drink en slaap.', 'Na eet komt een komma.', 'Komma', '-1 punt', 'Ik snap het']) expect(t).toContain(s);
-    expect(tm.element.querySelector('.teach-malus')).not.toBeNull();
+    for (const s of ['Zo zit het:', 'Ik eet, drink en slaap.', 'Na eet komt een komma.', 'Komma', 'Ik snap het']) expect(t).toContain(s);
+    expect(t).not.toContain('punt');
+    expect(tm.element.querySelector('.teach-malus')).toBeNull();
   });
 
   it('shows a worked example as steps', () => {
@@ -76,6 +77,6 @@ describe('teach moment', () => {
     expect(scroll?.querySelector('.teach-lesson')).not.toBeNull();
     expect(scroll?.querySelector('.teach-done')).toBeNull();
     expect(tm.element.querySelector('.teach-footer .teach-done')).not.toBeNull();
-    expect(tm.element.querySelector('.teach-footer .teach-malus')).not.toBeNull();
+    expect(tm.element.querySelector('.teach-footer .teach-malus')).toBeNull();
   });
 });
