@@ -15,7 +15,7 @@ You are the operator. Run the completion checklist from CLAUDE.md layer 7.
    * [ ] `docs/DECISIONS.md` has no `NEEDS FOUNDER` items
    * [ ] README explains how to play, run, test and deploy
    * [ ] `wrangler.jsonc` committed, no secrets in the repo
-2. Launch `scribe` for a final docs pass. Move CHANGELOG Unreleased entries under a version heading: `0.1.0` for v1, then `0.2.0` for v2, and so on. Mark the release `shipped` in the PRD backlog.
+2. Launch `scribe` for a final docs pass. Move CHANGELOG Unreleased entries under a version heading: `0.1.0` for v1, then `0.2.0` for v2, and so on. Mark the release `shipped` in `docs/BACKLOG.md`. Do not edit `docs/PRD.md` here: its section moves to `docs/releases/vN.md` when the next release is scoped (`/release`), so shipping never reopens the gate.
 3. **Deploy to Cloudflare Workers.** Ask the founder with AskUserQuestion where it should live (for a release, recommend the same place as last time): only on the home network (`npm run preview`, give the local address), private (workers.dev behind Cloudflare Access, the founder sets up Access), or public on workers.dev or a custom domain. Every deploy is a founder decision. Then:
    * Run `npm run build` and check `wrangler.jsonc` points at `./dist`.
    * Deploy with `npm run deploy` if the founder is logged in to wrangler on this machine (`npx wrangler whoami`), or ask the founder to run the Deploy workflow in GitHub Actions (needs the `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` secrets, which only the founder adds).
@@ -26,4 +26,4 @@ You are the operator. Run the completion checklist from CLAUDE.md layer 7.
    * What was built and where to play it
    * What works (AC coverage) and what is left
    * Founder decisions made along the way
-   * The top 3 releases in the backlog and which one you recommend next with `/release` (ask `brainstormer` if you need fresh ideas)
+   * The top 3 releases in `docs/BACKLOG.md` and which one you recommend next with `/release` (ask `brainstormer` if you need fresh ideas)

@@ -1,10 +1,10 @@
 # Status
 
-**Phase:** small releases. v1 (0.1.0) is the live build (decision 57). v2 Gouden ei (0.2.0) is built and in CI, then it ships to main.
-**Current release:** v2 Gouden ei: practice exams with a golden dino, plus the Winkel button and an instant Pauze (decision 73). Tasks T39, T51a, T51b, T51c, T51d, T51e are done.
-**Next step:** CI green, ship 0.2.0 (merge to main), founder iPad checks (one Taal exam, one Rekentoets, Pauze and Winkel from the home screen icon). Then the architect's simplification review the founder asked for.
-**Next in the backlog:** v3 Dino's veilig (backup and restore). On hold: the save on refresh fix (decision 72).
-**Blockers:** none. Note: this cloud session cannot push tags or to main directly (HTTP 403), so main is updated through a pull request; tag v0.1.0 is local only.
+**Phase:** small releases. 0.1.0 and 0.2.0 Gouden ei are shipped (0.2.0 is on main).
+**Current release:** v9 Eerlijke punten (0.3.0, decision 87): honest point banners, one egg hint rule, no malus. PRD split done (decisions 79, 80), PRD READY FOR SIGNOFF.
+**Next step:** founder signs the PRD, architect cuts the v9 tasks, build. Then the Taal content fixes (T65, decision 88) as a content release, then refactor round R1 (docs/PLAN.md).
+**Next in the backlog:** see docs/BACKLOG.md. On hold: the save on refresh fix (decision 72). Founder iPad check AC165 still open.
+**Blockers:** none. This cloud session cannot push tags or to main directly (HTTP 403), so main is updated through a pull request.
 
 ## Done
 * **2026-10-18: Gemini's build is the truth** (decision 50). `main` holds the Gemini2 code, live on Cloudflare Worker `minespel`. Claude's G0 to G6 branch is set aside (commit `4067f07` in history).
