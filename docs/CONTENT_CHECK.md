@@ -1,6 +1,6 @@
 # Content check: Taal (T65, AC124, founder decision 81)
 
-Date: 2026-10-22. By: QA. Module JSON was not changed. Nothing is fixed yet.
+Date: 2026-10-22. By: QA. F1 to F7 and F10 are fixed (see the "Fixed" line under each). F8, F9, F11, F12 are left as they are (style).
 
 ## How this was done
 
@@ -55,12 +55,16 @@ Severity words: wrong answer (a kid is marked wrong for a correct answer, or tau
 * **Source:** Taaladvies.net, "aanhalingstekens en andere leestekens" (not looked up live, confirm).
 * **Severity:** wrong answer in one of the two modules. Fix both to the same rule. Items to change if outside is right: `lt-023` (answer and correction, explain), `lt-022` explain, cito lesson page 4 text and example, and its bad example. Check that no item uses the other form.
 
+* **Fixed (2026-10-23, decision 88):** komma outside the quotes. Changed cito lt-022 explain, lt-023 (correction moe",, explain) and the lesson page "Het leesteken binnen de aanhalingstekens". No other item or lesson used the inside komma.
+
 ### F2. `ww-vt-027` explain teaches a wrong subject
 
 * **Item:** ww-vt-027, "Wat ... er als de dino het ei laat vallen?" Answer gebeurt (right).
 * **What is wrong:** explain says "Het onderwerp is het, dus stam gebeur plus t". There is no "het" in the first part. The onderwerp of "Wat gebeurt er" is "wat" (with "er" as a placeholder).
 * **Correct form:** "Wat is één ding, dus stam gebeur plus t: gebeurt. Er staat geen is of heeft bij."
 * **Severity:** wrong (explain only, answer is right).
+
+* **Fixed:** ww-vt-027 explain now says the onderwerp is "wat".
 
 ### F3. `e6-on-008` and the zelfstandig naamwoord test (ambiguous)
 
@@ -70,12 +74,16 @@ Severity words: wrong answer (a kid is marked wrong for a correct answer, or tau
 * **Source:** Woordenlijst lists springen as werkwoord, and nominalised infinitives (het springen) are normal Dutch.
 * **Severity:** ambiguous. Related: `e6-on-015` "Je kunt niet zeggen: wij snel" is fine.
 
+* **Fixed:** e6-on-008 explain no longer claims "de springen" is wrong; the ontleden lesson page "Zelfstandig naamwoord" text and tip now say it is a ding and that what you do is a werkwoord.
+
 ### F4. `e6-kl-004` ijsje or eisje (ambiguous)
 
 * **Item:** e6-kl-004, "Na het zwemmen eten wij een ...sje." Answer ij only.
 * **What is wrong:** "eisje" (a little egg) is a real word, and the lesson even uses it as a bad example. Eating "een eisje" after swimming is not likely, but a kid who types ei is marked wrong and the sentence alone does not rule it out.
 * **Correct form:** add a clue, for example "Na het zwemmen eten wij een koud ...sje." or "een ...sje met aardbeien", or keep ij and add the picture word "ijs" in the sentence.
 * **Severity:** ambiguous.
+
+* **Fixed:** e6-kl-004 sentence is now "een koud ...sje met aardbeien", explain updated. Only ij fits.
 
 ### F5. Komma between bijvoeglijke naamwoorden (ambiguous, confirm)
 
@@ -85,6 +93,8 @@ Severity words: wrong answer (a kid is marked wrong for a correct answer, or tau
 * **Source:** Taaladvies.net, "komma bij bijvoeglijke naamwoorden" (confirm).
 * **Severity:** ambiguous.
 
+* **Fixed:** km-019 is now a choice item ("lieve, slimme en grappige dino") where only one option is right and no correct variant is marked wrong. km-025 explain says "mag een komma"; lesson page "Extra uitleg, rijtjes woorden en geen komma" says komma or en.
+
 ### F6. Punt or uitroepteken, both fine (ambiguous)
 
 * **Items:** taal-e6 `e6-hl-005` ("Pas op, daar komt een grote T-rex aan", answer !), `e6-hl-012` ("Kijk eens, wat een prachtige regenboog", answer !), also `e6-hl-004` and `e6-hl-013` (these ask only for ! so they are fine). leestekens `ls-pt-005` offers an uitroepteken as a wrong option for "Mijn hond heet Max".
@@ -92,12 +102,16 @@ Severity words: wrong answer (a kid is marked wrong for a correct answer, or tau
 * **Correct form:** make the context clearly shouted, for example "Pas op, een T-rex" with "!" in the speech, or add "roept Sam". Remove "een punt" from the options of `e6-hl-012` and `e6-hl-005`, or accept both.
 * **Severity:** ambiguous (minor).
 
+* **Fixed:** e6-hl-005 and e6-hl-012 no longer offer "een punt (.)" (replaced by "een dubbele punt (:)"), so only the uitroepteken is right. The choice format has one answer index.
+
 ### F7. `e6` lesson "Persoonsvorm": a rule that is only half true
 
 * **Lesson page:** taal-e6 ontleden, "Persoonsvorm". Text: "In een vraag staat de persoonsvorm helemaal vooraan."
 * **What is wrong:** true only for ja/nee vragen ("Ga jij mee?"). In "Waar ga jij heen?" the persoonsvorm is second. A kid may later pick the wrong word.
 * **Correct form:** "In een vraag waar je ja of nee op kunt zeggen, staat de persoonsvorm helemaal vooraan." Item `e6-on-012` ("Ga jij vanmiddag naar de bieb?") is fine.
 * **Severity:** wrong (lesson text, minor).
+
+* **Fixed:** taal-e6 ontleden lesson "Persoonsvorm" now says ja/nee vragen have it first and vraagwoord vragen have it second.
 
 ### F8. Komma rules that are advice, taught as must (style, confirm)
 
@@ -122,6 +136,8 @@ Severity words: wrong answer (a kid is marked wrong for a correct answer, or tau
 * cito `ww-tt-028` explain: "Hij staat achter het werkwoord" (it means "mijn broer"). Better: "Mijn broer staat achter het werkwoord, maar het is één persoon."
 * cito `woordvormen` lesson examples: "We eten pannenkoeken met een verjaardagstaart toe." and "Ik maak een tekening van mijn vrijheid." read oddly. Use "We eten pannenkoeken en een verjaardagstaart." and "Ik maak een tekening van mijn nieuwe fiets."
 * cito `ww-vt-021` and `ww-vt-024`: tegenwoordige tijd items sit in the verleden file. Fine for the exam mix, only a note.
+
+* **Fixed:** ei-woord hyphen (cito kl-004 explain, plus the README example), meervoud "autos" line, tk-008, ls-dp-013, ww-tt-028 explains, and the two woordvormen lesson examples.
 
 ### F11. Titles rule (style, confirm)
 

@@ -24,14 +24,14 @@
       },
       {
         "title": "Zelfstandig naamwoord",
-        "text": "Een zelfstandig naamwoord is een woord voor een mens, dier, ding of plek. Test: kun je de, het of een ervoor zetten? Dan is het een zelfstandig naamwoord.",
+        "text": "Een zelfstandig naamwoord is een woord voor een mens, dier, ding of plek. Een ding kun je zien of aanraken. Test: is het een ding, en kun je de, het of een ervoor zetten? Dan is het een zelfstandig naamwoord. Wat je doet, is een werkwoord.",
         "examples": [
           {
             "good": "De raptor rent naar de boom.",
             "why": "De raptor en de boom: raptor en boom zijn zelfstandige naamwoorden."
           }
         ],
-        "tip": "Zet er de, het of een voor. Klinkt het goed? Zelfstandig naamwoord!",
+        "tip": "Is het een mens, dier, ding of plek? Zet er de, het of een voor. Klinkt het goed? Zelfstandig naamwoord!",
         "skill": "zelfstandig-naamwoord"
       },
       {
@@ -60,7 +60,7 @@
       },
       {
         "title": "Persoonsvorm",
-        "text": "De persoonsvorm is het werkwoord dat verandert als je de zin in een andere tijd zet. In een vraag staat de persoonsvorm helemaal vooraan.",
+        "text": "De persoonsvorm is het werkwoord dat verandert als je de zin in een andere tijd zet. In een vraag waar je ja of nee op kunt zeggen, staat de persoonsvorm helemaal vooraan. Begint de vraag met een vraagwoord, zoals waar of wie, dan staat de persoonsvorm als tweede.",
         "examples": [
           {
             "good": "Tim speelt met blokken.",
@@ -213,7 +213,7 @@
         "appel"
       ],
       "answer": 2,
-      "explain": "Je kunt niet zeggen: de springen. Springen is een werkwoord. De rest zijn zelfstandige naamwoorden."
+      "explain": "Springen is wat je doet, een werkwoord. Boom, fiets en appel zijn dingen, dus zelfstandige naamwoorden."
     },
     {
       "id": "e6-on-009",

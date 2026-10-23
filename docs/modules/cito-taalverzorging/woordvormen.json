@@ -61,8 +61,8 @@
         "text": "Met heid en ing maak je van een woord een ding. Vrij wordt vrijheid. Tekenen wordt tekening. Heid schrijf je met ei. Ing schrijf je met één n.",
         "examples": [
           {
-            "good": "Ik maak een tekening van mijn vrijheid.",
-            "bad": "Ik maak een tekenning van mijn vrijhijd."
+            "good": "Ik maak een tekening van mijn nieuwe fiets.",
+            "bad": "Ik maak een tekenning van mijn nieuwe fiets."
           },
           {
             "good": "De wandeling was een verrassing.",
@@ -80,8 +80,8 @@
             "bad": "Ik vond een dinosaurus ei bij de boom hut."
           },
           {
-            "good": "We eten pannenkoeken met een verjaardagstaart toe.",
-            "bad": "We eten pannekoeken met een verjaardagtaart toe."
+            "good": "We eten pannenkoeken en een verjaardagstaart.",
+            "bad": "We eten pannekoeken en een verjaardagtaart."
           }
         ],
         "tip": "Hoor je een s tussen de woorden? Schrijf die s. Hoor je 'e' en heeft het eerste woord een meervoud met en? Schrijf dan en: pannenkoek, paardenbloem, boekenkast."

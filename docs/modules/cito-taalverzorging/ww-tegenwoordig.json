@@ -226,7 +226,7 @@
       "words": ["Na", "het", "eten", "fietsen", "mijn", "broer", "snel", "naar", "de", "voetbalclub."],
       "answer": 3,
       "correction": "fietst",
-      "explain": "Wie fietst? Mijn broer. Hij staat achter het werkwoord, maar het is één broer. Stam plus t: fietst." },
+      "explain": "Wie fietst? Mijn broer. Mijn broer staat achter het werkwoord, maar het is één persoon. Stam plus t: fietst." },
     { "id": "ww-tt-029", "type": "find-error", "level": "E7", "skill": "inversie-jij",
       "prompt": "Welk woord is fout geschreven?",
       "words": ["Waarom", "houdt", "jij", "je", "dino", "niet", "gewoon", "vast?"],

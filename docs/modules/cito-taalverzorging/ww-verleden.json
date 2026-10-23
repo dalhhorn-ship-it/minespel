@@ -220,7 +220,7 @@
       "sentence": "Wat ... er als de dino het ei laat vallen?",
       "options": ["gebeurt", "gebeurd", "gebeurdt"],
       "answer": 0,
-      "explain": "Dit gaat over nu. Het onderwerp is het, dus stam gebeur plus t: gebeurt. Er staat geen is of heeft bij." },
+      "explain": "Dit gaat over nu. Het onderwerp is wat, dat is één ding, dus stam gebeur plus t: gebeurt. Er staat geen is of heeft bij." },
     { "id": "ww-vt-028", "type": "find-error", "level": "E7", "skill": "engels-werkwoord",
       "prompt": "Welk woord is fout geschreven?",
       "words": ["Na", "de", "toets", "hebben", "we", "lekker", "gerelaxed", "op", "de", "bank."],

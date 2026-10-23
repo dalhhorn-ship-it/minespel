@@ -135,7 +135,7 @@ Every item has these fields:
   "words": ["De", "dino", "legt", "een", "groot", "ij", "in", "het", "nest."],
   "answer": 5,
   "correction": "ei",
-  "explain": "Een ei schrijf je met ei. Het is een ei uit de lijst met ei woorden." }
+  "explain": "Een ei schrijf je met ei. Het is een ei uit de lijst met ei-woorden." }
 ```
 
 `words` is the sentence split on spaces, with punctuation stuck to its word. `answer` is the index of the wrong word, or `-1` when there is no mistake (the kid then taps "Geen fout"). `correction` is the right spelling of the wrong word, or `null` when `answer` is `-1`. At most one wrong word per sentence.
