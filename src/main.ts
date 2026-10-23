@@ -432,8 +432,16 @@ if (__E2E__) {
   registerHook('screenGuard', () => guard.state());
   registerHook('audioUnlocked', () => audio.isUnlocked());
   registerHook('openPauseMenu', () => openPauseMenu());
-  registerHook('openParentControls', () => whenReady(() => void parentFlow?.open()));
-  registerHook('openPractice', () => whenReady(() => practiceFlow?.open()));
+  // Tests call these after the save loaded, which can be before the ready gate on a slow machine (the save
+  // gives up after 3 s). Waiting for the gate keeps these hooks free of the waiting card.
+  registerHook('openParentControls', async () => {
+    await gate.ready;
+    await parentFlow?.open();
+  });
+  registerHook('openPractice', async () => {
+    await gate.ready;
+    practiceFlow?.open();
+  });
   registerHook('points', async () => (records ? (await records.get('economy')).points : 0));
   registerHook('setPoints', async (pts: number) => {
     if (records) {
