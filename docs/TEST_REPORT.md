@@ -1,5 +1,23 @@
 # Test report
 
+## R1 Boot safety (R1d)
+
+Result: pass in Chromium (`npm run test:e2e:local -- boot-taps`, 26 tests, run three times). WebKit runs in CI.
+
+Spec: `tests/e2e/boot-taps.spec.ts`, helper `tests/e2e/helpers/slow-storage.ts`. Real finger taps. The specs never wait for the ready hook before tapping. Storage is held at open (2 s, or never), and for the Lesboek button late in boot, because the Lesboek has no lessons before the database is read. The 10 s limit is moved with `page.clock`, so nothing sleeps.
+
+| Case | Buttons | Result |
+|---|---|---|
+| Storage held 2 s: card "Even geduld...", then opens by itself | HUD lock, Ouders in pause, Extra oefenen, Lesboek Oefen dit onderwerp, Nu oefenen | pass |
+| Storage never answers: card, Terug goes back to the world | same five | pass |
+| Storage never answers: cannot load text after 10 s, Terug works | same five | pass |
+| Normal storage: opens on the first tap, no card | same five | pass |
+| Pauze and Winkel open on the first tap | normal, held 2 s, never | pass |
+
+Dropped: the Winkel placeholder has no "Verdien punten" button (only the real shop has it), so there is no case for it.
+
+Proof the spec is real: copied into a worktree at d1a01ca (before R1b), 15 of 26 failed (every held and never case) and the 11 normal storage and Pauze or Winkel cases passed. On HEAD all 26 pass. The worktree is removed.
+
 ## v9 Eerlijke punten (0.3.0)
 
 Result: pass in Chromium. WebKit runs in CI.
