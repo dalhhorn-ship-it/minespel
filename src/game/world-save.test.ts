@@ -212,6 +212,8 @@ describe('world save', () => {
       const start = vi.fn(inner.start);
       let release!: () => void;
       const gate = new Promise<void>((r) => (release = r));
+      let lateRestoreDone!: () => void;
+      const lateRestore = new Promise<void>((r) => (lateRestoreDone = r));
       const result = await bootSave({
         game,
         timeoutMs: 20,
@@ -221,6 +223,7 @@ describe('world save', () => {
           restore: async () => {
             await gate;
             await inner.restore();
+            lateRestoreDone();
           },
         }),
       });
@@ -228,7 +231,7 @@ describe('world save', () => {
       expect(game.isRunning()).toBe(true);
       expect(start).not.toHaveBeenCalled();
       release();
-      await new Promise((r) => setTimeout(r, 10));
+      await lateRestore;
       expect(queue.pendingCount()).toBe(0);
     });
 

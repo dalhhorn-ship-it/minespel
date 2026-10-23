@@ -14,6 +14,11 @@ function tap(el: Element | null | undefined) {
   el.dispatchEvent(new PointerEvent('pointerup', { pointerId: 1, clientX: 5, clientY: 5, bubbles: true }));
 }
 
+// Lets the awaited record save and the re-render finish (they only wait on microtasks).
+async function flush() {
+  for (let i = 0; i < 20; i++) await Promise.resolve();
+}
+
 function setup(forceSetPin = false) {
   const clock = createFakeClock(new Date('2026-10-18T10:00:00Z').getTime());
   const store: { gate: GateRecord } = { gate: defaultKv('gate') as GateRecord };
@@ -39,14 +44,14 @@ function setup(forceSetPin = false) {
     const input = host.querySelector<HTMLInputElement>('input.parent-input')!;
     input.value = text;
     tap(host.querySelector('.parent-btn-primary'));
-    await new Promise((r) => setTimeout(r, 10));
+    await flush();
   };
   const pin = async (digits: string) => {
     for (const d of digits) {
       tap(host.querySelector(`[data-key="${d}"]`));
       clock.advance(300);
     }
-    await new Promise((r) => setTimeout(r, 10));
+    await flush();
   };
   return { host, store, clock, answerQuestion, pin, unlocked: () => unlocked };
 }

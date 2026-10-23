@@ -78,7 +78,9 @@ describe('save queue', () => {
     q.markDirty('stats');
     q.simulateKill();
     window.dispatchEvent(new Event('pagehide'));
-    await new Promise((r) => setTimeout(r, 20));
+    // A database round trip is queued behind any write the hide handler started.
+    await get(db, 'kv', 'economy');
+    await get(db, 'kv', 'stats');
     expect(await get(db, 'kv', 'stats')).toBeUndefined();
     detach();
   });
