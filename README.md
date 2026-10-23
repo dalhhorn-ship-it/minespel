@@ -56,6 +56,7 @@ npm test          # unit tests
 npm run build
 npm run test:dist
 npm run test:e2e  # needs the WebKit browser: npx playwright install webkit
+npm run test:e2e:local -- smoke  # same specs in the Chromium on disk (cloud container)
 ```
 
 The Playwright WebKit browser cannot download in the cloud sandbox, because the proxy blocks its download host. So the end to end tests run in GitHub CI, on every push, split over 4 parallel jobs. The CI workflow is in `.github/workflows/ci.yml`. On your own computer, run `npx playwright install webkit` once and then `npm run test:e2e`.
