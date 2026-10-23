@@ -79,7 +79,7 @@
       },
       {
         "title": "Extra uitleg, rijtjes woorden en geen komma",
-        "text": "Vertel je in de zin wie iemand is, zoals Rex, mijn dino? Zet die uitleg tussen twee komma's. Staan er een paar woorden op een rij die zeggen hoe iets is? Zet er dan een komma tussen, maar nooit vlak voor het ding zelf. In een gewone korte zin hoort vaak helemaal geen komma.",
+        "text": "Vertel je in de zin wie iemand is, zoals Rex, mijn dino? Zet die uitleg tussen twee komma's. Staan er een paar woorden op een rij die zeggen hoe iets is? Zet er dan een komma tussen of het woord en voor het laatste woord, maar nooit een komma vlak voor het ding zelf. In een gewone korte zin hoort vaak helemaal geen komma.",
         "examples": [
           {
             "good": "Rex, mijn dino, eet graag sla.",
@@ -430,25 +430,18 @@
     },
     {
       "id": "km-019",
-      "type": "punctuate",
+      "type": "choice",
       "level": "M7",
       "skill": "bijvoeglijk",
-      "prompt": "Tik waar een komma moet.",
-      "mark": ",",
-      "words": [
-        "Rex",
-        "is",
-        "een",
-        "lieve",
-        "slimme",
-        "grappige",
-        "dino."
+      "prompt": "Welke zin is goed?",
+      "options": [
+        "Rex is een lieve, slimme en grappige dino.",
+        "Rex is een lieve, slimme, en grappige dino.",
+        "Rex is een lieve, slimme en grappige, dino.",
+        "Rex is een, lieve, slimme en grappige dino."
       ],
-      "answer": [
-        3,
-        4
-      ],
-      "explain": "Drie woorden zeggen hoe Rex is. Daartussen komen komma's, maar niet vlak voor dino."
+      "answer": 0,
+      "explain": "Drie woorden zeggen hoe Rex is. Tussen lieve en slimme staat een komma, voor en komt geen komma en vlak voor dino ook niet."
     },
     {
       "id": "km-020",
@@ -557,7 +550,7 @@
         "Ik zag een grote groene, dino."
       ],
       "answer": 1,
-      "explain": "Tussen grote en groene komt een komma. Vlak voor dino komt nooit een komma."
+      "explain": "Tussen grote en groene mag een komma. Vlak voor dino komt nooit een komma."
     },
     {
       "id": "km-026",

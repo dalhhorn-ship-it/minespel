@@ -53,15 +53,15 @@
       },
       {
         "title": "Het leesteken binnen de aanhalingstekens",
-        "text": "Het leesteken aan het eind van wat iemand zegt, staat binnen de aanhalingstekens. Komt zei of vroeg erachter? Dan staat er een komma, vraagteken of uitroepteken binnen de aanhalingstekens. Zei begint dan met een kleine letter.",
+        "text": "Een punt, vraagteken of uitroepteken aan het eind van wat iemand zegt, staat binnen de aanhalingstekens. Komt zei of vroeg erachter? Dan staat een vraagteken of uitroepteken nog steeds binnen. Een komma komt buiten de aanhalingstekens. Zei begint dan met een kleine letter.",
         "examples": [
           {
             "good": "Juf zei: \"Pak allemaal je schrift.\"",
             "bad": "Juf zei: \"Pak allemaal je schrift\"."
           },
           {
-            "good": "\"Ik ben moe,\" zei de dino.",
-            "bad": "\"Ik ben moe.\" zei de dino."
+            "good": "\"Ik ben moe\", zei de dino.",
+            "bad": "\"Ik ben moe,\" zei de dino."
           },
           {
             "good": "\"Kijk, een ei!\" riep Mila.",
@@ -433,7 +433,7 @@
         "\"Kijk, een ei!\", riep Mila."
       ],
       "answer": 0,
-      "explain": "Staat riep achter wat iemand zegt? Dan gaat de zin verder met een kleine letter en zonder extra komma."
+      "explain": "Staat riep achter wat iemand zegt? Het uitroepteken staat binnen de aanhalingstekens. Dan gaat de zin verder met een kleine letter en zonder extra komma."
     },
     {
       "id": "lt-023",
@@ -450,8 +450,8 @@
         "dino."
       ],
       "answer": 2,
-      "correction": "moe,\"",
-      "explain": "Komt zei achter wat iemand zegt? Dan staat er een komma binnen de aanhalingstekens, geen punt."
+      "correction": "moe\",",
+      "explain": "Komt zei achter wat iemand zegt? Dan staat er een komma na de aanhalingstekens, geen punt: moe\", zei."
     },
     {
       "id": "lt-024",

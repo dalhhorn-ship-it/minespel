@@ -4,7 +4,7 @@ Not signed. Changing this file never closes the PRD gate (decision 80). The sign
 
 ## Next steps (founder order)
 
-1. **v9 Eerlijke punten (0.3.0)** (decision 87). The kid said the points do not add up and the game is too harsh. Honest point banners, one egg hint rule (decision 84) and no malus anywhere. Its section is in `docs/PRD.md` section 12. It comes before R1.
+1. **v9 Eerlijke punten (0.3.0)** (decision 87), shipped 2026-10-22. The kid said the points do not add up and the game is too harsh. Honest point banners, one egg hint rule (decision 84) and no malus anywhere. Its section is in `docs/PRD.md` section 12. It comes before R1.
 2. **Refactor round R1** (decision 78, see `docs/SIMPLIFY.md` section 4 and decision 82), right after v9. One ready signal so no button is dead while the app loads, the egg limit mismatch, and e2e in Chromium before each push. At most 5 tasks, milestone `R1` in `docs/PLAN.md`. It needs no PRD change: the kids see no new behaviour, except that buttons that did nothing while loading now work.
 3. **v3 Dino's veilig.** Picked by the founder as the release after R1 (decision 78). At `/release`, product writes its section in `docs/PRD.md` section 12 and the founder signs it.
 4. **Taal spelling check (T65)** runs beside the next release, so beside v9 (decision 81). It is the human content check from AC124: QA reads 5 items per Taal topic against woordenlijst.org, and the founder or a teacher reads 20 items. It is mostly reading and needs no code.
@@ -29,7 +29,7 @@ With v9 shipping as 0.3.0, v3 becomes 0.4.0 if it ships next (versions follow sh
 |---|---|---|---|---|---|---|
 | | **v1** | The block world with dinos, learning breaks, the Dinowinkel and chickens (PRD 4.0) | | | every v1 task in `docs/PLAN.md` | shipped (0.1.0) |
 | | **v2 Gouden ei** | The parent starts a practice exam. Pass it and a golden dino hatches. One tap Winkel, Pauze that always opens. | M | | T39, T51a, T51b, T51c, T51d, T51e | shipped (0.2.0), see `docs/releases/v2.md` |
-| | **v9 Eerlijke punten** | Every number I see is the points I get, the egg hint is always right, and a mistake never costs points. | S | High. A kid complaint, so it goes first. | cut by the architect, about 3 | next (0.3.0, decision 87) |
+| | **v9 Eerlijke punten** | Every number I see is the points I get, the egg hint is always right, and a mistake never costs points. | S | High. A kid complaint, so it goes first. | cut by the architect, about 3 | shipped (0.3.0, 2026-10-22) |
 | | **R1** (refactor, not a release) | Buttons are never dead while the app loads. | S to M | Medium. Fixes taps that did nothing. | R1a to R1e (decision 82) | after v9 (decisions 78 and 87) |
 | 1 | **v3 Dino's veilig** | A backup file keeps the world, dinos and points safe, even on a wiped or new iPad. | M | High, as insurance. Losing a herd of dinos would hurt the most. | T18, T19, T53a, T55 | candidate, the founder's pick after R1 (decision 78) |
 | 2 | **v4 Altijd spelen** | The game starts without internet, never shows a blank screen, and two open tabs never fight over the save. | M | Medium to high. Protects saves, and the kids notice when it is missing. | T52, T22, new first start task | later (after v3) |

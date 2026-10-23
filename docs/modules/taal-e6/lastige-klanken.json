@@ -145,11 +145,11 @@
       "level": "M6",
       "skill": "ei-ij",
       "prompt": "Welke letters moeten op de stippen? Kies ei of ij.",
-      "sentence": "Na het zwemmen eten wij een ...sje.",
+      "sentence": "Na het zwemmen eten wij een koud ...sje met aardbeien.",
       "answer": [
         "ij"
       ],
-      "explain": "IJs schrijf je met ij. Dat moet je onthouden."
+      "explain": "Een koud ding met aardbeien is een ijsje. IJs schrijf je met ij. Dat moet je onthouden."
     },
     {
       "id": "e6-kl-005",

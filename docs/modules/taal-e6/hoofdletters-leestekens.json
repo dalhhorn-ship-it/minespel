@@ -153,7 +153,7 @@
       "prompt": "Welk leesteken moet aan het eind?",
       "sentence": "Pas op, daar komt een grote T-rex aan",
       "options": [
-        "een punt (.)",
+        "een dubbele punt (:)",
         "een vraagteken (?)",
         "een uitroepteken (!)",
         "een komma (,)"
@@ -275,7 +275,7 @@
       "prompt": "Welk leesteken moet aan het eind?",
       "sentence": "Kijk eens, wat een prachtige regenboog",
       "options": [
-        "een punt (.)",
+        "een dubbele punt (:)",
         "een vraagteken (?)",
         "een uitroepteken (!)",
         "een komma (,)"

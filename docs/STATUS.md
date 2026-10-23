@@ -1,8 +1,8 @@
 # Status
 
-**Phase:** small releases. 0.1.0 and 0.2.0 Gouden ei are shipped (0.2.0 is on main).
+**Phase:** small releases. 0.1.0, 0.2.0 Gouden ei and 0.3.0 Eerlijke punten are shipped (0.3.0 merged to main 2026-10-22, main CI green).
 **Current release:** v9 Eerlijke punten (0.3.0, decision 87): honest point banners, one egg hint rule, no malus. PRD signed 2026-10-22. V9a, V9b, V9c built and verified.
-**Next step:** CI green with e2e, qa adds the AC166 to AC170 e2e, ship 0.3.0 to main. Then the Taal content fixes (T65, decision 88) as a content release, then refactor round R1 (docs/PLAN.md).
+**Next step:** founder iPad check for 0.3.0 (one Extra oefenen round past the day limit, one wrong twice answer). Then the Taal content fixes (T65, decision 88) as a content release, then refactor round R1 (docs/PLAN.md).
 **Next in the backlog:** see docs/BACKLOG.md. On hold: the save on refresh fix (decision 72). Founder iPad check AC165 still open.
 **Blockers:** none. This cloud session cannot push tags or to main directly (HTTP 403), so main is updated through a pull request.
 
