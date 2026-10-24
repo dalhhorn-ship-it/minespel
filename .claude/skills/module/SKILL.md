@@ -34,6 +34,7 @@ For every topic write a lesson with one page per skill, set the page `skill` to 
 * At least 6 items per level per topic, better 7 to 10. Mix the types. Every `explain` names the rule, not only the answer.
 * Item ids: `<short module prefix>-<topic prefix>-NNN`. Never renumber or reuse an id after it shipped: saved progress uses it.
 * Keep sentences within the word limits (15 at M6 and E6, 20 at M7 and E7).
+* Foreign language modules (Engels and the like): every item with a sentence in the other language and a gap (`...`) shows the Dutch meaning of the whole sentence in its `prompt`, as `Het betekent: <Nederlandse zin>`. Kids must know what the sentence says before they can pick or type the missing word (founder, decision 95).
 
 For big modules, write the JSON with a small one off script in the scratchpad (helpers for each item type) instead of by hand. The JSON files are the source of truth afterwards; do not commit the script.
 

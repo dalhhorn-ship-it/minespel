@@ -5,6 +5,7 @@ Written so kids can read it too.
 ## Unreleased
 
 * New English lessons: the words and sentences from the song Beautiful People. Learn courage, power and how to cheer: Keep going! You can do it!
+* English: when you fill in a missing word, you now see what the whole sentence means in Dutch first.
 * Buttons you tap while the game is still loading now say "Even geduld..." and open by themselves when the game is ready.
 
 ## 0.3.0 (2026-10-22)

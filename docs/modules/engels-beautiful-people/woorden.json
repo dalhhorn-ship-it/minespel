@@ -267,7 +267,7 @@
       "type": "choice",
       "level": "E6",
       "skill": "woord-in-zin",
-      "prompt": "Welk woord past op de stippen?",
+      "prompt": "Welk woord past op de stippen? Het betekent: De kinderen spelen buiten in de zon.",
       "sentence": "The kids play ... in the sun.",
       "options": [
         "power",
@@ -283,7 +283,7 @@
       "type": "choice",
       "level": "E6",
       "skill": "woord-in-zin",
-      "prompt": "Welk woord past op de stippen?",
+      "prompt": "Welk woord past op de stippen? Het betekent: In een hoge boom klimmen is een grote uitdaging.",
       "sentence": "Climbing a tall tree is a big ... .",
       "options": [
         "balance",
@@ -299,7 +299,7 @@
       "type": "choice",
       "level": "E6",
       "skill": "woord-in-zin",
-      "prompt": "Welk woord past op de stippen?",
+      "prompt": "Welk woord past op de stippen? Het betekent: Sta op een been en houd je evenwicht.",
       "sentence": "Stand on one leg and keep your ... .",
       "options": [
         "running",
@@ -315,7 +315,7 @@
       "type": "choice",
       "level": "E6",
       "skill": "woord-in-zin",
-      "prompt": "Welk woord past op de stippen?",
+      "prompt": "Welk woord past op de stippen? Het betekent: Van bananen krijg je energie om te spelen.",
       "sentence": "Bananas give you ... to play.",
       "options": [
         "outdoors",
@@ -331,7 +331,7 @@
       "type": "choice",
       "level": "E6",
       "skill": "woord-in-zin",
-      "prompt": "Welk woord past op de stippen?",
+      "prompt": "Welk woord past op de stippen? Het betekent: De T-rex heeft veel kracht in zijn poten.",
       "sentence": "The T-rex has a lot of ... in its legs.",
       "options": [
         "outdoors",
@@ -347,7 +347,7 @@
       "type": "choice",
       "level": "E6",
       "skill": "woord-in-zin",
-      "prompt": "Welk woord past op de stippen?",
+      "prompt": "Welk woord past op de stippen? Het betekent: Je hebt moed nodig om in het koude meer te springen.",
       "sentence": "It takes ... to jump into the cold lake.",
       "options": [
         "courage",
