@@ -1,6 +1,6 @@
 # PRD: Dino Blokwereld (working title)
 
-Status: READY FOR SIGNOFF
+Status: APPROVED by Founder on 2026-10-24
 
 This signoff archives the shipped v9 Eerlijke punten (0.3.0) to `docs/releases/v9.md` with its criteria AC166 to AC171 now in force in section 7, and scopes v10 Punten voor elke ronde (0.4.0, decision 92) in section 12.
 
