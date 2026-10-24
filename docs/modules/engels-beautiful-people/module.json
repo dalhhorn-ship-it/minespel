@@ -1,0 +1,77 @@
+{
+  "id": "engels-beautiful-people",
+  "title": "Engels: Beautiful People",
+  "subject": "engels",
+  "version": 1,
+  "language": "nl",
+  "description": "Engelse woorden en zinnen uit het liedje Beautiful People: sport, moed en iemand aanmoedigen. Lessen, oefenvragen en toetsen voor groep 6.",
+  "levels": [
+    "M6",
+    "E6"
+  ],
+  "topics": [
+    "woorden",
+    "zinnen",
+    "aanmoedigen"
+  ],
+  "exams": [
+    {
+      "id": "toets-bp-woorden",
+      "title": "Toets Words to know",
+      "levels": [
+        "M6",
+        "E6"
+      ],
+      "questionCount": 12,
+      "timeLimitMinutes": 12,
+      "passPercent": 70,
+      "mix": {
+        "woorden": 1
+      }
+    },
+    {
+      "id": "toets-bp-zinnen",
+      "title": "Toets Phrases",
+      "levels": [
+        "M6",
+        "E6"
+      ],
+      "questionCount": 8,
+      "timeLimitMinutes": 8,
+      "passPercent": 70,
+      "mix": {
+        "zinnen": 1
+      }
+    },
+    {
+      "id": "toets-bp-aanmoedigen",
+      "title": "Toets Zo moedig je iemand aan",
+      "levels": [
+        "M6",
+        "E6"
+      ],
+      "questionCount": 8,
+      "timeLimitMinutes": 8,
+      "passPercent": 70,
+      "mix": {
+        "aanmoedigen": 1
+      }
+    },
+    {
+      "id": "toets-bp-alles",
+      "title": "Toets Beautiful People",
+      "levels": [
+        "M6",
+        "E6"
+      ],
+      "questionCount": 20,
+      "timeLimitMinutes": 20,
+      "passPercent": 70,
+      "mix": {
+        "woorden": 2,
+        "zinnen": 1,
+        "aanmoedigen": 1
+      }
+    }
+  ]
+}

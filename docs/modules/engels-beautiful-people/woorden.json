@@ -1,0 +1,464 @@
+{
+  "id": "woorden",
+  "title": "Words to know",
+  "groups": [
+    6,
+    7
+  ],
+  "lesson": {
+    "pages": [
+      {
+        "title": "Wat betekent het Engelse woord?",
+        "skill": "woord-betekenis",
+        "text": "Dit zijn de woorden van het liedje Beautiful People. Ze gaan over sport en jezelf uitdagen. Leer ze in paren: eerst het Engelse woord, dan het Nederlandse.",
+        "examples": [
+          {
+            "good": "courage = moed"
+          },
+          {
+            "good": "power = kracht"
+          },
+          {
+            "good": "outdoors = buiten"
+          },
+          {
+            "good": "push yourself = jezelf uitdagen",
+            "bad": "push yourself = jezelf duwen",
+            "why": "Push betekent duwen, maar push yourself betekent jezelf uitdagen: iets moeilijks proberen."
+          }
+        ],
+        "tip": "Energy en energie lijken op elkaar, net als balance en balans. Zo onthoud je ze snel."
+      },
+      {
+        "title": "Van Nederlands naar Engels",
+        "skill": "woord-engels",
+        "text": "Nu andersom. Je denkt aan het Nederlandse woord en zoekt het Engelse. Zeg het woord hardop in het Engels, dat helpt.",
+        "examples": [
+          {
+            "good": "uitdaging = challenge"
+          },
+          {
+            "good": "evenwicht = balance"
+          },
+          {
+            "good": "rennen = running"
+          }
+        ],
+        "tip": "Maak kaartjes: Nederlands op de voorkant, Engels op de achterkant."
+      },
+      {
+        "title": "Het woord in een zin",
+        "skill": "woord-in-zin",
+        "text": "Lees de hele Engelse zin. Waar gaat hij over? Kies dan het woord dat past.",
+        "examples": [
+          {
+            "good": "Bananas give you energy.",
+            "why": "Energie krijg je van eten."
+          },
+          {
+            "good": "We play outdoors in the sun.",
+            "bad": "We play courage in the sun.",
+            "why": "Buiten spelen past, moed spelen niet."
+          }
+        ],
+        "tip": "Vertaal de zin in je hoofd naar het Nederlands. Klinkt het goed? Dan klopt het woord."
+      },
+      {
+        "title": "Engelse woorden spellen",
+        "skill": "woord-spellen",
+        "text": "Engelse woorden schrijf je anders dan je ze zegt. Let op de lastige letters: running heeft twee keer n, challenge heeft twee keer l.",
+        "examples": [
+          {
+            "good": "running",
+            "bad": "runing",
+            "why": "Run plus ing: de n komt twee keer."
+          },
+          {
+            "good": "technique",
+            "bad": "tecniek",
+            "why": "Technique eindigt op que, al klinkt het als niek."
+          },
+          {
+            "good": "courage",
+            "bad": "curage"
+          }
+        ],
+        "tip": "Energy eindigt op een y, niet op ie zoals energie."
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "bp-wo-001",
+      "type": "choice",
+      "level": "M6",
+      "skill": "woord-betekenis",
+      "prompt": "Wat betekent 'courage'?",
+      "options": [
+        "techniek",
+        "kracht",
+        "moed",
+        "energie"
+      ],
+      "answer": 2,
+      "explain": "Courage betekent moed. Je durft iets spannends te doen."
+    },
+    {
+      "id": "bp-wo-002",
+      "type": "choice",
+      "level": "M6",
+      "skill": "woord-betekenis",
+      "prompt": "Wat betekent 'outdoors'?",
+      "options": [
+        "binnen",
+        "boven",
+        "onder",
+        "buiten"
+      ],
+      "answer": 3,
+      "explain": "Outdoors betekent buiten. Out lijkt op uit: naar buiten."
+    },
+    {
+      "id": "bp-wo-003",
+      "type": "choice",
+      "level": "M6",
+      "skill": "woord-betekenis",
+      "prompt": "Wat betekent 'running'?",
+      "options": [
+        "zwemmen",
+        "rennen",
+        "fietsen",
+        "springen"
+      ],
+      "answer": 1,
+      "explain": "Running betekent rennen. Run is ren."
+    },
+    {
+      "id": "bp-wo-004",
+      "type": "choice",
+      "level": "M6",
+      "skill": "woord-betekenis",
+      "prompt": "Wat betekent 'balance'?",
+      "options": [
+        "kracht",
+        "moed",
+        "evenwicht",
+        "uitdaging"
+      ],
+      "answer": 2,
+      "explain": "Balance betekent evenwicht. Het lijkt op balans."
+    },
+    {
+      "id": "bp-wo-005",
+      "type": "choice",
+      "level": "M6",
+      "skill": "woord-betekenis",
+      "prompt": "Wat betekent 'push yourself'?",
+      "options": [
+        "jezelf wassen",
+        "jezelf uitdagen",
+        "jezelf duwen",
+        "jezelf vergeten"
+      ],
+      "answer": 1,
+      "explain": "Push yourself betekent jezelf uitdagen: iets moeilijks proberen. Niet jezelf duwen."
+    },
+    {
+      "id": "bp-wo-006",
+      "type": "choice",
+      "level": "M6",
+      "skill": "woord-betekenis",
+      "prompt": "Wat betekent 'challenge'?",
+      "options": [
+        "buiten",
+        "techniek",
+        "uitdaging",
+        "evenwicht"
+      ],
+      "answer": 2,
+      "explain": "Challenge betekent uitdaging: iets wat moeilijk is om te doen."
+    },
+    {
+      "id": "bp-wo-007",
+      "type": "choice",
+      "level": "M6",
+      "skill": "woord-engels",
+      "prompt": "Hoe zeg je 'kracht' in het Engels?",
+      "options": [
+        "energy",
+        "running",
+        "balance",
+        "power"
+      ],
+      "answer": 3,
+      "explain": "Kracht is power in het Engels."
+    },
+    {
+      "id": "bp-wo-008",
+      "type": "choice",
+      "level": "M6",
+      "skill": "woord-engels",
+      "prompt": "Hoe zeg je 'uitdaging' in het Engels?",
+      "options": [
+        "outdoors",
+        "challenge",
+        "courage",
+        "technique"
+      ],
+      "answer": 1,
+      "explain": "Uitdaging is challenge in het Engels."
+    },
+    {
+      "id": "bp-wo-009",
+      "type": "choice",
+      "level": "M6",
+      "skill": "woord-engels",
+      "prompt": "Hoe zeg je 'energie' in het Engels?",
+      "options": [
+        "power",
+        "balance",
+        "energy",
+        "courage"
+      ],
+      "answer": 2,
+      "explain": "Energie is energy in het Engels. Het lijkt erop, maar eindigt op y."
+    },
+    {
+      "id": "bp-wo-010",
+      "type": "type",
+      "level": "M6",
+      "skill": "woord-spellen",
+      "prompt": "Schrijf het Engelse woord voor 'techniek'.",
+      "answer": [
+        "technique",
+        "Technique"
+      ],
+      "explain": "Techniek is technique in het Engels. Het eindigt op que."
+    },
+    {
+      "id": "bp-wo-011",
+      "type": "type",
+      "level": "M6",
+      "skill": "woord-betekenis",
+      "prompt": "Schrijf het Nederlandse woord voor 'power'.",
+      "answer": [
+        "kracht",
+        "Kracht"
+      ],
+      "explain": "Power betekent kracht."
+    },
+    {
+      "id": "bp-wo-012",
+      "type": "choice",
+      "level": "E6",
+      "skill": "woord-engels",
+      "prompt": "Wat is het Engelse woord voor 'rennen'?",
+      "options": [
+        "raining",
+        "riding",
+        "rowing",
+        "running"
+      ],
+      "answer": 3,
+      "explain": "Rennen is running. Raining is regenen, rowing is roeien en riding is rijden."
+    },
+    {
+      "id": "bp-wo-013",
+      "type": "choice",
+      "level": "E6",
+      "skill": "woord-in-zin",
+      "prompt": "Welk woord past op de stippen?",
+      "sentence": "The kids play ... in the sun.",
+      "options": [
+        "power",
+        "outdoors",
+        "courage",
+        "technique"
+      ],
+      "answer": 1,
+      "explain": "We spelen buiten in de zon: outdoors."
+    },
+    {
+      "id": "bp-wo-014",
+      "type": "choice",
+      "level": "E6",
+      "skill": "woord-in-zin",
+      "prompt": "Welk woord past op de stippen?",
+      "sentence": "Climbing a tall tree is a big ... .",
+      "options": [
+        "balance",
+        "outdoors",
+        "running",
+        "challenge"
+      ],
+      "answer": 3,
+      "explain": "In een hoge boom klimmen is een grote uitdaging: a big challenge."
+    },
+    {
+      "id": "bp-wo-015",
+      "type": "choice",
+      "level": "E6",
+      "skill": "woord-in-zin",
+      "prompt": "Welk woord past op de stippen?",
+      "sentence": "Stand on one leg and keep your ... .",
+      "options": [
+        "running",
+        "challenge",
+        "balance",
+        "outdoors"
+      ],
+      "answer": 2,
+      "explain": "Op een been staan en je evenwicht houden: keep your balance."
+    },
+    {
+      "id": "bp-wo-016",
+      "type": "choice",
+      "level": "E6",
+      "skill": "woord-in-zin",
+      "prompt": "Welk woord past op de stippen?",
+      "sentence": "Bananas give you ... to play.",
+      "options": [
+        "outdoors",
+        "technique",
+        "energy",
+        "balance"
+      ],
+      "answer": 2,
+      "explain": "Van bananen krijg je energie: energy."
+    },
+    {
+      "id": "bp-wo-017",
+      "type": "choice",
+      "level": "E6",
+      "skill": "woord-in-zin",
+      "prompt": "Welk woord past op de stippen?",
+      "sentence": "The T-rex has a lot of ... in its legs.",
+      "options": [
+        "outdoors",
+        "technique",
+        "challenge",
+        "power"
+      ],
+      "answer": 3,
+      "explain": "De T-rex heeft veel kracht in zijn poten: power."
+    },
+    {
+      "id": "bp-wo-018",
+      "type": "choice",
+      "level": "E6",
+      "skill": "woord-in-zin",
+      "prompt": "Welk woord past op de stippen?",
+      "sentence": "It takes ... to jump into the cold lake.",
+      "options": [
+        "courage",
+        "outdoors",
+        "running",
+        "challenge"
+      ],
+      "answer": 0,
+      "explain": "In het koude meer springen is spannend. Daar heb je moed voor nodig: courage."
+    },
+    {
+      "id": "bp-wo-019",
+      "type": "type",
+      "level": "E6",
+      "skill": "woord-spellen",
+      "prompt": "Schrijf het Engelse woord voor 'moed'.",
+      "answer": [
+        "courage",
+        "Courage"
+      ],
+      "explain": "Moed is courage in het Engels."
+    },
+    {
+      "id": "bp-wo-020",
+      "type": "type",
+      "level": "E6",
+      "skill": "woord-spellen",
+      "prompt": "Schrijf het Engelse woord voor 'evenwicht'.",
+      "answer": [
+        "balance",
+        "Balance"
+      ],
+      "explain": "Evenwicht is balance in het Engels. Met een c, niet met een s."
+    },
+    {
+      "id": "bp-wo-021",
+      "type": "type",
+      "level": "E6",
+      "skill": "woord-spellen",
+      "prompt": "Schrijf het Engelse woord voor 'buiten'.",
+      "answer": [
+        "outdoors",
+        "Outdoors",
+        "outside",
+        "Outside"
+      ],
+      "explain": "Buiten is outdoors in het Engels. Outside mag ook."
+    },
+    {
+      "id": "bp-wo-022",
+      "type": "type",
+      "level": "E6",
+      "skill": "woord-spellen",
+      "prompt": "Schrijf in het Engels: 'jezelf uitdagen'.",
+      "answer": [
+        "push yourself",
+        "Push yourself"
+      ],
+      "explain": "Jezelf uitdagen is push yourself."
+    },
+    {
+      "id": "bp-wo-023",
+      "type": "find-error",
+      "level": "E6",
+      "skill": "woord-spellen",
+      "prompt": "Welk Engels woord is fout geschreven?",
+      "words": [
+        "I",
+        "love",
+        "runing",
+        "in",
+        "the",
+        "park."
+      ],
+      "answer": 2,
+      "correction": "running",
+      "explain": "Run plus ing schrijf je met twee keer n: running."
+    },
+    {
+      "id": "bp-wo-024",
+      "type": "find-error",
+      "level": "E6",
+      "skill": "woord-spellen",
+      "prompt": "Welk Engels woord is fout geschreven?",
+      "words": [
+        "The",
+        "chalenge",
+        "was",
+        "really",
+        "fun."
+      ],
+      "answer": 1,
+      "correction": "challenge",
+      "explain": "Challenge schrijf je met twee keer l."
+    },
+    {
+      "id": "bp-wo-025",
+      "type": "find-error",
+      "level": "E6",
+      "skill": "woord-spellen",
+      "prompt": "Welk Engels woord is fout geschreven?",
+      "words": [
+        "You",
+        "need",
+        "energy",
+        "to",
+        "play."
+      ],
+      "answer": -1,
+      "correction": null,
+      "explain": "Geen fout. Energy schrijf je met een y aan het eind."
+    }
+  ]
+}
