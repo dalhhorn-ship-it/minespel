@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { createScreenManager } from '../app/screens';
 import { createShopFlow } from '../app/shop-flow';
 import { MSG_CAP_REACHED, MSG_COOP_FULL } from '../core/economy';
@@ -184,7 +184,9 @@ describe('shop view and shop flow (T47, AC20, AC110, AC149, AC150)', () => {
     const yes = host.querySelector('[data-testid="shop-confirm-yes-kip"]');
     for (let i = 0; i < 5; i++) press(yes);
     const results = await Promise.all(Array.from({ length: 5 }, () => flow.buyChicken()));
-    await new Promise((r) => setTimeout(r, 20));
+    await vi.waitFor(async () => {
+      expect((await records.get('economy')).points).toBe(0);
+    });
     expect(results.filter(Boolean)).toHaveLength(0);
 
     expect((await records.get('economy')).points).toBe(0);

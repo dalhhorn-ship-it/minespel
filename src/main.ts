@@ -1,5 +1,6 @@
 import './styles/tokens.css';
 import './styles/base.css';
+import { createReadyGate } from './app/boot';
 import { createBreakFlow, type BreakFlow } from './app/break-flow';
 import { loadCatalog } from './app/content-loader';
 import { createExamFlow, type ExamFlow } from './app/exam-flow';
@@ -58,11 +59,14 @@ let activePauseMenu: PauseMenu | null = null;
 let activeDinoMenu: DinoMenu | null = null;
 // The Dinowinkel placeholder shown when it was tapped before boot made the shop flow (AC164).
 let waitingShop: ShopView | null = null;
-// Resolves when boot has opened storage and made `records`. Pause and shop fill their points from it.
-let recordsReadyResolve: (r: Records) => void = () => {};
-const recordsReady = new Promise<Records>((resolve) => {
-  recordsReadyResolve = resolve;
+// The one ready signal (decision 83). Buttons that need a flow go through `whenReady`.
+// Pause and shop fill their points once `ready` resolves.
+const gate = createReadyGate({
+  show: (node) => screens?.showKidOverlay(node),
+  hide: () => screens?.showKidOverlay(null),
+  back: () => screens?.showWorld(),
 });
+const whenReady = gate.whenReady;
 
 let teleported = 0;
 let rendererFactoryIsReal = true;
@@ -74,8 +78,10 @@ const countdownView = createCountdownView({
   initialMs: 5 * 60_000,
   warningEnabled: true,
   onStartNow: () => {
-    if (examFlow?.isActive()) return;
-    void breakFlow?.startBreak({ early: true });
+    whenReady(() => {
+      if (examFlow?.isActive()) return;
+      void breakFlow?.startBreak({ early: true });
+    });
   },
 });
 
@@ -142,7 +148,7 @@ function openShop() {
   screens.showKidOverlay(waiting.element);
 }
 
-/** Called by boot when the shop flow exists: a waiting card, if the kid is looking at one, becomes the real shop. */
+/** Called when the app is ready: a waiting card, if the kid is looking at one, becomes the real shop. */
 function shopFlowReady() {
   if (!waitingShop) return;
   waitingShop.destroy();
@@ -181,7 +187,9 @@ async function openPauseMenu(): Promise<void> {
           switches,
           onPracticeTopic: (moduleId, topicId) => {
             lesboek.destroy();
-            void practiceFlow?.startTopic(moduleId, topicId);
+            whenReady(() => {
+              void practiceFlow?.startTopic(moduleId, topicId);
+            });
           },
           onClose: () => {
             lesboek.destroy();
@@ -194,16 +202,19 @@ async function openPauseMenu(): Promise<void> {
     onPractice: () => {
       activePauseMenu?.destroy();
       activePauseMenu = null;
-      practiceFlow?.open();
+      whenReady(() => practiceFlow?.open());
     },
     onParent: () => {
-      void parentFlow?.open();
+      whenReady(() => {
+        void parentFlow?.open();
+      });
     },
   });
   activePauseMenu = menu;
   screens.showKidOverlay(menu.element);
   try {
-    const economy = await (await recordsReady).get('economy');
+    await gate.ready;
+    const economy = await (records as Records).get('economy');
     if (activePauseMenu === menu) menu.setPoints(economy.points);
   } catch {
     // The placeholder stays. Every other button still works.
@@ -247,7 +258,9 @@ if (app) {
       },
       onShopPressed: openShop,
       onParentPressed: () => {
-        void parentFlow?.open();
+        whenReady(() => {
+          void parentFlow?.open();
+        });
       },
       onDinoTapped: (dino, sx, sy) => {
         openDinoMenu(dino, sx, sy);
@@ -270,137 +283,146 @@ if (app) {
   }
 }
 
+/** Opens storage and builds every store and flow. Marks the app ready once the flows exist. */
+async function createApp() {
+  const db = await openDb();
+  const q = createSaveQueue({ db });
+  queue = q;
+  const recs = createRecords(db);
+  records = recs;
+  const progressStore = createProgressStore(db);
+  const logStore = createLogStore(db);
+  const sessionStore = createSessionStore(db);
+
+  catalog = await loadCatalog(db);
+  const [settings, timers] = await Promise.all([recs.get('settings'), recs.get('timers')]);
+
+  if (screens) {
+    breakFlow = createBreakFlow({
+      clock: systemClock,
+      rng,
+      screens,
+      records: recs,
+      progressStore,
+      logStore,
+      sessionStore,
+      getCatalog: () => catalog,
+      sound,
+      onBreakFinished: () => {
+        timerDriver?.resetPlayTimer();
+      },
+    });
+
+    timerDriver = createTimerDriver({
+      clock: systemClock,
+      screens,
+      guard,
+      records: recs,
+      sound,
+      countdownView,
+      initialBreakEveryMinutes: settings.breakEveryMinutes || 5,
+      initialPlayMsLeft: timers.playMsLeft,
+      initialWarningEnabled: settings.breakWarningEnabled !== false,
+      onBreakDue: () => {
+        // The play timer does not run during an exam, but never start a break over one (AC66).
+        if (examFlow?.isActive()) return;
+        void breakFlow?.startBreak();
+      },
+    });
+
+    applySettingsToRuntime(settings, { sound, timerDriver });
+
+    shopFlow = createShopFlow({
+      screens,
+      db,
+      records: recs,
+      logStore,
+      dinoStore: game?.dinoStore,
+      clock: systemClock,
+      sound,
+      onEarnCoins: () => {
+        void breakFlow?.startBreak({ early: true });
+      },
+    });
+    practiceFlow = createPracticeFlow({
+      screens,
+      clock: systemClock,
+      rng,
+      records: recs,
+      progressStore,
+      logStore,
+      getCatalog: () => catalog,
+      sound,
+      onStartBreakRound: async () => {
+        await breakFlow?.startBreak({ early: true });
+      },
+    });
+    const exams = createExamFlow({
+      clock: systemClock,
+      rng,
+      screens,
+      records: recs,
+      progressStore,
+      logStore,
+      sessionStore,
+      timerDriver,
+      dinoStore: game?.dinoStore ?? null,
+      getCatalog: () => catalog,
+      onLock: () => {
+        void parentFlow?.openExamStop();
+      },
+      sound,
+    });
+    examFlow = exams;
+    parentFlow = createParentFlow({
+      clock: systemClock,
+      rng,
+      screens,
+      records: recs,
+      progressStore,
+      logStore,
+      getCatalog: () => catalog,
+      breakFlow,
+      timerDriver,
+      exams: {
+        isActive: () => exams.isActive(),
+        plan: (m, e) => exams.plan(m, e),
+        start: (m, e) => exams.start(m, e),
+        stop: () => exams.stop(),
+      },
+      sound,
+      onResetWorld: () => {
+        game?.resetWorld();
+      },
+    });
+
+    // Every flow exists: buttons that waited can run now.
+    gate.markReady();
+    await resumeSessionIfAny({
+      sessionStore,
+      records: recs,
+      breakFlow,
+      examFlow: exams,
+    });
+  }
+
+  return createWorldSave({ game: game as Game, queue: q, records: recs });
+}
+
 // Loads the saved world and player, then starts saving and initializes M2 + M3 flows (timers, breaks, dinos, shop, practice, parental controls).
 const booted = game
   ? bootSave({
       game,
       wantsPause: () => userPaused || !worldActiveFromScreen,
-      create: async () => {
-        const db = await openDb();
-        const q = createSaveQueue({ db });
-        queue = q;
-        const recs = createRecords(db);
-        records = recs;
-        recordsReadyResolve(recs);
-        const progressStore = createProgressStore(db);
-        const logStore = createLogStore(db);
-        const sessionStore = createSessionStore(db);
-
-        catalog = await loadCatalog(db);
-        const [settings, timers] = await Promise.all([recs.get('settings'), recs.get('timers')]);
-
-        if (screens) {
-          breakFlow = createBreakFlow({
-            clock: systemClock,
-            rng,
-            screens,
-            records: recs,
-            progressStore,
-            logStore,
-            sessionStore,
-            getCatalog: () => catalog,
-            sound,
-            onBreakFinished: () => {
-              timerDriver?.resetPlayTimer();
-            },
-          });
-
-          timerDriver = createTimerDriver({
-            clock: systemClock,
-            screens,
-            guard,
-            records: recs,
-            sound,
-            countdownView,
-            initialBreakEveryMinutes: settings.breakEveryMinutes || 5,
-            initialPlayMsLeft: timers.playMsLeft,
-            initialWarningEnabled: settings.breakWarningEnabled !== false,
-            onBreakDue: () => {
-              // The play timer does not run during an exam, but never start a break over one (AC66).
-              if (examFlow?.isActive()) return;
-              void breakFlow?.startBreak();
-            },
-          });
-
-          applySettingsToRuntime(settings, { sound, timerDriver });
-
-          shopFlow = createShopFlow({
-            screens,
-            db,
-            records: recs,
-            logStore,
-            dinoStore: game?.dinoStore,
-            clock: systemClock,
-            sound,
-            onEarnCoins: () => {
-              void breakFlow?.startBreak({ early: true });
-            },
-          });
-          shopFlowReady();
-          practiceFlow = createPracticeFlow({
-            screens,
-            clock: systemClock,
-            rng,
-            records: recs,
-            progressStore,
-            logStore,
-            getCatalog: () => catalog,
-            sound,
-            onStartBreakRound: async () => {
-              await breakFlow?.startBreak({ early: true });
-            },
-          });
-          const exams = createExamFlow({
-            clock: systemClock,
-            rng,
-            screens,
-            records: recs,
-            progressStore,
-            logStore,
-            sessionStore,
-            timerDriver,
-            dinoStore: game?.dinoStore ?? null,
-            getCatalog: () => catalog,
-            onLock: () => {
-              void parentFlow?.openExamStop();
-            },
-            sound,
-          });
-          examFlow = exams;
-          parentFlow = createParentFlow({
-            clock: systemClock,
-            rng,
-            screens,
-            records: recs,
-            progressStore,
-            logStore,
-            getCatalog: () => catalog,
-            breakFlow,
-            timerDriver,
-            exams: {
-              isActive: () => exams.isActive(),
-              plan: (m, e) => exams.plan(m, e),
-              start: (m, e) => exams.start(m, e),
-              stop: () => exams.stop(),
-            },
-            sound,
-            onResetWorld: () => {
-              game?.resetWorld();
-            },
-          });
-
-          await resumeSessionIfAny({
-            sessionStore,
-            records: recs,
-            breakFlow,
-            examFlow: exams,
-          });
-        }
-
-        return createWorldSave({ game: game as Game, queue: q, records: recs });
-      },
+      create: () =>
+        createApp().catch((e: unknown) => {
+          gate.markFailed();
+          throw e;
+        }),
     })
   : Promise.resolve('not-saving');
+if (!game) gate.markFailed();
+void gate.ready.then(shopFlowReady, () => {});
 void booted.finally(() => {
   restored = true;
 });
@@ -410,8 +432,16 @@ if (__E2E__) {
   registerHook('screenGuard', () => guard.state());
   registerHook('audioUnlocked', () => audio.isUnlocked());
   registerHook('openPauseMenu', () => openPauseMenu());
-  registerHook('openParentControls', () => parentFlow?.open());
-  registerHook('openPractice', () => practiceFlow?.open());
+  // Tests call these after the save loaded, which can be before the ready gate on a slow machine (the save
+  // gives up after 3 s). Waiting for the gate keeps these hooks free of the waiting card.
+  registerHook('openParentControls', async () => {
+    await gate.ready;
+    await parentFlow?.open();
+  });
+  registerHook('openPractice', async () => {
+    await gate.ready;
+    practiceFlow?.open();
+  });
   registerHook('points', async () => (records ? (await records.get('economy')).points : 0));
   registerHook('setPoints', async (pts: number) => {
     if (records) {

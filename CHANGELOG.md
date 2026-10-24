@@ -4,6 +4,8 @@ Written so kids can read it too.
 
 ## Unreleased
 
+* Buttons you tap while the game is still loading now say "Even geduld..." and open by themselves when the game is ready.
+
 ## 0.3.0 (2026-10-22)
 
 ### Eerlijke punten

@@ -24,4 +24,25 @@ export default tseslint.config(
       ],
     },
   },
+  {
+    files: ['src/**/*.test.ts'],
+    rules: {
+      'no-restricted-syntax': [
+        'error',
+        banned('innerHTML'),
+        banned('outerHTML'),
+        banned('insertAdjacentHTML'),
+        {
+          selector: "CallExpression[callee.object.name='document'][callee.property.name=/^write(ln)?$/]",
+          message: 'document.write is not allowed.',
+        },
+        {
+          selector:
+            "NewExpression[callee.name='Promise'] CallExpression[callee.name='setTimeout']",
+          message:
+            'No fixed sleeps in tests (they flake on a slow machine). Use vi.waitFor, fake timers, or await the real event or promise.',
+        },
+      ],
+    },
+  },
 );
