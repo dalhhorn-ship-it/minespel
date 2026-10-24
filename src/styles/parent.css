@@ -302,3 +302,27 @@
   max-width: 520px;
   width: 100%;
 }
+
+/* Punten setting (v10, AC172): three big choices, at least 56px high. */
+.parent-points-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.parent-points-choice {
+  flex: 1 1 180px;
+  min-height: 72px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  font-size: 18px;
+}
+
+.parent-points-line {
+  font-size: 14px;
+  font-weight: 600;
+}

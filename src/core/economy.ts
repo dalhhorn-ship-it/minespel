@@ -1,4 +1,4 @@
-// Points, egg purchase, the 12 dino cap and the Extra oefenen day cap. Pure functions: they
+// Points, egg purchase and the 12 dino cap. Pure functions: they
 // return new records and never touch storage or the clock. The total is never below 0.
 
 import type { EconomyRecord } from '../storage/schema';
@@ -6,15 +6,12 @@ import { DINO_KINDS, SHOP_KINDS, type DinoKindId } from '../dinos/kinds';
 
 export const POINTS_FIRST_TRY = 2;
 export const POINTS_RETRY = 1;
-export const POINTS_TEACH = 0;
 export const POINTS_BONUS = 3;
 export const MAX_SHOP_DINOS = 12;
-export const PRACTICE_DAY_CAP = 10;
 export const MAX_CHICKENS = 10;
 
 export const MSG_CAP_REACHED = "Je hebt al 12 dino's! Wat een kudde.";
 export const MSG_COOP_FULL = 'Het kippenhok is vol!';
-export const MSG_ENOUGH_PRACTICE = 'Genoeg geoefend voor vandaag, ga lekker bouwen!';
 
 export type SessionMode = 'break' | 'practice' | 'preview';
 export type AnswerOutcome = 'first' | 'retry' | 'teach';
@@ -28,9 +25,27 @@ export function addPoints(points: number, delta: number): number {
   return Math.max(0, clean(points) + (Number.isFinite(delta) ? Math.trunc(delta) : 0));
 }
 
-/** Points for one answer before any cap: +2, +1 or 0 (a teach moment changes nothing). */
-export function answerPoints(outcome: AnswerOutcome): number {
-  return outcome === 'first' ? POINTS_FIRST_TRY : outcome === 'retry' ? POINTS_RETRY : POINTS_TEACH;
+/** Punten setting (decision 92): what a mistake costs. */
+export type PointsMode = 'makkelijk' | 'normaal' | 'moeilijk';
+export const POINTS_MODES: readonly PointsMode[] = ['makkelijk', 'normaal', 'moeilijk'];
+export const DEFAULT_POINTS_MODE: PointsMode = 'normaal';
+
+/** The mode in a settings record. A missing or odd value (a save from 0.3.0) reads as Normaal. */
+export function pointsModeOf(settings: { pointsMode?: unknown } | null | undefined): PointsMode {
+  const m = settings?.pointsMode;
+  return m === 'makkelijk' || m === 'normaal' || m === 'moeilijk' ? m : DEFAULT_POINTS_MODE;
+}
+
+/** What one step of a question is worth: a wrong first try ('miss') only counts on Moeilijk. */
+export type PointsEvent = AnswerOutcome | 'miss';
+
+/** Points for one answer before the total floor: +2, +1, or a minus by the Punten setting. */
+export function answerPoints(outcome: PointsEvent, mode: PointsMode = DEFAULT_POINTS_MODE): number {
+  if (outcome === 'first') return POINTS_FIRST_TRY;
+  if (outcome === 'retry') return POINTS_RETRY;
+  if (mode === 'makkelijk') return 0;
+  if (outcome === 'miss') return mode === 'moeilijk' ? -1 : 0;
+  return -1; // teach moment: Normaal and Moeilijk
 }
 
 /** Bonus when every question of a break was right on the first try (breaks only, not Extra oefenen). */
@@ -38,69 +53,17 @@ export function bonusPoints(mode: SessionMode, total: number, firstTryRight: num
   return mode === 'break' && total > 0 && firstTryRight === total ? POINTS_BONUS : 0;
 }
 
-/** Practice points already earned today; 0 when the stored day is not `day`. */
-export function practiceEarnedToday(eco: EconomyRecord, day: string): number {
-  return eco.practiceDay === day ? clean(eco.practicePointsToday) : 0;
-}
-
-export function practiceCapReached(eco: EconomyRecord, day: string): boolean {
-  return practiceEarnedToday(eco, day) >= PRACTICE_DAY_CAP;
-}
-
 export interface PointsResult {
   economy: EconomyRecord;
-  /** The change that really happened to the total (never negative). */
+  /** The change that really happened to the total: a minus is only what was really taken. */
   applied: number;
-  /** True when a plus was cut or removed by the Extra oefenen day cap. */
-  capHit: boolean;
-  /** "Genoeg geoefend..." when the day cap blocks or just ran out. */
-  message: string | null;
 }
 
-/**
- * Apply one points change from a session. Preview (Probeer) changes nothing. Break: no cap.
- * Practice: no malus and no bonus, plus points count toward the day cap of 10.
- * Early break (started with Nu oefenen, decision 56): the plus points and the +3 bonus share
- * that same day cap, a plus that does not fit gives the part that fits, and there is no malus.
- */
-export function applyPoints(
-  eco: EconomyRecord,
-  mode: SessionMode,
-  delta: number,
-  day: string,
-  early = false,
-): PointsResult {
-  const same = (capHit: boolean): PointsResult => ({
-    economy: { ...eco },
-    applied: 0,
-    capHit,
-    message: capHit ? MSG_ENOUGH_PRACTICE : null,
-  });
-  if (mode === 'preview' || !Number.isFinite(delta) || delta === 0) return same(false);
-
-  if (mode === 'break' && !early) {
-    const points = addPoints(eco.points, delta);
-    return { economy: { ...eco, points }, applied: points - clean(eco.points), capHit: false, message: null };
-  }
-
-  // practice or early break: no malus
-  if (delta < 0) return same(false);
-  const earned = practiceEarnedToday(eco, day);
-  const room = Math.max(0, PRACTICE_DAY_CAP - earned);
-  const gain = Math.min(Math.trunc(delta), room);
-  const capHit = gain < Math.trunc(delta) || room === 0;
-  const economy: EconomyRecord = {
-    ...eco,
-    points: addPoints(eco.points, gain),
-    practicePointsToday: earned + gain,
-    practiceDay: day,
-  };
-  return {
-    economy,
-    applied: gain,
-    capHit,
-    message: capHit || earned + gain >= PRACTICE_DAY_CAP ? MSG_ENOUGH_PRACTICE : null,
-  };
+/** Apply one points change from a session. Preview (Probeer) changes nothing. No day limit. */
+export function applyPoints(eco: EconomyRecord, mode: SessionMode, delta: number): PointsResult {
+  if (mode === 'preview' || !Number.isFinite(delta) || delta === 0) return { economy: { ...eco }, applied: 0 };
+  const points = addPoints(eco.points, delta);
+  return { economy: { ...eco, points }, applied: points - clean(eco.points) };
 }
 
 // ---- Dinowinkel ----

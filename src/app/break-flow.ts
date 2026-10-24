@@ -8,7 +8,7 @@ import type { Catalog } from '../content/catalog';
 import type { Item, Lesson } from '../content/format';
 import { isModuleOn, isModuleUsable, moduleWeight } from '../content/switches';
 import { effectiveDay, today, type Clock } from '../core/clock';
-import { canAffordEgg, shopDinoCount } from '../core/economy';
+import { canAffordEgg, pointsModeOf, shopDinoCount } from '../core/economy';
 import type { Rng } from '../core/rng';
 import { registerHook } from '../dev/e2e-hooks';
 import type { Response } from '../learning/answer-check';
@@ -77,8 +77,8 @@ export interface BreakFlowOptions {
 
 export interface BreakFlow {
   /**
-   * Start a break. `early: true` is a break the kid started with Nu oefenen: its plus points share
-   * the Extra oefenen day limit and there is no malus. A break from the countdown is never early.
+   * Start a break. `early: true` is a break the kid started with Nu oefenen. It pays like any
+   * break, with the +3 bonus (v10). Only a break from the countdown is not early.
    */
   startBreak(opts?: { early?: boolean }): Promise<void>;
   resumeBreak(saved: PersistedBreakSession): Promise<void>;
@@ -210,7 +210,7 @@ export function createBreakFlow(options: BreakFlowOptions): BreakFlow {
             ts: options.clock.now(),
             day: state.day,
             delta: ef.applied,
-            reason: 'break',
+            reason: ef.applied < 0 ? 'malus' : 'break',
           });
         }
       } else if (ef.type === 'unanswered') {
@@ -423,6 +423,7 @@ export function createBreakFlow(options: BreakFlowOptions): BreakFlow {
       const started = startSession({
         mode: 'break',
         early: opts?.early === true,
+        pointsMode: pointsModeOf(settings),
         entries,
         economy,
         day: effDay,

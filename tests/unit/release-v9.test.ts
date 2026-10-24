@@ -8,9 +8,10 @@ const getModule = (globalThis as unknown as { process: { getBuiltinModule(n: str
 const fs = getModule('node:fs') as Fs;
 
 describe('v9 release', () => {
-  it('AC171: package.json has version 0.3.0', () => {
+  it('AC171: package.json has version 0.3.0 or later (0.4.0 shipped v10)', () => {
     const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8')) as { version: string };
-    expect(pkg.version).toBe('0.3.0');
+    const [major = 0, minor = 0] = pkg.version.split('.').map(Number);
+    expect(major * 1000 + minor).toBeGreaterThanOrEqual(3);
   });
 
   it('AC171: CHANGELOG has a 0.3.0 entry', () => {

@@ -15,6 +15,7 @@ const samples: { [K in KvName]: KvRecords[K] } = {
     newLessonsEnabled: false,
     breakWarningEnabled: false,
     soundEffectsEnabled: false,
+    pointsMode: 'moeilijk',
   },
   player: {
     x: 1,
@@ -58,7 +59,7 @@ describe('records', () => {
   });
 
   for (const name of KV_NAMES) {
-    it(`${name}: default when empty, round trip after put`, async () => {
+    it(`${name}: default when empty, round trip after put (AC172: pointsMode moeilijk stays)`, async () => {
       const db = await fresh();
       const records = createRecords(db);
       expect(await records.get(name)).toEqual(defaultKv(name));
@@ -115,6 +116,7 @@ describe('records', () => {
       newLessonsEnabled: true,
       breakWarningEnabled: true,
       soundEffectsEnabled: true,
+      pointsMode: 'normaal',
     });
     db.close();
   });
