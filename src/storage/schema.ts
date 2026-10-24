@@ -40,6 +40,7 @@ export const KV_NAMES = [
   'settings',
   'player',
   'world',
+  'worldV1',
   'dinos',
   'economy',
   'timers',
@@ -80,6 +81,8 @@ export interface PlayerRecord {
 export interface WorldRecord {
   /** Changed cells as cellIndex * 256 + blockId. */
   diff: Uint32Array;
+  /** The terrain the diff is against (v11). Missing means 1, the world of 0.4.0 and earlier. */
+  terrainVersion?: number;
 }
 export interface DinosRecord {
   dinos: Record<string, unknown>[];
@@ -126,6 +129,8 @@ export interface KvRecords {
   settings: SettingsRecord;
   player: PlayerRecord;
   world: WorldRecord;
+  /** The world record of 0.4.0, copied unchanged before the villages were stamped in (v11). Null when there was none. Deleted in the release after v11. */
+  worldV1: WorldRecord | null;
   dinos: DinosRecord;
   economy: EconomyRecord;
   timers: TimersRecord;
@@ -151,6 +156,7 @@ export const KV_DEFAULTS: { [K in KvName]: () => KvRecords[K] } = {
   }),
   player: () => ({ x: 0, y: 0, z: 0, yaw: 0, pitch: 0, hotbar: [], selectedSlot: 0, mode: 'mine' }),
   world: () => ({ diff: new Uint32Array(0) }),
+  worldV1: () => null,
   dinos: () => ({ dinos: [], eggs: [] }),
   economy: () => ({ points: 0, practicePointsToday: 0, practiceDay: '' }),
   timers: () => ({ playMsLeft: null, examMsLeft: null }),

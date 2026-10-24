@@ -34,6 +34,20 @@ export const WATER = 30;
 export const IJS = 31;
 export const SNEEUW = 32;
 export const WOL_ORANJE = 33;
+// Rare blocks (v11 Dorp). A villager gives one of these for a right answer. Ids 34 to 41, never renumber.
+export const SMARAGD = 34;
+export const ROBIJN = 35;
+export const SAFFIER = 36;
+export const AMETHIST = 37;
+export const KRISTAL = 38;
+export const LICHTSTEEN = 39;
+export const REGENBOOGSTEEN = 40;
+export const STERRENSTEEN = 41;
+
+/** The rare blocks in villager order. */
+export const RARE_BLOCKS: readonly number[] = [
+  SMARAGD, ROBIJN, SAFFIER, AMETHIST, KRISTAL, LICHTSTEEN, REGENBOOGSTEEN, STERRENSTEEN,
+];
 
 export interface BlockInfo {
   id: number;
@@ -84,13 +98,21 @@ export const BLOCKS: readonly BlockInfo[] = [
   block(IJS, 'ijs', true),
   block(SNEEUW, 'sneeuw'),
   block(WOL_ORANJE, 'wol oranje'),
+  block(SMARAGD, 'smaragd'),
+  block(ROBIJN, 'robijn'),
+  block(SAFFIER, 'saffier'),
+  block(AMETHIST, 'amethist'),
+  block(KRISTAL, 'kristal'),
+  block(LICHTSTEEN, 'lichtsteen'),
+  block(REGENBOOGSTEEN, 'regenboogsteen'),
+  block(STERRENSTEEN, 'sterrensteen'),
 ];
 
-/** All blocks a kid can place, in grid order. */
-export const PLACEABLE_BLOCKS: readonly number[] = BLOCKS.filter((b) => b.placeable).map((b) => b.id);
+/** The 32 building blocks a kid can place from the start, in grid order. Rare blocks are placeable too, but only once found, so they are not in this list. */
+export const PLACEABLE_BLOCKS: readonly number[] = BLOCKS.filter((b) => b.placeable && b.id <= WOL_ORANJE).map((b) => b.id);
 
 /** Highest block id, used to size atlas tables. */
-export const MAX_BLOCK_ID = WOL_ORANJE;
+export const MAX_BLOCK_ID = STERRENSTEEN;
 
 export function blockInfo(id: number): BlockInfo {
   const info = BLOCKS[id];

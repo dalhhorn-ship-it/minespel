@@ -27,7 +27,8 @@ const samples: { [K in KvName]: KvRecords[K] } = {
     selectedSlot: 2,
     mode: 'build',
   },
-  world: { diff: new Uint32Array([256 + 1, 512 + 2]) },
+  world: { diff: new Uint32Array([256 + 1, 512 + 2]), terrainVersion: 2 },
+  worldV1: { diff: new Uint32Array([256 + 3]) },
   dinos: {
     dinos: [{ kind: 'rex', name: 'Rex' }],
     eggs: [{ kind: 'tri', golden: true }],
@@ -65,9 +66,11 @@ describe('records', () => {
       expect(await records.get(name)).toEqual(defaultKv(name));
       await records.put(name, samples[name] as never);
       const back = await records.get(name);
-      if (name === 'world') {
+      if (name === 'world' || name === 'worldV1') {
         // fake-indexeddb clones in another realm in jsdom, so compare the numbers.
-        expect(Array.from((back as KvRecords['world']).diff)).toEqual(Array.from(samples.world.diff));
+        const want = samples[name] as KvRecords['world'];
+        expect(Array.from((back as KvRecords['world']).diff)).toEqual(Array.from(want.diff));
+        expect((back as KvRecords['world']).terrainVersion).toBe(want.terrainVersion);
       } else {
         expect(back).toEqual(samples[name]);
       }

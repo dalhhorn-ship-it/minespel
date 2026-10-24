@@ -1,5 +1,6 @@
 import { createRng } from '../core/rng';
 import { AARDE, AIR, BLADEREN, BOOMSTAM, GRAS, KEISTEEN, OBSIDIAAN, OERSTEEN, STEEN, VUURSTEEN, ZAND } from './blocks';
+import { VILLAGE_SITES, houseCells, siteRegion, type VillageSite } from './village-layout';
 
 /** Blocks wide and deep. The speed spike may change this to 48. Tests read this constant. */
 export const WORLD_SIZE = 64;
@@ -41,8 +42,50 @@ function smoothHeight(rawHeights: Int32Array): Int32Array {
   return out;
 }
 
-/** Builds the fixed start world. Pure: the same seed always gives the same blocks. */
-export function generateTerrain(seed: number = WORLD_SEED): Uint8Array {
+/**
+ * Terrain versions. 1 is the world of 0.4.0 and earlier, byte for byte. 2 is version 1 plus the villages (v11).
+ * A saved world records its version; a missing version means 1.
+ */
+export type TerrainVersion = 1 | 2;
+export const CURRENT_TERRAIN_VERSION: TerrainVersion = 2;
+
+/**
+ * Builds the fixed start world. Pure: the same seed and version always give the same blocks.
+ * Version 2 only adds the village stamp on top of version 1 and never draws a random number.
+ */
+export function generateTerrain(seed: number = WORLD_SEED, version: TerrainVersion = CURRENT_TERRAIN_VERSION): Uint8Array {
+  const blocks = generateV1(seed);
+  if (version === 2) stampVillages(blocks, VILLAGE_SITES);
+  return blocks;
+}
+
+/**
+ * Stamps village sites into a block array, changing only cells inside each site (rectangle plus margin):
+ * a flat grass pad at `padY` with aarde under it, nothing above it (trees cleared), then the houses.
+ */
+export function stampVillages(blocks: Uint8Array, sites: readonly VillageSite[]): void {
+  for (const site of sites) {
+    const r = siteRegion(site);
+    for (let z = Math.max(0, r.z0); z <= Math.min(WORLD_SIZE - 1, r.z1); z++) {
+      for (let x = Math.max(0, r.x0); x <= Math.min(WORLD_SIZE - 1, r.x1); x++) {
+        for (let y = 1; y < WORLD_HEIGHT; y++) {
+          const i = cellIndex(x, y, z);
+          if (y > site.padY) blocks[i] = AIR;
+          else if (y === site.padY) blocks[i] = GRAS;
+          else if (y >= site.padY - 2) blocks[i] = AARDE;
+          else {
+            const b = blocks[i] ?? AIR;
+            if (b === AIR || b === BOOMSTAM || b === BLADEREN) blocks[i] = AARDE;
+          }
+        }
+      }
+    }
+    for (const c of houseCells(site)) blocks[cellIndex(c.x, c.y, c.z)] = c.id;
+  }
+}
+
+/** The world of 0.4.0. Never add, move or remove an rng call here: old saves are diffs against it. */
+function generateV1(seed: number): Uint8Array {
   const rng = createRng(seed);
   const blocks = new Uint8Array(CELL_COUNT);
 

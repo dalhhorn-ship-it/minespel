@@ -1,10 +1,24 @@
 import { describe, expect, it } from 'vitest';
 import {
   AIR, BLADEREN, BLOCKS, GLAS, IJS, LAVA, MAX_BLOCK_ID, OBSIDIAAN, OERSTEEN, PLACEABLE_BLOCKS,
-  STEEN, VUUR, VUURSTEEN, WATER, blockInfo, isCutout, isMinable, isPlaceable, isSolid,
+  RARE_BLOCKS, STEEN, VUUR, VUURSTEEN, WATER, blockInfo, isCutout, isMinable, isPlaceable, isSolid,
 } from './blocks';
 
 describe('blocks', () => {
+  it('AC187: has 8 rare blocks, ids 34 to 41, placeable and minable, not in the 32 building blocks', () => {
+    expect(RARE_BLOCKS).toEqual([34, 35, 36, 37, 38, 39, 40, 41]);
+    expect(RARE_BLOCKS.map((id) => blockInfo(id).name)).toEqual([
+      'smaragd', 'robijn', 'saffier', 'amethist', 'kristal', 'lichtsteen', 'regenboogsteen', 'sterrensteen',
+    ]);
+    for (const id of RARE_BLOCKS) {
+      expect(isPlaceable(id)).toBe(true);
+      expect(isMinable(id)).toBe(true);
+      expect(isSolid(id)).toBe(true);
+      expect(PLACEABLE_BLOCKS).not.toContain(id);
+    }
+    expect(MAX_BLOCK_ID).toBe(41);
+  });
+
   it('has 32 placeable blocks, all with a name (CR1, CR2, CR4)', () => {
     expect(PLACEABLE_BLOCKS).toHaveLength(32);
     expect(PLACEABLE_BLOCKS).toContain(OBSIDIAAN);

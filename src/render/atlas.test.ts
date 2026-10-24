@@ -15,7 +15,17 @@ describe('atlas', () => {
       }
     }
     expect(tileFor(AIR, 'top')).toBe(-1);
-    expect(MAX_BLOCK_ID).toBe(33);
+    expect(MAX_BLOCK_ID).toBe(41);
+  });
+
+  it('AC187: paints 8 solid rare tiles that all differ from each other', () => {
+    const seen = new Set<string>();
+    for (let id = 34; id <= 41; id++) {
+      const d = paintTile(tileFor(id, 'side')).data;
+      for (let i = 3; i < d.length; i += 4) expect(d[i]).toBe(255);
+      seen.add(Array.from(d).join(','));
+    }
+    expect(seen.size).toBe(8);
   });
 
   it('gives grass its own top and side', () => {

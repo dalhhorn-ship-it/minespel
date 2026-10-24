@@ -1,13 +1,21 @@
 import { AIR } from './blocks';
-import { CELL_COUNT, WORLD_HEIGHT, WORLD_SEED, WORLD_SIZE, cellIndex, generateTerrain } from './terrain';
+import {
+  CELL_COUNT, CURRENT_TERRAIN_VERSION, WORLD_HEIGHT, WORLD_SEED, WORLD_SIZE, cellIndex, generateTerrain,
+  type TerrainVersion,
+} from './terrain';
 
-/** The voxel world: a flat block array plus the diff against the fixed start world. */
+/**
+ * The voxel world: a flat block array plus the diff against the fixed start world.
+ * The start world is terrain version 2 (with the villages), so a new game and "Wereld opnieuw beginnen" get them.
+ */
 export class World {
   private readonly blocks: Uint8Array;
   private readonly start: Uint8Array;
+  readonly terrainVersion: TerrainVersion;
 
-  constructor(seed: number = WORLD_SEED) {
-    this.start = generateTerrain(seed);
+  constructor(seed: number = WORLD_SEED, version: TerrainVersion = CURRENT_TERRAIN_VERSION) {
+    this.terrainVersion = version;
+    this.start = generateTerrain(seed, version);
     this.blocks = this.start.slice();
   }
 

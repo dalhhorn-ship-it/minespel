@@ -3,7 +3,7 @@ import {
   AARDE, BAKSTEEN, BASALT, BLADEREN, BOOMSTAM, DIAMANT, DIEPSTEEN, GLAS, GOUDSTEEN, GRANIET, GRAS,
   IJS, KEISTEEN, LAVA, MARMER, MOSSTEEN, OBSIDIAAN, OERSTEEN, PLANKEN, SNEEUW, STEEN, VUUR,
   VUURSTEEN, WATER, WOL_BLAUW, WOL_GEEL, WOL_GROEN, WOL_ORANJE, WOL_PAARS, WOL_ROOD, WOL_WIT, ZAND,
-  ZANDSTEEN,
+  AMETHIST, KRISTAL, LICHTSTEEN, REGENBOOGSTEEN, ROBIJN, SAFFIER, SMARAGD, STERRENSTEEN, ZANDSTEEN,
 } from '../world/blocks';
 
 export const TILE_SIZE = 16;
@@ -25,6 +25,23 @@ interface TileSpec {
 
 
 const wool = (name: string, base: Rgb): TileSpec => ({ name, base, speckle: 8 });
+
+const RAINBOW: readonly (readonly [number, number, number, number])[] = [
+  [236, 60, 60, 255], [248, 150, 40, 255], [250, 224, 60, 255], [70, 190, 86, 255],
+  [60, 120, 230, 255], [158, 84, 210, 255], [236, 60, 60, 255],
+];
+
+/** A rare gem block: dark rock, a bright gem diamond in the middle, a shine spot and a lighter edge. */
+const gem = (name: string, rock: Rgb, glow: Rgb, shine: Rgb): TileSpec => ({
+  name, base: rock, speckle: 10,
+  pattern: (x, y) => {
+    const d = Math.abs(x - 7.5) + Math.abs(y - 7.5);
+    if (x === 0 || y === 0 || x === 15 || y === 15) return [glow[0] * 0.55, glow[1] * 0.55, glow[2] * 0.55, 255];
+    if (d < 2) return [shine[0], shine[1], shine[2], 255];
+    if (d < 6) return [glow[0], glow[1], glow[2], 255];
+    return (x * 7 + y * 5) % 13 === 0 ? [glow[0], glow[1], glow[2], 255] : null;
+  },
+});
 
 export const TILES: readonly TileSpec[] = [
   { name: 'gras-top', base: [92, 178, 70], speckle: 22 },
@@ -151,6 +168,45 @@ export const TILES: readonly TileSpec[] = [
   },
   { name: 'sneeuw', base: [246, 250, 255], speckle: 6 },
   wool('wol-oranje', [245, 130, 32]),
+  // Rare blocks: a dark stone with bright gems and a shiny edge, so they look special next to the plain blocks.
+  gem('smaragd', [22, 120, 70], [60, 235, 130], [200, 255, 220]),
+  gem('robijn', [130, 14, 36], [250, 60, 90], [255, 200, 210]),
+  gem('saffier', [24, 48, 140], [70, 130, 255], [200, 225, 255]),
+  gem('amethist', [74, 30, 120], [190, 110, 250], [240, 210, 255]),
+  {
+    name: 'kristal', base: [170, 232, 248], speckle: 8,
+    pattern: (x, y) => {
+      if (x === 0 || y === 0 || x === 15 || y === 15) return [96, 190, 226, 255];
+      const d = Math.abs(x - 7.5) + Math.abs(y - 7.5);
+      if (d < 3) return [255, 255, 255, 255];
+      if (d >= 6 && d < 7) return [120, 205, 235, 255];
+      return null;
+    },
+  },
+  {
+    name: 'lichtsteen', base: [255, 226, 110], speckle: 10,
+    pattern: (x, y) => {
+      const d = Math.hypot(x - 7.5, y - 7.5);
+      if (d < 3) return [255, 255, 235, 255];
+      if (d < 5) return [255, 244, 170, 255];
+      return x === 0 || y === 0 || x === 15 || y === 15 ? [214, 160, 40, 255] : null;
+    },
+  },
+  {
+    name: 'regenboogsteen', base: [200, 200, 210], speckle: 6,
+    pattern: (x, y) => RAINBOW[Math.floor(((x + y) % 14) / 2)] ?? null,
+  },
+  {
+    name: 'sterrensteen', base: [24, 20, 70], speckle: 8,
+    pattern: (x, y) => {
+      if ((Math.abs(x - 7.5) < 1 && Math.abs(y - 7.5) < 3) || (Math.abs(y - 7.5) < 1 && Math.abs(x - 7.5) < 3)) {
+        return [255, 238, 120, 255];
+      }
+      if ((x * 7 + y * 11) % 17 === 0) return [255, 255, 255, 255];
+      if ((x * 5 + y * 3) % 19 === 0) return [160, 170, 255, 255];
+      return x === 0 || y === 0 || x === 15 || y === 15 ? [70, 60, 150, 255] : null;
+    },
+  },
 ];
 
 const TILE_INDEX = new Map(TILES.map((t, i) => [t.name, i]));
@@ -190,6 +246,14 @@ function tileName(block: number, face: FaceKind): string | null {
     case IJS: return 'ijs';
     case SNEEUW: return 'sneeuw';
     case WOL_ORANJE: return 'wol-oranje';
+    case SMARAGD: return 'smaragd';
+    case ROBIJN: return 'robijn';
+    case SAFFIER: return 'saffier';
+    case AMETHIST: return 'amethist';
+    case KRISTAL: return 'kristal';
+    case LICHTSTEEN: return 'lichtsteen';
+    case REGENBOOGSTEEN: return 'regenboogsteen';
+    case STERRENSTEEN: return 'sterrensteen';
     default: return null;
   }
 }
