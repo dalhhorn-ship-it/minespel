@@ -16,7 +16,7 @@ import { createLessonView } from './lesson-view';
 import { createQuestionHost, formatRightAnswer } from './question-host';
 import { applyMcBackground } from './mc-background';
 import { createSummaryView } from './summary';
-import { createTeachMoment, pickLessonPage, type Teaching } from './teach-moment';
+import { createTeachMoment, minusText, pickLessonPage, type Teaching } from './teach-moment';
 
 export type BreakScreenAction =
   | { type: 'lessonDone' }
@@ -73,18 +73,13 @@ function buildTeaching(
   return undefined;
 }
 
-/** Banner text for a right answer, with the points that really counted (AC166, AC167). */
+/** Banner text for a right answer, with the points that really counted (AC29, AC145). */
 export function rightBannerText(outcome: unknown, lastApplied: number | undefined): string {
   const retry = outcome === 'retry';
   const head = retry ? 'Goed zo!' : 'Goed!';
   if (lastApplied === undefined) return retry ? 'Goed zo! +1 punt' : 'Goed! +2 punten';
   if (lastApplied <= 0) return head;
   return `${head} +${lastApplied} ${lastApplied === 1 ? 'punt' : 'punten'}`;
-}
-
-/** The day cap note: only when the cap really cut points. Older saves without capCut keep the message. */
-function capNote(state: SessionState): string | null {
-  return (state.capCut ?? true) ? state.message : null;
 }
 
 export function createBreakScreen(options: BreakScreenOptions): BreakScreen {
@@ -187,21 +182,18 @@ export function createBreakScreen(options: BreakScreenOptions): BreakScreen {
 
       if (state.try === 2) {
         // AC30: soft orange cross and retry message, no right answer shown, input cleared.
+        const taken = state.lastApplied !== undefined && state.lastApplied < 0 ? -state.lastApplied : 0;
         playOnce(`q-${state.index}-retry`, 'hmm');
         juf.say('Net niet. Probeer het nog een keer.');
         body.append(
           el('div', { class: 'break-banner break-banner-wrong', attrs: { role: 'status' } }, [
             el('span', { class: 'break-banner-icon', text: '✗', attrs: { 'aria-hidden': 'true' } }),
             el('span', { text: 'Net niet. Probeer het nog een keer.' }),
+            ...(taken > 0 ? [el('span', { class: 'points-minus', text: minusText(taken) })] : []),
           ]),
         );
       } else {
         juf.say(`Vraag ${state.index + 1} van ${state.entries.length}`);
-      }
-
-      const note = capNote(state);
-      if (note) {
-        body.append(el('p', { class: 'break-cap-note', text: note }));
       }
 
       const qIndex = state.index;
@@ -245,10 +237,6 @@ export function createBreakScreen(options: BreakScreenOptions): BreakScreen {
       if (entry?.item.explain) {
         cardChildren.push(el('p', { class: 'break-explain', text: entry.item.explain }));
       }
-      const feedbackNote = capNote(state);
-      if (feedbackNote) {
-        cardChildren.push(el('p', { class: 'break-cap-note', text: feedbackNote }));
-      }
 
       const qIndex = state.index;
       const nextBtn = el('button', {
@@ -284,6 +272,7 @@ export function createBreakScreen(options: BreakScreenOptions): BreakScreen {
         answer: formatRightAnswer(entry.item),
         explain: entry.item.explain,
         teaching: buildTeaching(entry.item, entry.numeric, options.lessonForItem),
+        taken: state.lastApplied !== undefined && state.lastApplied < 0 ? -state.lastApplied : 0,
         onDone: () => options.onAction({ type: 'understood', q: qIndex }),
         now: options.now,
       });
@@ -298,7 +287,6 @@ export function createBreakScreen(options: BreakScreenOptions): BreakScreen {
       const summaryView = createSummaryView({
         summary: state.summary,
         canAffordEgg: options.canAffordEgg?.(state.summary.pointsTotal) ?? false,
-        capMessage: capNote(state),
         buttonLabel: options.finishLabel,
         onFinish: () => options.onAction({ type: 'finish' }),
         now: options.now,

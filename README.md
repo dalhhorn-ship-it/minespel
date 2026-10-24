@@ -71,7 +71,7 @@ Please play only from the home screen icon. The home screen app and a Safari tab
 
 ## Where it is deployed
 
-On Cloudflare Workers as static assets, at `minespel.dalhhorn.workers.dev`. Cloudflare Workers Builds is connected to this repo and deploys `main` on every merge, so merging to `main` is the yes to deploy (decision 91). Merge only when CI is green. The manual GitHub workflow (`.github/workflows/deploy.yml`) is a spare path; it needs the repo secrets `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`.
+On Cloudflare Workers as static assets, at `minespel.dalhhorn.workers.dev`. Cloudflare Workers Builds is connected to this repo and deploys `main` on every merge, so merging to `main` is the yes to deploy (decision 94). Merge only when CI is green. The manual GitHub workflow (`.github/workflows/deploy.yml`) is a spare path; it needs the repo secrets `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`.
 
 ## Built by an agent factory
 This app was made with the agent factory in `CLAUDE.md`. Start Claude Code in this folder and say what you want to make, or type `/factory` to continue where you left off.

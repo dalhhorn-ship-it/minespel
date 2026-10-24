@@ -1,6 +1,6 @@
 // Teach moment card (AC146 view part): "Zo zit het:", the right answer, the explain text,
 // teaching (a lesson page or a worked example) and "Ik snap het".
-// The point change itself is done by the caller. This only shows the card.
+// The point change itself is done by the caller. This only shows the card and the minus it is given.
 import '../../styles/mc-menu.css';
 import '../../styles/lesson.css';
 import type { Lesson, LessonPage } from '../../content/format';
@@ -21,12 +21,19 @@ export function pickLessonPage(lesson: Lesson, skill: string): LessonPage | unde
   return lesson.pages.find((p) => p.skill === skill) ?? lesson.pages[0];
 }
 
+/** "-1 punt" or "-2 punten". Soft orange in CSS (.points-minus), never red. */
+export function minusText(n: number): string {
+  return `-${n} ${n === 1 ? 'punt' : 'punten'}`;
+}
+
 export interface TeachMomentOptions {
   /** The right answer as text. */
   answer: string;
   explain: string;
   /** Undefined shows no teaching block (for example a topic without pages). */
   teaching?: Teaching;
+  /** Points really taken by this teach moment (1 means "-1 punt"). 0 or missing shows no line. */
+  taken?: number;
   onDone: () => void;
   now?: () => number;
 }
@@ -44,6 +51,9 @@ export function createTeachMoment(options: TeachMomentOptions): TeachMoment {
   scroll.append(el('h2', { class: 'teach-heading', text: 'Zo zit het:' }));
   scroll.append(el('p', { class: 'teach-answer', text: options.answer }));
   scroll.append(el('p', { class: 'teach-explain', text: options.explain }));
+  if (options.taken && options.taken > 0) {
+    scroll.append(el('p', { class: 'points-minus teach-minus', text: minusText(options.taken) }));
+  }
 
   const t = options.teaching;
   if (t?.kind === 'page') {

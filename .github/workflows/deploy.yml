@@ -1,5 +1,5 @@
 name: Deploy to Cloudflare Workers
-# Spare manual path. The normal deploy is Cloudflare Workers Builds on every merge to main (decision 91).
+# Spare manual path. The normal deploy is Cloudflare Workers Builds on every merge to main (decision 94).
 # Needs repo secrets CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID.
 # Does not rerun the tests: it deploys only a commit whose CI run is green.
 on:

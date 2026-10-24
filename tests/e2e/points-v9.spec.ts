@@ -1,8 +1,10 @@
 import { expect, test, type Page } from '@playwright/test';
-import { openApp, readState } from './helpers/app';
+import { killApp, openApp, readState } from './helpers/app';
+import { loginAsParent, setupPin } from './helpers/gate';
 
-// Release v9 Eerlijke punten (0.3.0): AC166 to AC170 played with real finger taps.
-// AC171 (version and changelog) is checked in tests/unit.
+// Release v9 Eerlijke punten (0.3.0) and v10 Punten voor elke ronde (0.4.0), played with real finger taps.
+// v10 replaced the day limit and the no minus rule of v9 (AC166 to AC168, AC170) with AC172 to AC176.
+// AC169 (the egg hint) still holds. AC177 (version and changelog) is checked in tests/unit.
 
 interface Fs {
   existsSync(p: string): boolean;
@@ -191,181 +193,219 @@ async function summaryText(page: Page): Promise<string> {
   return page.locator('.break-summary').innerText();
 }
 
-async function expectNoMinusPoints(page: Page): Promise<void> {
-  const text = await page.locator('body').innerText();
-  expect(text).not.toMatch(/[−-]\s*\d+\s*punt/i);
-  const ledger = await readState<Array<{ delta: number }>>(page, 'ledgerLog');
-  expect(ledger.filter((l) => l.delta < 0)).toEqual([]);
+type PointsMode = 'makkelijk' | 'normaal' | 'moeilijk';
+
+/** Saves the Punten setting, as the parent would (before a round starts). */
+async function setPointsMode(page: Page, mode: PointsMode): Promise<void> {
+  await page.evaluate(
+    (m) =>
+      new Promise<void>((resolve, reject) => {
+        const open = indexedDB.open('dino-blokwereld');
+        open.onerror = () => reject(open.error);
+        open.onsuccess = () => {
+          const db = open.result;
+          const tx = db.transaction('kv', 'readwrite');
+          const store = tx.objectStore('kv');
+          const get = store.get('settings');
+          get.onsuccess = () => store.put({ ...((get.result ?? {}) as object), pointsMode: m }, 'settings');
+          tx.oncomplete = () => {
+            db.close();
+            resolve();
+          };
+          tx.onerror = () => reject(tx.error);
+        };
+      }),
+    mode,
+  );
 }
 
-test.describe('v9 Eerlijke punten (AC166 to AC170)', () => {
-  test('AC166: Extra oefenen past the 10 point limit shows Goed! with no number and the total stays', async ({ page }) => {
+const MINUS = /[−-]\s*\d+\s*punt/i;
+
+/** First try wrong, and the retry wrong (a teach moment) or right. Returns the texts seen on the way. */
+async function wrongTries(page: Page, retryRight: boolean): Promise<{ retryBanner: string; after: string }> {
+  await answerOnce(page, false);
+  const banner = page.locator('.break-banner-wrong');
+  await banner.waitFor();
+  const retryBanner = (await banner.innerText()).replace('✗', '').trim();
+  await answerOnce(page, retryRight);
+  if (retryRight) {
+    await page.locator('.break-banner-right').waitFor();
+    return { retryBanner, after: (await page.locator('.break-banner-right').innerText()).replace('✓', '').trim() };
+  }
+  await page.locator('.teach-moment').waitFor();
+  return { retryBanner, after: await page.locator('.teach-moment').innerText() };
+}
+
+test.describe('v10 Punten voor elke ronde (AC172 to AC176, AC169)', () => {
+  test('AC175: Extra oefenen pays every round, also with 50 points counted today and in a second round', async ({ page }) => {
     await openApp(page);
     await readState(page, 'setPoints', 50);
-    await readState(page, 'setPracticeUsed', 10);
-    await startPractice(page);
-    // first try right, then right on the retry
-    const banners = await playRound(page, ['right', 'retry', 'right', 'right', 'right']);
-    expect(banners[0]).toBe('Goed!');
-    expect(banners[1]).toBe('Goed zo!');
-    for (const b of banners) expect(b).not.toMatch(/\+|punt/);
-    expect(await readState<number>(page, 'points')).toBe(50);
-    const text = await summaryText(page);
-    expect(text).toContain('Totaal: 50 punten');
-    expect(text).not.toMatch(/\+[1-9]/);
+    await readState(page, 'setPracticeUsed', 50);
+    for (const total of [60, 70]) {
+      await startPractice(page);
+      const banners = await playRound(page, ['right', 'right', 'right', 'right', 'right']);
+      for (const b of banners) expect(b).toBe('Goed! +2 punten');
+      const text = await summaryText(page);
+      expect(text).toContain('+10 punten verdiend');
+      expect(text).toContain(`Totaal: ${total} punten`);
+      expect(await page.locator('body').innerText()).not.toContain('Genoeg geoefend');
+      expect(await readState<number>(page, 'points')).toBe(total);
+      await page.locator('.summary-done-btn').tap();
+      await page.locator('.break-screen').waitFor({ state: 'hidden' });
+    }
+    await readState(page, 'openPractice');
+    await expect(page.getByRole('dialog', { name: 'Extra oefenen' })).toBeVisible();
+    const picker = await page.getByRole('dialog', { name: 'Extra oefenen' }).innerText();
+    expect(picker).not.toContain('Genoeg geoefend');
+    expect(picker).not.toContain('Vandaag:');
   });
 
-  test('AC166: a Nu oefenen break past the limit also shows Goed! with no number', async ({ page }) => {
+  test('AC175: a Nu oefenen break pays +2 and the +3 bonus with 50 points counted today', async ({ page }) => {
     await openApp(page);
     await readState(page, 'setPoints', 50);
-    await readState(page, 'setPracticeUsed', 10);
+    await readState(page, 'setPracticeUsed', 50);
     await onlyRekenen(page);
     await readState(page, 'startEarlyBreak');
     await page.locator('.break-screen').waitFor();
     await skipLessonIfShown(page);
     await expectOnlySums(page);
-    const banners = await playRound(page, ['right', 'retry', 'right', 'right', 'right']);
-    expect(banners[0]).toBe('Goed!');
-    expect(banners[1]).toBe('Goed zo!');
-    expect(await readState<number>(page, 'points')).toBe(50);
-  });
-
-  test('AC167: with 1 point left the banner shows +1 punt and the total goes up by exactly 1', async ({ page }) => {
-    await openApp(page);
-    await readState(page, 'setPoints', 50);
-    await readState(page, 'setPracticeUsed', 9);
-    await startPractice(page);
-    const first = await playQuestion(page, 'right');
-    expect(first).toBe('Goed! +1 punt');
-    expect(await readState<number>(page, 'points')).toBe(51);
-    // next right answer is over the limit: no number, total stays 51
-    const second = await playQuestion(page, 'right');
-    expect(second).toBe('Goed!');
-    expect(await readState<number>(page, 'points')).toBe(51);
-  });
-
-  test('AC167: a Nu oefenen break with every first try right and 1 point left shows only points that fit', async ({
-    page,
-  }) => {
-    await openApp(page);
-    await readState(page, 'setPoints', 50);
-    await readState(page, 'setPracticeUsed', 9);
-    await onlyRekenen(page);
-    await readState(page, 'startEarlyBreak');
-    await page.locator('.break-screen').waitFor();
-    await skipLessonIfShown(page);
-    await expectOnlySums(page);
-    const banners = await playRound(page, ['right', 'right', 'right', 'right', 'right']);
-    expect(banners[0]).toBe('Goed! +1 punt');
-    const text = await summaryText(page);
-    // 1 point fit, so the bonus line shows nothing
-    expect(text).toContain('+1 punt verdiend');
-    expect(text).not.toMatch(/bonus/i);
-    expect(await readState<number>(page, 'points')).toBe(51);
-  });
-
-  test('AC168: a round where the limit cut points shows the note and what was really earned', async ({ page }) => {
-    await openApp(page);
-    await readState(page, 'setPoints', 50);
-    await readState(page, 'setPracticeUsed', 9);
-    await startPractice(page);
-    await playRound(page, ['right', 'right', 'right', 'right', 'right']);
-    const text = await summaryText(page);
-    expect(text).toContain('Genoeg geoefend voor vandaag');
-    expect(text).toContain('+1 punt verdiend');
-    expect(text).toContain('Totaal: 51 punten');
-  });
-
-  test('AC168: a round where the limit cut nothing has no note', async ({ page }) => {
-    await openApp(page);
-    await readState(page, 'setPoints', 50);
-    await readState(page, 'setPracticeUsed', 0);
-    await startPractice(page);
-    // 2 right (+4), 3 teach moments: well under the limit
-    await playRound(page, ['right', 'right', 'teach', 'teach', 'teach']);
-    const text = await summaryText(page);
-    expect(text).not.toContain('Genoeg geoefend voor vandaag');
-    expect(text).toContain('+4 punten verdiend');
-    expect(text).toContain('Totaal: 54 punten');
-  });
-
-  test('AC168: a timed break after the limit still shows +2 and the +3 bonus, no note', async ({ page }) => {
-    await openApp(page);
-    await readState(page, 'setPoints', 50);
-    await readState(page, 'setPracticeUsed', 10);
-    await startTimedBreak(page);
     const banners = await playRound(page, ['right', 'right', 'right', 'right', 'right']);
     for (const b of banners) expect(b).toBe('Goed! +2 punten');
     const text = await summaryText(page);
     expect(text).toContain('+13 punten verdiend');
     expect(text).toContain('inclusief +3 bonus');
-    expect(text).not.toContain('Genoeg geoefend voor vandaag');
+    expect(text).not.toContain('Genoeg geoefend');
     expect(await readState<number>(page, 'points')).toBe(63);
   });
 
-  test('AC168: a timed break shows +1 punt on a right retry', async ({ page }) => {
+  test('AC175: a timed break pays +2, +1 and the +3 bonus', async ({ page }) => {
     await openApp(page);
-    await readState(page, 'setPracticeUsed', 10);
+    await readState(page, 'setPracticeUsed', 99);
     await startTimedBreak(page);
     const banners = await playRound(page, ['retry', 'right', 'right', 'right', 'right']);
     expect(banners[0]).toBe('Goed zo! +1 punt');
     expect(banners[1]).toBe('Goed! +2 punten');
   });
 
-  test('AC170: wrong twice in Extra oefenen shows no minus and the total does not drop', async ({ page }) => {
+  test('AC173: Makkelijk, two wrong tries leave the total and no minus shows', async ({ page }) => {
     await openApp(page);
-    await readState(page, 'setPoints', 40);
+    await setPointsMode(page, 'makkelijk');
+    await readState(page, 'setPoints', 10);
+    await startPractice(page);
+    const seen = await wrongTries(page, false);
+    expect(seen.retryBanner).not.toMatch(MINUS);
+    expect(seen.after).not.toMatch(MINUS);
+    expect(await readState<number>(page, 'points')).toBe(10);
+  });
+
+  test('AC173: Normaal, a wrong first try costs nothing and the teach moment shows -1 punt', async ({ page }) => {
+    await openApp(page);
+    await readState(page, 'setPoints', 10);
     await startPractice(page);
     await answerOnce(page, false);
     await page.locator('.break-banner-wrong').waitFor();
+    expect(await page.locator('.break-banner-wrong').innerText()).not.toMatch(MINUS);
+    expect(await readState<number>(page, 'points')).toBe(10);
     await answerOnce(page, false);
     await page.locator('.teach-moment').waitFor();
-    await expect(page.locator('.teach-moment')).toContainText('Zo zit het:');
-    const card = await page.locator('.teach-moment').innerText();
-    expect(card).not.toMatch(/punt/i);
-    expect(card).not.toMatch(/[−-]\s*\d+\s*punt/i);
-    expect(await readState<number>(page, 'points')).toBe(40);
+    await expect(page.locator('.teach-minus')).toHaveText('-1 punt');
+    expect(await readState<number>(page, 'points')).toBe(9);
     await page.locator('.teach-done').tap();
-    await expectNoMinusPoints(page);
-    expect(await readState<number>(page, 'points')).toBe(40);
   });
 
-  test('AC170: wrong twice in a Nu oefenen break and a timed break keeps the total and shows no points line', async ({
+  test('AC173 and AC174: Moeilijk, the first wrong try shows -1 punt in soft orange, a right retry gives +1 back', async ({
     page,
   }) => {
     await openApp(page);
-    await readState(page, 'setPoints', 40);
-    await onlyRekenen(page);
-    for (const hook of ['startEarlyBreak', 'startBreakNow']) {
-      await readState(page, hook);
-      await page.locator('.break-screen').waitFor();
-      await skipLessonIfShown(page);
-      await expectOnlySums(page);
-      await answerOnce(page, false);
-      await page.locator('.break-banner-wrong').waitFor();
-      await answerOnce(page, false);
-      await page.locator('.teach-moment').waitFor();
-      expect(await page.locator('.teach-moment').innerText()).not.toMatch(/punt/i);
-      expect(await readState<number>(page, 'points')).toBe(40);
-      await expectNoMinusPoints(page);
-      await readState(page, 'endBreakByParent');
-      await page.locator('.break-screen').waitFor({ state: 'hidden' });
-      expect(await readState<number>(page, 'points')).toBe(40);
-    }
+    await setPointsMode(page, 'moeilijk');
+    await readState(page, 'setPoints', 10);
+    await startPractice(page);
+    await answerOnce(page, false);
+    const minus = page.locator('.break-banner-wrong .points-minus');
+    await expect(minus).toHaveText('-1 punt');
+    const color = await minus.evaluate((e) => getComputedStyle(e).color);
+    const [r = 0, g = 0, b = 0] = (color.match(/\d+/g) ?? []).map(Number);
+    expect(r).toBeGreaterThan(g); // orange or brown, never pure red
+    expect(g).toBeGreaterThan(0);
+    expect(b).toBeLessThan(r);
+    expect(await readState<number>(page, 'points')).toBe(9);
+    await answerOnce(page, true);
+    await expect(page.locator('.break-banner-right')).toContainText('Goed zo! +1 punt');
+    expect(await readState<number>(page, 'points')).toBe(10);
   });
 
-  test('AC170: a timed break with 4 right first try and 1 teach moment gives 8 points', async ({ page }) => {
+  test('AC173: Moeilijk, wrong twice takes 2 in total', async ({ page }) => {
+    await openApp(page);
+    await setPointsMode(page, 'moeilijk');
+    await readState(page, 'setPoints', 10);
+    await startPractice(page);
+    await wrongTries(page, false);
+    await expect(page.locator('.teach-minus')).toHaveText('-1 punt');
+    expect(await readState<number>(page, 'points')).toBe(8);
+  });
+
+  test('AC174: at 0 points Normaal takes nothing and the teach moment shows no minus', async ({ page }) => {
+    await openApp(page);
+    await readState(page, 'setPoints', 0);
+    await startPractice(page);
+    const seen = await wrongTries(page, false);
+    expect(seen.after).not.toMatch(MINUS);
+    await expect(page.locator('.teach-minus')).toHaveCount(0);
+    expect(await readState<number>(page, 'points')).toBe(0);
+  });
+
+  test('AC173 and AC176: a timed break with 4 right and 1 teach moment gives 7 on Normaal', async ({ page }) => {
     await openApp(page);
     await readState(page, 'setPoints', 40);
     await startTimedBreak(page);
     await playRound(page, ['right', 'right', 'teach', 'right', 'right']);
     const text = await summaryText(page);
     expect(text).toContain('4 van de 5 goed!');
-    expect(text).toContain('+8 punten verdiend');
+    expect(text).toContain('+7 punten verdiend');
     expect(text).not.toMatch(/bonus/i);
-    expect(text).toContain('Totaal: 48 punten');
-    expect(await readState<number>(page, 'points')).toBe(48);
-    await expectNoMinusPoints(page);
+    expect(text).toContain('Totaal: 47 punten');
+    expect(await readState<number>(page, 'points')).toBe(47);
+  });
+
+  test('AC176: a round of only mistakes on Moeilijk shows the minus sum in soft orange and the new total', async ({ page }) => {
+    await openApp(page);
+    await setPointsMode(page, 'moeilijk');
+    await readState(page, 'setPoints', 40);
+    await startPractice(page);
+    await playRound(page, ['teach', 'teach', 'teach', 'teach', 'teach']);
+    const line = page.locator('.summary-points');
+    await expect(line).toHaveText('-10 punten');
+    await expect(line).toHaveClass(/points-minus/);
+    await expect(page.locator('.summary-total')).toHaveText('Totaal: 30 punten');
+    expect(await readState<number>(page, 'points')).toBe(30);
+  });
+
+  test('AC172: Punten is in Ouders, Instellingen behind the gate, Normaal first, big choices, and Moeilijk stays after a restart', async ({
+    page,
+  }) => {
+    await openApp(page);
+    await setupPin(page);
+    // Nothing of it is in the world
+    await expect(page.locator('[data-testid="points-setting"]')).toHaveCount(0);
+    await loginAsParent(page);
+    await page.locator('.parent-nav-btn[data-section="instellingen"]').tap();
+    const card = page.locator('[data-testid="points-setting"]');
+    await expect(card).toContainText('Punten');
+    for (const mode of ['makkelijk', 'normaal', 'moeilijk']) {
+      const box = await card.locator(`[data-points-mode="${mode}"]`).boundingBox();
+      expect(box?.height ?? 0).toBeGreaterThanOrEqual(56);
+      expect(box?.width ?? 0).toBeGreaterThanOrEqual(56);
+      await expect(card.locator(`[data-points-mode="${mode}"] .parent-points-line`)).not.toHaveText('');
+    }
+    await expect(card.locator('[data-points-mode="normaal"]')).toHaveAttribute('aria-pressed', 'true');
+    await card.locator('[data-points-mode="moeilijk"]').tap();
+    await expect(card.locator('[data-points-mode="moeilijk"]')).toHaveAttribute('aria-pressed', 'true');
+    await readState(page, 'flushSave');
+
+    const fresh = await killApp(page);
+    await loginAsParent(fresh);
+    await fresh.locator('.parent-nav-btn[data-section="instellingen"]').tap();
+    await expect(fresh.locator('[data-points-mode="moeilijk"]')).toHaveAttribute('aria-pressed', 'true');
   });
 
   async function ownHerd(page: Page, shop: number): Promise<void> {

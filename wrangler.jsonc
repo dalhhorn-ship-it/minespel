@@ -2,7 +2,7 @@
 // Static assets only: there is no Worker script, no KV, D1 or R2 (PRD section 10).
 // Not to be confused with the browser service worker in offline/service-worker.js.
 // Never put an account id or a token in this file.
-// The name must stay "minespel": that is the live Worker. Cloudflare Workers Builds deploys main on every merge (decision 91).
+// The name must stay "minespel": that is the live Worker. Cloudflare Workers Builds deploys main on every merge (decision 94).
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
   "name": "minespel",

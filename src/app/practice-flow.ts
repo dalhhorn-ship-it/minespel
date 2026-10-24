@@ -1,5 +1,5 @@
 // Extra oefenen flow (T46, AC52, AC120):
-// Lets the kid pick any switched-on topic to practice for extra coins (up to 10 points/day cap in practice mode),
+// Lets the kid pick any switched-on topic to practice for extra coins (every round pays, no day limit),
 // or override the countdown timer to start a full learning break immediately.
 
 import '../styles/lesboek.css';
@@ -17,14 +17,7 @@ import {
   switchedOnSkills,
 } from '../content/switches';
 import { effectiveDay, systemClock, today, type Clock } from '../core/clock';
-import {
-  canAffordEgg,
-  MSG_ENOUGH_PRACTICE,
-  PRACTICE_DAY_CAP,
-  practiceCapReached,
-  practiceEarnedToday,
-  shopDinoCount,
-} from '../core/economy';
+import { canAffordEgg, pointsModeOf, shopDinoCount } from '../core/economy';
 import { createRng, type Rng } from '../core/rng';
 import type { Response } from '../learning/answer-check';
 import {
@@ -265,7 +258,7 @@ export function createPracticeFlow(options: PracticeFlowOptions): PracticeFlow {
             ts: clock.now(),
             day: state.day,
             delta: ef.applied,
-            reason: 'practice',
+            reason: ef.applied < 0 ? 'malus' : 'practice',
           });
         }
       }
@@ -353,6 +346,7 @@ export function createPracticeFlow(options: PracticeFlowOptions): PracticeFlow {
       mode: 'practice',
       entries,
       economy,
+      pointsMode: pointsModeOf(settings),
       day: effDay,
       lessonFirst: false,
       at: now,
@@ -362,14 +356,6 @@ export function createPracticeFlow(options: PracticeFlowOptions): PracticeFlow {
     activeTopicId = topicId;
     activeSessionId = `practice-${now}-${Math.floor(rng.next() * 1_000_000)}`;
     activeState = started.state;
-
-    // If the daily practice cap was already reached before starting, keep the cap message visible
-    if (practiceCapReached(economy, effDay)) {
-      activeState = {
-        ...activeState,
-        message: MSG_ENOUGH_PRACTICE,
-      };
-    }
 
     const topicLesson = catalog.getTopic(moduleId, topicId)?.lesson;
     screenView = createBreakScreen({
@@ -388,19 +374,12 @@ export function createPracticeFlow(options: PracticeFlowOptions): PracticeFlow {
   async function renderPicker() {
     clearScreen();
     const catalog = options.getCatalog?.();
-    const [settings, switches, economy] = options.records
+    const [switches, economy] = options.records
       ? await Promise.all([
-          options.records.get('settings'),
           options.records.get('switches'),
           options.records.get('economy'),
         ])
-      : [null, { modules: {} } as SwitchesRecord, { points: 0, practicePointsToday: 0, practiceDay: '' }];
-
-    const clockDay = today(clock);
-    const lastSeenDay = (settings as { lastSeenDay?: string } | null)?.lastSeenDay ?? null;
-    const effDay = effectiveDay(clockDay, lastSeenDay);
-    const earnedToday = practiceEarnedToday(economy, effDay);
-    const capHit = practiceCapReached(economy, effDay);
+      : [{ modules: {} } as SwitchesRecord, { points: 0, practicePointsToday: 0, practiceDay: '' }];
 
     const closeBtn = el('button', {
       class: 'pause-btn pause-btn-primary',
@@ -425,31 +404,17 @@ export function createPracticeFlow(options: PracticeFlowOptions): PracticeFlow {
           class: 'lesboek-pill',
           text: `\u{1FA99} ${economy.points} ${economy.points === 1 ? 'punt' : 'punten'}`,
         }),
-        el('span', {
-          class: 'lesboek-pill',
-          text: `Vandaag: ${earnedToday} / ${PRACTICE_DAY_CAP} extra`,
-        }),
       ]),
       closeBtn,
     ]);
 
     const bodyChildren: HTMLElement[] = [header];
 
-    if (capHit) {
-      bodyChildren.push(
-        el('p', {
-          class: 'lesboek-cap-banner',
-          text: MSG_ENOUGH_PRACTICE,
-          attrs: { 'data-testid': 'practice-cap-banner' },
-        }),
-      );
-    } else {
-      bodyChildren.push(
-        el('p', {
-          text: 'Kies een onderwerp om extra vragen te oefenen en munten te verdienen!',
-        }),
-      );
-    }
+    bodyChildren.push(
+      el('p', {
+        text: 'Kies een onderwerp om extra vragen te oefenen en munten te verdienen!',
+      }),
+    );
 
     if (options.onStartBreakRound) {
       const breakBtn = el(

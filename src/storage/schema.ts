@@ -63,6 +63,8 @@ export interface SettingsRecord {
   breakWarningEnabled: boolean;
   /** "Geluidseffecten". */
   soundEffectsEnabled: boolean;
+  /** "Punten": what a mistake costs (v10). Missing in a save from 0.3.0, read as 'normaal'. */
+  pointsMode?: 'makkelijk' | 'normaal' | 'moeilijk';
   [key: string]: unknown;
 }
 export interface PlayerRecord {
@@ -145,6 +147,7 @@ export const KV_DEFAULTS: { [K in KvName]: () => KvRecords[K] } = {
     newLessonsEnabled: true,
     breakWarningEnabled: true,
     soundEffectsEnabled: true,
+    pointsMode: 'normaal',
   }),
   player: () => ({ x: 0, y: 0, z: 0, yaw: 0, pitch: 0, hotbar: [], selectedSlot: 0, mode: 'mine' }),
   world: () => ({ diff: new Uint32Array(0) }),
