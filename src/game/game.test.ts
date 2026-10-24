@@ -146,6 +146,30 @@ describe('game', () => {
     expect(s.game.isRunning()).toBe(false);
   });
 
+  it('V11c: the game has 8 villagers beside the dinos and shows them every frame', () => {
+    const s = setup();
+    const sync = vi.fn();
+    expect(s.game.villagerSystem.villagers()).toHaveLength(8);
+    expect(s.game.dinoStore.dinos()).toHaveLength(0);
+    expect(s.game.dinoStore.eggs()).toHaveLength(0);
+    s.game.renderer.syncVillagers = sync;
+    runFrames(2);
+    expect(sync).toHaveBeenCalled();
+  });
+
+  it('V11c: ?still=1 starts the villagers in stillMode', () => {
+    expect(setup().game.villagerSystem.stillMode()).toBe(false);
+    expect(setup('?still=1').game.villagerSystem.stillMode()).toBe(true);
+  });
+
+  it('V11c: a new world puts the villagers back at home', () => {
+    const s = setup();
+    const v = s.game.villagerSystem.villagers()[0]!;
+    v.x += 2;
+    s.game.resetWorld();
+    expect(v.x).toBe(v.home.x);
+  });
+
   it('has 8 hotbar slots and the Alle blokken button, and the Bouwen button switches mode (AC7)', () => {
     const s = setup();
     expect(s.container.querySelectorAll('.hotbar-slot')).toHaveLength(8);

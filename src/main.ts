@@ -527,6 +527,15 @@ if (__E2E__) {
     registerHook('eggs', () => g.dinoStore.eggs());
     registerHook('addEgg', (kind: DinoKindId, golden?: boolean) => g.dinoStore.addEgg(kind, golden));
     registerHook('stepDinos', (dt: number) => g.dinoSystem.step(dt));
+    // Villagers (V11c): plain copies, so a test reads them without touching the live state.
+    registerHook('villagers', () =>
+      g.villagerSystem.villagers().map((v) => ({
+        id: v.id, site: v.site, home: { ...v.home }, position: { x: v.x, y: v.y, z: v.z },
+        shirt: v.look.shirt, style: v.look.style, gives: v.gives, dancing: v.danceLeft > 0,
+      })),
+    );
+    registerHook('stepVillagers', (dt: number) => g.villagerSystem.step(dt));
+    registerHook('danceVillager', (id: string) => g.villagerSystem.dance(id));
     registerHook('openDinoMenuFor', (id: string) => {
       const d = g.dinoStore.getDino(id);
       if (d) openDinoMenu(d);

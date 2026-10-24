@@ -196,4 +196,25 @@ describe('dino ai', () => {
     stepDino(w, d, { x: 20.5, y: GY, z: 10.5 }, rng, 5);
     expect(dinoCollides(w, d)).toBe(false);
   });
+
+  it('V11c: the caller can give the box size and the wander radius', () => {
+    const w = flatWorld();
+    const d = dinoAt(10.5, 10.5);
+    d.mode = 'stay';
+    d.stayX = 10.5; d.stayZ = 10.5;
+    const box = { side: 0.6, height: 1.8 };
+    // A wall one block high and two wide is no problem for a tall box only when it fits below the ceiling.
+    w.set(10, GY + 1, 10, STEEN); // a ceiling cell over the dino: too low for the tall box
+    expect(dinoCollides(w, d, d.x, d.y, d.z)).toBe(false);
+    expect(dinoCollides(w, d, d.x, d.y, d.z, box)).toBe(true);
+    w.set(10, GY + 1, 10, AIR);
+    const rng = createRng(2);
+    let far = 0;
+    for (let i = 0; i < 60 * 60; i++) {
+      stepDino(w, d, { x: 40, y: GY, z: 40 }, rng, 1 / 60, { box, radius: 1 });
+      far = Math.max(far, Math.hypot(d.x - 10.5, d.z - 10.5));
+    }
+    expect(far).toBeLessThan(1.4);
+    expect(far).toBeGreaterThan(0.3);
+  });
 });

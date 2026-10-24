@@ -7,6 +7,7 @@ import { createBlockGrid } from '../ui/block-grid';
 import { createHotbar } from '../ui/hotbar';
 import { createBuildController, type BuildState } from './build-controller';
 import { createDinoSystem, type DinoSystem } from './dino-system';
+import { createVillagerSystem, type VillagerSystem } from './villager-system';
 import { createFpsCounter, type FpsCounter } from '../render/fps-counter';
 import { createLook } from '../input/look';
 import { createPointerRouter } from '../input/pointer-router';
@@ -44,6 +45,8 @@ export interface Game {
   readonly hud: Hud;
   readonly dinoStore: DinoStore;
   readonly dinoSystem: DinoSystem;
+  /** The village people (V11c). Beside the dinos, never in the dino store. */
+  readonly villagerSystem: VillagerSystem;
   /** Stops the world: no steps, no drawing. Safe to call twice. */
   pause(): void;
   resume(): void;
@@ -131,6 +134,13 @@ export function createGame(options: GameOptions): Game {
     doc,
   });
 
+  const villagerSystem = createVillagerSystem({
+    world,
+    player,
+    renderer,
+    stillMode: new URLSearchParams(search).get('still') === '1',
+  });
+
   const hud = createHud({
     router,
     onJump: () => player.jump(),
@@ -156,7 +166,7 @@ export function createGame(options: GameOptions): Game {
     effects,
     sound,
     viewport: () => ({ width: win.innerWidth, height: win.innerHeight }),
-    isOccupied: (box) => dinoSystem.isOccupied(box),
+    isOccupied: (box) => dinoSystem.isOccupied(box) || villagerSystem.isOccupied(box),
     canAct: () => loopRunning(),
   });
   tapWorld.fn = (x, y) => {
@@ -215,6 +225,7 @@ export function createGame(options: GameOptions): Game {
     frame(dt, now) {
       player.update(dt);
       dinoSystem.step(dt);
+      villagerSystem.step(dt);
       if (dinos) stepSpikeDinos(world, dinos, dt);
       renderer.setCamera(player.pose());
       renderer.render();
@@ -285,6 +296,7 @@ export function createGame(options: GameOptions): Game {
     hud,
     dinoStore,
     dinoSystem,
+    villagerSystem,
     pause() {
       manualPause = true;
       update();
@@ -302,6 +314,7 @@ export function createGame(options: GameOptions): Game {
     teleportHome,
     resetWorld() {
       world.reset();
+      villagerSystem.reset();
       renderer.setWorld(world);
       emitChanged('world');
       teleportHome();
