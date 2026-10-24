@@ -353,6 +353,11 @@ export function createVillageFlow(options: VillageFlowOptions): VillageFlow {
   }
 
   const offScreen = screens.subscribe((kind) => {
+    // Any screen but the world hides the bubble at once, so a menu never shows it for a moment (AC182).
+    if (kind !== 'world') {
+      hideBubble();
+      dropPrepared();
+    }
     // Something else took the screen (never expected): the card is gone, nothing is given.
     if (open && kind !== 'kid-overlay') {
       const o = open;

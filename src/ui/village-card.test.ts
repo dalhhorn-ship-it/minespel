@@ -72,6 +72,17 @@ describe('village card (V11d)', () => {
     expect(card.element.textContent).toContain('Kijk, een dansje!');
   });
 
+  it('AC184: the cheer shows once on the reward card', () => {
+    const { card } = open(q(choice));
+    const s0 = startVillageCard(q(choice), 35, []);
+    for (const c of [step(s0, ans(0, 0.9)), step(s0, ans(0, 0.1))]) {
+      card.render(c);
+      const text = card.element.textContent ?? '';
+      const cheer = text.includes('Respect bruuuuu!') ? 'Respect bruuuuu!' : 'Kijk, een dansje!';
+      expect(text.split(cheer).length - 1).toBe(1);
+    }
+  });
+
   it('AC184: a block found before shows "Die had je al!" and only Verder', () => {
     const { card } = open(q(choice), [35]);
     card.render(step(startVillageCard(q(choice), 35, [35]), ans(0)));

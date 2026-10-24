@@ -121,6 +121,14 @@ describe('village flow: the bubble (V11d)', () => {
     expect(document.querySelectorAll('.village-bubble:not([hidden])')).toHaveLength(1);
   });
 
+  it('AC182: the bubble hides at once when the screen changes, without a look', async () => {
+    const s = await setup();
+    s.stand(0);
+    await vi.waitFor(() => { s.flow.tick(); expect(s.bubble.state().visible).toBe(true); });
+    s.screens.setExternalKidOverlay(true);
+    expect(s.bubble.state().visible).toBe(false);
+  });
+
   it('AC182: every screen but the world keeps the bubble away, and so does a paused game', async () => {
     const s = await setup();
     s.stand(0);

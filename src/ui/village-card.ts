@@ -128,11 +128,12 @@ export function createVillageCard(options: VillageCardOptions): VillageCard {
 
     if (state.phase === 'right') {
       face.classList.toggle('village-face-dance', state.celebration === 'dance');
+      // The cheer is said once, in the speech line. The green banner says something else.
       say.textContent = state.celebration === 'respect' ? RESPECT_TEXT : DANCE_TEXT;
       const kids: Node[] = [
         el('div', { class: 'village-banner village-banner-right', attrs: { role: 'status' } }, [
           el('span', { text: '✓', attrs: { 'aria-hidden': 'true' } }, [], doc),
-          el('span', { text: say.textContent }, [], doc),
+          el('span', { text: 'Goed zo!' }, [], doc),
         ], doc),
       ];
       if (state.alreadyFound) {
