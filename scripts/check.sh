@@ -34,7 +34,11 @@ fi
 
 # 2. The app. Task T1 creates package.json. Before that only the content is checked.
 if [[ -f package.json ]]; then
-  if [[ -f package-lock.json ]]; then npm ci --no-audit --no-fund; else npm install --no-audit --no-fund; fi
+  # Skip the install when node_modules is newer than the lock file (saves about 10 seconds).
+  if [[ -f package-lock.json && -f node_modules/.package-lock.json && node_modules/.package-lock.json -nt package-lock.json ]]; then
+    echo "check.sh: node_modules is up to date, skipping npm ci."
+  elif [[ -f package-lock.json ]]; then npm ci --no-audit --no-fund
+  else npm install --no-audit --no-fund; fi
   npm run lint
   npm run typecheck
   npm test
@@ -47,11 +51,20 @@ if [[ -f package.json ]]; then
     # Installs the WebKit browser once. Fast when it is already there.
     # As root (cloud sandbox, CI containers) also install the Linux system libraries.
     if [[ "$(id -u)" -eq 0 ]]; then
-      npx playwright install --with-deps webkit
+      install_webkit=(npx playwright install --with-deps webkit)
     else
-      npx playwright install webkit
+      install_webkit=(npx playwright install webkit)
     fi
-    npm run test:e2e
+    if "${install_webkit[@]}"; then
+      npm run test:e2e
+    elif [[ -z "${CI:-}" && -d /opt/pw-browsers/chromium ]]; then
+      # Cloud sandboxes block the WebKit download. CI always has WebKit and never takes this path.
+      echo "check.sh: WARNING: WebKit could not be installed. Running e2e in LOCAL CHROMIUM (E2E_LOCAL=1), NOT WebKit. CI on WebKit stays the truth."
+      npm run test:e2e:local
+    else
+      echo "check.sh: WebKit could not be installed and no local Chromium was found." >&2
+      exit 1
+    fi
   fi
 else
   echo "No package.json yet: only the content was checked. Task T1 sets up lint, typecheck, unit tests, build and e2e."

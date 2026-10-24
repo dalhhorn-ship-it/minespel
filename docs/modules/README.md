@@ -184,3 +184,4 @@ Besides the fields and types above, it fails on:
 * Follow the official Dutch spelling (Groene Boekje, woordenlijst.org).
 * Keep sentences short: at most 15 words at M6 and E6, 20 at M7 and E7. The validator counts the `sentence`, the `words`, or each option when the options are the sentences.
 * Every `explain` names the rule, not only the answer.
+* E2E and unit tests never depend on which modules exist. Pick subjects and topics by role, or switch every other subject off, so a new module cannot break them.

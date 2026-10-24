@@ -4,6 +4,13 @@ import { openApp, readState } from './helpers/app';
 // Release v9 Eerlijke punten (0.3.0): AC166 to AC170 played with real finger taps.
 // AC171 (version and changelog) is checked in tests/unit.
 
+interface Fs {
+  existsSync(p: string): boolean;
+  readFileSync(p: string, enc: string): string;
+  readdirSync(p: string, o: { withFileTypes: true }): Array<{ name: string; isDirectory(): boolean }>;
+}
+const fs = (globalThis as unknown as { process: { getBuiltinModule(n: string): unknown } }).process.getBuiltinModule('node:fs') as Fs;
+
 type How = 'right' | 'retry' | 'teach';
 
 interface BreakItem {
@@ -101,10 +108,15 @@ async function playRound(page: Page, plan: How[]): Promise<string[]> {
   return banners;
 }
 
-/** Switches the Taal subject off in the saved switches, so every break asks Rekenen sums (the number pad). */
+/** Allow list: every subject but Rekenen is switched off, so every break asks Rekenen sums (the number pad). New subjects never leak in. */
 async function onlyRekenen(page: Page): Promise<void> {
+  // Every subject the shipped modules use, read from disk, so a new module never leaks in.
+  const others = [...new Set(fs.readdirSync('docs/modules', { withFileTypes: true })
+    .filter((d) => d.isDirectory() && fs.existsSync(`docs/modules/${d.name}/module.json`))
+    .map((d) => String((JSON.parse(fs.readFileSync(`docs/modules/${d.name}/module.json`, 'utf8')) as { subject?: string }).subject ?? '').toLowerCase())
+    .filter((id) => id && id !== 'rekenen'))];
   await page.evaluate(
-    () =>
+    (others) =>
       new Promise<void>((resolve, reject) => {
         const open = indexedDB.open('dino-blokwereld');
         open.onerror = () => reject(open.error);
@@ -115,7 +127,10 @@ async function onlyRekenen(page: Page): Promise<void> {
           const get = store.get('switches');
           get.onsuccess = () => {
             const cur = (get.result ?? { modules: {} }) as { modules?: unknown; subjects?: Record<string, boolean> };
-            store.put({ ...cur, modules: cur.modules ?? {}, subjects: { ...(cur.subjects ?? {}), taal: false } }, 'switches');
+            const subjects: Record<string, boolean> = { ...(cur.subjects ?? {}) };
+            for (const id of others) subjects[id] = false;
+            subjects.rekenen = true;
+            store.put({ ...cur, modules: cur.modules ?? {}, subjects }, 'switches');
           };
           tx.oncomplete = () => {
             db.close();
@@ -124,6 +139,7 @@ async function onlyRekenen(page: Page): Promise<void> {
           tx.onerror = () => reject(tx.error);
         };
       }),
+    others,
   );
 }
 
