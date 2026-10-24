@@ -346,10 +346,11 @@ Rules: every task adds tests that fail without its change. Pure logic is tested 
 
 ## How to deploy
 
-* Worker name `dino-blokwereld`, static assets from `./dist`, `compatibility_date` 2026-10-17, see `wrangler.jsonc`. No Worker script, no KV, D1 or R2. `preview_urls` is off so no extra public addresses appear.
-* Address: `https://dino-blokwereld.<account subdomain>.workers.dev` (F9, public).
-* `npm run deploy` (build, then `wrangler deploy`) on the founder's machine after `npx wrangler login`, or the manual "Deploy to Cloudflare Workers" GitHub workflow (it does not rerun the tests; it refuses a commit without a green CI run, then builds and deploys) with the repo secrets `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`, which only the founder adds.
-* Every deploy is a founder decision. The ship checklist confirms Cloudflare Web Analytics is off for this Worker (AC98).
+* Worker name `minespel` (the live Worker), static assets from `./dist`, `compatibility_date` 2026-10-17, see `wrangler.jsonc`. No Worker script, no KV, D1 or R2. `preview_urls` is off so no extra public addresses appear.
+* Address: `https://minespel.dalhhorn.workers.dev` (F9, public).
+* Cloudflare Workers Builds is connected to the GitHub repo and deploys `main` on every merge (decision 91). It does not wait for GitHub CI, so merge to `main` only when CI is green. The IndexedDB name stays `dino-blokwereld` (`src/storage/schema.ts`): renaming it would lose the kids' saves.
+* Spare paths: `npm run deploy` (build, then `wrangler deploy`) on the founder's machine after `npx wrangler login`, or the manual "Deploy to Cloudflare Workers" GitHub workflow (it does not rerun the tests; it refuses a commit without a green CI run, then builds and deploys) with the repo secrets `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`, which only the founder adds.
+* Every deploy is a founder decision; a merge to `main` counts as that yes. The ship checklist confirms Cloudflare Web Analytics is off for this Worker (AC98).
 * `public/_headers` sets `Cache-Control: no-cache` for `/service-worker.js` and `/index.html`, and long caching for hashed files in `/assets/`.
 
 ## Conventions for developers
