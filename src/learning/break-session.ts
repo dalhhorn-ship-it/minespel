@@ -16,6 +16,7 @@ import {
   applyPoints,
   bonusPoints,
   type AnswerOutcome,
+  type PointsMode,
   type SessionMode,
 } from '../core/economy';
 import { applyFirstTry } from './srs';
@@ -41,7 +42,7 @@ export interface SessionSummary {
   firstTryRight: number;
   /** Plus points of the +3 bonus (0 outside breaks). */
   bonus: number;
-  /** Net points really applied during this session, malus and bonus included. */
+  /** Net points really applied during this session, plus, minus and bonus; equals the change in the total (AC176). */
   earned: number;
   /** Point total at the end. */
   pointsTotal: number;
@@ -51,12 +52,11 @@ export interface SessionSummary {
 
 export interface SessionState {
   mode: SessionMode;
-  /**
-   * Early break (started with Nu oefenen): plus points share the Extra oefenen day limit and there
-   * is no malus. Missing means a normal break (older saved sessions).
-   */
+  /** Started with Nu oefenen (decision 56). It pays like any break since v10. Missing in older saves. */
   early?: boolean;
-  /** Effective local day, "2026-10-18", for the Extra oefenen cap. */
+  /** Punten setting for this session (v10). Missing in older saves, read as 'normaal'. */
+  pointsMode?: PointsMode;
+  /** Effective local day, "2026-10-18". */
   day: string;
   entries: SessionEntry[];
   /** Per entry: how it ended, null while open. */
@@ -74,12 +74,8 @@ export interface SessionState {
   economy: EconomyRecord;
   earned: number;
   bonus: number;
-  /** Last cap message ("Genoeg geoefend voor vandaag...") or null. */
-  message: string | null;
-  /** Points the last answer really added (0 at the day cap). Missing in older saves and in preview. */
+  /** Points the last answer really changed, plus or minus (0 when nothing was taken). Missing in older saves and in preview. */
   lastApplied?: number;
-  /** True once the day cap really cut a plus or the bonus. Missing in older saves. */
-  capCut?: boolean;
   summary: SessionSummary | null;
   endReason: EndReason | null;
 }
@@ -113,7 +109,7 @@ export type SessionEffect =
   /** New SRS box after the first try only (never on a retry). Not emitted in preview. */
   | { type: 'box'; itemId: string; box: number; due: string }
   /** A points change. Not emitted in preview or when nothing changed. */
-  | { type: 'points'; delta: number; applied: number; total: number; reason: 'answer' | 'bonus'; message: string | null }
+  | { type: 'points'; delta: number; applied: number; total: number; reason: 'answer' | 'bonus' }
   /** Open question logged as "niet beantwoord", no box change (AC95). Not emitted in preview. */
   | { type: 'unanswered'; itemId: string }
   /** The session is over. */
@@ -123,6 +119,8 @@ export interface SessionConfig {
   mode: SessionMode;
   /** True for a break started with Nu oefenen (decision 56). */
   early?: boolean;
+  /** The Punten setting (v10). Default 'normaal'. */
+  pointsMode?: PointsMode;
   entries: SessionEntry[];
   economy: EconomyRecord;
   day: string;
@@ -140,6 +138,7 @@ export function startSession(config: SessionConfig): StepResult {
   const base: SessionState = {
     mode: config.mode,
     ...(config.early ? { early: true } : {}),
+    pointsMode: config.pointsMode ?? 'normaal',
     day: config.day,
     entries: config.entries.map((e) => ({ ...e })),
     results: config.entries.map(() => null),
@@ -151,13 +150,11 @@ export function startSession(config: SessionConfig): StepResult {
     economy: { ...config.economy },
     earned: 0,
     bonus: 0,
-    message: null,
-    capCut: false,
     summary: null,
     endReason: null,
   };
   if (config.entries.length === 0) {
-    // AC39: friendly message, 10 seconds, no points, no malus.
+    // AC39: friendly message, 10 seconds, no points.
     return { state: { ...base, phase: 'empty', emptyUntil: config.at + EMPTY_BREAK_MS }, effects: [] };
   }
   return { state: { ...base, phase: config.lessonFirst ? 'lesson' : 'question' }, effects: [] };
@@ -182,17 +179,15 @@ function applyDelta(
   effects: SessionEffect[],
 ): SessionState {
   if (state.mode === 'preview') return state;
-  const r = applyPoints(state.economy, state.mode, delta, state.day, state.early === true);
-  if (r.applied !== 0 || r.message) {
-    effects.push({ type: 'points', delta, applied: r.applied, total: r.economy.points, reason, message: r.message });
+  const r = applyPoints(state.economy, state.mode, delta);
+  if (r.applied !== 0) {
+    effects.push({ type: 'points', delta, applied: r.applied, total: r.economy.points, reason });
   }
   return {
     ...state,
     economy: r.economy,
     earned: state.earned + r.applied,
     bonus: reason === 'bonus' ? state.bonus + r.applied : state.bonus,
-    message: r.message ?? state.message,
-    capCut: (state.capCut ?? false) || r.capHit,
     ...(reason === 'answer' ? { lastApplied: r.applied } : {}),
   };
 }
@@ -234,6 +229,7 @@ function onAnswer(state: SessionState, ev: Extract<SessionEvent, { type: 'answer
   const effects: SessionEffect[] = [];
   const correct = checkAnswer(entry.item, ev.response, entry.numeric === true);
   const tries = state.try;
+  const pm = state.pointsMode ?? 'normaal';
   if (state.mode !== 'preview') {
     effects.push({
       type: 'answer',
@@ -252,15 +248,17 @@ function onAnswer(state: SessionState, ev: Extract<SessionEvent, { type: 'answer
   if (correct) {
     const outcome: AnswerOutcome = tries === 1 ? 'first' : 'retry';
     let s: SessionState = { ...state, phase: 'feedback', results: setResult(state.results, state.index, outcome) };
-    s = applyDelta(s, answerPoints(outcome), 'answer', effects);
+    s = applyDelta(s, answerPoints(outcome, pm), 'answer', effects);
     return { state: s, effects };
   }
   if (tries === 1) {
     // AC30: same question again, input cleared by the screen, no answer shown.
-    return { state: { ...state, try: 2, shownAt: ev.at }, effects };
+    // A wrong first try costs 1 on Moeilijk only (AC173).
+    const retry = applyDelta({ ...state, try: 2, shownAt: ev.at }, answerPoints('miss', pm), 'answer', effects);
+    return { state: retry, effects };
   }
   let s: SessionState = { ...state, phase: 'teach', results: setResult(state.results, state.index, 'teach') };
-  s = applyDelta(s, answerPoints('teach'), 'answer', effects);
+  s = applyDelta(s, answerPoints('teach', pm), 'answer', effects);
   return { state: s, effects };
 }
 

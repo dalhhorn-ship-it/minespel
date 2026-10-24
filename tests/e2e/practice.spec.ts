@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { openApp, readState } from './helpers/app';
 
-test.describe('lesboek, extra oefenen, and countdown override (T46, AC51, AC52, AC120)', () => {
+test.describe('lesboek, extra oefenen, and countdown override (T46, AC51, AC52, AC175)', () => {
   test('opens Lesboek lessons, opens Extra oefenen, and overrides countdown via HUD Nu oefenen button', async ({
     page,
   }) => {

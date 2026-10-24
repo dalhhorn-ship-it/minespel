@@ -1,8 +1,15 @@
 // Parent Instellingen screen (T49, T55, AC27, AC93, AC94, AC95, AC135, AC154).
 
+import { pointsModeOf, type PointsMode } from '../../core/economy';
 import type { SettingsRecord } from '../../storage/schema';
 import { el } from '../dom';
 import { onTap } from '../tap';
+
+const POINTS_CHOICES: { mode: PointsMode; label: string; line: string }[] = [
+  { mode: 'makkelijk', label: 'Makkelijk', line: 'Een foutje kost geen punten.' },
+  { mode: 'normaal', label: 'Normaal', line: 'Twee keer fout kost 1 punt.' },
+  { mode: 'moeilijk', label: 'Moeilijk', line: 'Elke foute poging kost 1 punt.' },
+];
 
 export interface SettingsScreenOptions {
   settings: SettingsRecord;
@@ -122,6 +129,26 @@ export function createSettingsScreen(options: SettingsScreenOptions): SettingsSc
       ),
     );
 
+    // Punten card (AC172): three big choices, each with one short line.
+    const pointsCard = el('div', { class: 'parent-card parent-points', attrs: { 'data-testid': 'points-setting' } });
+    pointsCard.append(el('strong', { text: 'Punten' }));
+    const chosen = pointsModeOf(current);
+    const choiceRow = el('div', { class: 'parent-points-row' });
+    for (const c of POINTS_CHOICES) {
+      const on = c.mode === chosen;
+      const btn = el(
+        'button',
+        {
+          class: `parent-btn parent-points-choice ${on ? 'parent-btn-primary' : ''}`.trim(),
+          attrs: { type: 'button', 'aria-pressed': String(on), 'data-points-mode': c.mode },
+        },
+        [el('span', { class: 'parent-points-label', text: c.label }), el('span', { class: 'parent-points-line', text: c.line })],
+      );
+      cleanups.push(onTap(btn, () => updateField('pointsMode', c.mode), { now: options.now }));
+      choiceRow.append(btn);
+    }
+    pointsCard.append(choiceRow);
+
     // Direct actions card (AC94, AC95)
     const actionsCard = el('div', { class: 'parent-card' });
     const startBreakBtn = el('button', {
@@ -220,7 +247,7 @@ export function createSettingsScreen(options: SettingsScreenOptions): SettingsSc
       }
     }
 
-    root.append(title, breakCard, displayCard, actionsCard);
+    root.append(title, breakCard, displayCard, pointsCard, actionsCard);
   }
 
   render();

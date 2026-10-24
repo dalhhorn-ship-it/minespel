@@ -29,6 +29,15 @@ describe('pickLessonPage', () => {
 });
 
 describe('teach moment', () => {
+  it('AC173: shows "-1 punt" in the minus style only when a point was really taken', () => {
+    const base = { answer: 'a', explain: 'e', onDone: () => {} };
+    const taken = createTeachMoment({ ...base, taken: 1 });
+    expect(taken.element.querySelector('.teach-minus')?.textContent).toBe('-1 punt');
+    expect(taken.element.querySelector('.teach-minus')?.classList.contains('points-minus')).toBe(true);
+    expect(createTeachMoment({ ...base, taken: 0 }).element.querySelector('.teach-minus')).toBeNull();
+    expect(createTeachMoment(base).element.querySelector('.teach-minus')).toBeNull();
+  });
+
   it('shows Zo zit het, answer, explain, lesson page and no minus', () => {
     const page = pickLessonPage(lesson, 'komma-opsomming')!;
     const tm = createTeachMoment({ answer: 'Ik eet, drink en slaap.', explain: 'Na eet komt een komma.', teaching: { kind: 'page', page }, onDone: () => {} });

@@ -4,6 +4,13 @@ Written so kids can read it too.
 
 ## Unreleased
 
+## 0.4.0 (2026-10-24)
+
+### Punten voor elke ronde
+
+* Every round of oefenen gives points again. There is no limit for the day anymore.
+* A mistake can cost a point. You always see how many points you really get or lose.
+* Mom or dad can make it easier or harder with Punten in Ouders, Instellingen: Makkelijk, Normaal or Moeilijk.
 * Buttons you tap while the game is still loading now say "Even geduld..." and open by themselves when the game is ready.
 
 ## 0.3.0 (2026-10-22)
