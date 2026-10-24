@@ -37,3 +37,13 @@ describe('v11 world records', () => {
   });
 });
 
+
+describe('v11 village record', () => {
+  it('AC188: a save from 0.4.0 has no village record and starts with 0 found and no cooldown', () => {
+    expect(defaultKv('village')).toEqual({ found: [], cooldownMs: 0, lastVillager: null });
+  });
+  it('AC188: every default is a fresh copy', () => {
+    defaultKv('village').found.push(35);
+    expect(defaultKv('village').found).toEqual([]);
+  });
+});

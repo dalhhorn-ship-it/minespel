@@ -17,6 +17,7 @@ import type { GuardState } from '../platform/screen-guard';
 import { qualityFromSearch } from '../render/quality';
 import type { GameRenderer, RendererFactory } from '../render/renderer';
 import { createHud, type Hud } from '../ui/hud';
+import { createVillageBubble, type VillageBubble } from '../ui/village-bubble';
 import { el } from '../ui/dom';
 import { World } from '../world/world';
 import { createLoop } from './loop';
@@ -47,6 +48,12 @@ export interface Game {
   readonly dinoSystem: DinoSystem;
   /** The village people (V11c). Beside the dinos, never in the dino store. */
   readonly villagerSystem: VillagerSystem;
+  /** The speech bubble of the nearest villager (V11d). The village flow shows and hides it. */
+  readonly villageBubble: VillageBubble;
+  /** Tells the Dorp tab in Alle blokken which rare blocks are found (V11d, AC187). */
+  setFoundBlocks(ids: readonly number[]): void;
+  /** Puts a block in the selected hotbar slot and saves it (V11d "In mijn hotbar", AC184). */
+  giveToHotbar(block: number): void;
   /** Stops the world: no steps, no drawing. Safe to call twice. */
   pause(): void;
   resume(): void;
@@ -84,6 +91,8 @@ export interface GameOptions {
   onParentPressed?: () => void;
   onDinoTapped?: (dino: WorldDino, screenX: number, screenY: number) => void;
   onBlockGridOpenChange?: (open: boolean) => void;
+  /** The kid tapped the villager bubble (V11d). */
+  onVillageBubbleTapped?: () => void;
 }
 
 const SILENT_UNLOCK = { isUnlocked: () => false, watch: () => {}, whenUnlocked: () => {} };
@@ -211,7 +220,8 @@ export function createGame(options: GameOptions): Game {
     grid.setHotbar?.(s.hotbar, s.selected);
     hud.setMode(s.mode);
   };
-  options.container.append(hud.root, stick.element, grid.root);
+  const villageBubble = createVillageBubble({ router, onTap: () => options.onVillageBubbleTapped?.() });
+  options.container.append(hud.root, stick.element, grid.root, villageBubble.element);
 
   let dinos: SpikeDino[] | null = null;
   if (isSpikeEnabled(search)) {
@@ -297,6 +307,13 @@ export function createGame(options: GameOptions): Game {
     dinoStore,
     dinoSystem,
     villagerSystem,
+    villageBubble,
+    setFoundBlocks: (ids) => grid.setFound(ids),
+    giveToHotbar(block) {
+      build.setSlotBlock(build.getState().selected, block);
+      refreshHotbar();
+      emitChanged('build');
+    },
     pause() {
       manualPause = true;
       update();
@@ -335,6 +352,7 @@ export function createGame(options: GameOptions): Game {
       win.removeEventListener('keyup', onKeyUp);
       router.destroy();
       hud.destroy();
+      villageBubble.destroy();
       hotbar.destroy();
       grid.destroy();
       dinoSystem.dispose();

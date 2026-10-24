@@ -79,6 +79,15 @@ describe('log store', () => {
     db.close();
   });
 
+  it('AC183: a villager answer is saved with the context dorp', async () => {
+    const db = await fresh();
+    const log = createLogStore(db);
+    await log.appendAnswer(answer({ context: 'dorp', sessionId: 'dorp-1' }));
+    expect((await log.listAnswers())[0]).toMatchObject({ context: 'dorp', sessionId: 'dorp-1' });
+    expect(await log.listBreaks()).toEqual([]);
+    db.close();
+  });
+
   it('saveBreak sets snelGeklikt for all quick first answers', async () => {
     const db = await fresh();
     const log = createLogStore(db);

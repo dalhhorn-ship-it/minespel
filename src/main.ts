@@ -11,6 +11,7 @@ import { createScreenManager, type ScreenManager } from './app/screens';
 import { applySettingsToRuntime } from './app/settings-apply';
 import { createShopFlow, type ShopFlow } from './app/shop-flow';
 import { createTimerDriver, type TimerDriver } from './app/timer-driver';
+import { createVillageFlow, type VillageFlow } from './app/village-flow';
 import { createSound } from './audio/sound';
 import { createCatalog, type Catalog } from './content/catalog';
 import { systemClock, today } from './core/clock';
@@ -55,6 +56,7 @@ let parentFlow: ParentFlow | null = null;
 let shopFlow: ShopFlow | null = null;
 let practiceFlow: PracticeFlow | null = null;
 let examFlow: ExamFlow | null = null;
+let villageFlow: VillageFlow | null = null;
 let activePauseMenu: PauseMenu | null = null;
 let activeDinoMenu: DinoMenu | null = null;
 // The Dinowinkel placeholder shown when it was tapped before boot made the shop flow (AC164).
@@ -268,6 +270,9 @@ if (app) {
       onBlockGridOpenChange: (open) => {
         screens?.setExternalKidOverlay(open);
       },
+      onVillageBubbleTapped: () => {
+        villageFlow?.onBubbleTapped();
+      },
     });
     game.hud.countdownSlot.append(countdownView.root);
     game.on('teleported', () => {
@@ -396,8 +401,25 @@ async function createApp() {
       },
     });
 
+    // Villagers ask their question only once the app is ready (AC182).
+    if (game) {
+      villageFlow = createVillageFlow({
+        game,
+        screens,
+        timerDriver,
+        records: recs,
+        progressStore,
+        logStore,
+        getCatalog: () => catalog,
+        sound,
+        clock: systemClock,
+        rng,
+      });
+    }
+
     // Every flow exists: buttons that waited can run now.
     gate.markReady();
+    void villageFlow?.start();
     await resumeSessionIfAny({
       sessionStore,
       records: recs,

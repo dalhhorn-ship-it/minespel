@@ -4,6 +4,7 @@ import {
   AARDE, BAKSTEEN, BASALT, BLADEREN, BOOMSTAM, DIAMANT, DIEPSTEEN, GLAS, GOUDSTEEN, GRANIET, GRAS,
   IJS, KEISTEEN, LAVA, MARMER, MOSSTEEN, OBSIDIAAN, PLANKEN, SNEEUW, STEEN, VUUR, VUURSTEEN, WATER,
   WOL_BLAUW, WOL_GEEL, WOL_GROEN, WOL_ORANJE, WOL_PAARS, WOL_ROOD, WOL_WIT, ZAND, ZANDSTEEN,
+  SMARAGD, ROBIJN, SAFFIER, AMETHIST, KRISTAL, LICHTSTEEN, REGENBOOGSTEEN, STERRENSTEEN,
 } from '../world/blocks';
 
 /** A flat colour for each block, for pop bits and the hotbar swatches. */
@@ -40,6 +41,15 @@ export const BLOCK_COLORS: Readonly<Record<number, string>> = {
   [IJS]: '#a4dafc',
   [SNEEUW]: '#f6faff',
   [WOL_ORANJE]: '#f58220',
+  // The 8 rare blocks of v11 Dorp.
+  [SMARAGD]: '#17c964',
+  [ROBIJN]: '#d81b3c',
+  [SAFFIER]: '#2457e6',
+  [AMETHIST]: '#9b4fd8',
+  [KRISTAL]: '#bdeffc',
+  [LICHTSTEEN]: '#fff3a0',
+  [REGENBOOGSTEEN]: '#ff8fc8',
+  [STERRENSTEEN]: '#27306b',
 };
 
 export function blockColor(id: number): string {

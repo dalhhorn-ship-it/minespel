@@ -1,0 +1,163 @@
+/* Villagers (v11 Dorp): the speech bubble on the world and the question card.
+   Taps only, no hover rules. Every button is at least 56 high (bubble: 64). */
+.village-bubble {
+  position: fixed;
+  z-index: 5;
+  left: 50%;
+  transform: translateX(-50%);
+  /* Under the top bar, so it never covers the countdown, Winkel, Pauze or the lock. */
+  top: calc(var(--safe-top) + var(--touch-min) + var(--gap) * 2);
+  min-width: 220px;
+  max-width: min(360px, 40vw);
+  min-height: 64px;
+  padding: 8px calc(var(--gap) * 2);
+  border: 4px solid var(--ink);
+  border-radius: var(--radius);
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+  font-family: var(--font-stack);
+  font-size: calc(var(--font-body) * var(--font-scale, 1));
+  font-weight: 800;
+  line-height: 1.2;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  pointer-events: auto;
+}
+.village-bubble[hidden] { display: none; }
+.village-bubble::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -14px;
+  width: 20px;
+  height: 20px;
+  margin-left: -10px;
+  background: var(--paper);
+  border-right: 4px solid var(--ink);
+  border-bottom: 4px solid var(--ink);
+  transform: rotate(45deg);
+}
+/* A plain "Hoi!": nothing to tap, so the touch goes on to the world. */
+.village-bubble-quiet { pointer-events: none; min-width: 0; }
+.village-bubble:active:not(.village-bubble-quiet) { background: var(--sky-light); }
+
+/* The card */
+.village-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: calc(var(--safe-top) + var(--gap)) calc(var(--safe-right) + var(--gap) * 2) calc(var(--safe-bottom) + var(--gap)) calc(var(--safe-left) + var(--gap) * 2);
+  background: rgb(10 12 20 / 0.6);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  font-family: var(--font-stack);
+  font-size: var(--font-body);
+  color: var(--mc-text, var(--ink));
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+.village-card {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 820px;
+  margin: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
+  padding: var(--gap);
+  background: var(--mc-panel, #c6c6c6);
+  border: var(--mc-step, 4px) solid var(--mc-edge, #121212);
+}
+.village-header { display: flex; align-items: center; gap: var(--gap); }
+.village-speech {
+  flex: 1 1 auto;
+  padding: 8px 14px;
+  background: var(--paper);
+  border: 3px solid var(--ink);
+  border-radius: var(--radius);
+}
+.village-say { margin: 0; font-size: var(--font-large); font-weight: 800; }
+.village-body { display: flex; flex-direction: column; gap: var(--gap); }
+.village-footer { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: var(--gap); }
+
+.village-btn {
+  min-width: 140px;
+  min-height: 56px;
+  padding: 0 calc(var(--gap) * 2);
+  border: 3px solid var(--ink);
+  border-radius: var(--radius);
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+  font-size: var(--font-large);
+  font-weight: 800;
+  touch-action: manipulation;
+}
+.village-btn-primary { background: var(--grass); color: var(--on-grass); }
+.village-btn:active { filter: brightness(0.85); }
+
+.village-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  border: 3px solid currentColor;
+  border-radius: var(--radius);
+  font-size: var(--font-large);
+  font-weight: 800;
+}
+.village-banner-right { background: var(--right-bg); color: var(--right); }
+.village-banner-wrong { background: var(--wrong-bg); color: var(--wrong); }
+.village-feedback { display: flex; flex-direction: column; gap: var(--gap); padding: var(--gap); background: var(--paper); border-radius: var(--radius); }
+.village-reward { display: flex; align-items: center; gap: var(--gap); }
+.village-reward-text, .village-zo, .village-answer, .village-explain { margin: 0; font-size: var(--font-large); font-weight: 800; }
+.village-explain { font-weight: 600; font-size: var(--font-body); }
+.village-swatch { flex: none; width: 56px; height: 56px; border: 4px solid var(--ink); }
+
+/* The face: a blocky head with a hat or hair, in the villager's own colours. */
+.village-face {
+  position: relative;
+  flex: none;
+  width: 72px;
+  height: 88px;
+}
+.village-hat { position: absolute; left: 6px; right: 6px; top: 0; height: 18px; background: var(--v-hat); }
+.village-head {
+  position: absolute; left: 10px; right: 10px; top: 14px; height: 44px;
+  background: var(--v-skin);
+  border: 3px solid var(--ink);
+}
+.village-eye { position: absolute; top: 14px; width: 6px; height: 8px; background: var(--ink); }
+.village-eye-left { left: 8px; }
+.village-eye-right { right: 8px; }
+.village-mouth { position: absolute; left: 14px; right: 14px; bottom: 6px; height: 4px; background: var(--ink); }
+.village-shirt { position: absolute; left: 0; right: 0; bottom: 0; height: 28px; background: var(--v-shirt); border: 3px solid var(--ink); }
+.village-hat-tall .village-hat { top: -10px; height: 28px; left: 14px; right: 14px; }
+.village-hat-bun .village-hat { left: 22px; right: 22px; top: -6px; height: 22px; border-radius: 50%; }
+.village-hat-spikes .village-hat { clip-path: polygon(0 100%, 12% 0, 25% 100%, 38% 0, 50% 100%, 62% 0, 75% 100%, 88% 0, 100% 100%); top: -8px; height: 26px; }
+.village-hat-crown .village-hat { clip-path: polygon(0 100%, 0 20%, 25% 60%, 50% 0, 75% 60%, 100% 20%, 100% 100%); top: -4px; height: 22px; }
+.village-hat-bald .village-hat { display: none; }
+.village-hat-band .village-hat { top: 10px; height: 8px; left: 8px; right: 8px; }
+@keyframes village-dance {
+  0% { transform: rotate(-12deg) translateY(0); }
+  25% { transform: rotate(0deg) translateY(-10px); }
+  50% { transform: rotate(12deg) translateY(0); }
+  75% { transform: rotate(0deg) translateY(-10px); }
+  100% { transform: rotate(-12deg) translateY(0); }
+}
+.village-face-dance { animation: village-dance 0.6s linear infinite; }
+
+/* A Safari tab is only about 690 high: tighten the card. */
+@media (max-height: 740px) {
+  .village-backdrop { padding-top: calc(var(--safe-top) + 6px); padding-bottom: calc(var(--safe-bottom) + 6px); align-items: flex-start; }
+  .village-card { gap: 6px; padding: 8px; }
+  .village-say { font-size: calc(24px * var(--kid-scale)); }
+}

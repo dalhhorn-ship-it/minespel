@@ -50,6 +50,7 @@ export const KV_NAMES = [
   'gate',
   'stats',
   'meta',
+  'village',
 ] as const;
 export type KvName = (typeof KV_NAMES)[number];
 
@@ -125,6 +126,16 @@ export interface MetaRecord {
   createdAt: string | null;
 }
 
+/** v11 Dorp: the rare blocks the kid found, the cooldown left and who asked last. Not part of the world. */
+export interface VillageRecord {
+  /** Found rare block ids (34 to 41). */
+  found: number[];
+  /** Milliseconds of play time before the next villager may ask. */
+  cooldownMs: number;
+  /** Id of the villager who asked last, or null. */
+  lastVillager: string | null;
+}
+
 export interface KvRecords {
   settings: SettingsRecord;
   player: PlayerRecord;
@@ -140,6 +151,7 @@ export interface KvRecords {
   gate: GateRecord;
   stats: StatsRecord;
   meta: MetaRecord;
+  village: VillageRecord;
 }
 
 /** Fresh copies every call, so nobody shares or mutates a default. */
@@ -166,6 +178,7 @@ export const KV_DEFAULTS: { [K in KvName]: () => KvRecords[K] } = {
   gate: () => ({ salt: '', pinHash: '', wrongTries: 0, blockedUntil: 0, resetWrongTries: 0 }),
   stats: () => ({ playMsPerDay: {} }),
   meta: () => ({ schemaVersion: SCHEMA_VERSION, appVersion: '', lastBackup: null, createdAt: null }),
+  village: () => ({ found: [], cooldownMs: 0, lastVillager: null }),
 };
 
 export function defaultKv<K extends KvName>(name: K): KvRecords[K] {
