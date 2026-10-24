@@ -4,6 +4,8 @@ Written so kids can read it too.
 
 ## Unreleased
 
+* English: when you fill in a missing word, you now see what the whole sentence means in Dutch first.
+
 ## 0.4.0 (2026-10-24)
 
 ### Punten voor elke ronde

@@ -1,5 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
 import { STEEN } from '../../src/world/blocks';
+import { cellIndex } from '../../src/world/terrain';
 import { killApp, openApp, readState } from './helpers/app';
 
 interface Pose {
@@ -23,7 +24,40 @@ test.describe('saving the world', () => {
   test('a kill 3 seconds after building keeps the world, spot and hotbar (AC96, AC7)', async ({ page }) => {
     await openApp(page);
     await build(page);
-    await page.waitForTimeout(3000); // the queue writes within about 2 seconds
+    // No flush: the queue must write by itself (within about 2 seconds). Wait until the player AND the
+    // world block (7,25,7) are both in storage.
+    const entry = cellIndex(7, 25, 7) * 256 + STEEN;
+    await expect
+      .poll(
+        () =>
+          page.evaluate(
+            (want) =>
+              new Promise<boolean>((resolve) => {
+                const open = indexedDB.open('dino-blokwereld');
+                open.onerror = () => resolve(false);
+                open.onsuccess = () => {
+                  const db = open.result;
+                  const store = db.transaction('kv', 'readonly').objectStore('kv');
+                  const player = store.get('player');
+                  const world = store.get('world');
+                  const tx = store.transaction;
+                  tx.oncomplete = () => {
+                    const p = player.result as { x?: number } | undefined;
+                    const w = world.result as { diff?: ArrayLike<number> } | undefined;
+                    db.close();
+                    resolve(p?.x !== undefined && Math.abs(p.x - 12.5) < 0.1 && Array.from(w?.diff ?? []).includes(want));
+                  };
+                  tx.onerror = () => {
+                    db.close();
+                    resolve(false);
+                  };
+                };
+              }),
+            entry,
+          ),
+        { timeout: 6000 },
+      )
+      .toBe(true);
     const fresh = await killApp(page);
     expect(await readState<number>(fresh, 'blockAt', 7, 25, 7)).toBe(STEEN);
     const p = await readState<Pose>(fresh, 'player');

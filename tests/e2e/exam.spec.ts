@@ -124,7 +124,8 @@ test.describe('kid exam (T51b, v2)', () => {
 
     await page.locator('[data-testid="exam-leave"]').tap();
     await expect.poll(() => screen(page)).toBe('world');
-    expect(await readState<number>(page, 'remainingPlayMs')).toBe(5 * 60_000);
+    // Real time passes between steps: allow a second of drift.
+    expect(Math.abs((await readState<number>(page, 'remainingPlayMs')) - 5 * 60_000)).toBeLessThanOrEqual(1000);
     expect(await readState<number>(page, 'points')).toBe(points);
 
     const eggs = await readState<Array<{ golden: boolean }>>(page, 'eggs');
@@ -180,8 +181,10 @@ test.describe('kid exam (T51b, v2)', () => {
     await answerAll(page, Array.from({ length: 11 }, () => true));
     await expect(page.locator('[data-testid="exam-number"]')).toHaveText('Vraag 12 van 30');
     await readState(page, 'advanceExamMs', 12 * 60_000, true);
-    expect(await readState<number>(page, 'remainingExamMs')).toBe(18 * 60_000);
-    await expect.poll(() => savedExamMs(page)).toBe(18 * 60_000);
+    expect(Math.abs((await readState<number>(page, 'remainingExamMs')) - 18 * 60_000)).toBeLessThanOrEqual(1000);
+    await expect
+      .poll(async () => Math.abs(((await savedExamMs(page)) ?? 0) - 18 * 60_000) <= 1000)
+      .toBe(true);
 
     const fresh = await killApp(page);
     await expect(fresh.locator('[data-testid="exam-number"]')).toHaveText('Vraag 12 van 30');

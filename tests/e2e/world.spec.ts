@@ -58,7 +58,7 @@ async function flatten(page: Page, x0: number, x1: number, z0: number, z1: numbe
 
 async function place(page: Page, x: number, y: number, z: number, yaw: number) {
   await page.evaluate(({ x, y, z, yaw }) => (window as unknown as { __dino: Record<string, (...a: number[]) => void> }).__dino.placePlayer!(x, y, z, yaw), { x, y, z, yaw });
-  await page.waitForTimeout(150);
+  await expect.poll(async () => Math.hypot((await player(page)).x - x, (await player(page)).z - z)).toBeLessThan(0.01);
 }
 
 test.describe('walkable world', () => {
@@ -99,10 +99,9 @@ test.describe('walkable world', () => {
     await place(page, WORLD_SIZE - 4, 10, z + 0.5, Math.PI / 2); // yaw pi/2 looks towards +x
     await touch(page, 'pointerdown', 1, 150, 600);
     await touch(page, 'pointermove', 1, 150, 540); // full forward
-    await page.waitForTimeout(1800);
+    await expect.poll(async () => (await player(page)).x, { timeout: 8000 }).toBeGreaterThan(WORLD_SIZE - 0.5);
     const p = await player(page);
     expect(p.x).toBeLessThanOrEqual(WORLD_SIZE);
-    expect(p.x).toBeGreaterThan(WORLD_SIZE - 0.5);
     await page.waitForTimeout(500);
     expect((await player(page)).x).toBeLessThanOrEqual(WORLD_SIZE);
     await touch(page, 'pointerup', 1, 150, 540);
@@ -153,9 +152,14 @@ test.describe('walkable world', () => {
     await touch(page, 'pointermove', 1, 150, 540);
     await page.waitForTimeout(250);
     await tapJump(page, 5);
-    await page.waitForTimeout(900);
+    // Keep walking until the player stands on the step.
+    await expect
+      .poll(async () => {
+        const q = await player(page);
+        return q.onGround && Math.abs(q.y - 11) < 0.05;
+      }, { timeout: 5000 })
+      .toBe(true);
     await touch(page, 'pointerup', 1, 150, 540);
-    await page.waitForTimeout(200);
     const p = await player(page);
     expect(p.y).toBeCloseTo(11, 1);
     expect(p.onGround).toBe(true);
