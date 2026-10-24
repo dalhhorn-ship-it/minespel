@@ -4,6 +4,8 @@ Written so kids can read it too.
 
 ## Unreleased
 
+* English: when you fill in a missing word, you now see what the whole sentence means in Dutch first.
+
 ## 0.4.0 (2026-10-24)
 
 ### Punten voor elke ronde
@@ -12,7 +14,6 @@ Written so kids can read it too.
 * A mistake can cost a point. You always see how many points you really get or lose.
 * Mom or dad can make it easier or harder with Punten in Ouders, Instellingen: Makkelijk, Normaal or Moeilijk.
 * New English lessons: the words and sentences from the song Beautiful People. Learn courage, power and how to cheer: Keep going! You can do it!
-* English: when you fill in a missing word, you now see what the whole sentence means in Dutch first.
 * Buttons you tap while the game is still loading now say "Even geduld..." and open by themselves when the game is ready.
 
 ## 0.3.0 (2026-10-22)
