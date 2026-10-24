@@ -1,0 +1,371 @@
+{
+  "id": "aanmoedigen",
+  "title": "Zo moedig je iemand aan",
+  "groups": [
+    6,
+    7
+  ],
+  "lesson": {
+    "pages": [
+      {
+        "title": "Iemand aanmoedigen in het Engels",
+        "skill": "aanmoedigen-betekenis",
+        "text": "Met deze korte zinnen moedig je iemand aan. Je zegt ze als iemand iets moeilijks doet. Ze maken iemand blij en sterk.",
+        "examples": [
+          {
+            "good": "Keep going! = Ga door!"
+          },
+          {
+            "good": "You can do it! = Je kunt het!"
+          },
+          {
+            "good": "Don't stress. = Maak je niet druk."
+          },
+          {
+            "good": "Let's push on. = Laten we doorgaan.",
+            "bad": "Let's push on. = Laten we duwen.",
+            "why": "Push on betekent doorgaan, ook als het zwaar is."
+          },
+          {
+            "good": "Go for it! = Ga ervoor!"
+          }
+        ],
+        "tip": "Een ! achter de zin betekent: je roept het blij en hard."
+      },
+      {
+        "title": "Van Nederlands naar Engels",
+        "skill": "aanmoedigen-engels",
+        "text": "Nu andersom. Don't betekent niet of niet doen. Let's betekent laten we. Beide hebben een apostrof.",
+        "examples": [
+          {
+            "good": "Don't stress.",
+            "bad": "Dont stress.",
+            "why": "Don't is kort voor do not. De apostrof komt op de plek van de o."
+          },
+          {
+            "good": "You can do it!",
+            "bad": "You kan do it!",
+            "why": "Kunnen is can, met een c."
+          }
+        ],
+        "tip": "Let's = let us: laten we."
+      },
+      {
+        "title": "Welke zin past?",
+        "skill": "aanmoedigen-kiezen",
+        "text": "Kijk wat er aan de hand is. Is iemand bijna klaar? Dan: Keep going! Is iemand zenuwachtig? Dan: Don't stress. Durft iemand niet te beginnen? Dan: Go for it!",
+        "examples": [
+          {
+            "good": "Zenuwachtig voor een toets: Don't stress."
+          },
+          {
+            "good": "Samen moe, maar nog niet klaar: Let's push on."
+          }
+        ],
+        "tip": "Let's push on zeg je als je samen iets doet. Let's betekent laten we."
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "bp-am-001",
+      "type": "choice",
+      "level": "M6",
+      "skill": "aanmoedigen-betekenis",
+      "prompt": "Wat betekent 'Keep going!'?",
+      "options": [
+        "Ga door!",
+        "Ga weg!",
+        "Stop maar!",
+        "Kom hier!"
+      ],
+      "answer": 0,
+      "explain": "Keep going! betekent Ga door! Je stopt niet."
+    },
+    {
+      "id": "bp-am-002",
+      "type": "choice",
+      "level": "M6",
+      "skill": "aanmoedigen-betekenis",
+      "prompt": "Wat betekent 'You can do it!'?",
+      "options": [
+        "Ik kan het niet!",
+        "Je mag het niet!",
+        "Doe het maar niet!",
+        "Je kunt het!"
+      ],
+      "answer": 3,
+      "explain": "You can do it! betekent Je kunt het! Can is kunnen."
+    },
+    {
+      "id": "bp-am-003",
+      "type": "choice",
+      "level": "M6",
+      "skill": "aanmoedigen-betekenis",
+      "prompt": "Wat betekent 'Don't stress.'?",
+      "options": [
+        "Doe je best.",
+        "Maak je niet druk.",
+        "Wees stil.",
+        "Ga snel."
+      ],
+      "answer": 1,
+      "explain": "Don't stress. betekent Maak je niet druk."
+    },
+    {
+      "id": "bp-am-004",
+      "type": "choice",
+      "level": "M6",
+      "skill": "aanmoedigen-betekenis",
+      "prompt": "Wat betekent 'Let's push on.'?",
+      "options": [
+        "Laten we eten.",
+        "Laten we duwen.",
+        "Laten we stoppen.",
+        "Laten we doorgaan."
+      ],
+      "answer": 3,
+      "explain": "Let's push on. betekent Laten we doorgaan, ook als het zwaar is."
+    },
+    {
+      "id": "bp-am-005",
+      "type": "choice",
+      "level": "M6",
+      "skill": "aanmoedigen-betekenis",
+      "prompt": "Wat betekent 'Go for it!'?",
+      "options": [
+        "Ga ervoor!",
+        "Ga zitten!",
+        "Ga ervandoor!",
+        "Ga naar huis!"
+      ],
+      "answer": 0,
+      "explain": "Go for it! betekent Ga ervoor! Doe het gewoon."
+    },
+    {
+      "id": "bp-am-006",
+      "type": "choice",
+      "level": "M6",
+      "skill": "aanmoedigen-engels",
+      "prompt": "Hoe zeg je 'Je kunt het!' in het Engels?",
+      "options": [
+        "Can you do it?",
+        "You can't do it!",
+        "You can do it!",
+        "I can do it!"
+      ],
+      "answer": 2,
+      "explain": "Je kunt het! is You can do it! Can't betekent juist niet kunnen."
+    },
+    {
+      "id": "bp-am-007",
+      "type": "choice",
+      "level": "M6",
+      "skill": "aanmoedigen-engels",
+      "prompt": "Hoe zeg je 'Ga door!' in het Engels?",
+      "options": [
+        "Keep quiet!",
+        "Stop going!",
+        "Keep going!",
+        "Go home!"
+      ],
+      "answer": 2,
+      "explain": "Ga door! is Keep going!"
+    },
+    {
+      "id": "bp-am-008",
+      "type": "choice",
+      "level": "M6",
+      "skill": "aanmoedigen-engels",
+      "prompt": "Hoe zeg je 'Maak je niet druk.' in het Engels?",
+      "options": [
+        "Don't stop.",
+        "Don't go.",
+        "Don't stress.",
+        "Don't push."
+      ],
+      "answer": 2,
+      "explain": "Maak je niet druk. is Don't stress."
+    },
+    {
+      "id": "bp-am-009",
+      "type": "choice",
+      "level": "E6",
+      "skill": "aanmoedigen-kiezen",
+      "prompt": "Je zus rent een wedstrijd en is bijna bij de finish. Wat roep je?",
+      "options": [
+        "Don't stress.",
+        "I want to try rafting.",
+        "Keep going!",
+        "I'm not sure I can do it."
+      ],
+      "answer": 2,
+      "explain": "Ze is bijna klaar en moet niet stoppen: Keep going!"
+    },
+    {
+      "id": "bp-am-010",
+      "type": "choice",
+      "level": "E6",
+      "skill": "aanmoedigen-kiezen",
+      "prompt": "Je vriend is zenuwachtig voor een toets. Wat zeg je?",
+      "options": [
+        "Don't stress.",
+        "You are in good shape.",
+        "I want to try rafting.",
+        "Let's push on."
+      ],
+      "answer": 0,
+      "explain": "Iemand is zenuwachtig, dus: Don't stress. Maak je niet druk."
+    },
+    {
+      "id": "bp-am-011",
+      "type": "choice",
+      "level": "E6",
+      "skill": "aanmoedigen-kiezen",
+      "prompt": "Jullie zijn moe, maar de top van de berg is nog ver. Wat zeg je tegen je groep?",
+      "options": [
+        "I'm not sure I can do it.",
+        "I want to try rafting.",
+        "Don't stress.",
+        "Let's push on."
+      ],
+      "answer": 3,
+      "explain": "Samen verder gaan als het zwaar is: Let's push on."
+    },
+    {
+      "id": "bp-am-012",
+      "type": "choice",
+      "level": "E6",
+      "skill": "aanmoedigen-kiezen",
+      "prompt": "Je broer durft niet te beginnen aan zijn eerste duik. Wat zeg je?",
+      "options": [
+        "Go for it!",
+        "I'm not sure I can do it.",
+        "I want to try rafting.",
+        "Let's push on."
+      ],
+      "answer": 0,
+      "explain": "Iemand durft niet te beginnen: Go for it! Ga ervoor!"
+    },
+    {
+      "id": "bp-am-013",
+      "type": "type",
+      "level": "E6",
+      "skill": "aanmoedigen-engels",
+      "prompt": "Schrijf in het Engels: 'Ga ervoor!'",
+      "answer": [
+        "Go for it!",
+        "Go for it",
+        "go for it!",
+        "go for it"
+      ],
+      "explain": "Ga ervoor! is Go for it!"
+    },
+    {
+      "id": "bp-am-014",
+      "type": "type",
+      "level": "E6",
+      "skill": "aanmoedigen-engels",
+      "prompt": "Schrijf het woord dat mist. Het betekent: Ga door!",
+      "sentence": "Keep ...!",
+      "answer": [
+        "going",
+        "Going"
+      ],
+      "explain": "Ga door! is Keep going!"
+    },
+    {
+      "id": "bp-am-015",
+      "type": "type",
+      "level": "E6",
+      "skill": "aanmoedigen-engels",
+      "prompt": "Schrijf het woord dat mist. Het betekent: Je kunt het!",
+      "sentence": "You can ... it!",
+      "answer": [
+        "do",
+        "Do"
+      ],
+      "explain": "Je kunt het! is You can do it!"
+    },
+    {
+      "id": "bp-am-016",
+      "type": "type",
+      "level": "E6",
+      "skill": "aanmoedigen-engels",
+      "prompt": "Schrijf het woord dat mist. Het betekent: Laten we doorgaan.",
+      "sentence": "Let's push ... .",
+      "answer": [
+        "on",
+        "On"
+      ],
+      "explain": "Laten we doorgaan. is Let's push on."
+    },
+    {
+      "id": "bp-am-017",
+      "type": "find-error",
+      "level": "E6",
+      "skill": "aanmoedigen-engels",
+      "prompt": "Welk Engels woord is fout geschreven?",
+      "words": [
+        "Dont",
+        "stress",
+        "about",
+        "the",
+        "test."
+      ],
+      "answer": 0,
+      "correction": "Don't",
+      "explain": "Don't is kort voor do not. Er hoort een apostrof in: Don't."
+    },
+    {
+      "id": "bp-am-018",
+      "type": "find-error",
+      "level": "E6",
+      "skill": "aanmoedigen-engels",
+      "prompt": "Welk Engels woord is fout geschreven?",
+      "words": [
+        "You",
+        "kan",
+        "do",
+        "it,",
+        "dino!"
+      ],
+      "answer": 1,
+      "correction": "can",
+      "explain": "Kunnen is in het Engels can, met een c."
+    },
+    {
+      "id": "bp-am-019",
+      "type": "find-error",
+      "level": "E6",
+      "skill": "aanmoedigen-kiezen",
+      "prompt": "Welk Engels woord is fout geschreven?",
+      "words": [
+        "Keep",
+        "going,",
+        "you",
+        "are",
+        "almost",
+        "there!"
+      ],
+      "answer": -1,
+      "correction": null,
+      "explain": "Geen fout. Keep going! betekent Ga door!"
+    },
+    {
+      "id": "bp-am-020",
+      "type": "choice",
+      "level": "E6",
+      "skill": "aanmoedigen-engels",
+      "prompt": "Welke zin is goed geschreven?",
+      "options": [
+        "Let's push on.",
+        "Let's push un.",
+        "Let push on.",
+        "Lets push on."
+      ],
+      "answer": 0,
+      "explain": "Let's is kort voor let us: laten we. Met een apostrof en een s."
+    }
+  ]
+}
