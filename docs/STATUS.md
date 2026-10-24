@@ -1,8 +1,8 @@
 # Status
 
 **Phase:** small releases. 0.1.0, 0.2.0 Gouden ei and 0.3.0 Eerlijke punten are shipped (0.3.0 merged to main 2026-10-22, main CI green).
-**Current release:** v9 Eerlijke punten (0.3.0, decision 87): honest point banners, one egg hint rule, no malus. PRD signed 2026-10-22. V9a, V9b, V9c built and verified.
-**Next step:** R1 (boot safety) shipped to main 2026-10-24. Founder iPad checks: 0.3.0 points, AC165, and tap buttons right after opening the app. Next in the backlog: v3 Dino's veilig (0.4.0).
+**Current release:** v10 Punten voor elke ronde (0.4.0, decision 92), PRD signed 2026-10-24. Fast lane: V10a, V10b, V10c.
+**Next step:** build v10, then qa e2e, CI, ship. After it: v3 Dino's veilig (0.5.0), then v6 with the parent dashboard (0.6.0).
 **Next in the backlog:** see docs/BACKLOG.md. On hold: the save on refresh fix (decision 72). Founder iPad check AC165 still open.
 **Blockers:** none. This cloud session cannot push tags or to main directly (HTTP 403), so main is updated through a pull request.
 
