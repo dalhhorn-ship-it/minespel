@@ -1,0 +1,347 @@
+{
+  "id": "zinnen",
+  "title": "Phrases",
+  "groups": [
+    6,
+    7
+  ],
+  "lesson": {
+    "pages": [
+      {
+        "title": "Wat betekent de Engelse zin?",
+        "skill": "zin-betekenis",
+        "text": "Een Engelse zin vertaal je niet altijd woord voor woord. Kijk wat de hele zin wil zeggen.",
+        "examples": [
+          {
+            "good": "I want to try rafting. = Ik wil raften proberen."
+          },
+          {
+            "good": "I'm not sure I can do it. = Ik weet niet zeker of ik het kan."
+          },
+          {
+            "good": "You are in good shape. = Je bent in goede conditie.",
+            "bad": "You are in good shape. = Je hebt een goede vorm.",
+            "why": "In good shape zeg je als iemand fit en sterk is."
+          },
+          {
+            "good": "You just need the courage. = Je moet alleen de moed hebben."
+          }
+        ],
+        "tip": "Raften is met een rubberboot over een wilde rivier varen."
+      },
+      {
+        "title": "Van Nederlands naar Engels",
+        "skill": "zin-engels",
+        "text": "Nu andersom. Let op de kleine woorden. Not maakt de zin ontkennend: niet. I'm is kort voor I am.",
+        "examples": [
+          {
+            "good": "Ik weet niet zeker of ik het kan. = I'm not sure I can do it.",
+            "bad": "I'm sure I can do it.",
+            "why": "Zonder not weet je het juist wel zeker."
+          }
+        ],
+        "tip": "I'm = I am. De apostrof staat op de plek van de weggelaten a."
+      },
+      {
+        "title": "Welke zin past?",
+        "skill": "zin-gebruiken",
+        "text": "Elke zin hoort bij een moment. Wil je iets nieuws doen? Twijfel je? Is iemand fit? Is iemand bang? Kies de zin die past.",
+        "examples": [
+          {
+            "good": "Iemand is bang: You just need the courage."
+          },
+          {
+            "good": "Je twijfelt: I'm not sure I can do it."
+          }
+        ],
+        "tip": "Bedenk eerst wat je in het Nederlands zou zeggen. Zoek dan de Engelse zin."
+      },
+      {
+        "title": "Maak de zin af",
+        "skill": "zin-afmaken",
+        "text": "Er mist een woord in de zin. Ken je de hele zin uit je hoofd? Dan weet je welk woord er mist.",
+        "examples": [
+          {
+            "good": "You are in good shape."
+          },
+          {
+            "good": "I want to try rafting."
+          }
+        ],
+        "tip": "Zeg de zin een paar keer hardop, net als een stukje van een liedje."
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "bp-zi-001",
+      "type": "choice",
+      "level": "M6",
+      "skill": "zin-betekenis",
+      "prompt": "Wat betekent 'I want to try rafting.'?",
+      "options": [
+        "Ik wil raften proberen.",
+        "Ik kan goed raften.",
+        "Ik heb al geraft.",
+        "Ik wil niet raften."
+      ],
+      "answer": 0,
+      "explain": "I want to try = ik wil proberen. Dus: ik wil raften proberen."
+    },
+    {
+      "id": "bp-zi-002",
+      "type": "choice",
+      "level": "M6",
+      "skill": "zin-betekenis",
+      "prompt": "Wat betekent 'I'm not sure I can do it.'?",
+      "options": [
+        "Ik heb het al gedaan.",
+        "Ik weet niet zeker of ik het kan.",
+        "Ik weet zeker dat ik het kan.",
+        "Ik wil het niet doen."
+      ],
+      "answer": 1,
+      "explain": "Not sure = niet zeker. Ik weet niet zeker of ik het kan."
+    },
+    {
+      "id": "bp-zi-003",
+      "type": "choice",
+      "level": "M6",
+      "skill": "zin-betekenis",
+      "prompt": "Wat betekent 'You are in good shape.'?",
+      "options": [
+        "Je bent op tijd.",
+        "Je bent in goede conditie.",
+        "Je bent heel moe.",
+        "Je hebt een mooie vorm."
+      ],
+      "answer": 1,
+      "explain": "In good shape betekent fit en sterk: in goede conditie."
+    },
+    {
+      "id": "bp-zi-004",
+      "type": "choice",
+      "level": "M6",
+      "skill": "zin-betekenis",
+      "prompt": "Wat betekent 'You just need the courage.'?",
+      "options": [
+        "Je hebt geen moed.",
+        "Je hebt alleen kracht nodig.",
+        "Je moet gewoon rennen.",
+        "Je moet alleen de moed hebben."
+      ],
+      "answer": 3,
+      "explain": "Courage is moed. Just need = alleen nodig hebben."
+    },
+    {
+      "id": "bp-zi-005",
+      "type": "choice",
+      "level": "M6",
+      "skill": "zin-engels",
+      "prompt": "Hoe zeg je 'Ik wil raften proberen.' in het Engels?",
+      "options": [
+        "I want to try rafting.",
+        "I tried rafting.",
+        "I want to try running.",
+        "I don't want rafting."
+      ],
+      "answer": 0,
+      "explain": "Ik wil proberen = I want to try. Dus: I want to try rafting."
+    },
+    {
+      "id": "bp-zi-006",
+      "type": "choice",
+      "level": "M6",
+      "skill": "zin-engels",
+      "prompt": "Hoe zeg je 'Je bent in goede conditie.' in het Engels?",
+      "options": [
+        "You are a good shape.",
+        "You are in good shape.",
+        "You are in the shop.",
+        "You have good shoes."
+      ],
+      "answer": 1,
+      "explain": "In goede conditie = in good shape. You are in good shape."
+    },
+    {
+      "id": "bp-zi-007",
+      "type": "choice",
+      "level": "M6",
+      "skill": "zin-engels",
+      "prompt": "Hoe zeg je 'Ik weet niet zeker of ik het kan.' in het Engels?",
+      "options": [
+        "I don't want to do it.",
+        "I'm sure I can do it.",
+        "I can't do it.",
+        "I'm not sure I can do it."
+      ],
+      "answer": 3,
+      "explain": "Niet zeker = not sure. I'm not sure I can do it."
+    },
+    {
+      "id": "bp-zi-008",
+      "type": "find-error",
+      "level": "M6",
+      "skill": "zin-engels",
+      "prompt": "Welk Engels woord is fout geschreven?",
+      "words": [
+        "Your",
+        "are",
+        "in",
+        "good",
+        "shape."
+      ],
+      "answer": 0,
+      "correction": "You",
+      "explain": "Je bent = you are. Your betekent jouw."
+    },
+    {
+      "id": "bp-zi-009",
+      "type": "choice",
+      "level": "E6",
+      "skill": "zin-gebruiken",
+      "prompt": "Je vriendin is bang om van de hoge glijbaan te gaan. Wat zeg je?",
+      "options": [
+        "You are in good shape.",
+        "You just need the courage.",
+        "I'm not sure I can do it.",
+        "I want to try rafting."
+      ],
+      "answer": 1,
+      "explain": "Iemand is bang, dus je zegt dat ze alleen moed nodig heeft: You just need the courage."
+    },
+    {
+      "id": "bp-zi-010",
+      "type": "choice",
+      "level": "E6",
+      "skill": "zin-gebruiken",
+      "prompt": "Je wilt met een rubberboot over een wilde rivier. Wat zeg je?",
+      "options": [
+        "You are in good shape.",
+        "I want to try rafting.",
+        "You just need the courage.",
+        "I'm not sure I can do it."
+      ],
+      "answer": 1,
+      "explain": "Je wilt iets nieuws proberen: I want to try rafting."
+    },
+    {
+      "id": "bp-zi-011",
+      "type": "choice",
+      "level": "E6",
+      "skill": "zin-gebruiken",
+      "prompt": "Je twijfelt of je de hoge klimmuur op kunt. Wat zeg je?",
+      "options": [
+        "You just need the courage.",
+        "I want to try rafting.",
+        "You are in good shape.",
+        "I'm not sure I can do it."
+      ],
+      "answer": 3,
+      "explain": "Je twijfelt, je weet het niet zeker: I'm not sure I can do it."
+    },
+    {
+      "id": "bp-zi-012",
+      "type": "choice",
+      "level": "E6",
+      "skill": "zin-gebruiken",
+      "prompt": "Opa fietst elke dag twintig kilometer. Wat zeg je tegen hem?",
+      "options": [
+        "You are in good shape.",
+        "I'm not sure I can do it.",
+        "You just need the courage.",
+        "I want to try rafting."
+      ],
+      "answer": 0,
+      "explain": "Opa is fit en sterk, dus: You are in good shape."
+    },
+    {
+      "id": "bp-zi-013",
+      "type": "type",
+      "level": "E6",
+      "skill": "zin-afmaken",
+      "prompt": "Schrijf het woord dat mist.",
+      "sentence": "You just need the ... .",
+      "answer": [
+        "courage",
+        "Courage"
+      ],
+      "explain": "You just need the courage: je moet alleen de moed hebben."
+    },
+    {
+      "id": "bp-zi-014",
+      "type": "type",
+      "level": "E6",
+      "skill": "zin-afmaken",
+      "prompt": "Schrijf het woord dat mist.",
+      "sentence": "You are in good ... .",
+      "answer": [
+        "shape",
+        "Shape"
+      ],
+      "explain": "You are in good shape: je bent in goede conditie."
+    },
+    {
+      "id": "bp-zi-015",
+      "type": "type",
+      "level": "E6",
+      "skill": "zin-afmaken",
+      "prompt": "Schrijf het woord dat mist.",
+      "sentence": "I want to ... rafting.",
+      "answer": [
+        "try",
+        "Try"
+      ],
+      "explain": "I want to try rafting: ik wil raften proberen. Try is proberen."
+    },
+    {
+      "id": "bp-zi-016",
+      "type": "type",
+      "level": "E6",
+      "skill": "zin-afmaken",
+      "prompt": "Schrijf het woord dat mist.",
+      "sentence": "I'm not ... I can do it.",
+      "answer": [
+        "sure",
+        "Sure"
+      ],
+      "explain": "I'm not sure I can do it: ik weet niet zeker of ik het kan. Sure is zeker."
+    },
+    {
+      "id": "bp-zi-017",
+      "type": "find-error",
+      "level": "E6",
+      "skill": "zin-afmaken",
+      "prompt": "Welk Engels woord is fout geschreven?",
+      "words": [
+        "I",
+        "want",
+        "to",
+        "tri",
+        "rafting."
+      ],
+      "answer": 3,
+      "correction": "try",
+      "explain": "Proberen is try, met een y aan het eind."
+    },
+    {
+      "id": "bp-zi-018",
+      "type": "find-error",
+      "level": "E6",
+      "skill": "zin-engels",
+      "prompt": "Welk Engels woord is fout geschreven?",
+      "words": [
+        "I'm",
+        "not",
+        "sure",
+        "I",
+        "can",
+        "do",
+        "it."
+      ],
+      "answer": -1,
+      "correction": null,
+      "explain": "Geen fout. I'm is kort voor I am, met een apostrof."
+    }
+  ]
+}
