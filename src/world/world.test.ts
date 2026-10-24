@@ -2,6 +2,8 @@ import { describe, expect, it } from 'vitest';
 import { AIR, GRAS, BLADEREN, BOOMSTAM, KEISTEEN, OBSIDIAAN, OERSTEEN, PLACEABLE_BLOCKS, VUURSTEEN, ZAND, isSolid } from './blocks';
 import { CELL_COUNT, START_SPOT, WORLD_HEIGHT, WORLD_SIZE, generateTerrain } from './terrain';
 import { World } from './world';
+import { mineBlock, placeBlock } from './build';
+import { VILLAGE_SITES, houseCells, siteHasHouses } from './village-layout';
 
 function topSolid(w: World, x: number, z: number): number {
   for (let y = WORLD_HEIGHT - 1; y >= 0; y--) if (isSolid(w.get(x, y, z))) return y;
@@ -127,3 +129,44 @@ describe('World', () => {
     expect(CELL_COUNT * 256).toBeLessThan(2 ** 32);
   });
 });
+
+describe('villages in the world (v11)', () => {
+  const has = (w: World) => VILLAGE_SITES.map((s) => siteHasHouses((x, y, z) => w.get(x, y, z), s));
+
+  it('AC178: a new world has all 3 villages at the same spots every time', () => {
+    const a = new World();
+    const b = new World();
+    expect(a.terrainVersion).toBe(2);
+    expect(has(a)).toEqual([true, true, true]);
+    for (const s of VILLAGE_SITES) for (const c of houseCells(s)) expect(b.get(c.x, c.y, c.z)).toBe(c.id);
+    expect(has(new World(undefined, 1))).toEqual([false, false, false]);
+  });
+
+  it('AC178: "Wereld opnieuw beginnen" (reset) brings every village back', () => {
+    const w = new World();
+    for (const c of houseCells(VILLAGE_SITES[0]!)) w.set(c.x, c.y, c.z, AIR);
+    expect(has(w)[0]).toBe(false);
+    w.reset();
+    expect(has(w)).toEqual([true, true, true]);
+    expect(w.diff()).toHaveLength(0);
+  });
+
+  it('AC178: a house block can be mined (Hakken) and built on (Bouwen) like any block', () => {
+    const w = new World();
+    const site = VILLAGE_SITES[0]!;
+    const h = site.houses[0]!;
+    // Stand outside the house, in front of a wall, and mine the wall block next to the door.
+    const wall = { x: h.x + 1, y: site.padY + 1, z: h.z + 4 };
+    const before = w.get(wall.x, wall.y, wall.z);
+    expect(before).not.toBe(AIR);
+    const mined = mineBlock(w, { ox: wall.x + 0.5, oy: wall.y + 0.5, oz: wall.z + 2.5, dx: 0, dy: 0, dz: -1 });
+    expect(mined).toEqual({ ok: true, ...wall, block: before });
+    expect(w.get(wall.x, wall.y, wall.z)).toBe(AIR);
+    // Build on the roof from above.
+    const roofY = site.padY + 4;
+    const placed = placeBlock(w, { ox: h.x + 2.5, oy: roofY + 3, oz: h.z + 2.5, dx: 0, dy: -1, dz: 0 }, GRAS, { x: 0.5, y: 40, z: 0.5 });
+    expect(placed.ok).toBe(true);
+    expect(w.get(h.x + 2, roofY + 1, h.z + 2)).toBe(GRAS);
+  });
+});
+

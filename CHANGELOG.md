@@ -4,6 +4,9 @@ Written so kids can read it too.
 
 ## Unreleased
 
+* 8 rare blocks are ready to find: smaragd, robijn, saffier, amethist, kristal, lichtsteen, regenboogsteen and sterrensteen. In Alle blokken the new Dorp tab shows them, with a "?" for the ones you have not found yet.
+* There are 3 villages with little houses in the world. Your old world gets them too, but only in places where you did not build or dig, so your builds stay just the way you made them.
+
 ## 0.4.0 (2026-10-24)
 
 ### Punten voor elke ronde

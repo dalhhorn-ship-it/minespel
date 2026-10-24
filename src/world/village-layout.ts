@@ -166,3 +166,14 @@ export function houseCells(site: VillageSite): { x: number; y: number; z: number
   }
   return out;
 }
+
+/**
+ * True when the site has its houses in a world: more than half of its house cells hold the house block.
+ * A site skipped for an old save (AC179) has none; a kid who mined a few house blocks still has the village.
+ */
+export function siteHasHouses(get: (x: number, y: number, z: number) => number, site: VillageSite): boolean {
+  const cells = houseCells(site);
+  let match = 0;
+  for (const c of cells) if (get(c.x, c.y, c.z) === c.id) match++;
+  return match * 2 > cells.length;
+}

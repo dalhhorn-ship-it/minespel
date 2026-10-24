@@ -1,9 +1,15 @@
 // Saves and restores the world (changed blocks) and the player (spot, look, hotbar, mode).
+// v11: a world saved by 0.4.0 or earlier (terrain version 1) gets the villages stamped in once,
+// only at sites the kid did not change and where nobody stands (AC179).
+import { registerHook } from '../dev/e2e-hooks';
 import type { SaveQueue } from '../storage/save-queue';
 import type { Records } from '../storage/records';
-import type { PlayerRecord } from '../storage/schema';
+import type { PlayerRecord, WorldRecord } from '../storage/schema';
 import { isPlaceable } from '../world/blocks';
-import { CELL_COUNT, WORLD_HEIGHT, WORLD_SIZE } from '../world/terrain';
+import {
+  CELL_COUNT, CURRENT_TERRAIN_VERSION, WORLD_HEIGHT, WORLD_SEED, WORLD_SIZE, cellIndex, generateTerrain,
+} from '../world/terrain';
+import { VILLAGE_SITES, houseCells, siteHasHouses, siteRegion, type VillageSite } from '../world/village-layout';
 import { HOTBAR_SIZE } from './build-controller';
 import type { Game } from './game';
 
@@ -91,6 +97,90 @@ export function cleanDiff(raw: unknown): number[] {
   return out;
 }
 
+/** A spot where the player, a dino, an egg or a chicken stands (only x and z matter). */
+export interface StandingSpot {
+  x: number;
+  z: number;
+}
+
+/** Bodies are up to about 2 blocks long, so a spot this close to a site also blocks it. */
+export const STANDING_SLACK = 2;
+
+export interface VillageUpgrade {
+  /** The new diff against terrain version 2. */
+  diff: number[];
+  /** Per site in VILLAGE_SITES order: true when its houses were stamped in. */
+  stamped: boolean[];
+}
+
+/** True when the old diff (against version 1) has any cell in the site, at any height, or someone stands in or next to it. */
+export function siteBlocked(site: VillageSite, oldDiff: readonly number[], standing: readonly StandingSpot[]): boolean {
+  const r = siteRegion(site);
+  for (const e of oldDiff) {
+    const index = Math.floor(e / 256);
+    const x = index % WORLD_SIZE;
+    const z = Math.floor(index / WORLD_SIZE) % WORLD_SIZE;
+    if (x >= r.x0 && x <= r.x1 && z >= r.z0 && z <= r.z1) return true;
+  }
+  return standing.some(
+    (p) => p.x >= r.x0 - STANDING_SLACK && p.x < r.x1 + 1 + STANDING_SLACK && p.z >= r.z0 - STANDING_SLACK && p.z < r.z1 + 1 + STANDING_SLACK,
+  );
+}
+
+/**
+ * Pure. Rebuilds the kid's real world (version 1 terrain plus the old diff), puts the village of every
+ * site that is not blocked into it, and returns the diff of that world against version 2.
+ * Cells outside the sites and every cell of a blocked site stay exactly as they were.
+ * `stamp: false` keeps every site as it was (used when the copy of the old record cannot be written).
+ */
+export function upgradeV1World(
+  oldDiff: readonly number[],
+  standing: readonly StandingSpot[],
+  options: { seed?: number; stamp?: boolean } = {},
+): VillageUpgrade {
+  const seed = options.seed ?? WORLD_SEED;
+  const real = generateTerrain(seed, 1);
+  for (const e of oldDiff) {
+    const index = Math.floor(e / 256);
+    if (index >= 0 && index < CELL_COUNT) real[index] = e % 256;
+  }
+  const v2 = generateTerrain(seed, 2);
+  const stamped = VILLAGE_SITES.map((site) => options.stamp !== false && !siteBlocked(site, oldDiff, standing));
+  VILLAGE_SITES.forEach((site, k) => {
+    if (!stamped[k]) return;
+    const r = siteRegion(site);
+    for (let z = Math.max(0, r.z0); z <= Math.min(WORLD_SIZE - 1, r.z1); z++) {
+      for (let x = Math.max(0, r.x0); x <= Math.min(WORLD_SIZE - 1, r.x1); x++) {
+        for (let y = 0; y < WORLD_HEIGHT; y++) {
+          const i = cellIndex(x, y, z);
+          real[i] = v2[i] ?? 0;
+        }
+      }
+    }
+  });
+  const diff: number[] = [];
+  for (let i = 0; i < CELL_COUNT; i++) {
+    const b = real[i] ?? 0;
+    if (b !== v2[i]) diff.push(i * 256 + b);
+  }
+  return { diff, stamped };
+}
+
+/** The spots of the saved player, dinos, eggs and chickens. Anything broken is left out. */
+export function standingSpots(player: unknown, dinos: unknown): StandingSpot[] {
+  const out: StandingSpot[] = [];
+  const p = player as Partial<PlayerRecord> | null;
+  if (p && isNum(p.x) && isNum(p.y) && isNum(p.z) && p.y > 0) out.push({ x: p.x, z: p.z });
+  const d = dinos as { dinos?: unknown; eggs?: unknown } | null;
+  for (const list of [d?.dinos, d?.eggs]) {
+    if (!Array.isArray(list)) continue;
+    for (const e of list as { x?: unknown; z?: unknown }[]) {
+      if (e && isNum(e.x) && isNum(e.z)) out.push({ x: e.x, z: e.z });
+    }
+  }
+  return out;
+}
+
 export function createWorldSave(options: WorldSaveOptions): WorldSave {
   const { game, queue, records } = options;
   const doc = options.doc ?? document;
@@ -108,7 +198,7 @@ export function createWorldSave(options: WorldSaveOptions): WorldSave {
     };
   }
 
-  queue.register('world', () => ({ diff: game.world.diff() }));
+  queue.register('world', (): WorldRecord => ({ diff: game.world.diff(), terrainVersion: CURRENT_TERRAIN_VERSION }));
   queue.register('player', readPlayer);
   game.dinoStore?.attachPersistence(records, queue);
 
@@ -116,6 +206,31 @@ export function createWorldSave(options: WorldSaveOptions): WorldSave {
     const diff = cleanDiff((raw as { diff?: unknown } | null)?.diff);
     if (diff.length === 0) return;
     game.world.applyDiff(diff);
+    game.renderer.setWorld(game.world);
+  }
+
+  /**
+   * Once per save: a version 1 world gets the villages. The old record is copied to worldV1 first, then the
+   * new world record is written. A kill in between leaves the old record in `world`, so the next start does
+   * the same stamp again. If the writes fail, the kid gets the old world exactly, without new houses.
+   */
+  async function upgradeWorld(raw: unknown): Promise<void> {
+    const oldDiff = cleanDiff((raw as { diff?: unknown } | null)?.diff);
+    let player: unknown = null;
+    let dinos: unknown = null;
+    try { player = await records.get('player'); } catch { /* broken: the player starts at home, outside every site */ }
+    try { dinos = await records.get('dinos'); } catch { /* broken: no dinos are loaded */ }
+    if (cancelled) return;
+    const standing = standingSpots(player, dinos);
+    let result = upgradeV1World(oldDiff, standing);
+    try {
+      await records.put('worldV1', raw as WorldRecord);
+      await records.put('world', { diff: Uint32Array.from(result.diff), terrainVersion: CURRENT_TERRAIN_VERSION });
+    } catch {
+      result = upgradeV1World(oldDiff, standing, { stamp: false });
+    }
+    if (cancelled) return;
+    game.world.applyDiff(result.diff);
     game.renderer.setWorld(game.world);
   }
 
@@ -142,7 +257,9 @@ export function createWorldSave(options: WorldSaveOptions): WorldSave {
     try {
       const raw = await records.get('world');
       if (cancelled) return;
-      restoreWorld(raw);
+      const version = (raw as { terrainVersion?: unknown } | null)?.terrainVersion;
+      if (typeof version === 'number' && version >= CURRENT_TERRAIN_VERSION) restoreWorld(raw);
+      else await upgradeWorld(raw);
     } catch {
       /* a broken world record: play on in the start world */
     }
@@ -196,6 +313,25 @@ export function createWorldSave(options: WorldSaveOptions): WorldSave {
       win.removeEventListener('pagehide', onHide);
       detach();
     };
+  }
+
+  if (__E2E__) {
+    registerHook('terrainVersion', async () => {
+      const raw = await records.get('world');
+      return typeof raw.terrainVersion === 'number' ? raw.terrainVersion : 1;
+    });
+    registerHook('hasWorldV1', async () => (await records.get('worldV1')) !== null);
+    registerHook('villageSites', () =>
+      VILLAGE_SITES.map((site) => ({
+        id: site.id,
+        rect: { x0: site.x0, z0: site.z0, x1: site.x1, z1: site.z1 },
+        region: siteRegion(site),
+        padY: site.padY,
+        homes: site.homes.map((h) => ({ ...h })),
+        houseCells: houseCells(site),
+        hasHouses: siteHasHouses((x, y, z) => game.world.get(x, y, z), site),
+      })),
+    );
   }
 
   return { restore, start, cancel: () => { cancelled = true; } };

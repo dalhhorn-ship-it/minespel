@@ -27,3 +27,13 @@ describe('settings defaults match the PRD', () => {
     expect(s.soundEffectsEnabled).toBe(true);
   });
 });
+
+describe('v11 world records', () => {
+  it('AC179: a world record without terrainVersion is a 0.4.0 world (missing means 1)', () => {
+    expect(defaultKv('world').terrainVersion).toBeUndefined();
+  });
+  it('AC179: worldV1 (the copy of the old world record) defaults to null', () => {
+    expect(defaultKv('worldV1')).toBeNull();
+  });
+});
+
