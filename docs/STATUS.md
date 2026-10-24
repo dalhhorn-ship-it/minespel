@@ -1,8 +1,8 @@
 # Status
 
 **Phase:** small releases. 0.1.0, 0.2.0, 0.3.0, R1 and 0.4.0 Punten voor elke ronde are shipped (0.4.0 merged 2026-10-24).
-**Current release:** v11 Dorp (0.5.0, decision 94): villagers and houses, a villager asks a question from the lesson content, a right answer gives a silly dance and a rare block. Being scoped.
-**Next step:** product scopes v11 with an architect review (world generation and save impact), founder signs, build. Then v3 backup (0.6.0), then v6 parent dashboard (0.7.0). The bigger world is a separate step.
+**Current release:** v11 Dorp (0.5.0, decisions 94 to 97), PRD signed 2026-10-24. Tasks V11a to V11e in docs/PLAN.md.
+**Next step:** build V11a and V11b in parallel, then V11c, V11d, V11e. Then v3 backup (0.6.0), v6 parent dashboard (0.7.0).
 **Next in the backlog:** see docs/BACKLOG.md. On hold: the save on refresh fix (decision 72). Founder iPad check AC165 still open.
 **Blockers:** none. This cloud session cannot push tags or to main directly (HTTP 403), so main is updated through a pull request.
 
