@@ -11,6 +11,7 @@ import {
   VILLAGER_WANDER,
   type VillagerState,
 } from '../villagers/villager';
+import { isSolid } from '../world/blocks';
 import type { Box } from '../world/build';
 import type { World } from '../world/world';
 
@@ -42,6 +43,8 @@ export interface VillagerSystem {
   /** Starts the silly dance (about 2 seconds, model only). False for an unknown id. */
   dance(id: string): boolean;
   isOccupied(box: Box): boolean;
+  /** Moves any villager that stands inside a block to the nearest free spot. Call after the saved world loads. */
+  fixPlaces(): void;
   /** Puts every villager back at its home spot. */
   reset(): void;
   setStillMode(on: boolean): void;
@@ -75,26 +78,64 @@ export function createVillagerSystem(options: VillagerSystemOptions): VillagerSy
   let still = options.stillMode ?? false;
   let needsHome = true;
 
-  /** Stands the villager on the ground at its home column (a site without houses has its own ground, AC179). */
-  function settle(v: VillagerState): void {
-    const { side, height } = VILLAGER_BOX;
-    const base = Math.floor(v.home.y);
-    const offsets = [0, 1, -1, 2, -2, 3, -3, 4, -4, 5, -5, 6, -6, 7, -7, 8, -8];
-    let y = v.home.y;
-    for (const dy of offsets) {
-      const cy = base + dy;
-      if (cy < 1) continue;
-      if (!boxCollides(options.world, v.home.x, cy, v.home.z, side, height) &&
-          boxCollides(options.world, v.home.x, cy - 0.05, v.home.z, side, height)) {
-        y = cy;
-        break;
+  const free = (x: number, y: number, z: number): boolean =>
+    !boxCollides(options.world, x, y, z, VILLAGER_BOX.side, VILLAGER_BOX.height);
+
+  /** True when a solid block overlaps the body (the world edge does not count). */
+  function inBlock(v: VillagerState): boolean {
+    const h = VILLAGER_BOX.side / 2;
+    for (let x = Math.floor(v.x - h); x <= Math.floor(v.x + h - EPS); x++) {
+      for (let y = Math.floor(v.y); y <= Math.floor(v.y + VILLAGER_BOX.height - EPS); y++) {
+        for (let z = Math.floor(v.z - h); z <= Math.floor(v.z + h - EPS); z++) {
+          if (isSolid(options.world.get(x, y, z))) return true;
+        }
       }
     }
-    v.home.y = y;
-    v.x = v.home.x; v.y = y; v.z = v.home.z;
-    v.stayX = v.home.x; v.stayZ = v.home.z;
+    return false;
+  }
+
+  /** The y of the ground in column (x, z) where the whole body box fits, closest to `base`, or null. */
+  function groundAt(x: number, z: number, base: number): number | null {
+    for (let k = 0; k <= 5; k++) {
+      for (const cy of k === 0 ? [base] : [base + k, base - k]) {
+        if (cy < 1) continue;
+        if (free(x, cy, z) && !free(x, cy - 0.05, z)) return cy;
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Stands the villager on the ground at its home column (a site without houses has its own ground, AC179).
+   * The whole 1.8 high body must fit. When the column is built over, the nearest free spot within 5 blocks is the new home.
+   */
+  function settle(v: VillagerState): void {
+    const base = Math.floor(v.home.y);
+    let x = v.home.x, z = v.home.z;
+    let y = groundAt(x, z, base);
+    for (let r = 1; y === null && r <= 5; r++) {
+      for (let i = 0; i < 16 && y === null; i++) {
+        const a = (i / 16) * Math.PI * 2;
+        const cx = Math.floor(v.home.x + Math.cos(a) * r) + 0.5, cz = Math.floor(v.home.z + Math.sin(a) * r) + 0.5;
+        const cyy = groundAt(cx, cz, base);
+        if (cyy !== null) { x = cx; z = cz; y = cyy; }
+      }
+    }
+    if (y === null) { x = v.home.x; z = v.home.z; y = v.home.y; }
+    v.home = { x, y, z };
+    v.x = x; v.y = y; v.z = z;
+    v.stayX = x; v.stayZ = z;
     v.vy = 0; v.onGround = true; v.goal = null; v.goalLeft = 0; v.idleLeft = 1;
     v.stuckTime = 0; v.waving = false;
+  }
+
+  /** The saved world may load, or the kid may build, after a villager was placed: move any villager now inside a block. */
+  function ensureFree(): void {
+    let moved = false;
+    for (const v of list) {
+      if (inBlock(v)) { settle(v); moved = true; }
+    }
+    if (moved) sync();
   }
 
   function reset(): void {
@@ -112,8 +153,10 @@ export function createVillagerSystem(options: VillagerSystemOptions): VillagerSy
 
   return {
     villagers: () => list,
+    fixPlaces: ensureFree,
     step(dt) {
       if (!(dt > 0) || !Number.isFinite(dt)) return;
+      ensureFree();
       if (needsHome) {
         for (const v of list) settle(v);
         needsHome = false;

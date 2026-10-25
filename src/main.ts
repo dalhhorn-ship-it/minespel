@@ -446,6 +446,8 @@ const booted = game
 if (!game) gate.markFailed();
 void gate.ready.then(shopFlowReady, () => {});
 void booted.finally(() => {
+  // The saved world has loaded: no villager may stand inside a block the kid built (AC180).
+  game?.villagerSystem.fixPlaces();
   restored = true;
 });
 

@@ -171,4 +171,29 @@ describe('villager system (V11c)', () => {
     sys.step(10);
     for (const v of sys.villagers()) expect(Number.isFinite(v.x + v.y + v.z)).toBe(true);
   });
+
+  it('AC180: a kid structure on a home spot, built before the saved world loads, never leaves a villager inside a block', () => {
+    const world = new World();
+    const { sys } = setup({ world });
+    const v = sys.villagers()[0]!;
+    const home = { x: v.home.x, z: v.home.z };
+    // The saved world arrives after the villagers were made: a tall tower stands on the home spot.
+    for (let y = Math.floor(v.y) - 1; y < Math.floor(v.y) + 12; y++) {
+      world.set(Math.floor(home.x), y, Math.floor(home.z), STEEN);
+    }
+    const check = () => {
+      for (const w of sys.villagers()) {
+        expect(boxCollides(world, w.x, w.y, w.z, VILLAGER_BOX.side, VILLAGER_BOX.height)).toBe(false);
+      }
+    };
+    sys.fixPlaces(); // what main.ts does when the saved world has loaded
+    check();
+    expect(dist(v, home)).toBeGreaterThan(0.4); // moved to the nearest free spot
+    expect(dist(v, v.home)).toBe(0);
+    sys.step(1 / 30);
+    check();
+    // A low ceiling over the ground (a 1 high gap is too small for a 1.8 high body) is not a spot either.
+    sys.reset();
+    check();
+  });
 });
