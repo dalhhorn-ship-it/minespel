@@ -1,8 +1,8 @@
 # PRD: Dino Blokwereld (working title)
 
-Status: APPROVED by Founder on 2026-10-24
+Status: READY FOR SIGNOFF
 
-This signoff archives v10 and scopes v11 Dorp (0.5.0).
+This signoff renames the 8 rare village blocks for 0.5.1 (decision 104): drakenoog, lavakristal, maansteen, meteoriet, ijsdiamant, bliksemsteen, regenboogkern, sterrenstof, with more spectacular still tiles. 0.5.1 also shows the version in the pause menu (decision 103). v11 Dorp shipped as 0.5.0 on 2026-10-25.
 
 ## 1. Summary
 Dino Blokwereld is a small 3D block world on the iPad where a kid explores, mines and builds with Minecraft style blocks. Every few minutes the game pauses for a short learning break in Rekenen or Taal. Right answers earn dino points. In the Dinowinkel the kid buys dino eggs with those points, and the eggs hatch into friendly blocky dinos that walk around in the world. A passed practice exam gives a golden dino.
@@ -825,7 +825,7 @@ Only the next release has its section here, and it is signed with this file. Whe
 9. **Timers.** The play timer stops while the card is open and goes on where it was when the card closes. A villager question never resets the countdown and never replaces a learning break.
 10. **Cooldown.** After a card opens, no villager shows a bubble for 3 minutes of play time (only time when the play timer runs counts). It is one cooldown for all villagers, saved the moment the card opens. After it, the villager who asked last does not ask again until another villager has asked.
 11. **When villagers stay quiet.** No bubble and no card during an exam, a learning break or lesson, the pause menu, the Dinowinkel, the Lesboek, Extra oefenen, the dino menu, the block grid, the pin pad or the parent area, and not before the app is ready. No bubble in the last 30 seconds before a break; a bubble that shows then hides.
-12. **8 rare blocks:** smaragd, robijn, saffier, amethist, kristal, lichtsteen, regenboogsteen and sterrensteen. Each villager gives one, a different one each. Lichtsteen only looks bright; there is no lighting. Once found, a rare block is free and unlimited like every other block (4.1), and can be placed and mined. The 32 building blocks stay as they are.
+12. **8 rare blocks:** drakenoog, lavakristal, maansteen, meteoriet, ijsdiamant, bliksemsteen, regenboogkern and sterrenstof (renamed in 0.5.1, decision 104; the block ids 34 to 41 stay, so found blocks stay found). Each tile looks spectacular but does not move: no animation or particles, so the old iPad stays smooth. Each villager gives one, a different one each. Lichtsteen only looks bright; there is no lighting. Once found, a rare block is free and unlimited like every other block (4.1), and can be placed and mined. The 32 building blocks stay as they are.
 13. **Dorp tab in Alle blokken.** A "Dorp" tab with 8 tiles and a counter "3 van de 8 gevonden". A found block shows its picture and name and can be picked. A block not found yet is a dark tile with a big "?" and the hint "Een dorpeling heeft deze"; it cannot be picked.
 14. **Found blocks stay found**, after a restart and after "Wereld opnieuw beginnen" (like dinos, earned things are never taken away). Rare blocks the kid placed in the world go with the world, like other blocks. A save from 0.4.0 starts with 0 found and no cooldown.
 15. Version 0.5.0 and a kid readable entry in `CHANGELOG.md`.
