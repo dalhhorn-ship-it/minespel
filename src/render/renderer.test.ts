@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { createVillagers } from '../villagers/villager';
 import { World } from '../world/world';
 import {
   CONTEXT_RESTORE_WAIT_MS, createNullRenderer, createRenderer, withContextRecovery, type GameRenderer, type RendererFactory,
@@ -26,6 +27,7 @@ describe('createRenderer', () => {
     r.resize(100, 100, 2);
     r.setQuality(DEFAULT_QUALITY);
     r.setSpikeDinos(null);
+    r.syncVillagers?.([]);
     r.render();
     r.dispose();
   });
@@ -50,6 +52,7 @@ describe('withContextRecovery', () => {
         resize: () => void calls.push('resize'),
         setQuality: () => void calls.push('quality'),
         setSpikeDinos: (d) => void calls.push(d ? 'dinos' : 'nodinos'),
+        syncVillagers: () => void calls.push('villagers'),
         render: () => void calls.push('render'),
         dispose,
       };
@@ -90,6 +93,14 @@ describe('withContextRecovery', () => {
     expect(made[1]?.calls).toContain('render');
     vi.advanceTimersByTime(5000);
     expect(made).toHaveLength(2); // the timer was cancelled
+  });
+
+  it('V11c: the villagers are shown again after the context comes back', () => {
+    const { made, canvas, r } = setup();
+    r.syncVillagers?.(createVillagers());
+    lose(canvas);
+    canvas.dispatchEvent(new Event('webglcontextrestored'));
+    expect(made[1]?.calls).toEqual(['resize', 'world', 'dinos', 'villagers', 'camera']);
   });
 
   it('makes a new canvas in the same place when there is no restore in 1.5 seconds', () => {

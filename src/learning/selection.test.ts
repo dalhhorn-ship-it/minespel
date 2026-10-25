@@ -294,3 +294,52 @@ describe('selection (T38)', () => {
     expect(newEntries.map((e) => e.item.id)).not.toContain('optellen:47+38');
   });
 });
+
+describe('seenOnly (V11d, AC183)', () => {
+  const catalog = createCatalog();
+  const items = catalog.fixedItems(TAAL_MODULE_ID, 'ww-tegenwoordig', { levels: ['M6'] });
+  const seen = (i: number, box: number): ProgressRecord => ({
+    moduleId: TAAL_MODULE_ID,
+    itemId: items[i]!.id,
+    topic: 'ww-tegenwoordig',
+    skill: items[i]!.skill,
+    level: 'M6',
+    box,
+    due: '2026-10-15',
+    seen: 1,
+  });
+
+  it('AC183: never picks a box 0 item and leaves the rotation as it was', () => {
+    const rotation = { weights: { taal: 3 }, topicPointers: { taal: 2 }, lessonsSeen: ['taal/x'] };
+    const res = selectBreakItems({
+      catalog,
+      switches: defaultKv('switches'),
+      rotation,
+      progress: [seen(0, 1), seen(1, 3)],
+      moduleId: TAAL_MODULE_ID,
+      count: 5,
+      today: '2026-10-20',
+      seenOnly: true,
+      rng: createRng(1),
+    });
+    expect(res.entries.length).toBe(2);
+    expect(res.entries.every((e) => e.box >= 1)).toBe(true);
+    expect(res.newTopicId).toBeNull();
+    expect(res.rotation).toBe(rotation);
+  });
+
+  it('AC182: with no seen item the result is empty', () => {
+    const res = selectBreakItems({
+      catalog,
+      switches: defaultKv('switches'),
+      rotation: emptyRotation(),
+      progress: [],
+      moduleId: TAAL_MODULE_ID,
+      count: 5,
+      today: '2026-10-20',
+      seenOnly: true,
+      rng: createRng(1),
+    });
+    expect(res.entries).toEqual([]);
+  });
+});

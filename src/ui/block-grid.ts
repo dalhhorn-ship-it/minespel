@@ -8,12 +8,13 @@ import {
   AARDE, BAKSTEEN, BASALT, BLADEREN, BOOMSTAM, DIAMANT, DIEPSTEEN, GLAS, GOUDSTEEN, GRANIET, GRAS,
   IJS, KEISTEEN, LAVA, MARMER, MOSSTEEN, OBSIDIAAN, PLACEABLE_BLOCKS, PLANKEN, SNEEUW, STEEN, VUUR,
   VUURSTEEN, WATER, WOL_BLAUW, WOL_GEEL, WOL_GROEN, WOL_ORANJE, WOL_PAARS, WOL_ROOD, WOL_WIT, ZAND,
-  ZANDSTEEN, blockInfo,
+  ZANDSTEEN, RARE_BLOCKS, AMETHIST, KRISTAL, LICHTSTEEN, REGENBOOGSTEEN, ROBIJN, SAFFIER, SMARAGD,
+  STERRENSTEEN, blockInfo,
 } from '../world/blocks';
 import { el } from './dom';
 import { onTap } from './tap';
 
-export type BlockCategoryId = 'all' | 'fire-gate' | 'stones' | 'nature' | 'wool';
+export type BlockCategoryId = 'all' | 'fire-gate' | 'stones' | 'nature' | 'wool' | 'dorp';
 
 interface BlockCategory {
   id: BlockCategoryId;
@@ -43,7 +44,20 @@ export const BLOCK_CATEGORIES: readonly BlockCategory[] = [
     label: 'Wol & Kleur',
     blocks: [WOL_WIT, WOL_ROOD, WOL_ORANJE, WOL_GEEL, WOL_GROEN, WOL_BLAUW, WOL_PAARS],
   },
+  { id: 'dorp', label: 'Dorp', blocks: RARE_BLOCKS },
 ];
+
+/** Tile colours for the rare blocks (the picture in the grid). */
+const RARE_COLORS: Readonly<Record<number, string>> = {
+  [SMARAGD]: 'radial-gradient(#d8ffe6 12%, #3deb82 40%, #16784a 100%)',
+  [ROBIJN]: 'radial-gradient(#ffd0d8 12%, #fa3c5a 40%, #820e24 100%)',
+  [SAFFIER]: 'radial-gradient(#d0e2ff 12%, #4682ff 40%, #183090 100%)',
+  [AMETHIST]: 'radial-gradient(#f0d2ff 12%, #be6efa 40%, #4a1e78 100%)',
+  [KRISTAL]: 'radial-gradient(#ffffff 15%, #aae8f8 55%, #60bee2 100%)',
+  [LICHTSTEEN]: 'radial-gradient(#ffffeb 15%, #fff4aa 45%, #ffe26e 100%)',
+  [REGENBOOGSTEEN]: 'linear-gradient(135deg, #ec3c3c, #f89628, #fae03c, #46be56, #3c78e6, #9e54d2)',
+  [STERRENSTEEN]: 'radial-gradient(#fff 8%, #ffee78 14%, #18144a 40%, #18144a 100%)',
+};
 
 export interface BlockGridOptions {
   router: PointerRouter;
@@ -51,6 +65,8 @@ export interface BlockGridOptions {
   onOpenChange?: (open: boolean) => void;
   hotbar?: readonly number[];
   selectedSlot?: number;
+  /** Rare block ids the kid has found (default none). */
+  found?: readonly number[];
   onSelectSlot?: (slot: number) => void;
 }
 
@@ -60,6 +76,8 @@ export interface BlockGrid {
   close(): void;
   isOpen(): boolean;
   setHotbar?(blocks: readonly number[], selected: number): void;
+  /** Tells the Dorp tab which rare blocks are found. */
+  setFound(ids: readonly number[]): void;
   destroy(): void;
 }
 
@@ -68,6 +86,7 @@ export function createBlockGrid(options: BlockGridOptions): BlockGrid {
   let currentHotbar: readonly number[] = options.hotbar ?? PLACEABLE_BLOCKS.slice(0, 8);
   let currentSelected = options.selectedSlot ?? 0;
   let activeCategory: BlockCategoryId = 'all';
+  let foundSet = new Set<number>(options.found ?? []);
 
   // 8-slot lower-bar selector row inside the modal so the kid can pick which lower-bar slot to customize (CR1)
   const slotButtons = Array.from({ length: 8 }, (_, idx) => {
@@ -102,7 +121,7 @@ export function createBlockGrid(options: BlockGridOptions): BlockGrid {
     slotButtons.forEach(({ btn, swatch, nameEl }, idx) => {
       const blockId = currentHotbar[idx] ?? PLACEABLE_BLOCKS[0]!;
       const info = blockInfo(blockId);
-      swatch.style.background = blockColor(blockId);
+      swatch.style.background = RARE_COLORS[blockId] ?? blockColor(blockId);
       nameEl.textContent = info.name;
       btn.setAttribute('aria-pressed', String(idx === currentSelected));
       btn.setAttribute('aria-label', `Vakje ${idx + 1}: ${info.name}`);
@@ -142,6 +161,35 @@ export function createBlockGrid(options: BlockGridOptions): BlockGrid {
     return { id, b };
   });
 
+  // Dorp tab: the 8 rare blocks. A block not found yet is a dark "?" tile that does nothing.
+  const rareEntries = RARE_BLOCKS.map((id) => {
+    const swatch = el('span', { class: 'grid-swatch' });
+    const name = el('span', { class: 'grid-name' });
+    const b = el('button', { class: 'grid-rare', attrs: { type: 'button', 'data-block-id': String(id) } }, [swatch, name]);
+    cleanups.push(onTap(b, () => {
+      if (!foundSet.has(id)) return;
+      options.onPick(id);
+      close();
+    }));
+    return { id, b, swatch, name };
+  });
+  const counter = el('div', { class: 'grid-rare-count', attrs: { 'data-testid': 'grid-rare-count' } });
+
+  function syncRare() {
+    let n = 0;
+    for (const { id, b, swatch, name } of rareEntries) {
+      const isFound = foundSet.has(id);
+      if (isFound) n++;
+      b.classList.toggle('grid-rare-locked', !isFound);
+      b.setAttribute('aria-disabled', String(!isFound));
+      swatch.textContent = isFound ? '' : '?';
+      swatch.style.background = isFound ? (RARE_COLORS[id] ?? blockColor(id)) : '';
+      name.textContent = isFound ? blockInfo(id).name : 'Een dorpeling heeft deze';
+      b.setAttribute('aria-label', isFound ? blockInfo(id).name : 'Nog niet gevonden. Een dorpeling heeft deze');
+    }
+    counter.textContent = `${n} van de ${RARE_BLOCKS.length} gevonden`;
+  }
+
   function syncCategoryFilter() {
     const activeSpec = catButtons.find((c) => c.id === activeCategory) ?? catButtons[0]!;
     const allowed = new Set(activeSpec.blocks);
@@ -151,9 +199,13 @@ export function createBlockGrid(options: BlockGridOptions): BlockGrid {
     for (const entry of cellEntries) {
       entry.b.hidden = !allowed.has(entry.id);
     }
+    const dorp = activeCategory === 'dorp';
+    for (const r of rareEntries) r.b.hidden = !dorp;
+    counter.hidden = !dorp;
   }
 
   syncHotbarRow();
+  syncRare();
   syncCategoryFilter();
 
   const closeBtn = el('button', { class: 'grid-close', text: 'Klaar', attrs: { type: 'button' } });
@@ -170,7 +222,8 @@ export function createBlockGrid(options: BlockGridOptions): BlockGrid {
     headerRow,
     slotBar,
     catBar,
-    el('div', { class: 'grid-cells' }, cellEntries.map((e) => e.b)),
+    counter,
+    el('div', { class: 'grid-cells' }, [...cellEntries.map((e) => e.b), ...rareEntries.map((e) => e.b)]),
   ]);
   const root = el('div', { class: 'block-grid', attrs: { role: 'dialog', 'aria-label': 'Alle blokken' } }, [panel]);
   root.hidden = true;
@@ -203,6 +256,10 @@ export function createBlockGrid(options: BlockGridOptions): BlockGrid {
       currentHotbar = blocks;
       currentSelected = selected;
       syncHotbarRow();
+    },
+    setFound(ids) {
+      foundSet = new Set(ids);
+      syncRare();
     },
     destroy() {
       for (const c of cleanups) c();

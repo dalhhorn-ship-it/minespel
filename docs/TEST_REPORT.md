@@ -1,5 +1,89 @@
 # Test report
 
+## v11 Dorp (0.5.0)
+
+Result: PASS for everything that can run here. AC190 (fps on the oldest iPad) and the kid play check are still open for the founder.
+
+Run on 2026-10-24 in local Chromium (`npm run test:e2e:local`, iPad gen 6 profiles), not WebKit. CI runs WebKit.
+
+| Command | Result |
+|---|---|
+| `npm run test:e2e:local -- dorp` | 39 passed (38 landscape, 1 portrait) |
+| `npm run test:e2e:local` (full, run twice) | 283 and 282 passed. Failures were only the two exam tests below and one Dorp timing race in my own test, fixed |
+| `npx vitest run` | 111 files, 940 tests passed |
+| `npm run typecheck`, `npm run lint` | clean |
+
+### Failures that were not Dorp bugs
+
+* `exam.spec.ts` AC71 (`remainingExamMs` 1079980 instead of 1080000) and AC112 (1795000 instead of 1800000). They are timing flakes: real time passes between two reads. Both also fail on the commit before v11 (07e15ce): AC71 failed 3 of 6 runs there, AC112 1 of 8. Not caused by v11. They should be fixed by the owner of the exam spec (use a fake clock or allow a small margin).
+* Two Dorp test races, both fixed in the test: the cooldown test read a value across real ticks, and the shop close button swapped while tapped (now retried with `toPass`).
+
+### AC coverage (e2e in `tests/e2e/dorp.spec.ts`, AC191 in `tests/unit/release-v11.test.ts`)
+
+| AC | Test | Result |
+|---|---|---|
+| AC178 | three villages with houses in a new world, none within 10 blocks of the start; a house block can be mined | pass |
+| AC179 | old 0.4.0 save: untouched world gets 3 villages and `worldV1` is kept; a changed site keeps its cells and gets no house; all three changed gives no houses; player stays; second start changes nothing | pass |
+| AC180 | 8 villagers (3, 3, 2), 8 shirts, stay within 3 of home, never inside a block, never move the player; drawn in the world (shirt colour found on screen when looking, not when looking away) | pass |
+| AC180 (build blocked inside a villager) | no e2e: no hook for the build rule. Covered by `src/game/game.test.ts` | unit only |
+| AC181 | bubble near a villager, hides when far, nearest owns it, plain Hoi! cannot be tapped, double tap makes one card, no look change; size at least 44 x 44, in safe area, no HUD overlap at 1024x768, 1180x820, 1024x690; portrait shows no bubble and landscape brings it back | pass |
+| AC181 (hold the move stick while the bubble shows) | not run by finger: needs two real fingers. Unit tests only. Founder check below | open |
+| AC182 | no bubble in the pause menu, the shop, a break; 0:31 shows and 0:30 hides; paused game hides it | pass |
+| AC183 | card opens from a bubble tap, one seen sum, no lesson; not a break (no break record, no ledger row, answers marked "dorp"); box 2 goes to 3 on right, to 1 on wrong then right; double tap acts once | pass |
+| AC184 | wrong once shows "Net niet. Probeer het nog een keer." with no answer and a cleared input; wrong twice shows "Zo zit het:" and the answer; dance and "Respect bruuuuu!" both appear; "In mijn hotbar" fills the selected slot | pass |
+| AC185 | points stay the same, no plus or minus number; timer stops under the card and keeps its value; kill with a card open reopens with no card | pass |
+| AC186 | "Laat maar" starts the cooldown; cooldown counts only play time (not the pause menu); the villager who asked last is skipped, another one asks after 3 minutes; cooldown survives a kill | pass |
+| AC187 | Dorp tab: 8 dark tiles, tap changes nothing; found block picked, placed twice, mined; 8 answers give "8 van de 8 gevonden" | pass |
+| AC188 | 3 found blocks and the hotbar survive kill and reopen; Wereld opnieuw beginnen keeps them and removes rare blocks placed in the old world; 0.4.0 save loads with 0 van de 8 and no cooldown | pass |
+| AC189 | no request outside the app origin during a full play session; no link, image, script or form on the card; saved village record has only found, cooldownMs, lastVillager | pass |
+| AC189 (HTML looking item text) | not e2e: the generated sums cannot hold HTML. Card uses `textContent` only, covered by `src/ui/village-card.test.ts` | unit only |
+| AC190 | iPad only, see below | open |
+| AC191 | version 0.5.0 or later, 0.5.0 changelog entry about villages, a question, a dance, a rare block | pass |
+
+I also changed `tests/unit/release-v10.test.ts` to accept 0.4.0 or later, the same way the v9 and v2 release tests do, so the version bump does not break it.
+
+### Bugs found
+
+None blocker or major. Small notes for the developer:
+
+* Minor: the dance card says "Respect bruuuuu!" twice (in the speech bubble at the top and in the green banner). Screenshot `docs/screenshots/v11/dance.png`.
+* Minor: the bubble is only hidden on the next village look (up to 250 ms), so a bubble can be on screen for a moment when the pause menu opens. A tap in that gap is ignored by the flow, so it is cosmetic.
+* Note: `package-lock.json` still says 0.4.0. It is not in the V11e row.
+
+### Kid safety and accessibility
+
+* No network request beyond the app files (AC189 test). No tracking, no links, no ads.
+* Bubble and card buttons are at least 44 px. Dorp tiles at least 44 px.
+* Works without sound (the dance and "Respect bruuuuu!" are text and picture).
+* No flashing: the dance is a slow wobble of the model.
+* Not checked in WebKit here: iOS callout menu and zoom on the bubble. The bubble CSS has `user-select: none`, `-webkit-touch-callout: none` and `touch-action: none`. Check on the iPad.
+
+### Screenshots (`docs/screenshots/v11/`)
+
+`village.png` (the camera ended inside a house, a villager stands in the doorway), `village-villager.png`, `bubble.png`, `card.png`, `dance.png`, `zo-zit-het.png`, `dorp-tab.png`, `portrait.png`.
+
+### Founder check on the iPad, AC190 (fps walk)
+
+Use the oldest iPad (2018 or newer), from the home screen icon, with the fps counter on.
+
+1. Baseline first on 0.4.0: buy or have 12 shop dinos on Volg mij and 10 chickens. Walk for 2 minutes through the world (there are no villages on 0.4.0, so walk the same route).
+2. Then on 0.5.0 with the same dinos and chickens: walk 2 minutes through the biggest village and on to the next one.
+3. Write down for each: the share of frames at 33 ms or less (needs 95 percent) and the slowest frame (needs 200 ms or less).
+4. If 0.5.0 fails, open the app with `?still=1` (villagers stand at home and only turn to the player), measure again, and tell the operator. Only `stillMode` changes.
+
+Results (founder fills in): 0.4.0 baseline ____ , 0.5.0 ____ , with `?still=1` if needed ____ .
+
+### Kid play check (founder, from the home screen icon, with the kid own 0.4.0 save)
+
+* Every build the kid made is still there. See which villages appeared.
+* Hold the move stick with one finger and watch a bubble appear: the player must keep walking. Tap the bubble with the other finger.
+* Walk to a villager, tap the bubble, answer right, see the dance or "Respect bruuuuu!" and the new block. Put it in the hotbar and build with it.
+* Get one wrong twice and see "Zo zit het:".
+* Walk to another villager right away: no bubble. After 3 minutes of play: a bubble.
+* Open Alle blokken, Dorp: "?" tiles and the counter.
+* Long press the bubble: no menu, no zoom. Rotate the iPad: the bubble hides in portrait.
+* Ask the kid if the villagers are fun or annoying.
+
 ## R1 Boot safety (R1d)
 
 Result: pass in Chromium (`npm run test:e2e:local -- boot-taps`, 26 tests, run three times). WebKit runs in CI.

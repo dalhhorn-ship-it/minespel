@@ -1,0 +1,175 @@
+{
+  "schemaVersion": 1,
+  "appVersion": "0.4.0",
+  "note": "No block changed. In each variant only one thing stands in one site: the player in noord, a dino in oost, an egg in west, a chicken just outside the rectangle of oost (in its margin). That site stays as it was; the other two get houses.",
+  "variants": [
+    {
+      "who": "player",
+      "site": "noord",
+      "kv": {
+        "world": {
+          "diff": []
+        },
+        "player": {
+          "x": 24.5,
+          "y": 17,
+          "z": 6.5,
+          "yaw": 0.5,
+          "pitch": 0,
+          "hotbar": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            9
+          ],
+          "selectedSlot": 0,
+          "mode": "build"
+        },
+        "dinos": {
+          "dinos": [],
+          "eggs": []
+        }
+      }
+    },
+    {
+      "who": "dino",
+      "site": "oost",
+      "kv": {
+        "world": {
+          "diff": []
+        },
+        "player": {
+          "x": 32.5,
+          "y": 11,
+          "z": 32.5,
+          "yaw": 0.5,
+          "pitch": 0,
+          "hotbar": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            9
+          ],
+          "selectedSlot": 0,
+          "mode": "build"
+        },
+        "dinos": {
+          "dinos": [
+            {
+              "id": "dino-1",
+              "kind": "triceratops",
+              "golden": false,
+              "name": "",
+              "mode": "stay",
+              "x": 52.5,
+              "y": 11,
+              "z": 33.5,
+              "heading": 0,
+              "growth": 600,
+              "stayX": 52.5,
+              "stayZ": 33.5
+            }
+          ],
+          "eggs": []
+        }
+      }
+    },
+    {
+      "who": "egg",
+      "site": "west",
+      "kv": {
+        "world": {
+          "diff": []
+        },
+        "player": {
+          "x": 32.5,
+          "y": 11,
+          "z": 32.5,
+          "yaw": 0.5,
+          "pitch": 0,
+          "hotbar": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            9
+          ],
+          "selectedSlot": 0,
+          "mode": "build"
+        },
+        "dinos": {
+          "dinos": [],
+          "eggs": [
+            {
+              "id": "egg-1",
+              "kind": "compy",
+              "golden": false,
+              "x": 11.5,
+              "y": 11,
+              "z": 31.5,
+              "playSeconds": 30
+            }
+          ]
+        }
+      }
+    },
+    {
+      "who": "chicken",
+      "site": "oost",
+      "kv": {
+        "world": {
+          "diff": []
+        },
+        "player": {
+          "x": 32.5,
+          "y": 11,
+          "z": 32.5,
+          "yaw": 0.5,
+          "pitch": 0,
+          "hotbar": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            9
+          ],
+          "selectedSlot": 0,
+          "mode": "build"
+        },
+        "dinos": {
+          "dinos": [
+            {
+              "id": "kip-1",
+              "kind": "kip",
+              "golden": false,
+              "name": "",
+              "mode": "stay",
+              "x": 45.5,
+              "y": 10,
+              "z": 38.5,
+              "heading": 0,
+              "growth": 600,
+              "stayX": 45.5,
+              "stayZ": 38.5
+            }
+          ],
+          "eggs": []
+        }
+      }
+    }
+  ]
+}

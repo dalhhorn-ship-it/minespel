@@ -3,7 +3,7 @@
 import { request, transact } from './db';
 import type { StoreName } from './schema';
 
-export type AnswerContext = 'break' | 'practice' | 'exam';
+export type AnswerContext = 'break' | 'practice' | 'exam' | 'dorp';
 
 export interface AnswerInput {
   /** Milliseconds since 1970. */

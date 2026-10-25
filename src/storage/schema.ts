@@ -40,6 +40,7 @@ export const KV_NAMES = [
   'settings',
   'player',
   'world',
+  'worldV1',
   'dinos',
   'economy',
   'timers',
@@ -49,6 +50,7 @@ export const KV_NAMES = [
   'gate',
   'stats',
   'meta',
+  'village',
 ] as const;
 export type KvName = (typeof KV_NAMES)[number];
 
@@ -80,6 +82,8 @@ export interface PlayerRecord {
 export interface WorldRecord {
   /** Changed cells as cellIndex * 256 + blockId. */
   diff: Uint32Array;
+  /** The terrain the diff is against (v11). Missing means 1, the world of 0.4.0 and earlier. */
+  terrainVersion?: number;
 }
 export interface DinosRecord {
   dinos: Record<string, unknown>[];
@@ -122,10 +126,22 @@ export interface MetaRecord {
   createdAt: string | null;
 }
 
+/** v11 Dorp: the rare blocks the kid found, the cooldown left and who asked last. Not part of the world. */
+export interface VillageRecord {
+  /** Found rare block ids (34 to 41). */
+  found: number[];
+  /** Milliseconds of play time before the next villager may ask. */
+  cooldownMs: number;
+  /** Id of the villager who asked last, or null. */
+  lastVillager: string | null;
+}
+
 export interface KvRecords {
   settings: SettingsRecord;
   player: PlayerRecord;
   world: WorldRecord;
+  /** The world record of 0.4.0, copied unchanged before the villages were stamped in (v11). Null when there was none. Deleted in the release after v11. */
+  worldV1: WorldRecord | null;
   dinos: DinosRecord;
   economy: EconomyRecord;
   timers: TimersRecord;
@@ -135,6 +151,7 @@ export interface KvRecords {
   gate: GateRecord;
   stats: StatsRecord;
   meta: MetaRecord;
+  village: VillageRecord;
 }
 
 /** Fresh copies every call, so nobody shares or mutates a default. */
@@ -151,6 +168,7 @@ export const KV_DEFAULTS: { [K in KvName]: () => KvRecords[K] } = {
   }),
   player: () => ({ x: 0, y: 0, z: 0, yaw: 0, pitch: 0, hotbar: [], selectedSlot: 0, mode: 'mine' }),
   world: () => ({ diff: new Uint32Array(0) }),
+  worldV1: () => null,
   dinos: () => ({ dinos: [], eggs: [] }),
   economy: () => ({ points: 0, practicePointsToday: 0, practiceDay: '' }),
   timers: () => ({ playMsLeft: null, examMsLeft: null }),
@@ -160,6 +178,7 @@ export const KV_DEFAULTS: { [K in KvName]: () => KvRecords[K] } = {
   gate: () => ({ salt: '', pinHash: '', wrongTries: 0, blockedUntil: 0, resetWrongTries: 0 }),
   stats: () => ({ playMsPerDay: {} }),
   meta: () => ({ schemaVersion: SCHEMA_VERSION, appVersion: '', lastBackup: null, createdAt: null }),
+  village: () => ({ found: [], cooldownMs: 0, lastVillager: null }),
 };
 
 export function defaultKv<K extends KvName>(name: K): KvRecords[K] {

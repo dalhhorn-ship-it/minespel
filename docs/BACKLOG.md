@@ -6,14 +6,15 @@ Not signed. Changing this file never closes the PRD gate (decision 80). The sign
 
 1. **v9 Eerlijke punten (0.3.0)** (decision 87), shipped 2026-10-22. Honest point banners, one egg hint rule (decision 84) and no malus anywhere. Its section is archived in `docs/releases/v9.md`.
 2. **Refactor round R1** (shipped 2026-10-24, decision 78, see `docs/SIMPLIFY.md` section 4 and decision 82). One ready signal so no button is dead while the app loads, the egg limit mismatch, and e2e in Chromium before each push. It needed no PRD change.
-3. **v10 Punten voor elke ronde (0.4.0), next.** A kid bug goes first (decision 92): the 10 a day limit means only the first round of Extra oefenen or Nu oefenen pays. Its section is in `docs/PRD.md` section 12, waiting for the founder's signoff.
-4. **v3 Dino's veilig (0.5.0)**, right after v10 (decisions 90 and 92).
-5. **v6 Wat heb ik geleerd (0.6.0)**, after v3 (decisions 91 and 92). It grows into a parent learning dashboard. v4 and v5 come after it.
-6. **Taal spelling check (T65)** runs beside the next release (decision 81). It is the human content check from AC124: QA reads 5 items per Taal topic against woordenlijst.org, and the founder or a teacher reads 20 items. It is mostly reading and needs no code.
+3. **v10 Punten voor elke ronde (0.4.0), shipped 2026-10-24.** A kid bug went first (decision 92): every round of oefenen pays, and the parent picks how much a mistake costs. Its section is archived in `docs/releases/v10.md`.
+4. **v11 Dorp (0.5.0), next** (decisions 94 and 95): villages with houses, villagers who ask a question from the lesson content, a silly dance or "Respect bruuuuu!" and a rare block for a right answer. Its section is in `docs/PRD.md` section 12, waiting for the founder's signoff. Architect review in `docs/DISCUSSION.md`. The bigger world is a later release of its own.
+5. **v3 Dino's veilig (0.6.0)**, after v11 (decisions 90, 92 and 94).
+6. **v6 Wat heb ik geleerd (0.7.0)**, after v3 (decisions 91, 92 and 94). It grows into a parent learning dashboard. v4 and v5 come after it.
+7. **Taal spelling check (T65)** runs beside the next release (decision 81). It is the human content check from AC124: QA reads 5 items per Taal topic against woordenlijst.org, and the founder or a teacher reads 20 items. It is mostly reading and needs no code.
 
 On hold: the save on refresh fix (decision 72).
 
-Versions follow shipping order: v10 ships as 0.4.0, then v3 as 0.5.0, then v6 as 0.6.0. v9 and v10 got their ids because v7 and v8 are never reused.
+Versions follow shipping order: v10 shipped as 0.4.0, then v11 as 0.5.0, v3 as 0.6.0, v6 as 0.7.0. v9 and v10 got their ids because v7 and v8 are never reused.
 
 ## Rules
 
@@ -33,30 +34,32 @@ Versions follow shipping order: v10 ships as 0.4.0, then v3 as 0.5.0, then v6 as
 | | **v2 Gouden ei** | The parent starts a practice exam. Pass it and a golden dino hatches. One tap Winkel, Pauze that always opens. | M | | T39, T51a, T51b, T51c, T51d, T51e | shipped (0.2.0), see `docs/releases/v2.md` |
 | | **v9 Eerlijke punten** | Every number I see is the points I get, the egg hint is always right, and a mistake never costs points. | S | High. A kid complaint, so it goes first. | V9a, V9b, V9c (decision 89) | shipped (0.3.0, 2026-10-22), see `docs/releases/v9.md` |
 | | **R1** (refactor, not a release) | Buttons are never dead while the app loads. | S to M | Medium. Fixes taps that did nothing. | R1a to R1e (decision 82) | shipped (2026-10-24) |
-| 1 | **v10 Punten voor elke ronde** | Every round of oefenen pays, not only the first one. Papa or mama picks how much a mistake costs: Makkelijk, Normaal or Moeilijk. | S | High. A bug the kid hit, so it goes first. | about 3, the operator or architect cuts them | next (0.4.0, decision 92), section in `docs/PRD.md` section 12 |
-| 2 | **v3 Dino's veilig** | A backup file keeps the world, dinos and points safe, even on a wiped or new iPad. | M | High, as insurance. Losing a herd of dinos would hurt the most. | T18, T19, T53a, T55 | candidate, next after v10 (decisions 90 and 92), 0.5.0 |
-| 3 | **v6 Wat heb ik geleerd** | A parent learning dashboard: is my kid really learning? Right on the first try per topic over time, topics that got better or got stuck, the hardest questions, exam results, and learning time against play time. All worked out on the iPad, behind the gate. | M, may grow to L | High for the parent (decision 91). Through the parent, who can then switch on what is hard. | T21, T56, T61, plus dashboard tasks the architect cuts | candidate, after v3 (decisions 91 and 92), 0.6.0 |
+| | **v10 Punten voor elke ronde** | Every round of oefenen pays, not only the first one. Papa or mama picks how much a mistake costs: Makkelijk, Normaal or Moeilijk. | S | High. A bug the kid hit, so it goes first. | about 3, the operator or architect cuts them | shipped (0.4.0, 2026-10-24), see `docs/releases/v10.md` |
+| 1 | **v11 Dorp** | Villages with houses; a villager asks a question when I come close; a right answer gives a silly dance or "Respect bruuuuu!" and a rare block; 8 rare blocks to find. | M | High. A founder and kid wish, learning inside the world. | V11a to V11e (architect review) | next (0.5.0, decisions 94 and 95) |
+| 2 | **v3 Dino's veilig** | A backup file keeps the world, dinos and points safe, even on a wiped or new iPad. | M | High, as insurance. Losing a herd of dinos would hurt the most. | T18, T19, T53a, T55 | candidate, next after v11 (decisions 90, 92 and 94), 0.6.0 |
+| 3 | **v6 Wat heb ik geleerd** | A parent learning dashboard: is my kid really learning? Right on the first try per topic over time, topics that got better or got stuck, the hardest questions, exam results, and learning time against play time. All worked out on the iPad, behind the gate. | M, may grow to L | High for the parent (decision 91). Through the parent, who can then switch on what is hard. | T21, T56, T61, plus dashboard tasks the architect cuts | candidate, after v3 (decisions 91, 92 and 94), 0.7.0 |
 | 4 | **v4 Altijd spelen** | The game starts without internet, never shows a blank screen, and two open tabs never fight over the save. | M | Medium to high. Protects saves, and the kids notice when it is missing. | T52, T22, new first start task | later (after v3) |
 | 5 | **v5 Veilig en juist** | Nothing reaches the internet, everything fits with the big font, and the game is smooth on the family iPad. | M | Medium. Mostly invisible, but it protects what the kids learn and see. | T63, T62, T32, T64 (T65 runs now, decision 81) | candidate |
 | | **v7 Eigen woorden** | | | | T40, T54, T57, T59 | dropped (decision 79) |
 | | **v8 Modules delen** | | | | T53b, T20, T58, T60 | dropped (decision 79) |
 
-Open plan tasks: about 3 for v10, 13 in v3 to v6 (v6 may get more for the dashboard, decision 91), plus the new first start task in v4 (decision 60), plus T65 beside the next release. The 8 tasks of v7 and v8 are dropped; the architect marks them in `docs/PLAN.md`.
+Open plan tasks: 5 for v11 (V11a to V11e), 13 in v3 to v6 (v6 may get more for the dashboard, decision 91), plus the new first start task in v4 (decision 60), plus T65 beside the next release. The 8 tasks of v7 and v8 are dropped; the architect marks them in `docs/PLAN.md`.
 
-### v10 Punten voor elke ronde
-* **Status:** next, ships as 0.4.0 (decision 92). The signed text is `docs/PRD.md` section 12; this entry is the short version.
-* **Goal:** every round of oefenen pays, and the parent picks how much a mistake costs.
-* **In:** no day limit anywhere (drops the cap of decisions 48 and 56 and "Genoeg geoefend"). A Punten setting in Instellingen: Makkelijk, Normaal (default), Moeilijk. Honest banners with the real minus. Version 0.4.0.
-* **Out:** other point values, egg prices, break interval.
-* **Size:** S, about 3 tasks. **Criteria:** AC29, AC35, AC52, AC145, AC146 rewritten; AC120, AC166, AC167, AC168, AC170 removed; new AC172 to AC177.
+### v11 Dorp
+* **Status:** next, ships as 0.5.0 (decisions 94 and 95). The signed text is `docs/PRD.md` section 12; this entry is the short version.
+* **Goal:** villages in the world, where villagers ask a question the kid has learned before and give a dance or "Respect bruuuuu!" and a rare block for a right answer.
+* **In:** 3 villages with 2 or 3 houses each, added to existing worlds only where the kid changed nothing. 8 villagers wandering near home. A speech bubble the kid taps for one question from seen items, two tries, no points. First try moves the boxes. A 3 minute shared cooldown. 8 rare blocks, a Dorp tab with "?" tiles and "N van de 8 gevonden", kept after "Wereld opnieuw beginnen". Version 0.5.0.
+* **Out:** the bigger world (its own later release, speed spike at 128 x 128 first). Villagers that trade, talk or follow. Points for villager questions.
+* **Size:** M, 5 tasks (V11a to V11e, architect review). **Criteria:** AC178 to AC191.
+* **Note for the release after v11:** delete the kept copy of the old world record (PRD section 12, In item 2).
 
 ### v3 Dino's veilig
-* **Status:** candidate, next after v10, ships as 0.5.0 (decisions 90 and 92). Its section was drafted on 2026-10-24 (see "Draft section" below) and is written into PRD section 12 when v10 has shipped.
+* **Status:** candidate, next after v11, ships as 0.6.0 (decisions 90, 92 and 94). Its section was drafted on 2026-10-24 (see "Draft section" below) and is written into PRD section 12 when v11 has shipped. The backup must also hold the found rare blocks and the villager cooldown of v11 (PRD 4.15 and AC87 already say so).
 * **Goal:** the parent can make a backup file and put it back, so nothing the kid built or earned is ever lost for good.
 * **In:** PRD 4.15 file header, sharing files, Backup maken, Backup terugzetten. 4.17 Alles wissen, Volume and the app version. Tests for Pauze nu starten, Pauze nu beëindigen and Wereld opnieuw beginnen, which v1 already has.
 * **Out:** the backup reminder after 30 days (v4). Module import and export (dropped, decision 79).
 * **Size:** M. **Tasks:** T18 (backup file), T19 (share and file pick helpers), T53a (backup in the parent area), T55 (settings actions). Volume and the app version are small leftovers of T49 that go with T55.
-* **Criteria:** AC87, AC93 (Volume part), AC94 and AC95 (tests), AC130, AC131, AC133, AC135, AC152 (Alles wissen and restore part), and 7 new criteria (drafted below as B1 to B7; they get the next free numbers, from AC178, when v3 is scoped).
+* **Criteria:** AC87, AC93 (Volume part), AC94 and AC95 (tests), AC130, AC131, AC133, AC135, AC152 (Alles wissen and restore part), and 7 new criteria (drafted below as B1 to B7; they get the next free numbers, from AC192 after v11, when v3 is scoped).
 * **Already in the PRD core:** the v10 signoff also carries the v3 clarifications of 4.15 (what the backup holds, where the buttons are), 4.17 (Alles wissen), Flow 10, section 9 (Files) and AC87, AC131, AC133 and AC135, all still tagged or marked for v3.
 * **Open founder question for v3 (V3-1): how does the parent reach "Pauze nu beëindigen"?** The button works only while a break runs, but since decision 53 a learning break has no lock and the world lock is hidden then. So no parent can open the parent area during a break, and the button can never be tapped (checked in `src/app/parent-flow.ts` and `src/ui/parent/settings-screen.ts`). Options: **A (recommended)** a small lock on the learning break only to end it, like the exam lock of decision 61, one more criterion inside T55; **B** keep it, tested through the code only; **C** remove the button and AC95. Ask when v3 is scoped.
 * **Draft section** (not signed, written 2026-10-24, to copy into PRD section 12 at `/release`):
@@ -75,7 +78,7 @@ Open plan tasks: about 3 for v10, 13 in v3 to v6 (v6 may get more for the dashbo
   * **iPad check:** on the HTTPS address (a test deploy is a founder action), make a backup to Bestanden, change something, restore and see the old world back; then in a Safari tab with empty storage set a pincode through the lock, restore the same file and see the world, dinos and points appear. Turn Volume down and up.
 
 ### v6 Wat heb ik geleerd
-* **Status:** candidate, after v3 (decisions 91 and 92). Ships as 0.6.0 if it ships in this order.
+* **Status:** candidate, after v3 (decisions 91, 92 and 94). Ships as 0.7.0 if it ships in this order.
 * **Goal:** the parent sees what the kid knows and what is hard, and can tell at a glance if the kid is really learning. It grows into a parent learning dashboard (decision 91).
 * **In:** PRD 4.16 in full: Overzicht, Pauzes, Per onderdeel, Over tijd, Lastige vragen, Examens. Plus key dashboard stats: right on the first try per topic over time, topics that got better or got stuck, the hardest questions, exam results, and learning time against play time.
 * **Kid safety:** everything is worked out on the iPad, behind the parent gate. Nothing leaves the device, no tracking, no analytics service (decision 91, PRD section 9).
@@ -124,7 +127,7 @@ Dropped by the founder (decision 79). New lessons and questions come through the
 ## Later
 
 Not planned in any release. Each would need the founder to pick it first.
-* Bigger world, more biomes, caves, flowing water and lava, day and night, weather. (Water and lava as plain blocks are in v1.)
+* Bigger world (decision 94 wants it as its own release after v11; it starts with a speed spike at 128 x 128 on the oldest iPad, see the architect review in `docs/DISCUSSION.md`). More biomes, caves, flowing water and lava, day and night, weather. (Water and lava as plain blocks are in v1.)
 * More block types beyond the 32 in v1, crafting, tools, chests to store blocks, doors.
 * Wild dinos, taming with food, earning blocks.
 * Creative mode (floating is in v1), riding dinos, dino eggs found in the world, baby dinos that grow up over days, more dino kinds, dino skins, selling or swapping dinos.

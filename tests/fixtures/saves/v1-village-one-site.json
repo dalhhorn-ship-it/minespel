@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "appVersion": "0.4.0",
+  "note": "0.4.0 save with changes inside site oost only (a little tower, a hole, a block high in the air, a cell deep down in the margin). Oost stays as it was; noord and west get houses.",
+  "kv": {
+    "world": {
+      "diff": [
+        1535488,
+        11039239,
+        12087815,
+        14235392,
+        42464270
+      ]
+    },
+    "player": {
+      "x": 32.5,
+      "y": 11,
+      "z": 32.5,
+      "yaw": 0.5,
+      "pitch": 0,
+      "hotbar": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        9
+      ],
+      "selectedSlot": 0,
+      "mode": "build"
+    },
+    "dinos": {
+      "dinos": [],
+      "eggs": []
+    }
+  }
+}

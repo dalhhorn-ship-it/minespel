@@ -36,6 +36,11 @@ export interface SelectBreakOptions {
   lastSeenDay?: string | null;
   /** "Nieuwe lessen en vragen" setting. When false, only seen items are picked (AC47). */
   newLessonsEnabled?: boolean;
+  /**
+   * Villager questions (v11): only seen items (box 1 to 5). No new items, no new topic, the rotation comes back
+   * unchanged. Overrides `newLessonsEnabled`.
+   */
+  seenOnly?: boolean;
   /** Extra item ids to leave out (for example items already asked in the current break). */
   excludeIds?: ReadonlySet<string>;
   /** Mix question order at the end (PRD 4.6 step 5). Default true. */
@@ -77,12 +82,14 @@ export function selectBreakItems(options: SelectBreakOptions): SelectionResult {
     count,
     today,
     lastSeenDay,
-    newLessonsEnabled = true,
+    newLessonsEnabled: newLessonsSetting = true,
+    seenOnly = false,
     excludeIds = new Set<string>(),
     shuffleOrder = true,
     rng,
   } = options;
 
+  const newLessonsEnabled = newLessonsSetting && !seenOnly;
   const bundle = catalog.getModule(moduleId);
   if (!bundle || count <= 0) {
     return { entries: [], newTopicId: null, rotation };

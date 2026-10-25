@@ -63,6 +63,12 @@ export interface DinoState {
 
 export type DinoEvent = 'popped' | null;
 
+/** What a caller other than the dino system may decide: the body box and the wander radius (villagers, V11c). */
+export interface StepOptions {
+  box?: { side: number; height: number };
+  radius?: number;
+}
+
 export function createDino(spot: HatchSpot, grown = false): DinoState {
   return {
     kind: spot.kind, golden: spot.golden, mode: 'follow',
@@ -107,8 +113,8 @@ export function boxCollides(world: World, px: number, py: number, pz: number, si
   return false;
 }
 
-export function dinoCollides(world: World, d: DinoState, x = d.x, y = d.y, z = d.z): boolean {
-  const { side, height } = dinoBox(d);
+export function dinoCollides(world: World, d: DinoState, x = d.x, y = d.y, z = d.z, box?: StepOptions['box']): boolean {
+  const { side, height } = box ?? dinoBox(d);
   return boxCollides(world, x, y, z, side, height);
 }
 
@@ -118,8 +124,8 @@ function resetMotion(d: DinoState): void {
 }
 
 /** Puts the dino on a free spot on the ground 1.5 to 2.5 blocks from the player. False when none was found. */
-export function popNextTo(world: World, d: DinoState, player: Point, rng: Rng): boolean {
-  const { side, height } = dinoBox(d);
+export function popNextTo(world: World, d: DinoState, player: Point, rng: Rng, box?: StepOptions['box']): boolean {
+  const { side, height } = box ?? dinoBox(d);
   const baseY = Math.floor(player.y);
   const start = rng.next() * Math.PI * 2;
   const radii = [1.5, 2, 2.5, 1];
@@ -142,17 +148,17 @@ export function popNextTo(world: World, d: DinoState, player: Point, rng: Rng): 
   return false;
 }
 
-function pickGoal(d: DinoState, ax: number, az: number, rng: Rng): void {
+function pickGoal(d: DinoState, ax: number, az: number, rng: Rng, radius: number): void {
   const a = rng.next() * Math.PI * 2;
-  const r = Math.sqrt(rng.next()) * WANDER_RADIUS;
+  const r = Math.sqrt(rng.next()) * radius;
   const lim = (v: number): number => Math.min(WORLD_SIZE - 1, Math.max(1, v));
   d.goal = { x: lim(ax + Math.cos(a) * r), z: lim(az + Math.sin(a) * r) };
   d.goalLeft = 4;
 }
 
 /** One small physics step. Returns the horizontal distance moved. */
-function physics(world: World, d: DinoState, dirX: number, dirZ: number, dt: number): number {
-  const { side, height } = dinoBox(d);
+function physics(world: World, d: DinoState, dirX: number, dirZ: number, dt: number, box?: StepOptions['box']): number {
+  const { side, height } = box ?? dinoBox(d);
   const ox = d.x, oz = d.z;
   const mx = dirX * DINO_SPEED * dt, mz = dirZ * DINO_SPEED * dt;
   let hitWall = false;
@@ -184,45 +190,46 @@ function physics(world: World, d: DinoState, dirX: number, dirZ: number, dt: num
 }
 
 /** Moves a dino out of a block (for example one placed on top of it), or pops it to the player. */
-function rescue(world: World, d: DinoState, player: Point, rng: Rng): DinoEvent {
+function rescue(world: World, d: DinoState, player: Point, rng: Rng, opts: StepOptions): DinoEvent {
   for (let up = 1; up <= 3; up++) {
-    if (!dinoCollides(world, d, d.x, d.y + up, d.z)) { d.y += up; d.vy = 0; return null; }
+    if (!dinoCollides(world, d, d.x, d.y + up, d.z, opts.box)) { d.y += up; d.vy = 0; return null; }
   }
-  return popNextTo(world, d, player, rng) ? 'popped' : null;
+  return popNextTo(world, d, player, rng, opts.box) ? 'popped' : null;
 }
 
 /**
  * Advances one dino by `dt` seconds. Mutates `d`. Returns 'popped' when it jumped next to the
  * player because it was stuck or far away for too long (the caller can show a puff).
  */
-export function stepDino(world: World, d: DinoState, player: Point, rng: Rng, dt: number): DinoEvent {
+export function stepDino(world: World, d: DinoState, player: Point, rng: Rng, dt: number, opts: StepOptions = {}): DinoEvent {
   if (!(dt > 0) || !Number.isFinite(dt)) return null;
   const total = Math.min(dt, MAX_FRAME_TIME);
   d.growth = Math.min(GROW_SECONDS, d.growth + total);
 
   let event: DinoEvent = null;
-  if (dinoCollides(world, d)) {
-    event = rescue(world, d, player, rng);
+  if (dinoCollides(world, d, d.x, d.y, d.z, opts.box)) {
+    event = rescue(world, d, player, rng, opts);
     if (event) return event;
   }
 
   const n = Math.max(1, Math.ceil(total / SUB_STEP));
   const h = total / n;
   for (let i = 0; i < n; i++) {
-    const ev = stepOnce(world, d, player, rng, h);
+    const ev = stepOnce(world, d, player, rng, h, opts);
     if (ev) { event = ev; break; }
   }
   return event;
 }
 
-function stepOnce(world: World, d: DinoState, player: Point, rng: Rng, dt: number): DinoEvent {
+function stepOnce(world: World, d: DinoState, player: Point, rng: Rng, dt: number, opts: StepOptions): DinoEvent {
+  const radius = opts.radius ?? WANDER_RADIUS;
   const follow = d.mode === 'follow';
   const distPlayer = Math.hypot(player.x - d.x, player.z - d.z);
 
   if (follow) {
     d.farTime = distPlayer > FAR_DISTANCE ? d.farTime + dt : 0;
     if (d.farTime >= FAR_SECONDS || d.stuckTime >= STUCK_SECONDS) {
-      return popNextTo(world, d, player, rng) ? 'popped' : (d.farTime = 0, d.stuckTime = 0, null);
+      return popNextTo(world, d, player, rng, opts.box) ? 'popped' : (d.farTime = 0, d.stuckTime = 0, null);
     }
     if (distPlayer > WANDER_RADIUS) d.chasing = true;
     else if (distPlayer <= CLOSE_ENOUGH) d.chasing = false;
@@ -241,13 +248,13 @@ function stepOnce(world: World, d: DinoState, player: Point, rng: Rng, dt: numbe
     d.goalLeft -= dt;
     const gd = Math.hypot(d.goal.x - d.x, d.goal.z - d.z);
     const anchorDist = Math.hypot(d.goal.x - ax, d.goal.z - az);
-    if (gd < 0.2 || d.goalLeft <= 0 || anchorDist > WANDER_RADIUS + 0.5) {
+    if (gd < 0.2 || d.goalLeft <= 0 || anchorDist > radius + 0.5) {
       d.goal = null;
       d.idleLeft = 1 + rng.next() * 2;
     }
   } else {
     d.idleLeft -= dt;
-    if (d.idleLeft <= 0) pickGoal(d, ax, az, rng);
+    if (d.idleLeft <= 0) pickGoal(d, ax, az, rng, radius);
   }
 
   let dirX = 0, dirZ = 0;
@@ -256,7 +263,7 @@ function stepOnce(world: World, d: DinoState, player: Point, rng: Rng, dt: numbe
     const len = Math.hypot(gx, gz);
     if (len > 0.05) { dirX = gx / len; dirZ = gz / len; }
   }
-  const moved = physics(world, d, dirX, dirZ, dt);
+  const moved = physics(world, d, dirX, dirZ, dt, opts.box);
   if (dirX !== 0 || dirZ !== 0) {
     d.heading = Math.atan2(dirX, dirZ);
     if (d.onGround && moved < DINO_SPEED * dt * 0.25) d.stuckTime += dt;

@@ -146,6 +146,65 @@ describe('game', () => {
     expect(s.game.isRunning()).toBe(false);
   });
 
+  it('V11c: the game has 8 villagers beside the dinos and shows them every frame', () => {
+    const s = setup();
+    const sync = vi.fn();
+    expect(s.game.villagerSystem.villagers()).toHaveLength(8);
+    expect(s.game.dinoStore.dinos()).toHaveLength(0);
+    expect(s.game.dinoStore.eggs()).toHaveLength(0);
+    s.game.renderer.syncVillagers = sync;
+    runFrames(2);
+    expect(sync).toHaveBeenCalled();
+  });
+
+  it('V11c: ?still=1 starts the villagers in stillMode', () => {
+    expect(setup().game.villagerSystem.stillMode()).toBe(false);
+    expect(setup('?still=1').game.villagerSystem.stillMode()).toBe(true);
+  });
+
+  it('V11c: a new world puts the villagers back at home', () => {
+    const s = setup();
+    const v = s.game.villagerSystem.villagers()[0]!;
+    v.x += 2;
+    s.game.resetWorld();
+    expect(v.x).toBe(v.home.x);
+  });
+
+  it('V11d: the game has a hidden village bubble and passes a tap on it on', () => {
+    const container = document.createElement('div');
+    document.body.append(container);
+    const onVillageBubbleTapped = vi.fn();
+    const game = createGame({
+      container,
+      guard: { subscribe: (l) => { l({ portrait: false, tooSmall: false }); return () => {}; } },
+      rendererFactory: (o) => createNullRenderer(o),
+      onVillageBubbleTapped,
+    });
+    const node = container.querySelector('.village-bubble') as HTMLElement;
+    expect(game.villageBubble.state().visible).toBe(false);
+    game.villageBubble.show('v1', true);
+    node.dispatchEvent(new PointerEvent('pointerdown', { pointerId: 1, clientX: 5, clientY: 5, bubbles: true }));
+    node.dispatchEvent(new PointerEvent('pointerup', { pointerId: 1, clientX: 5, clientY: 5, bubbles: true }));
+    expect(onVillageBubbleTapped).toHaveBeenCalledTimes(1);
+    game.dispose();
+  });
+
+  it('AC184: giveToHotbar puts the rare block in the selected slot and says the build state changed', () => {
+    const s = setup();
+    const changed = vi.fn();
+    s.game.on('changed', changed);
+    const slot = s.game.getBuildState().selected;
+    s.game.giveToHotbar(35);
+    expect(s.game.getBuildState().hotbar[slot]).toBe(35);
+    expect(changed).toHaveBeenCalledWith({ kind: 'build' });
+  });
+
+  it('AC187: setFoundBlocks lets the Dorp tab count the found blocks', () => {
+    const s = setup();
+    s.game.setFoundBlocks([35, 39, 41]);
+    expect(s.container.textContent).toContain('3 van de 8 gevonden');
+  });
+
   it('has 8 hotbar slots and the Alle blokken button, and the Bouwen button switches mode (AC7)', () => {
     const s = setup();
     expect(s.container.querySelectorAll('.hotbar-slot')).toHaveLength(8);

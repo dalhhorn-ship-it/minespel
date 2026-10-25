@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "appVersion": "0.4.0",
+  "note": "0.4.0 save with changes in all 3 sites, some on the margin and some high or deep. No site gets houses.",
+  "kv": {
+    "world": {
+      "diff": [
+        2117120,
+        11686922,
+        12061195,
+        12188684,
+        13109771,
+        16315392,
+        53056265
+      ]
+    },
+    "player": {
+      "x": 32.5,
+      "y": 11,
+      "z": 32.5,
+      "yaw": 0.5,
+      "pitch": 0,
+      "hotbar": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        9
+      ],
+      "selectedSlot": 0,
+      "mode": "build"
+    },
+    "dinos": {
+      "dinos": [],
+      "eggs": []
+    }
+  }
+}

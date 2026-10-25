@@ -1,8 +1,8 @@
 # Status
 
-**Phase:** small releases. 0.1.0, 0.2.0 Gouden ei and 0.3.0 Eerlijke punten are shipped (0.3.0 merged to main 2026-10-22, main CI green).
-**Current release:** v10 Punten voor elke ronde (0.4.0, decision 92), PRD signed 2026-10-24. Fast lane: V10a, V10b, V10c.
-**Next step:** 0.4.0 is merged to main. Merge the decision 96 fix (red `main`, `check.sh` fallback, exam clock tests, polls) with green CI. Then refactor round R2 (decision 97, `docs/PLAN.md`): R2a, R2c, R2e in parallel, then R2b and R2d. Then the "Bouwsels veilig" save fix (decision 95). After it: v3 Dino's veilig, then v6 with the parent dashboard. E2e now runs in real WebKit in the cloud container.
+**Phase:** small releases. 0.1.0, 0.2.0, 0.3.0, R1 and 0.4.0 Punten voor elke ronde are shipped (0.4.0 merged 2026-10-24).
+**Current release:** v11 Dorp (0.5.0, decisions 94 to 97), PRD signed 2026-10-24. V11a to V11e done.
+**Next step:** v11 Dorp built and verified (V11a to V11e, villager fix), CI green on the iPad browser. Ship 0.5.0 with the founder. Then refactor round R2 (decisions 99 to 101, docs/TECH_REVIEW.md), then v3 backup (0.6.0), v6 parent dashboard (0.7.0).
 **Next in the backlog:** see docs/BACKLOG.md. On hold: the save on refresh fix (decision 72). Founder iPad check AC165 still open.
 **Blockers:** none. This cloud session cannot push tags or to main directly (HTTP 403), so main is updated through a pull request.
 

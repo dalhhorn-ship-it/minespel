@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
+import { createRng } from '../core/rng';
 import {
+  pickModuleForVillager,
   emptyRotation,
   hasSeenLesson,
   markLessonSeen,
@@ -135,5 +137,25 @@ describe('lessons seen', () => {
     s = roundTrip(s);
     expect(hasSeenLesson(s, 'm', 't')).toBe(true);
     expect(hasSeenLesson(s, 'm', 'other')).toBe(false);
+  });
+});
+
+describe('pickModuleForVillager (V11d, AC183)', () => {
+  const cands = [
+    { id: 'a', weight: 3, usable: true },
+    { id: 'b', weight: 1, usable: true },
+    { id: 'c', weight: 5, usable: false },
+  ];
+  it('AC183: follows the weights, skips unusable modules, and has no state to move', () => {
+    const rng = createRng(7);
+    const counts: Record<string, number> = { a: 0, b: 0 };
+    for (let i = 0; i < 400; i++) counts[pickModuleForVillager(cands, rng) as string]!++;
+    expect(counts.a! / 400).toBeGreaterThan(0.65);
+    expect(counts.a! / 400).toBeLessThan(0.85);
+    expect(counts.b!).toBeGreaterThan(0);
+  });
+  it('AC182: returns null when nothing is usable', () => {
+    expect(pickModuleForVillager([{ id: 'c', weight: 5, usable: false }], createRng(1))).toBeNull();
+    expect(pickModuleForVillager([], createRng(1))).toBeNull();
   });
 });

@@ -11,6 +11,7 @@ import { createScreenManager, type ScreenManager } from './app/screens';
 import { applySettingsToRuntime } from './app/settings-apply';
 import { createShopFlow, type ShopFlow } from './app/shop-flow';
 import { createTimerDriver, type TimerDriver } from './app/timer-driver';
+import { createVillageFlow, type VillageFlow } from './app/village-flow';
 import { createSound } from './audio/sound';
 import { createCatalog, type Catalog } from './content/catalog';
 import { systemClock, today } from './core/clock';
@@ -55,6 +56,7 @@ let parentFlow: ParentFlow | null = null;
 let shopFlow: ShopFlow | null = null;
 let practiceFlow: PracticeFlow | null = null;
 let examFlow: ExamFlow | null = null;
+let villageFlow: VillageFlow | null = null;
 let activePauseMenu: PauseMenu | null = null;
 let activeDinoMenu: DinoMenu | null = null;
 // The Dinowinkel placeholder shown when it was tapped before boot made the shop flow (AC164).
@@ -268,6 +270,9 @@ if (app) {
       onBlockGridOpenChange: (open) => {
         screens?.setExternalKidOverlay(open);
       },
+      onVillageBubbleTapped: () => {
+        villageFlow?.onBubbleTapped();
+      },
     });
     game.hud.countdownSlot.append(countdownView.root);
     game.on('teleported', () => {
@@ -396,8 +401,25 @@ async function createApp() {
       },
     });
 
+    // Villagers ask their question only once the app is ready (AC182).
+    if (game) {
+      villageFlow = createVillageFlow({
+        game,
+        screens,
+        timerDriver,
+        records: recs,
+        progressStore,
+        logStore,
+        getCatalog: () => catalog,
+        sound,
+        clock: systemClock,
+        rng,
+      });
+    }
+
     // Every flow exists: buttons that waited can run now.
     gate.markReady();
+    void villageFlow?.start();
     await resumeSessionIfAny({
       sessionStore,
       records: recs,
@@ -424,6 +446,8 @@ const booted = game
 if (!game) gate.markFailed();
 void gate.ready.then(shopFlowReady, () => {});
 void booted.finally(() => {
+  // The saved world has loaded: no villager may stand inside a block the kid built (AC180).
+  game?.villagerSystem.fixPlaces();
   restored = true;
 });
 
@@ -527,6 +551,15 @@ if (__E2E__) {
     registerHook('eggs', () => g.dinoStore.eggs());
     registerHook('addEgg', (kind: DinoKindId, golden?: boolean) => g.dinoStore.addEgg(kind, golden));
     registerHook('stepDinos', (dt: number) => g.dinoSystem.step(dt));
+    // Villagers (V11c): plain copies, so a test reads them without touching the live state.
+    registerHook('villagers', () =>
+      g.villagerSystem.villagers().map((v) => ({
+        id: v.id, site: v.site, home: { ...v.home }, position: { x: v.x, y: v.y, z: v.z },
+        shirt: v.look.shirt, style: v.look.style, gives: v.gives, dancing: v.danceLeft > 0,
+      })),
+    );
+    registerHook('stepVillagers', (dt: number) => g.villagerSystem.step(dt));
+    registerHook('danceVillager', (id: string) => g.villagerSystem.dance(id));
     registerHook('openDinoMenuFor', (id: string) => {
       const d = g.dinoStore.getDino(id);
       if (d) openDinoMenu(d);

@@ -27,3 +27,23 @@ describe('settings defaults match the PRD', () => {
     expect(s.soundEffectsEnabled).toBe(true);
   });
 });
+
+describe('v11 world records', () => {
+  it('AC179: a world record without terrainVersion is a 0.4.0 world (missing means 1)', () => {
+    expect(defaultKv('world').terrainVersion).toBeUndefined();
+  });
+  it('AC179: worldV1 (the copy of the old world record) defaults to null', () => {
+    expect(defaultKv('worldV1')).toBeNull();
+  });
+});
+
+
+describe('v11 village record', () => {
+  it('AC188: a save from 0.4.0 has no village record and starts with 0 found and no cooldown', () => {
+    expect(defaultKv('village')).toEqual({ found: [], cooldownMs: 0, lastVillager: null });
+  });
+  it('AC188: every default is a fresh copy', () => {
+    defaultKv('village').found.push(35);
+    expect(defaultKv('village').found).toEqual([]);
+  });
+});

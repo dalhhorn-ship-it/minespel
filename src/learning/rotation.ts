@@ -70,6 +70,26 @@ export function pickModule(
 }
 
 /**
+ * A module for a villager question (v11). Weighted random by the parent weights, so the Vakverdeling is
+ * respected over many questions. Pure and stateless: it never reads or moves the break turn order or the
+ * topic pointers (AC183). Returns null when no module is usable.
+ */
+export function pickModuleForVillager(
+  candidates: readonly ModuleCandidate[],
+  rng: { next(): number },
+): string | null {
+  const eligible = candidates.filter((c) => c.usable && c.weight > 0);
+  if (eligible.length === 0) return null;
+  const total = eligible.reduce((sum, c) => sum + c.weight, 0);
+  let roll = rng.next() * total;
+  for (const c of eligible) {
+    roll -= c.weight;
+    if (roll < 0) return c.id;
+  }
+  return (eligible[eligible.length - 1] as ModuleCandidate).id;
+}
+
+/**
  * Next topic for a module: the first topic with new items, searching from the pointer in teaching
  * order and wrapping once. The pointer then moves past the chosen topic (AC46).
  * Returns topicId null when no topic has new items.
