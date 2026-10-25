@@ -260,7 +260,7 @@
       "type": "type",
       "level": "E6",
       "skill": "zin-afmaken",
-      "prompt": "Schrijf het woord dat mist.",
+      "prompt": "Schrijf het woord dat mist. Het betekent: Je hebt alleen de moed nodig.",
       "sentence": "You just need the ... .",
       "answer": [
         "courage",
@@ -273,7 +273,7 @@
       "type": "type",
       "level": "E6",
       "skill": "zin-afmaken",
-      "prompt": "Schrijf het woord dat mist.",
+      "prompt": "Schrijf het woord dat mist. Het betekent: Je bent in goede conditie.",
       "sentence": "You are in good ... .",
       "answer": [
         "shape",
@@ -286,7 +286,7 @@
       "type": "type",
       "level": "E6",
       "skill": "zin-afmaken",
-      "prompt": "Schrijf het woord dat mist.",
+      "prompt": "Schrijf het woord dat mist. Het betekent: Ik wil raften proberen.",
       "sentence": "I want to ... rafting.",
       "answer": [
         "try",
@@ -299,7 +299,7 @@
       "type": "type",
       "level": "E6",
       "skill": "zin-afmaken",
-      "prompt": "Schrijf het woord dat mist.",
+      "prompt": "Schrijf het woord dat mist. Het betekent: Ik weet niet zeker of ik het kan.",
       "sentence": "I'm not ... I can do it.",
       "answer": [
         "sure",

@@ -13,6 +13,8 @@ Written so kids can read it too.
 * 8 rare blocks are ready to find: smaragd, robijn, saffier, amethist, kristal, lichtsteen, regenboogsteen and sterrensteen. In Alle blokken the new Dorp tab shows them, with a "?" for the ones you have not found yet. Your rare blocks stay when mom or dad starts a new world.
 * After a question the villagers rest for 3 minutes of play time.
 
+* English: when you fill in a missing word, you now see what the whole sentence means in Dutch first.
+
 ## 0.4.0 (2026-10-24)
 
 ### Punten voor elke ronde

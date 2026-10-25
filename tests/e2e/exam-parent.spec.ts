@@ -153,7 +153,8 @@ test.describe('parent starts and stops an exam (T51d, v2)', () => {
     await expect(page.locator('[data-testid="exam-result"]')).toHaveCount(0);
     await expect(page.locator('[data-testid="exam-review-open"]')).toHaveCount(0);
     expect(await readState<boolean>(page, 'isExamActive')).toBe(false);
-    expect(await readState<number>(page, 'remainingPlayMs')).toBe(5 * 60_000);
+    // Real time passes between steps: allow a second of drift.
+    expect(Math.abs((await readState<number>(page, 'remainingPlayMs')) - 5 * 60_000)).toBeLessThanOrEqual(1000);
     expect(await readState<unknown[]>(page, 'eggs')).toHaveLength(0);
     const log = await readState<Array<{ status: string }>>(page, 'examsLog');
     expect(log).toHaveLength(1);
