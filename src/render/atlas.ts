@@ -3,7 +3,7 @@ import {
   AARDE, BAKSTEEN, BASALT, BLADEREN, BOOMSTAM, DIAMANT, DIEPSTEEN, GLAS, GOUDSTEEN, GRANIET, GRAS,
   IJS, KEISTEEN, LAVA, MARMER, MOSSTEEN, OBSIDIAAN, OERSTEEN, PLANKEN, SNEEUW, STEEN, VUUR,
   VUURSTEEN, WATER, WOL_BLAUW, WOL_GEEL, WOL_GROEN, WOL_ORANJE, WOL_PAARS, WOL_ROOD, WOL_WIT, ZAND,
-  AMETHIST, KRISTAL, LICHTSTEEN, REGENBOOGSTEEN, ROBIJN, SAFFIER, SMARAGD, STERRENSTEEN, ZANDSTEEN,
+  METEORIET, IJSDIAMANT, BLIKSEMSTEEN, REGENBOOGKERN, LAVAKRISTAL, MAANSTEEN, DRAKENOOG, STERRENSTOF, ZANDSTEEN,
 } from '../world/blocks';
 
 export const TILE_SIZE = 16;
@@ -30,18 +30,6 @@ const RAINBOW: readonly (readonly [number, number, number, number])[] = [
   [236, 60, 60, 255], [248, 150, 40, 255], [250, 224, 60, 255], [70, 190, 86, 255],
   [60, 120, 230, 255], [158, 84, 210, 255], [236, 60, 60, 255],
 ];
-
-/** A rare gem block: dark rock, a bright gem diamond in the middle, a shine spot and a lighter edge. */
-const gem = (name: string, rock: Rgb, glow: Rgb, shine: Rgb): TileSpec => ({
-  name, base: rock, speckle: 10,
-  pattern: (x, y) => {
-    const d = Math.abs(x - 7.5) + Math.abs(y - 7.5);
-    if (x === 0 || y === 0 || x === 15 || y === 15) return [glow[0] * 0.55, glow[1] * 0.55, glow[2] * 0.55, 255];
-    if (d < 2) return [shine[0], shine[1], shine[2], 255];
-    if (d < 6) return [glow[0], glow[1], glow[2], 255];
-    return (x * 7 + y * 5) % 13 === 0 ? [glow[0], glow[1], glow[2], 255] : null;
-  },
-});
 
 export const TILES: readonly TileSpec[] = [
   { name: 'gras-top', base: [92, 178, 70], speckle: 22 },
@@ -168,43 +156,104 @@ export const TILES: readonly TileSpec[] = [
   },
   { name: 'sneeuw', base: [246, 250, 255], speckle: 6 },
   wool('wol-oranje', [245, 130, 32]),
-  // Rare blocks: a dark stone with bright gems and a shiny edge, so they look special next to the plain blocks.
-  gem('smaragd', [22, 120, 70], [60, 235, 130], [200, 255, 220]),
-  gem('robijn', [130, 14, 36], [250, 60, 90], [255, 200, 210]),
-  gem('saffier', [24, 48, 140], [70, 130, 255], [200, 225, 255]),
-  gem('amethist', [74, 30, 120], [190, 110, 250], [240, 210, 255]),
+  // Rare blocks (still pictures): each one is a small scene so it looks special next to the plain blocks.
   {
-    name: 'kristal', base: [170, 232, 248], speckle: 8,
+    // Green scales with a golden eye and a black slit pupil.
+    name: 'drakenoog', base: [28, 128, 66], speckle: 8,
     pattern: (x, y) => {
-      if (x === 0 || y === 0 || x === 15 || y === 15) return [96, 190, 226, 255];
-      const d = Math.abs(x - 7.5) + Math.abs(y - 7.5);
-      if (d < 3) return [255, 255, 255, 255];
-      if (d >= 6 && d < 7) return [120, 205, 235, 255];
-      return null;
+      const dx = (x - 7.5) / 6.5;
+      const dy = (y - 7.5) / 4.2;
+      const e = dx * dx + dy * dy;
+      if (e < 1) {
+        if (Math.abs(x - 7.5) < 1 && e < 0.9) return [8, 8, 8, 255];
+        if (e > 0.72) return [214, 150, 20, 255];
+        return (x + y) % 5 === 0 ? [255, 244, 140, 255] : [255, 208, 40, 255];
+      }
+      if (e < 1.35) return [14, 70, 36, 255];
+      const row = y >> 2;
+      if (y % 4 === 3 || (x + (row % 2) * 4) % 8 === 7) return [18, 88, 46, 255];
+      return (x + y) % 6 === 0 ? [92, 214, 124, 255] : null;
     },
   },
   {
-    name: 'lichtsteen', base: [255, 226, 110], speckle: 10,
+    // Dark red rock cracked open, with glowing orange lava inside the cracks.
+    name: 'lavakristal', base: [70, 12, 16], speckle: 10,
+    pattern: (x, y) => {
+      const crack = (x + y * 2) % 8 === 0 || (x * 2 - y + 40) % 11 === 0 || (x === 7 && y > 4 && y < 12);
+      if (!crack) return (x * 7 + y * 3) % 13 === 0 ? [120, 24, 20, 255] : null;
+      return (x + y) % 3 === 0 ? [255, 226, 80, 255] : [255, 128, 20, 255];
+    },
+  },
+  {
+    // Pale grey blue stone with small round craters.
+    name: 'maansteen', base: [172, 184, 208], speckle: 8,
+    pattern: (x, y) => {
+      const craters: readonly (readonly [number, number, number])[] = [[4, 4, 3], [11, 6, 2.6], [7, 12, 2.4], [13, 13, 1.6]];
+      for (const [cx, cy, r] of craters) {
+        const d = Math.hypot(x - cx, y - cy);
+        if (d < r - 0.8) return [104, 116, 148, 255];
+        if (d < r) return x + y < cx + cy ? [88, 100, 134, 255] : [236, 242, 255, 255];
+      }
+      return x === 0 || y === 0 || x === 15 || y === 15 ? [132, 146, 178, 255] : null;
+    },
+  },
+  {
+    // Black charred rock, bright green cracks and a green halo: it looks radioactive.
+    name: 'meteoriet', base: [20, 18, 20], speckle: 8,
+    pattern: (x, y) => {
+      const crack = (x + y * 2) % 7 === 0 || (x * 2 - y + 30) % 9 === 0 || (x === 7 && y > 2 && y < 13);
+      if (crack) return (x + y) % 3 === 0 ? [220, 255, 190, 255] : [90, 255, 60, 255];
+      const edge = Math.min(x, y, 15 - x, 15 - y);
+      if (edge === 0) return [40, 190, 40, 255];
+      if (edge === 1) return [24, 92, 28, 255];
+      return (x * 5 + y * 7) % 11 === 0 ? [60, 40, 28, 255] : null;
+    },
+  },
+  {
+    // Icy blue with sharp white facets that meet in the middle.
+    name: 'ijsdiamant', base: [120, 196, 240], speckle: 8,
+    pattern: (x, y) => {
+      const d = Math.abs(x - 7.5) + Math.abs(y - 7.5);
+      if (x === 0 || y === 0 || x === 15 || y === 15) return [60, 140, 210, 255];
+      if (d < 2) return [255, 255, 255, 255];
+      if (x === y || x + y === 15 || x === 7 || x === 8 || y === 7 || y === 8) return [232, 250, 255, 255];
+      if (d >= 7 && d < 8) return [200, 238, 255, 255];
+      return (x < 8) === (y < 8) ? [150, 214, 248, 255] : [92, 168, 226, 255];
+    },
+  },
+  {
+    // Dark stone with a bright yellow lightning bolt.
+    name: 'bliksemsteen', base: [44, 46, 68], speckle: 8,
+    pattern: (x, y) => {
+      const bolt: readonly (readonly [number, number])[] = [
+        [9, 1], [8, 1], [8, 2], [7, 3], [7, 4], [6, 5], [5, 6], [6, 7], [7, 7], [8, 7], [8, 8], [7, 9], [7, 10], [6, 11], [6, 12], [5, 13], [5, 14],
+      ];
+      if (bolt.some(([bx, by]) => bx === x && by === y)) return [255, 244, 90, 255];
+      if (bolt.some(([bx, by]) => Math.abs(bx - x) + Math.abs(by - y) === 1)) return [255, 176, 20, 255];
+      return x === 0 || y === 0 || x === 15 || y === 15 ? [90, 96, 140, 255] : null;
+    },
+  },
+  {
+    // Rainbow rings around a white core.
+    name: 'regenboogkern', base: [255, 255, 255], speckle: 0,
     pattern: (x, y) => {
       const d = Math.hypot(x - 7.5, y - 7.5);
-      if (d < 3) return [255, 255, 235, 255];
-      if (d < 5) return [255, 244, 170, 255];
-      return x === 0 || y === 0 || x === 15 || y === 15 ? [214, 160, 40, 255] : null;
+      if (d < 2.2) return [255, 255, 255, 255];
+      return RAINBOW[Math.min(5, Math.floor((d - 2.2) / 1.5))] ?? null;
     },
   },
   {
-    name: 'regenboogsteen', base: [200, 200, 210], speckle: 6,
-    pattern: (x, y) => RAINBOW[Math.floor(((x + y) % 14) / 2)] ?? null,
-  },
-  {
-    name: 'sterrensteen', base: [24, 20, 70], speckle: 8,
+    // Deep blue with gold star dust and one bright star.
+    name: 'sterrenstof', base: [16, 16, 72], speckle: 8,
     pattern: (x, y) => {
-      if ((Math.abs(x - 7.5) < 1 && Math.abs(y - 7.5) < 3) || (Math.abs(y - 7.5) < 1 && Math.abs(x - 7.5) < 3)) {
-        return [255, 238, 120, 255];
-      }
-      if ((x * 7 + y * 11) % 17 === 0) return [255, 255, 255, 255];
-      if ((x * 5 + y * 3) % 19 === 0) return [160, 170, 255, 255];
-      return x === 0 || y === 0 || x === 15 || y === 15 ? [70, 60, 150, 255] : null;
+      const ax = Math.abs(x - 7.5);
+      const ay = Math.abs(y - 7.5);
+      if (ax + ay < 1.5) return [255, 255, 255, 255];
+      if ((ax < 1 && ay < 5) || (ay < 1 && ax < 5)) return [255, 240, 130, 255];
+      if (ax + ay < 3.5) return [255, 214, 70, 255];
+      if ((x * 7 + y * 11) % 13 === 0) return [255, 214, 70, 255];
+      if ((x * 5 + y * 3) % 17 === 0) return [180, 190, 255, 255];
+      return x === 0 || y === 0 || x === 15 || y === 15 ? [60, 50, 150, 255] : null;
     },
   },
 ];
@@ -246,14 +295,14 @@ function tileName(block: number, face: FaceKind): string | null {
     case IJS: return 'ijs';
     case SNEEUW: return 'sneeuw';
     case WOL_ORANJE: return 'wol-oranje';
-    case SMARAGD: return 'smaragd';
-    case ROBIJN: return 'robijn';
-    case SAFFIER: return 'saffier';
-    case AMETHIST: return 'amethist';
-    case KRISTAL: return 'kristal';
-    case LICHTSTEEN: return 'lichtsteen';
-    case REGENBOOGSTEEN: return 'regenboogsteen';
-    case STERRENSTEEN: return 'sterrensteen';
+    case DRAKENOOG: return 'drakenoog';
+    case LAVAKRISTAL: return 'lavakristal';
+    case MAANSTEEN: return 'maansteen';
+    case METEORIET: return 'meteoriet';
+    case IJSDIAMANT: return 'ijsdiamant';
+    case BLIKSEMSTEEN: return 'bliksemsteen';
+    case REGENBOOGKERN: return 'regenboogkern';
+    case STERRENSTOF: return 'sterrenstof';
     default: return null;
   }
 }

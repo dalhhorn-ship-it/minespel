@@ -35,18 +35,18 @@ export const IJS = 31;
 export const SNEEUW = 32;
 export const WOL_ORANJE = 33;
 // Rare blocks (v11 Dorp). A villager gives one of these for a right answer. Ids 34 to 41, never renumber.
-export const SMARAGD = 34;
-export const ROBIJN = 35;
-export const SAFFIER = 36;
-export const AMETHIST = 37;
-export const KRISTAL = 38;
-export const LICHTSTEEN = 39;
-export const REGENBOOGSTEEN = 40;
-export const STERRENSTEEN = 41;
+export const DRAKENOOG = 34;
+export const LAVAKRISTAL = 35;
+export const MAANSTEEN = 36;
+export const METEORIET = 37;
+export const IJSDIAMANT = 38;
+export const BLIKSEMSTEEN = 39;
+export const REGENBOOGKERN = 40;
+export const STERRENSTOF = 41;
 
 /** The rare blocks in villager order. */
 export const RARE_BLOCKS: readonly number[] = [
-  SMARAGD, ROBIJN, SAFFIER, AMETHIST, KRISTAL, LICHTSTEEN, REGENBOOGSTEEN, STERRENSTEEN,
+  DRAKENOOG, LAVAKRISTAL, MAANSTEEN, METEORIET, IJSDIAMANT, BLIKSEMSTEEN, REGENBOOGKERN, STERRENSTOF,
 ];
 
 export interface BlockInfo {
@@ -98,21 +98,21 @@ export const BLOCKS: readonly BlockInfo[] = [
   block(IJS, 'ijs', true),
   block(SNEEUW, 'sneeuw'),
   block(WOL_ORANJE, 'wol oranje'),
-  block(SMARAGD, 'smaragd'),
-  block(ROBIJN, 'robijn'),
-  block(SAFFIER, 'saffier'),
-  block(AMETHIST, 'amethist'),
-  block(KRISTAL, 'kristal'),
-  block(LICHTSTEEN, 'lichtsteen'),
-  block(REGENBOOGSTEEN, 'regenboogsteen'),
-  block(STERRENSTEEN, 'sterrensteen'),
+  block(DRAKENOOG, 'drakenoog'),
+  block(LAVAKRISTAL, 'lavakristal'),
+  block(MAANSTEEN, 'maansteen'),
+  block(METEORIET, 'meteoriet'),
+  block(IJSDIAMANT, 'ijsdiamant'),
+  block(BLIKSEMSTEEN, 'bliksemsteen'),
+  block(REGENBOOGKERN, 'regenboogkern'),
+  block(STERRENSTOF, 'sterrenstof'),
 ];
 
 /** The 32 building blocks a kid can place from the start, in grid order. Rare blocks are placeable too, but only once found, so they are not in this list. */
 export const PLACEABLE_BLOCKS: readonly number[] = BLOCKS.filter((b) => b.placeable && b.id <= WOL_ORANJE).map((b) => b.id);
 
 /** Highest block id, used to size atlas tables. */
-export const MAX_BLOCK_ID = STERRENSTEEN;
+export const MAX_BLOCK_ID = STERRENSTOF;
 
 export function blockInfo(id: number): BlockInfo {
   const info = BLOCKS[id];

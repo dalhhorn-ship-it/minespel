@@ -42,7 +42,7 @@ describe('block grid Dorp tab', () => {
 
     grid.setFound([RARE_BLOCKS[1]!, RARE_BLOCKS[7]!]);
     expect(count.textContent).toBe('2 van de 8 gevonden');
-    expect(tiles()[1]!.textContent).toBe('robijn');
+    expect(tiles()[1]!.textContent).toBe('lavakristal');
     expect(tiles()[1]!.textContent).not.toContain('?');
     expect(tiles()[0]!.textContent).toContain('?');
     tap(tiles()[0]!);

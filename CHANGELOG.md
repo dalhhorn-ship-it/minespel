@@ -4,6 +4,7 @@ Written so kids can read it too.
 
 ## 0.5.1 (2026-10-25)
 
+* The village stones got cooler names and looks: drakenoog, lavakristal, maansteen, meteoriet, ijsdiamant, bliksemsteen, regenboogkern and sterrenstof. The meteoriet glows green like it is from space.
 * The version number now shows at the bottom of the pause menu.
 
 ## 0.5.0 (2026-10-24)
@@ -14,7 +15,7 @@ Written so kids can read it too.
 * 8 villagers live in the villages. Each one has its own shirt and hat or hair. They wander around their home and you can walk right past them. You cannot build a block inside a villager.
 * Walk up to a villager and a bubble says "Hoi! Wil je een vraag?". Tap it and the villager asks one question from things you have already learned. There are no points, and you can always tap "Laat maar".
 * Answer right and the villager does a silly dance or shouts "Respect bruuuuu!". Then you get a rare block to collect. Put it in your hotbar and build with it.
-* 8 rare blocks are ready to find: smaragd, robijn, saffier, amethist, kristal, lichtsteen, regenboogsteen and sterrensteen. In Alle blokken the new Dorp tab shows them, with a "?" for the ones you have not found yet. Your rare blocks stay when mom or dad starts a new world.
+* 8 rare blocks are ready to find: drakenoog, lavakristal, maansteen, meteoriet, ijsdiamant, bliksemsteen, regenboogkern and sterrenstof. In Alle blokken the new Dorp tab shows them, with a "?" for the ones you have not found yet. Your rare blocks stay when mom or dad starts a new world.
 * After a question the villagers rest for 3 minutes of play time.
 
 * English: when you fill in a missing word, you now see what the whole sentence means in Dutch first.

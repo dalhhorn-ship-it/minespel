@@ -8,8 +8,8 @@ import {
   AARDE, BAKSTEEN, BASALT, BLADEREN, BOOMSTAM, DIAMANT, DIEPSTEEN, GLAS, GOUDSTEEN, GRANIET, GRAS,
   IJS, KEISTEEN, LAVA, MARMER, MOSSTEEN, OBSIDIAAN, PLACEABLE_BLOCKS, PLANKEN, SNEEUW, STEEN, VUUR,
   VUURSTEEN, WATER, WOL_BLAUW, WOL_GEEL, WOL_GROEN, WOL_ORANJE, WOL_PAARS, WOL_ROOD, WOL_WIT, ZAND,
-  ZANDSTEEN, RARE_BLOCKS, AMETHIST, KRISTAL, LICHTSTEEN, REGENBOOGSTEEN, ROBIJN, SAFFIER, SMARAGD,
-  STERRENSTEEN, blockInfo,
+  ZANDSTEEN, RARE_BLOCKS, METEORIET, IJSDIAMANT, BLIKSEMSTEEN, REGENBOOGKERN, LAVAKRISTAL, MAANSTEEN, DRAKENOOG,
+  STERRENSTOF, blockInfo,
 } from '../world/blocks';
 import { el } from './dom';
 import { onTap } from './tap';
@@ -49,14 +49,14 @@ export const BLOCK_CATEGORIES: readonly BlockCategory[] = [
 
 /** Tile colours for the rare blocks (the picture in the grid). */
 const RARE_COLORS: Readonly<Record<number, string>> = {
-  [SMARAGD]: 'radial-gradient(#d8ffe6 12%, #3deb82 40%, #16784a 100%)',
-  [ROBIJN]: 'radial-gradient(#ffd0d8 12%, #fa3c5a 40%, #820e24 100%)',
-  [SAFFIER]: 'radial-gradient(#d0e2ff 12%, #4682ff 40%, #183090 100%)',
-  [AMETHIST]: 'radial-gradient(#f0d2ff 12%, #be6efa 40%, #4a1e78 100%)',
-  [KRISTAL]: 'radial-gradient(#ffffff 15%, #aae8f8 55%, #60bee2 100%)',
-  [LICHTSTEEN]: 'radial-gradient(#ffffeb 15%, #fff4aa 45%, #ffe26e 100%)',
-  [REGENBOOGSTEEN]: 'linear-gradient(135deg, #ec3c3c, #f89628, #fae03c, #46be56, #3c78e6, #9e54d2)',
-  [STERRENSTEEN]: 'radial-gradient(#fff 8%, #ffee78 14%, #18144a 40%, #18144a 100%)',
+  [DRAKENOOG]: 'radial-gradient(#ffe45a 10%, #2fb25f 38%, #0f4a2a 100%)',
+  [LAVAKRISTAL]: 'radial-gradient(#ffd23c 10%, #ff7a14 38%, #46090c 100%)',
+  [MAANSTEEN]: 'radial-gradient(#f2f6ff 12%, #aab6d2 45%, #66749a 100%)',
+  [METEORIET]: 'radial-gradient(#b8ff8c 10%, #3cd23c 38%, #121412 100%)',
+  [IJSDIAMANT]: 'radial-gradient(#ffffff 12%, #8ad0f6 50%, #3c8cd2 100%)',
+  [BLIKSEMSTEEN]: 'radial-gradient(#fff45a 12%, #ffb414 30%, #2c2e44 70%, #2c2e44 100%)',
+  [REGENBOOGKERN]: 'radial-gradient(#fff 14%, #9e54d2 20%, #3c78e6 34%, #46be56 48%, #fae03c 62%, #f89628 76%, #ec3c3c 100%)',
+  [STERRENSTOF]: 'radial-gradient(#fff 8%, #ffd646 16%, #10104a 42%, #10104a 100%)',
 };
 
 export interface BlockGridOptions {

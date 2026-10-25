@@ -8,7 +8,7 @@ describe('blocks', () => {
   it('AC187: has 8 rare blocks, ids 34 to 41, placeable and minable, not in the 32 building blocks', () => {
     expect(RARE_BLOCKS).toEqual([34, 35, 36, 37, 38, 39, 40, 41]);
     expect(RARE_BLOCKS.map((id) => blockInfo(id).name)).toEqual([
-      'smaragd', 'robijn', 'saffier', 'amethist', 'kristal', 'lichtsteen', 'regenboogsteen', 'sterrensteen',
+      'drakenoog', 'lavakristal', 'maansteen', 'meteoriet', 'ijsdiamant', 'bliksemsteen', 'regenboogkern', 'sterrenstof',
     ]);
     for (const id of RARE_BLOCKS) {
       expect(isPlaceable(id)).toBe(true);

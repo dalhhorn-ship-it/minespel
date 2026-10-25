@@ -231,7 +231,7 @@ describe('village flow: the card and the answers (V11d)', () => {
     const s = await setup();
     await openCard(s);
     tap(option(rightIndex));
-    expect(byId('village-found')?.textContent).toBe('Je hebt smaragd gevonden!');
+    expect(byId('village-found')?.textContent).toBe('Je hebt drakenoog gevonden!');
     expect(s.setFoundBlocks).toHaveBeenLastCalledWith([RARE_BLOCKS[0]]);
     tap(byId('village-hotbar')!);
     expect(s.giveToHotbar).toHaveBeenCalledWith(RARE_BLOCKS[0]);

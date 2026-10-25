@@ -64,7 +64,7 @@ describe('village card (V11d)', () => {
     const s0 = startVillageCard(q(choice), 35, []);
     card.render(step(s0, ans(0, 0.9)));
     expect(card.element.textContent).toContain('Respect bruuuuu!');
-    expect(byId(card.element, 'village-found')?.textContent).toBe('Je hebt robijn gevonden!');
+    expect(byId(card.element, 'village-found')?.textContent).toBe('Je hebt lavakristal gevonden!');
     tap(byId(card.element, 'village-hotbar')!);
     tap(byId(card.element, 'village-verder')!);
     expect(actions.map((a) => a.type)).toEqual(['hotbar', 'verder']);
