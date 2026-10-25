@@ -1,9 +1,9 @@
 # Status
 
-**Phase:** small releases. 0.1.0, 0.2.0 Gouden ei and 0.3.0 Eerlijke punten are shipped (0.3.0 merged to main 2026-10-22, main CI green).
-**Current release:** v10 Punten voor elke ronde (0.4.0, decision 92), PRD signed 2026-10-24. Fast lane: V10a, V10b, V10c.
-**Next step:** R2 group A done (R2a boot and hooks out of `main.ts`, now 248 lines; R2c one shuffle, one serial queue, dead exports out; R2e UI review split, about 40 percent faster, no fixed waits). Next: group B, R2b one session writer and R2d no global dino store (rows updated for 0.4.0). Then architect review of R2, the R1 iPad tap check, and the "Bouwsels veilig" save fix (decision 95).
-**Next in the backlog:** see docs/BACKLOG.md. On hold: the save on refresh fix (decision 72). Founder iPad check AC165 still open.
+**Phase:** small releases. 0.1.0, 0.2.0 Gouden ei, 0.3.0 Eerlijke punten and 0.4.0 Punten voor elke ronde are shipped. PR 12 (green `main`, Dutch meaning on English gap questions, tech review) is live since 2026-10-24.
+**Current work:** refactor round R2 (decision 97), **paused by the founder on 2026-10-25** (decision 99). Group A (R2a, R2c, R2e) is done, verified and goes to `main` in its own PR. Group B (R2b, R2d) is not started: no code exists for it yet.
+**Next step (when the founder picks it up again):** group B of R2: R2b one session writer (points and ledger row in one transaction) and R2d no global dino store plus faster Vitest. Both rows in `docs/PLAN.md` are up to date for 0.4.0; measure the `npm test` time again before R2d. Then the architect review of R2, the R1 iPad tap check (startup changed in R2a), and the "Bouwsels veilig" save fix (decision 95).
+**Next in the backlog:** see docs/BACKLOG.md. The save on refresh fix (decision 72) is planned right after R2 (decision 95). Founder iPad check AC165 still open.
 **Blockers:** none. This cloud session cannot push tags or to main directly (HTTP 403), so main is updated through a pull request.
 
 ## Done
