@@ -134,6 +134,12 @@ export interface VillageRecord {
   cooldownMs: number;
   /** Id of the villager who asked last, or null. */
   lastVillager: string | null;
+  /**
+   * 0.5.1 (decision 106): how many of each rare block the kid has left, keyed by block id (34 to 41).
+   * Missing in a record of 0.5.0: the first load of 0.5.1 gives 2 of each found block, once.
+   * Not in the default, so a 0.5.0 record can be told apart from a 0.5.1 one.
+   */
+  stock?: Record<string, number>;
 }
 
 export interface KvRecords {

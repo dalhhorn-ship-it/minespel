@@ -7,6 +7,24 @@
 }
 .hotbar-slot[aria-pressed='true'] { outline: 5px solid var(--grass); outline-offset: -5px; background: var(--sand); }
 .hotbar-swatch { display: block; width: 34px; height: 34px; border: 2px solid var(--ink); border-radius: 6px; }
+/* Rare village blocks are counted (decision 106): a small number on the slot, greyed at 0. */
+.hotbar-slot { position: relative; }
+.hotbar-count {
+  position: absolute; right: 4px; bottom: 2px; min-width: 20px; padding: 0 4px;
+  border-radius: 999px; background: var(--ink); color: #fff;
+  font: inherit; font-size: 15px; font-weight: 900; line-height: 20px; text-align: center; pointer-events: none;
+}
+.hotbar-count[hidden] { display: none; }
+.hotbar-slot-empty .hotbar-swatch { filter: grayscale(1) brightness(0.8); opacity: 0.55; }
+.hotbar-slot-empty .hotbar-count { background: #6b7080; }
+.rare-empty-note {
+  position: fixed; left: 50%; bottom: calc(var(--safe-bottom, 0px) + 110px); z-index: 15;
+  transform: translateX(-50%); max-width: 80vw; padding: 10px 18px;
+  border: 3px solid var(--ink); border-radius: var(--radius); background: var(--paper); color: var(--ink);
+  font-family: var(--font-stack); font-size: var(--font-body); font-weight: 800; text-align: center;
+  pointer-events: none; user-select: none; -webkit-user-select: none;
+}
+.rare-empty-note[hidden] { display: none; }
 .hotbar-all {
   min-width: 96px; width: 100%; height: 100%; min-height: var(--touch-min);
   padding: 0 var(--gap); border: 0; background: var(--paper); color: var(--ink);
@@ -79,6 +97,13 @@
   display: flex; align-items: center; justify-content: center; width: 48px; height: 48px;
   font-size: 34px; font-weight: 900; line-height: 1;
 }
+.grid-rare-stock {
+  min-width: 28px; padding: 0 6px; border-radius: 999px; background: var(--ink); color: #fff;
+  font-size: 17px; font-weight: 900; line-height: 24px; text-align: center;
+}
+.grid-rare-stock[hidden] { display: none; }
+.grid-rare-empty .grid-swatch { filter: grayscale(1) brightness(0.8); opacity: 0.55; }
+.grid-rare-empty .grid-rare-stock { background: #6b7080; }
 .grid-rare-locked { background: #2b2f3a; color: #fff; border-color: #14161c; }
 .grid-rare-locked .grid-swatch { background: #14161c; border-color: #4a4f60; color: #ffe26e; }
 .grid-close {

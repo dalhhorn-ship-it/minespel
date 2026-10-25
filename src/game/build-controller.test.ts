@@ -1,9 +1,9 @@
 import { describe, expect, it, vi } from 'vitest';
-import { AIR, GRAS, OBSIDIAAN, OERSTEEN, STEEN, VUUR, WOL_ROOD } from '../world/blocks';
+import { AIR, GRAS, LAVAKRISTAL, OBSIDIAAN, OERSTEEN, RARE_BLOCKS, STEEN, VUUR, WOL_ROOD } from '../world/blocks';
 import { WORLD_HEIGHT, WORLD_SIZE } from '../world/terrain';
 import { World } from '../world/world';
 import { EYE_HEIGHT, createPlayer } from '../world/physics';
-import { DEFAULT_HOTBAR, aimFromScreen, createBuildController, tryLightObsidianGate } from './build-controller';
+import { DEFAULT_HOTBAR, aimFromScreen, createBuildController, tryLightObsidianGate, type BlockStock } from './build-controller';
 
 const FLOOR = 4; // floor top at y = 5
 function flatWorld(): World {
@@ -205,5 +205,96 @@ describe('build controller', () => {
     expect(w.get(11, 6, 20)).toBe(VUUR);
     expect(w.get(12, 6, 20)).toBe(VUUR);
     expect(changed).toContainEqual([12, 20]);
+  });
+});
+
+describe('build controller: counted rare blocks (0.5.1, decision 106)', () => {
+  function stockSetup(start: number) {
+    const s = setup(0, 0);
+    const counts = new Map<number, number>([[LAVAKRISTAL, start]]);
+    const changes: Array<[number, number]> = [];
+    const stock: BlockStock = {
+      limited: (b) => RARE_BLOCKS.includes(b),
+      count: (b) => counts.get(b) ?? 0,
+      change: (b, d) => {
+        changes.push([b, d]);
+        counts.set(b, Math.max(0, (counts.get(b) ?? 0) + d));
+      },
+    };
+    const onEmpty = vi.fn();
+    const c = createBuildController({
+      world: s.world, player: s.ctrl as never, onBlockChanged: s.onBlockChanged, effects: { pop: s.pop }, sound: { play: s.play },
+      viewport: () => ({ width: 1000, height: 700 }), stock, onEmpty,
+    });
+    s.world.set(20, 6, 26, GRAS);
+    c.setMode('bouwen');
+    c.setSlotBlock(4, LAVAKRISTAL);
+    return { ...s, c, counts, changes, onEmpty };
+  }
+
+  it('AC192: a stock of 2 places 2 blocks, then the third tap places nothing and says it is empty', () => {
+    const s = stockSetup(2);
+    s.c.tap(500, 350);
+    s.c.tap(500, 350);
+    expect(s.world.get(20, 6, 25)).toBe(LAVAKRISTAL);
+    expect(s.world.get(20, 6, 24)).toBe(LAVAKRISTAL);
+    expect(s.counts.get(LAVAKRISTAL)).toBe(0);
+    s.c.tap(500, 350);
+    expect(s.world.get(20, 6, 23)).toBe(AIR);
+    expect(s.counts.get(LAVAKRISTAL)).toBe(0);
+    expect(s.onEmpty).toHaveBeenCalledTimes(1);
+    expect(s.onEmpty).toHaveBeenCalledWith(LAVAKRISTAL);
+    expect(s.onBlockChanged).toHaveBeenCalledTimes(2);
+    expect(s.c.getState().hotbar[4]).toBe(LAVAKRISTAL); // the block stays in the hotbar
+  });
+
+  it('AC192: a double tap places at most as many blocks as the stock holds', () => {
+    const s = stockSetup(1);
+    s.c.tap(500, 350);
+    s.c.tap(500, 350);
+    let placed = 0;
+    for (let z = 20; z < 26; z++) if (s.world.get(20, 6, z) === LAVAKRISTAL) placed++;
+    expect(placed).toBe(1);
+    expect(s.counts.get(LAVAKRISTAL)).toBe(0);
+    expect(s.changes).toEqual([[LAVAKRISTAL, -1]]);
+  });
+
+  it('AC192: mining a placed rare block gives 1 back, also one that was in the world before 0.5.1', () => {
+    const s = stockSetup(0);
+    s.world.set(20, 6, 26, AIR);
+    s.world.set(20, 6, 24, LAVAKRISTAL); // placed by 0.5.0
+    s.c.setMode('hakken');
+    s.c.tap(500, 350);
+    expect(s.world.get(20, 6, 24)).toBe(AIR);
+    expect(s.counts.get(LAVAKRISTAL)).toBe(1);
+    expect(s.changes).toEqual([[LAVAKRISTAL, 1]]);
+    s.c.setMode('bouwen');
+    s.world.set(20, 6, 26, GRAS);
+    s.c.tap(500, 350);
+    expect(s.world.get(20, 6, 25)).toBe(LAVAKRISTAL);
+    expect(s.counts.get(LAVAKRISTAL)).toBe(0);
+  });
+
+  it('AC192: a failed place (no target) takes nothing', () => {
+    const s = stockSetup(2);
+    s.world.set(20, 6, 26, AIR);
+    s.ctrl.pitch = 1.4; // looking at the sky
+    s.c.tap(500, 350);
+    expect(s.counts.get(LAVAKRISTAL)).toBe(2);
+    expect(s.changes).toEqual([]);
+    expect(s.onEmpty).not.toHaveBeenCalled();
+  });
+
+  it('AC192: building blocks have no count: placing and mining them never touches the stock', () => {
+    const s = stockSetup(0);
+    s.c.setSlotBlock(2, WOL_ROOD);
+    for (let i = 0; i < 4; i++) s.c.tap(500, 350);
+    let placed = 0;
+    for (let z = 20; z < 26; z++) if (s.world.get(20, 6, z) === WOL_ROOD) placed++;
+    expect(placed).toBe(4);
+    s.c.setMode('hakken');
+    s.c.tap(500, 350);
+    expect(s.changes).toEqual([]);
+    expect(s.onEmpty).not.toHaveBeenCalled();
   });
 });

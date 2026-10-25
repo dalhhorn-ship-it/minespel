@@ -1,6 +1,8 @@
 // Helpers for the v11 Dorp e2e spec: seeding a seen item, standing next to a villager, real finger taps.
 import { expect, type Page } from '@playwright/test';
 import { itemFromId } from '../../../src/content/rekenen/generator';
+import { STEEN } from '../../../src/world/blocks';
+import { WORLD_HEIGHT, WORLD_SIZE } from '../../../src/world/terrain';
 import { openApp, readState } from './app';
 
 export interface VillagerInfo {
@@ -25,6 +27,13 @@ export interface VillageStateShape {
   found: number[];
   cooldownMs: number;
   lastVillager: string | null;
+  /** 0.5.1 (decision 106): how many of each rare block are left, keyed by block id as text. */
+  stock: Record<string, number>;
+}
+
+/** A stock with every rare block id at 0 plus the given counts, as the village record saves it. */
+export function stockOf(rare: readonly number[], counts: Record<number, number> = {}): Record<string, number> {
+  return Object.fromEntries(rare.map((id) => [String(id), counts[id] ?? 0]));
 }
 
 /** Hakken/Bouwen state as the game reports it. */
@@ -172,6 +181,43 @@ export async function waitBubble(page: Page, visible: boolean): Promise<BubbleSt
     })
     .toBe(visible);
   return bubble(page);
+}
+
+/** The middle column of the world, used as a flat test yard. */
+export const YARD = Math.floor(WORLD_SIZE / 2);
+
+/**
+ * Makes a flat stone yard around the middle of the world (top at y 9) and puts the player on it at y 10,
+ * looking along +z with a level view, so a tap in the middle of the screen aims at y 11.6 straight ahead.
+ */
+export async function flattenYard(page: Page): Promise<void> {
+  await page.evaluate(
+    ({ c, stone, height }) => {
+      const hooks = (window as unknown as { __dino: Record<string, (...a: number[]) => void> }).__dino;
+      for (let x = c - 10; x <= c + 10; x++)
+        for (let z = c - 10; z <= c + 10; z++)
+          for (let y = 0; y < height; y++) hooks.setBlock!(x, y, z, y < 10 ? stone : 0, 1);
+      hooks.rebuildWorld!();
+      hooks.placePlayer!(c + 0.5, 10, c + 0.5, 0);
+    },
+    { c: YARD, stone: STEEN, height: WORLD_HEIGHT },
+  );
+  await expect.poll(() => readState<{ onGround: boolean }>(page, 'player').then((p) => p.onGround)).toBe(true);
+}
+
+/** One finger on the world at the middle of the screen (it counts as a tap). Same as the build spec. */
+export async function worldTapCentre(page: Page, pointerId: number): Promise<void> {
+  const vp = page.viewportSize()!;
+  await page.evaluate(
+    ({ id, x, y }) => {
+      const target = document.querySelector('.world') as HTMLElement;
+      const fire = (type: string) =>
+        target.dispatchEvent(new PointerEvent(type, { pointerId: id, pointerType: 'touch', clientX: x, clientY: y, bubbles: true }));
+      fire('pointerdown');
+      fire('pointerup');
+    },
+    { id: pointerId, x: vp.width / 2 + 1, y: vp.height / 2 },
+  );
 }
 
 /** Types a whole number on the open number pad with finger taps and taps the done key. */

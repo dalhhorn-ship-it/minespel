@@ -3,6 +3,9 @@
 // and no ledger row, and never touches points. The card is a `kid-overlay` screen, so the play timer stops by itself.
 // The cooldown counts the play time that the timer driver takes off the countdown: it follows the countdown
 // going down, so time in a menu, a break, the parent area or the background never counts (AC186).
+// 0.5.1 (decision 106): the record also counts how many of each rare block are left. A right answer adds 2; the game
+// takes 1 per placed block and gives 1 back per mined one and tells this flow, which saves it. A 0.5.0 record (no
+// stock yet) gets 2 of each found block once, in one put, on the first load (AC193).
 import type { Sound } from '../audio/sound';
 import type { Catalog } from '../content/catalog';
 import { effectiveDay, systemClock, today, type Clock } from '../core/clock';
@@ -18,6 +21,7 @@ import {
   pickVillageQuestion,
   QUIET_BEFORE_BREAK_MS,
   reduceVillage,
+  REWARD_COUNT,
   startVillageCard,
   type VillageCardState,
   type VillageEffect,
@@ -40,7 +44,7 @@ export const HIDE_DISTANCE = 6;
 const SAVE_STEP_MS = 15_000;
 
 export interface VillageFlowOptions {
-  game: Pick<Game, 'player' | 'villagerSystem' | 'villageBubble' | 'setFoundBlocks' | 'giveToHotbar' | 'isRunning'>;
+  game: Pick<Game, 'player' | 'villagerSystem' | 'villageBubble' | 'setFoundBlocks' | 'giveToHotbar' | 'isRunning' | 'setRareStock'>;
   screens: Pick<ScreenManager, 'current' | 'showKidOverlay' | 'showWorld' | 'subscribe'>;
   timerDriver: Pick<TimerDriver, 'remainingPlayMs'>;
   records: Records;
@@ -62,6 +66,8 @@ export interface VillageFlow {
   tick(): void;
   /** The kid tapped the bubble (Game calls this). */
   onBubbleTapped(): void;
+  /** The game placed or mined a rare block, or gave placed ones back on Wereld opnieuw beginnen: save the new stock. */
+  onStockChanged(stock: Readonly<Record<number, number>>): void;
   isCardOpen(): boolean;
   state(): VillageRecord;
   /** Waits for the question that is being picked and for the saves on their way. */
@@ -83,15 +89,42 @@ function formatGiven(item: Item, response: Response): string {
   }
 }
 
+/** A clean stock: only rare block ids, whole numbers, never below 0. Every rare id is listed. */
+function cleanStock(raw: unknown): Record<string, number> {
+  const src = raw && typeof raw === 'object' && !Array.isArray(raw) ? (raw as Record<string, unknown>) : {};
+  const out: Record<string, number> = {};
+  for (const id of RARE_BLOCKS) {
+    const n = src[String(id)];
+    out[String(id)] = typeof n === 'number' && Number.isFinite(n) ? Math.max(0, Math.floor(n)) : 0;
+  }
+  return out;
+}
+
+/** The record with a stock: a record without one is from 0.5.0 and gets REWARD_COUNT of each found block. */
 function sanitize(raw: VillageRecord): VillageRecord {
   const found = [...new Set((Array.isArray(raw.found) ? raw.found : []).filter((b) => RARE_BLOCKS.includes(b)))].sort((a, b) => a - b);
   const cd = typeof raw.cooldownMs === 'number' && Number.isFinite(raw.cooldownMs) ? raw.cooldownMs : 0;
+  const stock = hasStock(raw)
+    ? cleanStock(raw.stock)
+    : cleanStock(Object.fromEntries(found.map((b) => [String(b), REWARD_COUNT])));
   return {
     found,
     cooldownMs: Math.min(COOLDOWN_MS, Math.max(0, cd)),
     lastVillager: typeof raw.lastVillager === 'string' ? raw.lastVillager : null,
+    stock,
   };
 }
+
+function hasStock(raw: VillageRecord): boolean {
+  return raw.stock !== undefined && raw.stock !== null && typeof raw.stock === 'object';
+}
+
+const copyOf = (v: VillageRecord): VillageRecord => ({
+  found: [...v.found],
+  cooldownMs: v.cooldownMs,
+  lastVillager: v.lastVillager,
+  stock: { ...(v.stock ?? {}) },
+});
 
 interface Prepared {
   token: number;
@@ -117,7 +150,7 @@ export function createVillageFlow(options: VillageFlowOptions): VillageFlow {
   const now = options.now ?? (() => clock.now());
   const { game, screens } = options;
 
-  let village: VillageRecord = { found: [], cooldownMs: 0, lastVillager: null };
+  let village: VillageRecord = sanitize({ found: [], cooldownMs: 0, lastVillager: null, stock: {} });
   let started = false;
   let lastRemaining: number | null = null;
   let lastSavedStep = Infinity;
@@ -135,9 +168,16 @@ export function createVillageFlow(options: VillageFlowOptions): VillageFlow {
   }
 
   function saveVillage() {
-    const copy: VillageRecord = { found: [...village.found], cooldownMs: village.cooldownMs, lastVillager: village.lastVillager };
+    const copy = copyOf(village);
     enqueue(() => options.records.put('village', copy));
   }
+
+  /** The stock as the game wants it: keyed by number. */
+  const stockForGame = (): Record<number, number> => {
+    const out: Record<number, number> = {};
+    for (const [k, n] of Object.entries(village.stock ?? {})) out[Number(k)] = n;
+    return out;
+  };
 
   function dropPrepared() {
     prep = null;
@@ -292,13 +332,18 @@ export function createVillageFlow(options: VillageFlowOptions): VillageFlow {
           );
           break;
         }
-        case 'found':
+        case 'reward': {
+          // Found (if new) and 2 more in stock, in one save (decision 106).
           if (!village.found.includes(ef.block)) {
             village.found = [...village.found, ef.block].sort((a, b) => a - b);
             game.setFoundBlocks(village.found);
-            saveVillage();
           }
+          const key = String(ef.block);
+          village.stock = { ...(village.stock ?? {}), [key]: (village.stock?.[key] ?? 0) + ef.count };
+          game.setRareStock(stockForGame());
+          saveVillage();
           break;
+        }
         case 'dance':
           game.villagerSystem.dance(o.villagerId);
           break;
@@ -367,10 +412,11 @@ export function createVillageFlow(options: VillageFlowOptions): VillageFlow {
   });
 
   if (__E2E__) {
-    registerHook('villageState', () => ({ found: [...village.found], cooldownMs: village.cooldownMs, lastVillager: village.lastVillager }));
+    registerHook('villageState', () => copyOf(village));
     registerHook('setVillageState', (s: Partial<VillageRecord>) => {
-      village = sanitize({ ...village, ...s });
+      village = sanitize({ ...village, ...s, stock: { ...(village.stock ?? {}), ...(s.stock ?? {}) } });
       game.setFoundBlocks(village.found);
+      game.setRareStock(stockForGame());
       lastSavedStep = Infinity;
       saveVillage();
     });
@@ -383,11 +429,16 @@ export function createVillageFlow(options: VillageFlowOptions): VillageFlow {
     async start() {
       if (started) return;
       try {
-        village = sanitize(await options.records.get('village'));
+        const raw = await options.records.get('village');
+        village = sanitize(raw);
+        // A 0.5.0 record (no stock): write the upgraded record once, in one put, so a kill leaves either the old
+        // record (the next start does the same upgrade) or the new one, never a mix (AC193).
+        if (!hasStock(raw)) await options.records.put('village', copyOf(village));
       } catch {
-        village = sanitize({ found: [], cooldownMs: 0, lastVillager: null });
+        /* unreadable or the upgrade put failed: play on with what we have; the next start tries again */
       }
       game.setFoundBlocks(village.found);
+      game.setRareStock(stockForGame());
       lastRemaining = options.timerDriver.remainingPlayMs();
       started = true;
       const ms = options.intervalMs ?? 250;
@@ -401,8 +452,14 @@ export function createVillageFlow(options: VillageFlowOptions): VillageFlow {
       if (!b.visible || !b.canAsk || !b.villager || !prep?.question) return;
       openCard(b.villager, prep.question, prep.day);
     },
+    onStockChanged(stock) {
+      // Before the record is loaded the game has no stock to change; never overwrite the saved one.
+      if (!started) return;
+      village.stock = cleanStock(Object.fromEntries(Object.entries(stock).map(([k, n]) => [String(k), n])));
+      saveVillage();
+    },
     isCardOpen: () => open !== null,
-    state: () => ({ found: [...village.found], cooldownMs: village.cooldownMs, lastVillager: village.lastVillager }),
+    state: () => copyOf(village),
     flush: async () => {
       await prepWork;
       await chain;

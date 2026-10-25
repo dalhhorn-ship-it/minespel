@@ -12,7 +12,7 @@ import { openDb, transact, request } from '../storage/db';
 import { createRecords } from '../storage/records';
 import { createSaveQueue } from '../storage/save-queue';
 import { createNullRenderer } from '../render/renderer';
-import { AIR, STEEN } from '../world/blocks';
+import { AIR, BLIKSEMSTEEN, LAVAKRISTAL, MAANSTEEN, STEEN } from '../world/blocks';
 import { CELL_COUNT, START_SPOT, WORLD_HEIGHT, WORLD_SEED, WORLD_SIZE, cellIndex, generateTerrain } from '../world/terrain';
 import { VILLAGE_SITES, inRegion, siteHasHouses, siteRegion } from '../world/village-layout';
 import type { World } from '../world/world';
@@ -105,6 +105,25 @@ describe('world save', () => {
     expect(game.world.diff().length).toBe(0);
     await queue.flushNow();
     expect(Array.from((await records.get('world')).diff)).toEqual([]);
+  });
+
+  it('AC193: a 0.5.0 world with 4 rare blocks placed loads with them at the same cells and every other cell unchanged', async () => {
+    const { records, queue } = await setupDb();
+    const cells = [
+      [5, 20, 5, LAVAKRISTAL], [6, 20, 5, LAVAKRISTAL], [40, 22, 41, MAANSTEEN], [7, 21, 9, BLIKSEMSTEEN],
+    ] as const;
+    const diff = [...cells.map(([x, y, z, b]) => cellIndex(x, y, z) * 256 + b), cellIndex(8, 20, 8) * 256 + STEEN].sort((a, b) => a - b);
+    await records.put('world', { diff: Uint32Array.from(diff), terrainVersion: 2 });
+    await records.put('player', {
+      x: 30.5, y: 15, z: 31.5, yaw: 0, pitch: 0, hotbar: [1, 2, 3, LAVAKRISTAL, 6, 9, 10, 12], selectedSlot: 3, mode: 'build',
+    });
+    const game = makeGame();
+    await createWorldSave({ game, queue, records }).restore();
+    for (const [x, y, z, b] of cells) expect(game.world.get(x, y, z)).toBe(b);
+    expect(Array.from(game.world.diff())).toEqual(diff);
+    // The rare block stays in the hotbar.
+    expect(game.getBuildState()).toMatchObject({ hotbar: [1, 2, 3, LAVAKRISTAL, 6, 9, 10, 12], selected: 3 });
+    expect(Array.from((await records.get('world')).diff)).toEqual(diff);
   });
 
   it('restores the v1 fixture (an old M1 save)', async () => {

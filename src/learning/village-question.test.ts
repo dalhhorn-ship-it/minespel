@@ -9,6 +9,7 @@ import { emptyRotation, pickModule } from './rotation';
 import {
   pickVillageQuestion,
   reduceVillage,
+  REWARD_COUNT,
   startVillageCard,
   type VillageCardState,
   type VillageEffect,
@@ -114,16 +115,17 @@ const answer = (response: typeof right | typeof wrong, roll = 0.7) =>
 const types = (effects: VillageEffect[]) => effects.map((e) => e.type);
 
 describe('village card state (V11d)', () => {
-  it('AC183, AC184: right on the first try moves the box up, gives the block and a celebration', () => {
+  it('AC183, AC184: right on the first try moves the box up, gives 2 of the block and a celebration', () => {
     const s0 = startVillageCard(question, 35, []);
     const r = reduceVillage(s0, answer(right, 0.7));
     expect(r.state).toMatchObject({ phase: 'right', firstTryRight: true, celebration: 'respect', alreadyFound: false });
-    expect(types(r.effects)).toEqual(['answer', 'box', 'found']);
+    expect(types(r.effects)).toEqual(['answer', 'box', 'reward']);
     expect(r.effects[1]).toEqual({ type: 'box', firstTryRight: true });
-    expect(r.effects[2]).toEqual({ type: 'found', block: 35 });
+    expect(r.effects[2]).toEqual({ type: 'reward', block: 35, count: 2 });
+    expect(REWARD_COUNT).toBe(2);
     expect(r.effects[0]).toMatchObject({ type: 'answer', try: 1, correct: true });
     const dance = reduceVillage(s0, answer(right, 0.2));
-    expect(types(dance.effects)).toEqual(['answer', 'box', 'dance', 'found']);
+    expect(types(dance.effects)).toEqual(['answer', 'box', 'dance', 'reward']);
   });
 
   it('AC184: wrong first try puts the box in 1 at once, shows the retry, and a right retry never changes the box', () => {
@@ -133,7 +135,7 @@ describe('village card state (V11d)', () => {
     expect(w.effects[1]).toEqual({ type: 'box', firstTryRight: false });
     const r = reduceVillage(w.state, answer(right));
     expect(r.state).toMatchObject({ phase: 'right', firstTryRight: false });
-    expect(types(r.effects)).toContain('found');
+    expect(r.effects).toContainEqual({ type: 'reward', block: 36, count: 2 });
     expect(types(r.effects)).not.toContain('box');
     expect(r.effects[0]).toMatchObject({ type: 'answer', try: 2, correct: true });
   });
@@ -148,12 +150,23 @@ describe('village card state (V11d)', () => {
     expect(done.effects).toEqual([]);
   });
 
-  it('AC184: a block found before gives no found effect and no hotbar button action', () => {
+  it('AC184: a block found before gives 2 more, and In mijn hotbar still works', () => {
     const s0 = startVillageCard(question, 35, [35, 39]);
     expect(s0.alreadyFound).toBe(true);
     const r = reduceVillage(s0, answer(right));
-    expect(types(r.effects)).not.toContain('found');
-    expect(reduceVillage(r.state, { type: 'hotbar' }).effects).toEqual([]);
+    expect(r.state.phase).toBe('right');
+    expect(r.effects).toContainEqual({ type: 'reward', block: 35, count: 2 });
+    const h = reduceVillage(r.state, { type: 'hotbar' });
+    expect(h.state.phase).toBe('closed');
+    expect(h.effects).toEqual([{ type: 'hotbar', block: 35 }]);
+  });
+
+  it('AC184: wrong twice or Laat maar never gives a reward', () => {
+    const s0 = startVillageCard(question, 35, [35]);
+    const w1 = reduceVillage(s0, answer(wrong));
+    const w2 = reduceVillage(w1.state, answer(wrong));
+    const l = reduceVillage(w1.state, { type: 'laatMaar' });
+    for (const e of [...w1.effects, ...w2.effects, ...l.effects]) expect(e.type).not.toBe('reward');
   });
 
   it('AC184: In mijn hotbar gives the block and closes', () => {
@@ -201,6 +214,6 @@ describe('village card state (V11d)', () => {
       st = r.state;
       all.push(...r.effects);
     }
-    expect(all.map((e) => e.type).every((t) => ['answer', 'box', 'found', 'dance', 'hotbar'].includes(t))).toBe(true);
+    expect(all.map((e) => e.type).every((t) => ['answer', 'box', 'reward', 'dance', 'hotbar'].includes(t))).toBe(true);
   });
 });

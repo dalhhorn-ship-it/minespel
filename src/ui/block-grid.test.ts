@@ -42,7 +42,8 @@ describe('block grid Dorp tab', () => {
 
     grid.setFound([RARE_BLOCKS[1]!, RARE_BLOCKS[7]!]);
     expect(count.textContent).toBe('2 van de 8 gevonden');
-    expect(tiles()[1]!.textContent).toBe('lavakristal');
+    expect(tiles()[1]!.querySelector('.grid-name')!.textContent).toBe('lavakristal');
+    expect(tiles()[1]!.querySelector('.grid-rare-stock')!.textContent).toBe('0'); // AC187: with no stock it shows 0
     expect(tiles()[1]!.textContent).not.toContain('?');
     expect(tiles()[0]!.textContent).toContain('?');
     tap(tiles()[0]!);
@@ -60,6 +61,44 @@ describe('block grid Dorp tab', () => {
     const router = { addIgnoreZone: () => () => {}, ownerOf: () => null, destroy() {} };
     const grid = createBlockGrid({ router, onPick: vi.fn(), found: [RARE_BLOCKS[0]!, RARE_BLOCKS[2]!, RARE_BLOCKS[3]!] });
     expect(grid.root.querySelector('[data-testid="grid-rare-count"]')!.textContent).toBe('3 van de 8 gevonden');
+    grid.destroy();
+  });
+
+  it('AC187, AC192: a found tile shows its stock; at 0 it is greyed with "0" and can still be picked; it still counts as found', () => {
+    const { grid, onPick } = setup();
+    const [a, b] = [RARE_BLOCKS[1]!, RARE_BLOCKS[4]!];
+    grid.setFound([a, b]);
+    grid.setStock({ [a]: 2, [b]: 0 });
+    grid.open();
+    tap(grid.root.querySelector('[data-testid="grid-cat-dorp"]')!);
+    const tile = (id: number) => grid.root.querySelector<HTMLButtonElement>(`.grid-rare[data-block-id="${id}"]`)!;
+    const stock = (id: number) => grid.root.querySelector<HTMLElement>(`[data-testid="grid-rare-stock-${id}"]`)!;
+    expect(stock(a).textContent).toBe('2');
+    expect(stock(a).hidden).toBe(false);
+    expect(tile(a).classList.contains('grid-rare-empty')).toBe(false);
+    expect(stock(b).textContent).toBe('0');
+    expect(tile(b).classList.contains('grid-rare-empty')).toBe(true);
+    expect(grid.root.querySelector('[data-testid="grid-rare-count"]')!.textContent).toBe('2 van de 8 gevonden');
+    // A block not found shows no number.
+    expect(stock(RARE_BLOCKS[0]!).hidden).toBe(true);
+    expect(tile(RARE_BLOCKS[0]!).classList.contains('grid-rare-empty')).toBe(false);
+    tap(tile(b));
+    expect(onPick).toHaveBeenCalledWith(b);
+    // Mined one back: no longer greyed.
+    grid.setStock({ [a]: 2, [b]: 1 });
+    expect(stock(b).textContent).toBe('1');
+    expect(tile(b).classList.contains('grid-rare-empty')).toBe(false);
+    grid.destroy();
+  });
+
+  it('AC187: the 32 building blocks show no count', () => {
+    const { grid } = setup();
+    grid.setStock({ [RARE_BLOCKS[0]!]: 4 });
+    grid.open();
+    for (const b of grid.root.querySelectorAll('button.grid-block')) {
+      expect(b.querySelector('.grid-rare-stock')).toBeNull();
+      expect(b.textContent).not.toMatch(/\d/);
+    }
     grid.destroy();
   });
 });

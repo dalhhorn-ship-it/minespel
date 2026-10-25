@@ -52,7 +52,7 @@ const samples: { [K in KvName]: KvRecords[K] } = {
     lastBackup: '2026-10-17',
     createdAt: '2026-10-01',
   },
-  village: { found: [35, 39], cooldownMs: 90_000, lastVillager: 'v3' },
+  village: { found: [35, 39], cooldownMs: 90_000, lastVillager: 'v3', stock: { '35': 2, '39': 0 } },
 };
 
 describe('records', () => {
@@ -146,6 +146,15 @@ describe('records', () => {
     await records.update('economy', (e) => ({ ...e, points: e.points + 5 }));
     expect((await records.get('economy')).points).toBe(10);
     expect(await get(db, 'kv', 'economy')).toMatchObject({ points: 10 });
+    db.close();
+  });
+  it('AC193: a 0.5.0 village record (no stock) reads back without a stock, so the upgrade can see it', async () => {
+    const db = await fresh();
+    const records = createRecords(db);
+    await records.put('village', { found: [36], cooldownMs: 5000, lastVillager: 'v2' });
+    const back = await records.get('village');
+    expect(back).toEqual({ found: [36], cooldownMs: 5000, lastVillager: 'v2' });
+    expect(back.stock).toBeUndefined();
     db.close();
   });
 });

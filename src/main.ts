@@ -273,6 +273,10 @@ if (app) {
       onVillageBubbleTapped: () => {
         villageFlow?.onBubbleTapped();
       },
+      // Rare block stock changed by building, mining or a world reset (decision 106): the village record saves it.
+      onRareStockChanged: (stock) => {
+        villageFlow?.onStockChanged(stock);
+      },
     });
     game.hud.countdownSlot.append(countdownView.root);
     game.on('teleported', () => {

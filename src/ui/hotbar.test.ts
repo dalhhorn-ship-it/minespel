@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { describe, expect, it, vi } from 'vitest';
-import { PLACEABLE_BLOCKS } from '../world/blocks';
+import { LAVAKRISTAL, MAANSTEEN, PLACEABLE_BLOCKS } from '../world/blocks';
 import { createBlockGrid } from './block-grid';
 import { createHotbar } from './hotbar';
 
@@ -34,6 +34,46 @@ describe('hotbar', () => {
     expect(all.textContent).toBe('Alle blokken');
     bar.destroy();
     expect(slots[0]!.querySelector('button')).toBeNull();
+  });
+});
+
+describe('hotbar: counted rare blocks (0.5.1, decision 106)', () => {
+  function setup(blocks: number[]) {
+    const slots = Array.from({ length: 8 }, () => document.createElement('div'));
+    const bar = createHotbar({ slots, allBlocksSlot: document.createElement('div'), blocks, selected: 0, onSelect: vi.fn(), onAllBlocks: vi.fn() });
+    const count = (i: number) => slots[i]!.querySelector<HTMLElement>('.hotbar-count')!;
+    const slot = (i: number) => slots[i]!.querySelector<HTMLElement>('button.hotbar-slot')!;
+    return { bar, count, slot };
+  }
+
+  it('AC192: a rare block slot shows its count, greyed with "0" at 0, and not greyed again after one is mined', () => {
+    const { bar, count, slot } = setup([1, 2, 3, LAVAKRISTAL, 6, 9, 10, MAANSTEEN]);
+    bar.setStock({ [LAVAKRISTAL]: 2 });
+    expect(count(3).hidden).toBe(false);
+    expect(count(3).textContent).toBe('2');
+    expect(slot(3).classList.contains('hotbar-slot-empty')).toBe(false);
+    expect(count(7).textContent).toBe('0');
+    expect(slot(7).classList.contains('hotbar-slot-empty')).toBe(true);
+    bar.setStock({ [LAVAKRISTAL]: 0 });
+    expect(count(3).textContent).toBe('0');
+    expect(slot(3).classList.contains('hotbar-slot-empty')).toBe(true);
+    bar.setStock({ [LAVAKRISTAL]: 1 });
+    expect(count(3).textContent).toBe('1');
+    expect(slot(3).classList.contains('hotbar-slot-empty')).toBe(false);
+    bar.destroy();
+  });
+
+  it('AC192: building blocks show no count, also after a rare block leaves the slot', () => {
+    const { bar, count, slot } = setup([1, 2, 3, LAVAKRISTAL, 6, 9, 10, 12]);
+    bar.setStock({ [LAVAKRISTAL]: 0 });
+    for (const i of [0, 1, 2, 4, 5, 6, 7]) {
+      expect(count(i).hidden).toBe(true);
+      expect(slot(i).classList.contains('hotbar-slot-empty')).toBe(false);
+    }
+    bar.setBlocks([1, 2, 3, 4, 6, 9, 10, 12]);
+    expect(count(3).hidden).toBe(true);
+    expect(slot(3).classList.contains('hotbar-slot-empty')).toBe(false);
+    bar.destroy();
   });
 });
 

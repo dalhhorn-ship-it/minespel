@@ -5,6 +5,7 @@ Written so kids can read it too.
 ## 0.5.1 (2026-10-25)
 
 * The village stones got cooler names and looks: drakenoog, lavakristal, maansteen, meteoriet, ijsdiamant, bliksemsteen, regenboogkern and sterrenstof. The meteoriet glows green like it is from space.
+* A villager now gives you 2 of their rare stone for each right answer. Placing one uses it up, and the number on the block shows how many you have left. Mine it and you get it back. Wereld opnieuw beginnen gives back every rare stone you placed.
 * The version number now shows at the bottom of the pause menu.
 
 ## 0.5.0 (2026-10-24)

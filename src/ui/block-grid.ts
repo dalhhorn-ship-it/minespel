@@ -67,6 +67,8 @@ export interface BlockGridOptions {
   selectedSlot?: number;
   /** Rare block ids the kid has found (default none). */
   found?: readonly number[];
+  /** How many of each rare block are left, keyed by id (decision 106). Missing means 0. */
+  stock?: Readonly<Record<number, number>>;
   onSelectSlot?: (slot: number) => void;
 }
 
@@ -78,6 +80,8 @@ export interface BlockGrid {
   setHotbar?(blocks: readonly number[], selected: number): void;
   /** Tells the Dorp tab which rare blocks are found. */
   setFound(ids: readonly number[]): void;
+  /** Tells the Dorp tab how many of each rare block are left. At 0 a found tile is greyed with "0". */
+  setStock(stock: Readonly<Record<number, number>>): void;
   destroy(): void;
 }
 
@@ -87,6 +91,7 @@ export function createBlockGrid(options: BlockGridOptions): BlockGrid {
   let currentSelected = options.selectedSlot ?? 0;
   let activeCategory: BlockCategoryId = 'all';
   let foundSet = new Set<number>(options.found ?? []);
+  let stock: Readonly<Record<number, number>> = { ...(options.stock ?? {}) };
 
   // 8-slot lower-bar selector row inside the modal so the kid can pick which lower-bar slot to customize (CR1)
   const slotButtons = Array.from({ length: 8 }, (_, idx) => {
@@ -162,30 +167,36 @@ export function createBlockGrid(options: BlockGridOptions): BlockGrid {
   });
 
   // Dorp tab: the 8 rare blocks. A block not found yet is a dark "?" tile that does nothing.
+  // A found block shows how many are left; with 0 it is greyed but can still be picked (decision 106).
   const rareEntries = RARE_BLOCKS.map((id) => {
     const swatch = el('span', { class: 'grid-swatch' });
     const name = el('span', { class: 'grid-name' });
-    const b = el('button', { class: 'grid-rare', attrs: { type: 'button', 'data-block-id': String(id) } }, [swatch, name]);
+    const left = el('span', { class: 'grid-rare-stock', attrs: { 'data-testid': `grid-rare-stock-${id}` } });
+    const b = el('button', { class: 'grid-rare', attrs: { type: 'button', 'data-block-id': String(id) } }, [swatch, name, left]);
     cleanups.push(onTap(b, () => {
       if (!foundSet.has(id)) return;
       options.onPick(id);
       close();
     }));
-    return { id, b, swatch, name };
+    return { id, b, swatch, name, left };
   });
   const counter = el('div', { class: 'grid-rare-count', attrs: { 'data-testid': 'grid-rare-count' } });
 
   function syncRare() {
     let n = 0;
-    for (const { id, b, swatch, name } of rareEntries) {
+    for (const { id, b, swatch, name, left } of rareEntries) {
       const isFound = foundSet.has(id);
       if (isFound) n++;
+      const count = Math.max(0, stock[id] ?? 0);
+      left.hidden = !isFound;
+      left.textContent = isFound ? String(count) : '';
+      b.classList.toggle('grid-rare-empty', isFound && count === 0);
       b.classList.toggle('grid-rare-locked', !isFound);
       b.setAttribute('aria-disabled', String(!isFound));
       swatch.textContent = isFound ? '' : '?';
       swatch.style.background = isFound ? (RARE_COLORS[id] ?? blockColor(id)) : '';
       name.textContent = isFound ? blockInfo(id).name : 'Een dorpeling heeft deze';
-      b.setAttribute('aria-label', isFound ? blockInfo(id).name : 'Nog niet gevonden. Een dorpeling heeft deze');
+      b.setAttribute('aria-label', isFound ? `${blockInfo(id).name}, nog ${count}` : 'Nog niet gevonden. Een dorpeling heeft deze');
     }
     counter.textContent = `${n} van de ${RARE_BLOCKS.length} gevonden`;
   }
@@ -259,6 +270,10 @@ export function createBlockGrid(options: BlockGridOptions): BlockGrid {
     },
     setFound(ids) {
       foundSet = new Set(ids);
+      syncRare();
+    },
+    setStock(next) {
+      stock = { ...next };
       syncRare();
     },
     destroy() {

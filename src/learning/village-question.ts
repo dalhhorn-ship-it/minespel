@@ -15,6 +15,8 @@ import { selectBreakItems } from './selection';
 export const COOLDOWN_MS = 3 * 60_000;
 /** No bubble when the play timer has this much or less left (AC182). */
 export const QUIET_BEFORE_BREAK_MS = 30_000;
+/** How many of the villager's rare block one right answer gives (decision 106). */
+export const REWARD_COUNT = 2;
 /** How many seen items one pick looks at before choosing one at random. */
 const POOL = 5;
 
@@ -84,7 +86,7 @@ export interface VillageCardState {
   question: VillageQuestion;
   /** The rare block of this villager. */
   gives: number;
-  /** True when the block was found before: "Die had je al!". */
+  /** True when the block was found before: "Nog 2 [naam] erbij!" instead of "Je hebt [naam] gevonden!". */
   alreadyFound: boolean;
   /** Set on a right answer: the villager dances, or shouts "Respect bruuuuu!". */
   celebration: Celebration | null;
@@ -96,14 +98,15 @@ export type VillageEvent =
   | { type: 'verder' }
   /** "Laat maar": close without a block. A first try already given still counts. */
   | { type: 'laatMaar' }
-  /** "In mijn hotbar" after a right answer with a new block. */
+  /** "In mijn hotbar" after a right answer. */
   | { type: 'hotbar' };
 
 export type VillageEffect =
   | { type: 'answer'; try: 1 | 2; correct: boolean; response: Response; ms: number; at: number }
   /** Only from the first try: right moves the box up, wrong puts it in box 1 (PRD 4.6). */
   | { type: 'box'; firstTryRight: boolean }
-  | { type: 'found'; block: number }
+  /** A right answer: the block is found (if it was not yet) and its stock goes up by `count` (decision 106). */
+  | { type: 'reward'; block: number; count: number }
   | { type: 'dance' }
   | { type: 'hotbar'; block: number };
 
@@ -140,14 +143,14 @@ export function reduceVillage(
       if (correct) {
         const celebration: Celebration = event.roll < 0.5 ? 'dance' : 'respect';
         if (celebration === 'dance') effects.push({ type: 'dance' });
-        if (!state.alreadyFound) effects.push({ type: 'found', block: state.gives });
+        effects.push({ type: 'reward', block: state.gives, count: REWARD_COUNT });
         return { state: { ...state, phase: 'right', firstTryRight, celebration }, effects };
       }
       if (state.try === 1) return { state: { ...state, try: 2, firstTryRight }, effects };
       return { state: { ...state, phase: 'wrong', firstTryRight }, effects };
     }
     case 'hotbar': {
-      if (state.phase !== 'right' || state.alreadyFound) return none;
+      if (state.phase !== 'right') return none;
       return {
         state: { ...state, phase: 'closed' },
         effects: [{ type: 'hotbar', block: state.gives }],

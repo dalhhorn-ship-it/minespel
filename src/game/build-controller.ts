@@ -112,6 +112,17 @@ export function aimFromScreen(pose: CameraPose, width: number, height: number, x
   return { ox: pose.x, oy: pose.y, oz: pose.z, dx: x2, dy: y1, dz: z2 };
 }
 
+/**
+ * Rare village blocks are counted (decision 106). Only blocks with `limited` true are counted: placing one takes 1,
+ * mining one gives 1 back. Every other block keeps the old rules: free and unlimited.
+ */
+export interface BlockStock {
+  limited(block: number): boolean;
+  count(block: number): number;
+  /** Adds delta (+1 or -1). Never goes below 0. */
+  change(block: number, delta: number): void;
+}
+
 export interface BuildControllerOptions {
   world: World;
   player: PlayerController;
@@ -124,6 +135,10 @@ export interface BuildControllerOptions {
   isOccupied?: IsOccupied;
   /** False while the world is stopped: taps then do nothing. */
   canAct?: () => boolean;
+  /** Counted rare blocks (decision 106). Without it every block is unlimited. */
+  stock?: BlockStock;
+  /** A build tap with a counted block and none left: nothing is placed. */
+  onEmpty?: (block: number) => void;
 }
 
 export interface BuildController {
@@ -151,15 +166,24 @@ export function createBuildController(options: BuildControllerOptions): BuildCon
       if (mode === 'hakken') {
         const r = mineBlock(options.world, aim);
         if (!r.ok) return;
+        if (options.stock?.limited(r.block)) options.stock.change(r.block, 1);
         options.onBlockChanged(r.x, r.z);
         options.effects.pop(x, y, r.block);
         options.sound.play('pop');
         return;
       }
       const block = hotbar[selected]!;
+      const counted = options.stock?.limited(block) === true;
+      // None left: nothing is placed. Each tap reads the count after the last one took its block,
+      // so a double tap never places more than the stock holds.
+      if (counted && options.stock!.count(block) <= 0) {
+        options.onEmpty?.(block);
+        return;
+      }
       const p = options.player.player;
       const r = placeBlock(options.world, aim, block, p, options.isOccupied);
       if (!r.ok) return;
+      if (counted) options.stock!.change(block, -1);
       if (r.liftPlayerTo !== undefined) {
         p.y = r.liftPlayerTo;
         p.vy = 0;

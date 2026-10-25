@@ -3,7 +3,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { GuardState } from '../platform/screen-guard';
 import { createNullRenderer, type GameRenderer } from '../render/renderer';
 import { START_SPOT } from '../world/terrain';
-import { createGame, type Game } from './game';
+import { LAVAKRISTAL, MAANSTEEN, STEEN } from '../world/blocks';
+import { World } from '../world/world';
+import { RARE_EMPTY_TEXT, createGame, placedRareBlocks, type Game } from './game';
 
 let frameCb: ((t: number) => void) | null = null;
 let clock = 0;
@@ -228,5 +230,85 @@ describe('game', () => {
     expect(s.game.getBuildState()).toEqual(state);
     const pressed = [...s.container.querySelectorAll('.hotbar-slot')].map((b) => b.getAttribute('aria-pressed'));
     expect(pressed.indexOf('true')).toBe(6);
+  });
+});
+
+describe('game: counted rare blocks (0.5.1, decision 106)', () => {
+  function stockGame() {
+    const container = document.createElement('div');
+    document.body.append(container);
+    const onRareStockChanged = vi.fn();
+    const world = new World();
+    const game = createGame({
+      container,
+      world,
+      guard: { subscribe: (l) => { l({ portrait: false, tooSmall: false }); return () => {}; } },
+      rendererFactory: (o) => createNullRenderer(o),
+      onRareStockChanged,
+    });
+    return { container, game, world, onRareStockChanged };
+  }
+
+  it('AC192: setRareStock shows the count on the hotbar slot and the Dorp tile, greyed at 0, without reporting a change', () => {
+    const s = stockGame();
+    s.game.setFoundBlocks([LAVAKRISTAL, MAANSTEEN]);
+    s.game.setBuildState({ hotbar: [1, 2, 3, LAVAKRISTAL, 6, 9, 10, MAANSTEEN], selected: 3 });
+    s.game.setRareStock({ [LAVAKRISTAL]: 2 });
+    const slots = s.container.querySelectorAll('.hotbar-slot');
+    expect(slots[3]!.querySelector('.hotbar-count')!.textContent).toBe('2');
+    expect(slots[7]!.querySelector('.hotbar-count')!.textContent).toBe('0');
+    expect(slots[7]!.classList.contains('hotbar-slot-empty')).toBe(true);
+    expect(s.container.querySelector(`[data-testid="grid-rare-stock-${LAVAKRISTAL}"]`)!.textContent).toBe('2');
+    expect(s.container.querySelector(`.grid-rare[data-block-id="${MAANSTEEN}"]`)!.classList.contains('grid-rare-empty')).toBe(true);
+    expect(s.game.rareStock()).toEqual({ [LAVAKRISTAL]: 2 });
+    expect(s.onRareStockChanged).not.toHaveBeenCalled();
+    s.game.dispose();
+  });
+
+  it('AC192: a build tap with none left places nothing and shows "Op! Een dorpeling geeft je er meer."', () => {
+    const s = stockGame();
+    s.game.setBuildState({ mode: 'bouwen', hotbar: [1, 2, 3, LAVAKRISTAL, 6, 9, 10, 12], selected: 3 });
+    s.game.setRareStock({});
+    const note = s.container.querySelector<HTMLElement>('[data-testid="rare-empty"]')!;
+    expect(note.hidden).toBe(true);
+    expect(note.textContent).toBe(RARE_EMPTY_TEXT);
+    expect(RARE_EMPTY_TEXT).toBe('Op! Een dorpeling geeft je er meer.');
+    const before = Array.from(s.world.diff());
+    const fire = (type: string) =>
+      s.container.dispatchEvent(new PointerEvent(type, { pointerId: 7, pointerType: 'touch', clientX: 900, clientY: 300, bubbles: true }));
+    fire('pointerdown');
+    fire('pointerup');
+    expect(note.hidden).toBe(false);
+    expect(Array.from(s.world.diff())).toEqual(before);
+    expect(s.game.rareStock()).toEqual({});
+    expect(s.onRareStockChanged).not.toHaveBeenCalled();
+    s.game.dispose();
+  });
+
+  it('AC188: Wereld opnieuw beginnen gives every placed rare block back to the stock and reports it', () => {
+    const s = stockGame();
+    s.game.setRareStock({ [LAVAKRISTAL]: 2 });
+    s.world.set(10, 30, 10, LAVAKRISTAL);
+    s.world.set(11, 30, 10, LAVAKRISTAL);
+    s.world.set(12, 30, 10, LAVAKRISTAL);
+    s.world.set(13, 30, 10, MAANSTEEN);
+    s.world.set(14, 30, 10, STEEN);
+    s.game.resetWorld();
+    expect(s.world.get(10, 30, 10)).not.toBe(LAVAKRISTAL);
+    expect(s.game.rareStock()).toEqual({ [LAVAKRISTAL]: 5, [MAANSTEEN]: 1 });
+    expect(s.onRareStockChanged).toHaveBeenLastCalledWith({ [LAVAKRISTAL]: 5, [MAANSTEEN]: 1 });
+    // A second reset has nothing to give back.
+    s.onRareStockChanged.mockClear();
+    s.game.resetWorld();
+    expect(s.game.rareStock()).toEqual({ [LAVAKRISTAL]: 5, [MAANSTEEN]: 1 });
+    expect(s.onRareStockChanged).not.toHaveBeenCalled();
+    s.game.dispose();
+  });
+
+  it('AC188: placedRareBlocks counts only rare blocks in a world diff', () => {
+    expect(placedRareBlocks([5 * 256 + LAVAKRISTAL, 9 * 256 + LAVAKRISTAL, 7 * 256 + STEEN, 3 * 256 + MAANSTEEN, 4 * 256])).toEqual({
+      [LAVAKRISTAL]: 2,
+      [MAANSTEEN]: 1,
+    });
   });
 });

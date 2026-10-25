@@ -7,12 +7,13 @@ import { VILLAGE_SITES, siteRegion } from '../../src/world/village-layout';
 import { killApp, openApp, readState } from './helpers/app';
 import { loginAsParent, setupPin } from './helpers/gate';
 import {
-  SEEN_ANSWER, SEEN_ITEM_ID, bubble, buildState, cardState, fingerTap, fingerTapText, getKv, openCardAt,
-  openForVillage, putKv, shirtPixels, standNear, typeNumber, villageState, villagers, waitBubble, walkFarAway,
-  type VillagerInfo,
+  SEEN_ANSWER, SEEN_ITEM_ID, YARD, bubble, buildState, cardState, fingerTap, fingerTapText, flattenYard, getKv, openCardAt,
+  openForVillage, putKv, shirtPixels, standNear, stockOf, typeNumber, villageState, villagers, waitBubble, walkFarAway,
+  worldTapCentre, type VillagerInfo,
 } from './helpers/dorp';
 
-// Release v11 Dorp (0.5.0), AC178 to AC191, played with real finger taps (page.touchscreen.tap).
+// Release v11 Dorp (0.5.0), AC178 to AC191, and its 0.5.1 update (AC192, AC193: counted rare blocks),
+// played with real finger taps (page.touchscreen.tap).
 // The pure rules have unit tests; these specs prove what needs a real browser: seeing, tapping, screens, saves.
 // AC190 (fps on the oldest iPad) is a founder check on the real iPad, listed in docs/TEST_REPORT.md.
 // AC191 (version and changelog) is checked in tests/unit/release-v11.test.ts.
@@ -257,7 +258,7 @@ test.describe('an old 0.4.0 save', () => {
 
   test('AC188: a save from 0.4.0 loads with 0 van de 8 gevonden and no cooldown running', async ({ page }) => {
     await openWithOldSave(page, []);
-    expect(await villageState(page)).toEqual({ found: [], cooldownMs: 0, lastVillager: null });
+    expect(await villageState(page)).toEqual({ found: [], cooldownMs: 0, lastVillager: null, stock: stockOf(RARE_BLOCKS) });
     await fingerTap(page, '.hotbar-all');
     await fingerTap(page, '[data-testid="grid-cat-dorp"]');
     await expect(page.locator('[data-testid="grid-rare-count"]')).toHaveText('0 van de 8 gevonden');
@@ -464,7 +465,7 @@ test.describe('the villager card', () => {
     expect([DANCE, RESPECT]).toContain(text);
     const gives = v.gives;
     await expect(page.locator('[data-testid="village-found"]')).toContainText('Je hebt');
-    await expect(page.locator('[data-testid="village-found"]')).toContainText('gevonden!');
+    await expect(page.locator('[data-testid="village-found"]')).toContainText('gevonden! Je krijgt er 2.');
     if (text === DANCE) {
       await expect(page.locator('[data-testid="village-face"]')).toHaveClass(/village-face-dance/);
       expect((await villagers(page)).find((x) => x.id === v.id)!.dancing).toBe(true);
@@ -483,12 +484,16 @@ test.describe('the villager card', () => {
     expect(after.hotbar.filter((b) => b === gives)).toHaveLength(1);
     expect(hotbarBefore.hotbar[hotbarBefore.selected]).not.toBe(gives);
     expect((await villageState(page)).found).toEqual([gives]);
+    expect((await villageState(page)).stock[String(gives)]).toBe(2);
+    // The hotbar slot shows the count (Flow 11 step 5).
+    await expect(page.locator(`[data-testid="hotbar-count-${after.selected}"]`)).toHaveText('2');
     // The Dorp tab
     await fingerTap(page, '.hotbar-all');
     await fingerTap(page, '[data-testid="grid-cat-dorp"]');
     await expect(page.locator('[data-testid="grid-rare-count"]')).toHaveText('1 van de 8 gevonden');
     await expect(page.locator('.grid-rare:not([hidden])')).toHaveCount(8);
     await expect(page.locator('.grid-rare-locked:not([hidden])')).toHaveCount(7);
+    await expect(page.locator(`[data-testid="grid-rare-stock-${gives}"]`)).toHaveText('2');
     await page.screenshot({ path: 'docs/screenshots/v11/dorp-tab.png' });
   });
 
@@ -568,6 +573,27 @@ test.describe('the villager card', () => {
     await expect.poll(() => cardState(page).then((c) => c.open)).toBe(false);
     await expect.poll(() => progressBox(page)).toBe(1);
     expect((await villageState(page)).found).toEqual([v.gives]);
+  });
+
+  test('AC184: a block found before gives "Nog 2 [naam] erbij!" and adds 2 to its stock, also from 0', async ({ page }) => {
+    await openForVillage(page);
+    const v = (await villagers(page))[2]!;
+    await readState(page, 'setVillageState', { found: [v.gives], stock: { [v.gives]: 0 } });
+    await openCardAt(page, v.id);
+    await answerRight(page);
+    const name = await page.locator('[data-testid="village-more"]').innerText();
+    expect(name).toMatch(/^Nog 2 \S+ erbij!$/);
+    await expect(page.locator('[data-testid="village-found"]')).toHaveCount(0);
+    await expect(page.locator('[data-testid="village-card"]')).not.toContainText('Die had je al!');
+    await fingerTap(page, '[data-testid="village-hotbar"]');
+    await expect.poll(() => cardState(page).then((c) => c.open)).toBe(false);
+    const st = await buildState(page);
+    expect(st.hotbar[st.selected]).toBe(v.gives);
+    const s = await villageState(page);
+    expect(s.found).toEqual([v.gives]);
+    expect(s.stock[String(v.gives)]).toBe(2);
+    await expect(page.locator(`[data-testid="hotbar-count-${st.selected}"]`)).toHaveText('2');
+    await expect.poll(async () => (await getKv<{ stock?: Record<string, number> }>(page, 'village'))?.stock?.[String(v.gives)]).toBe(2);
   });
 
   test('AC183 AC186: Laat maar closes the card, gives nothing and still starts the cooldown', async ({ page }) => {
@@ -741,44 +767,92 @@ test.describe('rare blocks and the Dorp tab', () => {
     await fingerTap(page, '[data-testid="grid-cat-dorp"]');
     await expect(page.locator('[data-testid="grid-rare-count"]')).toHaveText('8 van de 8 gevonden');
     await expect(page.locator('.grid-rare-locked:not([hidden])')).toHaveCount(0);
+    for (const id of RARE_BLOCKS) await expect(page.locator(`[data-testid="grid-rare-stock-${id}"]`)).toHaveText('2');
+    expect((await villageState(page)).stock).toEqual(Object.fromEntries(RARE_BLOCKS.map((id) => [String(id), 2])));
   });
 
-  test('AC187: a found block is picked from the Dorp tab, placed without limit and mined', async ({ page }) => {
+  test('AC187 AC192: a found block is picked from the Dorp tab; a stock of 2 places twice, then "Op!", and mining gives one back', async ({ page }) => {
     await openApp(page);
-    const block = RARE_BLOCKS[0]!;
-    await readState(page, 'setVillageState', { found: [block] });
+    const block = RARE_BLOCKS[1]!; // lavakristal
+    await readState(page, 'setVillageState', { found: [block], stock: { [block]: 2 } });
+    await flattenYard(page);
     await fingerTap(page, '.hotbar-all');
     await fingerTap(page, '[data-testid="grid-cat-dorp"]');
+    await expect(page.locator(`[data-testid="grid-rare-stock-${block}"]`)).toHaveText('2');
     await fingerTap(page, `.grid-rare[data-block-id="${block}"]`);
     await expect(page.locator('.block-grid:not([hidden])')).toHaveCount(0);
     const st = await buildState(page);
     expect(st.hotbar[st.selected]).toBe(block);
-    // Placed twice in two places, still in the hotbar (no limit); then mined away.
-    await readState(page, 'setBuildState', { mode: 'bouwen' });
-    const spot = START_SPOT;
-    const y = groundY(spot.x, spot.z) + 1;
-    await page.evaluate(
-      ({ x, y, z, block }) => {
-        const hooks = (window as unknown as { __dino: Record<string, (...a: number[]) => void> }).__dino;
-        hooks.setBlock!(x + 3, y, z, block);
-        hooks.setBlock!(x + 4, y, z, block);
-      },
-      { x: Math.floor(spot.x), y, z: Math.floor(spot.z), block },
-    );
-    expect(await readState<number>(page, 'blockAt', Math.floor(spot.x) + 3, y, Math.floor(spot.z))).toBe(block);
-    const st2 = await buildState(page);
-    expect(st2.hotbar[st2.selected]).toBe(block);
-    await page.evaluate(
-      ({ x, y, z }) => (window as unknown as { __dino: Record<string, (...a: number[]) => void> }).__dino.setBlock!(x + 3, y, z, 0),
-      { x: Math.floor(spot.x), y, z: Math.floor(spot.z) },
-    );
-    expect(await readState<number>(page, 'blockAt', Math.floor(spot.x) + 3, y, Math.floor(spot.z))).toBe(0);
+    const count = page.locator(`[data-testid="hotbar-count-${st.selected}"]`);
+    const slot = page.locator('.hotbar-slot').nth(st.selected);
+    await expect(count).toHaveText('2');
+    await expect(slot).not.toHaveClass(/hotbar-slot-empty/);
+
+    // A wall to build against, 5 ahead at eye height. Each tap builds one closer.
+    await readState(page, 'setBlock', YARD, 11, YARD + 5, STEEN);
+    await fingerTap(page, '.hud-mode:has-text("Bouwen")');
+    await expect.poll(() => buildState(page).then((b) => b.mode)).toBe('bouwen');
+    await worldTapCentre(page, 41);
+    await expect.poll(() => readState<number>(page, 'blockAt', YARD, 11, YARD + 4)).toBe(block);
+    await worldTapCentre(page, 42);
+    await expect.poll(() => readState<number>(page, 'blockAt', YARD, 11, YARD + 3)).toBe(block);
+    expect((await villageState(page)).stock[String(block)]).toBe(0);
+    await expect(count).toHaveText('0');
+    await expect(slot).toHaveClass(/hotbar-slot-empty/);
+    await expect(page.locator('[data-testid="rare-empty"]')).toBeHidden();
+    // The Dorp tile is greyed with 0 and still counts as found.
+    await fingerTap(page, '.hotbar-all');
+    await fingerTap(page, '[data-testid="grid-cat-dorp"]');
+    await expect(page.locator(`[data-testid="grid-rare-stock-${block}"]`)).toHaveText('0');
+    await expect(page.locator(`.grid-rare[data-block-id="${block}"]`)).toHaveClass(/grid-rare-empty/);
+    await expect(page.locator('[data-testid="grid-rare-count"]')).toHaveText('1 van de 8 gevonden');
+    await fingerTapText(page, 'Klaar', '.block-grid');
+    await expect(page.locator('.block-grid:not([hidden])')).toHaveCount(0);
+
+    // A third tap: nothing is placed, the stock stays 0 and the "Op!" line shows.
+    await worldTapCentre(page, 43);
+    await expect(page.locator('[data-testid="rare-empty"]')).toBeVisible();
+    await expect(page.locator('[data-testid="rare-empty"]')).toHaveText('Op! Een dorpeling geeft je er meer.');
+    expect(await readState<number>(page, 'blockAt', YARD, 11, YARD + 2)).toBe(0);
+    expect((await villageState(page)).stock[String(block)]).toBe(0);
+
+    // Hakken: mining one gives it back, and the slot is no longer greyed.
+    await fingerTap(page, '.hud-mode:has-text("Hakken")');
+    await expect.poll(() => buildState(page).then((b) => b.mode)).toBe('hakken');
+    await worldTapCentre(page, 44);
+    await expect.poll(() => readState<number>(page, 'blockAt', YARD, 11, YARD + 3)).toBe(0);
+    expect((await villageState(page)).stock[String(block)]).toBe(1);
+    await expect(count).toHaveText('1');
+    await expect(slot).not.toHaveClass(/hotbar-slot-empty/);
+    await expect.poll(async () => (await getKv<{ stock?: Record<string, number> }>(page, 'village'))?.stock?.[String(block)]).toBe(1);
   });
 
-  test('AC188: three found blocks and one in the hotbar survive a kill and reopen', async ({ page }) => {
+  test('AC192: a double tap with a stock of 1 places one block; a rare block placed before 0.5.1 gives one back when mined', async ({ page }) => {
+    await openApp(page);
+    const block = RARE_BLOCKS[3]!;
+    await readState(page, 'setVillageState', { found: [block], stock: { [block]: 1 } });
+    await flattenYard(page);
+    await readState(page, 'setBuildState', { mode: 'bouwen', hotbar: [1, 2, 3, block, 6, 9, 10, 12], selected: 3 });
+    await readState(page, 'setBlock', YARD, 11, YARD + 5, STEEN);
+    await worldTapCentre(page, 51);
+    await worldTapCentre(page, 52);
+    await expect.poll(() => readState<number>(page, 'blockAt', YARD, 11, YARD + 4)).toBe(block);
+    expect(await readState<number>(page, 'blockAt', YARD, 11, YARD + 3)).toBe(0);
+    expect((await villageState(page)).stock[String(block)]).toBe(0);
+    // A block that stood in the world before (as a 0.5.0 save has it): mining it adds 1.
+    await readState(page, 'setBlock', YARD, 11, YARD + 4, 0);
+    await readState(page, 'setBlock', YARD, 11, YARD + 2, block);
+    await readState(page, 'setBuildState', { mode: 'hakken' });
+    await worldTapCentre(page, 53);
+    await expect.poll(() => readState<number>(page, 'blockAt', YARD, 11, YARD + 2)).toBe(0);
+    expect((await villageState(page)).stock[String(block)]).toBe(1);
+  });
+
+  test('AC188: three found blocks with stocks 2, 0 and 5 and one in the hotbar survive a kill and reopen', async ({ page }) => {
     await openApp(page);
     const found = [RARE_BLOCKS[0]!, RARE_BLOCKS[3]!, RARE_BLOCKS[6]!];
-    await readState(page, 'setVillageState', { found });
+    const counts = { [found[0]!]: 2, [found[1]!]: 0, [found[2]!]: 5 };
+    await readState(page, 'setVillageState', { found, stock: counts });
     await fingerTap(page, '.hotbar-all');
     await fingerTap(page, '[data-testid="grid-cat-dorp"]');
     await fingerTap(page, `.grid-rare[data-block-id="${found[1]}"]`);
@@ -786,25 +860,33 @@ test.describe('rare blocks and the Dorp tab', () => {
     await expect.poll(async () => (await getKv<{ found: number[] }>(page, 'village'))?.found ?? []).toEqual(found);
     const fresh = await killApp(page);
     expect((await villageState(fresh)).found).toEqual(found);
+    expect((await villageState(fresh)).stock).toEqual(stockOf(RARE_BLOCKS, counts));
     const st = await buildState(fresh);
     expect(st.hotbar[st.selected]).toBe(found[1]);
+    await expect(fresh.locator(`[data-testid="hotbar-count-${st.selected}"]`)).toHaveText('0');
     await fingerTap(fresh, '.hotbar-all');
     await fingerTap(fresh, '[data-testid="grid-cat-dorp"]');
     await expect(fresh.locator('[data-testid="grid-rare-count"]')).toHaveText('3 van de 8 gevonden');
+    for (const id of found) await expect(fresh.locator(`[data-testid="grid-rare-stock-${id}"]`)).toHaveText(String(counts[id]));
   });
 
-  test('AC188: Wereld opnieuw beginnen keeps the found blocks and removes rare blocks placed in the old world', async ({ page }) => {
+  test('AC188: Wereld opnieuw beginnen keeps the found blocks, removes placed rare blocks and gives them back to the stock', async ({ page }) => {
     await openApp(page);
     await setupPin(page);
     const found = [RARE_BLOCKS[1]!, RARE_BLOCKS[2]!, RARE_BLOCKS[5]!];
-    await readState(page, 'setVillageState', { found });
+    const lavakristal = found[0]!;
+    await readState(page, 'setVillageState', { found, stock: { [lavakristal]: 2 } });
     const y = groundY(START_SPOT.x, START_SPOT.z) + 1;
-    const cell = { x: Math.floor(START_SPOT.x) + 3, y, z: Math.floor(START_SPOT.z) };
+    const cells = [3, 4, 5].map((dx) => ({ x: Math.floor(START_SPOT.x) + dx, y, z: Math.floor(START_SPOT.z) }));
     await page.evaluate(
-      ({ cell, block }) => (window as unknown as { __dino: Record<string, (...a: number[]) => void> }).__dino.setBlock!(cell.x, cell.y, cell.z, block),
-      { cell, block: found[0]! },
+      ({ cells, block }) => {
+        const hooks = (window as unknown as { __dino: Record<string, (...a: number[]) => void> }).__dino;
+        for (const c of cells) hooks.setBlock!(c.x, c.y, c.z, block);
+      },
+      { cells, block: lavakristal },
     );
-    expect(await readState<number>(page, 'blockAt', cell.x, cell.y, cell.z)).toBe(found[0]);
+    const cell = cells[0]!;
+    for (const c of cells) expect(await readState<number>(page, 'blockAt', c.x, c.y, c.z)).toBe(lavakristal);
 
     await loginAsParent(page);
     await fingerTap(page, '.parent-nav-btn[data-section="instellingen"]');
@@ -815,15 +897,64 @@ test.describe('rare blocks and the Dorp tab', () => {
     await expect(page.locator('[data-testid="parent-shell"]')).toBeHidden();
 
     expect((await villageState(page)).found).toEqual(found);
+    for (const c of cells) expect(await readState<number>(page, 'blockAt', c.x, c.y, c.z)).toBe(0);
+    expect((await villageState(page)).stock).toEqual(stockOf(RARE_BLOCKS, { [lavakristal]: 5 }));
+    await expect.poll(async () => (await getKv<{ stock?: Record<string, number> }>(page, 'village'))?.stock?.[String(lavakristal)]).toBe(5);
     // The villages stand in the new world.
     const sites = await readState<Array<{ hasHouses: boolean }>>(page, 'villageSites');
     expect(sites.every((s) => s.hasHouses)).toBe(true);
     await fingerTap(page, '.hotbar-all');
     await fingerTap(page, '[data-testid="grid-cat-dorp"]');
     await expect(page.locator('[data-testid="grid-rare-count"]')).toHaveText('3 van de 8 gevonden');
+    await expect(page.locator(`[data-testid="grid-rare-stock-${lavakristal}"]`)).toHaveText('5');
     await fingerTap(page, `.grid-rare[data-block-id="${found[2]}"]`);
     const st = await buildState(page);
     expect(st.hotbar[st.selected]).toBe(found[2]);
+  });
+});
+
+// ---------------------------------------------------------------- a 0.5.0 save in 0.5.1 (AC193)
+
+test.describe('a 0.5.0 save', () => {
+  test('AC193: found blocks get 2 each once, the rest stay "?", placed rare blocks, the cooldown and the last villager stay', async ({ page }) => {
+    await openApp(page);
+    const found = [RARE_BLOCKS[0]!, RARE_BLOCKS[4]!, RARE_BLOCKS[7]!];
+    const sx = Math.floor(START_SPOT.x);
+    const sz = Math.floor(START_SPOT.z);
+    const y = groundY(sx, sz) + 1;
+    const placed = [
+      { x: sx + 3, y, z: sz, b: found[0]! }, { x: sx + 4, y, z: sz, b: found[0]! },
+      { x: sx + 3, y, z: sz + 2, b: found[1]! }, { x: sx + 4, y: y + 1, z: sz + 2, b: RARE_BLOCKS[2]! },
+    ];
+    const kid = { x: sx - 3, y, z: sz, b: STEEN };
+    const diff = [...placed, kid].map((c) => cellIndex(c.x, c.y, c.z) * 256 + c.b).sort((a, b) => a - b);
+    // Stop the save queue, then write exactly what 0.5.0 saved: a version 2 world and a village record without a stock.
+    await readState(page, 'simulateKill');
+    await putKv(page, 'world', { diff: Uint32Array.from(diff), terrainVersion: CURRENT_TERRAIN_VERSION });
+    await putKv(page, 'village', { found, cooldownMs: 100_000, lastVillager: 'v5' });
+    await page.reload();
+    await page.waitForFunction(() => (window as unknown as { __dino?: Record<string, () => unknown> }).__dino?.ready?.() === true);
+
+    const want = stockOf(RARE_BLOCKS, { [found[0]!]: 2, [found[1]!]: 2, [found[2]!]: 2 });
+    await expect.poll(async () => (await villageState(page)).stock).toEqual(want);
+    const s = await villageState(page);
+    expect(s.found).toEqual(found);
+    expect(s.lastVillager).toBe('v5');
+    expect(s.cooldownMs).toBeLessThanOrEqual(100_000);
+    expect(s.cooldownMs).toBeGreaterThan(90_000);
+    for (const c of [...placed, kid]) expect(await readState<number>(page, 'blockAt', c.x, c.y, c.z)).toBe(c.b);
+    await expect.poll(async () => (await getKv<{ stock?: Record<string, number> }>(page, 'village'))?.stock).toEqual(want);
+    await fingerTap(page, '.hotbar-all');
+    await fingerTap(page, '[data-testid="grid-cat-dorp"]');
+    await expect(page.locator('[data-testid="grid-rare-count"]')).toHaveText('3 van de 8 gevonden');
+    await expect(page.locator('.grid-rare-locked:not([hidden])')).toHaveCount(5);
+    for (const id of found) await expect(page.locator(`[data-testid="grid-rare-stock-${id}"]`)).toHaveText('2');
+
+    // Opened a second time: nothing is added again.
+    await page.reload();
+    await page.waitForFunction(() => (window as unknown as { __dino?: Record<string, () => unknown> }).__dino?.ready?.() === true);
+    expect((await villageState(page)).stock).toEqual(want);
+    for (const c of [...placed, kid]) expect(await readState<number>(page, 'blockAt', c.x, c.y, c.z)).toBe(c.b);
   });
 });
 
@@ -865,7 +996,7 @@ test.describe('safety', () => {
     await expect(card.locator('a, iframe, script, img, form')).toHaveCount(0);
   });
 
-  test('AC189: the only new saved data is the found list, the cooldown and the last villager', async ({ page }) => {
+  test('AC189: the only new saved data is the found list, the stock per rare block, the cooldown and the last villager', async ({ page }) => {
     await openForVillage(page);
     const v = (await villagers(page))[0]!;
     await openCardAt(page, v.id);
@@ -874,7 +1005,10 @@ test.describe('safety', () => {
     await expect.poll(() => cardState(page).then((c) => c.open)).toBe(false);
     await expect
       .poll(async () => Object.keys((await getKv<Record<string, unknown>>(page, 'village')) ?? {}).sort())
-      .toEqual(['cooldownMs', 'found', 'lastVillager']);
+      .toEqual(['cooldownMs', 'found', 'lastVillager', 'stock']);
+    const saved = (await getKv<{ stock: Record<string, number> }>(page, 'village'))!;
+    expect(Object.keys(saved.stock).map(Number).sort((a, b) => a - b)).toEqual([...RARE_BLOCKS].sort((a, b) => a - b));
+    expect(Object.values(saved.stock).every((n) => Number.isInteger(n) && n >= 0)).toBe(true);
   });
 });
 

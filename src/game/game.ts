@@ -19,6 +19,7 @@ import type { GameRenderer, RendererFactory } from '../render/renderer';
 import { createHud, type Hud } from '../ui/hud';
 import { createVillageBubble, type VillageBubble } from '../ui/village-bubble';
 import { el } from '../ui/dom';
+import { RARE_BLOCKS } from '../world/blocks';
 import { World } from '../world/world';
 import { createLoop } from './loop';
 import { createPlayerController, type PlayerController } from './player-controller';
@@ -54,6 +55,10 @@ export interface Game {
   setFoundBlocks(ids: readonly number[]): void;
   /** Puts a block in the selected hotbar slot and saves it (V11d "In mijn hotbar", AC184). */
   giveToHotbar(block: number): void;
+  /** Sets how many of each rare block are left (decision 106). The hotbar and the Dorp tab show it. */
+  setRareStock(stock: Readonly<Record<number, number>>): void;
+  /** A copy of the rare block stock, keyed by block id. */
+  rareStock(): Record<number, number>;
   /** Stops the world: no steps, no drawing. Safe to call twice. */
   pause(): void;
   resume(): void;
@@ -64,7 +69,10 @@ export interface Game {
   setBuildState(state: Partial<BuildState>): void;
   /** Puts the player back on the start spot and says so with `teleported`. */
   teleportHome(): void;
-  /** Puts every block back to the start world, saves that, and puts the player on the start spot. */
+  /**
+   * Puts every block back to the start world, saves that, and puts the player on the start spot.
+   * Every rare block placed in the old world goes back to the stock first (decision 106).
+   */
   resetWorld(): void;
   on<K extends keyof GameEvents>(event: K, listener: (payload: GameEvents[K]) => void): () => void;
   /** Frames drawn since the start. */
@@ -93,6 +101,22 @@ export interface GameOptions {
   onBlockGridOpenChange?: (open: boolean) => void;
   /** The kid tapped the villager bubble (V11d). */
   onVillageBubbleTapped?: () => void;
+  /** The rare block stock changed by placing, mining or Wereld opnieuw beginnen (decision 106). Not on setRareStock. */
+  onRareStockChanged?: (stock: Record<number, number>) => void;
+}
+
+/** "Op!" line when a rare block runs out (decision 106, AC192). */
+export const RARE_EMPTY_TEXT = 'Op! Een dorpeling geeft je er meer.';
+const RARE_EMPTY_MS = 2500;
+
+/** How many of each rare block stand in a world diff (cellIndex * 256 + blockId). The start world has none. */
+export function placedRareBlocks(diff: ArrayLike<number>): Record<number, number> {
+  const out: Record<number, number> = {};
+  for (let k = 0; k < diff.length; k++) {
+    const id = (diff[k] ?? 0) % 256;
+    if (RARE_BLOCKS.includes(id)) out[id] = (out[id] ?? 0) + 1;
+  }
+  return out;
 }
 
 const SILENT_UNLOCK = { isUnlocked: () => false, watch: () => {}, whenUnlocked: () => {} };
@@ -143,6 +167,30 @@ export function createGame(options: GameOptions): Game {
     doc,
   });
 
+  // Rare block stock (decision 106). The village flow loads and saves it; building uses it.
+  let rareStock = new Map<number, number>();
+  const stockCopy = (): Record<number, number> => Object.fromEntries(rareStock) as Record<number, number>;
+  const emptyNote = el('div', { class: 'rare-empty-note', text: RARE_EMPTY_TEXT, attrs: { role: 'status', 'data-testid': 'rare-empty' } }, [], doc);
+  emptyNote.hidden = true;
+  let emptyTimer: ReturnType<typeof setTimeout> | null = null;
+  const showEmpty = () => {
+    emptyNote.hidden = false;
+    if (emptyTimer !== null) clearTimeout(emptyTimer);
+    emptyTimer = setTimeout(() => {
+      emptyNote.hidden = true;
+      emptyTimer = null;
+    }, RARE_EMPTY_MS);
+  };
+  const showStock = () => {
+    const copy = stockCopy();
+    hotbar.setStock(copy);
+    grid.setStock(copy);
+  };
+  const stockChanged = () => {
+    showStock();
+    options.onRareStockChanged?.(stockCopy());
+  };
+
   const villagerSystem = createVillagerSystem({
     world,
     player,
@@ -177,6 +225,16 @@ export function createGame(options: GameOptions): Game {
     viewport: () => ({ width: win.innerWidth, height: win.innerHeight }),
     isOccupied: (box) => dinoSystem.isOccupied(box) || villagerSystem.isOccupied(box),
     canAct: () => loopRunning(),
+    stock: {
+      limited: (block) => RARE_BLOCKS.includes(block),
+      count: (block) => rareStock.get(block) ?? 0,
+      change(block, delta) {
+        rareStock.set(block, Math.max(0, (rareStock.get(block) ?? 0) + delta));
+        if (delta < 0) emptyNote.hidden = true;
+        stockChanged();
+      },
+    },
+    onEmpty: () => showEmpty(),
   });
   tapWorld.fn = (x, y) => {
     if (!loopRunning()) return;
@@ -221,7 +279,7 @@ export function createGame(options: GameOptions): Game {
     hud.setMode(s.mode);
   };
   const villageBubble = createVillageBubble({ router, onTap: () => options.onVillageBubbleTapped?.() });
-  options.container.append(hud.root, stick.element, grid.root, villageBubble.element);
+  options.container.append(hud.root, stick.element, grid.root, villageBubble.element, emptyNote);
 
   let dinos: SpikeDino[] | null = null;
   if (isSpikeEnabled(search)) {
@@ -314,6 +372,16 @@ export function createGame(options: GameOptions): Game {
       refreshHotbar();
       emitChanged('build');
     },
+    setRareStock(stock) {
+      const next = new Map<number, number>();
+      for (const id of RARE_BLOCKS) {
+        const n = stock[id];
+        if (typeof n === 'number' && Number.isFinite(n) && n > 0) next.set(id, Math.floor(n));
+      }
+      rareStock = next;
+      showStock();
+    },
+    rareStock: () => stockCopy(),
     pause() {
       manualPause = true;
       update();
@@ -330,6 +398,11 @@ export function createGame(options: GameOptions): Game {
     },
     teleportHome,
     resetWorld() {
+      // Rare blocks in the old world go back to the stock before the world resets (decision 106, AC188).
+      const placed = placedRareBlocks(world.diff());
+      const ids = Object.keys(placed).map(Number);
+      for (const id of ids) rareStock.set(id, (rareStock.get(id) ?? 0) + (placed[id] ?? 0));
+      if (ids.length > 0) stockChanged();
       world.reset();
       villagerSystem.reset();
       renderer.setWorld(world);
@@ -353,6 +426,8 @@ export function createGame(options: GameOptions): Game {
       router.destroy();
       hud.destroy();
       villageBubble.destroy();
+      if (emptyTimer !== null) clearTimeout(emptyTimer);
+      emptyNote.remove();
       hotbar.destroy();
       grid.destroy();
       dinoSystem.dispose();

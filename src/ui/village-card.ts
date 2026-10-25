@@ -17,7 +17,9 @@ export const RESPECT_TEXT = 'Respect bruuuuu!';
 export const DANCE_TEXT = 'Kijk, een dansje!';
 export const WRONG_TWICE_HEAD = 'Zo zit het:';
 export const WRONG_TWICE_LINE = 'Volgende keer lukt het vast!';
-export const ALREADY_TEXT = 'Die had je al!';
+/** The reward lines (decision 106): a right answer always gives 2 of the villager's block. */
+export const foundText = (name: string): string => `Je hebt ${name} gevonden! Je krijgt er 2.`;
+export const moreText = (name: string): string => `Nog 2 ${name} erbij!`;
 
 export type VillageCardAction =
   | { type: 'answer'; response: Response }
@@ -136,24 +138,18 @@ export function createVillageCard(options: VillageCardOptions): VillageCard {
           el('span', { text: 'Goed zo!' }, [], doc),
         ], doc),
       ];
-      if (state.alreadyFound) {
-        kids.push(el('p', { class: 'village-reward-text', text: ALREADY_TEXT, attrs: { 'data-testid': 'village-already' } }, [], doc));
-        footer.append(button('Verder', 'village-verder', { type: 'verder' }));
-      } else {
-        const name = blockInfo(state.gives).name;
-        const swatch = el('span', { class: 'village-swatch', attrs: { 'aria-hidden': 'true' } }, [], doc);
-        swatch.style.background = blockColor(state.gives);
-        kids.push(
-          el('div', { class: 'village-reward' }, [
-            swatch,
-            el('p', { class: 'village-reward-text', text: `Je hebt ${name} gevonden!`, attrs: { 'data-testid': 'village-found' } }, [], doc),
-          ], doc),
-        );
-        footer.append(
-          button('In mijn hotbar', 'village-hotbar', { type: 'hotbar' }),
-          button('Verder', 'village-verder', { type: 'verder' }, false),
-        );
-      }
+      // First find: "Je hebt ... gevonden! Je krijgt er 2.". Found before: "Nog 2 ... erbij!". Same two buttons.
+      const name = blockInfo(state.gives).name;
+      const swatch = el('span', { class: 'village-swatch', attrs: { 'aria-hidden': 'true' } }, [], doc);
+      swatch.style.background = blockColor(state.gives);
+      const line = state.alreadyFound
+        ? el('p', { class: 'village-reward-text', text: moreText(name), attrs: { 'data-testid': 'village-more' } }, [], doc)
+        : el('p', { class: 'village-reward-text', text: foundText(name), attrs: { 'data-testid': 'village-found' } }, [], doc);
+      kids.push(el('div', { class: 'village-reward' }, [swatch, line], doc));
+      footer.append(
+        button('In mijn hotbar', 'village-hotbar', { type: 'hotbar' }),
+        button('Verder', 'village-verder', { type: 'verder' }, false),
+      );
       body.append(el('div', { class: 'village-feedback' }, kids, doc));
       return;
     }

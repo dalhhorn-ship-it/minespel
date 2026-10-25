@@ -42,6 +42,9 @@ describe('v11 village record', () => {
   it('AC188: a save from 0.4.0 has no village record and starts with 0 found and no cooldown', () => {
     expect(defaultKv('village')).toEqual({ found: [], cooldownMs: 0, lastVillager: null });
   });
+  it('AC193: the default has no stock, so a 0.5.0 record (no stock) is not mistaken for a 0.5.1 one', () => {
+    expect('stock' in defaultKv('village')).toBe(false);
+  });
   it('AC188: every default is a fresh copy', () => {
     defaultKv('village').found.push(35);
     expect(defaultKv('village').found).toEqual([]);

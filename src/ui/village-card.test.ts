@@ -64,7 +64,7 @@ describe('village card (V11d)', () => {
     const s0 = startVillageCard(q(choice), 35, []);
     card.render(step(s0, ans(0, 0.9)));
     expect(card.element.textContent).toContain('Respect bruuuuu!');
-    expect(byId(card.element, 'village-found')?.textContent).toBe('Je hebt lavakristal gevonden!');
+    expect(byId(card.element, 'village-found')?.textContent).toBe('Je hebt lavakristal gevonden! Je krijgt er 2.');
     tap(byId(card.element, 'village-hotbar')!);
     tap(byId(card.element, 'village-verder')!);
     expect(actions.map((a) => a.type)).toEqual(['hotbar', 'verder']);
@@ -83,13 +83,15 @@ describe('village card (V11d)', () => {
     }
   });
 
-  it('AC184: a block found before shows "Die had je al!" and only Verder', () => {
-    const { card } = open(q(choice), [35]);
+  it('AC184: a block found before shows "Nog 2 [naam] erbij!" with In mijn hotbar and Verder, never "Die had je al!"', () => {
+    const { card, actions } = open(q(choice), [35]);
     card.render(step(startVillageCard(q(choice), 35, [35]), ans(0)));
-    expect(byId(card.element, 'village-already')?.textContent).toBe('Die had je al!');
-    expect(byId(card.element, 'village-hotbar')).toBeNull();
+    expect(byId(card.element, 'village-more')?.textContent).toBe('Nog 2 lavakristal erbij!');
     expect(byId(card.element, 'village-found')).toBeNull();
-    expect(byId(card.element, 'village-verder')).not.toBeNull();
+    expect(card.element.textContent).not.toContain('Die had je al!');
+    tap(byId(card.element, 'village-hotbar')!);
+    tap(byId(card.element, 'village-verder')!);
+    expect(actions.map((a) => a.type)).toEqual(['hotbar', 'verder']);
   });
 
   it('AC184: wrong twice shows "Zo zit het:", the right answer and the explain text, with no block', () => {
