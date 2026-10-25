@@ -1,6 +1,6 @@
 # PRD: Dino Blokwereld (working title)
 
-Status: READY FOR SIGNOFF
+Status: APPROVED by Founder on 2026-10-25
 
 This signoff covers decisions 103, 104 and 106 for 0.5.1. Decision 103: the version shows in the pause menu. Decision 104: the 8 rare village blocks get new names (drakenoog, lavakristal, maansteen, meteoriet, ijsdiamant, bliksemsteen, regenboogkern, sterrenstof) and more spectacular still tiles. Decision 106: rare blocks are no longer unlimited. Each right villager answer gives 2 of that villager's block, placing one uses it up, mining a placed one gives it back, and the Dorp tab and hotbar show how many are left (section 12 items 6, 12 to 14, AC184, AC187 to AC189, new AC192 to AC194). v11 Dorp shipped as 0.5.0 on 2026-10-25.
 
