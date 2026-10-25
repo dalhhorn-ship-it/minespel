@@ -45,4 +45,18 @@ export default tseslint.config(
       ],
     },
   },
+  {
+    // R2e: the UI review waits on the screen hook, an element or finished animations, never on a clock.
+    files: ['tests/e2e/ui-review*.spec.ts', 'tests/e2e/helpers/ui-audit.ts'],
+    rules: {
+      'no-restricted-properties': [
+        'error',
+        {
+          property: 'waitForTimeout',
+          message:
+            'No fixed waits in the UI review (they flake on a slow machine and cost time). Wait for the screen hook, an element, or idle(page) for animations.',
+        },
+      ],
+    },
+  },
 );

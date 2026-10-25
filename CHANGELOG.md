@@ -4,6 +4,7 @@ Written so kids can read it too.
 
 ## Unreleased
 
+* Under the hood: the game starts up in one place now, the screen checks run faster, and some unused code is gone. Nothing changes for the kids.
 * English: when you fill in a missing word, you now see what the whole sentence means in Dutch first.
 
 ## 0.4.0 (2026-10-24)

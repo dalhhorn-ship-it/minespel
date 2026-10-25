@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { createReadyGate, READY_SLOW_MS } from './boot';
+import main from '../main.ts?raw';
+import { bootApp, createReadyGate, READY_SLOW_MS, type BootDeps } from './boot';
 import { FAILED_TEXT, WAITING_TEXT } from '../ui/waiting-card';
 
 function tap(node: Element) {
@@ -110,5 +111,36 @@ describe('whenReady (R1b, decision 83)', () => {
     const t = setup();
     t.gate.markReady();
     expect(vi.getTimerCount()).toBe(0);
+  });
+});
+
+describe('main.ts and boot (R2a)', () => {
+  it('R2a: main.ts is under 250 lines and keeps no test hooks', () => {
+    expect(main.split('\n').length).toBeLessThan(250);
+    expect(main).not.toContain('registerHook');
+  });
+
+  it('R2a: main.ts keeps no nullable flow variables', () => {
+    const names = ['breakFlow', 'parentFlow', 'shopFlow', 'practiceFlow', 'examFlow', 'timerDriver', 'records', 'queue'];
+    for (const name of names) {
+      expect(main).not.toMatch(new RegExp(`let ${name}\\b`));
+    }
+  });
+
+  it('R2a: main.ts only reaches the hooks file inside the __E2E__ check', () => {
+    expect(main).toMatch(/if \(__E2E__\) \{\s*registerAppHooks\(/);
+  });
+
+  it('R2a: bootApp rejects when storage cannot open, and the gate stays not ready', async () => {
+    const original = globalThis.indexedDB;
+    Object.defineProperty(globalThis, 'indexedDB', { value: undefined, configurable: true });
+    try {
+      const gate = createReadyGate({ show: () => {}, hide: () => {}, back: () => {} });
+      const deps = { gate, onApp: () => {} } as unknown as BootDeps;
+      await expect(bootApp(deps)).rejects.toBeDefined();
+      expect(gate.isReady()).toBe(false);
+    } finally {
+      Object.defineProperty(globalThis, 'indexedDB', { value: original, configurable: true });
+    }
   });
 });

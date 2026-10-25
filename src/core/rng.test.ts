@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { createRng } from './rng';
+import { createRng, shuffle } from './rng';
 
 describe('createRng', () => {
   it('gives the same sequence for the same seed', () => {
@@ -22,5 +22,25 @@ describe('createRng', () => {
       expect(n).toBeGreaterThanOrEqual(3);
       expect(n).toBeLessThanOrEqual(5);
     }
+  });
+});
+
+describe('shuffle', () => {
+  const list = [1, 2, 3, 4, 5, 6, 7, 8];
+
+  it('gives a pinned order for seed 1', () => {
+    expect(shuffle(list, createRng(1))).toEqual([3, 2, 7, 8, 5, 4, 1, 6]);
+  });
+
+  it('gives a pinned order for seed 2024', () => {
+    expect(shuffle(list, createRng(2024))).toEqual([8, 1, 2, 3, 6, 4, 5, 7]);
+  });
+
+  it('keeps every element and never changes the input', () => {
+    const input = [...list];
+    const out = shuffle(input, createRng(5));
+    expect(input).toEqual(list);
+    expect(out).not.toBe(input);
+    expect([...out].sort((a, b) => a - b)).toEqual(list);
   });
 });

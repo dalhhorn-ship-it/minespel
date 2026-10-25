@@ -3,6 +3,7 @@
 // to `timerMatrix`, the play countdown, the HUD countdown view, and persistent stores.
 
 import { today, type Clock } from '../core/clock';
+import { createSerialQueue } from '../core/serial-queue';
 import {
   createExamTimer,
   createHeartbeat,
@@ -93,12 +94,10 @@ export function createTimerDriver(options: TimerDriverOptions): TimerDriver {
   let pageVisible = doc ? doc.visibilityState !== 'hidden' : true;
   let lastTickSecond: number | null = null;
   let breakTriggeredForCycle = false;
-  let pendingWrite: Promise<unknown> = Promise.resolve();
+  const writes = createSerialQueue();
 
   function enqueueWrite(fn: () => Promise<unknown>) {
-    pendingWrite = pendingWrite.then(fn).catch(() => {
-      /* ignore write errors if db closed */
-    });
+    void writes.run(fn);
   }
 
   options.countdownView?.setWarningEnabled(warningEnabled);
@@ -339,7 +338,7 @@ export function createTimerDriver(options: TimerDriverOptions): TimerDriver {
     isExamRunning,
     step,
     flush: async () => {
-      await pendingWrite;
+      await writes.idle();
     },
     destroy() {
       if (intervalId !== null && win) {

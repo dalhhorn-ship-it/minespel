@@ -4,6 +4,7 @@
 // gives the golden egg once on a pass, resumes at boot, and goes back to the world with a full play timer.
 // Points never change here (AC65).
 
+import { createSerialQueue } from '../core/serial-queue';
 import type { Sound } from '../audio/sound';
 import type { Catalog } from '../content/catalog';
 import type { Item } from '../content/format';
@@ -126,14 +127,8 @@ export function responseFor(item: Item, right: boolean): Response {
 export function createExamFlow(options: ExamFlowOptions): ExamFlow {
   let active: PersistedExamSession | null = null;
   let screenView: ExamScreen | null = null;
-  let queue: Promise<void> = Promise.resolve();
-
-  function enqueue(job: () => Promise<void>): Promise<void> {
-    queue = queue.then(job).catch(() => {
-      /* keep the queue alive */
-    });
-    return queue;
-  }
+  const queue = createSerialQueue();
+  const enqueue = (job: () => Promise<void>): Promise<void> => queue.run(job);
 
   function viewOf(persisted: PersistedExamSession): ExamView {
     const state = persisted.session;

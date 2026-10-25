@@ -23,3 +23,13 @@ export function createRng(seed: number): Rng {
     },
   };
 }
+
+/** Fisher-Yates shuffle. Returns a new array and leaves the input alone. Same seed, same order. */
+export function shuffle<T>(list: readonly T[], rng: Rng): T[] {
+  const out = [...list];
+  for (let i = out.length - 1; i > 0; i--) {
+    const j = rng.int(0, i);
+    [out[i], out[j]] = [out[j] as T, out[i] as T];
+  }
+  return out;
+}
