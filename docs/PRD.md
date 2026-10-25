@@ -1,6 +1,6 @@
 # PRD: Dino Blokwereld (working title)
 
-Status: READY FOR SIGNOFF
+Status: APPROVED by Founder on 2026-10-25
 
 This signoff renames the 8 rare village blocks for 0.5.1 (decision 104): drakenoog, lavakristal, maansteen, meteoriet, ijsdiamant, bliksemsteen, regenboogkern, sterrenstof, with more spectacular still tiles. 0.5.1 also shows the version in the pause menu (decision 103). v11 Dorp shipped as 0.5.0 on 2026-10-25.
 
