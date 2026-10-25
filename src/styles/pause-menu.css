@@ -89,3 +89,10 @@
   border-color: #bfb399;
   color: #36312a;
 }
+
+.pause-version {
+  margin: 0;
+  text-align: center;
+  font-size: 14px;
+  color: #5c5648;
+}

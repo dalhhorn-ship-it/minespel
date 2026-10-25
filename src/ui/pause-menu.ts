@@ -67,6 +67,7 @@ export function createPauseMenu(options: PauseMenuOptions): PauseMenu {
   const card = el('div', { class: 'pause-card scrollable', attrs: { role: 'dialog', 'aria-label': 'Pauze' } }, [
     header,
     actions,
+    el('p', { class: 'pause-version', text: `Versie ${__APP_VERSION__}`, attrs: { 'data-testid': 'pause-version' } }),
   ]);
   const root = el('div', { class: 'pause-backdrop' }, [card]);
 

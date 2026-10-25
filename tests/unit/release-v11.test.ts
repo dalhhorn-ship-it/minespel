@@ -14,6 +14,14 @@ describe('v11 release', () => {
     expect(major > 0 || minor >= 5).toBe(true);
   });
 
+  it('T68: __APP_VERSION__ is defined from package.json in vite.config.ts and in tests', () => {
+    const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8')) as { version: string };
+    const cfg = fs.readFileSync('vite.config.ts', 'utf8');
+    expect(cfg).toMatch(/__APP_VERSION__:\s*JSON\.stringify\(pkg\.version\)/);
+    expect(cfg).toContain("./package.json");
+    expect(__APP_VERSION__).toBe(pkg.version);
+  });
+
   it('AC191: CHANGELOG has a 0.5.0 entry about villages, a villager question, a dance and a rare block', () => {
     const log = fs.readFileSync('CHANGELOG.md', 'utf8');
     const v5 = log.indexOf('## 0.5.0 (2026-10-24)');

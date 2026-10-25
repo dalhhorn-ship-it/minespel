@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { describe, expect, it, vi } from 'vitest';
 import { createPauseMenu } from './pause-menu';
+import pkg from '../../package.json';
 
 function tap(el: Element) {
   el.dispatchEvent(new PointerEvent('pointerdown', { pointerId: 1, clientX: 5, clientY: 5, bubbles: true }));
@@ -8,6 +9,21 @@ function tap(el: Element) {
 }
 
 describe('pause menu (T44)', () => {
+  it('T68: shows Versie with the package.json version at the bottom', () => {
+    const menu = createPauseMenu({
+      points: 1,
+      onResume: vi.fn(),
+      onTeleportHome: vi.fn(),
+      onShop: vi.fn(),
+      onLesboek: vi.fn(),
+      onPractice: vi.fn(),
+    });
+    const v = menu.element.querySelector('[data-testid="pause-version"]');
+    expect(v?.textContent).toBe(`Versie ${pkg.version}`);
+    expect(v?.tagName).toBe('P');
+    expect(menu.element.querySelector('.pause-card')?.lastElementChild).toBe(v);
+  });
+
   it('the card can be scrolled by finger on a short screen', () => {
     const menu = createPauseMenu({
       points: 1,

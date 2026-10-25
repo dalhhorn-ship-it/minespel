@@ -2,6 +2,10 @@
 
 Written so kids can read it too.
 
+## 0.5.1 (2026-10-25)
+
+* The version number now shows at the bottom of the pause menu.
+
 ## 0.5.0 (2026-10-24)
 
 ### Dorp
