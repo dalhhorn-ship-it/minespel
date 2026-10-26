@@ -17,3 +17,6 @@ dist-e2e/
 
 # Screenshots: e2e specs write them to test-results/screenshots. Never commit screenshots.
 docs/screenshots/
+
+# Agent worktrees (developers working in parallel)
+.claude/worktrees/
