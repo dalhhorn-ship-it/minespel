@@ -6,7 +6,7 @@ const env = (globalThis as unknown as { process: { env: Record<string, string | 
 // E2E_PORT lets two developers run e2e at the same time in two worktrees.
 const PORT = Number(env.E2E_PORT ?? 4173);
 const local = env.E2E_LOCAL === '1';
-// The full UI review (ui-review.spec.ts, about 140 tests) runs only on request: UI_REVIEW=1 (decision 106).
+// The full UI review (ui-review*.spec.ts, about 140 tests) runs only on request: UI_REVIEW=1 (decision 106).
 const uiReview = env.UI_REVIEW === '1';
 const localUse = local
   ? {
@@ -20,7 +20,7 @@ const localUse = local
 
 export default defineConfig({
   testDir: 'tests/e2e',
-  testIgnore: uiReview ? [] : ['**/ui-review.spec.ts'],
+  testIgnore: uiReview ? [] : ['**/ui-review*.spec.ts'],
   fullyParallel: true,
   ...(local ? { workers: 2 } : {}),
   reporter: 'list',

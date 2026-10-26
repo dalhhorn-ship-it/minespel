@@ -45,4 +45,17 @@ export default tseslint.config(
       ],
     },
   },
+  {
+    // R2e: the UI review waits on the screen, the element or the animations, never on a timer.
+    files: ['tests/e2e/ui-review*.spec.ts', 'tests/e2e/helpers/ui-audit.ts'],
+    rules: {
+      'no-restricted-properties': [
+        'error',
+        {
+          property: 'waitForTimeout',
+          message: 'No fixed sleeps in the UI review. Wait for the screen hook, the element, or document.getAnimations() to finish (waitSettled in helpers/ui-audit.ts).',
+        },
+      ],
+    },
+  },
 );

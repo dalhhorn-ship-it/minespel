@@ -11,7 +11,7 @@ Moved out of `CLAUDE.md` on 2026-10-26 (decision 104) so it is read only when ne
 | `architect` | opus | Stack, structure, task graph, code review at milestones | `docs/ARCHITECTURE.md`, `docs/PLAN.md` |
 | `developer` | sonnet | Implements one task at a time, with tests | source code, unit tests |
 | `qa` | sonnet | Acceptance tests, plays the app, finds bugs, kid safety check | `tests/`, `docs/TEST_REPORT.md` |
-| `kid-ui-reviewer` | sonnet | Opens every screen on iPad sizes: buttons fit and are big enough, every screen has a way back, flows make sense for a kid | `docs/UI_REVIEW.md`, `tests/e2e/ui-review.spec.ts`, screenshots |
+| `kid-ui-reviewer` | sonnet | Opens every screen on iPad sizes: buttons fit and are big enough, every screen has a way back, flows make sense for a kid | `docs/UI_REVIEW.md`, `tests/e2e/ui-review*.spec.ts`, `tests/e2e/helpers/ui-audit.ts`, screenshots |
 | `scribe` | haiku | Keeps README, CHANGELOG and docs in sync with the code | docs |
 | `verifier` | haiku | Independent, read only check of another agent's work against the ACs | nothing, returns a verdict |
 

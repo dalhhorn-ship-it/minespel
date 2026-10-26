@@ -9,7 +9,7 @@ Seen like an 8 to 10 year old on an iPad, in landscape.
 
 ## How this was done
 
-* Spec: `tests/e2e/ui-review.spec.ts`. It opens every screen at four sizes, saves a screenshot, and measures every button.
+* Specs: `tests/e2e/ui-review.spec.ts` opens every screen at four sizes, saves a screenshot, and measures every button. It boots once per size (R2e). The session walks are in `ui-review-sessions.spec.ts`, portrait and real taps in `ui-review-taps.spec.ts`, and the audit rules and the `ALLOWED` list in `tests/e2e/helpers/ui-audit.ts`. No fixed waits: an ESLint rule blocks `waitForTimeout` in these files.
 * Sizes: 1024x768 (iPad 9.7), 1180x820 (iPad Air), 1366x1024 (iPad Pro 12.9), and 1024x690 (a Safari tab with its toolbars, about 70 points lost). The fourth size is extra. A kid who plays in Safari, not from the home screen, gets this one.
 * Safe area: Chromium has no `env()`, so the spec sets `--safe-top: 24px` and `--safe-bottom: 20px` (an iPad home screen app).
 * Checks per screen: inside the screen, inside the safe area, at least 44 x 44, main buttons at least 56, at least 8 points between neighbours, not covered by another element (a real hit test at the centre), text not clipped, no sideways scroll, text at least 17 points, a visible way back, and back to the world in at most 2 real touch taps.

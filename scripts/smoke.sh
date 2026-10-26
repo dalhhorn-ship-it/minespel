@@ -44,7 +44,7 @@ npm run test:dist
 
 specs=(tests/e2e/smoke.spec.ts tests/e2e/boot-taps.spec.ts tests/e2e/world.spec.ts)
 while read -r f; do
-  [[ "$f" == tests/e2e/*.spec.ts && "$f" != tests/e2e/ui-review.spec.ts && -f "$f" ]] && specs+=("$f")
+  [[ "$f" == tests/e2e/*.spec.ts && "$f" != tests/e2e/ui-review*.spec.ts && -f "$f" ]] && specs+=("$f")
 done <<< "$changed"
 mapfile -t specs < <(printf '%s\n' "${specs[@]}" | sort -u)
 
