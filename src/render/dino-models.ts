@@ -2,9 +2,11 @@
 // Geometries and materials are shared between all dinos. Each dino is one Group of at most 7 meshes.
 // Local space: feet at y = 0, centred on x and z, facing +z (like the renderer's yaw 0).
 // Game state never lives here: the renderer moves the group and the game says what to show.
+// Shapes and colours come from the animal table (src/dinos/species.ts).
 
 import { BoxGeometry, BufferGeometry, Group, Mesh, MeshBasicMaterial } from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
+import type { Palette, Part } from '../dinos/body';
 import { DINO_KINDS, type DinoKindId } from '../dinos/kinds';
 
 export const GOLD_COLOR = 0xffc928;
@@ -20,90 +22,7 @@ export interface DinoLook {
   baby?: boolean;
 }
 
-interface Palette {
-  body: number;
-  head: number;
-  legs: number;
-  feature: number;
-}
-
-const PALETTES: Record<DinoKindId, Palette> = {
-  compy: { body: 0x66bb6a, head: 0x81c784, legs: 0x43a047, feature: 0x66bb6a },
-  triceratops: { body: 0xffa726, head: 0xffb74d, legs: 0xf57c00, feature: 0xfff3e0 },
-  stegosaurus: { body: 0x26a69a, head: 0x4db6ac, legs: 0x00897b, feature: 0xf48fb1 },
-  brachiosaurus: { body: 0x42a5f5, head: 0x64b5f6, legs: 0x1e88e5, feature: 0x90caf9 },
-  kip: { body: 0xfafafa, head: 0xf5f5f5, legs: 0xff9800, feature: 0xe53935 },
-};
 const GOLD_PALETTE: Palette = { body: GOLD_COLOR, head: 0xffe066, legs: 0xe0a000, feature: 0xfff3b0 };
-
-/** A box described by its centre and size. */
-interface Part {
-  x: number;
-  y: number;
-  z: number;
-  w: number;
-  h: number;
-  d: number;
-}
-
-interface Spec {
-  body: Part;
-  head: Part;
-  tail: Part;
-  /** Leg size and where they stand (x, z pairs). */
-  leg: { w: number; h: number; d: number; at: readonly (readonly [number, number])[] };
-  /** Horns, frill, plates or neck. */
-  feature: readonly Part[];
-}
-
-const SPECS: Record<DinoKindId, Spec> = {
-  compy: {
-    body: { x: 0, y: 0.4, z: -0.05, w: 0.45, h: 0.3, d: 0.5 },
-    head: { x: 0, y: 0.61, z: 0.3, w: 0.4, h: 0.38, d: 0.4 },
-    tail: { x: 0, y: 0.4, z: -0.375, w: 0.2, h: 0.2, d: 0.25 },
-    leg: { w: 0.14, h: 0.25, d: 0.14, at: [[-0.12, -0.05], [0.12, -0.05]] },
-    feature: [],
-  },
-  triceratops: {
-    body: { x: 0, y: 0.55, z: -0.1, w: 0.9, h: 0.5, d: 0.9 },
-    head: { x: 0, y: 0.6, z: 0.55, w: 0.6, h: 0.6, d: 0.5 },
-    tail: { x: 0, y: 0.6, z: -0.675, w: 0.25, h: 0.25, d: 0.25 },
-    leg: { w: 0.25, h: 0.35, d: 0.25, at: [[-0.3, -0.35], [0.3, -0.35], [-0.3, 0.2], [0.3, 0.2]] },
-    feature: [
-      { x: 0, y: 0.7, z: 0.36, w: 0.95, h: 0.6, d: 0.1 },
-      { x: -0.18, y: 0.92, z: 0.77, w: 0.1, h: 0.1, d: 0.2 },
-      { x: 0.18, y: 0.92, z: 0.77, w: 0.1, h: 0.1, d: 0.2 },
-    ],
-  },
-  stegosaurus: {
-    body: { x: 0, y: 0.625, z: -0.1, w: 0.9, h: 0.55, d: 1.2 },
-    head: { x: 0, y: 0.55, z: 0.62, w: 0.45, h: 0.4, d: 0.45 },
-    tail: { x: 0, y: 0.6, z: -0.675, w: 0.35, h: 0.3, d: 0.45 },
-    leg: { w: 0.28, h: 0.4, d: 0.28, at: [[-0.32, -0.5], [0.32, -0.5], [-0.32, 0.3], [0.32, 0.3]] },
-    feature: [
-      { x: 0, y: 1.05, z: -0.45, w: 0.1, h: 0.3, d: 0.3 },
-      { x: 0, y: 1.05, z: -0.1, w: 0.1, h: 0.3, d: 0.3 },
-      { x: 0, y: 1.05, z: 0.25, w: 0.1, h: 0.3, d: 0.3 },
-    ],
-  },
-  brachiosaurus: {
-    body: { x: 0, y: 0.95, z: -0.1, w: 1.1, h: 0.7, d: 1.4 },
-    head: { x: 0, y: 2.2, z: 0.72, w: 0.5, h: 0.4, d: 0.55 },
-    tail: { x: 0, y: 1.0, z: -0.8, w: 0.35, h: 0.3, d: 0.4 },
-    leg: { w: 0.35, h: 0.7, d: 0.35, at: [[-0.4, -0.55], [0.4, -0.55], [-0.4, 0.4], [0.4, 0.4]] },
-    feature: [{ x: 0, y: 1.75, z: 0.45, w: 0.4, h: 1.1, d: 0.4 }],
-  },
-  kip: {
-    body: { x: 0, y: 0.34, z: -0.03, w: 0.34, h: 0.26, d: 0.38 },
-    head: { x: 0, y: 0.52, z: 0.18, w: 0.24, h: 0.24, d: 0.22 },
-    tail: { x: 0, y: 0.4, z: -0.26, w: 0.18, h: 0.18, d: 0.12 },
-    leg: { w: 0.08, h: 0.22, d: 0.08, at: [[-0.09, -0.02], [0.09, -0.02]] },
-    feature: [
-      { x: 0, y: 0.67, z: 0.18, w: 0.08, h: 0.08, d: 0.14 },
-      { x: 0, y: 0.48, z: 0.33, w: 0.12, h: 0.08, d: 0.1 },
-    ],
-  },
-};
 
 const geometryCache = new Map<string, BufferGeometry>();
 const materialCache = new Map<number, MeshBasicMaterial>();
@@ -166,8 +85,8 @@ export function setDinoBaby(model: Group, baby: boolean): void {
 }
 
 export function createDinoModel(kind: DinoKindId, look: DinoLook = {}): Group {
-  const spec = SPECS[kind];
-  const pal = look.golden ? GOLD_PALETTE : PALETTES[kind];
+  const spec = DINO_KINDS[kind].body;
+  const pal = look.golden ? GOLD_PALETTE : DINO_KINDS[kind].palette;
   const { eyes, pupils } = eyeParts(spec.head);
   const legs: Part[] = spec.leg.at.map(([x, z]) => ({ x, y: spec.leg.h / 2, z, w: spec.leg.w, h: spec.leg.h, d: spec.leg.d }));
 
@@ -204,7 +123,7 @@ export function createEggModel(kind: DinoKindId, golden = false): Group {
   ];
   const group = new Group();
   group.add(new Mesh(merged('egg:shell', shell), material(golden ? 0xfff3b0 : 0xfff8e1)));
-  group.add(new Mesh(merged('egg:spots', spots), material(golden ? GOLD_COLOR : PALETTES[kind].body)));
+  group.add(new Mesh(merged('egg:spots', spots), material(golden ? GOLD_COLOR : DINO_KINDS[kind].palette.body)));
   group.userData = { kind, golden, egg: true };
   return group;
 }

@@ -1,8 +1,11 @@
-// The four shop dinos plus deployable chickens (kip). Prices live here and nowhere else (ARCHITECTURE).
+// Every animal with all its properties, made from the table in species.ts (decision 111).
+// The shop dinos plus deployable chickens (kip).
 
-export const SHOP_DINO_IDS = ['compy', 'triceratops', 'stegosaurus', 'brachiosaurus'] as const;
-export const DINO_KIND_IDS = ['compy', 'triceratops', 'stegosaurus', 'brachiosaurus', 'kip'] as const;
-export type DinoKindId = (typeof DINO_KIND_IDS)[number];
+import { bodyFromPlan, cssColor, paletteFrom, shade, sizeLabelFor, type Body, type Palette, type Size } from './body';
+import { SPECIES, type SpeciesDef } from './species';
+
+export type DinoKindId = (typeof SPECIES)[number]['id'];
+export const DINO_KIND_IDS: readonly DinoKindId[] = SPECIES.map((s) => s.id);
 
 export interface DinoKind {
   id: DinoKindId;
@@ -11,19 +14,44 @@ export interface DinoKind {
   /** Price in points. */
   price: number;
   /** Box size in blocks (width, height, length) of the grown dino. */
-  size: { w: number; h: number; l: number };
+  size: Size;
+  /** Sold as an egg card in the Dinowinkel. */
+  inShop: boolean;
+  trait: string;
+  sizeLabel: string;
+  body: Body;
+  palette: Palette;
+  emblem: { light: string; tint: string; body: string };
 }
 
-export const DINO_KINDS: Record<DinoKindId, DinoKind> = {
-  compy: { id: 'compy', name: 'Compy', price: 20, size: { w: 0.6, h: 0.8, l: 1 } },
-  triceratops: { id: 'triceratops', name: 'Triceratops', price: 40, size: { w: 1, h: 1, l: 1.6 } },
-  stegosaurus: { id: 'stegosaurus', name: 'Stegosaurus', price: 40, size: { w: 1, h: 1.2, l: 1.8 } },
-  brachiosaurus: { id: 'brachiosaurus', name: 'Brachiosaurus', price: 80, size: { w: 1.2, h: 2.4, l: 2 } },
-  kip: { id: 'kip', name: 'Kip', price: 5, size: { w: 0.5, h: 0.7, l: 0.7 } },
-};
+/** Fills in what a species entry leaves out. */
+export function generateKind(def: SpeciesDef): DinoKind {
+  const palette = def.palette ?? paletteFrom(def.color, def.featureColor);
+  return {
+    id: def.id as DinoKindId,
+    name: def.name,
+    price: def.price,
+    size: def.size,
+    inShop: def.inShop,
+    trait: def.trait,
+    sizeLabel: def.sizeLabel ?? sizeLabelFor(def.size),
+    body: def.body ?? bodyFromPlan(def.plan, def.size),
+    palette,
+    emblem: {
+      light: def.emblem?.light ?? cssColor(shade(def.color, 0.85)),
+      tint: def.emblem?.tint ?? cssColor(shade(def.color, 0.45)),
+      body: cssColor(palette.body),
+    },
+  };
+}
 
-/** Shop dino egg order, cheapest first. */
-export const SHOP_KINDS: readonly DinoKind[] = SHOP_DINO_IDS.map((id) => DINO_KINDS[id]);
+export const DINO_KINDS = Object.fromEntries(SPECIES.map((s) => [s.id, generateKind(s)])) as Record<DinoKindId, DinoKind>;
+
+/** Shop dino egg order, cheapest first (stable, so equal prices keep table order). */
+export const SHOP_KINDS: readonly DinoKind[] = DINO_KIND_IDS.map((id) => DINO_KINDS[id])
+  .filter((k) => k.inShop)
+  .sort((a, b) => a.price - b.price);
+export const SHOP_DINO_IDS: readonly DinoKindId[] = SHOP_KINDS.map((k) => k.id);
 
 export function isDinoKindId(x: unknown): x is DinoKindId {
   return typeof x === 'string' && (DINO_KIND_IDS as readonly string[]).includes(x);

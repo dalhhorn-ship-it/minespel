@@ -15,7 +15,8 @@
     "test:dist": "node scripts/check-dist.mjs",
     "test:e2e": "playwright test",
     "test:e2e:local": "E2E_LOCAL=1 playwright test",
-    "test:e2e:ui-review": "UI_REVIEW=1 playwright test ui-review"
+    "test:e2e:ui-review": "UI_REVIEW=1 playwright test ui-review",
+    "new-animal": "node scripts/new-animal.mjs"
   },
   "dependencies": {
     "@fontsource/nunito": "^5.3.0",

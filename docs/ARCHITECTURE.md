@@ -83,7 +83,7 @@ src/
     renderer.ts             scene, camera, fog, resize, pixel ratio cap, context loss rebuild
     quality.ts              the knobs the speed spike may turn: pixel ratio, fog distance, view distance
     effects.ts              pop bits, puff, hearts
-    dino-models.ts          box dinos for 4 kinds, golden variant, baby scale, eggs
+    dino-models.ts          box dinos from the animal table, golden variant, baby scale, eggs
     dino-render.ts          keeps dino meshes in sync with dino state
     name-tag.ts             dino name as a canvas sprite
     fps-counter.ts          developer fps counter and frame time stats (hidden by default)
@@ -100,7 +100,9 @@ src/
     dino-system.ts          dinos and eggs in the world, hatching, tap hits
     world-save.ts           world diff, player and hotbar to the save queue
   dinos/
-    kinds.ts                Compy, Triceratops, Stegosaurus, Brachiosaurus: size, price, box size
+    species.ts              the animal table: one entry per shop animal and the kip (docs/ANIMALS.md)
+    body.ts                 body plans and the generator for model, colours and size chip
+    kinds.ts                every animal with all properties, generated from species.ts
     dino-ai.ts              follow, stay and wander, hop one block, stuck pop, pure
     egg.ts                  egg hatch timing, pure
     dino-store.ts           dinos and eggs records, add egg, rename, mode
@@ -371,7 +373,7 @@ Rules: every task adds tests that fail without its change. Pure logic is tested 
 * **Colocated tests.** A file listed for a task includes its test file next to it (`x.ts` and `x.test.ts`).
 * **CSS** lives in `src/styles/`, one file per screen, imported by that screen's `.ts` file (`import '../styles/x.css'`). `tokens.css` and `base.css` are imported by `main.ts`.
 * **Dutch text** for the kid and parent lives in the file of the screen that shows it. Short sentences, groep 5 level on kid screens.
-* **Point values and egg prices** live in `src/core/economy.ts` and `src/dinos/kinds.ts`, nowhere else.
+* **Point values and egg prices** live in `src/core/economy.ts` and `src/dinos/species.ts`, nowhere else.
 * **Time.** Never call `Date.now()` in pure code; take a `Clock`. Days are local calendar days from `clock.ts`.
 
 ## Risks

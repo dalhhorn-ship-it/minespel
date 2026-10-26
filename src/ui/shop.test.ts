@@ -9,6 +9,7 @@ import { createLogStore } from '../storage/log-store';
 import { createRecords } from '../storage/records';
 import { START_SPOT } from '../world/terrain';
 import { World } from '../world/world';
+import { SHOP_KINDS } from '../dinos/kinds';
 import { createShopView } from './shop';
 
 describe('shop view and shop flow (T47, AC20, AC110, AC149, AC150)', () => {
@@ -26,6 +27,21 @@ describe('shop view and shop flow (T47, AC20, AC110, AC149, AC150)', () => {
     expect(view.element.querySelector('.shop-close-btn')).not.toBeNull();
     // Fits at 1024x768: no long blurb per card.
     expect(view.element.querySelector('.shop-card-trait')).toBeNull();
+  });
+
+  it('shows a card with name, price, size chip, emblem colours and Kopen for every shop animal', () => {
+    const view = createShopView({ state: { points: 500, dinos: [], eggs: [] }, onBuy: () => {}, onClose: () => {} });
+    expect(view.element.querySelectorAll('[data-dino-card]').length).toBe(SHOP_KINDS.length);
+    for (const kind of SHOP_KINDS) {
+      const card = view.element.querySelector(`[data-dino-card="${kind.id}"]`)!;
+      expect(card.textContent).toContain(kind.name);
+      expect(card.textContent).toContain(`${kind.price} punten`);
+      expect(card.textContent).toContain(kind.sizeLabel);
+      const art = card.querySelector<HTMLElement>('.shop-art')!;
+      expect(art.style.getPropertyValue('--art-body')).toBe(kind.emblem.body);
+      expect(card.querySelector<HTMLButtonElement>(`[data-testid="shop-buy-${kind.id}"]`)?.disabled).toBe(false);
+    }
+    view.destroy();
   });
 
   it('shows 4 species cards, greys out unaffordable ones with "Nog X punten nodig", and shows 12-cap banner (AC149)', () => {
@@ -126,6 +142,28 @@ describe('shop view and shop flow (T47, AC20, AC110, AC149, AC150)', () => {
     expect(ledgerAfter[0]?.delta).toBe(-40);
     expect(ledgerAfter[0]?.reason).toBe('shop');
 
+    flow.destroy();
+    db.close();
+  });
+
+  it('every shop animal can be bought and lands as an egg of its kind (decision 111)', async () => {
+    const db = await openDb({ name: `shop-flow-all-${Math.random()}` });
+    const records = createRecords(db);
+    const logStore = createLogStore(db);
+    const dinoStore = createDinoStore({
+      world: new World(),
+      getPlayerSpot: () => ({ x: START_SPOT.x, y: START_SPOT.y, z: START_SPOT.z }),
+      records,
+    });
+    const screens = createScreenManager({ host: document.createElement('div') });
+    await records.put('economy', { points: 5000, practicePointsToday: 0, practiceDay: '2026-10-17' });
+    const flow = createShopFlow({ screens, db, records, logStore, dinoStore });
+    // The herd cap is 12, so at most 12 kinds are bought in one world.
+    const kinds = SHOP_KINDS.slice(0, 12);
+    for (const kind of kinds) {
+      expect(await flow.buyEgg(kind.id)).toBe(true);
+    }
+    expect(dinoStore.eggs().map((e) => e.kind)).toEqual(kinds.map((k) => k.id));
     flow.destroy();
     db.close();
   });

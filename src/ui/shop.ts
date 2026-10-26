@@ -1,5 +1,5 @@
 // Compelling Dinowinkel UI view (T47, docs/SHOP_PRD.md, AC20, AC110, AC149).
-// Four species cards with voxel emblems, personality blurbs, affordability progress bars,
+// Species cards (one per shop animal in src/dinos/species.ts) with voxel emblems, personality blurbs, affordability progress bars,
 // Kopen -> Ja/Nee confirmation, 12-cap banner, and live "Mijn Dino-verzameling" showcase.
 
 import '../styles/shop.css';
@@ -56,34 +56,6 @@ export interface ShopView {
   destroy(): void;
 }
 
-interface SpeciesMeta {
-  sizeLabel: string;
-  trait: string;
-}
-
-export const SPECIES_META: Record<DinoKindId, SpeciesMeta> = {
-  compy: {
-    sizeLabel: 'Klein (0,8 blok)',
-    trait: 'Snel & nieuwsgierig! Huppelt vrolijk overal achter je aan.',
-  },
-  triceratops: {
-    sizeLabel: 'Middel (1,6 blok)',
-    trait: 'Sterk & dapper! Met drie stoere hoorns en een groot nekschild.',
-  },
-  stegosaurus: {
-    sizeLabel: 'Groot (1,8 blok)',
-    trait: 'Rustig & vriendelijk! Heeft prachtige roze rugplaten.',
-  },
-  brachiosaurus: {
-    sizeLabel: 'Reusachtig (2,4 blok hoog)',
-    trait: 'De vriendelijke reus! Kijkt met zijn lange nek over je muren heen.',
-  },
-  kip: {
-    sizeLabel: 'Klein (0,7 blok)',
-    trait: 'Tok tok! Fladdert en scharrelt gezellig rond in je wereld.',
-  },
-};
-
 export function createShopView(options: ShopViewOptions): ShopView {
   const emptyState: ShopViewState = { points: 0, dinos: [], eggs: [] };
   let loaded = options.state !== null;
@@ -109,7 +81,7 @@ export function createShopView(options: ShopViewOptions): ShopView {
       el('span', { class: 'shop-art-eye' }),
       el('span', { class: 'shop-art-eye' }),
     ]);
-    return el(
+    const art = el(
       'div',
       {
         class: `shop-art shop-art-${kind}`,
@@ -117,6 +89,12 @@ export function createShopView(options: ShopViewOptions): ShopView {
       },
       [face],
     );
+    // Emblem colours come from the animal table, so a new animal needs no CSS.
+    const { light, tint, body } = DINO_KINDS[kind].emblem;
+    art.style.setProperty('--art-light', light);
+    art.style.setProperty('--art-tint', tint);
+    art.style.setProperty('--art-body', body);
+    return art;
   }
 
   /** Progress bar and note when locked, then Kopen or the Ja/Nee question (AC20, AC110, AC149, decision 55). */
@@ -321,11 +299,10 @@ export function createShopView(options: ShopViewOptions): ShopView {
       );
     }
 
-    // 4 Species Cards
+    // Species cards, one per shop animal
     const grid = el('div', { class: 'shop-grid' });
     for (const kind of SHOP_KINDS) {
       const bState = buyState(state.points, shopCount, kind.id);
-      const meta = SPECIES_META[kind.id];
       const ownedOfKind =
         state.dinos.filter((d) => d.kind === kind.id).length +
         state.eggs.filter((e) => e.kind === kind.id).length;
@@ -336,7 +313,7 @@ export function createShopView(options: ShopViewOptions): ShopView {
       ].join(' ');
 
       const chips: HTMLElement[] = [
-        el('span', { class: 'shop-chip', text: meta.sizeLabel }),
+        el('span', { class: 'shop-chip', text: kind.sizeLabel }),
       ];
       if (ownedOfKind > 0) {
         chips.push(
@@ -405,7 +382,7 @@ export function createShopView(options: ShopViewOptions): ShopView {
               el('span', { class: 'shop-card-price', text: `${DINO_KINDS.kip.price} punten per kip` }),
             ]),
             el('div', { class: 'shop-card-meta' }, [
-              el('span', { class: 'shop-chip', text: SPECIES_META.kip.sizeLabel }),
+              el('span', { class: 'shop-chip', text: DINO_KINDS.kip.sizeLabel }),
               el('span', {
                 class: 'shop-chip shop-chip-owned',
                 text: `Kippen: ${chickenCount} van de ${MAX_CHICKENS}`,
