@@ -44,8 +44,8 @@ export interface PracticeFlowOptions {
   screens: ScreenManager;
   clock?: Clock;
   rng?: Rng;
-  /** Needed to write points and ledger together. Without it practice writes no points. */
-  db?: IDBDatabase;
+  /** Needed to write points and ledger together, in one transaction. */
+  db: IDBDatabase;
   records?: Records;
   progressStore?: ProgressStore;
   logStore?: LogStore;
@@ -233,7 +233,7 @@ export function createPracticeFlow(options: PracticeFlowOptions): PracticeFlow {
           firstTryRight,
           at: clock.now(),
         });
-      } else if (ef.type === 'points' && options.db) {
+      } else if (ef.type === 'points') {
         await writeEffects(options.db, {
           sessionEconomy: state.economy,
           applied: ef.applied,

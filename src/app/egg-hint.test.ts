@@ -57,7 +57,7 @@ describe('egg hint is the same after a break and after Extra oefenen (AC169, AC3
         };
 
         seen.length = 0;
-        const practice = createPracticeFlow({ ...base, screens: createScreenManager({ host }), rng: createRng(1) });
+        const practice = createPracticeFlow({ ...base, db, screens: createScreenManager({ host }), rng: createRng(1) });
         await practice.startTopic(REKENEN_MODULE_ID, 'optellen');
         const practiceHint = seen.at(-1)?.(row.points);
         practice.destroy();
