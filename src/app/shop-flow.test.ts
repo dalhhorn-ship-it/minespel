@@ -94,3 +94,43 @@ describe('Dinowinkel opens at once (AC164)', () => {
     expect(shown()).toBeNull();
   });
 });
+
+describe('Dinowinkel buy with and without a dino store (AC150, R2d)', () => {
+  function econRecords() {
+    return {
+      get: vi.fn(async (key: string) => (key === 'economy' ? { ...defaultKv('economy'), points: 200 } : defaultKv('dinos'))),
+      put: vi.fn(async () => {}),
+      update: vi.fn(),
+    } as unknown as Records;
+  }
+
+  it('AC150: a buy with no store changes no points and shows a friendly message', async () => {
+    const { screens, shown } = fakeScreens();
+    const records = econRecords();
+    const flow = createShopFlow({ screens, records });
+    await flow.open();
+    expect(await flow.buyEgg('compy')).toBe(false);
+    expect(records.put).not.toHaveBeenCalled();
+    expect(shown()?.querySelector('[data-testid="shop-toast"]')?.textContent).toContain('Probeer het zo nog eens');
+    expect(shown()?.querySelector('[data-testid="shop-points"]')?.textContent).toContain('200 punten');
+  });
+
+  it('AC150: a buy with a store adds exactly one egg', async () => {
+    const { screens } = fakeScreens();
+    const records = econRecords();
+    const addEgg = vi.fn(async () => ({}));
+    const dinoStore = {
+      dinos: () => [],
+      eggs: () => [],
+      shopCount: () => 0,
+      chickenCount: () => 0,
+      addEgg,
+    } as never;
+    const flow = createShopFlow({ screens, records, dinoStore });
+    await flow.open();
+    expect(await flow.buyEgg('compy')).toBe(true);
+    expect(addEgg).toHaveBeenCalledTimes(1);
+    expect(addEgg).toHaveBeenCalledWith('compy', false);
+    expect(records.put).toHaveBeenCalledTimes(1);
+  });
+});

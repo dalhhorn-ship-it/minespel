@@ -1,6 +1,6 @@
 // Dino & egg persistence and live state store (T42, AC12, AC18, AC150, AC152).
 // Holds the live dinos and incubating eggs in the world, serializes to/from `kv.dinos`,
-// hooks into SaveQueue (`queue.register('dinos', ...)`), and exports `addEgg(kind, golden)`.
+// hooks into SaveQueue (`queue.register('dinos', ...)`), and offers `store.addEgg(kind, golden)`. No global store (R2d).
 
 import { chickenCount, shopDinoCount } from '../core/economy';
 import { createRng, type Rng } from '../core/rng';
@@ -167,25 +167,6 @@ export interface DinoStore {
   setDinoName(id: string, name: string): WorldDino | undefined;
   subscribe(listener: () => void): () => void;
   attachPersistence(records: Records, queue?: SaveQueue | null): void;
-}
-
-let activeStore: DinoStore | null = null;
-
-/** Registers the active DinoStore so `addEgg(kind, golden)` works across modules (T42, T47, T51a). */
-export function setActiveDinoStore(store: DinoStore | null): void {
-  activeStore = store;
-}
-
-export function getActiveDinoStore(): DinoStore | null {
-  return activeStore;
-}
-
-/** Spawns a dino egg next to the player and saves it (T42 export for T47 and T51a). */
-export async function addEgg(kind: DinoKindId, golden = false): Promise<WorldEgg> {
-  if (!activeStore) {
-    throw new Error('No active DinoStore initialized');
-  }
-  return activeStore.addEgg(kind, golden);
 }
 
 export function createDinoStore(options: DinoStoreOptions): DinoStore {
@@ -356,6 +337,5 @@ export function createDinoStore(options: DinoStoreOptions): DinoStore {
     },
   };
 
-  setActiveDinoStore(store);
   return store;
 }

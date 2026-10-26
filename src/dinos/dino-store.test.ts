@@ -3,7 +3,7 @@ import { openDb } from '../storage/db';
 import { createRecords } from '../storage/records';
 import { START_SPOT } from '../world/terrain';
 import { World } from '../world/world';
-import { addEgg, createDinoStore } from './dino-store';
+import { createDinoStore } from './dino-store';
 
 describe('dino-store (T42)', () => {
   it('spawns eggs next to the player, hatches into baby dinos, names and changes modes, and persists', async () => {
@@ -16,7 +16,7 @@ describe('dino-store (T42)', () => {
       records,
     });
 
-    const egg = await addEgg('compy', false);
+    const egg = await store.addEgg('compy', false);
     expect(store.eggs()).toHaveLength(1);
     expect(store.shopCount()).toBe(1);
     const dist = Math.hypot(egg.x - START_SPOT.x, egg.z - START_SPOT.z);
@@ -24,7 +24,7 @@ describe('dino-store (T42)', () => {
     expect(dist).toBeLessThanOrEqual(3);
 
     // Golden egg does not count toward shopCount (AC111)
-    await addEgg('brachiosaurus', true);
+    await store.addEgg('brachiosaurus', true);
     expect(store.eggs()).toHaveLength(2);
     expect(store.shopCount()).toBe(1);
 

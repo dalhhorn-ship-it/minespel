@@ -2,6 +2,13 @@
 
 Written so kids can read it too.
 
+## Unreleased
+
+### Onder de motorkap
+
+* The dino shop no longer uses a hidden global dino store. If the world is not ready, tapping Kopen shows "De winkel kan nu even niet kopen. Probeer het zo nog eens!" and no points are spent.
+* The tests run Node tests in shared workers and keep jsdom tests isolated, so a test can no longer fail because another test left the dino store behind.
+
 ## 0.5.0 (2026-10-24)
 
 ### Dorp
