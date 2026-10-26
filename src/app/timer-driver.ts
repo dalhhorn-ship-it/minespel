@@ -2,6 +2,7 @@
 // Connects the 1-second heartbeat, visibility/focus events, screen-guard, and screen manager
 // to `timerMatrix`, the play countdown, the HUD countdown view, and persistent stores.
 
+import { createSerialQueue } from '../core/serial-queue';
 import { today, type Clock } from '../core/clock';
 import {
   createExamTimer,
@@ -93,12 +94,12 @@ export function createTimerDriver(options: TimerDriverOptions): TimerDriver {
   let pageVisible = doc ? doc.visibilityState !== 'hidden' : true;
   let lastTickSecond: number | null = null;
   let breakTriggeredForCycle = false;
-  let pendingWrite: Promise<unknown> = Promise.resolve();
+  const writes = createSerialQueue();
+  let pendingWrite: Promise<void> = Promise.resolve();
 
   function enqueueWrite(fn: () => Promise<unknown>) {
-    pendingWrite = pendingWrite.then(fn).catch(() => {
-      /* ignore write errors if db closed */
-    });
+    // Write errors are ignored (the db may be closed).
+    pendingWrite = writes.run(fn);
   }
 
   options.countdownView?.setWarningEnabled(warningEnabled);

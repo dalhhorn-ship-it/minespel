@@ -9,6 +9,7 @@ import type { Catalog } from '../content/catalog';
 import type { Item } from '../content/format';
 import { effectiveDay, today, type Clock } from '../core/clock';
 import type { Rng } from '../core/rng';
+import { createSerialQueue } from '../core/serial-queue';
 import { registerHook } from '../dev/e2e-hooks';
 import type { DinoStore } from '../dinos/dino-store';
 import { SHOP_KINDS } from '../dinos/kinds';
@@ -126,13 +127,10 @@ export function responseFor(item: Item, right: boolean): Response {
 export function createExamFlow(options: ExamFlowOptions): ExamFlow {
   let active: PersistedExamSession | null = null;
   let screenView: ExamScreen | null = null;
-  let queue: Promise<void> = Promise.resolve();
+  const queue = createSerialQueue();
 
   function enqueue(job: () => Promise<void>): Promise<void> {
-    queue = queue.then(job).catch(() => {
-      /* keep the queue alive */
-    });
-    return queue;
+    return queue.run(job);
   }
 
   function viewOf(persisted: PersistedExamSession): ExamView {

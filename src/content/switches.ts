@@ -475,24 +475,3 @@ export function moduleCounts(
   }
   return { switchedOn, mastered, hasOpenSums };
 }
-
-export function subjectCounts(
-  record: SwitchesRecord,
-  catalog: Catalog,
-  subject: string,
-  progress: readonly ProgressRecord[] = [],
-): NodeCounts {
-  if (!isSubjectOn(record, subject)) {
-    return { switchedOn: 0, mastered: 0, hasOpenSums: false };
-  }
-  let switchedOn = 0;
-  let mastered = 0;
-  let hasOpenSums = false;
-  for (const bundle of catalog.modulesBySubject(subject)) {
-    const c = moduleCounts(record, catalog, bundle.module.id, progress);
-    switchedOn += c.switchedOn;
-    mastered += c.mastered;
-    if (c.hasOpenSums) hasOpenSums = true;
-  }
-  return { switchedOn, mastered, hasOpenSums };
-}
