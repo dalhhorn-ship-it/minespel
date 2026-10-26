@@ -61,6 +61,7 @@ describe('lesboek and practice-flow (T46, AC51, AC52, AC175)', () => {
       screens,
       clock: { now: () => Date.parse('2026-10-17T12:00:00Z') },
       rng: createRng(99),
+      db,
       records,
       progressStore: createProgressStore(db),
       logStore: createLogStore(db),
@@ -99,6 +100,7 @@ describe('lesboek and practice-flow (T46, AC51, AC52, AC175)', () => {
       screens,
       clock: { now: () => Date.parse('2026-10-17T12:00:00Z') },
       rng: createRng(7),
+      db,
       records,
       progressStore: createProgressStore(db),
       logStore: createLogStore(db),
@@ -124,6 +126,7 @@ describe('lesboek and practice-flow (T46, AC51, AC52, AC175)', () => {
       screens,
       clock: { now: () => Date.parse('2026-10-17T12:00:00Z') },
       rng: createRng(5),
+      db,
       records,
       progressStore: createProgressStore(db),
       logStore: createLogStore(db),
@@ -156,6 +159,37 @@ describe('lesboek and practice-flow (T46, AC51, AC52, AC175)', () => {
       expect(economy.points).toBe(2);
     });
 
+    flow.destroy();
+    db.close();
+  });
+
+  it('R2b: a wrong answer writes the points and the malus ledger row together', async () => {
+    const db = await openDb({ name: `practice-order-${Math.random()}` });
+    const records = createRecords(db);
+    const logStore = createLogStore(db);
+    const host = document.createElement('div');
+    const screens = createScreenManager({ host });
+    await records.update('settings', (st) => ({ ...st, pointsMode: 'moeilijk' }));
+    await records.put('economy', { points: 10, practicePointsToday: 0, practiceDay: '' });
+    const flow = createPracticeFlow({
+      screens,
+      clock: { now: () => Date.parse('2026-10-17T12:00:00Z') },
+      rng: createRng(7),
+      db,
+      records,
+      progressStore: createProgressStore(db),
+      logStore,
+      getCatalog: () => createCatalog(),
+    });
+    await flow.startTopic(REKENEN_MODULE_ID, 'optellen');
+    for (const ch of '9999') {
+      tap(Array.from(host.querySelectorAll('.kb-char')).find((b) => b.textContent === ch));
+    }
+    tap(host.querySelector('.kb-done'));
+    await vi.waitFor(async () => expect((await logStore.listLedger()).length).toBe(1));
+    expect((await logStore.listAnswers()).map((a) => a.try)).toEqual([1]);
+    expect((await logStore.listLedger())[0]).toMatchObject({ delta: -1, reason: 'malus' });
+    expect((await records.get('economy')).points).toBe(9);
     flow.destroy();
     db.close();
   });

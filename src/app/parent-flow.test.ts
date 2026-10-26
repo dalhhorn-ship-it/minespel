@@ -39,6 +39,7 @@ describe('parental controls flow (T48a, T48b, T49, T50)', () => {
         clock,
         rng,
         screens,
+        db,
         records,
         progressStore,
         logStore,
@@ -126,7 +127,7 @@ describe('parental controls flow (T48a, T48b, T49, T50)', () => {
     examNode.textContent = 'vraag 9';
     screens.showExam(examNode);
     const breakFlow = createBreakFlow({
-      clock, rng, screens, records,
+      clock, rng, screens, db, records,
       progressStore: createProgressStore(db),
       logStore: createLogStore(db),
       sessionStore: createSessionStore(db),
