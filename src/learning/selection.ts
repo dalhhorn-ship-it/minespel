@@ -14,7 +14,7 @@ import {
   switchedOnFixedItems,
   switchedOnSkills,
 } from '../content/switches';
-import type { Rng } from '../core/rng';
+import { shuffle, type Rng } from '../core/rng';
 import type { ProgressRecord } from '../storage/progress-store';
 import type { SwitchesRecord } from '../storage/schema';
 import type { SessionEntry } from './break-session';
@@ -61,15 +61,6 @@ interface SeenCandidate {
   box: number;
   due: string;
   topic: string;
-}
-
-function shuffle<T>(list: readonly T[], rng: Rng): T[] {
-  const out = [...list];
-  for (let i = out.length - 1; i > 0; i--) {
-    const j = rng.int(0, i);
-    [out[i], out[j]] = [out[j] as T, out[i] as T];
-  }
-  return out;
 }
 
 export function selectBreakItems(options: SelectBreakOptions): SelectionResult {

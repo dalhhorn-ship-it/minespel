@@ -149,10 +149,6 @@ function eyeParts(head: Part): { eyes: Part[]; pupils: Part[] } {
   };
 }
 
-export function isGoldenColor(color: number): boolean {
-  return color === GOLD_COLOR;
-}
-
 /** Height of the grown dino in blocks, used to float the name tag above it. */
 export function dinoHeight(kind: DinoKindId, baby = false): number {
   return DINO_KINDS[kind].size.h * (baby ? BABY_SCALE : 1);

@@ -4,9 +4,9 @@
 // Items are TypeItems with a plain numeric answer, checked with checkAnswer(item, response, true).
 // Everything is seeded with createRng, so a failing test can be replayed. No sum is negative.
 import { formatNumber, formatTenths } from '../../core/numbers';
-import type { Rng } from '../../core/rng';
+import { shuffle, type Rng } from '../../core/rng';
 import type { TypeItem } from '../format';
-import { REKENEN_LEVELS, REKENEN_SKILLS, REKENEN_TOPICS } from './module';
+import { REKENEN_LEVELS, REKENEN_TOPICS } from './module';
 import type { RekenenTopicId } from './module';
 import { answerOf, workedExample } from './worked-example';
 import type { Sum, WorkedExample } from './worked-example';
@@ -330,15 +330,6 @@ function pick<T>(list: readonly T[], rng: Rng): T {
   return list[rng.int(0, list.length - 1)] as T;
 }
 
-function shuffle<T>(list: readonly T[], rng: Rng): T[] {
-  const out = [...list];
-  for (let i = out.length - 1; i > 0; i--) {
-    const j = rng.int(0, i);
-    [out[i], out[j]] = [out[j] as T, out[i] as T];
-  }
-  return out;
-}
-
 function checkLevel(topic: RekenenTopicId, level: string): RekenenLevel {
   if (!isLevel(level) || !isTopic(topic)) throw new RangeError(`Unknown Rekenen topic or level: ${topic} ${level}`);
   return level;
@@ -410,9 +401,4 @@ export function generateExamItems(
   for (let i = 0; left > 0; i = (i + 1) % topics.length, left--) share[i] = (share[i] as number) + 1;
   const items = topics.flatMap((t, i) => generateItems(t, level, share[i] as number, rng));
   return shuffle(items, rng);
-}
-
-/** True when a skill belongs to the topic at the level (for callers that switch skills). */
-export function skillExists(topic: RekenenTopicId, level: string, skill: string): boolean {
-  return REKENEN_SKILLS[topic][level]?.includes(skill) ?? false;
 }

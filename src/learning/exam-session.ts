@@ -9,7 +9,7 @@ import type { Catalog } from '../content/catalog';
 import { isGeneratedModule } from '../content/catalog';
 import type { Exam, Item } from '../content/format';
 import { generateExamItems } from '../content/rekenen/generator';
-import { createRng, type Rng } from '../core/rng';
+import { createRng, shuffle } from '../core/rng';
 import type { ExamInput, ExamQuestionLog } from '../storage/log-store';
 import { checkAnswer, type Response } from './answer-check';
 import { applyFirstTry } from './srs';
@@ -180,15 +180,6 @@ export function planExam(catalog: Catalog, moduleId: string, examId: string): Ex
   };
 }
 
-function shuffle<T>(list: readonly T[], rng: Rng): T[] {
-  const out = [...list];
-  for (let i = out.length - 1; i > 0; i--) {
-    const j = rng.int(0, i);
-    [out[i], out[j]] = [out[j] as T, out[i] as T];
-  }
-  return out;
-}
-
 /**
  * Pick the exam items with a seed: same seed, same questions (AC125). Taal takes fixed items per
  * topic, Rekentoets goes through `generateExamItems` (no repeats). Parent switches are ignored.
@@ -257,11 +248,6 @@ const same = (state: ExamState): ExamStep => ({ state, effects: [] });
 /** The entry on screen, or null. */
 export function currentExamEntry(state: ExamState): ExamEntry | null {
   return state.phase === 'questions' ? (state.entries[state.index] ?? null) : null;
-}
-
-/** How many questions are answered (for "Vraag 7 van 30" the kid sees index + 1). */
-export function answeredCount(state: ExamState): number {
-  return state.answers.filter((a) => a !== null && a.response !== null).length;
 }
 
 /** The kid taps "Begin": the clock for the first question starts. */
