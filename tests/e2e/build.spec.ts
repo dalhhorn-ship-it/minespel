@@ -138,4 +138,29 @@ test.describe('mine and build', () => {
     expect(count).toBeLessThanOrEqual(2);
     expect(await readState(page, 'gameRunning')).toBe(true);
   });
+
+  test('a herd of 12 following dinos stays out of the way: taps mine, no dino menu (decision 112)', async ({ page }) => {
+    await openApp(page);
+    for (let i = 0; i < 12; i++) {
+      await readState(page, 'addEgg', ['compy', 'triceratops', 'stegosaurus', 'brachiosaurus'][i % 4]!, false);
+    }
+    await readState(page, 'stepDinos', 30);
+    await flatten(page);
+    await readState(page, 'stepDinos', 10);
+    const vp = page.viewportSize()!;
+    for (let k = 0; k < 20; k++) {
+      await readState(page, 'stepDinos', 1);
+      await worldTap(page, 20 + k, vp.width / 2 + 20 + ((k * 37) % (vp.width / 2 - 60)), vp.height * 0.4 + ((k * 53) % (vp.height * 0.4)));
+      expect(await readState<string>(page, 'currentScreen')).toBe('world');
+    }
+    // The floor ahead lost blocks: the taps mined.
+    const mined = await page.evaluate(({ c }) => {
+      const h = (window as unknown as { __dino: Record<string, (...a: number[]) => number> }).__dino;
+      let n = 0;
+      for (let x = c - 6; x <= c + 6; x++) for (let z = c; z <= c + 6; z++) if (h.blockAt!(x, 9, z) === 0) n++;
+      return n;
+    }, { c: C });
+    expect(mined).toBeGreaterThan(0);
+  });
 });
+

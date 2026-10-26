@@ -21,6 +21,15 @@ export const FAR_SECONDS = 5;
 export const STUCK_SECONDS = 5;
 /** Peak hop height is HOP_SPEED^2 / (2 * GRAVITY), about 1.14 blocks: one block up, not two. */
 export const HOP_SPEED = 8;
+/**
+ * Followers keep the view clear (decision 112): they gather this far behind the player, wander around
+ * that spot within FOLLOW_RADIUS and walk back behind when they end up in front.
+ * Without this, a herd of 12 got about 9 in 10 taps, so Hakken and Bouwen hardly worked.
+ */
+export const BEHIND_DISTANCE = 3;
+export const FOLLOW_RADIUS = 2;
+/** A follower counts as behind when it is at least this far behind the player's eye, along the view. */
+export const BEHIND_MARGIN = 0.75;
 
 const EPS = 1e-4;
 const SUB_STEP = 1 / 60;
@@ -67,6 +76,19 @@ export type DinoEvent = 'popped' | null;
 export interface StepOptions {
   box?: { side: number; height: number };
   radius?: number;
+  /** The player's view yaw. With it, followers stay behind the player (decision 112). */
+  playerYaw?: number;
+}
+
+/** The unit vector the player looks along on the ground, for a view yaw (the renderer's convention). */
+export function viewForward(yaw: number): { x: number; z: number } {
+  return { x: Math.sin(yaw), z: Math.cos(yaw) };
+}
+
+/** How far a point is in front of the player along the view (negative: behind). */
+function aheadOf(player: Point, yaw: number, x: number, z: number): number {
+  const f = viewForward(yaw);
+  return (x - player.x) * f.x + (z - player.z) * f.z;
 }
 
 export function createDino(spot: HatchSpot, grown = false): DinoState {
@@ -123,16 +145,25 @@ function resetMotion(d: DinoState): void {
   d.stuckTime = 0; d.farTime = 0; d.chasing = false;
 }
 
-/** Puts the dino on a free spot on the ground 1.5 to 2.5 blocks from the player. False when none was found. */
-export function popNextTo(world: World, d: DinoState, player: Point, rng: Rng, box?: StepOptions['box']): boolean {
+/**
+ * Puts the dino on a free spot on the ground 1.5 to 2.5 blocks from the player. With `yaw`, a spot behind
+ * the player comes first (decision 112). False when none was found.
+ */
+export function popNextTo(world: World, d: DinoState, player: Point, rng: Rng, box?: StepOptions['box'], yaw?: number): boolean {
+  if (yaw !== undefined && Number.isFinite(yaw) && popAt(world, d, player, rng, box, yaw)) return true;
+  return popAt(world, d, player, rng, box);
+}
+
+function popAt(world: World, d: DinoState, player: Point, rng: Rng, box?: StepOptions['box'], behindYaw?: number): boolean {
   const { side, height } = box ?? dinoBox(d);
   const baseY = Math.floor(player.y);
   const start = rng.next() * Math.PI * 2;
-  const radii = [1.5, 2, 2.5, 1];
+  const radii = behindYaw === undefined ? [1.5, 2, 2.5, 1] : [2.5, 3, 2, 3.5];
   for (const r of radii) {
     for (let i = 0; i < 16; i++) {
       const a = start + (i / 16) * Math.PI * 2;
       const x = player.x + Math.cos(a) * r, z = player.z + Math.sin(a) * r;
+      if (behindYaw !== undefined && aheadOf(player, behindYaw, x, z) > -BEHIND_MARGIN - 0.5) continue;
       for (const dy of [0, 1, -1, 2, -2, 3, -3]) {
         const y = baseY + dy;
         if (y < 0) continue;
@@ -148,11 +179,18 @@ export function popNextTo(world: World, d: DinoState, player: Point, rng: Rng, b
   return false;
 }
 
-function pickGoal(d: DinoState, ax: number, az: number, rng: Rng, radius: number): void {
-  const a = rng.next() * Math.PI * 2;
-  const r = Math.sqrt(rng.next()) * radius;
+function pickGoal(d: DinoState, ax: number, az: number, rng: Rng, radius: number, behind?: { player: Point; yaw: number }): void {
   const lim = (v: number): number => Math.min(WORLD_SIZE - 1, Math.max(1, v));
-  d.goal = { x: lim(ax + Math.cos(a) * r), z: lim(az + Math.sin(a) * r) };
+  for (let tries = 0; tries < 6; tries++) {
+    const a = rng.next() * Math.PI * 2;
+    const r = Math.sqrt(rng.next()) * radius;
+    const goal = { x: lim(ax + Math.cos(a) * r), z: lim(az + Math.sin(a) * r) };
+    if (behind && aheadOf(behind.player, behind.yaw, goal.x, goal.z) > -BEHIND_MARGIN) continue;
+    d.goal = goal;
+    d.goalLeft = 4;
+    return;
+  }
+  d.goal = { x: lim(ax), z: lim(az) };
   d.goalLeft = 4;
 }
 
@@ -222,16 +260,31 @@ export function stepDino(world: World, d: DinoState, player: Point, rng: Rng, dt
 }
 
 function stepOnce(world: World, d: DinoState, player: Point, rng: Rng, dt: number, opts: StepOptions): DinoEvent {
-  const radius = opts.radius ?? WANDER_RADIUS;
   const follow = d.mode === 'follow';
+  const yaw = follow && opts.playerYaw !== undefined && Number.isFinite(opts.playerYaw) ? opts.playerYaw : undefined;
+  const radius = opts.radius ?? (yaw !== undefined ? FOLLOW_RADIUS : WANDER_RADIUS);
   const distPlayer = Math.hypot(player.x - d.x, player.z - d.z);
+
+  // A follower's home spot: behind the player when the view is known, else the player itself.
+  let ax = follow ? player.x : d.stayX;
+  let az = follow ? player.z : d.stayZ;
+  if (yaw !== undefined) {
+    const f = viewForward(yaw);
+    ax = player.x - f.x * BEHIND_DISTANCE;
+    az = player.z - f.z * BEHIND_DISTANCE;
+  }
 
   if (follow) {
     d.farTime = distPlayer > FAR_DISTANCE ? d.farTime + dt : 0;
     if (d.farTime >= FAR_SECONDS || d.stuckTime >= STUCK_SECONDS) {
-      return popNextTo(world, d, player, rng, opts.box) ? 'popped' : (d.farTime = 0, d.stuckTime = 0, null);
+      return popNextTo(world, d, player, rng, opts.box, yaw) ? 'popped' : (d.farTime = 0, d.stuckTime = 0, null);
     }
-    if (distPlayer > WANDER_RADIUS) d.chasing = true;
+    if (yaw !== undefined) {
+      const distHome = Math.hypot(ax - d.x, az - d.z);
+      const inView = aheadOf(player, yaw, d.x, d.z) > -BEHIND_MARGIN;
+      if (inView || distHome > FOLLOW_RADIUS + 1) d.chasing = true;
+      else if (distHome <= FOLLOW_RADIUS) d.chasing = false;
+    } else if (distPlayer > WANDER_RADIUS) d.chasing = true;
     else if (distPlayer <= CLOSE_ENOUGH) d.chasing = false;
   } else {
     d.farTime = 0;
@@ -239,11 +292,8 @@ function stepOnce(world: World, d: DinoState, player: Point, rng: Rng, dt: numbe
     d.chasing = false;
   }
 
-  const ax = follow ? player.x : d.stayX;
-  const az = follow ? player.z : d.stayZ;
-
   if (d.chasing) {
-    d.goal = { x: player.x, z: player.z };
+    d.goal = { x: ax, z: az };
   } else if (d.goal) {
     d.goalLeft -= dt;
     const gd = Math.hypot(d.goal.x - d.x, d.goal.z - d.z);
@@ -254,7 +304,7 @@ function stepOnce(world: World, d: DinoState, player: Point, rng: Rng, dt: numbe
     }
   } else {
     d.idleLeft -= dt;
-    if (d.idleLeft <= 0) pickGoal(d, ax, az, rng, radius);
+    if (d.idleLeft <= 0) pickGoal(d, ax, az, rng, radius, yaw !== undefined ? { player, yaw } : undefined);
   }
 
   let dirX = 0, dirZ = 0;
