@@ -94,3 +94,10 @@ Below the 4 shop cards, the shop displays the child's live collection:
 * A golden dino (an exam prize) has no button and can never be traded in. Eggs cannot be traded in; they hatch in 5 seconds of play.
 * The toast says "Dag Lange Nek! Je kreeg 40 punten terug."
 
+## Bijzondere dino's (decision 113)
+
+* Below the 4 species cards, a heading "✨ Bijzondere dino's" and 10 more cards in the same 2 column grid, cheapest first.
+* Velociraptor 100, Pachycephalosaurus 110, Parasaurolophus 120, Ankylosaurus 130, Dilophosaurus 140, Spinosaurus 180, T-rex 200, IJsraptor 220, Lavarex 250, Regenboogsaurus 300.
+* Bought exactly like the other eggs (Kopen, Ja or Nee, one transaction). An affordable special card has a gold border.
+* They count toward the 25 dino herd and can be traded in for half their price. The golden exam egg is never one of them.
+

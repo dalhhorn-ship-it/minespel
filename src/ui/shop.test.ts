@@ -307,4 +307,41 @@ describe('shop view and shop flow (T47, AC20, AC110, AC149, AC150)', () => {
     flow.destroy();
     db.close();
   });
+
+  it("shows the 10 Bijzondere dino's, greyed until the kid has enough points (decision 113)", () => {
+    const view = createShopView({ state: { points: 150, dinos: [], eggs: [] }, onBuy: () => {}, onClose: () => {} });
+    const cards = view.element.querySelectorAll('[data-testid="shop-special"] [data-dino-card]');
+    expect(cards).toHaveLength(10);
+    expect(view.element.querySelector('[data-testid="shop-special-title"]')?.textContent).toContain("Bijzondere dino's");
+    const card = (id: string) => view.element.querySelector(`[data-dino-card="${id}"]`);
+    expect(card('velociraptor')?.getAttribute('aria-disabled')).toBe('false');
+    expect(card('trex')?.getAttribute('aria-disabled')).toBe('true');
+    expect(view.element.querySelector('[data-testid="shop-note-trex"]')?.textContent).toBe('Nog 50 punten nodig');
+    expect(view.element.querySelector('[data-testid="shop-note-regenboogsaurus"]')?.textContent).toBe('Nog 150 punten nodig');
+    view.destroy();
+  });
+
+  it('buys a T-rex egg for 200 points, it counts in the herd and trades in for 100', async () => {
+    const db = await openDb({ name: `shop-special-${Math.random()}` });
+    const records = createRecords(db);
+    const dinoStore = createDinoStore({
+      world: new World(),
+      getPlayerSpot: () => ({ x: START_SPOT.x, y: START_SPOT.y, z: START_SPOT.z }),
+      records,
+    });
+    const screens = createScreenManager({ host: document.createElement('div') });
+    await records.put('economy', { points: 210, practicePointsToday: 0, practiceDay: '2026-10-17' });
+    const flow = createShopFlow({ screens, db, records, dinoStore });
+    expect(await flow.buyEgg('trex')).toBe(true);
+    expect((await records.get('economy')).points).toBe(10);
+    expect(dinoStore.shopCount()).toBe(1);
+    const egg = dinoStore.eggs()[0]!;
+    const dino = dinoStore.hatchEgg(egg.id)!;
+    expect(dino.kind).toBe('trex');
+    expect(await flow.tradeIn(dino.id)).toBe(true);
+    expect((await records.get('economy')).points).toBe(110);
+    flow.destroy();
+    db.close();
+  });
 });
+

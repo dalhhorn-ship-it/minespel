@@ -17,7 +17,7 @@ import {
   type BuyState,
 } from '../core/economy';
 import { EGG_HATCH_SECONDS } from '../dinos/egg';
-import { DINO_KINDS, SHOP_KINDS, type DinoKindId } from '../dinos/kinds';
+import { DINO_KINDS, SHOP_KINDS, SPECIAL_KINDS, type DinoKind, type DinoKindId } from '../dinos/kinds';
 import { el } from './dom';
 import { onTap } from './tap';
 
@@ -82,6 +82,46 @@ export const SPECIES_META: Record<DinoKindId, SpeciesMeta> = {
   brachiosaurus: {
     sizeLabel: 'Reusachtig (2,4 blok hoog)',
     trait: 'De vriendelijke reus! Kijkt met zijn lange nek over je muren heen.',
+  },
+  velociraptor: {
+    sizeLabel: 'Klein (1 blok)',
+    trait: 'Supersnel en slim! Met een gele veren kuif.',
+  },
+  pachycephalosaurus: {
+    sizeLabel: 'Middel (1,2 blok)',
+    trait: 'Een harde koppie! Zijn kop is een dikke ronde helm.',
+  },
+  parasaurolophus: {
+    sizeLabel: 'Groot (1,6 blok)',
+    trait: 'Toetert door zijn lange buis op zijn kop.',
+  },
+  ankylosaurus: {
+    sizeLabel: 'Laag en breed (0,9 blok)',
+    trait: 'Een levende tank met een knots aan zijn staart!',
+  },
+  dilophosaurus: {
+    sizeLabel: 'Middel (1,4 blok)',
+    trait: 'Twee kammen op zijn kop en een roze kraag.',
+  },
+  spinosaurus: {
+    sizeLabel: 'Heel groot (2 blok)',
+    trait: 'Draagt een groot zeil op zijn rug.',
+  },
+  trex: {
+    sizeLabel: 'Reusachtig (2,2 blok)',
+    trait: 'De koning van de dino\'s! Grote kop, kleine armpjes.',
+  },
+  ijsraptor: {
+    sizeLabel: 'Klein (1 blok)',
+    trait: 'Een ijskoude raptor met ijspegels op zijn rug.',
+  },
+  lavarex: {
+    sizeLabel: 'Reusachtig (2,2 blok)',
+    trait: 'Een zwarte T-rex met gloeiende lava strepen!',
+  },
+  regenboogsaurus: {
+    sizeLabel: 'Reusachtig (2,4 blok hoog)',
+    trait: 'De zeldzaamste van allemaal: in alle kleuren van de regenboog.',
   },
   kip: {
     sizeLabel: 'Klein (0,7 blok)',
@@ -331,6 +371,70 @@ export function createShopView(options: ShopViewOptions): ShopView {
     return el('div', { class: `shop-collection-item ${goldenClass}` }, [text, tradeBtn]);
   }
 
+  /** One species card: emblem, name, price, size and owned chips, then Kopen or Ja/Nee. */
+  function speciesCard(kind: DinoKind, shopCount: number, special = false): HTMLElement {
+    const bState = buyState(state.points, shopCount, kind.id);
+    const meta = SPECIES_META[kind.id];
+    const ownedOfKind =
+      state.dinos.filter((d) => d.kind === kind.id).length +
+      state.eggs.filter((e) => e.kind === kind.id).length;
+
+    const cardClasses = [
+      'shop-card',
+      special ? 'shop-card-special' : '',
+      bState.canBuy ? 'shop-card-affordable' : 'shop-card-greyed',
+    ].filter(Boolean).join(' ');
+
+    const chips: HTMLElement[] = [
+      el('span', { class: 'shop-chip', text: meta.sizeLabel }),
+    ];
+    if (ownedOfKind > 0) {
+      chips.push(
+        el('span', {
+          class: 'shop-chip shop-chip-owned',
+          text: `In je kudde: ${ownedOfKind}`,
+        }),
+      );
+    }
+
+    const info = el('div', { class: 'shop-card-info' }, [
+      el('div', { class: 'shop-card-title-row' }, [
+        el('h3', { class: 'shop-card-name', text: kind.name }),
+        el('span', {
+          class: 'shop-card-price',
+          text: `${kind.price} punten`,
+        }),
+      ]),
+      el('div', { class: 'shop-card-meta' }, chips),
+    ]);
+
+    const topRow = el('div', { class: 'shop-card-top' }, [
+      buildArtEmblem(kind.id),
+      info,
+    ]);
+
+    const bottomChildren = buyControls(
+      kind.id,
+      kind.name,
+      kind.price,
+      bState,
+      `Wil je een ${kind.name}-ei kopen voor ${kind.price} punten?`,
+      true,
+    );
+
+    return el(
+      'article',
+      {
+        class: cardClasses,
+        attrs: {
+          'data-dino-card': kind.id,
+          'aria-disabled': String(!bState.canBuy),
+        },
+      },
+      [topRow, ...bottomChildren],
+    );
+  }
+
   function renderView() {
     clearCleanups();
     modal.replaceChildren();
@@ -415,71 +519,16 @@ export function createShopView(options: ShopViewOptions): ShopView {
       );
     }
 
-    // 4 Species Cards
+    // 4 Species Cards, then the 10 Bijzondere dino's (decision 113)
     const grid = el('div', { class: 'shop-grid' });
-    for (const kind of SHOP_KINDS) {
-      const bState = buyState(state.points, shopCount, kind.id);
-      const meta = SPECIES_META[kind.id];
-      const ownedOfKind =
-        state.dinos.filter((d) => d.kind === kind.id).length +
-        state.eggs.filter((e) => e.kind === kind.id).length;
-
-      const cardClasses = [
-        'shop-card',
-        bState.canBuy ? 'shop-card-affordable' : 'shop-card-greyed',
-      ].join(' ');
-
-      const chips: HTMLElement[] = [
-        el('span', { class: 'shop-chip', text: meta.sizeLabel }),
-      ];
-      if (ownedOfKind > 0) {
-        chips.push(
-          el('span', {
-            class: 'shop-chip shop-chip-owned',
-            text: `In je kudde: ${ownedOfKind}`,
-          }),
-        );
-      }
-
-      const info = el('div', { class: 'shop-card-info' }, [
-        el('div', { class: 'shop-card-title-row' }, [
-          el('h3', { class: 'shop-card-name', text: kind.name }),
-          el('span', {
-            class: 'shop-card-price',
-            text: `${kind.price} punten`,
-          }),
-        ]),
-        el('div', { class: 'shop-card-meta' }, chips),
-      ]);
-
-      const topRow = el('div', { class: 'shop-card-top' }, [
-        buildArtEmblem(kind.id),
-        info,
-      ]);
-
-      const bottomChildren = buyControls(
-        kind.id,
-        kind.name,
-        kind.price,
-        bState,
-        `Wil je een ${kind.name}-ei kopen voor ${kind.price} punten?`,
-        true,
-      );
-
-      const card = el(
-        'article',
-        {
-          class: cardClasses,
-          attrs: {
-            'data-dino-card': kind.id,
-            'aria-disabled': String(!bState.canBuy),
-          },
-        },
-        [topRow, ...bottomChildren],
-      );
-      grid.append(card);
-    }
+    for (const kind of SHOP_KINDS) grid.append(speciesCard(kind, shopCount));
     modal.append(grid);
+    modal.append(
+      el('h3', { class: 'shop-section-title', text: "\u{2728} Bijzondere dino's", attrs: { 'data-testid': 'shop-special-title' } }),
+    );
+    const specialGrid = el('div', { class: 'shop-grid shop-grid-special', attrs: { 'data-testid': 'shop-special' } });
+    for (const kind of SPECIAL_KINDS) specialGrid.append(speciesCard(kind, shopCount, true));
+    modal.append(specialGrid);
 
     // Kippenhok: 5 points a chicken, at most 10 (decision 55). Bought like an egg: Kopen, then Ja or Nee.
     const chickenCount = state.dinos.filter((d) => d.kind === 'kip').length;

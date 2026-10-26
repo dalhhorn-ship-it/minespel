@@ -94,6 +94,22 @@ test.describe('Dinowinkel shop (T47, AC20, AC110, AC149, AC150)', () => {
     expect(ledger.at(-1)).toMatchObject({ delta: 20, reason: 'tradein' });
   });
 
+  test("Bijzondere dino's: buy a T-rex egg, it hatches into a T-rex in the world (decision 113)", async ({ page }) => {
+    await openApp(page);
+    await readState(page, 'setPoints', 200);
+    await readState(page, 'openShop');
+    await expect(page.locator('[data-testid="shop-special"] [data-dino-card]')).toHaveCount(10);
+    await page.locator('[data-testid="shop-buy-trex"]').scrollIntoViewIfNeeded();
+    await page.screenshot({ path: 'test-results/screenshots/shop-special.png' });
+    await page.locator('[data-testid="shop-buy-trex"]').click();
+    await page.locator('[data-testid="shop-confirm-yes-trex"]').click();
+    await expect(page.locator('[data-testid="shop-points"]')).toContainText('0 punten');
+    await page.getByRole('button', { name: 'Sluiten' }).click();
+    await readState(page, 'stepDinos', 60);
+    const dinos = await readState<Array<{ kind: string }>>(page, 'dinos');
+    expect(dinos.map((d) => d.kind)).toEqual(['trex']);
+  });
+
   test('Nu oefenen starts an early break; a countdown break is not early (decision 56)', async ({ page }) => {
     await openApp(page);
     await readState(page, 'setPracticeUsed', 10);

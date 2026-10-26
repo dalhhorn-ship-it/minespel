@@ -220,6 +220,42 @@
 .shop-art-brachiosaurus .shop-art-voxel { background: #42a5f5; }
 .shop-art-kip .shop-art-voxel { background: #fafafa; border-top: 5px solid #e53935; }
 
+/* Bijzondere dino's (decision 113): body colour on the voxel, the feature colour as a top stripe. */
+.shop-art-velociraptor { background: linear-gradient(180deg, #ede7f6 0%, #b39ddb 100%); }
+.shop-art-pachycephalosaurus { background: linear-gradient(180deg, #efebe9 0%, #bcaaa4 100%); }
+.shop-art-parasaurolophus { background: linear-gradient(180deg, #ffebee 0%, #ef9a9a 100%); }
+.shop-art-ankylosaurus { background: linear-gradient(180deg, #efebe9 0%, #a1887f 100%); }
+.shop-art-dilophosaurus { background: linear-gradient(180deg, #f1f8e9 0%, #c5e1a5 100%); }
+.shop-art-spinosaurus { background: linear-gradient(180deg, #e8eaf6 0%, #9fa8da 100%); }
+.shop-art-trex { background: linear-gradient(180deg, #f1f8e9 0%, #9ccc65 100%); }
+.shop-art-ijsraptor { background: linear-gradient(180deg, #ffffff 0%, #b3e5fc 100%); }
+.shop-art-lavarex { background: linear-gradient(180deg, #ffe0b2 0%, #ff7043 100%); }
+.shop-art-regenboogsaurus { background: linear-gradient(180deg, #f8bbd0 0%, #fff59d 35%, #b2ebf2 70%, #e1bee7 100%); }
+.shop-art-velociraptor .shop-art-voxel { background: #7e57c2; border-top: 5px solid #ffca28; }
+.shop-art-pachycephalosaurus .shop-art-voxel { background: #a1887f; border-top: 5px solid #ff7043; }
+.shop-art-parasaurolophus .shop-art-voxel { background: #ef5350; border-top: 5px solid #ffeb3b; }
+.shop-art-ankylosaurus .shop-art-voxel { background: #8d6e63; border-top: 5px solid #d7ccc8; }
+.shop-art-dilophosaurus .shop-art-voxel { background: #9ccc65; border-top: 5px solid #ff4081; }
+.shop-art-spinosaurus .shop-art-voxel { background: #5c6bc0; border-top: 5px solid #ff8a65; }
+.shop-art-trex .shop-art-voxel { background: #558b2f; border-top: 5px solid #33691e; }
+.shop-art-ijsraptor .shop-art-voxel { background: #81d4fa; border-top: 5px solid #ffffff; }
+.shop-art-lavarex .shop-art-voxel { background: #37474f; border-top: 5px solid #ff6d00; }
+.shop-art-regenboogsaurus .shop-art-voxel {
+  background: linear-gradient(90deg, #ec407a, #ffee58, #26c6da, #ab47bc);
+}
+
+.shop-section-title {
+  margin: 4px 0 0;
+  font-size: calc(20px * var(--kid-scale, 1));
+  font-weight: 800;
+  color: #1f2d3d;
+}
+
+.shop-card-special.shop-card-affordable {
+  border-color: #b7791f;
+  background: linear-gradient(180deg, #ffffff 0%, #fff8e1 100%);
+}
+
 .shop-art-eye {
   width: 8px;
   height: 8px;
