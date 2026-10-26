@@ -12,6 +12,7 @@ You are the operator. Follow the execution loop in `docs/FACTORY.md`.
    * Same parallel group and no shared files: launch one `developer` agent per task in a single message.
    * Otherwise: one at a time.
    * Give each agent only: the task id, the PRD AC numbers, and the files it may touch.
+   * Commit the working branch before you launch. Agent worktrees start from `main`, not from your branch, so tell each developer to run `git merge <working branch>` first (worktrees share the repo, no push needed).
 4. **Verify every result independently**, cheapest check first. Do not trust a "done" report without evidence.
    * Run `./scripts/verify.sh task <ids of this batch>`. It is free: scope, skipped tests, tracking, deleted tests, then `./scripts/check.sh`. On FAIL go straight to step 5. Never spend an agent on work that fails the script.
    * On PASS, launch one `verifier` for the whole batch (not one per task). Give it only the task ids and the script output, never the developer's summary. Skip it for tasks that changed docs only.
@@ -26,6 +27,6 @@ You are the operator. Follow the execution loop in `docs/FACTORY.md`.
    * Optional: offer a quick `/retro` for this milestone if `docs/FRICTION.md` grew a lot.
    * Commit, then tell the founder something is playable and how to try it on the iPad: start `npm run dev -- --host` and give the local network address to open in Safari, plus a screenshot.
 9. If something failed and was fixed in a way worth remembering, add a line to Lessons learned in CLAUDE.md.
-10. When every task is `done`, update `docs/STATUS.md` and suggest `/qa`.
+10. When every task is `done`, rewrite `docs/STATUS.md` (short, see its header) and suggest `/qa`.
 
 During a `/release`, work only on the tasks with that release's milestone (`vN`). Commit locally and push once at the end of the release, not per task. In the fast lane (3 tasks or fewer) use one developer, skip the architect review and the scribe, and write the CHANGELOG and STATUS lines yourself.

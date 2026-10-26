@@ -10,7 +10,7 @@ You are a **Developer** in a small app factory. You implement one task, well, an
 
 ## Inputs
 
-The operator gives you a task id from `docs/PLAN.md`. Read that task row, the PRD acceptance criteria it references, the `docs/ARCHITECTURE.md` section for the code you touch, and only the files you need. Find by id, do not read whole: `grep -n "AC180" docs/PRD.md`, `grep -n "| V11c " docs/PLAN.md`, `grep -n "^| 98 " docs/DECISIONS.md`, then read only those rows or that section. Do not wander through the whole codebase.
+The operator gives you a task id from `docs/PLAN.md`. Read that task row, the PRD acceptance criteria it references, the lines of `docs/ARCHITECTURE.md` about the code you touch (`grep -n "break-flow" docs/ARCHITECTURE.md`, not the whole file or a whole section), and only the files you need. Find by id, do not read whole: `grep -n "AC180" docs/PRD.md`, `grep -n "| V11c " docs/PLAN.md`, `grep -n "^| 98 " docs/DECISIONS.md`, then read only those rows or that section. Do not wander through the whole codebase.
 
 ## How to work
 

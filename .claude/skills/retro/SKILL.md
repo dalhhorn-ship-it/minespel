@@ -10,7 +10,7 @@ You are the operator. The goal is to make the next app go better, not to grade a
 
 Read, do not guess:
 * `docs/FRICTION.md` (the running log of things that went wrong or felt slow)
-* `docs/DECISIONS.md`, `docs/DISCUSSION.md`, `docs/TEST_REPORT.md`, `docs/STATUS.md`
+* `docs/DISCUSSION.md`, `docs/TEST_REPORT.md` (the newest release sections) and `docs/STATUS.md`. Grep `docs/DECISIONS.md` for the decisions since the last retro; do not read it whole
 * `git log --oneline` (count fix commits, reverts, retries per task)
 * Lessons learned in `CLAUDE.md`
 * `.factory` (which factory repo this app came from and the date it started)
@@ -35,6 +35,7 @@ Rate each factory learning: impact (high, medium, low) and confidence (seen once
 
 ## 4. Write it down
 
+* Move the `docs/FRICTION.md` rows this retro covered to `docs/archive/friction-<YYYY-MM-DD>.md`, so the live log holds only new rows.
 * `docs/RETRO.md`: append a section for this retro (date, numbers, people answers, app learnings, factory learnings).
 * `docs/factory-feedback/<YYYY-MM-DD>.md` with only the factory learnings, in this format:
 

@@ -49,8 +49,9 @@ scripts/
   signoff.sh                PRD gate (do not touch)
 src/
   env.d.ts                  declares __E2E__ and the Vite types
-  main.ts                   boot: lockdown, one window check, open storage, migrate, load, first screen
+  main.ts                   thin entry: makes the world and HUD, calls app/boot.ts, registers dev hooks
   app/                      screens and flows: glue between logic and UI
+    boot.ts                 the ready gate: storage, migrate, load, builds every flow, returns one App
     screens.ts              which screen is up, the overlay layers, kid screen or parent screen
     timer-driver.ts         visibility, heartbeat, timer matrix inputs, play time stats
     break-flow.ts           runs a learning break: session, saving, logs, summary, back to world
@@ -170,6 +171,7 @@ src/
     base.css, hud.css, questions.css, keyboard.css, lesson.css, break.css, exam.css, ...
   dev/
     e2e-hooks.ts            window.__dino test hooks, only in the e2e build
+    app-hooks.ts            registers the app level test hooks (moved out of main.ts in R2a)
     spike-load.ts           14 placeholder dinos for the speed spike
 tests/
   setup/vitest.setup.ts     fake-indexeddb, canvas getContext stub

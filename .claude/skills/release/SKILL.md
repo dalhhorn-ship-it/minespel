@@ -33,7 +33,7 @@ Commit locally after each task, but do not push. Push once, when the whole relea
 
 ## 2. Scope and approve
 
-1. Launch `product` to write the release section in `docs/PRD.md` section 12: goal, in, out, and new acceptance criteria that continue the AC numbers. Section 12 holds only this next release. In the same edit, product moves the section of the release that shipped before it to `docs/releases/vN.md` (unchanged) and its criteria into section 7, so that is one signoff. It marks the release `next` in `docs/BACKLOG.md` and sets `Status: READY FOR SIGNOFF`.
+1. Launch `product` to write the release section in `docs/PRD.md` section 12: goal, in, out, and new acceptance criteria that continue the AC numbers. Section 12 holds only this next release. In the same edit, product moves the section of the release that shipped before it to `docs/releases/vN.md` (unchanged) and its criteria into section 7, so that is one signoff. In the same commit, that release's review rounds move from `docs/DISCUSSION.md` to `docs/archive/DISCUSSION-vN.md` (point any link to them at the new file), so the live file holds only open rounds. It marks the release `next` in `docs/BACKLOG.md` and sets `Status: READY FOR SIGNOFF`.
 2. Only if the release touches a Gate 2 topic (kid safety, money, accounts, platform), add a quick `architect` or `qa` review. Otherwise skip the review round.
 3. Run the `/signoff` steps. The summary is short: what the kids get, the new ACs, what is left out.
 
@@ -54,4 +54,4 @@ Push the release once (see One push per release). Then run the `/ship` steps for
 
 Ask the founder and kids two quick questions with AskUserQuestion: did they like the new thing, and what should come next. Put the answers in `docs/BACKLOG.md`. Add one line per real problem to `docs/FRICTION.md`. Run the full `/retro` only every 3 releases or when friction grew.
 
-Update `docs/STATUS.md` (current release, next in the backlog) and end with the next release you recommend.
+Rewrite `docs/STATUS.md` short (current release, next step, open founder checks, blockers; no done log) and end with the next release you recommend.
