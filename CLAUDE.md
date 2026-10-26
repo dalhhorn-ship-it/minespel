@@ -34,6 +34,7 @@ The big docs are append only logs. Never read them whole. Grep by id and read on
 * `./scripts/check.sh`: the full check (lint, typecheck, unit, build, dist check, e2e). CI runs it. Must pass before a task is done.
 * `CHECK_E2E=0 ./scripts/check.sh`: everything but the browser tests.
 * `npm run test:e2e:local -- <spec>`: one e2e spec in local Chromium. A fast first check only; WebKit in CI is the truth.
+* `npm run test:e2e:ui-review`: the full UI review, left out of normal runs. Every 5 releases or so, or after a lot of UI change (decision 106).
 * `./scripts/verify.sh task <ids>`: free independent check of a developer task, before any `verifier` agent.
 
 ## Hard rules

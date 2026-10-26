@@ -6,6 +6,8 @@ const PORT = 4173;
 // container cannot download WebKit). CI never sets it and keeps WebKit.
 const env = (globalThis as unknown as { process: { env: Record<string, string | undefined> } }).process.env;
 const local = env.E2E_LOCAL === '1';
+// The full UI review (ui-review.spec.ts, about 140 tests) runs only on request: UI_REVIEW=1 (decision 106).
+const uiReview = env.UI_REVIEW === '1';
 const localUse = local
   ? {
       defaultBrowserType: 'chromium' as const,
@@ -18,6 +20,7 @@ const localUse = local
 
 export default defineConfig({
   testDir: 'tests/e2e',
+  testIgnore: uiReview ? [] : ['**/ui-review.spec.ts'],
   fullyParallel: true,
   ...(local ? { workers: 2 } : {}),
   reporter: 'list',

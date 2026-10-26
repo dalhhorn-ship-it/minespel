@@ -8,6 +8,11 @@ on:
   push:
   pull_request:
   workflow_dispatch:
+    inputs:
+      ui_review:
+        description: Also run the full UI review (ui-review.spec.ts). Every 5 releases or so, or after a lot of UI change (decision 106).
+        type: boolean
+        default: false
 permissions:
   contents: read
 concurrency:
@@ -16,6 +21,7 @@ concurrency:
 env:
   CHECK_BASE: ${{ github.event_name == 'pull_request' && format('origin/{0}', github.base_ref) || 'origin/main' }}
   CHECK_FULL: ${{ github.ref == 'refs/heads/main' && '1' || '0' }}
+  UI_REVIEW: ${{ inputs.ui_review && '1' || '0' }}
 jobs:
   check:
     name: lint, types, unit, build
@@ -56,7 +62,7 @@ jobs:
         id: scope
         run: |
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
-          if [ "$CHECK_FULL" = "1" ]; then scope=full; else scope=$(./scripts/check-scope.sh); fi
+          if [ "$CHECK_FULL" = "1" ] || [ "$UI_REVIEW" = "1" ]; then scope=full; else scope=$(./scripts/check-scope.sh); fi
           echo "scope=$scope" >> "$GITHUB_OUTPUT"
           echo "Check scope: $scope"
       - uses: actions/setup-node@v4

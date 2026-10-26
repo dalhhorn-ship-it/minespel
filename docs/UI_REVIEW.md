@@ -1,6 +1,6 @@
 # UI review: Dino Blokwereld (Gemini's build, HEAD f2dee5b)
 
-> Screenshots are not in git (44 MB). Run `npx playwright test ui-review` to regenerate them in `test-results/screenshots/ui-review/`.
+> Screenshots are not in git (44 MB). Run `npm run test:e2e:ui-review` to regenerate them in `test-results/screenshots/ui-review/`.
 
 > **Status 2026-10-18:** all 14 findings are fixed (commits 0dbde85, 879b8ad and the next one). F1 and F13 follow founder decisions 51 to 54. `tests/e2e/ui-review.spec.ts` now asserts every check with no fixmes; the one allowance is decision 54 (shop and Lesboek may scroll in a Safari tab). Lesson and teach moment text scroll inside their own panel on purpose. Still to check on a real iPad: finger scrolling.
 
@@ -16,7 +16,7 @@ Seen like an 8 to 10 year old on an iPad, in landscape.
 * Result: 128 tests pass, 21 are `test.fixme` (one per known bug, numbered F1 to F14 below). The fixmes keep the checks alive. When a bug is fixed, delete its line in the `KNOWN` list and its fixme, and the check guards the layout.
 * Screenshots: `test-results/screenshots/ui-review/<size>-<screen>.png`. 201 files.
 * Limit: Chromium here cannot do a real swipe. Scrolling (F14) was proven by reading the code and by sending a `touchmove` event to the screens. Please confirm on a real iPad.
-* Run it: `npx playwright test ui-review` (CI uses WebKit). From the repo root, because the screenshot folder is relative.
+* Run it: `npm run test:e2e:ui-review`, or in CI with Actions, CI, Run workflow, "Also run the full UI review" (WebKit). It is left out of normal runs (decision 106). From the repo root, because the screenshot folder is relative.
 
 ## Why the founder sees buttons that do not fit
 

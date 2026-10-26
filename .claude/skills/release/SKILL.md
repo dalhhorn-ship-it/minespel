@@ -44,7 +44,7 @@ Commit locally after each task, but do not push. Push once, when the whole relea
 
 ## 4. Check
 
-Run the `/qa` steps in release mode: tests for the new ACs, the full `./scripts/check.sh` so nothing old broke, and a short play session on the iPad profile.
+Run the `/qa` steps in release mode: tests for the new ACs, the full `./scripts/check.sh` so nothing old broke, and a short play session on the iPad profile. Run the full UI review (`npm run test:e2e:ui-review`, or CI Run workflow with "Also run the full UI review") only when this release changes a lot of UI, or when about 5 releases have shipped since the last one (date at the top of `docs/UI_REVIEW.md`). Ask the founder when unsure (decision 106).
 
 ## 5. Ship
 
