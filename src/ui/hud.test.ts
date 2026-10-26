@@ -87,3 +87,20 @@ describe('world HUD Winkel button (AC160, AC161)', () => {
     hud.destroy();
   });
 });
+
+describe('world HUD Dinofluit button (decision 114)', () => {
+  it('stays hidden until the kid owns the fluit, then plays on a tap', () => {
+    const onFluit = vi.fn();
+    const hud = createHud({ router, onJump: vi.fn(), onMode: vi.fn(), onPause: vi.fn(), onFluit });
+    const btn = hud.root.querySelector<HTMLButtonElement>('[data-testid="hud-fluit"]')!;
+    expect(btn.hidden).toBe(true);
+    hud.setFluit(true);
+    expect(btn.hidden).toBe(false);
+    expect(btn.textContent).toContain('Fluit');
+    tap(btn);
+    expect(onFluit).toHaveBeenCalledTimes(1);
+    hud.setFluit(false);
+    expect(btn.hidden).toBe(true);
+    hud.destroy();
+  });
+});

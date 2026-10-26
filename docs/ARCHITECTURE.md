@@ -101,7 +101,7 @@ src/
     world-save.ts           world diff, player and hotbar to the save queue
   dinos/
     kinds.ts                Compy, Triceratops, Stegosaurus, Brachiosaurus: size, price, box size
-    dino-ai.ts              follow, stay and wander, hop one block, stuck pop, pure
+    dino-ai.ts              follow, stay and wander, hop one block, stuck pop, Dinofluit call (decision 114), pure
     egg.ts                  egg hatch timing, pure
     dino-store.ts           dinos and eggs records, add egg, rename, mode
   learning/                 pure learning engine
@@ -112,6 +112,7 @@ src/
     generated-items.ts      saved wrong plus and minus sums, 200 newest per topic
     break-session.ts        state machine for one break or practice round or preview
     exam-session.ts         state machine for one exam
+    progress-stats.ts       Voortgang numbers: week report, weeks, days, topics, hard questions (decision 115), pure
   content/
     format.ts               types: ModuleBundle, Topic, LessonPage, Item
     validate.ts             same rules as validate.py, Dutch error messages
@@ -156,7 +157,7 @@ src/
   ui/
     dom.ts                  el(), text only helpers
     tap.ts                  onTap(): pointer based tap, acts once, ignores repeats
-    hud.ts                  stick, jump, mode buttons, hotbar slot, countdown slot, pause button, Winkel button (T51e)
+    hud.ts                  stick, jump, mode buttons, hotbar slot, countdown slot, pause button, Winkel button (T51e), Fluit button (decision 114)
     countdown.ts            "Leerpauze over 4:12", pulse, tick
     hotbar.ts, block-grid.ts, pause-menu.ts, shop.ts, dino-menu.ts, name-screen.ts, lock-icon.ts
     broken-save-screen.ts
@@ -164,6 +165,7 @@ src/
     contrast.ts             WCAG contrast ratio, used by token tests and the a11y audit
     learn/                  kid learning screens (shared by break, practice, exam, Probeer)
     parent/                 parent area screens
+      progress-screen.ts    Voortgang: week report, SVG bar charts with table views (decision 115)
       editor/               own module editor
   styles/
     tokens.css              colours, sizes, --kid-scale for Groter lettertype

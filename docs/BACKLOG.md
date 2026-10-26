@@ -79,6 +79,7 @@ Open plan tasks: 5 for v11 (V11a to V11e), 13 in v3 to v6 (v6 may get more for t
 
 ### v6 Wat heb ik geleerd
 * **Status:** candidate, after v3 (decisions 91, 92 and 94). Ships as 0.7.0 if it ships in this order.
+* **Started early:** decision 115 shipped a first slice as Ouders > Voortgang (week report, 12 week charts, per topic trend, hardest questions). v6 builds on `src/learning/progress-stats.ts` for the rest.
 * **Goal:** the parent sees what the kid knows and what is hard, and can tell at a glance if the kid is really learning. It grows into a parent learning dashboard (decision 91).
 * **In:** PRD 4.16 in full: Overzicht, Pauzes, Per onderdeel, Over tijd, Lastige vragen, Examens. Plus key dashboard stats: right on the first try per topic over time, topics that got better or got stuck, the hardest questions, exam results, and learning time against play time.
 * **Kid safety:** everything is worked out on the iPad, behind the parent gate. Nothing leaves the device, no tracking, no analytics service (decision 91, PRD section 9).

@@ -54,6 +54,10 @@ export interface Game {
   setFoundBlocks(ids: readonly number[]): void;
   /** Puts a block in the selected hotbar slot and saves it (V11d "In mijn hotbar", AC184). */
   giveToHotbar(block: number): void;
+  /** Shows or hides the Dinofluit button (decision 114). */
+  setFluitOwned(owned: boolean): void;
+  /** Plays the Dinofluit: every dino and chicken walks slowly to the kid. Returns how many were called. */
+  playFluit(): number;
   /** Stops the world: no steps, no drawing. Safe to call twice. */
   pause(): void;
   resume(): void;
@@ -164,7 +168,26 @@ export function createGame(options: GameOptions): Game {
     onPause: () => options.onPausePressed?.(),
     onShop: options.onShopPressed ? () => options.onShopPressed?.() : undefined,
     onParent: options.onParentPressed ? () => options.onParentPressed?.() : undefined,
+    onFluit: () => {
+      playFluit();
+    },
   });
+  let fluitOwned = false;
+  let fluitGlow: ReturnType<typeof setTimeout> | null = null;
+  function playFluit(): number {
+    if (!fluitOwned || !loopRunning()) return 0;
+    sound.play('fluit');
+    const btn = hud.root.querySelector<HTMLElement>('.hud-fluit');
+    if (btn) {
+      btn.classList.add('hud-fluit-playing');
+      if (fluitGlow) clearTimeout(fluitGlow);
+      fluitGlow = setTimeout(() => {
+        fluitGlow = null;
+        btn.classList.remove('hud-fluit-playing');
+      }, 1500);
+    }
+    return dinoSystem.whistle();
+  }
   const build = createBuildController({
     world,
     player,
@@ -314,6 +337,11 @@ export function createGame(options: GameOptions): Game {
       refreshHotbar();
       emitChanged('build');
     },
+    setFluitOwned(owned) {
+      fluitOwned = owned;
+      hud.setFluit(owned);
+    },
+    playFluit,
     pause() {
       manualPause = true;
       update();
@@ -343,6 +371,7 @@ export function createGame(options: GameOptions): Game {
     },
     frameCount: () => frames,
     dispose() {
+      if (fluitGlow) clearTimeout(fluitGlow);
       loop.stop();
       unsubscribe();
       doc.removeEventListener('visibilitychange', update);

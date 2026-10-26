@@ -9,7 +9,12 @@ Written so kids can read it too.
 * Your herd can now grow to 25 dinos instead of 12.
 * Full herd, or want a different dino? Tap "Inruilen" next to a dino or chicken in Mijn Dino-verzameling. You get half its price back. Your golden dinos always stay.
 * 10 new Bijzondere dino's in the shop, for the real savers: Velociraptor, Pachycephalosaurus, Parasaurolophus, Ankylosaurus, Dilophosaurus, Spinosaurus, T-rex, IJsraptor, Lavarex and the rare Regenboogsaurus (300 points).
+* New in the shop: the Dinofluit (60 points, buy it once). Tap 🎶 Fluit in the world and all your dinos and chickens come running to you, nice and slow.
 * Fixed: with lots of dinos you could hardly dig or build, because your taps hit a dino. Your dinos now walk behind you and leave the view free. Turn around to see them and tap one to pet it.
+
+### Voor ouders
+
+* New in Ouders: Voortgang. A week report with this week against last week, charts of right on the first try and questions per week, learning and play time per day, every topic with its trend, and the hardest questions. Everything stays on the iPad.
 
 ### Onder de motorkap
 

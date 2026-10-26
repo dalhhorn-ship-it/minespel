@@ -101,3 +101,8 @@ Below the 4 shop cards, the shop displays the child's live collection:
 * Bought exactly like the other eggs (Kopen, Ja or Nee, one transaction). An affordable special card has a gold border.
 * They count toward the 25 dino herd and can be traded in for half their price. The golden exam egg is never one of them.
 
+## Dinofluit (decision 114)
+
+* A card "Dinofluit" under the Kippenhok, 60 points, bought once with Kopen, then Ja or Nee. Too few points: greyed with a bar and "Nog X punten nodig". Owned: "Van jou!" and a note, no Kopen.
+* Economy and a `shop` ledger row are written in one transaction. A fast double tap buys it once. Owned is saved as `economy.fluit`.
+* Once owned, the world HUD shows "🎶 Fluit" under Hakken and Bouwen (56 px or more). A tap plays a whistle; every dino and chicken switches to Volg mij and walks slowly (2 blocks a second) to the kid for at most 40 s, then walks behind as usual.

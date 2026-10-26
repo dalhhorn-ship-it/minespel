@@ -57,6 +57,9 @@
   flex-direction: column;
   gap: var(--gap);
 }
+.hud-btn.hud-fluit { white-space: nowrap; }
+.hud-btn.hud-fluit[hidden] { display: none; }
+.hud-btn.hud-fluit.hud-fluit-playing { background: var(--grass); color: var(--on-grass); }
 .hud-jump {
   right: calc(var(--safe-right) + var(--gap) * 2);
   bottom: calc(var(--safe-bottom) + var(--touch-min) + var(--gap) * 4);

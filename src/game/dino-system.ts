@@ -5,6 +5,7 @@
 import type { Sound } from '../audio/sound';
 import { createRng, type Rng } from '../core/rng';
 import {
+  callDino,
   dinoBounds,
   popNextTo,
   stepDino,
@@ -161,6 +162,8 @@ export interface DinoSystem {
   handleTap(screenX: number, screenY: number): boolean;
   isOccupied(box: Box): boolean;
   onPlayerTeleported(spot: Point): void;
+  /** The Dinofluit (decision 114): every dino and chicken follows and walks slowly to the kid. Returns how many. */
+  whistle(): number;
   showHearts(screenX?: number, screenY?: number): void;
   dispose(): void;
 }
@@ -277,6 +280,12 @@ export function createDinoSystem(options: DinoSystemOptions): DinoSystem {
         options.store.markDirty();
         options.renderer.syncDinos?.(options.store.dinos(), options.store.eggs());
       }
+    },
+    whistle() {
+      const all = options.store.dinos();
+      for (const d of all) callDino(d);
+      if (all.length > 0) options.store.markDirty();
+      return all.length;
     },
     showHearts,
     dispose() {

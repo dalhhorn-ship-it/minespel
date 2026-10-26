@@ -12,7 +12,8 @@ export type SoundName =
   | 'crack'
   | 'chirp'
   | 'fanfare'
-  | 'tick';
+  | 'tick'
+  | 'fluit';
 
 export const SOUND_NAMES: readonly SoundName[] = [
   'pop',
@@ -24,6 +25,7 @@ export const SOUND_NAMES: readonly SoundName[] = [
   'chirp',
   'fanfare',
   'tick',
+  'fluit',
 ];
 
 export interface SoundOptions {
@@ -145,6 +147,11 @@ const RECIPES: Record<SoundName, (c: Ctx, out: AudioNode, t: number) => void> = 
   },
   // Countdown tick: tiny and quiet.
   tick: (c, o, t) => tone(c, o, t, { type: 'square', from: 1000, dur: 0.03, gain: 0.12 }),
+  // Dinofluit: a friendly two tone whistle that slides up, like calling a dog (decision 114).
+  fluit: (c, o, t) => {
+    tone(c, o, t, { from: 1100, to: 1600, dur: 0.22, gain: 0.35 });
+    tone(c, o, t, { from: 1300, to: 2100, at: 0.3, dur: 0.35, gain: 0.35 });
+  },
 };
 
 export function createSound(options: SoundOptions): Sound {
