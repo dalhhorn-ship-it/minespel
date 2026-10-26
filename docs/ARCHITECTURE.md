@@ -55,6 +55,7 @@ src/
     timer-driver.ts         visibility, heartbeat, timer matrix inputs, play time stats
     break-flow.ts           runs a learning break: session, saving, logs, summary, back to world
     practice-flow.ts        Extra oefenen
+    session-log.ts          the one writer of session points + ledger row (one transaction), plus formatGivenResponse and lessonForItem
     exam-flow.ts            exams
     shop-flow.ts            Dinowinkel
     parent-flow.ts          gate, parent area open and close

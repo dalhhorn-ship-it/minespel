@@ -5,7 +5,7 @@
 import '../styles/lesboek.css';
 import type { Sound } from '../audio/sound';
 import { isGeneratedModule, subjectLabel, type Catalog } from '../content/catalog';
-import type { Item, Lesson } from '../content/format';
+import type { Item } from '../content/format';
 import { generateItems } from '../content/rekenen/generator';
 import type { RekenenTopicId } from '../content/rekenen/module';
 import {
@@ -18,8 +18,8 @@ import {
 } from '../content/switches';
 import { effectiveDay, systemClock, today, type Clock } from '../core/clock';
 import { canAffordEgg, pointsModeOf, shopDinoCount } from '../core/economy';
+import { createSerialQueue } from '../core/serial-queue';
 import { createRng, type Rng } from '../core/rng';
-import type { Response } from '../learning/answer-check';
 import {
   reduce,
   startSession,
@@ -38,11 +38,14 @@ import { el } from '../ui/dom';
 import { createBreakScreen, type BreakScreen, type BreakScreenAction } from '../ui/learn/break-screen';
 import { onTap } from '../ui/tap';
 import type { ScreenManager } from './screens';
+import { writeEffects, formatGivenResponse, lessonForItem } from './session-log';
 
 export interface PracticeFlowOptions {
   screens: ScreenManager;
   clock?: Clock;
   rng?: Rng;
+  /** Needed to write points and ledger together. Without it practice writes no points. */
+  db?: IDBDatabase;
   records?: Records;
   progressStore?: ProgressStore;
   logStore?: LogStore;
@@ -158,20 +161,6 @@ export function selectPracticeTopicItems(options: {
   return entries;
 }
 
-function formatGivenResponse(item: Item, response: Response): string {
-  switch (response.type) {
-    case 'choice':
-      return item.type === 'choice' ? (item.options[response.index] ?? String(response.index)) : String(response.index);
-    case 'find-error':
-      if (response.index === -1) return 'geen fout';
-      return item.type === 'find-error' ? (item.words[response.index] ?? String(response.index)) : String(response.index);
-    case 'type':
-      return response.text;
-    case 'punctuate':
-      return response.gaps.join(',');
-  }
-}
-
 export function createPracticeFlow(options: PracticeFlowOptions): PracticeFlow {
   const clock = options.clock ?? systemClock;
   const rng = options.rng ?? createRng(0x70726163);
@@ -182,6 +171,7 @@ export function createPracticeFlow(options: PracticeFlowOptions): PracticeFlow {
   let activeTopicId = '';
   let activeSessionId = '';
   let shopCount = 0;
+  const queue = createSerialQueue();
 
   function clearCleanups() {
     while (cleanups.length > 0) {
@@ -196,14 +186,6 @@ export function createPracticeFlow(options: PracticeFlowOptions): PracticeFlow {
       screenView = null;
     }
     activeState = null;
-  }
-
-  function lessonForItem(moduleId: string, item: Item): Lesson | undefined {
-    const catalog = options.getCatalog?.();
-    if (!catalog) return undefined;
-    const tId = catalog.topicOfItem(moduleId, item.id) || activeTopicId;
-    if (!tId) return undefined;
-    return catalog.getTopic(moduleId, tId)?.lesson;
   }
 
   async function processPracticeEffects(state: SessionState, effects: readonly SessionEffect[]) {
@@ -251,18 +233,20 @@ export function createPracticeFlow(options: PracticeFlowOptions): PracticeFlow {
           firstTryRight,
           at: clock.now(),
         });
-      } else if (ef.type === 'points' && options.records) {
-        await options.records.put('economy', state.economy);
-        if (ef.applied !== 0 && options.logStore) {
-          await options.logStore.appendLedger({
-            ts: clock.now(),
-            day: state.day,
-            delta: ef.applied,
-            reason: ef.applied < 0 ? 'malus' : 'practice',
-          });
-        }
+      } else if (ef.type === 'points' && options.db) {
+        await writeEffects(options.db, {
+          sessionEconomy: state.economy,
+          applied: ef.applied,
+          ts: clock.now(),
+          day: state.day,
+          reason: 'practice',
+        });
       }
     }
+  }
+
+  function enqueue(event: SessionEvent): Promise<void> {
+    return queue.run(() => dispatchPractice(event));
   }
 
   async function dispatchPractice(event: SessionEvent) {
@@ -290,19 +274,19 @@ export function createPracticeFlow(options: PracticeFlowOptions): PracticeFlow {
     const at = clock.now();
     switch (action.type) {
       case 'lessonDone':
-        void dispatchPractice({ type: 'lessonDone', at });
+        void enqueue({ type: 'lessonDone', at });
         break;
       case 'answer':
-        void dispatchPractice({ type: 'answer', response: action.response, q: action.q, at });
+        void enqueue({ type: 'answer', response: action.response, q: action.q, at });
         break;
       case 'next':
-        void dispatchPractice({ type: 'next', q: action.q, at });
+        void enqueue({ type: 'next', q: action.q, at });
         break;
       case 'understood':
-        void dispatchPractice({ type: 'understood', q: action.q, at });
+        void enqueue({ type: 'understood', q: action.q, at });
         break;
       case 'finish':
-        void dispatchPractice({ type: 'finish', at });
+        void enqueue({ type: 'finish', at });
         break;
     }
   }
@@ -361,7 +345,7 @@ export function createPracticeFlow(options: PracticeFlowOptions): PracticeFlow {
     screenView = createBreakScreen({
       state: activeState,
       lesson: topicLesson,
-      lessonForItem: (item) => lessonForItem(moduleId, item),
+      lessonForItem: (item) => lessonForItem(options.getCatalog?.(), moduleId, item, activeTopicId),
       canAffordEgg: (pts) => canAffordEgg(pts, shopCount),
       sound: options.sound,
       onAction: handleAction,

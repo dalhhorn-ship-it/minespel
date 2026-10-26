@@ -67,6 +67,7 @@ describe('egg hint is the same after a break and after Extra oefenen (AC169, AC3
           ...base,
           rng: createRng(1),
           screens: createScreenManager({ host }),
+          db,
           sessionStore: createSessionStore(db),
         });
         await brk.startBreak();

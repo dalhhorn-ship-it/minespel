@@ -5,13 +5,13 @@
 
 import type { Sound } from '../audio/sound';
 import type { Catalog } from '../content/catalog';
-import type { Item, Lesson } from '../content/format';
+import type { Lesson } from '../content/format';
 import { isModuleOn, isModuleUsable, moduleWeight } from '../content/switches';
+import { createSerialQueue } from '../core/serial-queue';
 import { effectiveDay, today, type Clock } from '../core/clock';
 import { canAffordEgg, pointsModeOf, shopDinoCount } from '../core/economy';
 import type { Rng } from '../core/rng';
 import { registerHook } from '../dev/e2e-hooks';
-import type { Response } from '../learning/answer-check';
 import {
   EMPTY_BREAK_MS,
   reduce,
@@ -36,6 +36,7 @@ import type { Records } from '../storage/records';
 import type { SessionState as StoredSessionRecord, SessionStore } from '../storage/session-store';
 import { createBreakScreen, type BreakScreen, type BreakScreenAction } from '../ui/learn/break-screen';
 import type { ScreenManager } from './screens';
+import { formatGivenResponse, lessonForItem, writeEffects } from './session-log';
 
 export interface PersistedBreakSession extends StoredSessionRecord {
   kind: 'break';
@@ -65,6 +66,7 @@ export interface BreakFlowOptions {
   clock: Clock;
   rng: Rng;
   screens: ScreenManager;
+  db: IDBDatabase;
   records: Records;
   progressStore: ProgressStore;
   logStore: LogStore;
@@ -90,33 +92,13 @@ export interface BreakFlow {
   destroy(): void;
 }
 
-function formatGivenResponse(item: Item, response: Response): string {
-  switch (response.type) {
-    case 'choice':
-      if (item.type === 'choice') {
-        return item.options[response.index] ?? String(response.index);
-      }
-      return String(response.index);
-    case 'find-error':
-      if (response.index === -1) return 'geen fout';
-      if (item.type === 'find-error') {
-        return item.words[response.index] ?? String(response.index);
-      }
-      return String(response.index);
-    case 'type':
-      return response.text;
-    case 'punctuate':
-      return response.gaps.join(',');
-  }
-}
-
 export function createBreakFlow(options: BreakFlowOptions): BreakFlow {
   const win = options.win ?? (typeof window !== 'undefined' ? window : undefined);
   let active: PersistedBreakSession | null = null;
   let screenView: BreakScreen | null = null;
   let emptyTimerId: number | null = null;
   let shopCount = 0;
-  let processingQueue: Promise<void> = Promise.resolve();
+  const queue = createSerialQueue();
 
   function clearEmptyTimer() {
     if (emptyTimerId !== null && win) {
@@ -138,13 +120,6 @@ export function createBreakFlow(options: BreakFlowOptions): BreakFlow {
   function lessonFor(moduleId: string, topicId: string | null): Lesson | undefined {
     if (!moduleId || !topicId) return undefined;
     return options.getCatalog().getTopic(moduleId, topicId)?.lesson;
-  }
-
-  function lessonForItem(moduleId: string, item: Item): Lesson | undefined {
-    const catalog = options.getCatalog();
-    const topicId = catalog.topicOfItem(moduleId, item.id);
-    if (!topicId) return undefined;
-    return catalog.getTopic(moduleId, topicId)?.lesson;
   }
 
   async function processEffects(
@@ -204,15 +179,13 @@ export function createBreakFlow(options: BreakFlowOptions): BreakFlow {
           at: options.clock.now(),
         });
       } else if (ef.type === 'points') {
-        await options.records.put('economy', state.economy);
-        if (ef.applied !== 0) {
-          await options.logStore.appendLedger({
-            ts: options.clock.now(),
-            day: state.day,
-            delta: ef.applied,
-            reason: ef.applied < 0 ? 'malus' : 'break',
-          });
-        }
+        await writeEffects(options.db, {
+          sessionEconomy: state.economy,
+          applied: ef.applied,
+          ts: options.clock.now(),
+          day: state.day,
+          reason: 'break',
+        });
       } else if (ef.type === 'unanswered') {
         const entry = state.entries.find((e) => e.item.id === ef.itemId);
         const item = entry?.item ?? catalog.getItem(moduleId, ef.itemId);
@@ -286,10 +259,7 @@ export function createBreakFlow(options: BreakFlowOptions): BreakFlow {
   }
 
   function enqueueDispatch(event: SessionEvent): Promise<void> {
-    processingQueue = processingQueue.then(() => dispatch(event)).catch(() => {
-      /* keep queue alive */
-    });
-    return processingQueue;
+    return queue.run(() => dispatch(event));
   }
 
   function handleScreenAction(action: BreakScreenAction) {
@@ -322,7 +292,7 @@ export function createBreakFlow(options: BreakFlowOptions): BreakFlow {
     screenView = createBreakScreen({
       state: persisted.session,
       lesson,
-      lessonForItem: (item) => lessonForItem(persisted.moduleId, item),
+      lessonForItem: (item) => lessonForItem(options.getCatalog(), persisted.moduleId, item),
       canAffordEgg: (pts) => canAffordEgg(pts, shopCount),
       sound: options.sound,
       onAction: handleScreenAction,
