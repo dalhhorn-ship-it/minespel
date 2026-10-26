@@ -28,7 +28,7 @@ describe('shop view and shop flow (T47, AC20, AC110, AC149, AC150)', () => {
     expect(view.element.querySelector('.shop-card-trait')).toBeNull();
   });
 
-  it('shows 4 species cards, greys out unaffordable ones with "Nog X punten nodig", and shows 12-cap banner (AC149)', () => {
+  it('shows 4 species cards, greys out unaffordable ones with "Nog X punten nodig", and shows the 25-cap banner (AC149)', () => {
     const view = createShopView({
       state: {
         points: 30,
@@ -53,10 +53,10 @@ describe('shop view and shop flow (T47, AC20, AC110, AC149, AC150)', () => {
       view.element.querySelector('[data-testid="shop-note-brachiosaurus"]')?.textContent,
     ).toBe('Nog 50 punten nodig');
 
-    // Render with 12 shop dinos -> cap banner shown and all buy buttons disabled (AC149)
+    // Render with 25 shop dinos -> cap banner shown and all buy buttons disabled (AC149)
     view.render({
       points: 200,
-      dinos: Array.from({ length: 12 }, (_, i) => ({
+      dinos: Array.from({ length: 25 }, (_, i) => ({
         id: `d-${i}`,
         kind: 'compy' as const,
         golden: false,
@@ -153,10 +153,10 @@ describe('shop view and shop flow (T47, AC20, AC110, AC149, AC150)', () => {
     expect(q('shop-chicken-count')?.textContent).toBe('Kippen: 10 van de 10');
     expect(q('shop-note-kip')?.textContent).toBe(MSG_COOP_FULL);
     expect((q('shop-buy-kip') as HTMLButtonElement).disabled).toBe(true);
-    // 12 dinos and a chicken: the dino cap does not block chickens
+    // A full herd of 25 dinos: the dino cap does not block chickens
     view.render({
       points: 100,
-      dinos: Array.from({ length: 12 }, (_, i) => ({ id: `d${i}`, kind: 'compy' as const })),
+      dinos: Array.from({ length: 25 }, (_, i) => ({ id: `d${i}`, kind: 'compy' as const })),
       eggs: [],
     });
     expect((q('shop-buy-kip') as HTMLButtonElement).disabled).toBe(false);
@@ -223,6 +223,87 @@ describe('shop view and shop flow (T47, AC20, AC110, AC149, AC150)', () => {
     expect(dinoStore.chickenCount()).toBe(10);
     expect((await records.get('economy')).points).toBe(100 - 45);
     expect(await flow.buyChicken()).toBe(false);
+    flow.destroy();
+    db.close();
+  });
+
+  it('Inruilen: a dino goes, half its price comes back with Ja, Nee keeps it, golden has no button (decision 111)', async () => {
+    const db = await openDb({ name: `shop-trade-${Math.random()}` });
+    const records = createRecords(db);
+    const logStore = createLogStore(db);
+    const dinoStore = createDinoStore({
+      world: new World(),
+      getPlayerSpot: () => ({ x: START_SPOT.x, y: START_SPOT.y, z: START_SPOT.z }),
+      records,
+    });
+    dinoStore.restoreFromRecord({
+      dinos: [
+        { id: 'b1', kind: 'brachiosaurus', name: 'Lange Nek', x: 32.5, y: 10, z: 32.5 },
+        { id: 'g1', kind: 'compy', golden: true, x: 33.5, y: 10, z: 32.5 },
+        { id: 'k1', kind: 'kip', x: 34.5, y: 10, z: 32.5 },
+      ],
+      eggs: [],
+    });
+    const host = document.createElement('div');
+    const screens = createScreenManager({ host });
+    await records.put('economy', { points: 3, practicePointsToday: 0, practiceDay: '2026-10-17' });
+    const flow = createShopFlow({ screens, db, records, logStore, dinoStore });
+    await flow.open();
+    const q = (id: string) => host.querySelector(`[data-testid="${id}"]`);
+
+    // A golden dino is a prize: no Inruilen. The others show what they give back.
+    expect(q('shop-trade-g1')).toBeNull();
+    expect(q('shop-trade-b1')?.textContent).toBe('Inruilen +40');
+    expect(q('shop-trade-k1')?.textContent).toBe('Inruilen +2');
+
+    // Nee keeps the dino and the points.
+    press(q('shop-trade-b1'));
+    expect(host.textContent).toContain('Wil je Lange Nek (Brachiosaurus) inruilen? Je krijgt 40 punten terug.');
+    press(q('shop-trade-no-b1'));
+    expect(q('shop-trade-confirm-b1')).toBeNull();
+    expect(dinoStore.getDino('b1')).toBeDefined();
+
+    // Ja: the dino goes, 40 points come back, all saved together.
+    press(q('shop-trade-b1'));
+    press(q('shop-trade-yes-b1'));
+    await vi.waitFor(() => expect(dinoStore.getDino('b1')).toBeUndefined());
+    await vi.waitFor(() => expect(host.textContent).toContain('Dag Lange Nek! Je kreeg 40 punten terug.'));
+    expect((await records.get('economy')).points).toBe(43);
+    const saved = await records.get('dinos');
+    expect((saved.dinos as Array<{ id: string }>).map((d) => d.id)).toEqual(['g1', 'k1']);
+    expect(await logStore.listLedger()).toMatchObject([{ delta: 40, reason: 'tradein' }]);
+
+    // Fast taps trade in one chicken once. A golden dino is refused without the screen too.
+    const r = await Promise.all(Array.from({ length: 5 }, () => flow.tradeIn('k1')));
+    expect(r.filter(Boolean)).toHaveLength(1);
+    expect(await flow.tradeIn('g1')).toBe(false);
+    expect((await records.get('economy')).points).toBe(45);
+    expect(dinoStore.dinos().map((d) => d.id)).toEqual(['g1']);
+    flow.destroy();
+    db.close();
+  });
+
+  it('a full herd of 25 can trade one in and then buy again', async () => {
+    const db = await openDb({ name: `shop-trade-cap-${Math.random()}` });
+    const records = createRecords(db);
+    const dinoStore = createDinoStore({
+      world: new World(),
+      getPlayerSpot: () => ({ x: START_SPOT.x, y: START_SPOT.y, z: START_SPOT.z }),
+      records,
+    });
+    dinoStore.restoreFromRecord({
+      dinos: Array.from({ length: 25 }, (_, i) => ({ id: `c${i}`, kind: 'compy', x: 32.5, y: 10, z: 32.5 })),
+      eggs: [],
+    });
+    const screens = createScreenManager({ host: document.createElement('div') });
+    await records.put('economy', { points: 10, practicePointsToday: 0, practiceDay: '2026-10-17' });
+    const flow = createShopFlow({ screens, db, records, dinoStore });
+    expect(await flow.buyEgg('compy')).toBe(false);
+    expect(await flow.tradeIn('c0')).toBe(true);
+    expect((await records.get('economy')).points).toBe(20);
+    expect(await flow.buyEgg('compy')).toBe(true);
+    expect(dinoStore.shopCount()).toBe(25);
+    expect((await records.get('economy')).points).toBe(0);
     flow.destroy();
     db.close();
   });

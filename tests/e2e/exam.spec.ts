@@ -99,12 +99,12 @@ test.describe('kid exam (T51b, v2)', () => {
     expect(await readState<boolean>(page, 'isBreakActive')).toBe(false);
   });
 
-  test('AC68, AC69, AC111: a pass hatches a golden dino, also with 12 shop dinos, and is saved', async ({ page }) => {
+  test('AC68, AC69, AC111: a pass hatches a golden dino, also with a full herd of 25 shop dinos, and is saved', async ({ page }) => {
     await openApp(page);
-    // 12 shop dinos: the golden egg must still come (AC111).
-    for (let i = 0; i < 12; i++) await readState(page, 'addEgg', 'compy', false);
+    // A full herd of 25 shop dinos: the golden egg must still come (AC111).
+    for (let i = 0; i < 25; i++) await readState(page, 'addEgg', 'compy', false);
     await readState(page, 'stepDinos', 60);
-    expect(await readState<unknown[]>(page, 'dinos')).toHaveLength(12);
+    expect(await readState<unknown[]>(page, 'dinos')).toHaveLength(25);
 
     const points = await readState<number>(page, 'points');
     await startAndBegin(page);
@@ -133,10 +133,10 @@ test.describe('kid exam (T51b, v2)', () => {
     expect(eggs[0]?.golden).toBe(true);
     await readState(page, 'stepDinos', 60);
     const dinos = await readState<Array<{ golden: boolean }>>(page, 'dinos');
-    expect(dinos).toHaveLength(13);
+    expect(dinos).toHaveLength(26);
     expect(dinos.filter((d) => d.golden)).toHaveLength(1);
 
-    // The Dinowinkel still blocks a 13th shop dino (12 shop dinos, golden does not count).
+    // The Dinowinkel still blocks a 26th shop dino (25 shop dinos, golden does not count).
     await readState(page, 'setPoints', 200);
     const bought = await readState<boolean>(page, 'buyEggInShop', 'compy');
     expect(bought).toBe(false);

@@ -1,16 +1,19 @@
 // Compelling Dinowinkel UI view (T47, docs/SHOP_PRD.md, AC20, AC110, AC149).
 // Four species cards with voxel emblems, personality blurbs, affordability progress bars,
-// Kopen -> Ja/Nee confirmation, 12-cap banner, and live "Mijn Dino-verzameling" showcase.
+// Kopen -> Ja/Nee confirmation, 25-cap banner, and live "Mijn Dino-verzameling" showcase,
+// where every animal but a golden dino can be traded in for half its price (Inruilen, decision 111).
 
 import '../styles/shop.css';
 import {
   buyState,
+  canTradeIn,
   capReached,
   chickenBuyState,
   MAX_CHICKENS,
   MAX_SHOP_DINOS,
   MSG_CAP_REACHED,
   shopDinoCount,
+  tradeInValue,
   type BuyState,
 } from '../core/economy';
 import { EGG_HATCH_SECONDS } from '../dinos/egg';
@@ -44,6 +47,8 @@ export interface ShopViewOptions {
   /** null while the points are still being read. The view opens at once with a placeholder and no Kopen (AC164). */
   state: ShopViewState | null;
   onBuy: (kind: DinoKindId) => Promise<void> | void;
+  /** Trades in the dino or chicken with this id. Without it the collection shows no Inruilen. */
+  onTradeIn?: (dinoId: string) => Promise<void> | void;
   onClose: () => void;
   /** Optional shortcut to override the countdown and earn coins immediately. */
   onEarnCoins?: () => void;
@@ -89,6 +94,7 @@ export function createShopView(options: ShopViewOptions): ShopView {
   let loaded = options.state !== null;
   let state: ShopViewState = options.state ?? emptyState;
   let confirmingKind: DinoKindId | null = null;
+  let confirmingTradeId: string | null = null;
   let purchaseInFlight = false;
   const cleanups: Array<() => void> = [];
 
@@ -226,6 +232,7 @@ export function createShopView(options: ShopViewOptions): ShopView {
             buyBtn,
             () => {
               confirmingKind = kindId;
+              confirmingTradeId = null;
               renderView();
             },
             { now: options.now },
@@ -235,6 +242,93 @@ export function createShopView(options: ShopViewOptions): ShopView {
       bottomChildren.push(buyBtn);
     }
     return bottomChildren;
+  }
+
+  /** One animal in the collection: a golden dino is only a label, every other one has Inruilen. */
+  function collectionDino(dino: ShopDinoSummary): HTMLElement {
+    const sp = DINO_KINDS[dino.kind]?.name ?? dino.kind;
+    const label = dino.name ? `${dino.name} (${sp})` : sp;
+    const star = dino.golden ? '\u{2B50} ' : dino.kind === 'kip' ? '\u{1F414} ' : '\u{1F995} ';
+    const goldenClass = dino.golden ? 'shop-collection-item-golden' : '';
+    const text = el('span', { class: 'shop-collection-label', text: `${star}${label}` });
+    const id = dino.id;
+    if (!loaded || !options.onTradeIn || !id || !canTradeIn(dino)) {
+      return el('div', { class: `shop-collection-item ${goldenClass}` }, [text]);
+    }
+    const refund = tradeInValue(dino.kind);
+    const refundText = `${refund} ${refund === 1 ? 'punt' : 'punten'}`;
+
+    if (confirmingTradeId === id) {
+      const yesBtn = el('button', {
+        class: 'shop-confirm-yes',
+        text: 'Ja',
+        attrs: { type: 'button', 'data-testid': `shop-trade-yes-${id}` },
+      });
+      const noBtn = el('button', {
+        class: 'shop-confirm-no',
+        text: 'Nee',
+        attrs: { type: 'button', 'data-testid': `shop-trade-no-${id}` },
+      });
+      yesBtn.disabled = purchaseInFlight;
+      cleanups.push(
+        onTap(
+          yesBtn,
+          () => {
+            if (purchaseInFlight) return;
+            purchaseInFlight = true;
+            yesBtn.disabled = true;
+            Promise.resolve(options.onTradeIn?.(id)).finally(() => {
+              purchaseInFlight = false;
+              confirmingTradeId = null;
+              renderView();
+            });
+          },
+          { now: options.now },
+        ),
+        onTap(
+          noBtn,
+          () => {
+            if (purchaseInFlight) return;
+            confirmingTradeId = null;
+            renderView();
+          },
+          { now: options.now },
+        ),
+      );
+      return el(
+        'div',
+        { class: 'shop-collection-item shop-collection-item-trading', attrs: { 'data-testid': `shop-trade-confirm-${id}` } },
+        [
+          el('p', {
+            class: 'shop-confirm-text',
+            text: `Wil je ${label} inruilen? Je krijgt ${refundText} terug.`,
+          }),
+          el('div', { class: 'shop-confirm-actions' }, [yesBtn, noBtn]),
+        ],
+      );
+    }
+
+    const tradeBtn = el('button', {
+      class: 'shop-trade-btn',
+      text: `Inruilen +${refund}`,
+      attrs: {
+        type: 'button',
+        'data-testid': `shop-trade-${id}`,
+        'aria-label': `Ruil ${label} in voor ${refundText}`,
+      },
+    });
+    cleanups.push(
+      onTap(
+        tradeBtn,
+        () => {
+          confirmingTradeId = id;
+          confirmingKind = null;
+          renderView();
+        },
+        { now: options.now },
+      ),
+    );
+    return el('div', { class: `shop-collection-item ${goldenClass}` }, [text, tradeBtn]);
   }
 
   function renderView() {
@@ -443,15 +537,7 @@ export function createShopView(options: ShopViewOptions): ShopView {
       );
     }
     for (const dino of state.dinos) {
-      const sp = DINO_KINDS[dino.kind]?.name ?? dino.kind;
-      const label = dino.name ? `${dino.name} (${sp})` : sp;
-      const star = dino.golden ? '\u{2B50} ' : dino.kind === 'kip' ? '\u{1F414} ' : '\u{1F995} ';
-      collectionItems.push(
-        el('span', {
-          class: `shop-collection-item ${dino.golden ? 'shop-collection-item-golden' : ''}`,
-          text: `${star}${label}`,
-        }),
-      );
+      collectionItems.push(collectionDino(dino));
     }
 
     const collectionSection = el(

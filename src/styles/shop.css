@@ -423,6 +423,30 @@
   color: #1f2d3d;
 }
 
+/* Inruilen: a big orange button inside the pill, 48px high for kid fingers (decision 111). */
+.shop-trade-btn {
+  min-height: 48px;
+  min-width: 48px;
+  padding: 6px 12px;
+  border-radius: 12px;
+  border: 3px solid #9c4221;
+  background: #dd6b20;
+  color: #ffffff;
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+  touch-action: none;
+}
+
+.shop-collection-item-trading {
+  flex-direction: column;
+  align-items: stretch;
+  padding: 8px 12px;
+  border-radius: 14px;
+  background: #fff8e1;
+  border-color: #e0a000;
+}
+
 .shop-collection-item-golden {
   background: #fff3b0;
   border-color: #b7791f;

@@ -30,9 +30,9 @@ const golden = (n: number) => Array.from({ length: n }, () => ({ kind: 'compy', 
 const chickens = (n: number) => Array.from({ length: n }, () => ({ kind: 'kip' }));
 
 const TABLE: Array<{ name: string; dinos: object[]; eggs: object[]; points: number; hint: boolean }> = [
-  { name: '12 shop dinos: cap, no hint', dinos: shop(12), eggs: [], points: 100, hint: false },
-  { name: '11 shop dinos plus 1 egg: cap, no hint', dinos: shop(11), eggs: shop(1), points: 100, hint: false },
-  { name: '11 shop dinos plus golden dinos plus chickens: room, hint', dinos: [...shop(11), ...golden(3), ...chickens(10)], eggs: golden(2), points: 20, hint: true },
+  { name: '25 shop dinos: cap, no hint', dinos: shop(25), eggs: [], points: 100, hint: false },
+  { name: '24 shop dinos plus 1 egg: cap, no hint', dinos: shop(24), eggs: shop(1), points: 100, hint: false },
+  { name: '24 shop dinos plus golden dinos plus chickens: room, hint', dinos: [...shop(24), ...golden(3), ...chickens(10)], eggs: golden(2), points: 20, hint: true },
   { name: 'few dinos but too few points: no hint', dinos: shop(2), eggs: [], points: 19, hint: false },
   { name: 'only golden and chickens: hint', dinos: [...golden(13), ...chickens(10)], eggs: [], points: 25, hint: true },
 ];
