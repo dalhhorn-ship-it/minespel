@@ -13,8 +13,9 @@ A free 3D block world with dinos and short learning breaks (Dutch: taal, rekenen
 The big docs are append only logs. Never read them whole. Grep by id and read only the matching rows or section.
 * Acceptance criteria: `grep -n "AC180" docs/PRD.md`
 * Tasks: `grep -n "| V11c " docs/PLAN.md`
-* Decisions: `grep -n "^| 98 " docs/DECISIONS.md`
+* Decisions: `grep -n "^| 98 " docs/DECISIONS.md` (1 to 86 are in `docs/archive/decisions-1-86.md`).
 * The next release: `docs/PRD.md` section 12. The backlog: `docs/BACKLOG.md`.
+* `docs/PLAN.md` holds only open tasks. Done tasks: `docs/releases/plan-done.md`.
 * `docs/archive/` and `docs/releases/` are history. Open them only when a task points there.
 
 ## Code map

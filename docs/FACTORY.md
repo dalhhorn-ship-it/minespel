@@ -100,7 +100,8 @@ Keep it economical:
 | `docs/TEST_REPORT.md` | Latest QA results |
 | `docs/FRICTION.md` | Running log of problems, the raw material for `/retro` |
 | `docs/RETRO.md` | Retrospective results |
-| `docs/archive/` | Old one off reports. Read only when a task points there. |
+| `docs/archive/` | Old one off reports, decisions 1 to 86, review rounds before v11. Read only when a task points there. |
+| `docs/releases/plan-done.md` | Done and dropped tasks from `docs/PLAN.md`. When a release ships, move its done rows and notes here. |
 | `docs/factory-feedback/` | Factory level learnings, also copied to the factory inbox |
 | `.factory` | Which factory repo this app came from and the date it started |
 | `CHANGELOG.md` | What changed, in kid readable words |

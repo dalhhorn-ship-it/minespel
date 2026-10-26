@@ -48,7 +48,7 @@ Run the `/qa` steps in release mode: tests for the new ACs, the full `./scripts/
 
 ## 5. Ship
 
-Push the release once (see One push per release). Then run the `/ship` steps for a release: the next minor version (v2 is `0.2.0`, v3 is `0.3.0`), CHANGELOG, deploy decision, tag.
+Push the release once (see One push per release). Then run the `/ship` steps for a release: the next minor version (v2 is `0.2.0`, v3 is `0.3.0`), CHANGELOG, deploy decision, tag. After it ships, move the release's done rows and task notes from `docs/PLAN.md` to `docs/releases/plan-done.md`, so the plan holds only open work.
 
 ## 6. Learn
 
