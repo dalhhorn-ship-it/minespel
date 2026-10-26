@@ -1,6 +1,12 @@
 // @vitest-environment jsdom
+import 'fake-indexeddb/auto';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { createReadyGate, READY_SLOW_MS } from './boot';
+import { createCountdownView } from '../ui/countdown';
+import { createRng } from '../core/rng';
+import type { Game } from '../game/game';
+import mainSource from '../main.ts?raw';
+import { createBoot, createReadyGate, READY_SLOW_MS } from './boot';
+import { createScreenManager } from './screens';
 import { FAILED_TEXT, WAITING_TEXT } from '../ui/waiting-card';
 
 function tap(node: Element) {
@@ -110,5 +116,87 @@ describe('whenReady (R1b, decision 83)', () => {
     const t = setup();
     t.gate.markReady();
     expect(vi.getTimerCount()).toBe(0);
+  });
+});
+
+// A game that answers every call with a harmless fake: the flows only touch it later.
+function fakeGame(): Game {
+  const fn = (): unknown => new Proxy(vi.fn(() => fn()), { get: (t, k) => (k in t ? Reflect.get(t, k) : fn()) });
+  return new Proxy({}, { get: (_t, k) => (k === 'isRunning' ? () => false : fn()) }) as unknown as Game;
+}
+
+function bootDeps(game: Game | null) {
+  const host = document.createElement('div');
+  document.body.append(host);
+  return {
+    host,
+    deps: {
+      screens: createScreenManager({ host, onWorldActiveChange: () => {} }),
+      game,
+      guard: { state: () => ({ portrait: false, tooSmall: false }), subscribe: () => () => {} } as never,
+      sound: new Proxy({}, { get: () => () => {} }) as never,
+      rng: createRng(1),
+      countdownView: createCountdownView({}),
+    },
+  };
+}
+
+describe('createBoot (R2a)', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+    document.body.replaceChildren();
+  });
+
+  it('R2a: the ready promise resolves with an App that has every flow', async () => {
+    const { deps } = bootDeps(fakeGame());
+    const boot = createBoot(deps);
+    expect(boot.current()).toBeUndefined();
+    await boot.create();
+    const app = await boot.app;
+    expect(boot.current()).toBe(app);
+    expect(boot.gate.isReady()).toBe(true);
+    for (const key of [
+      'queue', 'records', 'timerDriver', 'breakFlow', 'parentFlow', 'shopFlow', 'practiceFlow', 'examFlow', 'villageFlow',
+    ] as const) {
+      expect(app[key], key).toBeTruthy();
+    }
+    expect(typeof app.catalog().modules).not.toBe('undefined');
+    const action = vi.fn();
+    boot.whenApp(action);
+    expect(action).toHaveBeenCalledWith(app);
+  });
+
+  it('R2a: a storage that cannot open shows the cannot-load text and rejects the app', async () => {
+    const db = await import('../storage/db');
+    vi.spyOn(db, 'openDb').mockRejectedValue(new Error('no storage'));
+    const { deps, host } = bootDeps(fakeGame());
+    const boot = createBoot(deps);
+    await expect(boot.create()).rejects.toThrow('no storage');
+    await expect(boot.app).rejects.toThrow('no storage');
+    boot.whenApp(() => {});
+    expect(host.querySelector('[data-testid="waiting-text"]')?.textContent).toBe(FAILED_TEXT);
+  });
+
+  it('R2a: without a game boot fails at once', async () => {
+    const boot = createBoot(bootDeps(null).deps);
+    await expect(boot.create()).rejects.toThrow();
+    expect(boot.gate.isReady()).toBe(false);
+  });
+});
+
+describe('main.ts shape (R2a)', () => {
+  const main: string = mainSource;
+  it('R2a: main.ts is under 250 lines', () => {
+    expect(main.split('\n').length).toBeLessThan(250);
+  });
+  it('R2a: main.ts has no registerHook and registers app hooks only inside __E2E__', () => {
+    expect(main).not.toMatch(/registerHook\(/);
+    expect(main).toMatch(/if \(__E2E__\) \{\s*registerAppHooks\(/);
+  });
+  it('R2a: main.ts has no nullable flow variables', () => {
+    expect(main).not.toMatch(
+      /\b(breakFlow|parentFlow|shopFlow|practiceFlow|examFlow|villageFlow|timerDriver|records|queue)\b[^\n=]*\| null/,
+    );
+    expect(main).not.toMatch(/waitingShop|shopFlowReady/);
   });
 });
