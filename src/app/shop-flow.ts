@@ -4,7 +4,7 @@
 
 import type { Sound } from '../audio/sound';
 import { systemClock, today, type Clock } from '../core/clock';
-import { purchaseChicken, purchaseEgg, tradeIn } from '../core/economy';
+import { ownsFluit, purchaseChicken, purchaseEgg, purchaseFluit, tradeIn } from '../core/economy';
 import { registerHook } from '../dev/e2e-hooks';
 import type { DinoStore } from '../dinos/dino-store';
 import { DINO_KINDS, type DinoKindId } from '../dinos/kinds';
@@ -36,6 +36,8 @@ export interface ShopFlowOptions {
   /** Optional callback to override the countdown clock and earn coins right away. */
   onEarnCoins?: () => void;
   now?: () => number;
+  /** Called after the Dinofluit was bought, so the world shows its button (decision 114). */
+  onFluitBought?: () => void;
 }
 
 export interface ShopFlow {
@@ -44,6 +46,8 @@ export interface ShopFlow {
   buyChicken(): Promise<boolean>;
   /** Trades in one dino or chicken by id for half its price. A golden dino is refused. */
   tradeIn(dinoId: string): Promise<boolean>;
+  /** Buys the Dinofluit once (decision 114). False when it is owned or the points are short. */
+  buyFluit(): Promise<boolean>;
   destroy(): void;
 }
 
@@ -56,9 +60,11 @@ export function createShopFlow(options: ShopFlowOptions): ShopFlow {
   async function readViewState(): Promise<ShopViewState> {
     const store = options.dinoStore ?? null;
     let points = 0;
+    let fluit = false;
     if (options.records) {
       const eco = await options.records.get('economy');
       points = eco.points;
+      fluit = ownsFluit(eco);
     } else if (options.getPoints) {
       points = await options.getPoints();
     }
@@ -79,6 +85,7 @@ export function createShopFlow(options: ShopFlowOptions): ShopFlow {
       points,
       dinos,
       eggs,
+      fluit,
       toastMessage: lastToast,
     };
   }
@@ -256,6 +263,45 @@ export function createShopFlow(options: ShopFlowOptions): ShopFlow {
     return true;
   }
 
+  /** Buys the Dinofluit: economy and ledger in one transaction (decision 114). */
+  async function executeBuyFluit(): Promise<boolean> {
+    const dayStr = today(clock);
+    const ts = clock.now();
+    if (options.db) {
+      const bought = await transact(options.db, ['kv', 'ledger'], 'readwrite', async (tx) => {
+        const kvStore = tx.objectStore('kv');
+        const ledgerStore = tx.objectStore('ledger');
+        const rawEco = await request<EconomyRecord | undefined>(kvStore.get('economy'));
+        const currentEco: EconomyRecord = { ...defaultKv('economy'), ...(rawEco ?? {}) };
+        const res = purchaseFluit(currentEco);
+        if (!res.ok) return false;
+        const ledgerEntry: LedgerInput = { ts, day: dayStr, delta: -res.price, reason: 'shop' };
+        await request(kvStore.put(res.economy, 'economy'));
+        await request(ledgerStore.add(ledgerEntry));
+        return true;
+      });
+      if (!bought) return false;
+    } else if (options.records) {
+      const res = purchaseFluit(await options.records.get('economy'));
+      if (!res.ok) return false;
+      await options.records.put('economy', res.economy);
+      await options.logStore?.appendLedger({ ts, day: dayStr, delta: -res.price, reason: 'shop' });
+    } else {
+      return false;
+    }
+    options.sound?.play('clink');
+    options.onFluitBought?.();
+    lastToast = 'Hoera! Je hebt de Dinofluit! Tik in de wereld op \u{1F3B6} Fluit en al je dino\'s komen naar je toe.';
+    if (activeView) activeView.render(await readViewState());
+    return true;
+  }
+
+  function buyFluit(): Promise<boolean> {
+    const next = buyLock.then(() => executeBuyFluit()).catch(() => false);
+    buyLock = next;
+    return next;
+  }
+
   /** Trade ins share the purchase lock, so a fast double tap trades in one animal once. */
   function tradeInDino(dinoId: string): Promise<boolean> {
     const next = buyLock.then(() => executeTradeIn(dinoId)).catch(() => false);
@@ -291,6 +337,9 @@ export function createShopFlow(options: ShopFlowOptions): ShopFlow {
         onTradeIn: async (dinoId) => {
           await tradeInDino(dinoId);
         },
+        onBuyFluit: async () => {
+          await buyFluit();
+        },
         onEarnCoins: options.onEarnCoins
           ? () => {
               clear();
@@ -314,6 +363,7 @@ export function createShopFlow(options: ShopFlowOptions): ShopFlow {
     buyEgg,
     buyChicken: () => buyEgg('kip'),
     tradeIn: tradeInDino,
+    buyFluit,
     destroy() {
       clear();
     },
@@ -324,6 +374,7 @@ export function createShopFlow(options: ShopFlowOptions): ShopFlow {
     registerHook('buyEggInShop', (kind: DinoKindId) => flow.buyEgg(kind));
     registerHook('buyChickenInShop', () => flow.buyChicken());
     registerHook('tradeInInShop', (dinoId: string) => flow.tradeIn(dinoId));
+    registerHook('buyFluitInShop', () => flow.buyFluit());
   }
 
   return flow;

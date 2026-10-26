@@ -9,6 +9,8 @@ import {
   canTradeIn,
   capReached,
   chickenBuyState,
+  FLUIT_PRICE,
+  fluitBuyState,
   MAX_CHICKENS,
   MAX_SHOP_DINOS,
   MSG_CAP_REACHED,
@@ -40,6 +42,8 @@ export interface ShopViewState {
   points: number;
   dinos: readonly ShopDinoSummary[];
   eggs: readonly ShopEggSummary[];
+  /** True when the kid owns the Dinofluit (decision 114). */
+  fluit?: boolean;
   toastMessage?: string | null;
 }
 
@@ -49,6 +53,8 @@ export interface ShopViewOptions {
   onBuy: (kind: DinoKindId) => Promise<void> | void;
   /** Trades in the dino or chicken with this id. Without it the collection shows no Inruilen. */
   onTradeIn?: (dinoId: string) => Promise<void> | void;
+  /** Buys the Dinofluit. Without it the shop shows no fluit card (decision 114). */
+  onBuyFluit?: () => Promise<void> | void;
   onClose: () => void;
   /** Optional shortcut to override the countdown and earn coins immediately. */
   onEarnCoins?: () => void;
@@ -133,7 +139,8 @@ export function createShopView(options: ShopViewOptions): ShopView {
   const emptyState: ShopViewState = { points: 0, dinos: [], eggs: [] };
   let loaded = options.state !== null;
   let state: ShopViewState = options.state ?? emptyState;
-  let confirmingKind: DinoKindId | null = null;
+  /** The card waiting on Ja or Nee: a dino kind, 'kip' or 'fluit'. */
+  let confirmingKind: string | null = null;
   let confirmingTradeId: string | null = null;
   let purchaseInFlight = false;
   const cleanups: Array<() => void> = [];
@@ -167,12 +174,13 @@ export function createShopView(options: ShopViewOptions): ShopView {
 
   /** Progress bar and note when locked, then Kopen or the Ja/Nee question (AC20, AC110, AC149, decision 55). */
   function buyControls(
-    kindId: DinoKindId,
+    kindId: string,
     name: string,
     price: number,
-    bState: BuyState,
+    bState: Pick<BuyState, 'canBuy' | 'note'>,
     confirmText: string,
     withBar: boolean,
+    onYes: () => Promise<void> | void = () => options.onBuy(kindId as DinoKindId),
   ): HTMLElement[] {
     const bottomChildren: HTMLElement[] = [];
     if (loaded && !bState.canBuy && bState.note) {
@@ -220,7 +228,7 @@ export function createShopView(options: ShopViewOptions): ShopView {
             if (purchaseInFlight) return;
             purchaseInFlight = true;
             yesBtn.disabled = true;
-            Promise.resolve(options.onBuy(kindId)).finally(() => {
+            Promise.resolve(onYes()).finally(() => {
               purchaseInFlight = false;
               confirmingKind = null;
               renderView();
@@ -435,6 +443,52 @@ export function createShopView(options: ShopViewOptions): ShopView {
     );
   }
 
+  /** Speciale spullen: the Dinofluit, bought once (decision 114). Owned: a note instead of Kopen. */
+  function fluitCard(): HTMLElement {
+    const owned = state.fluit === true;
+    const fState = fluitBuyState(state.points, owned);
+    const art = el('div', { class: 'shop-art shop-art-fluit', text: '\u{1F3B6}', attrs: { 'aria-hidden': 'true' } });
+    const chips: HTMLElement[] = [
+      el('span', { class: 'shop-chip', text: 'Roept al je dino\'s' }),
+    ];
+    if (owned) chips.push(el('span', { class: 'shop-chip shop-chip-owned', text: 'Van jou!', attrs: { 'data-testid': 'shop-fluit-owned' } }));
+    const bottom = owned
+      ? [el('p', { class: 'shop-card-note', text: fState.note ?? '' })]
+      : buyControls(
+          'fluit',
+          'Dinofluit',
+          FLUIT_PRICE,
+          fState,
+          `Wil je de Dinofluit kopen voor ${FLUIT_PRICE} punten?`,
+          true,
+          () => options.onBuyFluit?.(),
+        );
+    return el(
+      'section',
+      {
+        class: `shop-card shop-card-special ${fState.canBuy || owned ? 'shop-card-affordable' : 'shop-card-greyed'} shop-fluit`,
+        attrs: { 'aria-label': 'Dinofluit', 'data-testid': 'shop-fluit' },
+      },
+      [
+        el('div', { class: 'shop-card-top' }, [
+          art,
+          el('div', { class: 'shop-card-info' }, [
+            el('div', { class: 'shop-card-title-row' }, [
+              el('h3', { class: 'shop-card-name', text: 'Dinofluit' }),
+              el('span', { class: 'shop-card-price', text: `${FLUIT_PRICE} punten` }),
+            ]),
+            el('p', {
+              class: 'shop-fluit-text',
+              text: 'Fluit en al je dino\'s en kippen komen rustig naar je toe rennen. Je koopt hem maar 1 keer.',
+            }),
+            el('div', { class: 'shop-card-meta' }, chips),
+          ]),
+        ]),
+        ...bottom,
+      ],
+    );
+  }
+
   function renderView() {
     clearCleanups();
     modal.replaceChildren();
@@ -572,6 +626,7 @@ export function createShopView(options: ShopViewOptions): ShopView {
       ],
     );
     modal.append(chickenCoop);
+    if (options.onBuyFluit) modal.append(fluitCard());
 
     // Live "Mijn Dino-verzameling" showcase
     const collectionItems: HTMLElement[] = [];

@@ -6,6 +6,7 @@
 import type { Sound } from '../audio/sound';
 import type { Catalog } from '../content/catalog';
 import { systemClock } from '../core/clock';
+import { ownsFluit } from '../core/economy';
 import type { Rng } from '../core/rng';
 import type { Game } from '../game/game';
 import { createWorldSave, type WorldSave } from '../game/world-save';
@@ -231,7 +232,10 @@ export function createBoot(deps: BootDeps): Boot {
       onEarnCoins: () => {
         void breakFlow.startBreak({ early: true });
       },
+      onFluitBought: () => world.setFluitOwned(true),
     });
+    // The Dinofluit button shows once the kid owns the fluit (decision 114).
+    world.setFluitOwned(ownsFluit(await records.get('economy')));
     const practiceFlow = createPracticeFlow({
       screens,
       clock: systemClock,

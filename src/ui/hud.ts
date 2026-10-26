@@ -26,6 +26,8 @@ export interface HudOptions {
   /** Optional eased camera angle arrow controls (turnX: -1 left / +1 right, tiltY: +1 up / -1 down). */
   onLookInput?: (turnX: number, tiltY: number) => void;
   onLookNudge?: (turnX: number, tiltY: number) => void;
+  /** Optional Dinofluit button (decision 114). It stays hidden until `setFluit(true)`. */
+  onFluit?: () => void;
 }
 
 export interface Hud {
@@ -37,6 +39,8 @@ export interface Hud {
   /** Holder for the countdown text. */
   readonly countdownSlot: HTMLElement;
   setMode(mode: BuildMode): void;
+  /** Shows the Dinofluit button once the kid owns the fluit (decision 114). */
+  setFluit(owned: boolean): void;
   destroy(): void;
 }
 
@@ -79,7 +83,17 @@ export function createHud(options: HudOptions): Hud {
   const slots = Array.from({ length: HOTBAR_SLOTS }, () => el('div', { class: 'hud-slot' }));
   const allBlocksSlot = el('div', { class: 'hud-all-blocks' });
   const hotbar = zone(el('div', { class: 'hud-hotbar' }, [...slots, allBlocksSlot]));
-  const modes = el('div', { class: 'hud-modes' }, [hakken, bouwen]);
+  const fluit = options.onFluit
+    ? button(
+        '\u{1F3B6} Fluit',
+        'hud-fluit',
+        options.onFluit,
+        { 'data-testid': 'hud-fluit', 'aria-label': 'Fluit: roep al je dino\'s' },
+        HUD_TAP_MOVE_LIMIT,
+      )
+    : null;
+  if (fluit) fluit.hidden = true;
+  const modes = el('div', { class: 'hud-modes' }, fluit ? [hakken, bouwen, fluit] : [hakken, bouwen]);
 
   const topRightChildren: HTMLElement[] = [];
   if (options.onParent) {
@@ -237,6 +251,9 @@ export function createHud(options: HudOptions): Hud {
     allBlocksSlot,
     countdownSlot,
     setMode,
+    setFluit(owned) {
+      if (fluit) fluit.hidden = !owned;
+    },
     destroy() {
       for (const c of cleanups) c();
       root.remove();

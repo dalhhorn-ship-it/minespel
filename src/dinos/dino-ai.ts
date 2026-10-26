@@ -30,6 +30,14 @@ export const BEHIND_DISTANCE = 3;
 export const FOLLOW_RADIUS = 2;
 /** A follower counts as behind when it is at least this far behind the player's eye, along the view. */
 export const BEHIND_MARGIN = 0.75;
+/**
+ * The Dinofluit (decision 114): a called dino walks slowly to the kid for at most CALL_SECONDS,
+ * at CALL_SPEED, and the call ends once it is within CALL_ARRIVED of the kid. It never pops while
+ * called, unless it is stuck, so the kid sees the whole herd come.
+ */
+export const CALL_SECONDS = 40;
+export const CALL_SPEED = 2;
+export const CALL_ARRIVED = 2.5;
 
 const EPS = 1e-4;
 const SUB_STEP = 1 / 60;
@@ -68,6 +76,8 @@ export interface DinoState {
   farTime: number;
   /** True while it walks all the way to the player. */
   chasing: boolean;
+  /** Seconds left of a Dinofluit call (decision 114). Missing or 0: not called. Never saved. */
+  called?: number;
 }
 
 export type DinoEvent = 'popped' | null;
@@ -142,7 +152,47 @@ export function dinoCollides(world: World, d: DinoState, x = d.x, y = d.y, z = d
 
 function resetMotion(d: DinoState): void {
   d.vy = 0; d.onGround = false; d.goal = null; d.goalLeft = 0; d.idleLeft = 0.5;
-  d.stuckTime = 0; d.farTime = 0; d.chasing = false;
+  d.stuckTime = 0; d.farTime = 0; d.chasing = false; d.called = 0;
+}
+
+/** Starts a Dinofluit call: the dino follows the kid from now on and walks slowly to them (decision 114). */
+export function callDino(d: DinoState): void {
+  d.mode = 'follow';
+  d.called = CALL_SECONDS;
+  d.chasing = false;
+  d.farTime = 0;
+  d.stuckTime = 0;
+  d.goal = null;
+}
+
+/** True while a Dinofluit call is running for this dino. */
+export function isCalled(d: Pick<DinoState, 'called'>): boolean {
+  return (d.called ?? 0) > 0;
+}
+
+/** One step of a called dino: straight to the kid at CALL_SPEED. Pops only when stuck too long. */
+function stepCalled(world: World, d: DinoState, player: Point, rng: Rng, dt: number, opts: StepOptions): DinoEvent {
+  d.called = Math.max(0, (d.called ?? 0) - dt);
+  d.farTime = 0;
+  const dist = Math.hypot(player.x - d.x, player.z - d.z);
+  if (dist <= CALL_ARRIVED) {
+    d.called = 0;
+    d.goal = null;
+    d.idleLeft = 0.5;
+    physics(world, d, 0, 0, dt, opts.box);
+    return null;
+  }
+  if (d.stuckTime >= STUCK_SECONDS) {
+    d.called = 0;
+    return popNextTo(world, d, player, rng, opts.box, opts.playerYaw) ? 'popped' : (d.stuckTime = 0, null);
+  }
+  const dirX = (player.x - d.x) / dist, dirZ = (player.z - d.z) / dist;
+  d.goal = { x: player.x, z: player.z };
+  const moved = physics(world, d, dirX, dirZ, dt, opts.box, CALL_SPEED);
+  d.heading = Math.atan2(dirX, dirZ);
+  if (d.onGround && moved < CALL_SPEED * dt * 0.25) d.stuckTime += dt;
+  else if (moved >= CALL_SPEED * dt * 0.25) d.stuckTime = 0;
+  return null;
 }
 
 /**
@@ -195,10 +245,10 @@ function pickGoal(d: DinoState, ax: number, az: number, rng: Rng, radius: number
 }
 
 /** One small physics step. Returns the horizontal distance moved. */
-function physics(world: World, d: DinoState, dirX: number, dirZ: number, dt: number, box?: StepOptions['box']): number {
+function physics(world: World, d: DinoState, dirX: number, dirZ: number, dt: number, box?: StepOptions['box'], speed = DINO_SPEED): number {
   const { side, height } = box ?? dinoBox(d);
   const ox = d.x, oz = d.z;
-  const mx = dirX * DINO_SPEED * dt, mz = dirZ * DINO_SPEED * dt;
+  const mx = dirX * speed * dt, mz = dirZ * speed * dt;
   let hitWall = false;
   if (mx !== 0 && !boxCollides(world, d.x + mx, d.y, d.z, side, height)) d.x += mx;
   else if (mx !== 0) hitWall = true;
@@ -260,6 +310,7 @@ export function stepDino(world: World, d: DinoState, player: Point, rng: Rng, dt
 }
 
 function stepOnce(world: World, d: DinoState, player: Point, rng: Rng, dt: number, opts: StepOptions): DinoEvent {
+  if (isCalled(d)) return stepCalled(world, d, player, rng, dt, opts);
   const follow = d.mode === 'follow';
   const yaw = follow && opts.playerYaw !== undefined && Number.isFinite(opts.playerYaw) ? opts.playerYaw : undefined;
   const radius = opts.radius ?? (yaw !== undefined ? FOLLOW_RADIUS : WANDER_RADIUS);
