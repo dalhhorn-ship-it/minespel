@@ -57,9 +57,10 @@ npm run build
 npm run test:dist
 npm run test:e2e  # needs the WebKit browser: npx playwright install webkit
 npm run test:e2e:local -- smoke  # same specs in the Chromium on disk (cloud container)
+npm run test:e2e:ui-review  # the full UI review at every iPad size, left out of the runs above (decision 106)
 ```
 
-The Playwright WebKit browser cannot download in the cloud sandbox, because the proxy blocks its download host. So the end to end tests run in GitHub CI, on every push, split over 4 parallel jobs. The CI workflow is in `.github/workflows/ci.yml`. On your own computer, run `npx playwright install webkit` once and then `npm run test:e2e`.
+The Playwright WebKit browser cannot download in the cloud sandbox, because the proxy blocks its download host. So the end to end tests run in GitHub CI, on every push, split over 4 parallel jobs. The full UI review is not part of that run; start it by hand (Actions, CI, Run workflow, "Also run the full UI review"). The CI workflow is in `.github/workflows/ci.yml`. On your own computer, run `npx playwright install webkit` once and then `npm run test:e2e`.
 
 ## Playing on the iPad
 
