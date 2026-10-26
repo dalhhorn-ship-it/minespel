@@ -1,54 +1,15 @@
 # Status
 
-**Phase:** small releases. 0.1.0, 0.2.0, 0.3.0, R1 and 0.4.0 Punten voor elke ronde are shipped (0.4.0 merged 2026-10-24).
-**Current release:** v11 Dorp (0.5.0, decisions 94 to 97), PRD signed 2026-10-24. V11a to V11e done.
-**Next step:** v11 Dorp built and verified (V11a to V11e, villager fix), CI green on the iPad browser. Ship 0.5.0 with the founder. Then refactor round R2 (decisions 99 to 101, docs/archive/TECH_REVIEW.md), then v3 backup (0.6.0), v6 parent dashboard (0.7.0).
-**2026-10-26, health audit on branch `claude/cool-allen-1mjpbu`:** lean CLAUDE.md (process in `docs/FACTORY.md`, platform in `docs/PLATFORM.md`), PLAN holds only open tasks, screenshots out of git, `scripts/smoke.sh` (about a minute), the full UI review only on request (decision 106), WebKit runs in the cloud sandbox, and refactor round R2a to R2d done (decisions 103 to 110; R2e on hold). The founder approved; it was pushed to `main` (32c260f) on 2026-10-26, which deploys through Workers Builds.
-**2026-10-26, founder requests on branch `claude/admiring-wozniak-hz8h2w`:** Inruilen and a herd of 25 (decision 111), follow dinos walk behind the kid so taps mine and build again (bug fix, decision 112), 10 Bijzondere dino's (decision 113). Full check green. Waits for the founder to merge to `main`. The founder should check speed with 25 dinos on the oldest iPad.
-**Next in the backlog:** see docs/BACKLOG.md. On hold: the save on refresh fix (decision 72). Founder iPad check AC165 still open.
-**Blockers:** none. This cloud session cannot push tags or to main directly (HTTP 403), so main is updated through a pull request.
+Keep this file short and true. Rewrite it, do not append. What was done lives in `CHANGELOG.md`, `docs/releases/` and git log. The old long status is `docs/archive/status-to-0.5.0.md`.
 
-## Done
-* **2026-10-18: Gemini's build is the truth** (decision 50). `main` holds the Gemini2 code, live on Cloudflare Worker `minespel`. Claude's G0 to G6 branch is set aside (commit `4067f07` in history).
-* Brainstorm: concept chosen (free 3D Minecraft world with dinos, learning breaks, Dutch, age 8 to 10).
-* Cito taalverzorging module for groep 6 and 7: 10 topics, 288 questions, 4 exams in `docs/modules/cito-taalverzorging/`. Passes `docs/modules/validate.py` (T2).
-* **2026-10-19: modules are reusable.** Every folder in `docs/modules/` loads by itself (`src/content/folder-modules.ts`). New `/module` skill turns workbook photos into lessons, questions and exams. Content only changes take a quick release path (validator, module unit tests, build, no e2e; decision 76). Modules so far: **Taal E6**, **Leestekens** (`docs/modules/leestekens/`, 5 topics, 69 questions) and **'t Kofschip** (`docs/modules/kofschip/`, 3 topics, 51 questions). 2026-10-24: **Engels: Beautiful People** (`docs/modules/engels-beautiful-people/`, 3 topics, 63 questions, 4 exams), the first English module, from the founder's school sheet. First one: **Taal E6** (`docs/modules/taal-e6/`, 6 topics, 105 questions, 4 exams) from the founder's Leerling in beeld + IEP E6 photos.
-* PRD drafted, reviewed by architect and qa (1 round), all founder decisions F1 to F15 answered.
-* PRD approved by the founder in chat on 2026-10-17.
-* Dedicated Shop PRD written in `docs/SHOP_PRD.md` specifying the compelling Dinowinkel, coin economy, species cards, affordability meters, and live collection showcase.
-* **M1 code is done** (except the on-device speed spike T32):
-  * T1 scaffold, lint, unit tests, WebKit e2e setup, npm scripts.
-  * T3 iPad shell: no zoom, no selection, portrait message, manifest and icons.
-  * T4 world data and seeded terrain. T8 block atlas and chunk mesher.
-  * T5 storage core and T66 typed save records.
-  * T9 physics and raycast. T10 touch controls and HUD.
-  * T23a renderer and fps counter. T23b walkable world and game loop.
-  * T24 mine and place rules. T33 Hakken, Bouwen, hotbar and Alle blokken.
-  * T34 recovers after WebGL context loss. T37 saves the world and the player.
-  * T11 sound effects.
-* **M2 code is done**:
-  * **T35 (`src/content/catalog.ts`, `src/content/switches.ts`):** Unified catalog of built-in Rekenen & Taal plus own modules; switch hierarchy, level selection, topic overrides, Groep 6/7 presets, module weights, and item counts.
-  * **T38 (`src/learning/selection.ts`, `src/learning/generated-items.ts`):** Leitner SRS due-first selection, new-topic pointer advancement, and 200-newest cap for saved generated Rekenen sums.
-  * **T36 (`src/ui/learn/break-screen.ts`, `dino-juf.ts`, `question-host.ts`, `summary.ts`, `src/styles/break.css`):** Full learning break UI with Dino Juf, progress dots, question views, retry banner, teach moment, and summary screen.
-  * **T41 (`src/app/screens.ts`, `src/app/timer-driver.ts`, `src/ui/countdown.ts`, `src/styles/countdown.css`, `tests/e2e/timer.spec.ts`):** Screen layer manager, 1s heartbeat timer driver, play time stats per day, and live HUD countdown pill (`"Leerpauze over 5:00"`) with 30s warning pulse and 10s tick sound.
-  * **T43 (`src/app/break-flow.ts`, `src/app/content-loader.ts`, `src/app/resume.ts`, `src/app/exam-flow.ts`, `tests/e2e/break.spec.ts`):** End-to-end learning break orchestrator with module rotation, first-time topic lesson display, step-by-step session persistence, SRS box updates, and automatic resume on app reload.
-  * **T44 (`src/ui/pause-menu.ts`, `src/styles/pause-menu.css`, `tests/e2e/pause.spec.ts`):** Pause menu showing points total, `Terug naar de wereld`, `Ik zit vast`, `Dinowinkel`, `Lesboek`, `Extra oefenen`, and `Ouders`.
-* **M3 code is done** (82 unit test files / 628 tests passing, e2e specs added, production & e2e builds verified):
-  * **T42 (`src/dinos/dino-store.ts`, `src/render/dino-render.ts`, `src/game/dino-system.ts`, `src/render/renderer.ts`, `src/game/game.ts`, `src/game/world-save.ts`, `tests/e2e/dinos.spec.ts`):** Live dinos and eggs in the 3D world; `addEgg(kind, golden)` spawns spotted eggs on a free spot 1.5–2.5 blocks from the player; eggs wobble and hatch after `5 s` of active play (`AC150`) with crack/chirp sounds and puff; baby dinos grow to full size over `2 s`; `isOccupied` prevents placing blocks on dinos or eggs (`AC6`); tapping a dino hits the dino before any block behind it (`AC104`); `Ik zit vast` (`teleportHome`) brings `Volg mij` dinos along (`AC106`).
-  * **T45 (`src/ui/dino-menu.ts`, `src/ui/name-screen.ts`, `src/styles/dino-menu.css`, `tests/e2e/dino-menu.spec.ts`):** Tapping a dino opens the dino menu (pausing the play timer, `AC23`) with `Volg mij`, `Blijf hier`, `Naam geven` (using the in-app `createKidKeyboard`, max 12 characters, `"Bedenk een leuke dinonaam"`, floating 3D name tag sprite above the dino, `AC18`), and `Knuffel` (floating hearts burst + chirp, `AC16`).
-  * **T46 (`src/ui/learn/lesboek.ts`, `src/app/practice-flow.ts`, `src/styles/lesboek.css`, `tests/e2e/practice.spec.ts`):** Full `Lesboek` with all switched-on topic lessons and direct `"Oefen dit onderwerp 🪙"` shortcut (`AC51`), plus full `Extra oefenen` topic picker running `practice` mode sessions (`+2` first try, `+1` retry, no malus, `10` pt/day cap with `"Genoeg geoefend voor vandaag, ga lekker bouwen!"` message that resets the next day, `AC52`, `AC120`).
-  * **T47 (`docs/SHOP_PRD.md`, `src/ui/shop.ts`, `src/app/shop-flow.ts`, `src/styles/shop.css`, `tests/e2e/shop.spec.ts`):** Compelling **Dinowinkel** with 4 species cards (`Compy` 20, `Triceratops` 40, `Stegosaurus` 40, `Brachiosaurus` 80), voxel dino emblems, traits & size chips, affordability progress bars (`"Nog X punten nodig"`, `AC149`), 12-dino herd cap banner (`"Je hebt al 12 dino's! Wat een kudde."`), live `"Mijn Dino-verzameling"` showcase, `Kopen` -> `Ja` / `Nee` confirmation (`AC20`), 10-tap concurrency lock (`AC110`), and single atomic IndexedDB transaction writing `economy`, `dinos`, and `ledger` (`AC150`).
-* **Founder-Requested Enhancements (implemented across M2 & M3):**
-  1. **Floating in the air with Up (`Omhoog ⬆`) & Down (`Omlaag ⬇`) arrows:** Holding or tapping `Omhoog ⬆` ascends into the `64`-block-high sky and engages **floating mode** (`floating = true` in `src/world/physics.ts` and `src/game/player-controller.ts`). When released, the player **stays floating in mid-air** (`vy = 0`, gravity disabled) so they can walk and build in the sky. Holding or tapping `Omlaag ⬇` (`setDescending`) descends smoothly, and touching solid ground disengages floating mode.
-  2. **Override countdown clock to do exercises/classes immediately for coins:** Added the **`"Nu oefenen 🪙"`** button directly on the HUD countdown pill (`src/ui/countdown.ts`), in `Extra oefenen` (`src/app/practice-flow.ts`), inside `Lesboek` (`src/ui/learn/lesboek.ts`), and in the `Dinowinkel` (`src/ui/shop.ts`) so the child can override the countdown clock at any time and earn coins immediately.
-  3. **Eased camera angle arrows & Parental controls button (`🔒 Ouders`):** Smooth `▲ ▼ ◀ ▶` camera arrows and `🔒 Ouders` button wired to the 4-digit PIN gate, Settings, and Content Picker.
-  4. **CR1 — Expanded 32-block palette & interactive lower-bar slot chooser (`src/world/blocks.ts`, `src/render/atlas.ts`, `src/ui/block-grid.ts`):** Expanded `PLACEABLE_BLOCKS` from 16 to **32 block variants** (`obsidiaan`, `vuur`, `lava`, `mossteen`, `zandsteen`, `graniet`, `marmer`, `basalt`, `diepsteen`, `vuursteen`, `goudsteen`, `diamant`, `water`, `ijs`, `sneeuw`, `wol oranje`) with a live 8-slot lower-bar selector (`Vakje 1..8`) and category filter pills inside `Alle blokken`.
-  5. **CR2 — Four blocks of obsidian on the ground for a gate + fire & stones (`src/world/terrain.ts`, `src/game/build-controller.ts`):** Placed 4 `obsidiaan` blocks in a row on the ground right in front of the start spot (flanked by `steen` and `vuursteen`), put `obsidiaan`, `vuur`, and `lava` in `DEFAULT_HOTBAR`, and added `tryLightObsidianGate` so building up the left and right obsidian walls and placing `vuur` lights the inner gate floor with fire.
-  6. **CR3 — Deploy chickens in the shop (`src/dinos/kinds.ts`, `src/render/dino-models.ts`, `src/dinos/dino-store.ts`, `src/ui/shop.ts`, `src/app/shop-flow.ts`):** Added 3D voxel chickens (`kip`) and a **🐔 Kippenhok** card inside `Dinowinkel` with `🐔 Kip loslaten` (1 chicken) and `🐔🐔🐔 3 Kippen loslaten` (flock of 3) that immediately spawn live wandering/following chickens in the 3D world without counting against the 12-dino cap.
-  7. **CR4 — Lava block option (`src/world/blocks.ts`, `src/render/atlas.ts`, `src/render/effects.ts`):** Added glowing molten `lava` (`LAVA = 20`) to the default hotbar and block chooser.
+**Phase:** small releases. Shipped: 0.1.0 to 0.5.0. The last one is v11 Dorp (0.5.0, PR #13).
+**On `main` since 0.5.0 (live, not yet a version):** the health audit (decisions 103 to 110, 114), Inruilen and a herd of 25, the follow dino fix and 10 Bijzondere dino's (decisions 111 to 113, PR #14). The kid lines are in `CHANGELOG.md` under Unreleased.
+**Next step:** `/release` to scope the next release with the founder: v3 Dino's veilig (0.6.0), then v6 Wat heb ik geleerd (0.7.0). See `docs/BACKLOG.md`. Scoping v3 also moves the v11 section from PRD section 12 to `docs/releases/v11.md`, in the same signoff.
+**Founder to do:** add the SessionStart hook line for `scripts/session-start.sh` to `.claude/settings.json` (decision 114; the gate protects that file).
+**Founder checks open:** speed with 25 dinos on the oldest iPad; the iPad check AC165; the Taal spelling check (AC124, T65).
+**On hold:** the save on refresh fix (decision 72); refactor R2e (decision 108).
+**Blockers:** none. Cloud sessions cannot push to `main` or push tags (HTTP 403), so `main` is updated through a pull request. A merge to `main` deploys (decision 98).
 
 ## Notes
-* Biggest risk is 3D performance in iPad Safari. The T32 speed spike decides whether the plan holds.
-* The Taal content (also the new Taal E6 module) still needs a human spelling check by the founder or a teacher (AC124).
-* The exam screens (T39, T51a, T51b) are not built yet. Module exams are ready as blueprints in `module.json` and will show up once those tasks are done.
-* Safari can clear the saves of a site not opened for a while. Tell the founder to play from the home screen app.
+* Biggest risk: 3D speed in iPad Safari, now with up to 25 dinos.
+* Safari can clear the saves of a site not opened for a while. The kids should play from the home screen app. v3 adds a backup file.

@@ -34,8 +34,7 @@ The big docs are append only logs. Never read them whole. Grep by id and read on
 * `./scripts/check.sh`: the full check (lint, typecheck, unit, build, dist check, e2e). CI runs it. Must pass before a task is done.
 * `./scripts/smoke.sh`: the fast check for one task, about a minute (lint, types, related unit tests, build, smoke, boot-taps and world e2e plus changed specs, one iPad size). Developers run this; the full check runs once per batch.
 * `CHECK_E2E=0 ./scripts/check.sh`: everything but the browser tests.
-* `npx playwright test <spec>`: one e2e spec in WebKit, which installs in the cloud sandbox now. `npm run test:e2e:local -- <spec>` is the Chromium fallback.
-* `npm run test:e2e:ui-review`: the full UI review, left out of normal runs. Every 5 releases or so, or after a lot of UI change (decision 106).
+* `npx playwright test <spec>`: one e2e spec in WebKit, which installs in the cloud sandbox now. Other test commands (Chromium fallback, the full UI review) are in `docs/PLATFORM.md`.
 * `./scripts/verify.sh task <ids>`: free independent check of a developer task, before any `verifier` agent.
 
 ## Hard rules
@@ -54,10 +53,7 @@ The big docs are append only logs. Never read them whole. Grep by id and read on
 
 ## Lessons learned
 
-Add a line when something went wrong and was fixed. Keep at most 10; move older ones to `docs/archive/lessons.md`. Format: `* YYYY-MM-DD: lesson (what to do instead)`.
+Add a line when something went wrong and was fixed. Drop a lesson once a hard rule, a script or a skill enforces it. Keep at most 10; move older ones to `docs/archive/lessons.md`. Format: `* YYYY-MM-DD: lesson (what to do instead)`.
 
 * 2026-10-17: With several developers in parallel, a scoped test run can pass while the full suite fails. Run the full `npm test` and `npm run typecheck` before every commit; typecheck with the in-flight file excluded if one is mid edit.
 * 2026-10-17: Linux WebKit in CI drops iOS only CSS like -webkit-touch-callout from computed style. Test the shipped stylesheet rule instead.
-* 2026-10-19: Every push queues a full CI run. Commit often, but push at task boundaries (a finished task, a signoff, the end of a turn).
-* 2026-10-25: Two sessions used the same decision numbers. Fetch `main` before adding a decision row.
-* 2026-10-26: Large docs read whole cost most of the tokens. Grep by AC, task or decision id instead.

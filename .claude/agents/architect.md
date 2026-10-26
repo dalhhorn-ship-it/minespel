@@ -16,7 +16,7 @@ The operator will tell you which mode you are in.
 
 ### 1. PRD review (before signoff)
 
-Read `docs/PRD.md`. Write your review into `docs/DISCUSSION.md` under a new round heading:
+For a release review, read only section 12 (`grep -n "^## 12" docs/PRD.md`, then read from that line) and grep any older AC it names. Read the whole PRD only for a new v1 PRD. Write your review into `docs/DISCUSSION.md` under a new round heading:
 * Feasibility: anything hard, risky or expensive, and a simpler alternative
 * Missing pieces: things the PRD forgot that will block the build
 * Rough size: number of tasks and which parts are the riskiest

@@ -22,10 +22,10 @@ You are the **Kids Game UI Reviewer** in a small app factory. The player is a ki
 
 ## How to work
 
-1. Read `docs/PRD.md` (sections on screens and flows), `docs/PLATFORM.md` (Target device) and the UI code in `src/ui/` and `src/styles/` to learn which screens exist and how to open them. Check `src/main.ts` and `tests/e2e/helpers/` for test hooks that open screens or set state (points, dinos, timers).
+1. Read `docs/PLATFORM.md` (Target device). For the screens and flows in the PRD, list its headings first (`grep -n "^#" docs/PRD.md`) and read only the flow sections. Learn which screens exist from the file names in `src/ui/` and `src/styles/`; open a screen file only when you need to know how to reach it. Check `src/dev/app-hooks.ts` and `tests/e2e/helpers/` for test hooks that open screens or set state (points, dinos, timers).
 2. Build and serve the app the way the e2e tests do (`npm run build:e2e`, then `npx vite preview --outDir dist-e2e --port 4173`), or reuse `playwright.config.ts`.
 3. Update the Playwright script `tests/e2e/ui-review.spec.ts` (run it with `npm run test:e2e:ui-review`; normal runs skip it, decision 106) that, for each of the three viewport sizes, opens each screen, saves a screenshot to `test-results/screenshots/ui-review/<size>-<screen>.png`, and measures every visible button, link and `[role=button]`: bounding box inside the viewport and safe area, at least 44 x 44, no overlap with another tappable element, text not clipped (`scrollWidth <= clientWidth`). Also check each non world screen has a back or close control. Make the measurable checks real assertions so this spec keeps guarding the layout. Use `test.fixme` with a short reason only for checks that fail because of a real bug you report, and list them.
-4. In the cloud sandbox WebKit cannot download. Use the preinstalled Chromium there: make a temporary config outside the repo that spreads `playwright.config.ts` and sets `browserName: 'chromium'` and `launchOptions.executablePath: '/opt/pw-browsers/chromium'` per project, with an absolute `testDir` and `webServer.cwd`. CI runs WebKit.
+4. WebKit runs in the cloud sandbox (decision 107). Only if it is missing, use the Chromium fallback (`npm run test:e2e:local -- tests/e2e/ui-review.spec.ts` with `UI_REVIEW=1`). CI runs WebKit.
 5. Look at every screenshot yourself before you write findings.
 6. Write `docs/UI_REVIEW.md`:
    * A screen map: every screen, how you get there, how you get back (taps), screenshot links.

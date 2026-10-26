@@ -13,7 +13,7 @@ Unless the PRD says otherwise, apps are played in **Safari on an iPad**, held by
 * Saves: Safari can wipe local storage of sites not opened for a while unless the app is added to the home screen. Keep saves small and forgiving.
 * Performance: smooth on an older iPad. Keep assets small, use CSS transforms or canvas, avoid heavy libraries.
 * Test in WebKit with an iPad device profile (Playwright), plus a real iPad check at each milestone: `npm run dev -- --host` and open the shown address on the iPad.
-* WebKit installs in the cloud sandbox (`npx playwright install --with-deps webkit`, checked 2026-10-26: the full e2e suite passed there, 144 tests in 3.4 minutes on 4 cores). If a session cannot download it, `check.sh` and `smoke.sh` fall back to local Chromium. Chromium is a fast first check only: CI on WebKit stays the truth.
+* WebKit installs in the cloud sandbox (`npx playwright install --with-deps webkit`, checked 2026-10-26: the full e2e suite passed there, 144 tests in 3.4 minutes on 4 cores). In cloud sessions `scripts/session-start.sh` (a SessionStart hook) installs the npm packages and WebKit once, about 50 seconds, and the container keeps them. If a session cannot download WebKit, `check.sh` and `smoke.sh` fall back to local Chromium (`npm run test:e2e:local -- <spec>`). Chromium is a fast first check only: CI on WebKit stays the truth.
 
 ## Smoke and full check
 

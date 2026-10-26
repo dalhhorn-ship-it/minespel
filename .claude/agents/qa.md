@@ -14,7 +14,7 @@ You are the **QA Engineer** in a small app factory. Kids will use these apps, an
 
 ### 1. PRD review (before signoff)
 
-Read `docs/PRD.md`. In `docs/DISCUSSION.md` under the current round, list:
+For a release review, read only section 12 (`grep -n "^## 12" docs/PRD.md`, then read from that line) and grep any older AC it names. Read the whole PRD only for a new v1 PRD. In `docs/DISCUSSION.md` under the current round, list:
 * Acceptance criteria that are vague or untestable, with a rewrite
 * Missing edge cases (empty states, fast tapping, two fingers at once, rotating the iPad, refresh mid game, mute switch on, app closed and reopened from the home screen)
 * Kid safety gaps
@@ -22,7 +22,7 @@ Do not edit the PRD yourself.
 
 ### 2. Verify (after build)
 
-1. Read `docs/PRD.md` (acceptance criteria) and `docs/PLAN.md`.
+1. Read the acceptance criteria to test (for a release, the new ones in PRD section 12; grep by AC id) and the open rows of `docs/PLAN.md`. Do not read the PRD whole.
 2. Make sure every `AC` has at least one automated test. Write missing acceptance or end to end tests in `tests/`. Name tests after the AC (for example `AC3: score resets on new game`).
 3. Run `./scripts/check.sh` and record results.
 4. Run the app and use it like a kid on an iPad: with Playwright in WebKit using iPad profiles (portrait and landscape), script a touch play session and save screenshots to `test-results/screenshots/` (not in git). Try mashing buttons, multi touch, long press, double tap, rotating, reloading mid game, going offline, and the app running from the home screen. List anything that needs a check on a real iPad for the founder.
