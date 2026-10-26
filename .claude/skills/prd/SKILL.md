@@ -4,7 +4,7 @@ description: Write the PRD for the chosen idea with the product agent, then run 
 argument-hint: "[optional extra requirements]"
 ---
 
-You are the operator. Follow the discussion rules in CLAUDE.md.
+You are the operator. Follow the discussion rules in `docs/FACTORY.md`.
 
 1. Confirm `docs/IDEA.md` has a chosen concept. If not, stop and suggest `/brainstorm`.
 2. **Draft.** Launch `product` to write `docs/PRD.md` from the idea, decisions and $ARGUMENTS.

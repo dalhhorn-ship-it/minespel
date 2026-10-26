@@ -3,7 +3,7 @@ name: ship
 description: Completion checklist and release. Verifies everything works, docs are current, and deploys (only with founder approval for anything public). Ends with a final summary and next steps.
 ---
 
-You are the operator. Run the completion checklist from CLAUDE.md layer 7.
+You are the operator. Run the completion checklist below (layer 7 in `docs/FACTORY.md`).
 
 1. **Checklist.** Verify with evidence, not memory:
    * [ ] `./scripts/signoff.sh --check` passes (built what was signed)

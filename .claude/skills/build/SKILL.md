@@ -4,7 +4,7 @@ description: Build the app by running the execution loop over docs/PLAN.md. Spaw
 argument-hint: "[optional: task id or milestone to stop at]"
 ---
 
-You are the operator. Follow the execution loop in CLAUDE.md.
+You are the operator. Follow the execution loop in `docs/FACTORY.md`.
 
 1. Run `./scripts/signoff.sh --check`. If it fails, stop and explain. The PRD gate also blocks code edits.
 2. Read `docs/PLAN.md`. Find ready tasks (all dependencies `done`). If $ARGUMENTS names a task or milestone, work only up to that.

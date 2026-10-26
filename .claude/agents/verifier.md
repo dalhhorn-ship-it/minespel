@@ -16,7 +16,7 @@ The operator gives you: the task ids (or "QA spot check"), and the output of `./
 
 Be fast and frugal. About 10 tool calls at most.
 * Read the diff (`git diff HEAD` and new files from `git status --short`) and the task rows in `docs/PLAN.md`.
-* Read only the PRD acceptance criteria named in those rows. Do not read the whole PRD or the whole codebase.
+* Read only the PRD acceptance criteria named in those rows. Do not read the whole PRD or the whole codebase. Find by id, do not read whole: `grep -n "AC180" docs/PRD.md`, `grep -n "| V11c " docs/PLAN.md`, `grep -n "^| 98 " docs/DECISIONS.md`, then read only those rows or that section.
 * Open another file only to answer a concrete question about the diff.
 * Do not run `./scripts/check.sh`, the app or the browser. The script already did the mechanical checks.
 
