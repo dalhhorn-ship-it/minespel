@@ -830,8 +830,8 @@ test.describe('rare blocks and the Dorp tab', () => {
 // ---------------------------------------------------------------- safety (AC189)
 
 test.describe('safety', () => {
-  test('AC189: playing with villages, villagers and the card makes no request beyond the app own files', async ({ page }) => {
-    const origin = new URL(page.url() === 'about:blank' ? 'http://localhost:4173' : page.url()).origin;
+  test('AC189: playing with villages, villagers and the card makes no request beyond the app own files', async ({ page, baseURL }) => {
+    const origin = new URL(page.url() === 'about:blank' ? baseURL! : page.url()).origin;
     const outside: string[] = [];
     page.on('request', (r) => {
       const u = r.url();
