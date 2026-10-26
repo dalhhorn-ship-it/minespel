@@ -1,6 +1,6 @@
 # UI review: Dino Blokwereld (Gemini's build, HEAD f2dee5b)
 
-> Screenshots are not in git (44 MB). Run `npx playwright test ui-review` to regenerate them in `docs/screenshots/ui-review/`.
+> Screenshots are not in git (44 MB). Run `npx playwright test ui-review` to regenerate them in `test-results/screenshots/ui-review/`.
 
 > **Status 2026-10-18:** all 14 findings are fixed (commits 0dbde85, 879b8ad and the next one). F1 and F13 follow founder decisions 51 to 54. `tests/e2e/ui-review.spec.ts` now asserts every check with no fixmes; the one allowance is decision 54 (shop and Lesboek may scroll in a Safari tab). Lesson and teach moment text scroll inside their own panel on purpose. Still to check on a real iPad: finger scrolling.
 
@@ -14,7 +14,7 @@ Seen like an 8 to 10 year old on an iPad, in landscape.
 * Safe area: Chromium has no `env()`, so the spec sets `--safe-top: 24px` and `--safe-bottom: 20px` (an iPad home screen app).
 * Checks per screen: inside the screen, inside the safe area, at least 44 x 44, main buttons at least 56, at least 8 points between neighbours, not covered by another element (a real hit test at the centre), text not clipped, no sideways scroll, text at least 17 points, a visible way back, and back to the world in at most 2 real touch taps.
 * Result: 128 tests pass, 21 are `test.fixme` (one per known bug, numbered F1 to F14 below). The fixmes keep the checks alive. When a bug is fixed, delete its line in the `KNOWN` list and its fixme, and the check guards the layout.
-* Screenshots: `docs/screenshots/ui-review/<size>-<screen>.png`. 201 files.
+* Screenshots: `test-results/screenshots/ui-review/<size>-<screen>.png`. 201 files.
 * Limit: Chromium here cannot do a real swipe. Scrolling (F14) was proven by reading the code and by sending a `touchmove` event to the screens. Please confirm on a real iPad.
 * Run it: `npx playwright test ui-review` (CI uses WebKit). From the repo root, because the screenshot folder is relative.
 
@@ -33,23 +33,23 @@ Size column shows what I saw at 1024x768 unless said otherwise. Taps back is to 
 
 | Screen | How to open | Way back (taps) | Screenshot |
 |---|---|---|---|
-| World HUD (Spring, Omhoog, Omlaag, camera arrows, Hakken, Bouwen, hotbar, Alle blokken, Ouders, Pauze, countdown, Nu oefenen) | start | this is the world | [hud](screenshots/ui-review/1024x768-wereld-hud.png), [Bouwen](screenshots/ui-review/1024x768-wereld-bouwen.png), [warning](screenshots/ui-review/1024x768-wereld-aftellen-waarschuwing.png) |
-| Alle blokken and slot chooser | hotbar "Alle blokken" | "Klaar" top right (1), or tap beside the panel | [grid](screenshots/ui-review/1024x768-alle-blokken.png), [slot 8, wol](screenshots/ui-review/1024x768-alle-blokken-vakje-kiezen.png) |
-| Pauze | HUD "Pauze" (blocked by F1) | "Terug naar de wereld" (1) | [pauze](screenshots/ui-review/1024x768-pauze.png) |
-| Dinowinkel | Pauze, Dinowinkel | "Sluiten" top left (1) | [shop](screenshots/ui-review/1024x768-dinowinkel.png), [few points](screenshots/ui-review/1024x768-dinowinkel-weinig-punten.png), [buy question](screenshots/ui-review/1024x768-dinowinkel-ei-kopen-vraag.png), [Kippenhok and collection](screenshots/ui-review/1024x768-dinowinkel-kippenhok-onderaan.png) |
-| Lesboek list | Pauze, Lesboek | "Sluiten" top right (1) | [list](screenshots/ui-review/1024x768-lesboek-lijst.png) |
-| Lesboek lesson | Lesboek, a topic | "Terug naar Lesboek", then "Sluiten" (2) | [lesson](screenshots/ui-review/1024x768-lesboek-les.png) |
-| Extra oefenen | Pauze, Extra oefenen, or Lesboek "Oefen dit onderwerp" | "Terug naar de wereld" top left (1) | [list](screenshots/ui-review/1024x768-extra-oefenen.png) |
-| Extra oefenen session | a topic in Extra oefenen | none until the summary, then "Terug naar de wereld" (F13) | [number](screenshots/ui-review/1024x768-oefenen-rekenen-vraag-number.png), [choice](screenshots/ui-review/1024x768-oefenen-taal-vraag-choice.png), [find error](screenshots/ui-review/1024x768-oefenen-taal-vraag-find-error.png), [typing](screenshots/ui-review/1024x768-oefenen-taal-vraag-type.png), [commas](screenshots/ui-review/1024x768-oefenen-komma-vraag-punctuate.png), [retry](screenshots/ui-review/1024x768-oefenen-taal-fout-opnieuw.png), [right](screenshots/ui-review/1024x768-oefenen-taal-goed.png), [teach, lesson](screenshots/ui-review/1024x768-oefenen-taal-uitleg-les.png), [teach, steps](screenshots/ui-review/1024x768-oefenen-rekenen-uitleg-voorbeeld.png), [summary](screenshots/ui-review/1024x768-oefenen-taal-samenvatting.png) |
-| Nu oefenen (HUD pill, shop pill, Extra oefenen bar) | tap it | starts a learning break, see below | [in HUD](screenshots/ui-review/1024x768-wereld-hud.png), [in shop](screenshots/ui-review/1024x768-dinowinkel.png) |
-| Learning break (lesson, questions, retry, teach, summary) | timer, or Nu oefenen | cannot be closed on purpose. After the summary "Terug naar de wereld" (1). A parent can end it through Ouders | [lesson](screenshots/ui-review/1024x768-leerpauze-les.png), [number](screenshots/ui-review/1024x768-leerpauze-vraag-number.png), [retry](screenshots/ui-review/1024x768-leerpauze-fout-opnieuw.png), [right](screenshots/ui-review/1024x768-leerpauze-goed.png), [teach](screenshots/ui-review/1024x768-leerpauze-uitleg-voorbeeld.png), [summary](screenshots/ui-review/1024x768-leerpauze-samenvatting.png) |
-| Dino menu | tap a dino | "Sluiten" at the bottom (1) | [menu](screenshots/ui-review/1024x768-dino-menu.png) |
-| Naming keyboard | Dino menu, Naam geven | "Terug" top right, then "Sluiten" (2) | [naming](screenshots/ui-review/1024x768-dino-naam-geven.png) |
-| Parent gate, choose PIN (first start) | HUD "Ouders" or Pauze, Ouders | "Sluiten" in the key pad (1) | [choose](screenshots/ui-review/1024x768-ouders-pincode-kiezen.png) |
-| Parent gate, enter PIN, wrong PIN | "Ouders" after a PIN exists | "Sluiten" in the key pad (1) | [enter](screenshots/ui-review/1024x768-ouders-pincode-invoeren.png), [wrong](screenshots/ui-review/1024x768-ouders-pincode-fout.png) |
-| PIN vergeten | gate, "Pincode vergeten?" | "Terug", then "Sluiten" (2) | [forgot](screenshots/ui-review/1024x768-ouders-pincode-vergeten.png) |
-| Parent area: Instellingen, Inhoud kiezen, Resultaten, Examens, Eigen modules, Import & Export | after the PIN | "Sluiten" bottom left of the side bar (1) | [Instellingen](screenshots/ui-review/1024x768-ouders-instellingen.png), [Inhoud](screenshots/ui-review/1024x768-ouders-inhoud-kiezen.png), [Resultaten](screenshots/ui-review/1024x768-ouders-resultaten.png), [Examens](screenshots/ui-review/1024x768-ouders-examens.png), [Eigen modules](screenshots/ui-review/1024x768-ouders-eigen-modules.png), [Import](screenshots/ui-review/1024x768-ouders-import-export.png), [reset world question](screenshots/ui-review/1024x768-ouders-wereld-opnieuw-vraag.png) |
-| Portrait | turn the iPad | turn it back | [turn message](screenshots/ui-review/768x1024-portrait-draai-je-ipad.png) |
+| World HUD (Spring, Omhoog, Omlaag, camera arrows, Hakken, Bouwen, hotbar, Alle blokken, Ouders, Pauze, countdown, Nu oefenen) | start | this is the world | [hud](../test-results/screenshots/ui-review/1024x768-wereld-hud.png), [Bouwen](../test-results/screenshots/ui-review/1024x768-wereld-bouwen.png), [warning](../test-results/screenshots/ui-review/1024x768-wereld-aftellen-waarschuwing.png) |
+| Alle blokken and slot chooser | hotbar "Alle blokken" | "Klaar" top right (1), or tap beside the panel | [grid](../test-results/screenshots/ui-review/1024x768-alle-blokken.png), [slot 8, wol](../test-results/screenshots/ui-review/1024x768-alle-blokken-vakje-kiezen.png) |
+| Pauze | HUD "Pauze" (blocked by F1) | "Terug naar de wereld" (1) | [pauze](../test-results/screenshots/ui-review/1024x768-pauze.png) |
+| Dinowinkel | Pauze, Dinowinkel | "Sluiten" top left (1) | [shop](../test-results/screenshots/ui-review/1024x768-dinowinkel.png), [few points](../test-results/screenshots/ui-review/1024x768-dinowinkel-weinig-punten.png), [buy question](../test-results/screenshots/ui-review/1024x768-dinowinkel-ei-kopen-vraag.png), [Kippenhok and collection](../test-results/screenshots/ui-review/1024x768-dinowinkel-kippenhok-onderaan.png) |
+| Lesboek list | Pauze, Lesboek | "Sluiten" top right (1) | [list](../test-results/screenshots/ui-review/1024x768-lesboek-lijst.png) |
+| Lesboek lesson | Lesboek, a topic | "Terug naar Lesboek", then "Sluiten" (2) | [lesson](../test-results/screenshots/ui-review/1024x768-lesboek-les.png) |
+| Extra oefenen | Pauze, Extra oefenen, or Lesboek "Oefen dit onderwerp" | "Terug naar de wereld" top left (1) | [list](../test-results/screenshots/ui-review/1024x768-extra-oefenen.png) |
+| Extra oefenen session | a topic in Extra oefenen | none until the summary, then "Terug naar de wereld" (F13) | [number](../test-results/screenshots/ui-review/1024x768-oefenen-rekenen-vraag-number.png), [choice](../test-results/screenshots/ui-review/1024x768-oefenen-taal-vraag-choice.png), [find error](../test-results/screenshots/ui-review/1024x768-oefenen-taal-vraag-find-error.png), [typing](../test-results/screenshots/ui-review/1024x768-oefenen-taal-vraag-type.png), [commas](../test-results/screenshots/ui-review/1024x768-oefenen-komma-vraag-punctuate.png), [retry](../test-results/screenshots/ui-review/1024x768-oefenen-taal-fout-opnieuw.png), [right](../test-results/screenshots/ui-review/1024x768-oefenen-taal-goed.png), [teach, lesson](../test-results/screenshots/ui-review/1024x768-oefenen-taal-uitleg-les.png), [teach, steps](../test-results/screenshots/ui-review/1024x768-oefenen-rekenen-uitleg-voorbeeld.png), [summary](../test-results/screenshots/ui-review/1024x768-oefenen-taal-samenvatting.png) |
+| Nu oefenen (HUD pill, shop pill, Extra oefenen bar) | tap it | starts a learning break, see below | [in HUD](../test-results/screenshots/ui-review/1024x768-wereld-hud.png), [in shop](../test-results/screenshots/ui-review/1024x768-dinowinkel.png) |
+| Learning break (lesson, questions, retry, teach, summary) | timer, or Nu oefenen | cannot be closed on purpose. After the summary "Terug naar de wereld" (1). A parent can end it through Ouders | [lesson](../test-results/screenshots/ui-review/1024x768-leerpauze-les.png), [number](../test-results/screenshots/ui-review/1024x768-leerpauze-vraag-number.png), [retry](../test-results/screenshots/ui-review/1024x768-leerpauze-fout-opnieuw.png), [right](../test-results/screenshots/ui-review/1024x768-leerpauze-goed.png), [teach](../test-results/screenshots/ui-review/1024x768-leerpauze-uitleg-voorbeeld.png), [summary](../test-results/screenshots/ui-review/1024x768-leerpauze-samenvatting.png) |
+| Dino menu | tap a dino | "Sluiten" at the bottom (1) | [menu](../test-results/screenshots/ui-review/1024x768-dino-menu.png) |
+| Naming keyboard | Dino menu, Naam geven | "Terug" top right, then "Sluiten" (2) | [naming](../test-results/screenshots/ui-review/1024x768-dino-naam-geven.png) |
+| Parent gate, choose PIN (first start) | HUD "Ouders" or Pauze, Ouders | "Sluiten" in the key pad (1) | [choose](../test-results/screenshots/ui-review/1024x768-ouders-pincode-kiezen.png) |
+| Parent gate, enter PIN, wrong PIN | "Ouders" after a PIN exists | "Sluiten" in the key pad (1) | [enter](../test-results/screenshots/ui-review/1024x768-ouders-pincode-invoeren.png), [wrong](../test-results/screenshots/ui-review/1024x768-ouders-pincode-fout.png) |
+| PIN vergeten | gate, "Pincode vergeten?" | "Terug", then "Sluiten" (2) | [forgot](../test-results/screenshots/ui-review/1024x768-ouders-pincode-vergeten.png) |
+| Parent area: Instellingen, Inhoud kiezen, Resultaten, Examens, Eigen modules, Import & Export | after the PIN | "Sluiten" bottom left of the side bar (1) | [Instellingen](../test-results/screenshots/ui-review/1024x768-ouders-instellingen.png), [Inhoud](../test-results/screenshots/ui-review/1024x768-ouders-inhoud-kiezen.png), [Resultaten](../test-results/screenshots/ui-review/1024x768-ouders-resultaten.png), [Examens](../test-results/screenshots/ui-review/1024x768-ouders-examens.png), [Eigen modules](../test-results/screenshots/ui-review/1024x768-ouders-eigen-modules.png), [Import](../test-results/screenshots/ui-review/1024x768-ouders-import-export.png), [reset world question](../test-results/screenshots/ui-review/1024x768-ouders-wereld-opnieuw-vraag.png) |
+| Portrait | turn the iPad | turn it back | [turn message](../test-results/screenshots/ui-review/768x1024-portrait-draai-je-ipad.png) |
 
 First start: there is no kid onboarding. The first thing that looks like "first start" is the choose PIN screen, which opens when anyone taps Ouders (see decision 2).
 
@@ -70,7 +70,7 @@ Counts: 4 blockers, 5 major, 5 minor, 14 findings in all.
 * Test: `F1` fixmes, plus "a finger on Pauze in the world opens the pause menu".
 
 **F2. Dinowinkel: the right column of egg cards is cut off.**
-* Screen: Dinowinkel, all four sizes. See [shop](screenshots/ui-review/1024x768-dinowinkel.png).
+* Screen: Dinowinkel, all four sizes. See [shop](../test-results/screenshots/ui-review/1024x768-dinowinkel.png).
 * What is wrong: `.pause-card { width: min(560px, 100%) }` (pause-menu.css) wins over `.shop-modal { width: min(960px, 96vw) }` because the shop uses both classes. The card is 560 wide with two columns inside, and `overflow-y: auto` hides what sticks out sideways. Triceratops and Brachiosaurus lose their price, the end of their name and half of "Kopen".
 * Why it matters: the kid cannot read the price of two of the four dinos and half of the buy button is not there.
 * Fix: in `src/styles/shop.css` add `.shop-modal.pause-card { width: min(960px, 96vw); }`. Also use `grid-template-columns: repeat(2, minmax(0, 1fr))` on `.shop-grid` so a long word can never push a column out.
@@ -86,7 +86,7 @@ Counts: 4 blockers, 5 major, 5 minor, 14 findings in all.
 * Test: three F14 fixmes (teach moment, Extra oefenen list, Dinowinkel) and one passing test that the parent area allows drags.
 
 **F5. Teach moment: "Ik snap het" is below the screen.**
-* Screen: after two wrong answers, Taal topics, at 1024x768 (button at y 830 to 924 for a 768 tall screen), 1180x820 and 1024x690. Fits at 1366x1024. See [teach](screenshots/ui-review/1024x768-oefenen-taal-uitleg-les.png).
+* Screen: after two wrong answers, Taal topics, at 1024x768 (button at y 830 to 924 for a 768 tall screen), 1180x820 and 1024x690. Fits at 1366x1024. See [teach](../test-results/screenshots/ui-review/1024x768-oefenen-taal-uitleg-les.png).
 * What is wrong: the lesson card (title, rule, two examples, tip) plus "-1 punt" is taller than the screen. The button is last. With F14 the kid cannot scroll to it.
 * Why it matters: the kid is stuck. A practice session cannot be closed (F13) and a learning break cannot be closed on purpose.
 * Fix: put "Ik snap het" in a sticky footer: `.teach-moment` as a flex column with `.teach-lesson { overflow-y: auto; min-height: 0 }` and the button fixed under it, `position: sticky; bottom: 0`. Or show only the first example. Also add `.scrollable` (F14).
@@ -101,12 +101,12 @@ Counts: 4 blockers, 5 major, 5 minor, 14 findings in all.
 * Fix: shorter egg cards (drop the `.shop-card-trait` line, or use 4 columns on one row at 1024 wide), or put the Kippenhok first in a compact row. Make `.shop-card` `min-height` smaller. Test: `F3` fixmes.
 
 **F4. Dinowinkel "Sluiten" scrolls out of view.**
-* Screen: Dinowinkel after scrolling down ([screenshot](screenshots/ui-review/1024x768-dinowinkel-kippenhok-onderaan.png)).
+* Screen: Dinowinkel after scrolling down ([screenshot](../test-results/screenshots/ui-review/1024x768-dinowinkel-kippenhok-onderaan.png)).
 * What is wrong: the header with "Sluiten" is part of the scrolling card, so once the kid scrolls to the Kippenhok there is no visible way back. Also the floating Ouders button lands on top of a "Kopen" button.
 * Fix: make `.shop-header` `position: sticky; top: 0` with the card background, or make only `.shop-grid` area scroll and keep the header outside it. Test: F4 fixme.
 
 **F7. The question keyboard does not fit.**
-* Screen: typing and number questions. At 1024x768 the "Klaar" key (y 692 to 768) sits under the home indicator. At 1024x690 it is cut off (typing: space and Klaar at y 630 to 698). See [typing at 690](screenshots/ui-review/1024x690-safari-oefenen-taal-vraag-type.png).
+* Screen: typing and number questions. At 1024x768 the "Klaar" key (y 692 to 768) sits under the home indicator. At 1024x690 it is cut off (typing: space and Klaar at y 630 to 698). See [typing at 690](../test-results/screenshots/ui-review/1024x690-safari-oefenen-taal-vraag-type.png).
 * Why it matters: "Klaar" is the main action of the question.
 * Fix: in `src/styles/keyboard.css` and `questions.css` use `clamp()` key heights tied to `vh` (for example `height: clamp(48px, 8.5vh, 76px)`), put the header on one row, and hide the Dino Juf bubble text on small heights. At 690 the area between the answer box and the keys is the first thing to shrink.
 * Test: F7 fixmes.

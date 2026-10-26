@@ -1,5 +1,5 @@
 // UI review (kid-ui-reviewer). Opens every screen at four iPad landscape sizes, saves a screenshot
-// to docs/screenshots/ui-review/<size>-<screen>.png and measures every tappable thing:
+// to test-results/screenshots/ui-review/<size>-<screen>.png and measures every tappable thing:
 // inside the viewport and the safe area, at least 44 x 44, at least 8 points between neighbours,
 // not covered by another element, text not clipped, no horizontal scroll, a way back, back in 2 taps.
 //
@@ -13,7 +13,7 @@ import apostrofTopic from '../../docs/modules/cito-taalverzorging/apostrof.json'
 import kommaTopic from '../../docs/modules/cito-taalverzorging/komma.json' with { type: 'json' };
 
 /** Screenshots go here. Playwright creates the folder. Run from the repo root. */
-const OUT = 'docs/screenshots/ui-review';
+const OUT = 'test-results/screenshots/ui-review';
 const SHOTS = OUT;
 
 /** The three target iPads, plus a Safari tab with its toolbars (about 70 points are gone). */

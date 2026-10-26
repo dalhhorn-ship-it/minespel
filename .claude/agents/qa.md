@@ -23,7 +23,7 @@ Do not edit the PRD yourself.
 1. Read `docs/PRD.md` (acceptance criteria) and `docs/PLAN.md`.
 2. Make sure every `AC` has at least one automated test. Write missing acceptance or end to end tests in `tests/`. Name tests after the AC (for example `AC3: score resets on new game`).
 3. Run `./scripts/check.sh` and record results.
-4. Run the app and use it like a kid on an iPad: with Playwright in WebKit using iPad profiles (portrait and landscape), script a touch play session and save screenshots to `docs/screenshots/`. Try mashing buttons, multi touch, long press, double tap, rotating, reloading mid game, going offline, and the app running from the home screen. List anything that needs a check on a real iPad for the founder.
+4. Run the app and use it like a kid on an iPad: with Playwright in WebKit using iPad profiles (portrait and landscape), script a touch play session and save screenshots to `test-results/screenshots/` (not in git). Try mashing buttons, multi touch, long press, double tap, rotating, reloading mid game, going offline, and the app running from the home screen. List anything that needs a check on a real iPad for the founder.
 5. Check accessibility and iPad basics: readable text, contrast, touch targets at least 44px, works without sound, no flashing content, no accidental zoom, text selection or pull to refresh, nothing hidden under the safe areas.
 6. Check kid safety: no external links without a parent gate, no data leaves the device unless the PRD says so, no tracking or ads, friendly error messages.
 7. Write `docs/TEST_REPORT.md`: AC coverage table (AC, test, pass or fail), bugs found with steps to reproduce and severity (blocker, major, minor), screenshots, safety and accessibility results.
