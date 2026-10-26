@@ -4,13 +4,9 @@
 
 import type { Sound } from '../audio/sound';
 import { systemClock, today, type Clock } from '../core/clock';
-import { chickenCount, purchaseChicken, purchaseEgg, shopDinoCount } from '../core/economy';
+import { purchaseChicken, purchaseEgg } from '../core/economy';
 import { registerHook } from '../dev/e2e-hooks';
-import {
-  addEgg,
-  getActiveDinoStore,
-  type DinoStore,
-} from '../dinos/dino-store';
+import type { DinoStore } from '../dinos/dino-store';
 import { DINO_KINDS, type DinoKindId } from '../dinos/kinds';
 import { request, transact } from '../storage/db';
 import type { LedgerInput, LogStore } from '../storage/log-store';
@@ -24,6 +20,8 @@ import {
   type ShopViewState,
 } from '../ui/shop';
 import type { ScreenManager } from './screens';
+
+const MSG_NO_STORE = 'De winkel kan nu even niet kopen. Probeer het zo nog eens!';
 
 export interface ShopFlowOptions {
   screens: ScreenManager;
@@ -53,12 +51,8 @@ export function createShopFlow(options: ShopFlowOptions): ShopFlow {
   let lastToast: string | null = null;
   let buyLock: Promise<boolean> = Promise.resolve(false);
 
-  function resolveDinoStore(): DinoStore | null {
-    return options.dinoStore ?? getActiveDinoStore();
-  }
-
   async function readViewState(): Promise<ShopViewState> {
-    const store = resolveDinoStore();
+    const store = options.dinoStore ?? null;
     let points = 0;
     if (options.records) {
       const eco = await options.records.get('economy');
@@ -94,9 +88,16 @@ export function createShopFlow(options: ShopFlowOptions): ShopFlow {
   }
 
   async function executeBuy(kind: DinoKindId): Promise<boolean> {
-    const store = resolveDinoStore();
+    const store = options.dinoStore ?? null;
     const dayStr = today(clock);
     const ts = clock.now();
+
+    // No dino store (world not started): refuse the buy and change no points.
+    if (!store) {
+      lastToast = MSG_NO_STORE;
+      if (activeView) activeView.render(await readViewState());
+      return false;
+    }
 
     // Atomic IndexedDB transaction writing economy, dinos, and ledger together (AC150)
     if (options.db && store) {
@@ -154,57 +155,21 @@ export function createShopFlow(options: ShopFlowOptions): ShopFlow {
       }
     }
 
-    // Fallback when `db` is not passed directly (uses `records`, `addEgg`, and `logStore.appendLedger`)
-    if (options.records) {
-      const [eco, dinosRec] = await Promise.all([
-        options.records.get('economy'),
-        options.records.get('dinos'),
-      ]);
-      const rawDinos = (dinosRec.dinos ?? []) as { golden?: boolean; kind?: string }[];
-      const rawEggs = (dinosRec.eggs ?? []) as { golden?: boolean; kind?: string }[];
+    // Fallback when `db` is not passed directly (uses `records`, the store's `addEgg`, and `logStore.appendLedger`)
+    if (options.records && store) {
+      const eco = await options.records.get('economy');
       const res =
         kind === 'kip'
-          ? purchaseChicken(eco, store ? store.chickenCount() : chickenCount(rawDinos))
-          : purchaseEgg(eco, store ? store.shopCount() : shopDinoCount(rawDinos, rawEggs), kind);
+          ? purchaseChicken(eco, store.chickenCount())
+          : purchaseEgg(eco, store.shopCount(), kind);
       if (!res.ok) return false;
 
       await options.records.put('economy', res.economy);
-      if (store) {
-        if (kind === 'kip') {
-          store.spawnChickenInMemory();
-          await store.saveNow();
-        } else {
-          await addEgg(kind, false);
-        }
-      } else if (kind === 'kip') {
-        await options.records.put('dinos', {
-          dinos: [
-            ...(dinosRec.dinos ?? []),
-            {
-              id: `kip-${ts}`,
-              kind: 'kip' as const,
-              golden: false,
-              name: '',
-              mode: 'follow' as const,
-              x: 32,
-              y: 10,
-              z: 32,
-              heading: 0,
-              growth: 2,
-              stayX: 32,
-              stayZ: 32,
-            },
-          ],
-          eggs: [...(dinosRec.eggs ?? [])],
-        });
+      if (kind === 'kip') {
+        store.spawnChickenInMemory();
+        await store.saveNow();
       } else {
-        await options.records.put('dinos', {
-          dinos: [...(dinosRec.dinos ?? [])],
-          eggs: [
-            ...(dinosRec.eggs ?? []),
-            { id: `egg-${ts}`, kind, golden: false, x: 32, y: 10, z: 32, playSeconds: 0 },
-          ],
-        });
+        await store.addEgg(kind, false);
       }
       if (options.logStore) {
         await options.logStore.appendLedger({
