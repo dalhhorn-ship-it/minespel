@@ -1,6 +1,5 @@
 import { defineConfig, devices } from '@playwright/test';
 
-
 // R1a: E2E_LOCAL=1 runs the same projects in the Chromium on disk (the cloud
 // container cannot download WebKit). CI never sets it and keeps WebKit.
 const env = (globalThis as unknown as { process: { env: Record<string, string | undefined> } }).process.env;
