@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import type { EconomyRecord } from '../storage/schema';
 import {
   addPoints, answerPoints, canAffordEgg, applyPoints, bonusPoints, buyState, canReceiveGolden, capReached,
-  purchaseEgg, purchaseChicken, chickenBuyState, chickenCount, MAX_CHICKENS, MSG_COOP_FULL, shopDinoCount, MSG_CAP_REACHED, pointsModeOf,
+  purchaseEgg, purchaseChicken, chickenBuyState, chickenCount, MAX_CHICKENS, MAX_SHOP_DINOS, canTradeIn, tradeIn, tradeInValue, MSG_COOP_FULL, shopDinoCount, MSG_CAP_REACHED, pointsModeOf,
 } from './economy';
 
 const eco = (points: number, today = 0, day = '2026-10-17'): EconomyRecord => ({
@@ -96,19 +96,22 @@ describe('Dinowinkel', () => {
     expect(bought).toBe(1);
     expect(e.points).toBe(5);
   });
-  it('blocks the 13th shop dino (AC20)', () => {
-    expect(capReached(11)).toBe(false);
-    expect(capReached(12)).toBe(true);
-    const r = purchaseEgg(eco(500), 12, 'compy');
+  it('blocks the 26th shop dino (AC20, cap raised to 25)', () => {
+    expect(MAX_SHOP_DINOS).toBe(25);
+    expect(capReached(24)).toBe(false);
+    expect(capReached(25)).toBe(true);
+    expect(MSG_CAP_REACHED).toContain("25 dino's");
+    const r = purchaseEgg(eco(500), 25, 'compy');
     expect(r.ok).toBe(false);
     expect(r.economy.points).toBe(500);
     if (!r.ok) expect(r.note).toBe(MSG_CAP_REACHED);
-    expect(buyState(500, 12, 'compy').blocked).toBe('cap');
+    expect(buyState(500, 25, 'compy').blocked).toBe('cap');
+    expect(buyState(500, 12, 'compy').canBuy).toBe(true);
   });
   it('golden is exempt (AC111)', () => {
-    const shop = Array.from({ length: 12 }, () => ({}));
+    const shop = Array.from({ length: MAX_SHOP_DINOS }, () => ({}));
     const withGolden = [...shop, { golden: true }];
-    expect(shopDinoCount(withGolden, [{ golden: true }])).toBe(12);
+    expect(shopDinoCount(withGolden, [{ golden: true }])).toBe(MAX_SHOP_DINOS);
     expect(canReceiveGolden()).toBe(true);
     expect(capReached(shopDinoCount(withGolden, []))).toBe(true);
   });
@@ -146,13 +149,13 @@ describe('Kippenhok (decision 55)', () => {
     expect(chickenBuyState(50, MAX_CHICKENS).note).toBe(MSG_COOP_FULL);
     expect(chickenBuyState(50, 12).canBuy).toBe(false);
   });
-  it('chickens do not count in the 12 dinos and 12 dinos still allow a chicken', () => {
+  it('chickens do not count in the dino cap and a full herd still allows a chicken', () => {
     const dinos = [
-      ...Array.from({ length: 12 }, () => ({ kind: 'compy' })),
+      ...Array.from({ length: MAX_SHOP_DINOS }, () => ({ kind: 'compy' })),
       { kind: 'kip' },
       { kind: 'kip' },
     ];
-    expect(shopDinoCount(dinos, [])).toBe(12);
+    expect(shopDinoCount(dinos, [])).toBe(MAX_SHOP_DINOS);
     expect(chickenCount(dinos)).toBe(2);
     expect(purchaseChicken(eco(10), chickenCount(dinos)).ok).toBe(true);
     // eggs never count against chickens
@@ -161,10 +164,35 @@ describe('Kippenhok (decision 55)', () => {
 });
 
 describe('canAffordEgg (AC169, AC34)', () => {
-  it('AC169: needs the cheapest egg price and room under the 12 dino cap', () => {
+  it('AC169: needs the cheapest egg price and room under the 25 dino cap', () => {
     expect(canAffordEgg(19, 0)).toBe(false);
     expect(canAffordEgg(20, 0)).toBe(true);
-    expect(canAffordEgg(500, 11)).toBe(true);
-    expect(canAffordEgg(500, 12)).toBe(false);
+    expect(canAffordEgg(500, 24)).toBe(true);
+    expect(canAffordEgg(500, 25)).toBe(false);
+  });
+});
+
+describe('inruilen (trade in)', () => {
+  it('gives half the price back, rounded down', () => {
+    expect(tradeInValue('compy')).toBe(10);
+    expect(tradeInValue('triceratops')).toBe(20);
+    expect(tradeInValue('stegosaurus')).toBe(20);
+    expect(tradeInValue('brachiosaurus')).toBe(40);
+    expect(tradeInValue('kip')).toBe(2);
+  });
+  it('adds the refund to the points and keeps the rest of the record', () => {
+    const r = tradeIn(eco(3, 4), { kind: 'brachiosaurus' });
+    expect(r.ok).toBe(true);
+    if (r.ok) expect(r.refund).toBe(40);
+    expect(r.economy).toEqual(eco(43, 4));
+  });
+  it('never trades in a golden dino', () => {
+    expect(canTradeIn({ kind: 'compy', golden: true })).toBe(false);
+    expect(canTradeIn({ kind: 'compy' })).toBe(true);
+    expect(canTradeIn({ kind: 'kip' })).toBe(true);
+    expect(canTradeIn({ kind: 'draak' })).toBe(false);
+    const r = tradeIn(eco(7), { kind: 'compy', golden: true });
+    expect(r.ok).toBe(false);
+    expect(r.economy.points).toBe(7);
   });
 });

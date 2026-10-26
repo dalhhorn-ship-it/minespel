@@ -91,6 +91,14 @@ describe('dino-system (T42)', () => {
     });
     expect(hit?.id).toBe(dino.id);
 
+    // The eye inside the dino: that dino never takes the tap, so Hakken and Bouwen keep working (decision 112).
+    dino.z = player.player.z;
+    expect(
+      pickDinoAtAim(world, store.dinos(), {
+        ox: player.player.x, oy: player.player.y + 0.5, oz: player.player.z, dx: 0, dy: 0, dz: 1,
+      }),
+    ).toBeNull();
+
     // Move dino far away, then teleport player home -> follow dino pops next to START_SPOT
     dino.x = 10;
     dino.z = 10;

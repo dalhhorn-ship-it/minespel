@@ -4,6 +4,13 @@ Written so kids can read it too.
 
 ## Unreleased
 
+### Dinowinkel
+
+* Your herd can now grow to 25 dinos instead of 12.
+* Full herd, or want a different dino? Tap "Inruilen" next to a dino or chicken in Mijn Dino-verzameling. You get half its price back. Your golden dinos always stay.
+* 10 new Bijzondere dino's in the shop, for the real savers: Velociraptor, Pachycephalosaurus, Parasaurolophus, Ankylosaurus, Dilophosaurus, Spinosaurus, T-rex, IJsraptor, Lavarex and the rare Regenboogsaurus (300 points).
+* Fixed: with lots of dinos you could hardly dig or build, because your taps hit a dino. Your dinos now walk behind you and leave the view free. Turn around to see them and tap one to pet it.
+
 ### Onder de motorkap
 
 * The dino shop no longer uses a hidden global dino store. If the world is not ready, tapping Kopen shows "De winkel kan nu even niet kopen. Probeer het zo nog eens!" and no points are spent.

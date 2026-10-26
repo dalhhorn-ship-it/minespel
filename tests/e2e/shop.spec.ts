@@ -65,6 +65,51 @@ test.describe('Dinowinkel shop (T47, AC20, AC110, AC149, AC150)', () => {
     expect(ledger[0]).toMatchObject({ delta: -5, reason: 'shop' });
   });
 
+  test('Inruilen: a hatched dino goes back for half its price, then the kid can buy again (decision 111)', async ({
+    page,
+  }) => {
+    await openApp(page);
+    await readState(page, 'addEgg', 'triceratops', false);
+    await readState(page, 'stepDinos', 60);
+    const [dino] = await readState<Array<{ id: string }>>(page, 'dinos');
+    expect(dino).toBeDefined();
+    await readState(page, 'setPoints', 0);
+    await readState(page, 'openShop');
+
+    const trade = page.locator(`[data-testid="shop-trade-${dino!.id}"]`);
+    await expect(trade).toHaveText('Inruilen +20');
+    const box = await trade.boundingBox();
+    expect(box?.height ?? 0).toBeGreaterThanOrEqual(44);
+    await trade.click();
+    await page.locator(`[data-testid="shop-trade-yes-${dino!.id}"]`).click();
+    await expect(page.locator('[data-testid="shop-toast"]')).toHaveText('Dag Triceratops! Je kreeg 20 punten terug.');
+    await expect(page.locator('[data-testid="shop-points"]')).toContainText('20 punten');
+    await expect(page.locator('[data-testid="shop-herd-count"]')).toHaveText("\u{1F995} 0 / 25 dino's");
+    await expect(page.locator('[data-testid="shop-buy-compy"]')).toBeEnabled();
+
+    const page2 = await killApp(page);
+    expect(await readState<number>(page2, 'points')).toBe(20);
+    expect(await readState<unknown[]>(page2, 'dinos')).toHaveLength(0);
+    const ledger = await readState<Array<{ delta: number; reason: string }>>(page2, 'ledgerLog');
+    expect(ledger.at(-1)).toMatchObject({ delta: 20, reason: 'tradein' });
+  });
+
+  test("Bijzondere dino's: buy a T-rex egg, it hatches into a T-rex in the world (decision 113)", async ({ page }) => {
+    await openApp(page);
+    await readState(page, 'setPoints', 200);
+    await readState(page, 'openShop');
+    await expect(page.locator('[data-testid="shop-special"] [data-dino-card]')).toHaveCount(10);
+    await page.locator('[data-testid="shop-buy-trex"]').scrollIntoViewIfNeeded();
+    await page.screenshot({ path: 'test-results/screenshots/shop-special.png' });
+    await page.locator('[data-testid="shop-buy-trex"]').click();
+    await page.locator('[data-testid="shop-confirm-yes-trex"]').click();
+    await expect(page.locator('[data-testid="shop-points"]')).toContainText('0 punten');
+    await page.getByRole('button', { name: 'Sluiten' }).click();
+    await readState(page, 'stepDinos', 60);
+    const dinos = await readState<Array<{ kind: string }>>(page, 'dinos');
+    expect(dinos.map((d) => d.kind)).toEqual(['trex']);
+  });
+
   test('Nu oefenen starts an early break; a countdown break is not early (decision 56)', async ({ page }) => {
     await openApp(page);
     await readState(page, 'setPracticeUsed', 10);

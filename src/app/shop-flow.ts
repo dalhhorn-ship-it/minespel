@@ -1,10 +1,10 @@
-// Dinowinkel flow orchestrator (T47, AC20, AC23, AC110, AC149, AC150).
+// Dinowinkel flow orchestrator (T47, AC20, AC23, AC110, AC149, AC150, Inruilen decision 111).
 // Writes economy, dinos, and ledger in a single atomic IndexedDB transaction (`transact(db, ['kv', 'ledger'], 'readwrite', ...)`),
 // spawns the egg next to the player through `dino-store.ts`, plays `clink`, and guards against fast multi-tap purchases.
 
 import type { Sound } from '../audio/sound';
 import { systemClock, today, type Clock } from '../core/clock';
-import { purchaseChicken, purchaseEgg } from '../core/economy';
+import { purchaseChicken, purchaseEgg, tradeIn } from '../core/economy';
 import { registerHook } from '../dev/e2e-hooks';
 import type { DinoStore } from '../dinos/dino-store';
 import { DINO_KINDS, type DinoKindId } from '../dinos/kinds';
@@ -42,6 +42,8 @@ export interface ShopFlow {
   open(): Promise<void>;
   buyEgg(kind: DinoKindId): Promise<boolean>;
   buyChicken(): Promise<boolean>;
+  /** Trades in one dino or chicken by id for half its price. A golden dino is refused. */
+  tradeIn(dinoId: string): Promise<boolean>;
   destroy(): void;
 }
 
@@ -190,6 +192,77 @@ export function createShopFlow(options: ShopFlowOptions): ShopFlow {
     return false;
   }
 
+  function tradedToast(name: string, refund: number): string {
+    return `Dag ${name}! Je kreeg ${refund} ${refund === 1 ? 'punt' : 'punten'} terug.`;
+  }
+
+  async function executeTradeIn(dinoId: string): Promise<boolean> {
+    const store = options.dinoStore ?? null;
+    if (!store) {
+      lastToast = MSG_NO_STORE;
+      if (activeView) activeView.render(await readViewState());
+      return false;
+    }
+    const dino = store.getDino(dinoId);
+    if (!dino) return false;
+    const name = dino.name || DINO_KINDS[dino.kind].name;
+    const dayStr = today(clock);
+    const ts = clock.now();
+    const index = store.dinos().indexOf(dino);
+
+    let refund = 0;
+    if (options.db) {
+      let removed = false;
+      try {
+        const traded = await transact(options.db, ['kv', 'ledger'], 'readwrite', async (tx) => {
+          const kvStore = tx.objectStore('kv');
+          const ledgerStore = tx.objectStore('ledger');
+          const rawEco = await request<EconomyRecord | undefined>(kvStore.get('economy'));
+          const currentEco: EconomyRecord = { ...defaultKv('economy'), ...(rawEco ?? {}) };
+          const res = tradeIn(currentEco, dino);
+          if (!res.ok) return false;
+          refund = res.refund;
+          store.removeDinoInMemory(dinoId);
+          removed = true;
+          const ledgerEntry: LedgerInput = { ts, day: dayStr, delta: res.refund, reason: 'tradein' };
+          await request(kvStore.put(res.economy, 'economy'));
+          await request(kvStore.put(store.toRecord(), 'dinos'));
+          await request(ledgerStore.add(ledgerEntry));
+          return true;
+        });
+        if (!traded) return false;
+      } catch {
+        if (removed) store.restoreDinoInMemory(dino, index);
+        return false;
+      }
+    } else if (options.records) {
+      const eco = await options.records.get('economy');
+      const res = tradeIn(eco, dino);
+      if (!res.ok) return false;
+      refund = res.refund;
+      await options.records.put('economy', res.economy);
+      store.removeDinoInMemory(dinoId);
+      await store.saveNow();
+      if (options.logStore) {
+        await options.logStore.appendLedger({ ts, day: dayStr, delta: res.refund, reason: 'tradein' });
+      }
+    } else {
+      return false;
+    }
+
+    options.sound?.play('clink');
+    lastToast = tradedToast(name, refund);
+    if (activeView) activeView.render(await readViewState());
+    return true;
+  }
+
+  /** Trade ins share the purchase lock, so a fast double tap trades in one animal once. */
+  function tradeInDino(dinoId: string): Promise<boolean> {
+    const next = buyLock.then(() => executeTradeIn(dinoId)).catch(() => false);
+    buyLock = next;
+    return next;
+  }
+
   /** Serializes purchase calls (eggs and chickens) so rapid taps never double-spend (AC110). */
   function buyEgg(kind: DinoKindId): Promise<boolean> {
     const next = buyLock.then(() => executeBuy(kind)).catch(() => false);
@@ -215,6 +288,9 @@ export function createShopFlow(options: ShopFlowOptions): ShopFlow {
         onBuy: async (kind) => {
           await buyEgg(kind);
         },
+        onTradeIn: async (dinoId) => {
+          await tradeInDino(dinoId);
+        },
         onEarnCoins: options.onEarnCoins
           ? () => {
               clear();
@@ -237,6 +313,7 @@ export function createShopFlow(options: ShopFlowOptions): ShopFlow {
     },
     buyEgg,
     buyChicken: () => buyEgg('kip'),
+    tradeIn: tradeInDino,
     destroy() {
       clear();
     },
@@ -246,6 +323,7 @@ export function createShopFlow(options: ShopFlowOptions): ShopFlow {
     registerHook('openShop', () => flow.open());
     registerHook('buyEggInShop', (kind: DinoKindId) => flow.buyEgg(kind));
     registerHook('buyChickenInShop', () => flow.buyChicken());
+    registerHook('tradeInInShop', (dinoId: string) => flow.tradeIn(dinoId));
   }
 
   return flow;
