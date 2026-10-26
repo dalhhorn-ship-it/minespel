@@ -61,3 +61,4 @@ Add a line when something went wrong and was fixed. Keep at most 10; move older 
 * 2026-10-19: Every push queues a full CI run. Commit often, but push at task boundaries (a finished task, a signoff, the end of a turn).
 * 2026-10-25: Two sessions used the same decision numbers. Fetch `main` before adding a decision row.
 * 2026-10-26: Large docs read whole cost most of the tokens. Grep by AC, task or decision id instead.
+* 2026-10-26: A big herd broke mining and no test caught it. When a release raises a cap, add a test at the cap near the player.
