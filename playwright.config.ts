@@ -1,11 +1,13 @@
 import { defineConfig, devices } from '@playwright/test';
 
-const PORT = 4173;
-
 // R1a: E2E_LOCAL=1 runs the same projects in the Chromium on disk (the cloud
 // container cannot download WebKit). CI never sets it and keeps WebKit.
 const env = (globalThis as unknown as { process: { env: Record<string, string | undefined> } }).process.env;
+// E2E_PORT lets two developers run e2e at the same time in two worktrees.
+const PORT = Number(env.E2E_PORT ?? 4173);
 const local = env.E2E_LOCAL === '1';
+// The full UI review (ui-review.spec.ts, about 140 tests) runs only on request: UI_REVIEW=1 (decision 106).
+const uiReview = env.UI_REVIEW === '1';
 const localUse = local
   ? {
       defaultBrowserType: 'chromium' as const,
@@ -18,6 +20,7 @@ const localUse = local
 
 export default defineConfig({
   testDir: 'tests/e2e',
+  testIgnore: uiReview ? [] : ['**/ui-review.spec.ts'],
   fullyParallel: true,
   ...(local ? { workers: 2 } : {}),
   reporter: 'list',

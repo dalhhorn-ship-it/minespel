@@ -40,7 +40,7 @@ test('the world comes back after the context is restored by the browser', async 
   await readState(page, 'setBlock', 40, 20, 42, AARDE);
   const before = await readState<Pose>(page, 'player');
   expect(await readState(page, 'loseWebGl')).toBe(true);
-  await page.waitForTimeout(200); // the browser must see the loss event first
+  await expect.poll(() => readState<boolean>(page, 'webGlLost'), { timeout: 3000 }).toBe(true); // the browser must see the loss event first
   await readState(page, 'restoreWebGl');
   await expect.poll(() => readState<boolean>(page, 'webGlLost'), { timeout: 3000 }).toBe(false);
   await expect.poll(() => canvasHasPicture(page), { timeout: 3000 }).toBe(true);

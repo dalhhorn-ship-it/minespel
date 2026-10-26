@@ -24,6 +24,23 @@ export async function readState<T = unknown>(page: Page, hook: string, ...args: 
 }
 
 /**
+ * Waits until the game loop has drawn n more frames. Use it in place of a fixed wait when the
+ * test needs the world to move on: a slow runner draws fewer frames per second, so a fixed
+ * wait in ms can be too short there. Only for a running loop (a paused loop draws nothing).
+ */
+export async function waitFrames(page: Page, n: number, timeout = 10_000): Promise<void> {
+  const start = await readState<number>(page, 'frameCount');
+  await page.waitForFunction(
+    ({ target }) => {
+      const hooks = (window as unknown as { __dino?: Record<string, () => number> }).__dino;
+      return (hooks?.frameCount?.() ?? 0) >= target;
+    },
+    { target: start + n },
+    { timeout },
+  );
+}
+
+/**
  * Simulates iOS killing the app: the save queue stops flushing, the page closes,
  * and a new page opens in the same context (IndexedDB stays, unsaved changes are lost).
  * Fails clearly until T5 registers the `simulateKill` hook.

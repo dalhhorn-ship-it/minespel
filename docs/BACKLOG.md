@@ -5,7 +5,7 @@ Not signed. Changing this file never closes the PRD gate (decision 80). The sign
 ## Next steps (founder order)
 
 1. **v9 Eerlijke punten (0.3.0)** (decision 87), shipped 2026-10-22. Honest point banners, one egg hint rule (decision 84) and no malus anywhere. Its section is archived in `docs/releases/v9.md`.
-2. **Refactor round R1** (shipped 2026-10-24, decision 78, see `docs/SIMPLIFY.md` section 4 and decision 82). One ready signal so no button is dead while the app loads, the egg limit mismatch, and e2e in Chromium before each push. It needed no PRD change.
+2. **Refactor round R1** (shipped 2026-10-24, decision 78, see `docs/archive/SIMPLIFY.md` section 4 and decision 82). One ready signal so no button is dead while the app loads, the egg limit mismatch, and e2e in Chromium before each push. It needed no PRD change.
 3. **v10 Punten voor elke ronde (0.4.0), shipped 2026-10-24.** A kid bug went first (decision 92): every round of oefenen pays, and the parent picks how much a mistake costs. Its section is archived in `docs/releases/v10.md`.
 4. **v11 Dorp (0.5.0), next** (decisions 94 and 95): villages with houses, villagers who ask a question from the lesson content, a silly dance or "Respect bruuuuu!" and a rare block for a right answer. Its section is in `docs/PRD.md` section 12, waiting for the founder's signoff. Architect review in `docs/DISCUSSION.md`. The bigger world is a later release of its own.
 5. **v3 Dino's veilig (0.6.0)**, after v11 (decisions 90, 92 and 94).

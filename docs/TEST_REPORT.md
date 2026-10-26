@@ -46,7 +46,7 @@ I also changed `tests/unit/release-v10.test.ts` to accept 0.4.0 or later, the sa
 
 None blocker or major. Small notes for the developer:
 
-* Minor: the dance card says "Respect bruuuuu!" twice (in the speech bubble at the top and in the green banner). Screenshot `docs/screenshots/v11/dance.png`.
+* Minor: the dance card says "Respect bruuuuu!" twice (in the speech bubble at the top and in the green banner). Screenshot `test-results/screenshots/v11/dance.png`.
 * Minor: the bubble is only hidden on the next village look (up to 250 ms), so a bubble can be on screen for a moment when the pause menu opens. A tap in that gap is ignored by the flow, so it is cosmetic.
 * Note: `package-lock.json` still says 0.4.0. It is not in the V11e row.
 
@@ -58,7 +58,7 @@ None blocker or major. Small notes for the developer:
 * No flashing: the dance is a slow wobble of the model.
 * Not checked in WebKit here: iOS callout menu and zoom on the bubble. The bubble CSS has `user-select: none`, `-webkit-touch-callout: none` and `touch-action: none`. Check on the iPad.
 
-### Screenshots (`docs/screenshots/v11/`)
+### Screenshots (`test-results/screenshots/v11/`, made by dorp.spec.ts, not in git)
 
 `village.png` (the camera ended inside a house, a villager stands in the doorway), `village-villager.png`, `bubble.png`, `card.png`, `dance.png`, `zo-zit-het.png`, `dorp-tab.png`, `portrait.png`.
 
@@ -185,7 +185,7 @@ No blockers, no majors. Notes, not bugs: the review shows only "Volgende" on pag
 * Colour contrast looked fine in the screenshots. Not measured with a tool.
 
 ### Screenshots
-`docs/screenshots/v2/` holds 14 shots per size, prefixed with the size (1024x768, 1180x820, 1024x690): 00 gate question, 01 Examens list, 02 Taal start, 03 Taal question, 04 after reload, 05 lock pin pad, 06 stop card, 07 Rekentoets start, 08 Rekentoets question, 09 typed answer, 10 end pass, 11 world after pass, 12 end fail, 13 review page 1. Taken in Chromium, not WebKit.
+The v2 screenshots (removed from git 2026-10-26, see git history) held 14 shots per size, prefixed with the size (1024x768, 1180x820, 1024x690): 00 gate question, 01 Examens list, 02 Taal start, 03 Taal question, 04 after reload, 05 lock pin pad, 06 stop card, 07 Rekentoets start, 08 Rekentoets question, 09 typed answer, 10 end pass, 11 world after pass, 12 end fail, 13 review page 1. Taken in Chromium, not WebKit.
 
 ### Manual iPad checks for the founder (home screen mode)
 1. One full Taal exam, 30 questions, start from Ouders, Examens. Check reading size, the lock in the top right (not under the status bar or a finger), and the timer.

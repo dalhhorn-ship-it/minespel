@@ -89,7 +89,7 @@ test.describe('villages and villagers', () => {
     await standNear(page, home.id, 7);
     const f = await readState<number>(page, 'frameCount');
     await expect.poll(() => readState<number>(page, 'frameCount')).toBeGreaterThan(f + 3);
-    await page.screenshot({ path: 'docs/screenshots/v11/village.png' });
+    await page.screenshot({ path: 'test-results/screenshots/v11/village.png' });
   });
 
   test('AC178: a house block can be mined like any block', async ({ page }) => {
@@ -142,7 +142,7 @@ test.describe('villages and villagers', () => {
     const { w, h } = await page.evaluate(() => ({ w: window.innerWidth, h: window.innerHeight }));
     const clip = { x: Math.floor(w / 2 - 150), y: Math.floor(h / 2 - 200), width: 300, height: 400 };
     const looking = await shirtPixels(page, await page.screenshot({ clip }), v.shirt);
-    await page.screenshot({ path: 'docs/screenshots/v11/village-villager.png' });
+    await page.screenshot({ path: 'test-results/screenshots/v11/village-villager.png' });
     // Turn around: the same part of the picture shows the other way.
     await page.evaluate(
       ({ x, y, z }) => (window as unknown as { __dino: Record<string, (...a: number[]) => void> }).__dino.placePlayer!(x, y, z, Math.PI),
@@ -276,7 +276,7 @@ test.describe('the speech bubble', () => {
     expect(shown.text).toBe(ASK);
     expect(shown.canAsk).toBe(true);
     expect(shown.villager).toBe(v.id);
-    await page.screenshot({ path: 'docs/screenshots/v11/bubble.png' });
+    await page.screenshot({ path: 'test-results/screenshots/v11/bubble.png' });
     await walkFarAway(page);
     await waitBubble(page, false);
   });
@@ -363,7 +363,7 @@ test.describe('the speech bubble', () => {
     await standNear(page, v.id);
     await readState(page, 'tickVillage');
     expect((await bubble(page)).visible).toBe(false);
-    await page.screenshot({ path: 'docs/screenshots/v11/portrait.png' });
+    await page.screenshot({ path: 'test-results/screenshots/v11/portrait.png' });
     await page.setViewportSize({ width: 1024, height: 768 });
     await waitBubble(page, true);
     const box = (await page.locator('[data-testid="village-bubble"]').boundingBox())!;
@@ -455,7 +455,7 @@ test.describe('the villager card', () => {
     const pointsBefore = await points(page);
     const hotbarBefore = await buildState(page);
     await openCardAt(page, v.id);
-    await page.screenshot({ path: 'docs/screenshots/v11/card.png' });
+    await page.screenshot({ path: 'test-results/screenshots/v11/card.png' });
     // One question from a seen sum, no lesson, no break dots.
     await expect(page.locator('[data-testid="village-card"] .q-prompt')).toHaveText(/7 × 8 = \?/);
     await expect(page.locator('.break-screen')).toHaveCount(0);
@@ -469,7 +469,7 @@ test.describe('the villager card', () => {
       await expect(page.locator('[data-testid="village-face"]')).toHaveClass(/village-face-dance/);
       expect((await villagers(page)).find((x) => x.id === v.id)!.dancing).toBe(true);
     }
-    await page.screenshot({ path: 'docs/screenshots/v11/dance.png' });
+    await page.screenshot({ path: 'test-results/screenshots/v11/dance.png' });
     // No points, no plus or minus number.
     expect(await points(page)).toBe(pointsBefore);
     await expect(page.locator('[data-testid="village-card"]')).not.toContainText(/[+−-]\s*\d+\s*punt/i);
@@ -489,7 +489,7 @@ test.describe('the villager card', () => {
     await expect(page.locator('[data-testid="grid-rare-count"]')).toHaveText('1 van de 8 gevonden');
     await expect(page.locator('.grid-rare:not([hidden])')).toHaveCount(8);
     await expect(page.locator('.grid-rare-locked:not([hidden])')).toHaveCount(7);
-    await page.screenshot({ path: 'docs/screenshots/v11/dorp-tab.png' });
+    await page.screenshot({ path: 'test-results/screenshots/v11/dorp-tab.png' });
   });
 
   test('AC183: a villager question is not a break: no break record, no ledger row, an answer marked dorp', async ({ page }) => {
@@ -553,7 +553,7 @@ test.describe('the villager card', () => {
     await expect.poll(() => progressBox(page)).toBe(1);
     expect((await villageState(page)).found).toEqual([]);
     expect(await points(page)).toBe(10);
-    await page.screenshot({ path: 'docs/screenshots/v11/zo-zit-het.png' });
+    await page.screenshot({ path: 'test-results/screenshots/v11/zo-zit-het.png' });
   });
 
   test('AC183: first try wrong, retry right still leaves the box at 1 and gives the block', async ({ page }) => {

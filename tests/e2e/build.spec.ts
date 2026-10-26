@@ -17,7 +17,7 @@ async function flatten(page: Page) {
     },
     { c: C, stone: STEEN, height: WORLD_HEIGHT },
   );
-  await page.waitForTimeout(200);
+  await expect.poll(async () => (await readState<{ onGround: boolean }>(page, 'player')).onGround).toBe(true);
 }
 
 /** One finger on the world (right half). Moves are tiny, so it counts as a tap. */
@@ -116,7 +116,6 @@ test.describe('mine and build', () => {
     await hudTap(page, '.hotbar-all', 21);
     await expect(page.locator('.block-grid')).toBeVisible();
     await expect(page.locator('.grid-block')).toHaveCount(32);
-    await page.waitForTimeout(400);
     await hudTap(page, '.grid-block', 22, 'wol paars');
     await expect(page.locator('.block-grid')).toBeHidden();
     await expect(page.locator('.hotbar-slot').first()).toHaveAttribute('aria-label', 'wol paars');

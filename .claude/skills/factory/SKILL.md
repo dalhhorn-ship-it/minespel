@@ -4,7 +4,7 @@ description: Run the app factory. Reads docs/STATUS.md, works out the next step 
 argument-hint: "[optional: an idea or instruction]"
 ---
 
-You are the operator. Follow CLAUDE.md.
+You are the operator. Follow CLAUDE.md; the pipeline is in `docs/FACTORY.md`.
 
 1. Read `docs/STATUS.md`, `docs/DECISIONS.md` and `git log --oneline -10`.
 2. If any decision is `NEEDS FOUNDER`, bring those to the founder first with AskUserQuestion. Record answers in `docs/DECISIONS.md`.
