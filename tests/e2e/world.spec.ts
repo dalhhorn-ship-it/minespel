@@ -1,7 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 import { STEEN } from '../../src/world/blocks';
 import { WORLD_HEIGHT, WORLD_SIZE, START_SPOT, cellIndex, generateTerrain } from '../../src/world/terrain';
-import { openApp, readState } from './helpers/app';
+import { openApp, readState, waitFrames } from './helpers/app';
 
 interface PlayerPose {
   x: number;
@@ -102,7 +102,7 @@ test.describe('walkable world', () => {
     await expect.poll(async () => (await player(page)).x, { timeout: 8000 }).toBeGreaterThan(WORLD_SIZE - 0.5);
     const p = await player(page);
     expect(p.x).toBeLessThanOrEqual(WORLD_SIZE);
-    await page.waitForTimeout(500);
+    await waitFrames(page, 30);
     expect((await player(page)).x).toBeLessThanOrEqual(WORLD_SIZE);
     await touch(page, 'pointerup', 1, 150, 540);
   });
@@ -118,16 +118,16 @@ test.describe('walkable world', () => {
     await touch(page, 'pointerdown', 2, 700, 400);
     for (let i = 1; i <= 10; i++) {
       await touch(page, 'pointermove', 2, 700 + i * 12, 400);
-      await page.waitForTimeout(60);
+      await waitFrames(page, 2);
     }
-    const mid = await player(page);
-    expect(Math.hypot(mid.x - before.x, mid.z - before.z)).toBeGreaterThan(1);
-    expect(mid.yaw).toBeLessThan(before.yaw - 0.3); // dragging right turns right
+    // Walking needs time on the stick: wait for the distance, not for a fixed number of ms.
+    await expect.poll(async () => { const q = await player(page); return Math.hypot(q.x - before.x, q.z - before.z); }).toBeGreaterThan(1);
+    expect((await player(page)).yaw).toBeLessThan(before.yaw - 0.3); // dragging right turns right
     await touch(page, 'pointerup', 2, 820, 400);
     await touch(page, 'pointerup', 1, 150, 540);
-    await page.waitForTimeout(200);
+    await waitFrames(page, 12);
     const end = await player(page);
-    await page.waitForTimeout(300);
+    await waitFrames(page, 18);
     const later = await player(page);
     expect(Math.hypot(later.x - end.x, later.z - end.z)).toBeLessThan(0.01);
   });
@@ -150,7 +150,7 @@ test.describe('walkable world', () => {
     await expect.poll(async () => (await player(page)).onGround).toBe(true);
     await touch(page, 'pointerdown', 1, 150, 600);
     await touch(page, 'pointermove', 1, 150, 540);
-    await page.waitForTimeout(250);
+    await waitFrames(page, 15);
     await tapJump(page, 5);
     // Keep walking until the player stands on the step.
     await expect
@@ -173,7 +173,7 @@ test.describe('walkable world', () => {
     await readState(page, 'pauseGame');
     expect(await readState(page, 'gameRunning')).toBe(false);
     const f0 = await frames(page);
-    await page.waitForTimeout(400);
+    await page.waitForTimeout(400); // the loop is paused, so no frames to wait for: nothing may change in this time
     expect(await frames(page)).toBe(f0);
     await readState(page, 'resumeGame');
     expect(await readState(page, 'gameRunning')).toBe(true);
@@ -191,7 +191,7 @@ test.describe('walkable world', () => {
     await expect(page.locator('[data-overlay="portrait"]')).toBeVisible();
     expect(await readState(page, 'gameRunning')).toBe(false);
     const f0 = await frames(page);
-    await page.waitForTimeout(400);
+    await page.waitForTimeout(400); // the loop is paused, so no frames to wait for: nothing may change in this time
     expect(await frames(page)).toBe(f0);
   });
 });

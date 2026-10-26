@@ -13,7 +13,14 @@ Unless the PRD says otherwise, apps are played in **Safari on an iPad**, held by
 * Saves: Safari can wipe local storage of sites not opened for a while unless the app is added to the home screen. Keep saves small and forgiving.
 * Performance: smooth on an older iPad. Keep assets small, use CSS transforms or canvas, avoid heavy libraries.
 * Test in WebKit with an iPad device profile (Playwright), plus a real iPad check at each milestone: `npm run dev -- --host` and open the shown address on the iPad.
-* `check.sh` installs WebKit with `npx playwright install webkit`. If a cloud session cannot download it, `check.sh` falls back to local Chromium (`npm run test:e2e:local`). Chromium is a fast first check only: CI on WebKit stays the truth.
+* WebKit installs in the cloud sandbox (`npx playwright install --with-deps webkit`, checked 2026-10-26: the full e2e suite passed there, 144 tests in 3.4 minutes on 4 cores). If a session cannot download it, `check.sh` and `smoke.sh` fall back to local Chromium. Chromium is a fast first check only: CI on WebKit stays the truth.
+
+## Smoke and full check
+
+* **Smoke** (`./scripts/smoke.sh`, about a minute): lint, typecheck, unit tests related to the changed files, build, dist check, and the `smoke`, `boot-taps` and `world` e2e specs plus every changed spec, on the landscape iPad only. Developers run it while they work.
+* **Full** (`./scripts/check.sh`, about 4.5 minutes): every module, every unit test, all e2e specs on every iPad project. It runs once per batch in `./scripts/verify.sh task`, before the release push, and in CI.
+* **UI review** (`npm run test:e2e:ui-review`): left out of both. Every 5 releases or so, or after a lot of UI change (decision 106).
+* Tests that wait for the game use `waitFrames(page, n)` or `expect.poll`, never a fixed `waitForTimeout`. A fixed wait is only for checking that a paused world stays still.
 
 ## Hosting: Cloudflare Workers
 
