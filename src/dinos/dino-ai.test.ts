@@ -4,7 +4,7 @@ import { AIR, STEEN } from '../world/blocks';
 import { WORLD_HEIGHT, WORLD_SIZE } from '../world/terrain';
 import { World } from '../world/world';
 import {
-  CLOSE_ENOUGH, FAR_DISTANCE, WANDER_RADIUS, createDino, dinoCollides, popNextTo, stepDino, type DinoState, type Point,
+  BEHIND_MARGIN, CLOSE_ENOUGH, FAR_DISTANCE, viewForward, WANDER_RADIUS, createDino, dinoCollides, popNextTo, stepDino, type DinoState, type Point,
 } from './dino-ai';
 import { GROW_SECONDS } from './egg';
 import { DINO_KIND_IDS, type DinoKindId } from './kinds';
@@ -218,3 +218,60 @@ describe('dino ai', () => {
     expect(far).toBeGreaterThan(0.3);
   });
 });
+
+describe('followers keep the view clear (decision 112)', () => {
+  const ahead = (d: DinoState, p: Point, yaw: number): number => {
+    const f = viewForward(yaw);
+    return (d.x - p.x) * f.x + (d.z - p.z) * f.z;
+  };
+
+  it('a herd that starts in front walks behind the player and stays there', () => {
+    const w = flatWorld();
+    const player: Point = { x: 32.5, y: GY, z: 32.5 };
+    const yaw = 0; // looks along +z
+    const rng = createRng(3);
+    const herd = Array.from({ length: 12 }, (_, i) => dinoAt(30 + (i % 6), 34 + Math.floor(i / 6), i % 2 ? 'brachiosaurus' : 'compy'));
+    for (let i = 0; i < 60 * 8; i++) for (const d of herd) stepDino(w, d, player, rng, 1 / 60, { playerYaw: yaw });
+    // Then 20 more seconds of wandering: every check finds the whole herd behind and close.
+    for (let i = 0; i < 60 * 20; i++) {
+      for (const d of herd) stepDino(w, d, player, rng, 1 / 60, { playerYaw: yaw });
+      if (i % 30 === 0) {
+        for (const d of herd) {
+          expect(ahead(d, player, yaw)).toBeLessThan(-BEHIND_MARGIN + 0.5);
+          expect(dist(d, player)).toBeLessThan(FAR_DISTANCE);
+        }
+      }
+    }
+  });
+
+  it('when the player turns around, the herd walks behind again', () => {
+    const w = flatWorld();
+    const player: Point = { x: 32.5, y: GY, z: 32.5 };
+    const rng = createRng(5);
+    const herd = Array.from({ length: 6 }, (_, i) => dinoAt(31 + i * 0.5, 30));
+    for (let i = 0; i < 60 * 6; i++) for (const d of herd) stepDino(w, d, player, rng, 1 / 60, { playerYaw: 0 });
+    for (const d of herd) expect(ahead(d, player, 0)).toBeLessThan(0);
+    // Turn to look along -z: the herd is now in front, and walks around to the new back.
+    for (let i = 0; i < 60 * 6; i++) for (const d of herd) stepDino(w, d, player, rng, 1 / 60, { playerYaw: Math.PI });
+    for (const d of herd) expect(ahead(d, player, Math.PI)).toBeLessThan(0);
+  });
+
+  it('a pop with the view known lands behind the player', () => {
+    const w = flatWorld();
+    const player: Point = { x: 32.5, y: GY, z: 32.5 };
+    for (let seed = 1; seed < 10; seed++) {
+      const d = dinoAt(5, 5);
+      expect(popNextTo(w, d, player, createRng(seed), undefined, 0)).toBe(true);
+      expect(ahead(d, player, 0)).toBeLessThan(-BEHIND_MARGIN);
+    }
+  });
+
+  it('Blijf hier dinos are not moved by the view', () => {
+    const w = flatWorld();
+    const d = dinoAt(32.5, 35);
+    d.mode = 'stay';
+    run(w, d, { x: 32.5, y: GY, z: 32.5 }, 5);
+    expect(Math.hypot(d.x - 32.5, d.z - 35)).toBeLessThanOrEqual(WANDER_RADIUS + 0.6);
+  });
+});
+

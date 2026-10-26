@@ -1,4 +1,4 @@
-// Points, egg purchase and the 12 dino cap. Pure functions: they
+// Points, egg purchase, trade in and the 25 dino cap. Pure functions: they
 // return new records and never touch storage or the clock. The total is never below 0.
 
 import type { EconomyRecord } from '../storage/schema';
@@ -7,10 +7,10 @@ import { DINO_KINDS, SHOP_KINDS, type DinoKindId } from '../dinos/kinds';
 export const POINTS_FIRST_TRY = 2;
 export const POINTS_RETRY = 1;
 export const POINTS_BONUS = 3;
-export const MAX_SHOP_DINOS = 12;
+export const MAX_SHOP_DINOS = 25;
 export const MAX_CHICKENS = 10;
 
-export const MSG_CAP_REACHED = "Je hebt al 12 dino's! Wat een kudde.";
+export const MSG_CAP_REACHED = `Je hebt al ${MAX_SHOP_DINOS} dino's! Wat een kudde. Ruil er een in om plek te maken.`;
 export const MSG_COOP_FULL = 'Het kippenhok is vol!';
 
 export type SessionMode = 'break' | 'practice' | 'preview';
@@ -111,14 +111,14 @@ export function buyState(points: number, shopCount: number, kind: DinoKindId): B
 
 /**
  * The egg hint after a break or Extra oefenen: true when the cheapest shop egg can be bought now.
- * Same rule as the Dinowinkel (cap of 12 shop dinos, golden dinos and chickens do not count).
+ * Same rule as the Dinowinkel (cap of 25 shop dinos, golden dinos and chickens do not count).
  */
 export function canAffordEgg(points: number, shopCount: number): boolean {
   const cheapest = SHOP_KINDS[0];
   return cheapest !== undefined && buyState(points, shopCount, cheapest.id).canBuy;
 }
 
-/** Chickens in the world. They never count toward the 12 dinos (decision 55). */
+/** Chickens in the world. They never count toward the 25 dinos (decision 55). */
 export function chickenCount(dinos: { kind?: string }[]): number {
   return dinos.filter((d) => d.kind === 'kip').length;
 }
@@ -155,4 +155,57 @@ export function purchaseChicken(eco: EconomyRecord, chickens: number): PurchaseR
   const s = chickenBuyState(eco.points, chickens);
   if (!s.canBuy) return { ok: false, reason: s.blocked as BuyBlock, economy: { ...eco }, note: s.note ?? '' };
   return { ok: true, economy: { ...eco, points: addPoints(eco.points, -s.price) }, kind: 'kip', price: s.price };
+}
+
+// ---- Inruilen (trade in) ----
+
+/** A traded in animal gives half its price back, rounded down (Compy 10, Kip 2). */
+export function tradeInValue(kind: DinoKindId): number {
+  return Math.floor(DINO_KINDS[kind].price / 2);
+}
+
+/** A golden dino is an exam prize: it can never be traded in. Every other dino and chicken can. */
+export function canTradeIn(animal: { kind?: string; golden?: boolean }): boolean {
+  return !animal.golden && typeof animal.kind === 'string' && animal.kind in DINO_KINDS;
+}
+
+export type TradeInResult =
+  | { ok: true; economy: EconomyRecord; refund: number }
+  | { ok: false; economy: EconomyRecord };
+
+/** Trade in one animal: the points go up by half its price. A golden dino is refused. */
+export function tradeIn(eco: EconomyRecord, animal: { kind: DinoKindId; golden?: boolean }): TradeInResult {
+  if (!canTradeIn(animal)) return { ok: false, economy: { ...eco } };
+  const refund = tradeInValue(animal.kind);
+  return { ok: true, economy: { ...eco, points: addPoints(eco.points, refund) }, refund };
+}
+
+// ---- Dinofluit (decision 114) ----
+
+/** The Dinofluit costs 60 points once. With it every dino and chicken walks slowly to the kid. */
+export const FLUIT_PRICE = 60;
+export const MSG_FLUIT_OWNED = 'Je hebt de fluit al! Tik in de wereld op \u{1F3B6} Fluit.';
+
+export function ownsFluit(eco: Pick<EconomyRecord, 'fluit'> | null | undefined): boolean {
+  return eco?.fluit === true;
+}
+
+export function fluitBuyState(points: number, owned: boolean): Omit<BuyState, 'kind'> {
+  if (owned) return { price: FLUIT_PRICE, canBuy: false, blocked: null, note: MSG_FLUIT_OWNED };
+  const have = clean(points);
+  if (have < FLUIT_PRICE) {
+    return { price: FLUIT_PRICE, canBuy: false, blocked: 'points', note: pointsNeededText(FLUIT_PRICE - have) };
+  }
+  return { price: FLUIT_PRICE, canBuy: true, blocked: null, note: null };
+}
+
+export type FluitPurchaseResult =
+  | { ok: true; economy: EconomyRecord; price: number }
+  | { ok: false; economy: EconomyRecord };
+
+/** Buy the Dinofluit once. Checks the points and ownership again, so a double tap buys it once. */
+export function purchaseFluit(eco: EconomyRecord): FluitPurchaseResult {
+  const s = fluitBuyState(eco.points, ownsFluit(eco));
+  if (!s.canBuy) return { ok: false, economy: { ...eco } };
+  return { ok: true, economy: { ...eco, points: addPoints(eco.points, -FLUIT_PRICE), fluit: true }, price: FLUIT_PRICE };
 }

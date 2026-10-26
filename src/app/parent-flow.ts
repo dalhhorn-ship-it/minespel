@@ -4,7 +4,8 @@
 
 import type { Sound } from '../audio/sound';
 import type { Catalog } from '../content/catalog';
-import type { Clock } from '../core/clock';
+import { today, type Clock } from '../core/clock';
+import { computeProgress, type ProgressStats } from '../learning/progress-stats';
 import type { Rng } from '../core/rng';
 import type { LogStore } from '../storage/log-store';
 import type { ProgressStore } from '../storage/progress-store';
@@ -99,16 +100,49 @@ export function createParentFlow(options: ParentFlowOptions): ParentFlow {
   async function openShell(initialSection?: ParentSectionId) {
     clearViews();
     openState = true;
-    const [settings, switches, progress, breaks, stats] = await Promise.all([
+    const [settings, switches, progress, breaks, stats, answers, exams, ledger] = await Promise.all([
       options.records.get('settings'),
       options.records.get('switches'),
       options.progressStore.list(),
       options.logStore.listBreaks(),
       options.records.get('stats'),
+      options.logStore.listAnswers(),
+      options.logStore.listExams(),
+      options.logStore.listLedger(),
     ]);
+    const catalog = options.getCatalog();
+    let learningStats: ProgressStats | undefined;
+    try {
+      learningStats = computeProgress({
+        answers,
+        breaks,
+        exams,
+        ledger,
+        stats,
+        today: today(options.clock),
+        topicLabel: (moduleId, topic) => {
+          const mod = catalog.getModule(moduleId)?.module.title ?? moduleId;
+          return `${mod}: ${catalog.getTopic(moduleId, topic)?.title ?? topic}`;
+        },
+        itemText: (moduleId, itemId) => {
+          const item = catalog.getItem(moduleId, itemId);
+          if (!item) return null;
+          const sentence =
+            'sentence' in item && item.sentence
+              ? ` ${item.sentence}`
+              : 'words' in item
+                ? ` ${item.words.join(' ')}`
+                : '';
+          return { prompt: `${item.prompt}${sentence}`, explain: item.explain };
+        },
+      });
+    } catch {
+      // Voortgang then says it cannot show the numbers; every other section still works.
+    }
 
     shellView = createParentShell({
-      catalog: options.getCatalog(),
+      catalog,
+      learningStats,
       settings,
       switches,
       progress,

@@ -76,6 +76,14 @@ export function registerAppHooks(app: Promise<App>, game: Game | null, shell: Ap
   registerHook('breaksLog', () => readLog((s) => s.listBreaks()));
   registerHook('answersLog', () => readLog((s) => s.listAnswers()));
   registerHook('ledgerLog', () => readLog((s) => s.listLedger()));
+  // Voortgang e2e (decision 115): writes answers straight into the log, as a finished break would.
+  registerHook('logAnswers', async (rows: Parameters<ReturnType<typeof createLogStore>['appendAnswer']>[0][]) => {
+    await app;
+    const db = await openDb();
+    const store = createLogStore(db);
+    for (const r of rows) await store.appendAnswer(r);
+    db.close();
+  });
 
   if (!game) return;
   const g = game;
@@ -123,6 +131,7 @@ export function registerAppHooks(app: Promise<App>, game: Game | null, shell: Ap
   registerHook('eggs', () => g.dinoStore.eggs());
   registerHook('addEgg', (kind: DinoKindId, golden?: boolean) => g.dinoStore.addEgg(kind, golden));
   registerHook('stepDinos', (dt: number) => g.dinoSystem.step(dt));
+  registerHook('setDinoMode', (id: string, mode: 'follow' | 'stay') => g.dinoStore.setDinoMode(id, mode));
   // Villagers (V11c): plain copies, so a test reads them without touching the live state.
   registerHook('villagers', () =>
     g.villagerSystem.villagers().map((v) => ({

@@ -5,6 +5,7 @@
 import type { Sound } from '../audio/sound';
 import { createRng, type Rng } from '../core/rng';
 import {
+  callDino,
   dinoBounds,
   popNextTo,
   stepDino,
@@ -103,6 +104,12 @@ export function rayHitsBox(aim: Aim, box: Box, maxDistance: number = REACH): num
   return tMin <= maxDistance ? Math.max(0, tMin) : null;
 }
 
+function insideBox(aim: Aim, box: Box): boolean {
+  return (
+    aim.ox > box[0] && aim.ox < box[3] && aim.oy > box[1] && aim.oy < box[4] && aim.oz > box[2] && aim.oz < box[5]
+  );
+}
+
 /**
  * Picks the closest dino hit by `aim` within `maxDistance` that stands in front of any solid block (`AC104`).
  */
@@ -122,6 +129,8 @@ export function pickDinoAtAim(
     // Slightly generous tap padding (+0.15 block) so excited kid taps on a moving dino feel responsive.
     const b = dinoBounds(d);
     const padded: Box = [b[0] - 0.15, b[1], b[2] - 0.15, b[3] + 0.15, b[4] + 0.15, b[5] + 0.15];
+    // The eye inside a dino (the kid stands in a big one): that dino would take every tap, so skip it (decision 112).
+    if (insideBox(aim, padded)) continue;
     const t = rayHitsBox(aim, padded, maxDistance);
     if (t !== null && t <= bestDist) {
       bestDist = t;
@@ -153,6 +162,8 @@ export interface DinoSystem {
   handleTap(screenX: number, screenY: number): boolean;
   isOccupied(box: Box): boolean;
   onPlayerTeleported(spot: Point): void;
+  /** The Dinofluit (decision 114): every dino and chicken follows and walks slowly to the kid. Returns how many. */
+  whistle(): number;
   showHearts(screenX?: number, screenY?: number): void;
   dispose(): void;
 }
@@ -208,6 +219,7 @@ export function createDinoSystem(options: DinoSystemOptions): DinoSystem {
       if (!(dt > 0) || !Number.isFinite(dt)) return;
       const p = options.player.player;
       const playerSpot: Point = { x: p.x, y: p.y, z: p.z };
+      const playerYaw = options.player.pose().yaw;
 
       // 1. Step eggs (only during active world play, AC150)
       const eggsSnapshot = [...options.store.eggs()];
@@ -226,7 +238,7 @@ export function createDinoSystem(options: DinoSystemOptions): DinoSystem {
       // 2. Step dinos
       const dinosList = options.store.dinos();
       for (const dino of dinosList) {
-        const ev = stepDino(options.world, dino, playerSpot, rng, dt);
+        const ev = stepDino(options.world, dino, playerSpot, rng, dt, { playerYaw });
         if (ev === 'popped') {
           showPuff(dino.golden);
         }
@@ -259,7 +271,7 @@ export function createDinoSystem(options: DinoSystemOptions): DinoSystem {
       let moved = false;
       for (const d of options.store.dinos()) {
         if (d.mode === 'follow') {
-          if (popNextTo(options.world, d, spot, rng)) {
+          if (popNextTo(options.world, d, spot, rng, undefined, options.player.pose().yaw)) {
             moved = true;
           }
         }
@@ -268,6 +280,12 @@ export function createDinoSystem(options: DinoSystemOptions): DinoSystem {
         options.store.markDirty();
         options.renderer.syncDinos?.(options.store.dinos(), options.store.eggs());
       }
+    },
+    whistle() {
+      const all = options.store.dinos();
+      for (const d of all) callDino(d);
+      if (all.length > 0) options.store.markDirty();
+      return all.length;
     },
     showHearts,
     dispose() {

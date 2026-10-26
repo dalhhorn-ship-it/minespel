@@ -1,20 +1,25 @@
 // Compelling Dinowinkel UI view (T47, docs/SHOP_PRD.md, AC20, AC110, AC149).
 // Four species cards with voxel emblems, personality blurbs, affordability progress bars,
-// Kopen -> Ja/Nee confirmation, 12-cap banner, and live "Mijn Dino-verzameling" showcase.
+// Kopen -> Ja/Nee confirmation, 25-cap banner, and live "Mijn Dino-verzameling" showcase,
+// where every animal but a golden dino can be traded in for half its price (Inruilen, decision 111).
 
 import '../styles/shop.css';
 import {
   buyState,
+  canTradeIn,
   capReached,
   chickenBuyState,
+  FLUIT_PRICE,
+  fluitBuyState,
   MAX_CHICKENS,
   MAX_SHOP_DINOS,
   MSG_CAP_REACHED,
   shopDinoCount,
+  tradeInValue,
   type BuyState,
 } from '../core/economy';
 import { EGG_HATCH_SECONDS } from '../dinos/egg';
-import { DINO_KINDS, SHOP_KINDS, type DinoKindId } from '../dinos/kinds';
+import { DINO_KINDS, SHOP_KINDS, SPECIAL_KINDS, type DinoKind, type DinoKindId } from '../dinos/kinds';
 import { el } from './dom';
 import { onTap } from './tap';
 
@@ -37,6 +42,8 @@ export interface ShopViewState {
   points: number;
   dinos: readonly ShopDinoSummary[];
   eggs: readonly ShopEggSummary[];
+  /** True when the kid owns the Dinofluit (decision 114). */
+  fluit?: boolean;
   toastMessage?: string | null;
 }
 
@@ -44,6 +51,10 @@ export interface ShopViewOptions {
   /** null while the points are still being read. The view opens at once with a placeholder and no Kopen (AC164). */
   state: ShopViewState | null;
   onBuy: (kind: DinoKindId) => Promise<void> | void;
+  /** Trades in the dino or chicken with this id. Without it the collection shows no Inruilen. */
+  onTradeIn?: (dinoId: string) => Promise<void> | void;
+  /** Buys the Dinofluit. Without it the shop shows no fluit card (decision 114). */
+  onBuyFluit?: () => Promise<void> | void;
   onClose: () => void;
   /** Optional shortcut to override the countdown and earn coins immediately. */
   onEarnCoins?: () => void;
@@ -78,6 +89,46 @@ export const SPECIES_META: Record<DinoKindId, SpeciesMeta> = {
     sizeLabel: 'Reusachtig (2,4 blok hoog)',
     trait: 'De vriendelijke reus! Kijkt met zijn lange nek over je muren heen.',
   },
+  velociraptor: {
+    sizeLabel: 'Klein (1 blok)',
+    trait: 'Supersnel en slim! Met een gele veren kuif.',
+  },
+  pachycephalosaurus: {
+    sizeLabel: 'Middel (1,2 blok)',
+    trait: 'Een harde koppie! Zijn kop is een dikke ronde helm.',
+  },
+  parasaurolophus: {
+    sizeLabel: 'Groot (1,6 blok)',
+    trait: 'Toetert door zijn lange buis op zijn kop.',
+  },
+  ankylosaurus: {
+    sizeLabel: 'Laag en breed (0,9 blok)',
+    trait: 'Een levende tank met een knots aan zijn staart!',
+  },
+  dilophosaurus: {
+    sizeLabel: 'Middel (1,4 blok)',
+    trait: 'Twee kammen op zijn kop en een roze kraag.',
+  },
+  spinosaurus: {
+    sizeLabel: 'Heel groot (2 blok)',
+    trait: 'Draagt een groot zeil op zijn rug.',
+  },
+  trex: {
+    sizeLabel: 'Reusachtig (2,2 blok)',
+    trait: 'De koning van de dino\'s! Grote kop, kleine armpjes.',
+  },
+  ijsraptor: {
+    sizeLabel: 'Klein (1 blok)',
+    trait: 'Een ijskoude raptor met ijspegels op zijn rug.',
+  },
+  lavarex: {
+    sizeLabel: 'Reusachtig (2,2 blok)',
+    trait: 'Een zwarte T-rex met gloeiende lava strepen!',
+  },
+  regenboogsaurus: {
+    sizeLabel: 'Reusachtig (2,4 blok hoog)',
+    trait: 'De zeldzaamste van allemaal: in alle kleuren van de regenboog.',
+  },
   kip: {
     sizeLabel: 'Klein (0,7 blok)',
     trait: 'Tok tok! Fladdert en scharrelt gezellig rond in je wereld.',
@@ -88,7 +139,9 @@ export function createShopView(options: ShopViewOptions): ShopView {
   const emptyState: ShopViewState = { points: 0, dinos: [], eggs: [] };
   let loaded = options.state !== null;
   let state: ShopViewState = options.state ?? emptyState;
-  let confirmingKind: DinoKindId | null = null;
+  /** The card waiting on Ja or Nee: a dino kind, 'kip' or 'fluit'. */
+  let confirmingKind: string | null = null;
+  let confirmingTradeId: string | null = null;
   let purchaseInFlight = false;
   const cleanups: Array<() => void> = [];
 
@@ -121,12 +174,13 @@ export function createShopView(options: ShopViewOptions): ShopView {
 
   /** Progress bar and note when locked, then Kopen or the Ja/Nee question (AC20, AC110, AC149, decision 55). */
   function buyControls(
-    kindId: DinoKindId,
+    kindId: string,
     name: string,
     price: number,
-    bState: BuyState,
+    bState: Pick<BuyState, 'canBuy' | 'note'>,
     confirmText: string,
     withBar: boolean,
+    onYes: () => Promise<void> | void = () => options.onBuy(kindId as DinoKindId),
   ): HTMLElement[] {
     const bottomChildren: HTMLElement[] = [];
     if (loaded && !bState.canBuy && bState.note) {
@@ -174,7 +228,7 @@ export function createShopView(options: ShopViewOptions): ShopView {
             if (purchaseInFlight) return;
             purchaseInFlight = true;
             yesBtn.disabled = true;
-            Promise.resolve(options.onBuy(kindId)).finally(() => {
+            Promise.resolve(onYes()).finally(() => {
               purchaseInFlight = false;
               confirmingKind = null;
               renderView();
@@ -226,6 +280,7 @@ export function createShopView(options: ShopViewOptions): ShopView {
             buyBtn,
             () => {
               confirmingKind = kindId;
+              confirmingTradeId = null;
               renderView();
             },
             { now: options.now },
@@ -235,6 +290,203 @@ export function createShopView(options: ShopViewOptions): ShopView {
       bottomChildren.push(buyBtn);
     }
     return bottomChildren;
+  }
+
+  /** One animal in the collection: a golden dino is only a label, every other one has Inruilen. */
+  function collectionDino(dino: ShopDinoSummary): HTMLElement {
+    const sp = DINO_KINDS[dino.kind]?.name ?? dino.kind;
+    const label = dino.name ? `${dino.name} (${sp})` : sp;
+    const star = dino.golden ? '\u{2B50} ' : dino.kind === 'kip' ? '\u{1F414} ' : '\u{1F995} ';
+    const goldenClass = dino.golden ? 'shop-collection-item-golden' : '';
+    const text = el('span', { class: 'shop-collection-label', text: `${star}${label}` });
+    const id = dino.id;
+    if (!loaded || !options.onTradeIn || !id || !canTradeIn(dino)) {
+      return el('div', { class: `shop-collection-item ${goldenClass}` }, [text]);
+    }
+    const refund = tradeInValue(dino.kind);
+    const refundText = `${refund} ${refund === 1 ? 'punt' : 'punten'}`;
+
+    if (confirmingTradeId === id) {
+      const yesBtn = el('button', {
+        class: 'shop-confirm-yes',
+        text: 'Ja',
+        attrs: { type: 'button', 'data-testid': `shop-trade-yes-${id}` },
+      });
+      const noBtn = el('button', {
+        class: 'shop-confirm-no',
+        text: 'Nee',
+        attrs: { type: 'button', 'data-testid': `shop-trade-no-${id}` },
+      });
+      yesBtn.disabled = purchaseInFlight;
+      cleanups.push(
+        onTap(
+          yesBtn,
+          () => {
+            if (purchaseInFlight) return;
+            purchaseInFlight = true;
+            yesBtn.disabled = true;
+            Promise.resolve(options.onTradeIn?.(id)).finally(() => {
+              purchaseInFlight = false;
+              confirmingTradeId = null;
+              renderView();
+            });
+          },
+          { now: options.now },
+        ),
+        onTap(
+          noBtn,
+          () => {
+            if (purchaseInFlight) return;
+            confirmingTradeId = null;
+            renderView();
+          },
+          { now: options.now },
+        ),
+      );
+      return el(
+        'div',
+        { class: 'shop-collection-item shop-collection-item-trading', attrs: { 'data-testid': `shop-trade-confirm-${id}` } },
+        [
+          el('p', {
+            class: 'shop-confirm-text',
+            text: `Wil je ${label} inruilen? Je krijgt ${refundText} terug.`,
+          }),
+          el('div', { class: 'shop-confirm-actions' }, [yesBtn, noBtn]),
+        ],
+      );
+    }
+
+    const tradeBtn = el('button', {
+      class: 'shop-trade-btn',
+      text: `Inruilen +${refund}`,
+      attrs: {
+        type: 'button',
+        'data-testid': `shop-trade-${id}`,
+        'aria-label': `Ruil ${label} in voor ${refundText}`,
+      },
+    });
+    cleanups.push(
+      onTap(
+        tradeBtn,
+        () => {
+          confirmingTradeId = id;
+          confirmingKind = null;
+          renderView();
+        },
+        { now: options.now },
+      ),
+    );
+    return el('div', { class: `shop-collection-item ${goldenClass}` }, [text, tradeBtn]);
+  }
+
+  /** One species card: emblem, name, price, size and owned chips, then Kopen or Ja/Nee. */
+  function speciesCard(kind: DinoKind, shopCount: number, special = false): HTMLElement {
+    const bState = buyState(state.points, shopCount, kind.id);
+    const meta = SPECIES_META[kind.id];
+    const ownedOfKind =
+      state.dinos.filter((d) => d.kind === kind.id).length +
+      state.eggs.filter((e) => e.kind === kind.id).length;
+
+    const cardClasses = [
+      'shop-card',
+      special ? 'shop-card-special' : '',
+      bState.canBuy ? 'shop-card-affordable' : 'shop-card-greyed',
+    ].filter(Boolean).join(' ');
+
+    const chips: HTMLElement[] = [
+      el('span', { class: 'shop-chip', text: meta.sizeLabel }),
+    ];
+    if (ownedOfKind > 0) {
+      chips.push(
+        el('span', {
+          class: 'shop-chip shop-chip-owned',
+          text: `In je kudde: ${ownedOfKind}`,
+        }),
+      );
+    }
+
+    const info = el('div', { class: 'shop-card-info' }, [
+      el('div', { class: 'shop-card-title-row' }, [
+        el('h3', { class: 'shop-card-name', text: kind.name }),
+        el('span', {
+          class: 'shop-card-price',
+          text: `${kind.price} punten`,
+        }),
+      ]),
+      el('div', { class: 'shop-card-meta' }, chips),
+    ]);
+
+    const topRow = el('div', { class: 'shop-card-top' }, [
+      buildArtEmblem(kind.id),
+      info,
+    ]);
+
+    const bottomChildren = buyControls(
+      kind.id,
+      kind.name,
+      kind.price,
+      bState,
+      `Wil je een ${kind.name}-ei kopen voor ${kind.price} punten?`,
+      true,
+    );
+
+    return el(
+      'article',
+      {
+        class: cardClasses,
+        attrs: {
+          'data-dino-card': kind.id,
+          'aria-disabled': String(!bState.canBuy),
+        },
+      },
+      [topRow, ...bottomChildren],
+    );
+  }
+
+  /** Speciale spullen: the Dinofluit, bought once (decision 114). Owned: a note instead of Kopen. */
+  function fluitCard(): HTMLElement {
+    const owned = state.fluit === true;
+    const fState = fluitBuyState(state.points, owned);
+    const art = el('div', { class: 'shop-art shop-art-fluit', text: '\u{1F3B6}', attrs: { 'aria-hidden': 'true' } });
+    const chips: HTMLElement[] = [
+      el('span', { class: 'shop-chip', text: 'Roept al je dino\'s' }),
+    ];
+    if (owned) chips.push(el('span', { class: 'shop-chip shop-chip-owned', text: 'Van jou!', attrs: { 'data-testid': 'shop-fluit-owned' } }));
+    const bottom = owned
+      ? [el('p', { class: 'shop-card-note', text: fState.note ?? '' })]
+      : buyControls(
+          'fluit',
+          'Dinofluit',
+          FLUIT_PRICE,
+          fState,
+          `Wil je de Dinofluit kopen voor ${FLUIT_PRICE} punten?`,
+          true,
+          () => options.onBuyFluit?.(),
+        );
+    return el(
+      'section',
+      {
+        class: `shop-card shop-card-special ${fState.canBuy || owned ? 'shop-card-affordable' : 'shop-card-greyed'} shop-fluit`,
+        attrs: { 'aria-label': 'Dinofluit', 'data-testid': 'shop-fluit' },
+      },
+      [
+        el('div', { class: 'shop-card-top' }, [
+          art,
+          el('div', { class: 'shop-card-info' }, [
+            el('div', { class: 'shop-card-title-row' }, [
+              el('h3', { class: 'shop-card-name', text: 'Dinofluit' }),
+              el('span', { class: 'shop-card-price', text: `${FLUIT_PRICE} punten` }),
+            ]),
+            el('p', {
+              class: 'shop-fluit-text',
+              text: 'Fluit en al je dino\'s en kippen komen rustig naar je toe rennen. Je koopt hem maar 1 keer.',
+            }),
+            el('div', { class: 'shop-card-meta' }, chips),
+          ]),
+        ]),
+        ...bottom,
+      ],
+    );
   }
 
   function renderView() {
@@ -321,71 +573,16 @@ export function createShopView(options: ShopViewOptions): ShopView {
       );
     }
 
-    // 4 Species Cards
+    // 4 Species Cards, then the 10 Bijzondere dino's (decision 113)
     const grid = el('div', { class: 'shop-grid' });
-    for (const kind of SHOP_KINDS) {
-      const bState = buyState(state.points, shopCount, kind.id);
-      const meta = SPECIES_META[kind.id];
-      const ownedOfKind =
-        state.dinos.filter((d) => d.kind === kind.id).length +
-        state.eggs.filter((e) => e.kind === kind.id).length;
-
-      const cardClasses = [
-        'shop-card',
-        bState.canBuy ? 'shop-card-affordable' : 'shop-card-greyed',
-      ].join(' ');
-
-      const chips: HTMLElement[] = [
-        el('span', { class: 'shop-chip', text: meta.sizeLabel }),
-      ];
-      if (ownedOfKind > 0) {
-        chips.push(
-          el('span', {
-            class: 'shop-chip shop-chip-owned',
-            text: `In je kudde: ${ownedOfKind}`,
-          }),
-        );
-      }
-
-      const info = el('div', { class: 'shop-card-info' }, [
-        el('div', { class: 'shop-card-title-row' }, [
-          el('h3', { class: 'shop-card-name', text: kind.name }),
-          el('span', {
-            class: 'shop-card-price',
-            text: `${kind.price} punten`,
-          }),
-        ]),
-        el('div', { class: 'shop-card-meta' }, chips),
-      ]);
-
-      const topRow = el('div', { class: 'shop-card-top' }, [
-        buildArtEmblem(kind.id),
-        info,
-      ]);
-
-      const bottomChildren = buyControls(
-        kind.id,
-        kind.name,
-        kind.price,
-        bState,
-        `Wil je een ${kind.name}-ei kopen voor ${kind.price} punten?`,
-        true,
-      );
-
-      const card = el(
-        'article',
-        {
-          class: cardClasses,
-          attrs: {
-            'data-dino-card': kind.id,
-            'aria-disabled': String(!bState.canBuy),
-          },
-        },
-        [topRow, ...bottomChildren],
-      );
-      grid.append(card);
-    }
+    for (const kind of SHOP_KINDS) grid.append(speciesCard(kind, shopCount));
     modal.append(grid);
+    modal.append(
+      el('h3', { class: 'shop-section-title', text: "\u{2728} Bijzondere dino's", attrs: { 'data-testid': 'shop-special-title' } }),
+    );
+    const specialGrid = el('div', { class: 'shop-grid shop-grid-special', attrs: { 'data-testid': 'shop-special' } });
+    for (const kind of SPECIAL_KINDS) specialGrid.append(speciesCard(kind, shopCount, true));
+    modal.append(specialGrid);
 
     // Kippenhok: 5 points a chicken, at most 10 (decision 55). Bought like an egg: Kopen, then Ja or Nee.
     const chickenCount = state.dinos.filter((d) => d.kind === 'kip').length;
@@ -429,6 +626,7 @@ export function createShopView(options: ShopViewOptions): ShopView {
       ],
     );
     modal.append(chickenCoop);
+    if (options.onBuyFluit) modal.append(fluitCard());
 
     // Live "Mijn Dino-verzameling" showcase
     const collectionItems: HTMLElement[] = [];
@@ -443,15 +641,7 @@ export function createShopView(options: ShopViewOptions): ShopView {
       );
     }
     for (const dino of state.dinos) {
-      const sp = DINO_KINDS[dino.kind]?.name ?? dino.kind;
-      const label = dino.name ? `${dino.name} (${sp})` : sp;
-      const star = dino.golden ? '\u{2B50} ' : dino.kind === 'kip' ? '\u{1F414} ' : '\u{1F995} ';
-      collectionItems.push(
-        el('span', {
-          class: `shop-collection-item ${dino.golden ? 'shop-collection-item-golden' : ''}`,
-          text: `${star}${label}`,
-        }),
-      );
+      collectionItems.push(collectionDino(dino));
     }
 
     const collectionSection = el(

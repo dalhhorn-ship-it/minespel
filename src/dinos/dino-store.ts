@@ -161,6 +161,8 @@ export interface DinoStore {
   spawnChickenInMemory(): WorldDino;
   /** Removes a dino or chicken by id in memory (used if an atomic transaction aborts). */
   removeDinoInMemory(id: string): void;
+  /** Puts a removed dino back at its old place in the list (used if a trade in transaction aborts). */
+  restoreDinoInMemory(dino: WorldDino, index: number): void;
   /** Hatches an egg into a baby dino at the egg's spot. */
   hatchEgg(eggId: string): WorldDino | null;
   setDinoMode(id: string, mode: DinoMode): WorldDino | undefined;
@@ -270,6 +272,11 @@ export function createDinoStore(options: DinoStoreOptions): DinoStore {
         dinosList.splice(idx, 1);
         notify();
       }
+    },
+    restoreDinoInMemory(dino, index) {
+      if (dinosList.some((d) => d.id === dino.id)) return;
+      dinosList.splice(Math.max(0, Math.min(index, dinosList.length)), 0, dino);
+      notify();
     },
     removeEggInMemory(eggId) {
       const idx = eggsList.findIndex((e) => e.id === eggId);

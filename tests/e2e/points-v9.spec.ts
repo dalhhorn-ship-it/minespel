@@ -418,11 +418,11 @@ test.describe('v10 Punten voor elke ronde (AC172 to AC176, AC169)', () => {
     await readState(page, 'setPoints', 30);
   }
 
-  test('AC169: with 11 shop dinos, 2 golden dinos and 3 chickens the egg hint shows after a break and after Extra oefenen', async ({
+  test('AC169: with 24 shop dinos, 2 golden dinos and 3 chickens the egg hint shows after a break and after Extra oefenen', async ({
     page,
   }) => {
     await openApp(page);
-    await ownHerd(page, 11);
+    await ownHerd(page, 24);
 
     await startTimedBreak(page);
     await playRound(page, ['right', 'right', 'right', 'right', 'right']);
@@ -441,9 +441,9 @@ test.describe('v10 Punten voor elke ronde (AC172 to AC176, AC169)', () => {
     await expect(page.locator('[data-testid="shop-buy-compy"]')).toBeEnabled();
   });
 
-  test('AC169: with 12 shop dinos the egg hint never shows after a break or after Extra oefenen', async ({ page }) => {
+  test('AC169: with a full herd of 25 shop dinos the egg hint never shows after a break or after Extra oefenen', async ({ page }) => {
     await openApp(page);
-    await ownHerd(page, 12);
+    await ownHerd(page, 25);
 
     await startTimedBreak(page);
     await playRound(page, ['right', 'right', 'right', 'right', 'right']);

@@ -93,6 +93,8 @@ export interface EconomyRecord {
   points: number;
   practicePointsToday: number;
   practiceDay: string;
+  /** True once the kid bought the Dinofluit (decision 114). Missing in older saves, which reads as not owned. */
+  fluit?: boolean;
 }
 export interface TimersRecord {
   playMsLeft: number | null;

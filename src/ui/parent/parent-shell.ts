@@ -9,12 +9,15 @@ import { el } from '../dom';
 import { onTap } from '../tap';
 import { createContentScreen } from './content-screen';
 import { createExamsScreen, type ExamPlanInfo } from './exams-screen';
+import { createProgressScreen } from './progress-screen';
+import type { ProgressStats } from '../../learning/progress-stats';
 import { createSettingsScreen } from './settings-screen';
 
 export type ParentSectionId =
   | 'instellingen'
   | 'inhoud'
   | 'resultaten'
+  | 'voortgang'
   | 'examens'
   | 'modules'
   | 'import-export';
@@ -23,6 +26,7 @@ const SECTIONS: readonly { id: ParentSectionId; label: string }[] = [
   { id: 'instellingen', label: 'Instellingen' },
   { id: 'inhoud', label: 'Inhoud kiezen' },
   { id: 'resultaten', label: 'Resultaten' },
+  { id: 'voortgang', label: 'Voortgang' },
   { id: 'examens', label: 'Examens' },
   { id: 'modules', label: 'Eigen modules' },
   { id: 'import-export', label: 'Import & Export' },
@@ -35,6 +39,8 @@ export interface ParentShellOptions {
   progress: readonly ProgressRecord[];
   breaks?: readonly BreakRecord[];
   stats?: StatsRecord;
+  /** Worked out learning stats for Voortgang (decision 115). Without them the section says so. */
+  learningStats?: ProgressStats;
   isBreakActive: boolean;
   isExamActive?: boolean;
   planFor?: (moduleId: string, examId: string) => ExamPlanInfo;
@@ -194,6 +200,20 @@ export function createParentShell(options: ParentShellOptions): ParentShell {
         }
       }
       main.append(el('h2', { class: 'parent-section-title', text: 'Resultaten' }), card);
+      return;
+    }
+
+    if (activeSection === 'voortgang') {
+      if (!options.learningStats) {
+        main.append(
+          el('h2', { class: 'parent-section-title', text: 'Voortgang' }),
+          el('div', { class: 'parent-card' }, [el('p', { text: 'De voortgang kan nu even niet worden berekend.' })]),
+        );
+        return;
+      }
+      const view = createProgressScreen({ stats: options.learningStats });
+      main.append(view.element);
+      sectionCleanup = () => view.destroy();
       return;
     }
 
