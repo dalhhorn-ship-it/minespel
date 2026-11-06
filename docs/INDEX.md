@@ -25,12 +25,13 @@
 
 | Ids | File | Range (count) |
 |---|---|---|
-| Acceptance criteria | docs/PRD.md | AC1 to AC191 (182) |
+| Acceptance criteria | docs/PRD.md | AC1 to AC199 (190) |
 | Acceptance criteria | docs/SHOP_PRD.md | AC20 to AC150 (5) |
 | Acceptance criteria | docs/releases/v10.md | AC172 to AC177 (6) |
+| Acceptance criteria | docs/releases/v11.md | AC178 to AC191 (14) |
 | Acceptance criteria | docs/releases/v2.md | AC155 to AC165 (11) |
 | Acceptance criteria | docs/releases/v9.md | AC166 to AC171 (6) |
-| Decisions | docs/DECISIONS.md | 87 to 118 (32) |
+| Decisions | docs/DECISIONS.md | 87 to 119 (33) |
 | Decisions | docs/archive/decisions-1-86.md | 1 to 86 (86) |
 | Tasks | docs/DISCUSSION.md | V11a, V11b, V11c, V11d, V11e (5) |
 | Tasks | docs/PLAN.md | T19, T18, T21, T32, T52, T53a, T56, T22, T55, T61, T62, T63, … (18) |
@@ -45,8 +46,8 @@
 | CLAUDE.md | 71 | A free 3D block world with dinos and short learning breaks (Dutch: taal, rekenen,… |
 | README.md | 78 | Dino Blokwereld is a free 3D block world for kids, played in Dutch on an iPad. Walk… |
 | docs/ARCHITECTURE.md | 393 | Written by the architect after PRD signoff (2026-10-17). Source of truth for how Dino… Sections: Stack and why:5, Folder structure:27, Modules and data flow:186, How modules are loaded:230, State and storage:271, Security and kid safety in…:301, How to run:310, How to test:323, How to deploy:356, Conventions for developers:365, Risks:379 |
-| docs/BACKLOG.md | 151 | Not signed. Changing this file never closes the PRD gate (decision 80). The signed… Sections: Next steps (founder order):5, Rules:19, Ranked backlog:29, Dropped:107, Later:128 |
-| docs/DECISIONS.md | 40 | Every notable decision. Founder decisions are marked NEEDS FOUNDER until answered, then… |
+| docs/BACKLOG.md | 152 | Not signed. Changing this file never closes the PRD gate (decision 80). The signed… Sections: Next steps (founder order):5, Rules:20, Ranked backlog:30, Dropped:108, Later:129 |
+| docs/DECISIONS.md | 41 | Every notable decision. Founder decisions are marked NEEDS FOUNDER until answered, then… |
 | docs/DISCUSSION.md | 96 | Review rounds between agents. Newest at the bottom. Keep it short: who said what, what… |
 | docs/FACTORY.md | 113 | Moved out of CLAUDE.md on 2026-10-26 (decision 104) so it is read only when needed. The… |
 | docs/FRICTION.md | 50 | The operator adds a line whenever something goes wrong or feels slow, so /retro has real… |
@@ -54,10 +55,11 @@
 | docs/IDEA.md | 81 | "Create a 3D minecraft education kind of game but then also with dinosaurs, and every 5… |
 | docs/PLAN.md | 62 | Task graph written by the architect on 2026-10-17 from the signed PRD. The operator… |
 | docs/PLATFORM.md | 39 | Moved out of CLAUDE.md on 2026-10-26 (decision 104). Read this when a task touches the… |
-| docs/PRD.md | 871 | Status: APPROVED by Founder on 2026-10-24 Sections: 1. Summary:7, 2. Users:12, 3. Goals and success:19, 4. What the app is today (v1…:29, 5. Release backlog:389, 6. User flows:392, 7. Acceptance criteria:481, 8. Look, sound and feel:697, 9. Kid safety and privacy:709, 10. Constraints:723, 11. Risks and decisions:734, 12. Releases:802 |
+| docs/PRD.md | 874 | Status: READY FOR SIGNOFF Sections: 1. Summary:7, 2. Users:12, 3. Goals and success:19, 4. What the app is today (v1…:29, 5. Release backlog:389, 6. User flows:392, 7. Acceptance criteria:481, 8. Look, sound and feel:714, 9. Kid safety and privacy:726, 10. Constraints:740, 11. Risks and decisions:751, 12. Releases:821 |
 | docs/RETRO.md | 25 | Written by /retro. Newest at the bottom. Factory level learnings are also saved in… |
 | docs/SHOP_PRD.md | 108 | Document Status: Approved Addendum (docs/SHOP_PRD.md — companion to docs/PRD.md) |
 | docs/STATUS.md | 55 | Phase: small releases. 0.1.0, 0.2.0, 0.3.0, R1 and 0.4.0 Punten voor elke ronde are… |
+| docs/TECH-DEBT.md | 33 | Known tech debt in one table. Major means it can cost the kids their builds or points.… |
 | docs/TEST_REPORT.md | 215 | Result: PASS for everything that can run here. AC190 (fps on the oldest iPad) and the… Sections: v11 Dorp (0.5.0):3, R1 Boot safety (R1d):87, v9 Eerlijke punten (0.3.0):105, v2 Gouden ei (0.2.0):130, Summary:202, Acceptance criteria coverage:205, Bugs:209, Kid safety and accessibility:213, Screenshots:215 |
 | docs/UI_REVIEW.md | 159 | Screenshots are not in git (44 MB). Run npm run test:e2e:ui-review to regenerate them in… Sections: How this was done:10, Why the founder sees buttons…:21, Screen map:30, Findings:58, Way back, in the same place?:135, What is good and should stay:142, Questions for the founder:153 |
 | docs/archive/CONTENT_CHECK.md | 215 | Date: 2026-10-22. By: QA. F1 to F7 and F10 are fixed (see the "Fixed" line under each).… Sections: How this was done:5, Overall result:40, Findings:48, What checked out (no finding):159, Top 5 to fix:170, 20 items for the founder or…:178, Lookup list for…:207, For the founder:211 |
@@ -69,5 +71,6 @@
 | docs/factory-feedback/2026-11-06.md | 26 | Source factory: dalhhorn-ship-it/danfactory (bf63299). For its inbox. |
 | docs/releases/plan-done.md | 133 | Moved out of docs/PLAN.md on 2026-10-26 (decision 105) so the plan holds only open work.… Sections: Milestones:5, Tasks:18, Task notes:100, Operator notes during the…:129 |
 | docs/releases/v10.md | 47 | Archive, not signed. This is the v10 section as the founder signed it in docs/PRD.md… |
+| docs/releases/v11.md | 70 | Archive, not signed. This is the v11 section as the founder signed it in docs/PRD.md… |
 | docs/releases/v2.md | 54 | Archive, not signed. This is the v2 section as the founder signed it in docs/PRD.md… |
 | docs/releases/v9.md | 38 | Archive, not signed. This is the v9 section as the founder signed it in docs/PRD.md… |
