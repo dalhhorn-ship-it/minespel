@@ -50,6 +50,7 @@
 | docs/DISCUSSION.md | 96 | Review rounds between agents. Newest at the bottom. Keep it short: who said what, what… |
 | docs/FACTORY.md | 113 | Moved out of CLAUDE.md on 2026-10-26 (decision 104) so it is read only when needed. The… |
 | docs/FRICTION.md | 50 | The operator adds a line whenever something goes wrong or feels slow, so /retro has real… |
+| docs/HANDOFF.md | 26 | Founder: pull best practices from dalhhorn-ship-it/danfactory into minespel; health… |
 | docs/IDEA.md | 81 | "Create a 3D minecraft education kind of game but then also with dinosaurs, and every 5… |
 | docs/PLAN.md | 62 | Task graph written by the architect on 2026-10-17 from the signed PRD. The operator… |
 | docs/PLATFORM.md | 39 | Moved out of CLAUDE.md on 2026-10-26 (decision 104). Read this when a task touches the… |
