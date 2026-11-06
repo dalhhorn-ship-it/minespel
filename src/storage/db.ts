@@ -44,6 +44,17 @@ export function request<T>(req: IDBRequest<T>): Promise<T> {
   });
 }
 
+let writesHalted = false;
+
+/**
+ * While halted, `transact` refuses every readwrite call (a restore or Alles wissen is running, so no other
+ * writer may land in the middle, AC197). Readonly calls still work.
+ */
+export function haltWrites(on: boolean): void {
+  writesHalted = on;
+}
+export const isHalted = (): boolean => writesHalted;
+
 /**
  * Runs `fn` in one transaction. Resolves with its result after the transaction has completed.
  * If `fn` throws or rejects, the transaction is aborted and nothing is written (AC136).
@@ -53,8 +64,13 @@ export function transact<T>(
   stores: StoreName | StoreName[],
   mode: IDBTransactionMode,
   fn: (tx: IDBTransaction) => Promise<T> | T,
+  options: { bypassHalt?: boolean } = {},
 ): Promise<T> {
   return new Promise<T>((resolve, reject) => {
+    if (writesHalted && mode !== 'readonly' && !options.bypassHalt) {
+      reject(new StorageError('Writes are halted.'));
+      return;
+    }
     let tx: IDBTransaction;
     try {
       tx = db.transaction(stores, mode);

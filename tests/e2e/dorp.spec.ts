@@ -199,10 +199,10 @@ test.describe('an old 0.4.0 save', () => {
     );
   }
 
-  test('AC179: an untouched old world gets all three villages, and the old record is kept', async ({ page }) => {
+  test('AC179: an untouched old world gets all three villages, and no copy of the old record is kept', async ({ page }) => {
     await openWithOldSave(page, []);
     expect(await readState<number>(page, 'terrainVersion')).toBe(CURRENT_TERRAIN_VERSION);
-    expect(await readState<boolean>(page, 'hasWorldV1')).toBe(true);
+    expect(await readState<boolean>(page, 'hasWorldV1')).toBe(false);
     const sites = await readState<Array<{ hasHouses: boolean }>>(page, 'villageSites');
     expect(sites.map((s) => s.hasHouses)).toEqual([true, true, true]);
     expect(await villagers(page)).toHaveLength(8);
@@ -240,7 +240,7 @@ test.describe('an old 0.4.0 save', () => {
     expect(await siteHash(page)).toBe(hash);
     expect(await readState<number>(page, 'blockAt', mine.x, mine.y, mine.z)).toBe(STEEN);
     expect(await readState<number>(page, 'blockAt', outside.x, outside.y, outside.z)).toBe(STEEN);
-    expect(await readState<boolean>(page, 'hasWorldV1')).toBe(true);
+    expect(await readState<boolean>(page, 'hasWorldV1')).toBe(false);
   });
 
   test('AC179: changes in all three sites give no houses at all and every cell stays', async ({ page }) => {

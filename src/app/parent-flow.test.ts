@@ -208,6 +208,44 @@ describe('parental controls flow (T48a, T48b, T49, T50)', () => {
     }
   });
 
+  it('AC199, AC95: break lock route shows only the end card, Pauze nu beëindigen ends the break', async () => {
+    const t = await examSetup();
+    try {
+      const end = vi.spyOn(t.breakFlow, 'endBreakByParent').mockResolvedValue();
+      await t.parentFlow.openBreakEnd();
+      await t.typePin('1234');
+      await vi.waitFor(() => expect(t.host.querySelector('[data-testid="break-end-card"]')).not.toBeNull());
+      expect(t.host.querySelector('[data-testid="parent-shell"]')).toBeNull();
+      expect(t.host.textContent).toContain('Terug naar de pauze');
+      tap(t.host.querySelector('[data-testid="break-end-confirm"]')!);
+      await vi.waitFor(() => expect(end).toHaveBeenCalledTimes(1));
+      await vi.waitFor(() => expect(t.host.querySelector('[data-testid="break-end-card"]')).toBeNull());
+      expect(t.parentFlow.isOpen()).toBe(false);
+    } finally {
+      t.parentFlow.destroy();
+      t.breakFlow.destroy();
+      t.db.close();
+    }
+  });
+
+  it('AC199: Terug naar de pauze does not end the break and leaves the learn layer', async () => {
+    const t = await examSetup();
+    try {
+      const end = vi.spyOn(t.breakFlow, 'endBreakByParent').mockResolvedValue();
+      await t.parentFlow.openBreakEnd();
+      await t.typePin('1234');
+      await vi.waitFor(() => expect(t.host.querySelector('[data-testid="break-end-back"]')).not.toBeNull());
+      tap(t.host.querySelector('[data-testid="break-end-back"]')!);
+      expect(end).not.toHaveBeenCalled();
+      expect(t.host.querySelector('[data-testid="break-end-card"]')).toBeNull();
+      expect(t.host.contains(t.examNode)).toBe(true);
+    } finally {
+      t.parentFlow.destroy();
+      t.breakFlow.destroy();
+      t.db.close();
+    }
+  });
+
   it('AC74: three wrong codes from the exam lock block the pin pad', async () => {
     const t = await examSetup();
     try {

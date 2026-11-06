@@ -11,12 +11,19 @@ A free 3D block world with dinos and short learning breaks (Dutch: taal, rekenen
 ## Find, do not read
 
 The big docs are append only logs. Never read them whole. Grep by id and read only the matching rows or section.
+* The reference table: `docs/INDEX.md` lists every doc, its sections with line numbers and where each kind of id lives. `docs/knowledge-graph.json` has the doc links. Both are built by `python3 scripts/docs_index.py`, which `check.sh` runs.
 * Acceptance criteria: `grep -n "AC180" docs/PRD.md`
 * Tasks: `grep -n "| V11c " docs/PLAN.md`
 * Decisions: `grep -n "^| 98 " docs/DECISIONS.md` (1 to 86 are in `docs/archive/decisions-1-86.md`).
 * The next release: `docs/PRD.md` section 12. The backlog: `docs/BACKLOG.md`.
 * `docs/PLAN.md` holds only open tasks. Done tasks: `docs/releases/plan-done.md`.
 * `docs/archive/` and `docs/releases/` are history. Open them only when a task points there.
+* A hook blocks whole reads of files over 350 lines in the main session (decision 117). Grep, then read a slice with offset and limit, or ask an Explore agent. Subagents are not blocked. Truly need it all: `touch .claude/.allow-large-read`, say why, retry once.
+
+## Short contexts
+
+* At a logical boundary (a task done, a release step done, a topic switch), or when the context watch hook says so, run `/handoff` and suggest `/clear`. The note in `docs/HANDOFF.md` loads again at session start. Never hand off mid debug.
+* Compact instructions: when compacting, keep the founder's goal and open questions, decisions and their reasons, files changed and commit shas, the current step and next steps, and failed approaches not to retry. Drop file contents, tool output and logs; they can be read again.
 
 ## Code map
 
@@ -36,6 +43,7 @@ The big docs are append only logs. Never read them whole. Grep by id and read on
 * `CHECK_E2E=0 ./scripts/check.sh`: everything but the browser tests.
 * `npx playwright test <spec>`: one e2e spec in WebKit, which installs in the cloud sandbox now. `npm run test:e2e:local -- <spec>` is the Chromium fallback.
 * `npm run test:e2e:ui-review`: the full UI review, left out of normal runs. Every 5 releases or so, or after a lot of UI change (decision 106).
+* `python3 scripts/dashboard.py --print`: a short project status, with CI, deploys, releases and tech debt. Run `python3 scripts/ci_runs.py` first to refresh the CI history in `metrics/` (not in git). The page is `dashboard/index.html` (not in git).
 * `./scripts/verify.sh task <ids>`: free independent check of a developer task, before any `verifier` agent.
 
 ## Hard rules

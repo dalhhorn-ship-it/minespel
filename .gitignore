@@ -20,3 +20,12 @@ docs/screenshots/
 
 # Agent worktrees (developers working in parallel)
 .claude/worktrees/
+
+# One shot escape hatch for the large read guard (decision 117)
+.claude/.allow-large-read
+
+# Generated project dashboard (decision 118)
+/dashboard/
+
+# CI run history, refreshed by python3 scripts/ci_runs.py; only the local dashboard reads it
+/metrics/

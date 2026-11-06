@@ -1,0 +1,102 @@
+{
+ "app": "dino-blokwereld",
+ "format": 2,
+ "createdAt": "2026-10-30T09:15:00.000Z",
+ "appVersion": "0.4.0",
+ "schemaVersion": 1,
+ "kv": {
+  "settings": {
+   "breakEveryMinutes": 5,
+   "questionsPerBreak": 5,
+   "volume": 0.7,
+   "largeFont": false,
+   "newLessonsEnabled": true,
+   "breakWarningEnabled": true,
+   "soundEffectsEnabled": true
+  },
+  "player": {
+   "x": 40.5,
+   "y": 12,
+   "z": 40.5,
+   "yaw": 0,
+   "pitch": 0,
+   "hotbar": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9
+   ],
+   "selectedSlot": 0,
+   "mode": "mine"
+  },
+  "world": {
+   "diff": {
+    "$u32": "AwoAAAMLAAA="
+   }
+  },
+  "dinos": {
+   "dinos": [
+    {
+     "kind": "rex",
+     "name": "Rex"
+    },
+    {
+     "kind": "kip",
+     "name": "Kip"
+    }
+   ],
+   "eggs": []
+  },
+  "economy": {
+   "points": 12,
+   "practicePointsToday": 0,
+   "practiceDay": "2026-10-30"
+  },
+  "meta": {
+   "schemaVersion": 1,
+   "appVersion": "0.4.0",
+   "lastBackup": null,
+   "createdAt": "2026-10-01T10:00:00.000Z"
+  }
+ },
+ "stores": {
+  "progress": [
+   [
+    "mod|a1",
+    {
+     "moduleId": "mod",
+     "itemId": "a1",
+     "box": 1,
+     "due": "2026-10-31",
+     "level": 1,
+     "topic": "t",
+     "skill": "s",
+     "seen": 2
+    }
+   ]
+  ],
+  "ownModules": [],
+  "answers": [],
+  "breaks": [],
+  "exams": [],
+  "ledger": [
+   {
+    "id": 1,
+    "ts": 1,
+    "kind": "malus",
+    "delta": -1
+   },
+   {
+    "id": 2,
+    "ts": 2,
+    "kind": "break",
+    "delta": 2
+   }
+  ]
+ }
+}

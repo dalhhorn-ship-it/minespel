@@ -7,7 +7,6 @@ import fxAllSites from '../../tests/fixtures/saves/v1-village-all-sites.json';
 import fxStanding from '../../tests/fixtures/saves/v1-village-standing.json';
 import fxRandom from '../../tests/fixtures/saves/v1-village-random-500.json';
 import type { Records } from '../storage/records';
-import type { WorldRecord } from '../storage/schema';
 import { openDb, transact, request } from '../storage/db';
 import { createRecords } from '../storage/records';
 import { createSaveQueue } from '../storage/save-queue';
@@ -319,13 +318,10 @@ function expectUpgraded(game: Game, kv: FixtureKv, stamped: boolean[]): void {
   expect(VILLAGE_SITES.map((s) => siteHasHouses((x, y, z) => game.world.get(x, y, z), s))).toEqual(stamped);
 }
 
-async function expectStored(records: Records, kv: FixtureKv): Promise<void> {
+async function expectStored(records: Records): Promise<void> {
   const world = await records.get('world');
   expect(world.terrainVersion).toBe(2);
-  const copy = (await records.get('worldV1')) as WorldRecord;
-  expect(copy).not.toBeNull();
-  expect(Array.from(copy.diff)).toEqual(kv.world.diff);
-  expect(copy.terrainVersion).toBeUndefined();
+  expect(await records.get('worldV1')).toBeNull();
 }
 
 const FIXTURES: { name: string; kv: FixtureKv; stamped: boolean[] }[] = [
@@ -357,7 +353,7 @@ describe('villages in a 0.4.0 save (AC179)', () => {
       const a = makeGame();
       await createWorldSave({ game: a, queue, records }).restore();
       expectUpgraded(a, f.kv, f.stamped);
-      await expectStored(records, f.kv);
+      await expectStored(records);
       const first = snapshot(a.world);
       const storedDiff = Array.from((await records.get('world')).diff);
 
@@ -365,15 +361,27 @@ describe('villages in a 0.4.0 save (AC179)', () => {
       await createWorldSave({ game: b, queue, records }).restore();
       expect(snapshot(b.world)).toEqual(first);
       expect(Array.from((await records.get('world')).diff)).toEqual(storedDiff);
-      await expectStored(records, f.kv);
+      await expectStored(records);
     });
   }
 
-  it('AC179: the old world record is copied unchanged and a second open does not touch the copy', async () => {
+  it('AC194: no copy of the old world record is written, and a kept copy is deleted when the save opens', async () => {
+    const { records } = await setupDb();
+    await seedKv(records, fxOneSite.kv as FixtureKv);
+    await records.put('worldV1', { diff: Uint32Array.from([256 + 3]) });
+    const g = makeGame();
+    await createWorldSave({ game: g, queue: (await setupDb()).queue, records }).restore();
+    expect(await records.get('worldV1')).toBeNull();
+    expect((await records.get('world')).terrainVersion).toBe(2);
+    // Every block of the world is as before.
+    expectUpgraded(g, fxOneSite.kv as FixtureKv, [true, false, true]);
+  });
+
+  it('AC194: a second open and later saves never bring the copy back', async () => {
     const { records, queue } = await setupDb();
     await seedKv(records, fxOneSite.kv as FixtureKv);
     await createWorldSave({ game: makeGame(), queue, records }).restore();
-    // The kid plays on and saves: the copy stays the old record.
+    // The kid plays on and saves: still no copy.
     const g = makeGame();
     const stop = createWorldSave({ game: g, queue, records });
     await stop.restore();
@@ -382,14 +390,13 @@ describe('villages in a 0.4.0 save (AC179)', () => {
     queue.markDirty('world');
     await queue.flushNow();
     off();
-    const copy = (await records.get('worldV1')) as WorldRecord;
-    expect(Array.from(copy.diff)).toEqual(fxOneSite.kv.world.diff);
+    expect(await records.get('worldV1')).toBeNull();
     const world = await records.get('world');
     expect(world.terrainVersion).toBe(2);
     expect(Array.from(world.diff)).toContain(cellIndex(1, 30, 1) * 256 + STEEN);
   });
 
-  it('AC179: killed after the copy was written and before the new world: the old world is stored whole and the next start stamps the same', async () => {
+  it('AC179: killed before the new world was written: the old world is stored whole and the next start stamps the same', async () => {
     const clean = await setupDb();
     await seedKv(clean.records, fxOneSite.kv as FixtureKv);
     const ref = makeGame();
@@ -415,7 +422,7 @@ describe('villages in a 0.4.0 save (AC179)', () => {
     await createWorldSave({ game: next, queue, records }).restore();
     expect(snapshot(next.world)).toEqual(expected);
     expectUpgraded(next, fxOneSite.kv as FixtureKv, [true, false, true]);
-    await expectStored(records, fxOneSite.kv as FixtureKv);
+    await expectStored(records);
   });
 
   it('AC179: killed before anything was written: the next start does the stamp', async () => {
@@ -432,7 +439,7 @@ describe('villages in a 0.4.0 save (AC179)', () => {
     const next = makeGame();
     await createWorldSave({ game: next, queue, records }).restore();
     expectUpgraded(next, fxAllSites.kv as FixtureKv, [false, false, false]);
-    await expectStored(records, fxAllSites.kv as FixtureKv);
+    await expectStored(records);
   });
 
   it('AC179: a world saved after the update has terrainVersion 2 and is never stamped again', async () => {

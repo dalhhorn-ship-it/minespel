@@ -10,6 +10,7 @@ import { workedExampleOf } from '../../content/rekenen/generator';
 import type { Response } from '../../learning/answer-check';
 import { currentEntry, type SessionState } from '../../learning/break-session';
 import { el } from '../dom';
+import { createLockIcon } from '../lock-icon';
 import { onTap } from '../tap';
 import { createDinoJuf } from './dino-juf';
 import { createLessonView } from './lesson-view';
@@ -38,6 +39,8 @@ export interface BreakScreenOptions {
   finishLabel?: string;
   /** Extra oefenen only (decision 51): shows a "Stoppen" button top right. Real learning breaks never pass this. */
   onStop?: () => void;
+  /** Learning break only (decision 119, AC199): the small grey lock, shown on lesson, question and teach moment. Extra oefenen never passes this. */
+  onLock?: () => void;
   onAction: (action: BreakScreenAction) => void;
   now?: () => number;
 }
@@ -99,10 +102,18 @@ export function createBreakScreen(options: BreakScreenOptions): BreakScreen {
     stopBtn && options.onStop
       ? onTap(stopBtn, () => options.onStop?.(), { now: options.now })
       : null;
+  const lock = options.onLock
+    ? createLockIcon({ onOpenParent: options.onLock, now: options.now })
+    : null;
+  if (lock) {
+    lock.element.classList.add('break-lock');
+    lock.element.hidden = true;
+  }
   const header = el('header', { class: 'break-header' }, [
     juf.element,
     dotsWrap,
     ...(stopBtn ? [stopBtn] : []),
+    ...(lock ? [lock.element] : []),
   ]);
   const body = el('div', { class: 'break-body' });
   root.append(header, body);
@@ -149,6 +160,14 @@ export function createBreakScreen(options: BreakScreenOptions): BreakScreen {
     renderDots(state);
     // The summary has its own finish button, so Stoppen is only for the steps before it.
     if (stopBtn) stopBtn.hidden = state.phase === 'summary';
+    // The lock shows on the lesson, the question and the teach moment only (AC199).
+    if (lock) {
+      lock.element.hidden = !(
+        state.phase === 'lesson' ||
+        state.phase === 'question' ||
+        state.phase === 'teach'
+      );
+    }
 
     if (state.phase === 'empty') {
       juf.say('Even geen vragen.');
@@ -303,6 +322,7 @@ export function createBreakScreen(options: BreakScreenOptions): BreakScreen {
     render,
     destroy() {
       stopOff?.();
+      lock?.destroy();
       clearChild();
       root.remove();
     },

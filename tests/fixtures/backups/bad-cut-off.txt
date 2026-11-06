@@ -1,0 +1,50 @@
+{
+ "app": "dino-blokwereld",
+ "format": 1,
+ "createdAt": "2026-10-30T09:15:00.000Z",
+ "appVersion": "0.4.0",
+ "schemaVersion": 1,
+ "kv": {
+  "settings": {
+   "breakEveryMinutes": 5,
+   "questionsPerBreak": 5,
+   "volume": 0.7,
+   "largeFont": false,
+   "newLessonsEnabled": true,
+   "breakWarningEnabled": true,
+   "soundEffectsEnabled": true
+  },
+  "player": {
+   "x": 40.5,
+   "y": 12,
+   "z": 40.5,
+   "yaw": 0,
+   "pitch": 0,
+   "hotbar": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9
+   ],
+   "selectedSlot": 0,
+   "mode": "mine"
+  },
+  "world": {
+   "diff": {
+    "$u32": "AwoAAAMLAAA="
+   }
+  },
+  "dinos": {
+   "dinos": [
+    {
+     "kind": "rex",
+     "name": "Rex"
+    },
+    {
+     "kind": "kip",
+     "nam

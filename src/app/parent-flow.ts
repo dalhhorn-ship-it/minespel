@@ -10,6 +10,7 @@ import type { Rng } from '../core/rng';
 import type { LogStore } from '../storage/log-store';
 import type { ProgressStore } from '../storage/progress-store';
 import type { Records } from '../storage/records';
+import { createBreakEndCard, type BreakEndCard } from '../ui/parent/break-end-card';
 import { createExamStopCard, type ExamStopCard } from '../ui/parent/exam-stop-card';
 import { createGateScreen, type GateScreen } from '../ui/parent/gate-screen';
 import { createParentShell, type ParentSectionId, type ParentShell } from '../ui/parent/parent-shell';
@@ -45,6 +46,8 @@ export interface ParentFlow {
   open(initialSection?: ParentSectionId): Promise<void>;
   /** Exam lock route: pin pad, then only the "Examen stoppen?" card (AC157, AC158). */
   openExamStop(): Promise<void>;
+  /** Break lock route: pin pad, then only "Pauze nu beëindigen" and "Terug naar de pauze" (AC199). */
+  openBreakEnd(): Promise<void>;
   close(): void;
   isOpen(): boolean;
   destroy(): void;
@@ -54,6 +57,7 @@ export function createParentFlow(options: ParentFlowOptions): ParentFlow {
   let gateView: GateScreen | null = null;
   let shellView: ParentShell | null = null;
   let stopCard: ExamStopCard | null = null;
+  let breakEndCard: BreakEndCard | null = null;
   let openState = false;
 
   function clearViews() {
@@ -68,6 +72,10 @@ export function createParentFlow(options: ParentFlowOptions): ParentFlow {
     if (stopCard) {
       stopCard.destroy();
       stopCard = null;
+    }
+    if (breakEndCard) {
+      breakEndCard.destroy();
+      breakEndCard = null;
     }
   }
 
@@ -225,8 +233,38 @@ export function createParentFlow(options: ParentFlowOptions): ParentFlow {
     options.screens.showParent(gateView.element);
   }
 
+  async function openBreakEnd() {
+    clearViews();
+    openState = true;
+    const gateRecord = await options.records.get('gate');
+    gateView = createGateScreen({
+      records: options.records,
+      clock: options.clock,
+      rng: options.rng,
+      initialRecord: gateRecord,
+      onUnlocked: () => {
+        clearViews();
+        breakEndCard = createBreakEndCard({
+          onEnd: () => {
+            void (async () => {
+              await options.breakFlow.endBreakByParent();
+              close();
+            })();
+          },
+          onBack: () => close(),
+          now: () => options.clock.now(),
+        });
+        options.screens.showParent(breakEndCard.element);
+      },
+      // Only the parent layer closes, so the break screen stays as it was.
+      onCancel: () => close(),
+    });
+    options.screens.showParent(gateView.element);
+  }
+
   return {
     openExamStop,
+    openBreakEnd,
     async open(initialSection) {
       await openGate(false, initialSection);
     },

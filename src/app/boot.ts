@@ -199,6 +199,9 @@ export function createBoot(deps: BootDeps): Boot {
       sessionStore,
       getCatalog,
       sound,
+      onLock: () => {
+        void parentFlow.openBreakEnd();
+      },
       onBreakFinished: () => {
         timerDriver.resetPlayTimer();
       },
