@@ -39,8 +39,11 @@ Versions follow shipping order: v10 shipped as 0.4.0 and v11 as 0.5.0; next v3 a
 | | **v11 Dorp** | Villages with houses; a villager asks a question when I come close; a right answer gives a silly dance or "Respect bruuuuu!" and a rare block; 8 rare blocks to find. | M | High. A founder and kid wish, learning inside the world. | V11a to V11e (architect review) | shipped (0.5.0, 2026-10-24), see `docs/releases/v11.md` |
 | 1 | **v3 Dino's veilig** | A backup file keeps the world, dinos and points safe, even on a wiped or new iPad. Papa or mama can end a break with the pincode. | M | High, as insurance. Losing a herd of dinos would hurt the most. | T18, T19, T53a, T55 | next (0.6.0, decisions 90 and 119), scoped in `docs/PRD.md` section 12 |
 | 2 | **v6 Wat heb ik geleerd** | A parent learning dashboard: is my kid really learning? Right on the first try per topic over time, topics that got better or got stuck, the hardest questions, exam results, and learning time against play time. All worked out on the iPad, behind the gate. | M, may grow to L | High for the parent (decision 91). Through the parent, who can then switch on what is hard. | T21, T56, T61, plus dashboard tasks the architect cuts | candidate, after v3 (decisions 91, 94 and 119), 0.7.0 |
-| 3 | **v4 Altijd spelen** | The game starts without internet, never shows a blank screen, and two open tabs never fight over the save. | M | Medium to high. Protects saves, and the kids notice when it is missing. | T52, T22, new first start task | later (after v3) |
-| 4 | **v5 Veilig en juist** | Nothing reaches the internet, everything fits with the big font, and the game is smooth on the family iPad. | M | Medium. Mostly invisible, but it protects what the kids learn and see. | T63, T62, T32, T64 (T65 runs now, decision 81) | candidate |
+| 3 | **v12 Dino-Hoed** | Hats, bows, capes and sunglasses for my dinos, from 5 to 60 coins. Each dino looks different. | S to M | High. A cheap, happy coin sink that keeps kids earning after they own every dino. | about 3, cut at `/release` | candidate, after v6 (founder pick 2026-11-06) |
+| 4 | **v13 Dino-Eten** | A food truck: I buy food for my herd, each dino likes its own food, I drag it on and it skips with hearts. Sums on the price board. | S to M | Medium to high. A small daily coin sink with Rekenen. No dino can starve. | about 3, cut at `/release` | candidate, after v6 (founder pick 2026-11-06) |
+| 5 | **v14 Bouw-Opdracht** | A villager asks for a build ("een toren van 3 bij 3 en 5 hoog"). I build it, tap Klaar and the game counts the blocks. | M to L | High. Rekenen inside the building kids love. | about 5, cut at `/release` | candidate, after v6 (founder pick 2026-11-06) |
+| 6 | **v4 Altijd spelen** | The game starts without internet, never shows a blank screen, and two open tabs never fight over the save. | M | Medium to high. Protects saves, and the kids notice when it is missing. | T52, T22, new first start task | later (after v3) |
+| 7 | **v5 Veilig en juist** | Nothing reaches the internet, everything fits with the big font, and the game is smooth on the family iPad. | M | Medium. Mostly invisible, but it protects what the kids learn and see. | T63, T62, T32, T64 (T65 runs now, decision 81) | candidate |
 | | **v7 Eigen woorden** | | | | T40, T54, T57, T59 | dropped (decision 79) |
 | | **v8 Modules delen** | | | | T53b, T20, T58, T60 | dropped (decision 79) |
 
@@ -87,6 +90,28 @@ Open plan tasks: 13 in v3 to v6, 4 of them in v3 (v6 may get more for the dashbo
 * **Out:** nothing else.
 * **Size:** M, may grow to L with the dashboard. If it is more than 5 tasks, product splits it into two small releases at `/release`, and the first part must be useful to the parent on its own (for example Overzicht with the key stats first, the drill down views second). **Tasks:** T21 (results queries), T56 (Overzicht, Pauzes, Examens), T61 (Per onderdeel, Over tijd, Lastige vragen), plus dashboard tasks the architect cuts.
 * **Criteria:** AC89, AC90, AC91, AC92, AC134, plus new criteria for the dashboard stats when it is scoped.
+
+### v12 Dino-Hoed
+* **Status:** candidate, after v6. From the game loop brainstorm, picked by the founder on 2026-11-06.
+* **Goal:** a fun coin sink. Kids dress up their dinos, so learning coins stay worth earning after the whole herd is bought.
+* **In:** a hat and colour shop (crown, party hat, sunglasses, bow, cape) for 5 to 60 coins, pick a dino then pick a hat, the hat shows on the dino in the world, a new item now and then so there is a reason to come back.
+* **Kid safety:** game coins only, no real money, no ads.
+* **Size:** S to M, about 3 tasks. It touches "dino skins" from Later. It changes the save format, so it comes after v3, so the backup holds hats too.
+
+### v13 Dino-Eten
+* **Status:** candidate, after v6. Founder pick 2026-11-06.
+* **Goal:** a small daily coin sink with Rekenen on the side.
+* **In:** a food truck that sells dino food for coins, each kind of dino likes its own food, drag food onto a dino and it skips with hearts, a small sum on the price board ("3 appels van 4 munten"), a well fed herd gives a small daily bonus.
+* **Kid safety:** no punishment and no guilt. A dino that is not fed never gets sick, sad or dies.
+* **Size:** S to M, about 3 tasks.
+
+### v14 Bouw-Opdracht
+* **Status:** candidate, after v6. Founder pick 2026-11-06.
+* **Goal:** Rekenen inside the building itself, using the villages from v11.
+* **In:** a villager asks for a build (area, height, volume, odd and even, "de helft is rood"), the kid builds it and taps Klaar, the game counts the blocks near the villager and checks it, a right build pays coins and a villager hat.
+* **Kid safety:** nothing new; every check runs on the iPad.
+* **Size:** M to L, about 5 tasks, because the game must read what was built. Split at `/release` if it grows.
+* **Other brainstorm ideas, not picked yet:** Woordenjacht-Eieren (word hunt eggs), Raad-de-Dino (guess the dino from clues), Dino-Dokter, Dino-Show, Dino-Taalkaart, Kamer-Meester (dino den), Rekenmarkt (be the shopkeeper), Tijdreis-Poort (time gates), Krijtbord (quiet daily goal).
 
 ### v4 Altijd spelen
 * **Goal:** the game always starts and never loses or mixes up a save.
