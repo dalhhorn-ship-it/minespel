@@ -1,6 +1,6 @@
 # PRD: Dino Blokwereld (working title)
 
-Status: READY FOR SIGNOFF
+Status: APPROVED by Founder on 2026-11-06
 
 This signoff archives v11 Dorp (shipped as 0.5.0) and scopes v3 Dino's veilig (0.6.0).
 
