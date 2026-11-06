@@ -50,7 +50,7 @@
 | docs/DECISIONS.md | 42 | Every notable decision. Founder decisions are marked NEEDS FOUNDER until answered, then… |
 | docs/DISCUSSION.md | 96 | Review rounds between agents. Newest at the bottom. Keep it short: who said what, what… |
 | docs/FACTORY.md | 113 | Moved out of CLAUDE.md on 2026-10-26 (decision 104) so it is read only when needed. The… |
-| docs/FRICTION.md | 52 | The operator adds a line whenever something goes wrong or feels slow, so /retro has real… |
+| docs/FRICTION.md | 53 | The operator adds a line whenever something goes wrong or feels slow, so /retro has real… |
 | docs/GAME_LOOP_PRD.md | 349 | Status: Draft, not signed. Each release moves into docs/PRD.md section 12 and is signed… Sections: 1. The game loop:13, 2. v12 Dino-Hoed:53, 3. v13 Dino-Eten:134, 4. v14 Bouw-Opdracht:214, 5. Order and dependencies:332, 6. Not picked yet:338 |
 | docs/HANDOFF.md | 23 | Founder: "build v11, v3, v6". v11 already shipped (0.5.0). Build v3 now as 0.6.0, then… |
 | docs/IDEA.md | 81 | "Create a 3D minecraft education kind of game but then also with dinosaurs, and every 5… |
@@ -60,7 +60,7 @@
 | docs/RETRO.md | 25 | Written by /retro. Newest at the bottom. Factory level learnings are also saved in… |
 | docs/SHOP_PRD.md | 108 | Document Status: Approved Addendum (docs/SHOP_PRD.md — companion to docs/PRD.md) |
 | docs/STATUS.md | 55 | Phase: small releases. 0.1.0, 0.2.0, 0.3.0, R1 and 0.4.0 Punten voor elke ronde are… |
-| docs/TECH-DEBT.md | 33 | Known tech debt in one table. Major means it can cost the kids their builds or points.… |
+| docs/TECH-DEBT.md | 34 | Known tech debt in one table. Major means it can cost the kids their builds or points.… |
 | docs/TEST_REPORT.md | 215 | Result: PASS for everything that can run here. AC190 (fps on the oldest iPad) and the… Sections: v11 Dorp (0.5.0):3, R1 Boot safety (R1d):87, v9 Eerlijke punten (0.3.0):105, v2 Gouden ei (0.2.0):130, Summary:202, Acceptance criteria coverage:205, Bugs:209, Kid safety and accessibility:213, Screenshots:215 |
 | docs/UI_REVIEW.md | 159 | Screenshots are not in git (44 MB). Run npm run test:e2e:ui-review to regenerate them in… Sections: How this was done:10, Why the founder sees buttons…:21, Screen map:30, Findings:58, Way back, in the same place?:135, What is good and should stay:142, Questions for the founder:153 |
 | docs/archive/CONTENT_CHECK.md | 215 | Date: 2026-10-22. By: QA. F1 to F7 and F10 are fixed (see the "Fixed" line under each).… Sections: How this was done:5, Overall result:40, Findings:48, What checked out (no finding):159, Top 5 to fix:170, 20 items for the founder or…:178, Lookup list for…:207, For the founder:211 |

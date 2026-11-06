@@ -210,9 +210,9 @@ export function createWorldSave(options: WorldSaveOptions): WorldSave {
   }
 
   /**
-   * Once per save: a version 1 world gets the villages. The old record is copied to worldV1 first, then the
-   * new world record is written. A kill in between leaves the old record in `world`, so the next start does
-   * the same stamp again. If the writes fail, the kid gets the old world exactly, without new houses.
+   * Once per save: a version 1 world gets the villages. The new world record is written in one put, so a kill
+   * leaves the old record in `world` and the next start does the same stamp again (no copy of the old record
+   * is kept any more, AC194). If the write fails, the kid gets the old world exactly, without new houses.
    */
   async function upgradeWorld(raw: unknown): Promise<void> {
     const oldDiff = cleanDiff((raw as { diff?: unknown } | null)?.diff);
@@ -224,7 +224,6 @@ export function createWorldSave(options: WorldSaveOptions): WorldSave {
     const standing = standingSpots(player, dinos);
     let result = upgradeV1World(oldDiff, standing);
     try {
-      await records.put('worldV1', raw as WorldRecord);
       await records.put('world', { diff: Uint32Array.from(result.diff), terrainVersion: CURRENT_TERRAIN_VERSION });
     } catch {
       result = upgradeV1World(oldDiff, standing, { stamp: false });
@@ -254,6 +253,12 @@ export function createWorldSave(options: WorldSaveOptions): WorldSave {
   let cancelled = false;
 
   async function restore(): Promise<void> {
+    try {
+      // The kept 0.4.0 copy is not written any more and is removed when a save opens (AC194).
+      if ((await records.get('worldV1')) !== null) await records.put('worldV1', null);
+    } catch {
+      /* the copy stays: harmless, nothing reads it */
+    }
     try {
       const raw = await records.get('world');
       if (cancelled) return;

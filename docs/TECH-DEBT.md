@@ -24,6 +24,7 @@ How to use it:
 | TD12 | low | The speed spike loader ships in the production bundle. | `src/dev/spike-load.ts` | S | TECH_REVIEW nits | open |
 | TD13 | low | `scripts/make-icons.mjs` is not wired to an npm script or named in the README. | `scripts/make-icons.mjs` | S | TECH_REVIEW nits | open |
 | TD14 | low | `docs/STATUS.md` still has a long Done section from the Gemini era. | `docs/STATUS.md` | S | TECH_REVIEW nits | open |
+| TD22 | medium | exam.spec.ts:254 (AC112, the exam timer does not count in portrait) fails about 2 in 5 runs in local Chromium: 5 s still count after the turn to portrait. It fails at 4c13d07 too, so it is older than v3. | `tests/e2e/exam.spec.ts:254`, exam timer pause | S | v3 build 2026-11-06 | open |
 | TD15 | major | `main` was red: an e2e helper assumed the list of modules. | `tests/e2e/points-v9.spec.ts` | S | TECH_REVIEW N1, decision 100 | done |
 | TD16 | major | It was unclear which deploy is live and whether a merge deploys. | `wrangler.jsonc` | S | TECH_REVIEW N3, decision 98 | done |
 | TD17 | medium | `main.ts` held every flow and all test hooks (544 lines). Now 245. | `src/main.ts` | M | TECH_REVIEW N4, R2a, decision 110 | done |
