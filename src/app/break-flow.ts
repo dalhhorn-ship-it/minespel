@@ -73,6 +73,8 @@ export interface BreakFlowOptions {
   sessionStore: SessionStore;
   getCatalog: () => Catalog;
   sound?: Pick<Sound, 'play'>;
+  /** The small grey lock on the break (AC199): boot wires it to parentFlow.openBreakEnd(). */
+  onLock?: () => void;
   onBreakFinished?: () => void;
   win?: Window;
 }
@@ -296,6 +298,7 @@ export function createBreakFlow(options: BreakFlowOptions): BreakFlow {
       canAffordEgg: (pts) => canAffordEgg(pts, shopCount),
       sound: options.sound,
       onAction: handleScreenAction,
+      onLock: options.onLock,
       now: () => options.clock.now(),
     });
     options.screens.showLearn(screenView.element);

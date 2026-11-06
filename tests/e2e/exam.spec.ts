@@ -263,12 +263,14 @@ test.describe('kid exam (T51b, v2)', () => {
     await page.setViewportSize(view);
   });
 
-  test('AC156: no lock on a break, a lesson or Extra oefenen, the world keeps its lock', async ({ page }) => {
+  test('AC156, AC199: the break lock shows on a running break (only to end it), none on Extra oefenen, the world keeps its lock', async ({ page }) => {
     await openApp(page);
     await expect(page.locator(LOCK).first()).toBeVisible();
     await readState(page, 'startBreakNow');
     await expect(page.locator('.break-screen')).toBeVisible();
-    await expect(page.locator(LAYER_LOCK)).toHaveCount(0);
+    // v3 (AC199): a break lesson or question shows its own lock, in the break header.
+    await expect(page.locator(`.break-screen .break-header ${LOCK}`)).toBeVisible();
+    await expect(page.locator(LAYER_LOCK)).toHaveCount(1);
     await readState(page, 'endBreakByParent');
     await expect.poll(() => screen(page)).toBe('world');
     await readState(page, 'openPractice');

@@ -274,6 +274,46 @@ describe('break-screen (T36)', () => {
   });
 });
 
+describe('break lock (T55b, AC199)', () => {
+  const entries: SessionEntry[] = [{ item: choiceItem1, box: 0 }];
+  const start = (lessonFirst: boolean) =>
+    startSession({ mode: 'break', entries, economy: defaultKv('economy'), day: '2026-10-17', lessonFirst, at: 1000 }).state;
+
+  it('AC199: the lock shows on lesson, question and teach, not on feedback or summary, and calls onLock', () => {
+    let locks = 0;
+    const screen = createBreakScreen({
+      state: start(true),
+      lesson: sampleLesson,
+      onAction: () => undefined,
+      onLock: () => locks++,
+    });
+    const lock = () => screen.element.querySelector<HTMLElement>('.lock-icon-btn')!;
+    expect(lock().hidden).toBe(false);
+    expect(lock().closest('.break-header')).not.toBeNull();
+    tap(lock());
+    expect(locks).toBe(1);
+
+    const q = start(false);
+    screen.render(q);
+    expect(lock().hidden).toBe(false);
+    screen.render({ ...q, phase: 'teach' });
+    expect(lock().hidden).toBe(false);
+    screen.render({ ...q, phase: 'feedback' });
+    expect(lock().hidden).toBe(true);
+    screen.render({ ...q, phase: 'empty' });
+    expect(lock().hidden).toBe(true);
+    screen.render({ ...q, phase: 'summary', summary: { pointsTotal: 2, hard: false } as never });
+    expect(lock().hidden).toBe(true);
+    screen.destroy();
+  });
+
+  it('AC199: without onLock (Extra oefenen) there is no lock', () => {
+    const screen = createBreakScreen({ state: start(false), onAction: () => undefined, onStop: () => undefined });
+    expect(screen.element.querySelector('.lock-icon-btn')).toBeNull();
+    screen.destroy();
+  });
+});
+
 describe('honest points banner (v10, AC29, AC175)', () => {
   function feedbackText(over: Record<string, unknown>, practiceDay: number): string {
     let { state } = startSession({

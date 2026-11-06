@@ -219,3 +219,8 @@
   touch-action: manipulation;
 }
 .break-stop-btn[hidden] { display: none; }
+
+/* Small grey lock on a learning break (AC199), at the place of the Extra oefenen Stoppen button.
+   44 x 44 comes from .lock-icon-btn. It sits in the header, so it never covers an answer or the number pad. */
+.break-lock { flex: none; }
+.break-lock[hidden] { display: none; }
