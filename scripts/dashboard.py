@@ -2,7 +2,8 @@
 """Project dashboard for the product director.
 
 Reads the repo docs and git, then writes a self contained page:
-  dashboard/index.html  (no JS, no network, light and dark)
+  dashboard/index.html  (no JS, no network, light and dark; two tabs,
+                         Overview and Roadmap, switched with pure CSS)
   dashboard/data.json   (the same numbers as data)
   dashboard/SUMMARY.md  (a short markdown table)
 
@@ -36,6 +37,23 @@ SOURCES = [
 
 STATUS_WORDS = ("shipped", "next", "candidate", "later", "dropped")
 TASK_ID = re.compile(r"^[A-Z]{1,2}\d+[a-z]?$")
+
+# Roadmap swimlanes. A release goes to the value lane (kids or parent feel
+# something new) unless one of these rules puts it in the foundation lane:
+#   1. a tag in the backlog row: #foundation (or #tech, #debt, #refactor,
+#      #quality, #safety, #infra, #perf); #value or #feature forces value;
+#   2. LANE_OVERRIDES below, keyed by release id (the first word: v4, R2);
+#   3. a refactor round: id R1, R2 and so on, or "refactor" in the row note.
+# Open items in docs/TECH-DEBT.md always go to the foundation lane.
+# v4 Altijd spelen is foundation: it adds nothing new to do; it makes start,
+# offline play and saves robust (T52, T22). v5 Veilig en juist is foundation:
+# safety, accessibility and speed checks (T62, T63, T32, T64).
+# Edit this map, or tag the row, to move a release to the other lane.
+LANE_OVERRIDES = {"v4": "foundation", "v5": "foundation"}
+FOUNDATION_TAGS = {"foundation", "tech", "debt", "tech-debt", "refactor", "quality",
+                   "safety", "infra", "perf", "robustness"}
+LANES = (("value", "Value for kids and parents", "releases they feel"),
+         ("foundation", "Technical foundation", "refactors, safety, robustness, tech debt"))
 
 
 # ---------- small helpers ----------
@@ -151,6 +169,9 @@ def parse_backlog(text):
         rows.append({
             "rank": plain(get("rank", 0)),
             "release": name,
+            "id": name.split(" ", 1)[0] if name else "",
+            "tasks": plain(get("plan tasks", 5)),
+            "tags": [t.lower() for t in re.findall(r"(?<![\w&])#([A-Za-z][\w-]*)", line)],
             "note": plain(release[m.end():]) if m else "",
             "feel": trim(get("what the kids or the parent feel", 2), 100),
             "size": plain(get("size", 3)),
@@ -170,6 +191,34 @@ def parse_plan(text):
         if c and TASK_ID.match(c[0]) and c[0] not in ids:
             ids.append(c[0])
     return ids
+
+
+def parse_plan_tasks(text):
+    """Task rows of docs/PLAN.md with their milestone and status, or UNKNOWN.
+
+    Milestone and Status are the last two columns. They are read from the end
+    of the row, so a pipe inside the task text does not shift them.
+    """
+    if text is None:
+        return UNKNOWN
+    rows, header = [], None
+    for line in text.splitlines():
+        c = cells(line)
+        if c is None:
+            continue
+        low = [h.lower() for h in c]
+        if low and low[0] == "id" and "milestone" in low:
+            header = low
+            continue
+        if header is None or not c or not TASK_ID.match(c[0]) or len(c) < len(header):
+            continue
+        status = plain(c[-1])
+        rows.append({
+            "id": c[0],
+            "milestone": plain(c[-2]),
+            "status": status.split(" ", 1)[0].strip(",.;:").lower() or "todo",
+        })
+    return rows
 
 
 def parse_decisions(text):
@@ -393,6 +442,86 @@ def release_metrics(text, today):
     }
 
 
+def lane_of(row):
+    """'value' or 'foundation' for a backlog row. See LANE_OVERRIDES for the rule."""
+    tags = set(row.get("tags") or [])
+    if tags & {"value", "feature"}:
+        return "value"
+    if tags & FOUNDATION_TAGS:
+        return "foundation"
+    rid = row.get("id", "")
+    if rid in LANE_OVERRIDES:
+        return LANE_OVERRIDES[rid]
+    if re.fullmatch(r"R\d+", rid) or "refactor" in row.get("note", "").lower():
+        return "foundation"
+    return "value"
+
+
+def release_tasks(row, plan):
+    """PLAN tasks of a release: rows with its id as milestone, plus ids named in
+    its Plan tasks cell (T55 also finds T55a and T55b)."""
+    named = set(re.findall(r"\b[A-Z]{1,2}\d+[a-z]?\b", row.get("tasks", "")))
+    out = []
+    for t in plan:
+        base = re.sub(r"[a-z]$", "", t["id"])
+        if t["milestone"] == row.get("id") or t["id"] in named or base in named:
+            out.append(t)
+    return out
+
+
+ROADMAP_GROUPS = (("next", "Now", "the release being built"),
+                  ("candidate", "Then", "candidates in rank order"),
+                  ("later", "Later", "after the candidates"))
+
+
+def roadmap(backlog, plan, debt):
+    """Proposed sequence. Columns: Now (status next), Then (candidates), Later,
+    and Tech debt to schedule. Rows keep their backlog rank order. Every card
+    gets a number per lane (1 is next up in that lane). Shipped and dropped
+    releases are left out and only counted."""
+    rows = backlog if isinstance(backlog, list) else []
+    plan = plan if isinstance(plan, list) else []
+    seq = {"value": 0, "foundation": 0}
+    columns = []
+    claimed = set()
+
+    def rank(r):
+        return (0, int(r["rank"])) if r["rank"].isdigit() else (1, 0)
+
+    for chip, name, sub in ROADMAP_GROUPS:
+        lanes = {"value": [], "foundation": []}
+        for r in sorted((r for r in rows if r["chip"] == chip), key=rank):
+            tasks = release_tasks(r, plan)
+            claimed.update(t["id"] for t in tasks)
+            lanes[lane_of(r)].append({"title": r["release"], "feel": trim(r["feel"], 90), "size": r["size"],
+                                      "tasks": tasks, "badge": "", "lane": lane_of(r)})
+        if chip == "next":
+            # Open refactor rounds from PLAN.md (R2, R3...) that are not a backlog row.
+            rounds = {}
+            for t in plan:
+                if re.fullmatch(r"R\d+", t["milestone"]) and t["id"] not in claimed:
+                    rounds.setdefault(t["milestone"], []).append(t)
+            for mid, tasks in rounds.items():
+                if any(t["status"] != "done" for t in tasks):
+                    lanes["foundation"].append({"title": "%s refactor round" % mid, "feel": "", "size": "",
+                                                "tasks": tasks, "badge": "", "lane": "foundation"})
+        columns.append({"name": name, "sub": sub, "lanes": lanes})
+    items = debt["items"] if isinstance(debt, dict) else []
+    if items:
+        columns.append({"name": "Tech debt to schedule", "sub": "open items, major first", "lanes": {
+            "value": [],
+            "foundation": [{"title": x["id"], "feel": trim(x["item"], 70), "size": x["size"],
+                            "tasks": [], "badge": x["severity"], "lane": "foundation"} for x in items]}})
+    columns = [c for c in columns if c["lanes"]["value"] or c["lanes"]["foundation"]]
+    for c in columns:
+        for key in ("value", "foundation"):
+            for card in c["lanes"][key]:
+                seq[key] += 1
+                card["seq"] = seq[key]
+    return {"columns": columns, "open": seq,
+            "shipped": sum(1 for r in rows if r["chip"] == "shipped")}
+
+
 # ---------- collectors (touch the disk and git) ----------
 
 def collect_tests():
@@ -478,9 +607,12 @@ def collect_deploy_dates():
 
 
 def collect():
-    tasks = parse_plan(read("docs/PLAN.md"))
+    plan_text = read("docs/PLAN.md")
+    tasks = parse_plan(plan_text)
     today = datetime.datetime.now(datetime.timezone.utc).date()
     changelog = read("CHANGELOG.md")
+    backlog = parse_backlog(read("docs/BACKLOG.md"))
+    debt = parse_tech_debt(read("docs/TECH-DEBT.md"))
     return {
         "generated": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d %H:%M UTC"),
         "version": parse_package_version(read("package.json")),
@@ -488,8 +620,9 @@ def collect():
         "releases": release_metrics(changelog, today),
         "ci": ci_metrics(parse_ci_runs(read("metrics/ci-runs.json")), today),
         "deploys": deploy_metrics(collect_deploy_dates(), today),
-        "debt": parse_tech_debt(read("docs/TECH-DEBT.md")),
-        "backlog": parse_backlog(read("docs/BACKLOG.md")),
+        "debt": debt,
+        "backlog": backlog,
+        "roadmap": roadmap(backlog, parse_plan_tasks(plan_text), debt),
         "tasks": tasks,
         "decisions": parse_decisions(read("docs/DECISIONS.md")),
         "status": parse_status(read("docs/STATUS.md")),
@@ -607,6 +740,42 @@ def debt_html(debt):
             '<tbody>%s</tbody></table>' % rows)
 
 
+def render_roadmap(rm):
+    cols = rm["columns"] if isinstance(rm, dict) else []
+    if not cols:
+        return ('<section class="card"><h2>Roadmap</h2>%s</section>' % empty(
+            "No roadmap yet. Give releases the status next, candidate or later in the Ranked backlog "
+            "table of docs/BACKLOG.md."))
+
+    def task(t):
+        return '<span class="chip id t-%s" title="%s">%s</span>' % (e(t["status"]), e(t["status"]), e(t["id"]))
+
+    def card(c):
+        badges = "".join([
+            '<span class="chip sev-%s">%s</span>' % (e(c["badge"]), e(c["badge"])) if c["badge"] else "",
+            '<span class="size">%s</span>' % e(c["size"]) if c["size"] else ""])
+        tasks = ('<div class="rm-tasks">%s</div>' % "".join(task(t) for t in c["tasks"])) if c["tasks"] else ""
+        return '<li class="rm-card"><span class="seq">%d</span><span class="t"><b>%s</b>%s</span>%s%s</li>' % (
+            c["seq"], e(c["title"]), '<br><span class="muted small">%s</span>' % e(c["feel"]) if c["feel"] else "",
+            '<span class="b">%s</span>' % badges if badges else "", tasks)
+
+    head = "".join('<div class="rm-col-h"><b>%s</b><span class="muted small">%s</span></div>' % (
+        e(c["name"]), e(c["sub"])) for c in cols)
+    rows = ""
+    for key, label, sub in LANES:
+        rows += '<div class="rm-lane-h %s"><b>%s</b><span class="muted small">%s, %d open</span></div>' % (
+            key, e(label), e(sub), rm["open"][key])
+        rows += "".join('<ul class="rm-cell %s">%s</ul>' % (
+            key, "".join(card(x) for x in c["lanes"][key]) or '<li class="muted small">none</li>') for c in cols)
+    return ('<section class="card"><h2>Roadmap: proposed sequence</h2>'
+            '<p class="muted small">Columns follow the status in the Ranked backlog of docs/BACKLOG.md, rows keep '
+            'its rank. Numbers are the suggested order within each lane. Task chips come from docs/PLAN.md '
+            '(green is done). Open items in docs/TECH-DEBT.md join the foundation lane. %d releases shipped, '
+            'not shown. Lane rule: LANE_OVERRIDES and #foundation or #value tags in scripts/dashboard.py.</p>'
+            '<div class="scroll"><div class="rm" style="--cols:%d">'
+            '<div class="rm-corner"></div>%s%s</div></div></section>' % (rm.get("shipped", 0), len(cols), head, rows))
+
+
 def render(d):
     cl, dec, fr, t, g = d["changelog"], d["decisions"], d["friction"], d["tests"], d["git"]
     open_dec = n_of(dec["open"]) if dec != UNKNOWN else UNKNOWN
@@ -699,7 +868,7 @@ def render(d):
 
     body = "".join([
         card("Where we are", status, "wide"),
-        card("Roadmap", roadmap, "wide"),
+        card("Ranked backlog", roadmap, "wide"),
         card("Open founder decisions", founder, "attn" if dec != UNKNOWN and dec["open"] else ""),
         card("Open tasks (%s)" % tasks_n, tasks),
         card("Recent decisions", recent),
@@ -710,7 +879,7 @@ def render(d):
         card("Learning modules", modules, "wide"),
     ])
     return PAGE.format(tiles=tiles, body=body, generated=e(d["generated"]),
-                       sources=e(", ".join(d["sources"])))
+                       sources=e(", ".join(d["sources"])), roadmap=render_roadmap(d.get("roadmap")))
 
 
 def sub_get(d, part, key):
@@ -833,7 +1002,34 @@ a {{ color:var(--accent); }}
 .chip.sev-medium {{ background:var(--warn-bg); color:var(--warn); }}
 table.debt td.mono {{ white-space:nowrap; }}
 footer {{ margin-top:24px; font-size:12px; color:var(--muted); }}
+.tabs {{ display:flex; gap:4px; border-bottom:1px solid var(--border); margin-bottom:16px; }}
+.tabs label {{ padding:10px 16px; cursor:pointer; color:var(--muted); border-bottom:2px solid transparent; margin-bottom:-1px; font-weight:600; font-size:15px; }}
+.tab-input {{ position:absolute; opacity:0; pointer-events:none; }}
+.panel {{ display:none; }}
+#tab-overview:checked ~ .panel-overview, #tab-roadmap:checked ~ .panel-roadmap {{ display:block; }}
+#tab-overview:checked ~ .tabs label[for="tab-overview"], #tab-roadmap:checked ~ .tabs label[for="tab-roadmap"] {{ color:var(--text); border-bottom-color:var(--accent); }}
+#tab-overview:focus-visible ~ .tabs label[for="tab-overview"], #tab-roadmap:focus-visible ~ .tabs label[for="tab-roadmap"] {{ outline:2px solid var(--accent); outline-offset:2px; }}
+.scroll {{ overflow-x:auto; }}
+.rm {{ --lane-w:minmax(150px,180px); --col-w:240px; display:grid; gap:8px; min-width:max-content;
+  grid-template-columns:var(--lane-w) repeat(var(--cols),var(--col-w)); }}
+.rm-col-h {{ display:flex; flex-direction:column; font-size:14px; padding:4px 2px; border-bottom:2px solid var(--border); }}
+.rm-lane-h {{ display:flex; flex-direction:column; font-size:14px; padding:10px; border-radius:8px; border-left:4px solid var(--accent); background:var(--track);
+  position:sticky; left:0; z-index:1; box-shadow:8px 0 0 var(--surface); }}
+.rm-lane-h.foundation {{ border-left-color:var(--warn); }}
+.rm-cell {{ list-style:none; margin:0; padding:8px; border-radius:8px; background:var(--bg); border:1px dashed var(--border); display:flex; flex-direction:column; gap:6px; }}
+.rm-card {{ display:flex; flex-wrap:wrap; align-items:baseline; gap:6px; background:var(--surface); border:1px solid var(--border); border-left:3px solid var(--accent); border-radius:6px; padding:6px 8px; font-size:13px; }}
+.rm-cell.foundation .rm-card {{ border-left-color:var(--warn); }}
+.rm-card .t {{ flex:1 1 120px; }}
+.rm-card .b {{ display:flex; gap:4px; }}
+.rm-card .seq {{ font-variant-numeric:tabular-nums; font-weight:650; color:var(--muted); min-width:1.4em; }}
+.rm-card .size {{ font-size:11px; padding:0 6px; border-radius:999px; background:var(--track); color:var(--muted); white-space:nowrap; }}
+.rm-tasks {{ flex-basis:100%; display:flex; flex-wrap:wrap; gap:4px; }}
+.rm-tasks .chip {{ font-size:11px; padding:1px 6px; }}
+.chip.t-done {{ background:var(--ok-bg); color:var(--ok); }}
+.chip.t-doing {{ background:var(--info-bg); color:var(--accent); }}
+.chip.t-blocked {{ background:var(--bad-bg); color:var(--bad); }}
 @media (max-width:720px) {{
+  .rm {{ --lane-w:104px; --col-w:210px; }} .rm-lane-h {{ padding:8px; }}
   .grid {{ grid-template-columns:1fr; }}
   .tiles {{ grid-template-columns:repeat(2,minmax(0,1fr)); }}
   dl {{ grid-template-columns:1fr; gap:2px; }} dd {{ margin-bottom:8px; }}
@@ -851,8 +1047,14 @@ footer {{ margin-top:24px; font-size:12px; color:var(--muted); }}
 <main>
 <h1>Minespel dashboard</h1>
 <p class="lead">Dino Blokwereld at a glance. Made from the repo docs and git.</p>
+<input type="radio" name="tab" id="tab-overview" class="tab-input" checked>
+<input type="radio" name="tab" id="tab-roadmap" class="tab-input">
+<nav class="tabs" aria-label="Dashboard views"><label for="tab-overview">Overview</label><label for="tab-roadmap">Roadmap</label></nav>
+<div class="panel panel-roadmap">{roadmap}</div>
+<div class="panel panel-overview">
 <div class="tiles">{tiles}</div>
 <div class="grid">{body}</div>
+</div>
 <footer>Generated {generated}. Sources: {sources}. Run python3 scripts/ci_runs.py to refresh the CI history, then python3 scripts/dashboard.py.</footer>
 </main>
 </body>

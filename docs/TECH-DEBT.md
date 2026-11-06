@@ -6,7 +6,7 @@ How to use it:
 * Add a row when a review, a friction line or a developer finds debt. Take the next free id.
 * Severity is `major`, `medium` or `low`. Major: the kids can lose something, or `main` can go red. Medium: it slows every release or hides bugs. Low: tidy up when the file is touched anyway.
 * Set Status to `done` when it is fixed, and name the decision or task in Source. Do not delete rows.
-* `python3 scripts/dashboard.py` counts the open rows per severity.
+* `python3 scripts/dashboard.py` counts the open rows per severity. Its Roadmap tab puts every open row in the foundation lane, major first.
 
 | Id | Severity | Item | Where | Size | Source | Status |
 |---|---|---|---|---|---|---|

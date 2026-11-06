@@ -290,5 +290,104 @@ class MissingSourceTest(unittest.TestCase):
         self.assertIn("&lt;script&gt;", page)
 
 
+ROADMAP_BACKLOG = """## Ranked backlog
+
+| Rank | Release | What the kids or the parent feel | Size | Value for the kids | Plan tasks | Status |
+|---|---|---|---|---|---|---|
+| | **v1** | The block world | | | every v1 task | shipped (0.1.0) |
+| | **R1** (refactor, not a release) | Buttons work. | S | | R1a to R1e | shipped |
+| 1 | **v3 Dino's veilig** | A backup file. | M | High. | T18, T55 | next (0.6.0) |
+| 2 | **v6 Wat heb ik geleerd** | A parent dashboard. | M | High. | T21 | candidate, after v3 |
+| 3 | **v12 Dino-Hoed** | Hats for dinos. #foundation | S | High. | about 3 | candidate |
+| 4 | **v4 Altijd spelen** | Starts without internet. | M | | T52 | later (after v3) |
+| 5 | **v5 Veilig en juist** | Safe and smooth. #value | M | | T63 | candidate |
+| | **v7 Eigen woorden** | | | | T40 | dropped (decision 79) |
+"""
+
+ROADMAP_PLAN = """| ID | Task | Depends on | Group | Files | Acceptance | Milestone | Status |
+|---|---|---|---|---|---|---|---|
+| T18 | Backup file | none | V3-A | src/a.ts | AC1 | v3 | todo |
+| T55a | Settings | none | V3-B | src/b.ts | AC2 | v3 | doing |
+| T19 | Share helpers | none | V3-A | src/c.ts | AC3 | v3 | done |
+| T21 | Results queries | T67 | E | src/d.ts | AC4 | M5 | todo |
+| T52 | Robustness with a `a | b` pipe in the text | T18 | K | src/e.ts | AC5 | M5 | todo |
+| T63 | Kid safety suite | T20 | M | tests/e2e/f.ts | AC6 | M7 | todo |
+| R3a | Split the shop | none | R | src/ui/shop.ts | AC7 | R3 | todo |
+| R2a | Boot out of main | none | R | src/main.ts | AC8 | R2 | done |
+"""
+
+
+class RoadmapTest(unittest.TestCase):
+    def build(self):
+        backlog = d.parse_backlog(ROADMAP_BACKLOG)
+        plan = d.parse_plan_tasks(ROADMAP_PLAN)
+        return d.roadmap(backlog, plan, d.parse_tech_debt(TECH_DEBT))
+
+    def test_plan_tasks_read_milestone_and_status_from_the_end(self):
+        plan = d.parse_plan_tasks(ROADMAP_PLAN)
+        self.assertEqual([(t["id"], t["milestone"], t["status"]) for t in plan][:5], [
+            ("T18", "v3", "todo"), ("T55a", "v3", "doing"), ("T19", "v3", "done"),
+            ("T21", "M5", "todo"), ("T52", "M5", "todo")])
+        self.assertEqual(d.parse_plan_tasks(None), d.UNKNOWN)
+
+    def test_lane_rule(self):
+        rows = {r["id"]: r for r in d.parse_backlog(ROADMAP_BACKLOG)}
+        self.assertEqual(d.lane_of(rows["v3"]), "value")
+        self.assertEqual(d.lane_of(rows["R1"]), "foundation")      # refactor round
+        self.assertEqual(d.lane_of(rows["v4"]), "foundation")      # LANE_OVERRIDES
+        self.assertEqual(d.lane_of(rows["v12"]), "foundation")     # #foundation tag
+        self.assertEqual(d.lane_of(rows["v5"]), "value")           # #value beats the override
+        self.assertEqual(rows["v12"]["tags"], ["foundation"])
+
+    def test_columns_lanes_and_numbers(self):
+        rm = self.build()
+        cols = rm["columns"]
+        self.assertEqual([c["name"] for c in cols], ["Now", "Then", "Later", "Tech debt to schedule"])
+        lane = lambda i, k: [(x["title"], x["seq"]) for x in cols[i]["lanes"][k]]
+        self.assertEqual(lane(0, "value"), [("v3 Dino's veilig", 1)])
+        self.assertEqual(lane(0, "foundation"), [("R3 refactor round", 1)])   # open R3, done R2 is left out
+        self.assertEqual(lane(1, "value"), [("v6 Wat heb ik geleerd", 2), ("v5 Veilig en juist", 3)])
+        self.assertEqual(lane(1, "foundation"), [("v12 Dino-Hoed", 2)])
+        self.assertEqual(lane(2, "foundation"), [("v4 Altijd spelen", 3)])
+        self.assertEqual([x["title"] for x in cols[3]["lanes"]["foundation"]],
+                         ["TD2", "TD5", "TD3", "TD1"])                       # major first
+        self.assertEqual(cols[3]["lanes"]["foundation"][0]["seq"], 4)
+        self.assertEqual(rm["open"], {"value": 3, "foundation": 7})
+        self.assertEqual(rm["shipped"], 2)
+
+    def test_release_tasks_from_milestone_and_plan_cell(self):
+        now = self.build()["columns"][0]["lanes"]["value"][0]
+        self.assertEqual([(t["id"], t["status"]) for t in now["tasks"]],
+                         [("T18", "todo"), ("T55a", "doing"), ("T19", "done")])  # T55 finds T55a
+        then = self.build()["columns"][1]["lanes"]["value"][0]
+        self.assertEqual([t["id"] for t in then["tasks"]], ["T21"])
+
+    def test_render_roadmap(self):
+        page = d.render_roadmap(self.build())
+        self.assertIn("Technical foundation", page)
+        self.assertIn("Value for kids and parents", page)
+        self.assertIn("Tech debt to schedule", page)
+        self.assertIn("Dino&#x27;s veilig", page)
+        self.assertNotIn("v7 Eigen woorden", page)
+        self.assertIn("No roadmap yet", d.render_roadmap(d.roadmap(d.UNKNOWN, d.UNKNOWN, d.UNKNOWN)))
+
+    def test_page_has_two_css_tabs(self):
+        data = {
+            "generated": "now", "version": "1", "changelog": d.parse_changelog(None),
+            "backlog": d.parse_backlog(ROADMAP_BACKLOG), "tasks": [], "decisions": d.parse_decisions(""),
+            "status": d.parse_status(None), "friction": d.parse_friction(""),
+            "tests": {"e2e_specs": 0, "e2e_tests": 0, "unit_files": 0, "unit_tests": 0},
+            "git": {"branch": "b", "commits": [], "ahead": 0, "tags": []}, "modules": [], "sources": [],
+            "roadmap": self.build(),
+        }
+        page = d.render(data)
+        self.assertIn('id="tab-overview" class="tab-input" checked', page)
+        self.assertIn('id="tab-roadmap"', page)
+        self.assertIn('class="panel panel-roadmap"', page)
+        self.assertIn('class="panel panel-overview"', page)
+        self.assertIn("Roadmap: proposed sequence", page)
+        self.assertNotIn("<script", page)
+
+
 if __name__ == "__main__":
     unittest.main()
