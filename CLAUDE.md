@@ -17,6 +17,12 @@ The big docs are append only logs. Never read them whole. Grep by id and read on
 * The next release: `docs/PRD.md` section 12. The backlog: `docs/BACKLOG.md`.
 * `docs/PLAN.md` holds only open tasks. Done tasks: `docs/releases/plan-done.md`.
 * `docs/archive/` and `docs/releases/` are history. Open them only when a task points there.
+* A hook blocks whole reads of files over 350 lines in the main session (decision 117). Grep, then read a slice with offset and limit, or ask an Explore agent. Subagents are not blocked. Truly need it all: `touch .claude/.allow-large-read`, say why, retry once.
+
+## Short contexts
+
+* At a logical boundary (a task done, a release step done, a topic switch), or when the context watch hook says so, run `/handoff` and suggest `/clear`. The note in `docs/HANDOFF.md` loads again at session start. Never hand off mid debug.
+* Compact instructions: when compacting, keep the founder's goal and open questions, decisions and their reasons, files changed and commit shas, the current step and next steps, and failed approaches not to retry. Drop file contents, tool output and logs; they can be read again.
 
 ## Code map
 
