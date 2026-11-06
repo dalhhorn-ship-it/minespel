@@ -18,7 +18,7 @@ How to use it:
 | TD6 | medium | `boot-taps.spec.ts:95` failed once in a full run: the waiting card came later than its 300 ms window under load. | `tests/e2e/boot-taps.spec.ts:95` | S | FRICTION 2026-10-26 | open |
 | TD7 | low | `context-loss.spec.ts` fails under double load (8 workers on 4 cores). Its 3 second limits are the product promise. | `tests/e2e/context-loss.spec.ts` | S | FRICTION 2026-10-26 | open |
 | TD8 | low | The village cooldown counts a shorter break interval as elapsed time once, so a villager question can come a bit sooner. | `src/app/village-flow.ts` | S | FRICTION 2026-10-24 (V11d review) | open |
-| TD9 | low | The kept copy of the old world record should be deleted in the release after v11. | `src/storage/` | S | BACKLOG v11 note, PRD section 12 | open |
+| TD9 | low | The kept copy of the old world record from v11 is still in every save. It is planned to go in v3 (0.6.0). | `src/storage/` | S | PRD section 12, v3 In item 7 | open |
 | TD10 | low | The own modules code path from v7 and v8 still reads the `ownModules` store at every start. Nothing writes it. | `src/app/content-loader.ts:11` | S | TECH_REVIEW N10 | open |
 | TD11 | low | three.js is not in its own chunk, so every content release makes the iPad fetch the whole bundle again. Do it with the v4 service worker. | `vite.config.ts` | S | TECH_REVIEW N11 | open |
 | TD12 | low | The speed spike loader ships in the production bundle. | `src/dev/spike-load.ts` | S | TECH_REVIEW nits | open |

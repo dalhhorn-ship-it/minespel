@@ -29,7 +29,8 @@ UNKNOWN = "unknown"
 
 SOURCES = [
     "package.json", "CHANGELOG.md", "docs/BACKLOG.md", "docs/PLAN.md",
-    "docs/DECISIONS.md", "docs/STATUS.md", "docs/FRICTION.md",
+    "docs/DECISIONS.md", "docs/STATUS.md", "docs/FRICTION.md", "docs/TECH-DEBT.md",
+    "metrics/ci-runs.json", "git log --first-parent origin/main",
     "tests/e2e/*.spec.ts", "src/**/*.test.ts", "docs/modules/*/", "git",
 ]
 
@@ -229,6 +230,169 @@ def count_tests(text):
     return len(re.findall(r"^\s*(?:test|it)(?:\.only|\.skip|\.fixme)?\(", text, re.M))
 
 
+SEVERITIES = ("major", "medium", "low")
+
+
+def parse_tech_debt(text):
+    """Rows of the docs/TECH-DEBT.md table and open counts per severity."""
+    if text is None:
+        return UNKNOWN
+    rows, header = [], None
+    for line in text.splitlines():
+        c = cells(line)
+        if c is None:
+            continue
+        if header is None:
+            if c and c[0].lower() == "id":
+                header = [h.lower() for h in c]
+            continue
+        if all(re.fullmatch(r":?-+:?", x or "-") for x in c) or len(c) < len(header):
+            continue
+        row = dict(zip(header, c))
+        sev = plain(row.get("severity", "")).lower()
+        rows.append({
+            "id": plain(row.get("id", "")),
+            "severity": sev if sev in SEVERITIES else "other",
+            "item": trim(row.get("item", ""), 160),
+            "where": plain(row.get("where", "")),
+            "size": plain(row.get("size", "")),
+            "open": plain(row.get("status", "")).lower().startswith("open"),
+        })
+    if header is None:
+        return UNKNOWN
+    open_rows = [r for r in rows if r["open"]]
+    order = {s: i for i, s in enumerate(SEVERITIES)}
+    open_rows.sort(key=lambda r: order.get(r["severity"], 9))
+    counts = {s: sum(1 for r in open_rows if r["severity"] == s) for s in SEVERITIES}
+    return {"total": len(rows), "open_total": len(open_rows), "open": counts, "items": open_rows}
+
+
+def to_time(s):
+    try:
+        return datetime.datetime.strptime(s, "%Y-%m-%dT%H:%M:%SZ")
+    except (TypeError, ValueError):
+        return None
+
+
+def week_of(day):
+    y, w, _ = day.isocalendar()
+    return "%d-W%02d" % (y, w)
+
+
+def last_weeks(today, n=8):
+    """The last n ISO week keys, oldest first, ending with the week of today."""
+    monday = today - datetime.timedelta(days=today.weekday())
+    return [week_of(monday - datetime.timedelta(weeks=i)) for i in range(n - 1, -1, -1)]
+
+
+def pct(part, whole):
+    return round(100.0 * part / whole) if whole else UNKNOWN
+
+
+def quantile(values, q):
+    if not values:
+        return UNKNOWN
+    v = sorted(values)
+    return v[min(len(v) - 1, int(q * len(v)))] if q != 0.5 else (
+        v[len(v) // 2] if len(v) % 2 else (v[len(v) // 2 - 1] + v[len(v) // 2]) / 2)
+
+
+def parse_ci_runs(text):
+    """The runs list from metrics/ci-runs.json text, or UNKNOWN."""
+    if text is None:
+        return UNKNOWN
+    try:
+        data = json.loads(text)
+    except ValueError:
+        return UNKNOWN
+    runs = data.get("runs") if isinstance(data, dict) else data
+    return runs if isinstance(runs, list) else UNKNOWN
+
+
+def ci_metrics(runs, today):
+    """Pass rates, durations, last failure and runs per week. Skipped and cancelled runs do not count."""
+    if runs == UNKNOWN or not runs:
+        return UNKNOWN
+    runs = sorted((r for r in runs if isinstance(r, dict)), key=lambda r: r.get("created_at") or "", reverse=True)
+    decided = [r for r in runs if r.get("conclusion") in ("success", "failure")]
+    last30 = decided[:30]
+    main30 = [r for r in decided if r.get("head_branch") == "main"][:30]
+    mins = []
+    for r in decided[:100]:
+        a, b = to_time(r.get("run_started_at") or r.get("created_at")), to_time(r.get("updated_at"))
+        if a and b and b >= a:
+            mins.append((b - a).total_seconds() / 60)
+    fail = next((r for r in runs if r.get("conclusion") == "failure"), None)
+    main_fail = next((r for r in runs if r.get("conclusion") == "failure" and r.get("head_branch") == "main"), None)
+    weeks = last_weeks(today)
+    per = {w: {"runs": 0, "ok": 0, "decided": 0} for w in weeks}
+    for r in runs:
+        t = to_time(r.get("created_at"))
+        w = week_of(t.date()) if t else None
+        if w in per:
+            per[w]["runs"] += 1
+            if r.get("conclusion") in ("success", "failure"):
+                per[w]["decided"] += 1
+                per[w]["ok"] += r.get("conclusion") == "success"
+    short = lambda r: None if r is None else {
+        "date": (r.get("created_at") or "")[:10], "branch": r.get("head_branch") or "", "url": r.get("html_url") or ""}
+    return {
+        "runs": len(runs),
+        "pass_rate_30": pct(sum(r["conclusion"] == "success" for r in last30), len(last30)),
+        "decided_30": len(last30),
+        "main_pass_rate": pct(sum(r["conclusion"] == "success" for r in main30), len(main30)),
+        "main_decided": len(main30),
+        "median_min": round(quantile(mins, 0.5), 1) if mins else UNKNOWN,
+        "p90_min": round(quantile(mins, 0.9), 1) if mins else UNKNOWN,
+        "last_failure": short(fail),
+        "last_main_failure": short(main_fail),
+        "weeks": weeks,
+        "runs_per_week": [per[w]["runs"] for w in weeks],
+        "pass_per_week": [pct(per[w]["ok"], per[w]["decided"]) for w in weeks],
+    }
+
+
+def deploy_metrics(dates, today):
+    """Deploys from the dates (YYYY-MM-DD) of first parent commits on origin/main."""
+    if dates == UNKNOWN or dates is None:
+        return UNKNOWN
+    days = []
+    for s in dates:
+        try:
+            days.append(datetime.date.fromisoformat(s.strip()))
+        except ValueError:
+            pass
+    weeks = last_weeks(today)
+    return {
+        "total": len(days),
+        "last": max(days).isoformat() if days else UNKNOWN,
+        "weeks": weeks,
+        "per_week": [sum(1 for d in days if week_of(d) == w) for w in weeks],
+    }
+
+
+def release_metrics(text, today):
+    """Released versions with dates from CHANGELOG.md, gaps between them and days since the last."""
+    if text is None:
+        return UNKNOWN
+    rel = []
+    for m in re.finditer(r"^## (\d+\.\d+\.\d+) \((\d{4}-\d{2}-\d{2})\)", text, re.M):
+        try:
+            rel.append((m.group(1), datetime.date.fromisoformat(m.group(2))))
+        except ValueError:
+            pass
+    if not rel:
+        return UNKNOWN
+    rel.sort(key=lambda x: (x[1], tuple(int(p) for p in x[0].split("."))))
+    gaps = [(b[1] - a[1]).days for a, b in zip(rel, rel[1:])]
+    return {
+        "count": len(rel),
+        "versions": [{"version": v, "date": d.isoformat()} for v, d in rel],
+        "median_gap_days": (lambda m: int(m) if m == int(m) else m)(quantile(gaps, 0.5)) if gaps else UNKNOWN,
+        "days_since_last": (today - rel[-1][1]).days,
+    }
+
+
 # ---------- collectors (touch the disk and git) ----------
 
 def collect_tests():
@@ -296,12 +460,35 @@ def collect_modules():
     return mods
 
 
+AUTO_DEPLOY_SINCE = "2026-10-24"  # decision 98: main deploys through Workers Builds
+
+
+def collect_deploy_dates():
+    """Commit dates of the first parent line of origin/main since auto deploys began.
+
+    A push or merge to main deploys through Cloudflare Workers Builds only since decision 98
+    (2026-10-24); older main commits did not deploy, so they are not counted.
+    """
+    if git("rev-parse", "--verify", "--quiet", "origin/main") is None:
+        return UNKNOWN
+    out = git("log", "--first-parent", "origin/main", "--date=short", "--format=%ad")
+    if out is None:
+        return UNKNOWN
+    return [d for d in out.splitlines() if d >= AUTO_DEPLOY_SINCE]
+
+
 def collect():
     tasks = parse_plan(read("docs/PLAN.md"))
+    today = datetime.datetime.now(datetime.timezone.utc).date()
+    changelog = read("CHANGELOG.md")
     return {
         "generated": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d %H:%M UTC"),
         "version": parse_package_version(read("package.json")),
-        "changelog": parse_changelog(read("CHANGELOG.md")),
+        "changelog": parse_changelog(changelog),
+        "releases": release_metrics(changelog, today),
+        "ci": ci_metrics(parse_ci_runs(read("metrics/ci-runs.json")), today),
+        "deploys": deploy_metrics(collect_deploy_dates(), today),
+        "debt": parse_tech_debt(read("docs/TECH-DEBT.md")),
         "backlog": parse_backlog(read("docs/BACKLOG.md")),
         "tasks": tasks,
         "decisions": parse_decisions(read("docs/DECISIONS.md")),
@@ -338,10 +525,94 @@ def empty(msg):
     return '<p class="muted">%s</p>' % e(msg)
 
 
+def bars(values, weeks, title, unit=""):
+    """Small inline SVG bar chart, one bar per week. No JS."""
+    nums = [v for v in values if isinstance(v, (int, float))]
+    top = max(nums) if nums and max(nums) > 0 else 1
+    rects = []
+    for i, (v, w) in enumerate(zip(values, weeks)):
+        x = i * 14 + 2
+        if isinstance(v, (int, float)):
+            h = max(1.5, 36.0 * v / top) if v else 1.5
+            rects.append('<rect x="%d" y="%.1f" width="10" height="%.1f" rx="1.5"%s><title>%s: %s%s</title></rect>'
+                         % (x, 40 - h, h, ' class="zero"' if not v else "", e(w), e(v), e(unit)))
+        else:
+            rects.append('<rect x="%d" y="38.5" width="10" height="1.5" class="zero"><title>%s: no data</title></rect>'
+                         % (x, e(w)))
+    last = values[-1] if values else UNKNOWN
+    return ('<figure class="spark"><figcaption>%s <b>%s%s</b> <span class="muted">this week</span></figcaption>'
+            '<svg viewBox="0 0 %d 40" preserveAspectRatio="none" role="img" aria-label="%s">%s</svg>'
+            '<div class="axis"><span>%s</span><span>%s</span></div></figure>'
+            % (e(title), e(last), e(unit) if isinstance(last, (int, float)) else "", len(weeks) * 14, e(title),
+               "".join(rects), e(weeks[0] if weeks else ""), e(weeks[-1] if weeks else "")))
+
+
+def delivery_html(d):
+    ci, dep, rel, t = d.get("ci", UNKNOWN), d.get("deploys", UNKNOWN), d.get("releases", UNKNOWN), d["tests"]
+    cl = d["changelog"]
+    get = lambda x, k: UNKNOWN if x == UNKNOWN else x[k]
+    p30, pm = get(ci, "pass_rate_30"), get(ci, "main_pass_rate")
+    state = lambda v: "" if not isinstance(v, (int, float)) else "ok" if v >= 90 else "warn" if v >= 70 else "bad"
+    with_pct = lambda v: "%s%%" % v if isinstance(v, (int, float)) else v
+    tiles = "".join([
+        tile("CI pass rate", with_pct(p30), "last %s finished runs" % get(ci, "decided_30"), state(p30)),
+        tile("Main pass rate", with_pct(pm), "last %s runs on main" % get(ci, "main_decided"), state(pm)),
+        tile("CI time", "%s min" % get(ci, "median_min") if ci != UNKNOWN else UNKNOWN,
+             "median, p90 %s min" % get(ci, "p90_min")),
+        tile("Deploys", get(dep, "total"), "merges to main, last %s" % get(dep, "last")),
+        tile("Releases", get(rel, "count"), "median %s days apart" % get(rel, "median_gap_days")),
+        tile("Since last release", "%s days" % get(rel, "days_since_last") if rel != UNKNOWN else UNKNOWN,
+             "%s changes waiting" % cl["unreleased"],
+             "warn" if rel != UNKNOWN and rel["days_since_last"] > 14 and cl["unreleased"] not in (0, UNKNOWN) else ""),
+    ])
+    charts = []
+    if ci != UNKNOWN:
+        charts.append(bars(ci["runs_per_week"], ci["weeks"], "CI runs per week"))
+        charts.append(bars(ci["pass_per_week"], ci["weeks"], "CI pass rate per week", "%"))
+    if dep != UNKNOWN:
+        charts.append(bars(dep["per_week"], dep["weeks"], "Deploys per week"))
+    lines = []
+    if ci == UNKNOWN:
+        lines.append(e("No CI data. Run python3 scripts/ci_runs.py to refresh metrics/ci-runs.json."))
+    else:
+        for label, f in (("Last failure", ci["last_failure"]), ("Last failure on main", ci["last_main_failure"])):
+            lines.append("%s: %s" % (e(label), "none" if f is None else '%s on <span class="mono">%s</span>, <a href="%s">the run</a>' % (
+                e(f["date"]), e(f["branch"]), e(f["url"]))))
+    if dep == UNKNOWN:
+        lines.append(e("Deploys unknown: no origin/main in git."))
+    lines.append(e("Tests: %s e2e specs with %s tests, %s unit files with %s tests. The full CI run is the suite time: %s min median." % (
+        t["e2e_specs"], t["e2e_tests"], t["unit_files"], t["unit_tests"], get(ci, "median_min"))))
+    lines.append(e("A merge to main deploys (Cloudflare Workers Builds, decision 98). Skipped and cancelled runs do not count."))
+    return ('<div class="tiles mini">%s</div>%s<ul class="plain small-list">%s</ul>' % (
+        tiles, '<div class="charts">%s</div>' % "".join(charts) if charts else "",
+        "".join("<li>%s</li>" % l for l in lines)))
+
+
+def debt_html(debt):
+    if debt == UNKNOWN:
+        return empty("unknown: no table found in docs/TECH-DEBT.md.")
+    c = debt["open"]
+    counts = '<div class="counts">%s</div>' % "".join(
+        '<div class="count %s%s"><b>%d</b><span>%s</span></div>' % (s, " hot" if s == "major" and c[s] else "", c[s], s)
+        for s in SEVERITIES)
+    if not debt["items"]:
+        return counts + empty("No open tech debt.")
+    rows = "".join(
+        '<tr><td data-l="Id" class="mono">%s</td><td data-l="Severity"><span class="chip sev-%s">%s</span></td>'
+        '<td data-l="Item">%s</td><td data-l="Where" class="mono small">%s</td><td data-l="Size">%s</td></tr>'
+        % (e(r["id"]), e(r["severity"]), e(r["severity"]), e(r["item"]), e(r["where"]), e(r["size"]))
+        for r in debt["items"])
+    return (counts + '<p class="muted small">%d open of %d rows in docs/TECH-DEBT.md.</p>' % (debt["open_total"], debt["total"])
+            + '<table class="stack debt"><thead><tr><th>Id</th><th>Severity</th><th>Item</th><th>Where</th><th>Size</th></tr></thead>'
+            '<tbody>%s</tbody></table>' % rows)
+
+
 def render(d):
     cl, dec, fr, t, g = d["changelog"], d["decisions"], d["friction"], d["tests"], d["git"]
     open_dec = n_of(dec["open"]) if dec != UNKNOWN else UNKNOWN
     tasks_n = n_of(d["tasks"])
+    debt = d.get("debt", UNKNOWN)
+    major = UNKNOWN if debt == UNKNOWN else debt["open"]["major"]
 
     tiles = "".join([
         tile("Version", d["version"], "last release %s, %s" % (cl["latest"], cl["latest_date"])),
@@ -352,6 +623,8 @@ def render(d):
              "bad" if isinstance(open_dec, int) and open_dec else "ok" if open_dec == 0 else ""),
         tile("E2e specs", t["e2e_specs"], "%s tests" % t["e2e_tests"]),
         tile("Unit test files", t["unit_files"], "%s tests" % t["unit_tests"]),
+        tile("Tech debt", n_of(debt, "open_total") if debt != UNKNOWN else UNKNOWN,
+             "open, %s major" % major, "bad" if isinstance(major, int) and major else "ok" if major == 0 else ""),
     ])
 
     s = d["status"]
@@ -431,11 +704,29 @@ def render(d):
         card("Open tasks (%s)" % tasks_n, tasks),
         card("Recent decisions", recent),
         card("Recent friction", friction),
+        card("Delivery", delivery_html(d), "wide"),
+        card("Tech debt", debt_html(debt), "wide"),
         card("Recent commits", commits, "wide"),
         card("Learning modules", modules, "wide"),
     ])
     return PAGE.format(tiles=tiles, body=body, generated=e(d["generated"]),
                        sources=e(", ".join(d["sources"])))
+
+
+def sub_get(d, part, key):
+    x = d.get(part, UNKNOWN)
+    return UNKNOWN if x == UNKNOWN else x.get(key, UNKNOWN)
+
+
+def ci_get(d, key):
+    return sub_get(d, "ci", key)
+
+
+def debt_line(debt):
+    if debt == UNKNOWN:
+        return UNKNOWN
+    c = debt["open"]
+    return "%d (%d major, %d medium, %d low)" % (debt["open_total"], c["major"], c["medium"], c["low"])
 
 
 def summary(d):
@@ -452,6 +743,11 @@ def summary(d):
         ("Decisions logged", n_of(dec, "total") if dec != UNKNOWN else UNKNOWN),
         ("Friction lines", n_of(fr, "total") if fr != UNKNOWN else UNKNOWN),
         ("Tests", "%s e2e specs, %s unit test files" % (d["tests"]["e2e_specs"], d["tests"]["unit_files"])),
+        ("CI", UNKNOWN if d.get("ci", UNKNOWN) == UNKNOWN else "%s%% pass (last 30), main %s%%, median %s min" % (
+            ci_get(d, "pass_rate_30"), ci_get(d, "main_pass_rate"), ci_get(d, "median_min"))),
+        ("Deploys and releases", "%s deploys, %s releases, %s days since the last" % (
+            sub_get(d, "deploys", "total"), sub_get(d, "releases", "count"), sub_get(d, "releases", "days_since_last"))),
+        ("Tech debt open", debt_line(d.get("debt", UNKNOWN))),
         ("Branch", "%s, %s ahead of origin/main" % (d["git"]["branch"], d["git"]["ahead"])),
         ("Blockers", trim(s["blockers"], 120)),
     ]
@@ -490,7 +786,7 @@ h2 {{ font-size:15px; margin:0 0 12px; }}
 .muted {{ color:var(--muted); }} .small {{ font-size:12px; }}
 .mono {{ font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:13px; }}
 .lead {{ color:var(--muted); margin:0 0 20px; }}
-.tiles {{ display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:12px; margin-bottom:16px; }}
+.tiles {{ display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin-bottom:16px; }}
 .tile {{ background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:14px; border-top:3px solid var(--border); min-width:0; }}
 .tile.ok {{ border-top-color:var(--ok); }} .tile.bad {{ border-top-color:var(--bad); }} .tile.warn {{ border-top-color:var(--warn); }}
 .tile .label {{ font-size:12px; color:var(--muted); }}
@@ -507,7 +803,7 @@ ul.plain li {{ padding:6px 0; border-bottom:1px solid var(--border); font-size:1
 ul.plain li:last-child {{ border-bottom:0; }}
 ul.alert li {{ color:var(--bad); font-weight:600; }}
 table {{ width:100%; border-collapse:collapse; font-size:14px; }}
-th {{ text-align:left; font-size:12px; color:var(--muted); font-weight:600; padding:6px 8px; border-bottom:1px solid var(--border); }}
+th {{ white-space:nowrap; text-align:left; font-size:12px; color:var(--muted); font-weight:600; padding:6px 8px; border-bottom:1px solid var(--border); }}
 td {{ padding:8px; border-bottom:1px solid var(--border); vertical-align:top; }}
 tr:last-child td {{ border-bottom:0; }}
 td.num {{ font-variant-numeric:tabular-nums; }}
@@ -518,6 +814,24 @@ td.num {{ font-variant-numeric:tabular-nums; }}
 .chip.dropped {{ text-decoration:line-through; color:var(--muted); }}
 .ids {{ margin:0; display:flex; flex-wrap:wrap; gap:6px; }}
 .chip.id {{ font-family:ui-monospace,SFMono-Regular,Menlo,monospace; border-radius:6px; }}
+.tiles.mini {{ grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); }}
+.tiles.mini .tile {{ background:var(--bg); }}
+.charts {{ display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:16px; margin-bottom:12px; }}
+.spark {{ margin:0; min-width:0; }}
+.spark figcaption {{ font-size:13px; margin-bottom:6px; }}
+.spark svg {{ width:100%; height:48px; display:block; }}
+.spark rect {{ fill:var(--accent); }} .spark rect.zero {{ fill:var(--border); }}
+.spark .axis {{ display:flex; justify-content:space-between; font-size:11px; color:var(--muted); margin-top:2px; }}
+ul.small-list li {{ font-size:13px; }}
+a {{ color:var(--accent); }}
+.counts {{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; margin-bottom:12px; }}
+.count {{ background:var(--track); border-radius:8px; padding:8px; text-align:center; }}
+.count b {{ display:block; font-size:22px; font-variant-numeric:tabular-nums; }}
+.count span {{ font-size:12px; color:var(--muted); }}
+.count.hot {{ background:var(--bad-bg); }} .count.hot b {{ color:var(--bad); }}
+.chip.sev-major {{ background:var(--bad-bg); color:var(--bad); font-weight:600; }}
+.chip.sev-medium {{ background:var(--warn-bg); color:var(--warn); }}
+table.debt td.mono {{ white-space:nowrap; }}
 footer {{ margin-top:24px; font-size:12px; color:var(--muted); }}
 @media (max-width:720px) {{
   .grid {{ grid-template-columns:1fr; }}
@@ -539,7 +853,7 @@ footer {{ margin-top:24px; font-size:12px; color:var(--muted); }}
 <p class="lead">Dino Blokwereld at a glance. Made from the repo docs and git.</p>
 <div class="tiles">{tiles}</div>
 <div class="grid">{body}</div>
-<footer>Generated {generated}. Sources: {sources}. Run python3 scripts/dashboard.py to refresh.</footer>
+<footer>Generated {generated}. Sources: {sources}. Run python3 scripts/ci_runs.py to refresh the CI history, then python3 scripts/dashboard.py.</footer>
 </main>
 </body>
 </html>

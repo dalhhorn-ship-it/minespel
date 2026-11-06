@@ -43,7 +43,7 @@ The big docs are append only logs. Never read them whole. Grep by id and read on
 * `CHECK_E2E=0 ./scripts/check.sh`: everything but the browser tests.
 * `npx playwright test <spec>`: one e2e spec in WebKit, which installs in the cloud sandbox now. `npm run test:e2e:local -- <spec>` is the Chromium fallback.
 * `npm run test:e2e:ui-review`: the full UI review, left out of normal runs. Every 5 releases or so, or after a lot of UI change (decision 106).
-* `python3 scripts/dashboard.py --print`: a short project status. The page is `dashboard/index.html` (not in git).
+* `python3 scripts/dashboard.py --print`: a short project status, with CI, deploys, releases and tech debt. Run `python3 scripts/ci_runs.py` first to refresh the CI history in `metrics/` (not in git). The page is `dashboard/index.html` (not in git).
 * `./scripts/verify.sh task <ids>`: free independent check of a developer task, before any `verifier` agent.
 
 ## Hard rules

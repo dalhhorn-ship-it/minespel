@@ -50,12 +50,12 @@
 | docs/DECISIONS.md | 41 | Every notable decision. Founder decisions are marked NEEDS FOUNDER until answered, then… |
 | docs/DISCUSSION.md | 96 | Review rounds between agents. Newest at the bottom. Keep it short: who said what, what… |
 | docs/FACTORY.md | 113 | Moved out of CLAUDE.md on 2026-10-26 (decision 104) so it is read only when needed. The… |
-| docs/FRICTION.md | 50 | The operator adds a line whenever something goes wrong or feels slow, so /retro has real… |
-| docs/HANDOFF.md | 26 | Founder: pull best practices from dalhhorn-ship-it/danfactory into minespel; health… |
+| docs/FRICTION.md | 51 | The operator adds a line whenever something goes wrong or feels slow, so /retro has real… |
+| docs/HANDOFF.md | 23 | Founder: "build v11, v3, v6". v11 already shipped (0.5.0). Build v3 now as 0.6.0, then… |
 | docs/IDEA.md | 81 | "Create a 3D minecraft education kind of game but then also with dinosaurs, and every 5… |
 | docs/PLAN.md | 62 | Task graph written by the architect on 2026-10-17 from the signed PRD. The operator… |
 | docs/PLATFORM.md | 39 | Moved out of CLAUDE.md on 2026-10-26 (decision 104). Read this when a task touches the… |
-| docs/PRD.md | 874 | Status: READY FOR SIGNOFF Sections: 1. Summary:7, 2. Users:12, 3. Goals and success:19, 4. What the app is today (v1…:29, 5. Release backlog:389, 6. User flows:392, 7. Acceptance criteria:481, 8. Look, sound and feel:714, 9. Kid safety and privacy:726, 10. Constraints:740, 11. Risks and decisions:751, 12. Releases:821 |
+| docs/PRD.md | 874 | Status: APPROVED by Founder on 2026-11-06 Sections: 1. Summary:7, 2. Users:12, 3. Goals and success:19, 4. What the app is today (v1…:29, 5. Release backlog:389, 6. User flows:392, 7. Acceptance criteria:481, 8. Look, sound and feel:714, 9. Kid safety and privacy:726, 10. Constraints:740, 11. Risks and decisions:751, 12. Releases:821 |
 | docs/RETRO.md | 25 | Written by /retro. Newest at the bottom. Factory level learnings are also saved in… |
 | docs/SHOP_PRD.md | 108 | Document Status: Approved Addendum (docs/SHOP_PRD.md — companion to docs/PRD.md) |
 | docs/STATUS.md | 55 | Phase: small releases. 0.1.0, 0.2.0, 0.3.0, R1 and 0.4.0 Punten voor elke ronde are… |

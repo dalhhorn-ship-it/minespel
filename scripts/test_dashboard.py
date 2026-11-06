@@ -146,6 +146,103 @@ class OtherParsersTest(unittest.TestCase):
         self.assertEqual(res["last"][0]["text"], "thing 5")
 
 
+TECH_DEBT = """> Known tech debt.
+
+# Tech debt
+
+| Id | Severity | Item | Where | Size | Source | Status |
+|---|---|---|---|---|---|---|
+| TD1 | low | Tidy a file. | `a.ts` | S | review | open |
+| TD2 | major | A refresh can lose a block. | `save.ts:62` | S | N2 | open |
+| TD3 | medium | Big shop file. | `shop.ts` | M | SIMPLIFY | open |
+| TD4 | major | Main was red. | `x.spec.ts` | S | N1 | done |
+| TD5 | Major | Worlds stop saving. | `world-save.ts` | S | N2 | open |
+"""
+
+
+def run(i, day, concl, branch="feature", minutes=3):
+    start = "2026-11-%02dT10:00:00Z" % day
+    return {"id": i, "name": "CI", "event": "push", "head_branch": branch, "status": "completed",
+            "conclusion": concl, "created_at": start, "run_started_at": start,
+            "updated_at": "2026-11-%02dT10:%02d:00Z" % (day, minutes), "html_url": "https://example.test/%d" % i}
+
+
+class TechDebtTest(unittest.TestCase):
+    def test_counts_and_order(self):
+        res = d.parse_tech_debt(TECH_DEBT)
+        self.assertEqual(res["total"], 5)
+        self.assertEqual(res["open_total"], 4)
+        self.assertEqual(res["open"], {"major": 2, "medium": 1, "low": 1})
+        self.assertEqual([r["id"] for r in res["items"]], ["TD2", "TD5", "TD3", "TD1"])
+        self.assertEqual(res["items"][0]["where"], "save.ts:62")
+
+    def test_no_table_is_unknown(self):
+        self.assertEqual(d.parse_tech_debt("# Tech debt\n\nNothing yet.\n"), d.UNKNOWN)
+        self.assertEqual(d.parse_tech_debt(None), d.UNKNOWN)
+
+
+class CiRunsTest(unittest.TestCase):
+    TODAY = d.datetime.date(2026, 11, 6)  # a Friday in ISO week 45
+
+    def runs(self):
+        return [
+            run(1, 6, "success", "main", 2),
+            run(2, 5, "failure", "main", 4),
+            run(3, 5, "cancelled", "feature", 1),
+            run(4, 4, "skipped", "feature", 0),
+            run(5, 3, "success", "feature", 6),
+            run(6, 2, "failure", "feature", 8),
+        ]
+
+    def test_metrics(self):
+        m = d.ci_metrics(self.runs(), self.TODAY)
+        self.assertEqual(m["runs"], 6)
+        self.assertEqual(m["decided_30"], 4)
+        self.assertEqual(m["pass_rate_30"], 50)
+        self.assertEqual(m["main_pass_rate"], 50)
+        self.assertEqual(m["median_min"], 5.0)  # 2, 4, 6, 8
+        self.assertEqual(m["p90_min"], 8.0)
+        self.assertEqual(m["last_failure"]["url"], "https://example.test/2")
+        self.assertEqual(m["last_main_failure"]["date"], "2026-11-05")
+        self.assertEqual(m["weeks"][-1], "2026-W45")
+        self.assertEqual(len(m["weeks"]), 8)
+        self.assertEqual(m["runs_per_week"][-1], 6)   # Monday 2 to Friday 6 November
+        self.assertEqual(m["runs_per_week"][-2], 0)
+        self.assertEqual(m["pass_per_week"][-1], 50)  # 2 of 4 finished runs
+        self.assertEqual(m["pass_per_week"][-2], d.UNKNOWN)
+
+    def test_parse_file_text(self):
+        text = '{"source": "x", "runs": [\n%s\n]}' % ",\n".join(d.json.dumps(r) for r in self.runs())
+        self.assertEqual(len(d.parse_ci_runs(text)), 6)
+        self.assertEqual(d.parse_ci_runs("not json"), d.UNKNOWN)
+        self.assertEqual(d.parse_ci_runs(None), d.UNKNOWN)
+        self.assertEqual(d.ci_metrics(d.UNKNOWN, self.TODAY), d.UNKNOWN)
+        self.assertEqual(d.ci_metrics([], self.TODAY), d.UNKNOWN)
+
+    def test_deploys(self):
+        m = d.deploy_metrics(["2026-11-06", "2026-11-02", "2026-10-26", "bad"], self.TODAY)
+        self.assertEqual(m["total"], 3)
+        self.assertEqual(m["last"], "2026-11-06")
+        self.assertEqual(m["per_week"][-1], 2)
+        self.assertEqual(m["per_week"][-2], 1)
+        self.assertEqual(d.deploy_metrics(d.UNKNOWN, self.TODAY), d.UNKNOWN)
+
+
+class ReleaseTest(unittest.TestCase):
+    def test_intervals(self):
+        text = ("## Unreleased\n\n* x\n\n## 0.4.0 (2026-10-24)\n\n## 0.3.0 (2026-10-22)\n\n"
+                "## 0.2.0 (2026-10-19)\n\n## 0.1.0 (2026-10-19)\n")
+        m = d.release_metrics(text, d.datetime.date(2026, 11, 6))
+        self.assertEqual(m["count"], 4)
+        self.assertEqual(m["median_gap_days"], 2)  # gaps 0, 3, 2
+        self.assertEqual(m["days_since_last"], 13)
+        self.assertEqual(m["versions"][0]["version"], "0.1.0")
+
+    def test_no_dated_release(self):
+        self.assertEqual(d.release_metrics("## Unreleased\n\n* x\n", d.datetime.date(2026, 11, 6)), d.UNKNOWN)
+        self.assertEqual(d.release_metrics(None, d.datetime.date(2026, 11, 6)), d.UNKNOWN)
+
+
 class MissingSourceTest(unittest.TestCase):
     def test_every_parser_gives_unknown(self):
         self.assertEqual(d.parse_package_version(None), d.UNKNOWN)
@@ -168,10 +265,13 @@ class MissingSourceTest(unittest.TestCase):
             "tests": {"e2e_specs": d.UNKNOWN, "e2e_tests": d.UNKNOWN,
                       "unit_files": d.UNKNOWN, "unit_tests": d.UNKNOWN},
             "git": {"branch": d.UNKNOWN, "commits": [], "ahead": d.UNKNOWN, "tags": []},
-            "modules": d.UNKNOWN, "sources": [],
+            "modules": d.UNKNOWN, "sources": [], "ci": d.UNKNOWN, "deploys": d.UNKNOWN,
+            "releases": d.UNKNOWN, "debt": d.UNKNOWN,
         }
         page = d.render(data)
         self.assertIn("<title>Minespel dashboard</title>", page)
+        self.assertIn("No CI data. Run python3 scripts/ci_runs.py", page)
+        self.assertIn("| CI | unknown |", d.summary(data))
         self.assertIn("unknown", page)
         self.assertIn("| Open tasks | unknown |", d.summary(data))
 
