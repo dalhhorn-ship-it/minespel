@@ -63,7 +63,7 @@ if [[ -f package.json ]]; then
     fi
     if "${install_webkit[@]}"; then
       npm run test:e2e
-    elif [[ -z "${CI:-}" && -d /opt/pw-browsers/chromium ]]; then
+    elif [[ -z "${CI:-}" && -e /opt/pw-browsers/chromium ]]; then
       # Cloud sandboxes block the WebKit download. CI always has WebKit and never takes this path.
       echo "check.sh: WARNING: WebKit could not be installed. Running e2e in LOCAL CHROMIUM (E2E_LOCAL=1), NOT WebKit. CI on WebKit stays the truth."
       npm run test:e2e:local
