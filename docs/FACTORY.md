@@ -104,6 +104,8 @@ Keep it economical:
 | `docs/releases/plan-done.md` | Done and dropped tasks from `docs/PLAN.md`. When a release ships, move its done rows and notes here. |
 | `docs/factory-feedback/` | Factory level learnings, also copied to the factory inbox |
 | `.factory` | Which factory repo this app came from and the date it started |
+| `docs/INDEX.md`, `docs/knowledge-graph.json` | Generated reference table and doc graph (decision 118). Edit only the curated block. |
+| `dashboard/` | Generated project dashboard, not in git (`scripts/dashboard.py`, decision 118) |
 | `docs/HANDOFF.md` | Short handoff note for a fresh context (`/handoff`). Loaded by the SessionStart hook. Only there while work is in flight. |
 | `.claude/hooks/*.py` | Context hooks from danfactory (decision 117): large read guard, SessionStart note, PreCompact snapshot, context watch |
 | `CHANGELOG.md` | What changed, in kid readable words |

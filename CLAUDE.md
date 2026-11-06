@@ -11,6 +11,7 @@ A free 3D block world with dinos and short learning breaks (Dutch: taal, rekenen
 ## Find, do not read
 
 The big docs are append only logs. Never read them whole. Grep by id and read only the matching rows or section.
+* The reference table: `docs/INDEX.md` lists every doc, its sections with line numbers and where each kind of id lives. `docs/knowledge-graph.json` has the doc links. Both are built by `python3 scripts/docs_index.py`, which `check.sh` runs.
 * Acceptance criteria: `grep -n "AC180" docs/PRD.md`
 * Tasks: `grep -n "| V11c " docs/PLAN.md`
 * Decisions: `grep -n "^| 98 " docs/DECISIONS.md` (1 to 86 are in `docs/archive/decisions-1-86.md`).
@@ -42,6 +43,7 @@ The big docs are append only logs. Never read them whole. Grep by id and read on
 * `CHECK_E2E=0 ./scripts/check.sh`: everything but the browser tests.
 * `npx playwright test <spec>`: one e2e spec in WebKit, which installs in the cloud sandbox now. `npm run test:e2e:local -- <spec>` is the Chromium fallback.
 * `npm run test:e2e:ui-review`: the full UI review, left out of normal runs. Every 5 releases or so, or after a lot of UI change (decision 106).
+* `python3 scripts/dashboard.py --print`: a short project status. The page is `dashboard/index.html` (not in git).
 * `./scripts/verify.sh task <ids>`: free independent check of a developer task, before any `verifier` agent.
 
 ## Hard rules

@@ -23,3 +23,6 @@ docs/screenshots/
 
 # One shot escape hatch for the large read guard (decision 117)
 .claude/.allow-large-read
+
+# Generated project dashboard (decision 118)
+/dashboard/
