@@ -2,14 +2,20 @@
 """Project dashboard for the product director.
 
 Reads the repo docs and git, then writes a self contained page:
-  dashboard/index.html  (no JS, no network, light and dark; two tabs,
-                         Overview and Roadmap, switched with pure CSS)
+  dashboard/index.html  (no network, light and dark; two tabs, Overview
+                         and Roadmap, switched with pure CSS; one small
+                         inline script only for the Ververs button)
   dashboard/data.json   (the same numbers as data)
   dashboard/SUMMARY.md  (a short markdown table)
 
 Usage:
   python3 scripts/dashboard.py          write the three files
   python3 scripts/dashboard.py --print  also print SUMMARY.md
+
+The Ververs button fires the Claude Code Routine REFRESH_TRIGGER through the
+artifact runtime capability `mcp` (decision 121). Set the env var
+DASHBOARD_REFRESH_TRIGGER to another trigger id, or to empty for no button.
+The page renders fully without the script.
 
 Python 3 stdlib only. Every parser takes text, not a path, and gives
 "unknown" when a source is missing or does not match. It never crashes
@@ -27,6 +33,11 @@ import sys
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT = os.path.join(ROOT, "dashboard")
 UNKNOWN = "unknown"
+
+# Ververs button (decision 121): the Routine that regenerates and republishes the page.
+REFRESH_TRIGGER = os.environ.get("DASHBOARD_REFRESH_TRIGGER", "trig_01E4LwguiwHKSMXYFywVuiFP").strip()
+REFRESH_SERVER = "Claude Code Remote"
+REFRESH_TOOL = "fire_trigger"
 
 SOURCES = [
     "package.json", "CHANGELOG.md", "docs/BACKLOG.md", "docs/PLAN.md",
@@ -776,7 +787,76 @@ def render_roadmap(rm):
             '<div class="rm-corner"></div>%s%s</div></div></section>' % (rm.get("shipped", 0), len(cols), head, rows))
 
 
-def render(d):
+REFRESH_JS = """(function () {
+  var TRIGGER = %(trigger)s, SERVER = %(server)s, TOOL = %(tool)s;
+  var btn = document.getElementById("refresh-btn");
+  var msg = document.getElementById("refresh-msg");
+  if (!btn || !msg) return;
+  var mcp = null, busy = false;
+  function say(text) { msg.textContent = text; }
+  function unavailable(text) { btn.hidden = true; btn.disabled = true; say(text); }
+  function fail(err) {
+    var code = (err && err.code) || "upstream_error";
+    if (code === "blocked_by_policy" || code === "not_in_manifest") {
+      return unavailable("Ververs is hier niet beschikbaar (" + code + ").");
+    }
+    var text = {
+      needs_reauth: "Verbind " + SERVER + " opnieuw in claude.ai, Instellingen, Connectors.",
+      server_not_connected: "Voeg " + SERVER + " toe in claude.ai, Instellingen, Connectors.",
+      approval_required: "Ververs heeft je toestemming nodig. Klik opnieuw en kies Toestaan.",
+      consent_required: "Ververs heeft je toestemming nodig. Klik opnieuw en kies Toestaan.",
+      server_unavailable: "Niet zeker of het bijwerken is gestart. Wacht een paar minuten.",
+      upstream_error: "Niet zeker of het bijwerken is gestart. Wacht een paar minuten."
+    }[code] || "Bijwerken lukte niet.";
+    var again = err && err.retryable === true || code === "approval_required" || code === "consent_required";
+    say(text + " (" + code + ")" + (again ? "" : " Opnieuw proberen kan nu niet."));
+    btn.disabled = !again;
+  }
+  btn.addEventListener("click", function () {
+    if (!mcp || busy) return;
+    busy = true; btn.disabled = true; say("Bezig...");
+    var listed = typeof mcp.listTools === "function" ? mcp.listTools(SERVER) : Promise.resolve(null);
+    listed.then(function (res) {
+      if (res) {
+        var ok = (res.servers || []).some(function (s) {
+          return s.server === SERVER && (s.tools || []).some(function (t) { return t.name === TOOL; });
+        });
+        if (!ok) { unavailable("Ververs is hier niet beschikbaar."); return; }
+      }
+      return mcp.callTool(SERVER, TOOL, { trigger_id: TRIGGER }).then(function () {
+        say("Bijwerken gestart. De pagina laadt zichzelf opnieuw over een paar minuten.");
+        setTimeout(function () { btn.disabled = false; }, 120000);
+      });
+    }).catch(fail).then(function () { busy = false; });
+  });
+  var use = window.claude && window.claude.use;
+  Promise.resolve(typeof use === "function" ? window.claude.use("mcp") : null)
+    .catch(function () { return null; })
+    .then(function (ns) {
+      if (!ns) return unavailable("Ververs werkt alleen in claude.ai.");
+      mcp = ns; btn.hidden = false; btn.disabled = false; say("");
+    });
+})();"""
+
+SAFE_TRIGGER = re.compile(r"^[A-Za-z0-9_-]{1,100}$")
+
+
+def refresh_html(generated, trigger):
+    """The Gemaakt line, plus the Ververs button when a trigger id is set.
+    The button starts hidden; the script shows it only when the mcp capability resolves."""
+    made = '<span class="muted small">Gemaakt: %s</span>' % e(generated)
+    if not trigger or not SAFE_TRIGGER.match(trigger):
+        return '<div class="refresh">%s</div>' % made
+    js = REFRESH_JS % {"trigger": json.dumps(trigger), "server": json.dumps(REFRESH_SERVER),
+                       "tool": json.dumps(REFRESH_TOOL)}
+    return ('<div class="refresh" data-trigger="%s"><button type="button" id="refresh-btn" hidden>Ververs</button>%s'
+            '<span id="refresh-msg" class="muted small" role="status">Ververs werkt alleen in claude.ai.</span></div>'
+            '<script>%s</script>' % (e(trigger), made, js))
+
+
+def render(d, refresh_trigger=None):
+    if refresh_trigger is None:
+        refresh_trigger = REFRESH_TRIGGER
     cl, dec, fr, t, g = d["changelog"], d["decisions"], d["friction"], d["tests"], d["git"]
     open_dec = n_of(dec["open"]) if dec != UNKNOWN else UNKNOWN
     tasks_n = n_of(d["tasks"])
@@ -879,6 +959,7 @@ def render(d):
         card("Learning modules", modules, "wide"),
     ])
     return PAGE.format(tiles=tiles, body=body, generated=e(d["generated"]),
+                       refresh=refresh_html(d["generated"], refresh_trigger),
                        sources=e(", ".join(d["sources"])), roadmap=render_roadmap(d.get("roadmap")))
 
 
@@ -1001,6 +1082,10 @@ a {{ color:var(--accent); }}
 .chip.sev-major {{ background:var(--bad-bg); color:var(--bad); font-weight:600; }}
 .chip.sev-medium {{ background:var(--warn-bg); color:var(--warn); }}
 table.debt td.mono {{ white-space:nowrap; }}
+.refresh {{ display:flex; flex-wrap:wrap; align-items:center; gap:8px 12px; margin:-8px 0 20px; }}
+.refresh button {{ font:inherit; font-weight:600; min-height:44px; padding:8px 18px; border-radius:8px; border:1px solid var(--accent); background:var(--accent); color:#fff; cursor:pointer; }}
+.refresh button:disabled {{ opacity:.55; cursor:default; }}
+.refresh button[hidden] {{ display:none; }}
 footer {{ margin-top:24px; font-size:12px; color:var(--muted); }}
 .tabs {{ display:flex; gap:4px; border-bottom:1px solid var(--border); margin-bottom:16px; }}
 .tabs label {{ padding:10px 16px; cursor:pointer; color:var(--muted); border-bottom:2px solid transparent; margin-bottom:-1px; font-weight:600; font-size:15px; }}
@@ -1047,6 +1132,7 @@ footer {{ margin-top:24px; font-size:12px; color:var(--muted); }}
 <main>
 <h1>Minespel dashboard</h1>
 <p class="lead">Dino Blokwereld at a glance. Made from the repo docs and git.</p>
+{refresh}
 <input type="radio" name="tab" id="tab-overview" class="tab-input" checked>
 <input type="radio" name="tab" id="tab-roadmap" class="tab-input">
 <nav class="tabs" aria-label="Dashboard views"><label for="tab-overview">Overview</label><label for="tab-roadmap">Roadmap</label></nav>

@@ -21,6 +21,7 @@ You are the operator. Run the completion checklist below (layer 7 in `docs/FACTO
    * Deploy with `npm run deploy` if the founder is logged in to wrangler on this machine (`npx wrangler whoami`), or ask the founder to run the Deploy workflow in GitHub Actions (needs the `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` secrets, which only the founder adds).
    * Verify the URL loads (`curl -sI <url>` returns 200) and that the manifest and the offline service worker are served. Then give the founder the iPad steps: open the URL in Safari, tap Share, then Add to Home Screen, then open it once while online so it works offline.
 4. Tag the release with its version (for example `git tag v0.1.0`). Commit and push.
+   * Refresh the dashboard: fire the Routine with the `fire_trigger` tool of the claude-code-remote MCP server, trigger id `trig_01E4LwguiwHKSMXYFywVuiFP` (decision 121). Do not regenerate and republish it by hand.
 5. For v1, run the `/retro` steps. For a later release, do the short learn step in `/release` instead. App lessons go into CLAUDE.md, factory learnings go to the factory inbox.
 6. Final summary to the founder:
    * What was built and where to play it

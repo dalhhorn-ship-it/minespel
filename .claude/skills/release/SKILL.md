@@ -50,6 +50,8 @@ Run the `/qa` steps in release mode: tests for the new ACs, the full `./scripts/
 
 Push the release once (see One push per release). Then run the `/ship` steps for a release: the next minor version (v2 is `0.2.0`, v3 is `0.3.0`), CHANGELOG, deploy decision, tag. After it ships, move the release's done rows and task notes from `docs/PLAN.md` to `docs/releases/plan-done.md`, so the plan holds only open work.
 
+Then refresh the dashboard: fire the Routine with the `fire_trigger` tool of the claude-code-remote MCP server, trigger id `trig_01E4LwguiwHKSMXYFywVuiFP` (decision 121). Do not regenerate and republish it by hand.
+
 ## 6. Learn
 
 Ask the founder and kids two quick questions with AskUserQuestion: did they like the new thing, and what should come next. Put the answers in `docs/BACKLOG.md`. Add one line per real problem to `docs/FRICTION.md`. Run the full `/retro` only every 3 releases or when friction grew.

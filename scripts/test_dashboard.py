@@ -285,7 +285,7 @@ class MissingSourceTest(unittest.TestCase):
             "tests": {"e2e_specs": 0, "e2e_tests": 0, "unit_files": 0, "unit_tests": 0},
             "git": {"branch": "b", "commits": [], "ahead": 0, "tags": []}, "modules": [], "sources": [],
         }
-        page = d.render(data)
+        page = d.render(data, refresh_trigger="")
         self.assertNotIn("<script>", page)
         self.assertIn("&lt;script&gt;", page)
 
@@ -386,6 +386,52 @@ class RoadmapTest(unittest.TestCase):
         self.assertIn('class="panel panel-roadmap"', page)
         self.assertIn('class="panel panel-overview"', page)
         self.assertIn("Roadmap: proposed sequence", page)
+        self.assertNotIn("<script", d.render(data, refresh_trigger=""))
+
+
+class RefreshButtonTest(unittest.TestCase):
+    """Decision 121: the Ververs button fires the dashboard Routine through the mcp capability."""
+
+    def page(self, trigger):
+        data = {
+            "generated": "2026-11-07 10:00 UTC", "version": "1", "changelog": d.parse_changelog(None),
+            "backlog": d.UNKNOWN, "tasks": [], "decisions": d.parse_decisions(""),
+            "status": d.parse_status(None), "friction": d.parse_friction(""),
+            "tests": {"e2e_specs": 0, "e2e_tests": 0, "unit_files": 0, "unit_tests": 0},
+            "git": {"branch": "b", "commits": [], "ahead": 0, "tags": []}, "modules": [], "sources": [],
+        }
+        return d.render(data, refresh_trigger=trigger)
+
+    def test_default_trigger_is_the_dashboard_routine(self):
+        if "DASHBOARD_REFRESH_TRIGGER" not in os.environ:
+            self.assertEqual(d.REFRESH_TRIGGER, "trig_01E4LwguiwHKSMXYFywVuiFP")
+
+    def test_button_present_with_the_id(self):
+        page = self.page("trig_ABC123")
+        self.assertIn('id="refresh-btn" hidden>Ververs</button>', page)
+        self.assertIn('"trig_ABC123"', page)
+        self.assertIn('"Claude Code Remote"', page)
+        self.assertIn('"fire_trigger"', page)
+        self.assertIn("Ververs werkt alleen in claude.ai.", page)
+        self.assertIn("Gemaakt: 2026-11-07 10:00 UTC", page)
+        self.assertIn("{ trigger_id: TRIGGER }", page)
+        self.assertNotIn("callTool(SERVER, TOOL", page.split("addEventListener")[0])
+
+    def test_only_one_inline_script(self):
+        page = self.page("trig_ABC123")
+        self.assertEqual(page.count("<script"), 1)
+        self.assertNotIn("<script src", page)
+        self.assertNotIn("http", page.split("<script>")[1].split("</script>")[0])
+
+    def test_absent_when_empty(self):
+        page = self.page("")
+        self.assertNotIn("refresh-btn", page)
+        self.assertNotIn("<script", page)
+        self.assertIn("Gemaakt: 2026-11-07 10:00 UTC", page)
+
+    def test_unsafe_id_gives_no_button(self):
+        page = self.page('x"</script><b>')
+        self.assertNotIn("refresh-btn", page)
         self.assertNotIn("<script", page)
 
 

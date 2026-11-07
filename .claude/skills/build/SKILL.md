@@ -19,6 +19,7 @@ You are the operator. Follow the execution loop in `docs/FACTORY.md`.
    * A FAIL from either goes back to the developer as the exact finding.
 5. On failure: send the exact error back to a `developer` agent with the task. Up to 3 attempts. If still failing, mark the task `blocked` in `docs/PLAN.md`, add a `NEEDS FOUNDER` decision with options (simplify the task, change approach, move it to a later release), and ask the founder.
 6. On success: mark the task `done` in `docs/PLAN.md`, commit with message `feat(T<id>): <title>` (include tests and docs in the same commit).
+   * Refresh the dashboard: fire the Routine with the `fire_trigger` tool of the claude-code-remote MCP server, trigger id `trig_01E4LwguiwHKSMXYFywVuiFP` (decision 121). Do not regenerate and republish it by hand.
 7. **Scope guard.** If any agent reports the PRD is wrong or something new is needed, ask `product` whether it is in scope. If not, it is a founder decision. Do not build it before the founder says yes and the PRD is updated and approved again.
 8. **At each milestone** (M1, M2, ...):
    * Launch `architect` in milestone review mode. Tell it the verifier already passed each task, so it should focus on design, structure and risks across tasks. Fix every "must fix" via `developer` agents.
