@@ -2,9 +2,10 @@
 """Project dashboard for the product director.
 
 Reads the repo docs and git, then writes a self contained page:
-  dashboard/index.html  (no network, light and dark; two tabs, Overview
-                         and Roadmap, switched with pure CSS; one small
-                         inline script only for the Ververs button)
+  dashboard/index.html  (no network, light and dark; four tabs, Overview,
+                         Roadmap, Deploy and Security, switched with pure
+                         CSS; one small inline script only for the Ververs
+                         button)
   dashboard/data.json   (the same numbers as data)
   dashboard/SUMMARY.md  (a short markdown table)
 
@@ -29,6 +30,7 @@ import os
 import re
 import subprocess
 import sys
+import urllib.parse
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT = os.path.join(ROOT, "dashboard")
@@ -42,7 +44,8 @@ REFRESH_TOOL = "fire_trigger"
 SOURCES = [
     "package.json", "CHANGELOG.md", "docs/BACKLOG.md", "docs/PLAN.md",
     "docs/DECISIONS.md", "docs/STATUS.md", "docs/FRICTION.md", "docs/TECH-DEBT.md",
-    "metrics/ci-runs.json", "git log --first-parent origin/main",
+    "metrics/ci-runs.json", "metrics/cf-builds.json", "docs/SECURITY-AUDIT.md",
+    "git log --first-parent origin/main",
     "tests/e2e/*.spec.ts", "src/**/*.test.ts", "docs/modules/*/", "git",
 ]
 
@@ -453,6 +456,189 @@ def release_metrics(text, today):
     }
 
 
+# ---------- Cloudflare builds (metrics/cf-builds.json, decision 122) ----------
+
+LIVE_URL = "https://minespel.dalhhorn.workers.dev"
+PREVIEW_URL = re.compile(r"/previews/([^/]+)/builds/")
+SERVICE_URL = re.compile(r"^(https://dash\.cloudflare\.com/[0-9a-f]{32}/workers/services/view/[^/?#]+/production)")
+
+
+def slug(name):
+    """A branch name as Cloudflare writes it in a preview alias: claude/x_y becomes claude-x-y."""
+    return re.sub(r"[^a-z0-9]+", "-", (name or "").lower()).strip("-")
+
+
+def parse_cf_builds(text):
+    """Builds (newest first) and the live check from metrics/cf-builds.json text, or UNKNOWN.
+
+    The env comes from the details_url: /previews/<alias>/builds/ is a preview build, anything
+    else a production build of main. A preview keeps the stored branch name when its alias
+    matches; a commit on main built as a preview on its branch first shows that alias.
+    """
+    if text is None:
+        return UNKNOWN
+    try:
+        data = json.loads(text)
+    except ValueError:
+        return UNKNOWN
+    commits = data.get("commits") if isinstance(data, dict) else None
+    if not isinstance(commits, dict):
+        return UNKNOWN
+    builds, seen = [], set()
+    for sha, entry in commits.items():
+        for b in (entry.get("builds") or []) if isinstance(entry, dict) else []:
+            if not isinstance(b, dict) or (b.get("id") is not None and b.get("id") in seen):
+                continue
+            seen.add(b.get("id"))
+            url = b.get("details_url") or ""
+            m = PREVIEW_URL.search(url)
+            stored = b.get("branch") or ("" if m else "main")
+            alias = urllib.parse.unquote(m.group(1)) if m else None
+            builds.append(dict(b, sha=b.get("sha") or sha, env="preview" if m else "production",
+                               branch=stored if not m or slug(stored) == slug(alias) else alias))
+    builds.sort(key=lambda b: b.get("completed_at") or b.get("started_at") or "", reverse=True)
+    live = data.get("live")
+    return {"fetched_at": data.get("fetched_at") or UNKNOWN, "builds": builds,
+            "live": live if isinstance(live, dict) else None}
+
+
+def build_secs(b):
+    """Seconds a build took. Workers Builds writes the check run at the end (start equals end),
+    so then the time runs from queued_at (the check suite opened at the push)."""
+    a, z = to_time(b.get("started_at")), to_time(b.get("completed_at"))
+    if a and z and z > a:
+        return (z - a).total_seconds()
+    q = to_time(b.get("queued_at"))
+    return (z - q).total_seconds() if q and z and z >= q else None
+
+
+def merge_to_live_secs(b):
+    """Seconds from the commit (the merge commit on main) to its production build done."""
+    c, z = to_time(b.get("commit_at")), to_time(b.get("completed_at"))
+    return (z - c).total_seconds() if c and z and z >= c else None
+
+
+def cf_service_url(details_url):
+    """The Workers service page on the Cloudflare dashboard, from a build details_url."""
+    m = SERVICE_URL.match(details_url or "")
+    return m.group(1) if m else None
+
+
+def dur(secs):
+    if not isinstance(secs, (int, float)):
+        return UNKNOWN
+    if secs < 90:
+        return "%d s" % round(secs)
+    if secs < 5400:
+        return "%.1f min" % (secs / 60)
+    return "%.1f h" % (secs / 3600)
+
+
+def cf_metrics(cf, now):
+    """Deploy tab numbers from parse_cf_builds. now is a naive UTC datetime."""
+    if cf == UNKNOWN:
+        return UNKNOWN
+    builds = cf["builds"]
+    decided = [b for b in builds if b.get("status") == "completed" and b.get("conclusion") in ("success", "failure")]
+    prod = [b for b in decided if b["env"] == "production"]
+    prev = [b for b in decided if b["env"] == "preview"]
+    prod_ok = [b for b in prod if b["conclusion"] == "success"]
+
+    def age_days(b):
+        t = to_time(b.get("completed_at"))
+        return (now - t).total_seconds() / 86400 if t else None
+
+    def within(rows, days):
+        return [b for b in rows if age_days(b) is not None and age_days(b) <= days]
+
+    secs = [s for s in (build_secs(b) for b in decided) if s is not None]
+    m2l = [s for s in (merge_to_live_secs(b) for b in prod_ok if b.get("branch") == "main") if s is not None]
+    weeks = last_weeks(now.date())
+    per_week = {w: 0 for w in weeks}
+    for b in prod_ok:
+        t = to_time(b.get("completed_at"))
+        if t and week_of(t.date()) in per_week:
+            per_week[week_of(t.date())] += 1
+    last = prod_ok[0] if prod_ok else None
+    service = next((u for u in (cf_service_url(b.get("details_url")) for b in builds) if u), None)
+    row = lambda b: {
+        "env": b["env"], "branch": b.get("branch") or "", "sha": (b.get("sha") or "")[:7],
+        "result": b.get("conclusion") or b.get("status") or UNKNOWN, "secs": build_secs(b),
+        "completed_at": b.get("completed_at") or "", "url": b.get("details_url") or ""}
+    return {
+        "fetched_at": cf["fetched_at"],
+        "builds": len(builds),
+        "last_prod": None if last is None else dict(row(last), merge_to_live=merge_to_live_secs(last)),
+        "last_prod_any": None if not prod else row(prod[0]),
+        "days_since_deploy": int(age_days(last)) if last and age_days(last) is not None else UNKNOWN,
+        "prod_7": len(within(prod_ok, 7)), "prod_30": len(within(prod_ok, 30)),
+        "failed_30": len(within([b for b in prod if b["conclusion"] == "failure"], 30)),
+        "prod_rate": pct(len(prod_ok), len(prod)), "prod_decided": len(prod),
+        "preview_rate": pct(sum(b["conclusion"] == "success" for b in prev), len(prev)), "preview_decided": len(prev),
+        "median_secs": quantile(secs, 0.5) if secs else UNKNOWN,
+        "p90_secs": quantile(secs, 0.9) if secs else UNKNOWN,
+        "m2l_median": quantile(m2l, 0.5) if m2l else UNKNOWN, "m2l_n": len(m2l),
+        "weeks": weeks, "per_week": [per_week[w] for w in weeks],
+        "last10": [row(b) for b in builds[:10]],
+        "service_url": service,
+        "live_url": (cf["live"] or {}).get("url") or LIVE_URL,
+        "live": cf["live"],
+    }
+
+
+# ---------- security audit (docs/SECURITY-AUDIT.md, decision 122) ----------
+
+SEC_LEVELS = ("critical", "high", "medium", "low", "info")
+SEC_STATUS = ("open", "accepted", "fixed")
+SEC_HEAD = {"date": "date", "scope": "scope", "auditor or tool": "auditor", "auditor": "auditor",
+            "tool": "auditor", "summary": "summary"}
+
+
+def parse_security_audit(text):
+    """Header lines and findings of docs/SECURITY-AUDIT.md, or UNKNOWN when the file is missing.
+
+    Header lines: 'Date: ...', 'Scope: ...', 'Auditor or tool: ...', 'Summary: ...' (bold or
+    a bullet is fine). Findings: a table whose first column is Id, with Severity, Title, Where,
+    Status and Fix or note. An unknown status counts as open. Findings sort by status
+    (open, accepted, fixed), then severity (critical first).
+    """
+    if text is None:
+        return UNKNOWN
+    head = {k: UNKNOWN for k in ("date", "scope", "auditor", "summary")}
+    rows, header = [], None
+    for line in text.splitlines():
+        c = cells(line)
+        if c is None:
+            s = line.replace("**", "").strip().lstrip("*- ").strip()
+            m = re.match(r"^(auditor or tool|auditor|tool|date|scope|summary)\s*:\s*(.+)$", s, re.I)
+            if m and head[SEC_HEAD[m.group(1).lower()]] == UNKNOWN:
+                head[SEC_HEAD[m.group(1).lower()]] = plain(m.group(2))
+            continue
+        low = [x.lower() for x in c]
+        if low and low[0] == "id" and "severity" in low:
+            header = low
+            continue
+        if header is None or all(re.fullmatch(r":?-+:?", x or "-") for x in c) or not c[0]:
+            continue
+        r = dict(zip(header, c))
+        sev = plain(r.get("severity", "")).split(" ", 1)[0].lower()
+        st = plain(r.get("status", "")).split(" ", 1)[0].strip(",.;:").lower()
+        rows.append({
+            "id": plain(r.get("id", "")),
+            "severity": sev if sev in SEC_LEVELS else "info",
+            "title": trim(r.get("title", ""), 160),
+            "where": plain(r.get("where", "")),
+            "status": st if st in SEC_STATUS else "open",
+            "note": trim(r.get("fix or note", r.get("note", "")), 200),
+        })
+    so, vo = {s: i for i, s in enumerate(SEC_STATUS)}, {s: i for i, s in enumerate(SEC_LEVELS)}
+    rows.sort(key=lambda r: (so[r["status"]], vo[r["severity"]], r["id"]))
+    counts = {s: {"open": sum(1 for r in rows if r["severity"] == s and r["status"] == "open"),
+                  "total": sum(1 for r in rows if r["severity"] == s)} for s in SEC_LEVELS}
+    return dict(head, findings=rows, counts=counts, has_table=header is not None,
+                open_total=sum(1 for r in rows if r["status"] == "open"))
+
+
 def lane_of(row):
     """'value' or 'foundation' for a backlog row. See LANE_OVERRIDES for the rule."""
     tags = set(row.get("tags") or [])
@@ -631,6 +817,9 @@ def collect():
         "releases": release_metrics(changelog, today),
         "ci": ci_metrics(parse_ci_runs(read("metrics/ci-runs.json")), today),
         "deploys": deploy_metrics(collect_deploy_dates(), today),
+        "cf": cf_metrics(parse_cf_builds(read("metrics/cf-builds.json")),
+                         datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None)),
+        "security": parse_security_audit(read("docs/SECURITY-AUDIT.md")),
         "debt": debt,
         "backlog": backlog,
         "roadmap": roadmap(backlog, parse_plan_tasks(plan_text), debt),
@@ -785,6 +974,101 @@ def render_roadmap(rm):
             'not shown. Lane rule: LANE_OVERRIDES and #foundation or #value tags in scripts/dashboard.py.</p>'
             '<div class="scroll"><div class="rm" style="--cols:%d">'
             '<div class="rm-corner"></div>%s%s</div></div></section>' % (rm.get("shipped", 0), len(cols), head, rows))
+
+
+def when(iso_time):
+    t = to_time(iso_time)
+    return t.strftime("%Y-%m-%d %H:%M UTC") if t else UNKNOWN
+
+
+def link_btn(href, label):
+    return '<a class="btn" href="%s" target="_blank" rel="noopener noreferrer">%s</a>' % (e(href), e(label))
+
+
+def render_deploy(m):
+    """The Deploy tab: Cloudflare Workers Builds from the check runs GitHub records (decision 122)."""
+    if m == UNKNOWN:
+        return ('<section class="card"><h2>Deploy</h2><div class="btns">%s</div>%s</section>' % (
+            link_btn(LIVE_URL, "Open the live site"), empty(
+                "No build data yet. Run python3 scripts/ci_runs.py to fetch the Cloudflare builds into "
+                "metrics/cf-builds.json, then python3 scripts/dashboard.py.")))
+    with_pct = lambda v: "%s%%" % v if isinstance(v, (int, float)) else v
+    state = lambda v: "" if not isinstance(v, (int, float)) else "ok" if v >= 90 else "warn" if v >= 70 else "bad"
+    last, live = m["last_prod"], m["live"] or {}
+    btns = link_btn(m["live_url"], "Open the live site")
+    btns += link_btn(m["service_url"], "Cloudflare dashboard") if m["service_url"] else (
+        '<span class="muted small">Cloudflare dashboard link unknown: no build with a details link yet.</span>')
+    if live.get("status"):
+        live_tile = tile("Live check", "HTTP %s" % live["status"], "%s ms, %s" % (live.get("ms"), when(live.get("checked_at"))),
+                         "ok" if 200 <= live["status"] < 400 else "bad")
+    else:
+        live_tile = tile("Live check", "not checked", "the network or proxy blocked the GET" if live.get("error") else "no check yet")
+    any_last = m["last_prod_any"]
+    last_failed = any_last is not None and any_last["result"] != "success"
+    days = m["days_since_deploy"]
+    tiles = "".join([
+        tile("Last production deploy", when(last["completed_at"])[:10] if last else "none",
+             "%s, %s, %s, build %s" % (when(last["completed_at"])[11:], last["sha"], last["result"], dur(last["secs"]))
+             if last else "no successful build",
+             "bad" if last_failed else "ok" if last else ""),
+        tile("Production deploys", "%s / %s" % (m["prod_7"], m["prod_30"]), "last 7 / 30 days, %s failed in 30" % m["failed_30"],
+             "warn" if m["failed_30"] else ""),
+        tile("Build success", with_pct(m["prod_rate"]), "production, %s builds" % m["prod_decided"], state(m["prod_rate"])),
+        tile("Preview success", with_pct(m["preview_rate"]), "previews, %s builds" % m["preview_decided"], state(m["preview_rate"])),
+        tile("Build time", dur(m["median_secs"]), "median, p90 %s, push to done" % dur(m["p90_secs"])),
+        tile("Merge to live", dur(m["m2l_median"]), "median of %s, last %s" % (
+            m["m2l_n"], dur(last["merge_to_live"]) if last else UNKNOWN)),
+        tile("Since last deploy", "%s days" % days if days != UNKNOWN else UNKNOWN, "successful production build",
+             "warn" if isinstance(days, int) and days > 14 else ""),
+        live_tile,
+    ])
+    rows = "".join(
+        '<tr><td data-l="Env"><span class="chip env-%s">%s</span></td><td data-l="Branch" class="mono small">%s</td>'
+        '<td data-l="Sha" class="mono sha">%s</td><td data-l="Result"><span class="chip r-%s">%s</span></td>'
+        '<td data-l="Time" class="num">%s</td><td data-l="Done" class="small">%s</td><td data-l="Link">%s</td></tr>' % (
+            e(b["env"]), e(b["env"]), e(b["branch"]), e(b["sha"]), e(b["result"]), e(b["result"]), e(dur(b["secs"])),
+            e(when(b["completed_at"])), '<a href="%s" target="_blank" rel="noopener noreferrer">build</a>' % e(b["url"])
+            if b["url"] else "")
+        for b in m["last10"])
+    table = ('<table class="stack builds"><thead><tr><th>Env</th><th>Branch</th><th>Sha</th><th>Result</th><th>Time</th>'
+             '<th>Done</th><th>Link</th></tr></thead><tbody>%s</tbody></table>' % rows) if rows else empty("No builds in the cache.")
+    return ('<section class="card"><h2>Deploy</h2><div class="btns">%s</div>'
+            '<div class="tiles mini">%s</div><div class="charts">%s</div>'
+            '<h2>Last 10 builds</h2>%s'
+            '<p class="muted small">From the check runs "Workers Builds: *" that Cloudflare records on GitHub, for the '
+            'first parent commits on main and the branch heads of the last 60 days (decisions 98 and 122). A merge to '
+            'main deploys. Build time runs from the push to the build done, so it includes the queue. Merge to live '
+            'runs from the merge commit to the production build done. Fetched %s. Run python3 scripts/ci_runs.py to '
+            'refresh.</p></section>' % (
+                btns, tiles, bars(m["per_week"], m["weeks"], "Production deploys per week"), table, e(when(m["fetched_at"]))))
+
+
+def render_security(a):
+    """The Security tab: the last audit in docs/SECURITY-AUDIT.md (decision 122)."""
+    how = ('<p class="muted small">To add one, run an audit and write docs/SECURITY-AUDIT.md in the format in '
+           'docs/PLATFORM.md, section Security audit.</p>')
+    if a == UNKNOWN:
+        return '<section class="card"><h2>Security</h2><p><b>No security audit yet.</b></p>%s</section>' % how
+    head = "<dl>%s</dl>" % "".join("<dt>%s</dt><dd>%s</dd>" % (e(label), e(a[k])) for k, label in (
+        ("date", "Date"), ("scope", "Scope"), ("auditor", "Auditor or tool"), ("summary", "Summary")))
+    c = a["counts"]
+    counts = '<div class="counts five">%s</div>' % "".join(
+        '<div class="count sec-%s%s"><b>%d</b><span>%s</span><span class="of">open of %d</span></div>' % (
+            s, " hot" if c[s]["open"] else "", c[s]["open"], s, c[s]["total"]) for s in SEC_LEVELS)
+    if not a["findings"]:
+        table = empty("No findings in the table." if a["has_table"] else "No findings table found.")
+    else:
+        table = ('<table class="stack sec"><thead><tr><th>Id</th><th>Severity</th><th>Title</th><th>Where</th><th>Status</th>'
+                 '<th>Fix or note</th></tr></thead><tbody>%s</tbody></table>' % "".join(
+                     '<tr class="st-%s"><td data-l="Id" class="mono">%s</td><td data-l="Severity"><span class="chip sev-%s">%s</span></td>'
+                     '<td data-l="Title">%s</td><td data-l="Where" class="mono small">%s</td>'
+                     '<td data-l="Status"><span class="chip st-%s">%s</span></td><td data-l="Fix or note">%s</td></tr>' % (
+                         e(r["status"]), e(r["id"]), e(r["severity"]), e(r["severity"]), e(r["title"]), e(r["where"]),
+                         e(r["status"]), e(r["status"]), e(r["note"])) for r in a["findings"]))
+    return ('<section class="card"><h2>Security audit</h2>%s%s<p class="muted small">%d open of %d findings in '
+            'docs/SECURITY-AUDIT.md, open first, then by severity.</p>%s%s</section>' % (
+                head, counts, a["open_total"], len(a["findings"]), table,
+                '<p class="muted small">Format: docs/PLATFORM.md, section Security audit.</p>'))
 
 
 REFRESH_JS = """(function () {
@@ -960,7 +1244,8 @@ def render(d, refresh_trigger=None):
     ])
     return PAGE.format(tiles=tiles, body=body, generated=e(d["generated"]),
                        refresh=refresh_html(d["generated"], refresh_trigger),
-                       sources=e(", ".join(d["sources"])), roadmap=render_roadmap(d.get("roadmap")))
+                       sources=e(", ".join(d["sources"])), roadmap=render_roadmap(d.get("roadmap")),
+                       deploy=render_deploy(d.get("cf", UNKNOWN)), security=render_security(d.get("security", UNKNOWN)))
 
 
 def sub_get(d, part, key):
@@ -977,6 +1262,22 @@ def debt_line(debt):
         return UNKNOWN
     c = debt["open"]
     return "%d (%d major, %d medium, %d low)" % (debt["open_total"], c["major"], c["medium"], c["low"])
+
+
+def cf_line(m):
+    if m == UNKNOWN:
+        return "no data (run python3 scripts/ci_runs.py)"
+    last = m["last_prod"]
+    return "last deploy %s (%s), %s in 7 days, %s in 30, production %s%% ok, build %s median" % (
+        when(last["completed_at"]) if last else "none", last["sha"] if last else "none",
+        m["prod_7"], m["prod_30"], m["prod_rate"], dur(m["median_secs"]))
+
+
+def security_line(a):
+    if a == UNKNOWN:
+        return "no audit yet"
+    return "%s, %d open (%s)" % (a["date"], a["open_total"], ", ".join(
+        "%d %s" % (a["counts"][s]["open"], s) for s in SEC_LEVELS if a["counts"][s]["open"]) or "none")
 
 
 def summary(d):
@@ -998,6 +1299,8 @@ def summary(d):
         ("Deploys and releases", "%s deploys, %s releases, %s days since the last" % (
             sub_get(d, "deploys", "total"), sub_get(d, "releases", "count"), sub_get(d, "releases", "days_since_last"))),
         ("Tech debt open", debt_line(d.get("debt", UNKNOWN))),
+        ("Cloudflare builds", cf_line(d.get("cf", UNKNOWN))),
+        ("Security audit", security_line(d.get("security", UNKNOWN))),
         ("Branch", "%s, %s ahead of origin/main" % (d["git"]["branch"], d["git"]["ahead"])),
         ("Blockers", trim(s["blockers"], 120)),
     ]
@@ -1091,9 +1394,29 @@ footer {{ margin-top:24px; font-size:12px; color:var(--muted); }}
 .tabs label {{ padding:10px 16px; cursor:pointer; color:var(--muted); border-bottom:2px solid transparent; margin-bottom:-1px; font-weight:600; font-size:15px; }}
 .tab-input {{ position:absolute; opacity:0; pointer-events:none; }}
 .panel {{ display:none; }}
-#tab-overview:checked ~ .panel-overview, #tab-roadmap:checked ~ .panel-roadmap {{ display:block; }}
-#tab-overview:checked ~ .tabs label[for="tab-overview"], #tab-roadmap:checked ~ .tabs label[for="tab-roadmap"] {{ color:var(--text); border-bottom-color:var(--accent); }}
-#tab-overview:focus-visible ~ .tabs label[for="tab-overview"], #tab-roadmap:focus-visible ~ .tabs label[for="tab-roadmap"] {{ outline:2px solid var(--accent); outline-offset:2px; }}
+#tab-overview:checked ~ .panel-overview, #tab-roadmap:checked ~ .panel-roadmap,
+#tab-deploy:checked ~ .panel-deploy, #tab-security:checked ~ .panel-security {{ display:block; }}
+#tab-overview:checked ~ .tabs label[for="tab-overview"], #tab-roadmap:checked ~ .tabs label[for="tab-roadmap"],
+#tab-deploy:checked ~ .tabs label[for="tab-deploy"], #tab-security:checked ~ .tabs label[for="tab-security"] {{ color:var(--text); border-bottom-color:var(--accent); }}
+#tab-overview:focus-visible ~ .tabs label[for="tab-overview"], #tab-roadmap:focus-visible ~ .tabs label[for="tab-roadmap"],
+#tab-deploy:focus-visible ~ .tabs label[for="tab-deploy"], #tab-security:focus-visible ~ .tabs label[for="tab-security"] {{ outline:2px solid var(--accent); outline-offset:2px; }}
+.btns {{ display:flex; flex-wrap:wrap; align-items:center; gap:8px 12px; margin-bottom:16px; }}
+.btn {{ display:inline-flex; align-items:center; min-height:44px; padding:8px 16px; border-radius:8px; border:1px solid var(--accent); color:var(--accent); font-weight:600; text-decoration:none; }}
+.btn:first-child {{ background:var(--accent); color:#fff; }}
+.chip.r-success {{ background:var(--ok-bg); color:var(--ok); }}
+.chip.r-failure {{ background:var(--bad-bg); color:var(--bad); font-weight:600; }}
+.chip.env-production {{ background:var(--info-bg); color:var(--accent); }}
+.counts.five {{ grid-template-columns:repeat(5,minmax(0,1fr)); }}
+.count span {{ display:block; }} .count .of {{ font-size:11px; }}
+.count.sec-critical.hot, .count.sec-high.hot {{ background:var(--bad-bg); }}
+.count.sec-critical.hot b, .count.sec-high.hot b {{ color:var(--bad); }}
+.count.sec-medium.hot {{ background:var(--warn-bg); }} .count.sec-medium.hot b {{ color:var(--warn); }}
+.count.sec-low.hot, .count.sec-info.hot {{ background:var(--info-bg); }}
+.chip.sev-critical, .chip.sev-high {{ background:var(--bad-bg); color:var(--bad); font-weight:600; }}
+.chip.st-open {{ background:var(--bad-bg); color:var(--bad); font-weight:600; }}
+.chip.st-fixed {{ background:var(--ok-bg); color:var(--ok); }}
+table.sec tr.st-fixed td {{ color:var(--muted); }}
+table.builds td.sha {{ white-space:nowrap; }}
 .scroll {{ overflow-x:auto; }}
 .rm {{ --lane-w:minmax(150px,180px); --col-w:240px; display:grid; gap:8px; min-width:max-content;
   grid-template-columns:var(--lane-w) repeat(var(--cols),var(--col-w)); }}
@@ -1124,6 +1447,8 @@ footer {{ margin-top:24px; font-size:12px; color:var(--muted); }}
   table.stack tr:last-child {{ border-bottom:0; }}
   table.stack td {{ border:0; padding:2px 0; }}
   table.stack td[data-l]::before {{ content:attr(data-l) ": "; color:var(--muted); font-size:12px; }}
+  table.stack td.mono {{ white-space:normal; }}
+  .tabs label {{ padding:10px 10px; }}
   table.stack td:first-child::before {{ content:none; }}
 }}
 </style>
@@ -1135,8 +1460,12 @@ footer {{ margin-top:24px; font-size:12px; color:var(--muted); }}
 {refresh}
 <input type="radio" name="tab" id="tab-overview" class="tab-input" checked>
 <input type="radio" name="tab" id="tab-roadmap" class="tab-input">
-<nav class="tabs" aria-label="Dashboard views"><label for="tab-overview">Overview</label><label for="tab-roadmap">Roadmap</label></nav>
+<input type="radio" name="tab" id="tab-deploy" class="tab-input">
+<input type="radio" name="tab" id="tab-security" class="tab-input">
+<nav class="tabs" aria-label="Dashboard views"><label for="tab-overview">Overview</label><label for="tab-roadmap">Roadmap</label><label for="tab-deploy">Deploy</label><label for="tab-security">Security</label></nav>
 <div class="panel panel-roadmap">{roadmap}</div>
+<div class="panel panel-deploy">{deploy}</div>
+<div class="panel panel-security">{security}</div>
 <div class="panel panel-overview">
 <div class="tiles">{tiles}</div>
 <div class="grid">{body}</div>

@@ -31,7 +31,7 @@
 | Acceptance criteria | docs/releases/v11.md | AC178 to AC191 (14) |
 | Acceptance criteria | docs/releases/v2.md | AC155 to AC165 (11) |
 | Acceptance criteria | docs/releases/v9.md | AC166 to AC171 (6) |
-| Decisions | docs/DECISIONS.md | 87 to 121 (35) |
+| Decisions | docs/DECISIONS.md | 87 to 122 (36) |
 | Decisions | docs/archive/decisions-1-86.md | 1 to 86 (86) |
 | Tasks | docs/DISCUSSION.md | V11a, V11b, V11c, V11d, V11e (5) |
 | Tasks | docs/PLAN.md | T18, T19, T55b, T55a, T53a, T21, T32, T52, T56, T22, T61, T62, … (19) |
@@ -47,7 +47,7 @@
 | README.md | 78 | Dino Blokwereld is a free 3D block world for kids, played in Dutch on an iPad. Walk… |
 | docs/ARCHITECTURE.md | 393 | Written by the architect after PRD signoff (2026-10-17). Source of truth for how Dino… Sections: Stack and why:5, Folder structure:27, Modules and data flow:186, How modules are loaded:230, State and storage:271, Security and kid safety in…:301, How to run:310, How to test:323, How to deploy:356, Conventions for developers:365, Risks:379 |
 | docs/BACKLOG.md | 177 | Not signed. Changing this file never closes the PRD gate (decision 80). The signed… Sections: Next steps (founder order):5, Rules:20, Ranked backlog:30, Dropped:133, Later:154 |
-| docs/DECISIONS.md | 43 | Every notable decision. Founder decisions are marked NEEDS FOUNDER until answered, then… |
+| docs/DECISIONS.md | 44 | Every notable decision. Founder decisions are marked NEEDS FOUNDER until answered, then… |
 | docs/DISCUSSION.md | 96 | Review rounds between agents. Newest at the bottom. Keep it short: who said what, what… |
 | docs/FACTORY.md | 113 | Moved out of CLAUDE.md on 2026-10-26 (decision 104) so it is read only when needed. The… |
 | docs/FRICTION.md | 53 | The operator adds a line whenever something goes wrong or feels slow, so /retro has real… |
@@ -55,7 +55,7 @@
 | docs/HANDOFF.md | 26 | Founder: "build v11, v3, v6". v11 shipped (0.5.0). Build v3 as 0.6.0, then v6 as 0.7.0,… |
 | docs/IDEA.md | 81 | "Create a 3D minecraft education kind of game but then also with dinosaurs, and every 5… |
 | docs/PLAN.md | 73 | Task graph written by the architect on 2026-10-17 from the signed PRD. The operator… |
-| docs/PLATFORM.md | 39 | Moved out of CLAUDE.md on 2026-10-26 (decision 104). Read this when a task touches the… |
+| docs/PLATFORM.md | 52 | Moved out of CLAUDE.md on 2026-10-26 (decision 104). Read this when a task touches the… |
 | docs/PRD.md | 874 | Status: APPROVED by Founder on 2026-11-06 Sections: 1. Summary:7, 2. Users:12, 3. Goals and success:19, 4. What the app is today (v1…:29, 5. Release backlog:389, 6. User flows:392, 7. Acceptance criteria:481, 8. Look, sound and feel:714, 9. Kid safety and privacy:726, 10. Constraints:740, 11. Risks and decisions:751, 12. Releases:821 |
 | docs/RETRO.md | 25 | Written by /retro. Newest at the bottom. Factory level learnings are also saved in… |
 | docs/SHOP_PRD.md | 108 | Document Status: Approved Addendum (docs/SHOP_PRD.md — companion to docs/PRD.md) |

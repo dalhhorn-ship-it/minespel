@@ -435,5 +435,238 @@ class RefreshButtonTest(unittest.TestCase):
         self.assertNotIn("<script", page)
 
 
+import ci_runs  # noqa: E402
+
+ACCT = "0123456789abcdef0123456789abcdef"
+SVC = "https://dash.cloudflare.com/%s/workers/services/view/minespel/production" % ACCT
+
+
+def cf_build(i, sha, branch, concl, done, env="production", alias=None, started=None, queued=None, commit=None):
+    url = SVC + ("/previews/%s/builds/b%d" % (alias, i) if env == "preview" else "/builds/b%d" % i)
+    return {"id": i, "name": "Workers Builds: minespel", "sha": sha, "branch": branch, "env": env,
+            "status": "completed", "conclusion": concl, "commit_at": commit, "queued_at": queued,
+            "started_at": started or done, "completed_at": done, "details_url": url, "suite_id": 9}
+
+
+CF_CACHE = d.json.dumps({"fetched_at": "2026-11-07T06:00:00Z", "live": {
+    "url": "https://minespel.dalhhorn.workers.dev", "checked_at": "2026-11-07T06:00:00Z",
+    "status": None, "ms": None, "error": "Tunnel connection failed: 403"}, "commits": {
+    "a" * 40: {"commit_at": "2026-11-06T19:01:22Z", "builds": [cf_build(
+        1, "a" * 40, "main", "success", "2026-11-06T19:02:02Z", queued="2026-11-06T19:01:25Z",
+        commit="2026-11-06T19:01:22Z")]},
+    "b" * 40: {"commit_at": "2026-10-20T10:00:00Z", "builds": [cf_build(
+        2, "b" * 40, "main", "failure", "2026-10-20T10:01:00Z", queued="2026-10-20T10:00:10Z",
+        commit="2026-10-20T10:00:00Z")]},
+    "c" * 40: {"commit_at": "2026-11-05T08:00:00Z", "builds": [cf_build(
+        3, "c" * 40, "claude/x_y", "success", "2026-11-05T08:02:00Z", env="preview", alias="claude-x-y",
+        started="2026-11-05T08:00:00Z", commit="2026-11-05T08:00:00Z")]},
+    "d" * 40: {"commit_at": "2026-11-04T08:00:00Z", "builds": [cf_build(
+        4, "d" * 40, "main", "success", "2026-11-04T08:00:20Z", env="preview", alias="feature-z",
+        queued="2026-11-04T08:00:00Z", commit="2026-11-04T08:00:00Z")]},
+    "e" * 40: {"commit_at": "2026-11-03T12:00:00Z", "builds": [cf_build(
+        5, "e" * 40, "main", "success", "2026-11-03T12:10:00Z", queued="2026-11-03T12:00:00Z",
+        commit="2026-11-03T11:58:00Z")]},
+}})
+NOW = d.datetime.datetime(2026, 11, 7, 12, 0, 0)
+
+
+class CloudflareBuildsTest(unittest.TestCase):
+    def test_parse_env_branch_and_order(self):
+        cf = d.parse_cf_builds(CF_CACHE)
+        self.assertEqual([b["id"] for b in cf["builds"]], [1, 3, 4, 5, 2])
+        by = {b["id"]: b for b in cf["builds"]}
+        self.assertEqual((by[1]["env"], by[1]["branch"]), ("production", "main"))
+        self.assertEqual((by[3]["env"], by[3]["branch"]), ("preview", "claude/x_y"))
+        # A commit on main built as a preview on its branch first shows that preview alias.
+        self.assertEqual((by[4]["env"], by[4]["branch"]), ("preview", "feature-z"))
+        self.assertEqual(cf["live"]["status"], None)
+
+    def test_parse_bad_input(self):
+        self.assertEqual(d.parse_cf_builds(None), d.UNKNOWN)
+        self.assertEqual(d.parse_cf_builds("not json"), d.UNKNOWN)
+        self.assertEqual(d.parse_cf_builds('{"runs": []}'), d.UNKNOWN)
+
+    def test_build_time_uses_the_suite_when_start_equals_end(self):
+        self.assertEqual(d.build_secs({"started_at": "2026-11-06T19:02:02Z", "completed_at": "2026-11-06T19:02:02Z",
+                                       "queued_at": "2026-11-06T19:01:25Z"}), 37)
+        self.assertEqual(d.build_secs({"started_at": "2026-11-05T08:00:00Z", "completed_at": "2026-11-05T08:02:00Z"}), 120)
+        self.assertIsNone(d.build_secs({"started_at": "2026-11-05T08:00:00Z", "completed_at": "2026-11-05T08:00:00Z"}))
+
+    def test_merge_to_live(self):
+        self.assertEqual(d.merge_to_live_secs({"commit_at": "2026-11-06T19:01:22Z", "completed_at": "2026-11-06T19:02:02Z"}), 40)
+        self.assertIsNone(d.merge_to_live_secs({"commit_at": None, "completed_at": "2026-11-06T19:02:02Z"}))
+
+    def test_metrics(self):
+        m = d.cf_metrics(d.parse_cf_builds(CF_CACHE), NOW)
+        self.assertEqual(m["last_prod"]["sha"], "aaaaaaa")
+        self.assertEqual(m["last_prod"]["merge_to_live"], 40)
+        self.assertEqual(m["days_since_deploy"], 0)
+        self.assertEqual((m["prod_7"], m["prod_30"], m["failed_30"]), (2, 2, 1))
+        self.assertEqual((m["prod_rate"], m["prod_decided"]), (67, 3))
+        self.assertEqual((m["preview_rate"], m["preview_decided"]), (100, 2))
+        # build times 37, 50, 120, 20, 600 s
+        self.assertEqual(m["median_secs"], 50)
+        self.assertEqual(m["p90_secs"], 600)
+        # merge to live: production successes on main, 40 s and 720 s
+        self.assertEqual((m["m2l_median"], m["m2l_n"]), (380, 2))
+        self.assertEqual(m["service_url"], SVC)
+        self.assertEqual(sum(m["per_week"]), 2)
+        self.assertEqual(len(m["last10"]), 5)
+        self.assertEqual(m["last10"][-1]["result"], "failure")
+        self.assertEqual(d.cf_metrics(d.UNKNOWN, NOW), d.UNKNOWN)
+
+    def test_service_url_only_from_cloudflare(self):
+        self.assertIsNone(d.cf_service_url("https://evil.example/%s/workers/services/view/x/production" % ACCT))
+        self.assertIsNone(d.cf_service_url(None))
+
+    def test_deploy_tab(self):
+        page = d.render_deploy(d.cf_metrics(d.parse_cf_builds(CF_CACHE), NOW))
+        self.assertIn('href="%s"' % SVC, page)
+        self.assertIn('href="https://minespel.dalhhorn.workers.dev"', page)
+        self.assertIn("not checked", page)
+        self.assertIn("r-failure", page)
+        self.assertIn("Production deploys per week", page)
+        self.assertIn("40 s", page)
+
+    def test_deploy_tab_live_ok(self):
+        cf = d.parse_cf_builds(CF_CACHE)
+        cf["live"] = {"url": "https://minespel.dalhhorn.workers.dev", "status": 200, "ms": 120,
+                      "checked_at": "2026-11-07T06:00:00Z", "error": None}
+        self.assertIn("HTTP 200", d.render_deploy(d.cf_metrics(cf, NOW)))
+
+    def test_deploy_empty_state(self):
+        page = d.render_deploy(d.UNKNOWN)
+        self.assertIn("No build data yet. Run python3 scripts/ci_runs.py", page)
+        self.assertNotIn("dash.cloudflare.com", page)
+
+
+class CiRunsCloudflareTest(unittest.TestCase):
+    RUNS = [
+        {"id": 1, "name": "Workers Builds: minespel", "status": "completed", "conclusion": "success",
+         "started_at": "t", "completed_at": "t", "check_suite": {"id": 7},
+         "details_url": SVC + "/previews/claude-x/builds/u1"},
+        {"id": 2, "name": "e2e 1/4", "status": "completed", "conclusion": "failure", "details_url": "x"},
+        {"id": 3, "name": "Workers Builds: other", "status": "in_progress", "conclusion": None,
+         "details_url": SVC + "/builds/u3"},
+    ]
+
+    def test_build_rows_keep_only_workers_builds(self):
+        rows = ci_runs.build_rows("s" * 40, "claude/x", "2026-11-01T00:00:00Z", self.RUNS)
+        self.assertEqual([r["id"] for r in rows], [1, 3])
+        self.assertEqual((rows[0]["env"], rows[0]["branch"], rows[0]["suite_id"]), ("preview", "claude/x", 7))
+        self.assertEqual(rows[1]["env"], "production")
+
+    def test_needs_fetch(self):
+        now = d.datetime.datetime(2026, 11, 7, tzinfo=d.datetime.timezone.utc)
+        done = {"status": "completed"}
+        self.assertTrue(ci_runs.needs_fetch(None, now))
+        self.assertFalse(ci_runs.needs_fetch({"builds": [done]}, now))
+        self.assertTrue(ci_runs.needs_fetch({"builds": [{"status": "in_progress"}]}, now))
+        self.assertTrue(ci_runs.needs_fetch({"builds": [], "commit_at": "2026-11-06T00:00:00Z"}, now))
+        self.assertFalse(ci_runs.needs_fetch({"builds": [], "commit_at": "2026-10-01T00:00:00Z"}, now))
+
+    def test_fetch_builds_uses_the_suite_and_keeps_cache_on_error(self):
+        now = d.datetime.datetime(2026, 11, 7, tzinfo=d.datetime.timezone.utc)
+
+        def get(path):
+            if path.startswith("commits/" + "f" * 40):
+                return {"check_runs": self.RUNS}
+            if path == "check-suites/7":
+                return {"created_at": "2026-11-06T23:59:00Z"}
+            raise OSError("proxy said no")
+
+        old = {"o" * 40: {"commit_at": "2026-11-01T00:00:00Z", "builds": []}}
+        cache, errors = ci_runs.fetch_builds([("f" * 40, "main", "2026-11-06T23:58:00Z"),
+                                              ("g" * 40, "main", "2026-11-06T23:59:00Z")], old, now, get=get)
+        self.assertEqual(errors, 1)
+        self.assertIn("o" * 40, cache)
+        self.assertNotIn("g" * 40, cache)
+        self.assertEqual(cache["f" * 40]["builds"][0]["queued_at"], "2026-11-06T23:59:00Z")
+
+    def test_live_check_tolerates_failure(self):
+        def opener(req, timeout):
+            raise OSError("Tunnel connection failed: 403 Forbidden")
+        res = ci_runs.check_live("https://example.test", opener=opener)
+        self.assertIsNone(res["status"])
+        self.assertIn("403", res["error"])
+
+
+SECURITY_AUDIT = """# Security audit
+
+**Date:** 2026-11-10
+**Scope:** dist build, wrangler.jsonc, service worker
+Auditor or tool: security-audit skill
+* Summary: Two small things, nothing for kids to worry about.
+
+| Id | Severity | Title | Where | Status | Fix or note |
+|---|---|---|---|---|---|
+| S1 | low | Missing header | wrangler.jsonc | fixed | Added in abc123 |
+| S2 | high | Inline <script> | dist/index.html | open | Move to a file |
+| S3 | medium | Old dep | package.json | accepted | Dev only |
+| S4 | critical | Leaky thing | src/x.ts | fixed | Done |
+| S5 | medium | Cache rule | public/sw.js | Open, needs work | |
+| S6 | weird | Odd row | x | maybe | |
+"""
+
+
+class SecurityAuditTest(unittest.TestCase):
+    def test_parse(self):
+        a = d.parse_security_audit(SECURITY_AUDIT)
+        self.assertEqual(a["date"], "2026-11-10")
+        self.assertEqual(a["scope"], "dist build, wrangler.jsonc, service worker")
+        self.assertEqual(a["auditor"], "security-audit skill")
+        self.assertTrue(a["summary"].startswith("Two small things"))
+        # open first (high, medium, then the unknown severity as info), then accepted, then fixed (critical first)
+        self.assertEqual([r["id"] for r in a["findings"]], ["S2", "S5", "S6", "S3", "S4", "S1"])
+        self.assertEqual(a["counts"]["high"], {"open": 1, "total": 1})
+        self.assertEqual(a["counts"]["medium"], {"open": 1, "total": 2})
+        self.assertEqual(a["counts"]["critical"], {"open": 0, "total": 1})
+        self.assertEqual(a["open_total"], 3)
+
+    def test_missing_file(self):
+        self.assertEqual(d.parse_security_audit(None), d.UNKNOWN)
+
+    def test_no_table(self):
+        a = d.parse_security_audit("Date: 2026-11-10\n")
+        self.assertEqual((a["findings"], a["has_table"]), ([], False))
+        self.assertIn("No findings table found.", d.render_security(a))
+
+    def test_tab(self):
+        page = d.render_security(d.parse_security_audit(SECURITY_AUDIT))
+        self.assertIn("2026-11-10", page)
+        self.assertIn("&lt;script&gt;", page)
+        self.assertNotIn("<script>", page)
+        self.assertIn('class="count sec-high hot"', page)
+        self.assertIn('class="count sec-critical"', page)
+        self.assertLess(page.index("S2"), page.index("S1"))
+
+    def test_empty_state(self):
+        page = d.render_security(d.UNKNOWN)
+        self.assertIn("No security audit yet.", page)
+        self.assertIn("docs/SECURITY-AUDIT.md", page)
+
+
+class TabsTest(unittest.TestCase):
+    def test_four_tabs_and_empty_states(self):
+        data = {
+            "generated": "now", "version": "1", "changelog": d.parse_changelog(None), "backlog": d.UNKNOWN,
+            "tasks": [], "decisions": d.parse_decisions(""), "status": d.parse_status(None),
+            "friction": d.parse_friction(""),
+            "tests": {"e2e_specs": 0, "e2e_tests": 0, "unit_files": 0, "unit_tests": 0},
+            "git": {"branch": "b", "commits": [], "ahead": 0, "tags": []}, "modules": [], "sources": [],
+        }
+        page = d.render(data, refresh_trigger="")
+        for tab, label in (("overview", "Overview"), ("roadmap", "Roadmap"), ("deploy", "Deploy"), ("security", "Security")):
+            self.assertIn('id="tab-%s"' % tab, page)
+            self.assertIn('<label for="tab-%s">%s</label>' % (tab, label), page)
+            self.assertIn('class="panel panel-%s"' % tab, page)
+            self.assertIn("#tab-%s:checked ~ .panel-%s" % (tab, tab), page)
+        self.assertEqual(page.count('type="radio"'), 4)
+        self.assertIn("No build data yet.", page)
+        self.assertIn("No security audit yet.", page)
+        self.assertIn("| Cloudflare builds | no data", d.summary(dict(data, ci=d.UNKNOWN, debt=d.UNKNOWN)))
+        self.assertIn("| Security audit | no audit yet |", d.summary(dict(data, ci=d.UNKNOWN, debt=d.UNKNOWN)))
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -34,6 +34,19 @@ The app is served as static assets by the Cloudflare Worker `minespel` (`wrangle
 * Never commit Cloudflare tokens or account ids.
 * For a private test, prefer `wrangler dev` on the local network, or Cloudflare Access (founder sets it up).
 
+## Security audit
+
+An audit writes its result to `docs/SECURITY-AUDIT.md`. The Security tab of the dashboard reads it (decision 122). No file means no audit yet. Never fill it with made up findings.
+* Header lines at the top, one per line: `Date: YYYY-MM-DD`, `Scope: what was checked`, `Auditor or tool: who or what ran it`, `Summary: one or two sentences`.
+* Then one findings table:
+
+| Id | Severity | Title | Where | Status | Fix or note |
+|---|---|---|---|---|---|
+| S1 | high | Short title | path/to/file.ts:12 | open | What to do, or why it is accepted |
+
+* Severity is critical, high, medium, low or info. Status is open, fixed or accepted. An unknown status counts as open.
+* A new audit replaces the file. Git keeps the old ones.
+
 ## Content releases (learning modules)
 
 A new or changed learning module that stays inside the format in `docs/modules/README.md` is content, not a feature. Make it with `/module`. `./scripts/check.sh` sees that only module JSON and docs changed (`scripts/check-scope.sh`) and runs just the validator, the module unit tests and the build, without e2e. CI does the same. Anything else in the same change (code, tests, `validate.py`) makes it a normal release with the full check. `main` and deploys always run everything.
