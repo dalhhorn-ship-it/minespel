@@ -1,0 +1,325 @@
+{
+  "id": "24-uursklok",
+  "title": "De 24-uursklok",
+  "groups": [
+    6
+  ],
+  "lesson": {
+    "pages": [
+      {
+        "title": "Voor en na de middag",
+        "skill": "dagdeel",
+        "text": "De dag heeft vier delen. Nacht is van 0:00 tot 6:00. Ochtend van 6:00 tot 12:00. Middag van 12:00 tot 18:00. Avond van 18:00 tot 24:00.",
+        "examples": [
+          {
+            "good": "09:30 is in de ochtend, voor de middag."
+          },
+          {
+            "good": "20:15 is in de avond, na de middag."
+          }
+        ],
+        "tip": "Is het uur groter dan 12? Dan is het na de middag."
+      },
+      {
+        "title": "Van 24-uursklok naar gewone tijd",
+        "skill": "24-naar-woorden",
+        "text": "Staat er een uur boven de 12? Haal er 12 af. Dan weet je de gewone tijd. Zeg er 's middags of 's avonds bij.",
+        "examples": [
+          {
+            "good": "19:45 is 19 - 12 = 7, dus kwart voor 8 's avonds.",
+            "bad": "19:45 is kwart voor 7 's avonds.",
+            "why": "Eerst 12 eraf: 7:45. Kwart voor zegt het volgende uur, 8."
+          }
+        ],
+        "tip": "Min 12, en dan klokkijken zoals altijd."
+      },
+      {
+        "title": "Van gewone tijd naar 24-uursklok",
+        "skill": "woorden-naar-24",
+        "text": "Is het na de middag? Tel 12 bij het uur op. 's Ochtends blijft het uur gewoon gelijk.",
+        "examples": [
+          {
+            "good": "3 uur 's middags is 15:00."
+          },
+          {
+            "good": "10 minuten voor half 7 's avonds is 18:20."
+          }
+        ],
+        "tip": "Na de middag: plus 12."
+      },
+      {
+        "title": "a.m. en p.m.",
+        "skill": "am-pm",
+        "text": "In het Engels schrijf je a.m. of p.m. achter de tijd. a.m. betekent voor de middag. p.m. betekent na de middag.",
+        "examples": [
+          {
+            "good": "7:54 a.m. is 07:54."
+          },
+          {
+            "good": "7:54 p.m. is 19:54."
+          }
+        ],
+        "tip": "a.m.: ochtend, a van aan het begin. p.m.: plus 12."
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "klok-24u-001",
+      "type": "choice",
+      "level": "M6",
+      "skill": "dagdeel",
+      "prompt": "Is dit voor of na de middag?",
+      "sentence": "Op de klok staat 14:20.",
+      "options": [
+        "voor de middag",
+        "na de middag"
+      ],
+      "answer": 1,
+      "explain": "Na 12 uur 's middags is het na de middag. 14:20 is groter dan 12:00."
+    },
+    {
+      "id": "klok-24u-002",
+      "type": "choice",
+      "level": "M6",
+      "skill": "dagdeel",
+      "prompt": "Is dit voor of na de middag?",
+      "sentence": "Op de klok staat 09:30.",
+      "options": [
+        "voor de middag",
+        "na de middag"
+      ],
+      "answer": 0,
+      "explain": "9:30 is voor 12 uur, dus voor de middag."
+    },
+    {
+      "id": "klok-24u-003",
+      "type": "choice",
+      "level": "M6",
+      "skill": "dagdeel",
+      "prompt": "Welk dagdeel is het?",
+      "sentence": "De klok wijst 20:15.",
+      "options": [
+        "ochtend",
+        "middag",
+        "avond",
+        "nacht"
+      ],
+      "answer": 2,
+      "explain": "Van 18:00 tot 24:00 is het avond. 20:15 is avond."
+    },
+    {
+      "id": "klok-24u-004",
+      "type": "choice",
+      "level": "M6",
+      "skill": "dagdeel",
+      "prompt": "Welk dagdeel is het?",
+      "sentence": "De klok wijst 03:10.",
+      "options": [
+        "ochtend",
+        "middag",
+        "avond",
+        "nacht"
+      ],
+      "answer": 3,
+      "explain": "Van 0:00 tot 6:00 is het nacht. 03:10 is midden in de nacht."
+    },
+    {
+      "id": "klok-24u-005",
+      "type": "type",
+      "level": "M6",
+      "skill": "woorden-naar-24",
+      "prompt": "Schrijf de tijd op de 24-uursklok, zoals 14:00.",
+      "sentence": "Het is 3 uur 's middags.",
+      "answer": [
+        "15:00",
+        "15.00"
+      ],
+      "explain": "Na de middag tel je 12 bij het uur: 3 + 12 = 15. Dus 15:00."
+    },
+    {
+      "id": "klok-24u-006",
+      "type": "type",
+      "level": "M6",
+      "skill": "woorden-naar-24",
+      "prompt": "Schrijf de tijd op de 24-uursklok, zoals 14:00.",
+      "sentence": "Het is 8 uur 's avonds.",
+      "answer": [
+        "20:00",
+        "20.00"
+      ],
+      "explain": "'s Avonds tel je 12 bij het uur: 8 + 12 = 20. Dus 20:00."
+    },
+    {
+      "id": "klok-24u-007",
+      "type": "choice",
+      "level": "M6",
+      "skill": "24-naar-woorden",
+      "prompt": "Hoe laat is het?",
+      "sentence": "Op de wekker staat 18:50.",
+      "options": [
+        "10 minuten voor 6 's avonds",
+        "10 minuten voor 7 's ochtends",
+        "10 minuten voor 9 's avonds",
+        "10 minuten voor 7 's avonds"
+      ],
+      "answer": 3,
+      "explain": "18 - 12 = 6, dus 18:50 is 6:50 's avonds. Dat is 10 minuten voor 7."
+    },
+    {
+      "id": "klok-24u-008",
+      "type": "choice",
+      "level": "M6",
+      "skill": "24-naar-woorden",
+      "prompt": "Hoe laat is het?",
+      "sentence": "Op de klok staat 13:30.",
+      "options": [
+        "half 4 's middags",
+        "half 2 's nachts",
+        "half 1 's middags",
+        "half 2 's middags"
+      ],
+      "answer": 3,
+      "explain": "13 - 12 = 1, dus 13:30 is 1:30 's middags. Dat is half 2."
+    },
+    {
+      "id": "klok-24u-009",
+      "type": "type",
+      "level": "M6",
+      "skill": "woorden-naar-24",
+      "prompt": "Welk getal tel je na de middag bij het uur op?",
+      "sentence": "Voorbeeld: 5 uur 's middags is 17:00.",
+      "answer": [
+        "12"
+      ],
+      "explain": "Na de middag tel je 12 bij het uur. 5 uur 's middags wordt 17:00."
+    },
+    {
+      "id": "klok-24u-010",
+      "type": "type",
+      "level": "E6",
+      "skill": "woorden-naar-24",
+      "prompt": "Schrijf de tijd op de 24-uursklok, zoals 14:00.",
+      "sentence": "Het is 1 minuut over 4 's middags.",
+      "answer": [
+        "16:01",
+        "16.01"
+      ],
+      "explain": "4 + 12 = 16. 1 minuut over 4 is dan 16:01."
+    },
+    {
+      "id": "klok-24u-011",
+      "type": "type",
+      "level": "E6",
+      "skill": "woorden-naar-24",
+      "prompt": "Schrijf de tijd op de 24-uursklok, zoals 14:00.",
+      "sentence": "Het is kwart voor 11 's avonds.",
+      "answer": [
+        "22:45",
+        "22.45"
+      ],
+      "explain": "Kwart voor 11 is 10:45. 's Avonds: 10 + 12 = 22. Dus 22:45."
+    },
+    {
+      "id": "klok-24u-012",
+      "type": "type",
+      "level": "E6",
+      "skill": "woorden-naar-24",
+      "prompt": "Schrijf de tijd op de 24-uursklok, zoals 14:00.",
+      "sentence": "Het is 10 minuten voor half 7 's avonds.",
+      "answer": [
+        "18:20",
+        "18.20"
+      ],
+      "explain": "10 minuten voor half 7 is 6:20. 's Avonds: 6 + 12 = 18. Dus 18:20."
+    },
+    {
+      "id": "klok-24u-013",
+      "type": "choice",
+      "level": "E6",
+      "skill": "24-naar-woorden",
+      "prompt": "Hoe laat is het?",
+      "sentence": "Op de klok staat 21:35.",
+      "options": [
+        "5 minuten voor half 10 's avonds",
+        "5 minuten over half 11 's avonds",
+        "5 minuten over half 10 's avonds",
+        "5 minuten over half 10 's ochtends"
+      ],
+      "answer": 2,
+      "explain": "21 - 12 = 9, dus 21:35 is 9:35 's avonds. Dat is 5 minuten over half 10."
+    },
+    {
+      "id": "klok-24u-014",
+      "type": "choice",
+      "level": "E6",
+      "skill": "am-pm",
+      "prompt": "Welke tijd is hetzelfde als 7:20 p.m.?",
+      "options": [
+        "19:20",
+        "21:20",
+        "07:20",
+        "17:20"
+      ],
+      "answer": 0,
+      "explain": "p.m. betekent na de middag. 7 + 12 = 19, dus 19:20."
+    },
+    {
+      "id": "klok-24u-015",
+      "type": "choice",
+      "level": "E6",
+      "skill": "am-pm",
+      "prompt": "Welke tijd is hetzelfde als 6:45 a.m.?",
+      "options": [
+        "18:45",
+        "16:45",
+        "06:45",
+        "08:45"
+      ],
+      "answer": 2,
+      "explain": "a.m. betekent voor de middag. Dan blijft het uur gelijk: 06:45."
+    },
+    {
+      "id": "klok-24u-016",
+      "type": "choice",
+      "level": "E6",
+      "skill": "am-pm",
+      "prompt": "Wat betekent a.m. achter een tijd?",
+      "options": [
+        "na de middag",
+        "voor de middag",
+        "precies 12 uur"
+      ],
+      "answer": 1,
+      "explain": "a.m. is voor de middag, p.m. is na de middag."
+    },
+    {
+      "id": "klok-24u-017",
+      "type": "type",
+      "level": "E6",
+      "skill": "am-pm",
+      "prompt": "Schrijf de tijd op de 24-uursklok, zoals 14:00.",
+      "sentence": "Het is 9:10 p.m.",
+      "answer": [
+        "21:10",
+        "21.10"
+      ],
+      "explain": "p.m. is na de middag: 9 + 12 = 21. Dus 21:10."
+    },
+    {
+      "id": "klok-24u-018",
+      "type": "choice",
+      "level": "E6",
+      "skill": "dagdeel",
+      "prompt": "Welke tijd komt het laatst op de dag?",
+      "options": [
+        "08:50",
+        "10:55",
+        "11:40",
+        "13:05"
+      ],
+      "answer": 3,
+      "explain": "Op de 24-uursklok is het grootste uur het laatst. 13 is meer dan 8, 10 en 11."
+    }
+  ]
+}

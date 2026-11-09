@@ -4,6 +4,11 @@ Written so kids can read it too.
 
 ## Unreleased
 
+### Nieuwe lessen
+
+* New Rekenen module Klokrekenen: read the clock to the minute, the 24-uursklok, voor en na de middag, and work out how long something takes. With lessons, questions and two tests.
+* New Rekenen module Breuken: what a fraction is, which one is bigger, fractions that are the same, 3/4 van 12, and adding and taking away fractions. With lessons, questions and two tests.
+
 ### Leerpauze
 
 * A small grey lock on the lesson, question and teach moment of a learning break. After the pincode a parent can only end the break or go back to it (T55b, AC199).

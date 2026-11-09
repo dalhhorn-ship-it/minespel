@@ -1,0 +1,53 @@
+{
+  "id": "klokrekenen",
+  "title": "Klokrekenen: klokkijken en tijd",
+  "subject": "rekenen",
+  "version": 1,
+  "language": "nl",
+  "description": "Klokkijken in minuten, de 24-uursklok, voor en na de middag, en uitrekenen hoe lang iets duurt. Lessen, oefenvragen en toetsen voor groep 6.",
+  "levels": [
+    "M6",
+    "E6"
+  ],
+  "topics": [
+    "dag-en-etmaal",
+    "klok-in-woorden",
+    "24-uursklok",
+    "tijdsduur"
+  ],
+  "exams": [
+    {
+      "id": "toets-klok-m6",
+      "title": "Toets klokrekenen M6",
+      "levels": [
+        "M6"
+      ],
+      "questionCount": 16,
+      "timeLimitMinutes": 16,
+      "passPercent": 70,
+      "mix": {
+        "dag-en-etmaal": 1,
+        "klok-in-woorden": 1,
+        "24-uursklok": 1,
+        "tijdsduur": 1
+      }
+    },
+    {
+      "id": "toets-klok-e6",
+      "title": "Toets klokrekenen E6",
+      "levels": [
+        "M6",
+        "E6"
+      ],
+      "questionCount": 24,
+      "timeLimitMinutes": 24,
+      "passPercent": 70,
+      "mix": {
+        "dag-en-etmaal": 1,
+        "klok-in-woorden": 2,
+        "24-uursklok": 2,
+        "tijdsduur": 2
+      }
+    }
+  ]
+}
