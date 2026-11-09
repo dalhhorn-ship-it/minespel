@@ -1,0 +1,282 @@
+{
+  "id": "breuken-vergelijken",
+  "title": "Breuken vergelijken",
+  "groups": [
+    6
+  ],
+  "lesson": {
+    "pages": [
+      {
+        "title": "Zelfde noemer",
+        "skill": "zelfde-noemer",
+        "text": "Hebben twee breuken dezelfde noemer? Dan zijn de stukken even groot. Kijk naar de teller: meer stukken is meer.",
+        "examples": [
+          {
+            "good": "5/8 > 3/8"
+          }
+        ],
+        "tip": "Zelfde stukken? Tel ze."
+      },
+      {
+        "title": "Zelfde teller",
+        "skill": "zelfde-teller",
+        "text": "Hebben twee breuken dezelfde teller? Kijk naar de noemer. Hoe groter de noemer, hoe kleiner elk stuk.",
+        "examples": [
+          {
+            "good": "1/2 > 1/4",
+            "bad": "1/4 > 1/2",
+            "why": "4 is groter dan 2, maar een kwart is kleiner dan een half."
+          }
+        ],
+        "tip": "Een pizza voor 10 kinderen geeft kleinere stukken dan voor 2."
+      },
+      {
+        "title": "Eén hele",
+        "skill": "een-hele",
+        "text": "Zijn teller en noemer gelijk? Dan heb je alle stukken: één hele. Is de teller groter dan de noemer? Dan is het meer dan één hele.",
+        "examples": [
+          {
+            "good": "4/4 = 1, 6/6 = 1, 5/4 is meer dan 1."
+          }
+        ],
+        "tip": "Boven = onder? Dan is het 1."
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "brk-verg-001",
+      "type": "choice",
+      "level": "M6",
+      "skill": "zelfde-noemer",
+      "prompt": "Welk teken moet op de stippen? < is kleiner dan, > is groter dan.",
+      "sentence": "3/8 ... 5/8",
+      "options": [
+        "<",
+        ">",
+        "="
+      ],
+      "answer": 0,
+      "explain": "Zelfde noemer: kijk naar de teller. 3 stukken is minder dan 5 stukken."
+    },
+    {
+      "id": "brk-verg-002",
+      "type": "choice",
+      "level": "M6",
+      "skill": "zelfde-noemer",
+      "prompt": "Welke breuk is het grootst?",
+      "options": [
+        "1/7",
+        "5/7",
+        "3/7",
+        "2/7"
+      ],
+      "answer": 1,
+      "explain": "Alle stukken zijn even groot (zevende). Wie de meeste stukken heeft, wint: 5/7."
+    },
+    {
+      "id": "brk-verg-003",
+      "type": "choice",
+      "level": "M6",
+      "skill": "zelfde-teller",
+      "prompt": "Welk teken moet op de stippen? < is kleiner dan, > is groter dan.",
+      "sentence": "1/2 ... 1/4",
+      "options": [
+        "<",
+        ">",
+        "="
+      ],
+      "answer": 1,
+      "explain": "Hoe minder stukken je maakt, hoe groter elk stuk. Een half is groter dan een kwart."
+    },
+    {
+      "id": "brk-verg-004",
+      "type": "choice",
+      "level": "M6",
+      "skill": "zelfde-teller",
+      "prompt": "Welke breuk is het kleinst?",
+      "options": [
+        "1/2",
+        "1/10",
+        "1/5",
+        "1/3"
+      ],
+      "answer": 1,
+      "explain": "Een taart in 10 stukken geeft kleine stukjes. 1/10 is het kleinst."
+    },
+    {
+      "id": "brk-verg-005",
+      "type": "type",
+      "level": "M6",
+      "skill": "een-hele",
+      "prompt": "Hoeveel vierde is samen één hele?",
+      "answer": [
+        "4",
+        "4/4"
+      ],
+      "explain": "Een hele in 4 gelijke stukken: 4/4 is 1 hele."
+    },
+    {
+      "id": "brk-verg-006",
+      "type": "choice",
+      "level": "M6",
+      "skill": "een-hele",
+      "prompt": "Hoeveel is 6/6?",
+      "options": [
+        "precies 1 hele",
+        "minder dan 1 hele",
+        "meer dan 1 hele"
+      ],
+      "answer": 0,
+      "explain": "Teller en noemer zijn gelijk: alle stukken zijn er. 6/6 is 1 hele."
+    },
+    {
+      "id": "brk-verg-007",
+      "type": "choice",
+      "level": "M6",
+      "skill": "zelfde-teller",
+      "prompt": "Wie krijgt het meeste taart?",
+      "sentence": "Sam krijgt 1/3 van de taart. Noor krijgt 1/6.",
+      "options": [
+        "ze krijgen evenveel",
+        "Noor",
+        "Sam"
+      ],
+      "answer": 2,
+      "explain": "Een taart in 3 stukken geeft grotere stukken dan in 6 stukken. 1/3 is meer dan 1/6."
+    },
+    {
+      "id": "brk-verg-008",
+      "type": "choice",
+      "level": "M6",
+      "skill": "zelfde-noemer",
+      "prompt": "Welk teken moet op de stippen? < is kleiner dan, > is groter dan.",
+      "sentence": "4/9 ... 4/9",
+      "options": [
+        "<",
+        ">",
+        "="
+      ],
+      "answer": 2,
+      "explain": "Precies dezelfde breuk: even groot."
+    },
+    {
+      "id": "brk-verg-009",
+      "type": "choice",
+      "level": "E6",
+      "skill": "zelfde-teller",
+      "prompt": "Welk teken moet op de stippen? < is kleiner dan, > is groter dan.",
+      "sentence": "2/3 ... 2/5",
+      "options": [
+        "<",
+        ">",
+        "="
+      ],
+      "answer": 1,
+      "explain": "Zelfde teller: kijk naar de noemer. Derden zijn groter dan vijfden."
+    },
+    {
+      "id": "brk-verg-010",
+      "type": "choice",
+      "level": "E6",
+      "skill": "zelfde-teller",
+      "prompt": "Welke breuk is het kleinst?",
+      "options": [
+        "3/5",
+        "3/10",
+        "3/4",
+        "3/8"
+      ],
+      "answer": 1,
+      "explain": "Zelfde teller. De grootste noemer geeft de kleinste stukken: 3/10."
+    },
+    {
+      "id": "brk-verg-011",
+      "type": "choice",
+      "level": "E6",
+      "skill": "een-hele",
+      "prompt": "Welk teken moet op de stippen? < is kleiner dan, > is groter dan.",
+      "sentence": "7/7 ... 1",
+      "options": [
+        "<",
+        ">",
+        "="
+      ],
+      "answer": 2,
+      "explain": "Teller en noemer zijn gelijk, dus 7/7 is precies 1."
+    },
+    {
+      "id": "brk-verg-012",
+      "type": "choice",
+      "level": "E6",
+      "skill": "een-hele",
+      "prompt": "Welke breuk is meer dan één hele?",
+      "options": [
+        "3/4",
+        "1/4",
+        "4/4",
+        "5/4"
+      ],
+      "answer": 3,
+      "explain": "4/4 is 1 hele. 5/4 is een stuk meer: groter dan 1."
+    },
+    {
+      "id": "brk-verg-013",
+      "type": "choice",
+      "level": "E6",
+      "skill": "zelfde-teller",
+      "prompt": "Wat is de goede volgorde van klein naar groot?",
+      "options": [
+        "1/4, 1/8, 1/2",
+        "1/2, 1/4, 1/8",
+        "1/8, 1/2, 1/4",
+        "1/8, 1/4, 1/2"
+      ],
+      "answer": 3,
+      "explain": "Teller is steeds 1. Grote noemer is klein stuk: 1/8, dan 1/4, dan 1/2."
+    },
+    {
+      "id": "brk-verg-014",
+      "type": "choice",
+      "level": "E6",
+      "skill": "zelfde-noemer",
+      "prompt": "Welk teken moet op de stippen? < is kleiner dan, > is groter dan.",
+      "sentence": "7/12 ... 5/12",
+      "options": [
+        "<",
+        ">",
+        "="
+      ],
+      "answer": 1,
+      "explain": "Zelfde noemer: 7 stukken is meer dan 5 stukken."
+    },
+    {
+      "id": "brk-verg-015",
+      "type": "type",
+      "level": "E6",
+      "skill": "een-hele",
+      "prompt": "Hoeveel achtste mist er nog tot één hele?",
+      "sentence": "De fles is 5/8 vol.",
+      "answer": [
+        "3",
+        "3/8"
+      ],
+      "explain": "Een hele is 8/8. 8 - 5 = 3, dus 3/8 erbij."
+    },
+    {
+      "id": "brk-verg-016",
+      "type": "choice",
+      "level": "E6",
+      "skill": "zelfde-teller",
+      "prompt": "Wie loopt het verst?",
+      "sentence": "Lisa loopt 3/4 km. Tim loopt 3/5 km.",
+      "options": [
+        "Lisa",
+        "Tim",
+        "ze lopen even ver"
+      ],
+      "answer": 0,
+      "explain": "Zelfde teller 3. Vierden zijn groter dan vijfden, dus 3/4 is meer."
+    }
+  ]
+}

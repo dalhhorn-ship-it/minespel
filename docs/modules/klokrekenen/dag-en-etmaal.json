@@ -1,0 +1,253 @@
+{
+  "id": "dag-en-etmaal",
+  "title": "Dag, etmaal, uur en minuut",
+  "groups": [
+    6
+  ],
+  "lesson": {
+    "pages": [
+      {
+        "title": "Een dag heeft 24 uur",
+        "skill": "etmaal",
+        "text": "Een hele dag en nacht samen heeft 24 uur. Een ander woord daarvoor is een etmaal. Op de klok staan maar 12 uren. Daarom gaat de kleine wijzer 2 keer rond op een dag.",
+        "examples": [
+          {
+            "good": "1 etmaal = 24 uur. 2 etmalen = 48 uur."
+          },
+          {
+            "good": "Kleine wijzer: 2 rondjes per dag, want 2 x 12 = 24."
+          }
+        ],
+        "tip": "Etmaal: een dag plus een nacht. Samen 24 uur."
+      },
+      {
+        "title": "Uren, kwartieren en minuten",
+        "skill": "uren-en-minuten",
+        "text": "Een uur heeft 60 minuten. Een half uur is 30 minuten. Een kwartier is 15 minuten. Een minuut heeft 60 seconden.",
+        "examples": [
+          {
+            "good": "Anderhalf uur = 60 + 30 = 90 minuten."
+          },
+          {
+            "good": "3 kwartier = 3 x 15 = 45 minuten.",
+            "bad": "3 kwartier = 30 minuten.",
+            "why": "Een kwartier is 15 minuten, niet 10."
+          }
+        ],
+        "tip": "Kwartier = kwart uur. Een pizza in 4 stukken: elk stuk is 15 minuten."
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "klok-dag-001",
+      "type": "choice",
+      "level": "M6",
+      "skill": "etmaal",
+      "prompt": "Hoeveel uur heeft een hele dag?",
+      "options": [
+        "12",
+        "100",
+        "60",
+        "24"
+      ],
+      "answer": 3,
+      "explain": "Een hele dag (een etmaal) heeft 24 uur. De klok gaat twee keer rond: 2 x 12 = 24."
+    },
+    {
+      "id": "klok-dag-002",
+      "type": "choice",
+      "level": "M6",
+      "skill": "etmaal",
+      "prompt": "Hoe vaak gaat de kleine wijzer rond in een hele dag?",
+      "options": [
+        "2 keer",
+        "24 keer",
+        "12 keer",
+        "1 keer"
+      ],
+      "answer": 0,
+      "explain": "Op de klok staan 12 uren. Een dag heeft 24 uur, dus de kleine wijzer gaat 2 keer rond."
+    },
+    {
+      "id": "klok-dag-003",
+      "type": "choice",
+      "level": "M6",
+      "skill": "etmaal",
+      "prompt": "Wat is een ander woord voor een hele dag van 24 uur?",
+      "options": [
+        "een kwartier",
+        "een seizoen",
+        "een eeuw",
+        "een etmaal"
+      ],
+      "answer": 3,
+      "explain": "Een etmaal is een dag en een nacht samen: 24 uur."
+    },
+    {
+      "id": "klok-dag-004",
+      "type": "type",
+      "level": "M6",
+      "skill": "uren-en-minuten",
+      "prompt": "Hoeveel minuten zitten er in een uur?",
+      "answer": [
+        "60",
+        "60 minuten"
+      ],
+      "explain": "Een uur heeft 60 minuten. De grote wijzer gaat dan 1 keer rond."
+    },
+    {
+      "id": "klok-dag-005",
+      "type": "type",
+      "level": "M6",
+      "skill": "uren-en-minuten",
+      "prompt": "Hoeveel minuten is een half uur?",
+      "answer": [
+        "30",
+        "30 minuten"
+      ],
+      "explain": "Een half uur is de helft van 60 minuten: 30 minuten."
+    },
+    {
+      "id": "klok-dag-006",
+      "type": "type",
+      "level": "M6",
+      "skill": "uren-en-minuten",
+      "prompt": "Hoeveel minuten is een kwartier?",
+      "answer": [
+        "15",
+        "15 minuten"
+      ],
+      "explain": "Een kwartier is een kwart uur: 60 gedeeld door 4 is 15 minuten."
+    },
+    {
+      "id": "klok-dag-007",
+      "type": "choice",
+      "level": "M6",
+      "skill": "uren-en-minuten",
+      "prompt": "Hoeveel kwartier gaat er in een uur?",
+      "options": [
+        "3",
+        "2",
+        "4",
+        "6"
+      ],
+      "answer": 2,
+      "explain": "4 kwartier is 4 x 15 = 60 minuten, dus een heel uur."
+    },
+    {
+      "id": "klok-dag-008",
+      "type": "type",
+      "level": "M6",
+      "skill": "etmaal",
+      "prompt": "Een dino slaapt 2 etmalen. Hoeveel uur is dat?",
+      "answer": [
+        "48",
+        "48 uur"
+      ],
+      "explain": "Een etmaal is 24 uur. 2 x 24 = 48 uur."
+    },
+    {
+      "id": "klok-dag-009",
+      "type": "type",
+      "level": "E6",
+      "skill": "uren-en-minuten",
+      "prompt": "Hoeveel minuten zijn 2 uur?",
+      "answer": [
+        "120",
+        "120 minuten"
+      ],
+      "explain": "Een uur is 60 minuten. 2 x 60 = 120 minuten."
+    },
+    {
+      "id": "klok-dag-010",
+      "type": "type",
+      "level": "E6",
+      "skill": "uren-en-minuten",
+      "prompt": "Hoeveel minuten is anderhalf uur?",
+      "answer": [
+        "90",
+        "90 minuten"
+      ],
+      "explain": "Anderhalf uur is 1 uur en een half uur: 60 + 30 = 90 minuten."
+    },
+    {
+      "id": "klok-dag-011",
+      "type": "type",
+      "level": "E6",
+      "skill": "etmaal",
+      "prompt": "Een ei broedt 3 etmalen. Hoeveel uur is dat?",
+      "answer": [
+        "72",
+        "72 uur"
+      ],
+      "explain": "Een etmaal is 24 uur. 3 x 24 = 72 uur."
+    },
+    {
+      "id": "klok-dag-012",
+      "type": "choice",
+      "level": "E6",
+      "skill": "uren-en-minuten",
+      "prompt": "Wat duurt het langst?",
+      "options": [
+        "anderhalf uur",
+        "1 uur",
+        "100 minuten",
+        "5 kwartier"
+      ],
+      "answer": 2,
+      "explain": "Reken alles om naar minuten: 100, 90, 75 en 60. 100 minuten is het langst."
+    },
+    {
+      "id": "klok-dag-013",
+      "type": "type",
+      "level": "E6",
+      "skill": "uren-en-minuten",
+      "prompt": "Hoeveel seconden zitten er in een minuut?",
+      "answer": [
+        "60",
+        "60 seconden"
+      ],
+      "explain": "Een minuut heeft 60 seconden, net zoals een uur 60 minuten heeft."
+    },
+    {
+      "id": "klok-dag-014",
+      "type": "type",
+      "level": "E6",
+      "skill": "uren-en-minuten",
+      "prompt": "Hoeveel uur is 180 minuten?",
+      "answer": [
+        "3",
+        "3 uur"
+      ],
+      "explain": "60 minuten is 1 uur. 180 gedeeld door 60 is 3 uur."
+    },
+    {
+      "id": "klok-dag-015",
+      "type": "choice",
+      "level": "E6",
+      "skill": "etmaal",
+      "prompt": "Een week heeft 7 etmalen. Hoeveel uur is dat?",
+      "options": [
+        "240",
+        "148",
+        "124",
+        "168"
+      ],
+      "answer": 3,
+      "explain": "7 x 24 uur = 168 uur. Reken: 7 x 20 = 140 en 7 x 4 = 28."
+    },
+    {
+      "id": "klok-dag-016",
+      "type": "type",
+      "level": "E6",
+      "skill": "uren-en-minuten",
+      "prompt": "Hoeveel minuten is 3 kwartier?",
+      "answer": [
+        "45",
+        "45 minuten"
+      ],
+      "explain": "Een kwartier is 15 minuten. 3 x 15 = 45 minuten."
+    }
+  ]
+}

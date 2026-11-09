@@ -1,0 +1,256 @@
+{
+  "id": "optellen-aftrekken",
+  "title": "Breuken optellen en aftrekken",
+  "groups": [
+    6
+  ],
+  "lesson": {
+    "pages": [
+      {
+        "title": "Optellen met dezelfde noemer",
+        "skill": "gelijknamig-optellen",
+        "text": "Hebben de breuken dezelfde noemer? Tel dan alleen de tellers op. De noemer blijft hetzelfde.",
+        "examples": [
+          {
+            "good": "1/5 + 2/5 = 3/5",
+            "bad": "1/5 + 2/5 = 3/10",
+            "why": "De stukken blijven vijfden. Tel de noemers niet op."
+          }
+        ],
+        "tip": "Stukken tel je op, de soort stuk blijft."
+      },
+      {
+        "title": "Aftrekken met dezelfde noemer",
+        "skill": "gelijknamig-aftrekken",
+        "text": "Bij aftrekken haal je alleen de tellers van elkaar af. De noemer blijft weer hetzelfde.",
+        "examples": [
+          {
+            "good": "5/8 - 2/8 = 3/8"
+          }
+        ],
+        "tip": "De noemer doet niet mee met rekenen."
+      },
+      {
+        "title": "Aanvullen tot één hele",
+        "skill": "aanvullen-tot-1",
+        "text": "Eén hele kun je schrijven als een breuk met teller en noemer gelijk. Zo kun je een breuk van 1 aftrekken.",
+        "examples": [
+          {
+            "good": "1 - 3/4 = 4/4 - 3/4 = 1/4"
+          }
+        ],
+        "tip": "Maak van 1 eerst 4/4, 5/5 of 8/8."
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "brk-som-001",
+      "type": "type",
+      "level": "M6",
+      "skill": "gelijknamig-optellen",
+      "prompt": "Reken uit. Schrijf zoals 3/4.",
+      "sentence": "1/5 + 2/5",
+      "answer": [
+        "3/5",
+        "3 / 5"
+      ],
+      "explain": "Zelfde noemer: tel alleen de tellers op. 1 + 2 = 3, dus 3/5."
+    },
+    {
+      "id": "brk-som-002",
+      "type": "type",
+      "level": "M6",
+      "skill": "gelijknamig-optellen",
+      "prompt": "Reken uit. Schrijf zoals 3/4.",
+      "sentence": "2/7 + 3/7",
+      "answer": [
+        "5/7",
+        "5 / 7"
+      ],
+      "explain": "Zelfde noemer: 2 + 3 = 5 zevende. Dus 5/7."
+    },
+    {
+      "id": "brk-som-003",
+      "type": "type",
+      "level": "M6",
+      "skill": "gelijknamig-optellen",
+      "prompt": "Reken uit. Schrijf zoals 3/4.",
+      "sentence": "1/4 + 2/4",
+      "answer": [
+        "3/4",
+        "3 / 4"
+      ],
+      "explain": "Zelfde noemer: 1 + 2 = 3 vierde. Dus 3/4."
+    },
+    {
+      "id": "brk-som-004",
+      "type": "type",
+      "level": "M6",
+      "skill": "gelijknamig-aftrekken",
+      "prompt": "Reken uit. Schrijf zoals 3/4.",
+      "sentence": "5/8 - 2/8",
+      "answer": [
+        "3/8",
+        "3 / 8"
+      ],
+      "explain": "Zelfde noemer: haal alleen de tellers af. 5 - 2 = 3, dus 3/8."
+    },
+    {
+      "id": "brk-som-005",
+      "type": "type",
+      "level": "M6",
+      "skill": "gelijknamig-aftrekken",
+      "prompt": "Reken uit. Schrijf zoals 3/4.",
+      "sentence": "4/6 - 1/6",
+      "answer": [
+        "3/6",
+        "3 / 6",
+        "1/2",
+        "1 / 2"
+      ],
+      "explain": "Zelfde noemer: 4 - 1 = 3 zesde. Dus 3/6, en dat is ook 1/2."
+    },
+    {
+      "id": "brk-som-006",
+      "type": "choice",
+      "level": "M6",
+      "skill": "gelijknamig-optellen",
+      "prompt": "Wat is 1/3 + 1/3?",
+      "options": [
+        "2/6",
+        "2/3",
+        "1/9",
+        "1/6"
+      ],
+      "answer": 1,
+      "explain": "Zelfde noemer: tel de tellers op, de noemer blijft 3. Dus 2/3."
+    },
+    {
+      "id": "brk-som-007",
+      "type": "choice",
+      "level": "M6",
+      "skill": "gelijknamig-optellen",
+      "prompt": "Wat is 2/5 + 1/5?",
+      "options": [
+        "1/5",
+        "3/10",
+        "3/5",
+        "2/10"
+      ],
+      "answer": 2,
+      "explain": "De noemer blijft 5. Tel alleen de tellers: 2 + 1 = 3. Dus 3/5."
+    },
+    {
+      "id": "brk-som-008",
+      "type": "type",
+      "level": "E6",
+      "skill": "gelijknamig-optellen",
+      "prompt": "Reken uit. Schrijf zoals 3/4.",
+      "sentence": "3/8 + 5/8",
+      "answer": [
+        "8/8",
+        "8 / 8",
+        "1/1",
+        "1 / 1",
+        "1"
+      ],
+      "explain": "3 + 5 = 8 achtste. 8/8 is 1 hele."
+    },
+    {
+      "id": "brk-som-009",
+      "type": "type",
+      "level": "E6",
+      "skill": "gelijknamig-aftrekken",
+      "prompt": "Reken uit. Schrijf zoals 3/4.",
+      "sentence": "7/10 - 4/10",
+      "answer": [
+        "3/10",
+        "3 / 10"
+      ],
+      "explain": "Zelfde noemer: 7 - 4 = 3 tiende. Dus 3/10."
+    },
+    {
+      "id": "brk-som-010",
+      "type": "type",
+      "level": "E6",
+      "skill": "aanvullen-tot-1",
+      "prompt": "Reken uit. Schrijf zoals 3/4.",
+      "sentence": "1 - 3/4",
+      "answer": [
+        "1/4",
+        "1 / 4"
+      ],
+      "explain": "1 hele is 4/4. 4/4 - 3/4 = 1/4."
+    },
+    {
+      "id": "brk-som-011",
+      "type": "type",
+      "level": "E6",
+      "skill": "aanvullen-tot-1",
+      "prompt": "Reken uit. Schrijf zoals 3/4.",
+      "sentence": "1 - 2/5",
+      "answer": [
+        "3/5",
+        "3 / 5"
+      ],
+      "explain": "1 hele is 5/5. 5/5 - 2/5 = 3/5."
+    },
+    {
+      "id": "brk-som-012",
+      "type": "type",
+      "level": "E6",
+      "skill": "gelijknamig-optellen",
+      "prompt": "Reken uit. Schrijf zoals 3/4.",
+      "sentence": "2/9 + 4/9 + 1/9",
+      "answer": [
+        "7/9",
+        "7 / 9"
+      ],
+      "explain": "Zelfde noemer: 2 + 4 + 1 = 7 negende. Dus 7/9."
+    },
+    {
+      "id": "brk-som-013",
+      "type": "type",
+      "level": "E6",
+      "skill": "gelijknamig-optellen",
+      "prompt": "Hoeveel eten ze samen? Schrijf zoals 3/4.",
+      "sentence": "Rex eet 2/8 van de pizza. Trix eet 3/8.",
+      "answer": [
+        "5/8",
+        "5 / 8"
+      ],
+      "explain": "Zelfde noemer: 2 + 3 = 5 achtste. Samen 5/8."
+    },
+    {
+      "id": "brk-som-014",
+      "type": "type",
+      "level": "E6",
+      "skill": "gelijknamig-aftrekken",
+      "prompt": "Hoeveel zit er nog in? Schrijf zoals 3/4.",
+      "sentence": "De fles is 5/6 vol. Je drinkt 2/6 op.",
+      "answer": [
+        "3/6",
+        "3 / 6",
+        "1/2",
+        "1 / 2"
+      ],
+      "explain": "Zelfde noemer: 5 - 2 = 3 zesde. Dat is 3/6, of 1/2."
+    },
+    {
+      "id": "brk-som-015",
+      "type": "choice",
+      "level": "E6",
+      "skill": "gelijknamig-optellen",
+      "prompt": "Wat is 3/4 + 1/4?",
+      "options": [
+        "4/8",
+        "3/16",
+        "2/4",
+        "1"
+      ],
+      "answer": 3,
+      "explain": "3 + 1 = 4 vierde. 4/4 is precies 1 hele."
+    }
+  ]
+}

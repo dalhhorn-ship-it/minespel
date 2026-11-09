@@ -1,0 +1,341 @@
+{
+  "id": "klok-in-woorden",
+  "title": "Klokkijken in minuten",
+  "groups": [
+    5,
+    6
+  ],
+  "lesson": {
+    "pages": [
+      {
+        "title": "Grote en kleine wijzer",
+        "skill": "wijzers",
+        "text": "De kleine wijzer wijst het uur aan. De grote wijzer wijst de minuten aan. Staat de grote wijzer op de 12? Dan is het een heel uur. Op de 6 is het half, op de 3 kwart over, op de 9 kwart voor.",
+        "examples": [
+          {
+            "good": "Grote wijzer op de 6, kleine wijzer tussen de 2 en de 3: half 3.",
+            "bad": "Half 2.",
+            "why": "Half 3 betekent halfweg naar 3 uur."
+          }
+        ],
+        "tip": "Elk cijfer op de klok is 5 minuten voor de grote wijzer."
+      },
+      {
+        "title": "Over en voor het hele uur",
+        "skill": "over-en-voor",
+        "text": "Tot kwart over zeg je minuten over het uur. Na kwart voor zeg je minuten voor het volgende uur. Bij voor tel je de minuten die nog missen tot 60.",
+        "examples": [
+          {
+            "good": "8:05 is 5 minuten over 8."
+          },
+          {
+            "good": "7:54 is 6 minuten voor 8.",
+            "bad": "7:54 is 6 minuten voor 7.",
+            "why": "Bij voor noem je het uur dat eraan komt."
+          }
+        ],
+        "tip": "Voor = hoeveel minuten nog tot het volgende hele uur."
+      },
+      {
+        "title": "Rond half",
+        "skill": "rond-half",
+        "text": "Tussen kwart over en kwart voor kijk je naar half. Half 8 is 7:30. Iets eerder is voor half 8, iets later is over half 8.",
+        "examples": [
+          {
+            "good": "7:20 is 10 minuten voor half 8."
+          },
+          {
+            "good": "7:40 is 10 minuten over half 8.",
+            "bad": "7:40 is 10 minuten over half 7.",
+            "why": "Half 8 is 7:30. Daar komen 10 minuten bij."
+          }
+        ],
+        "tip": "Half 8 is halfweg naar 8 uur, dus 7:30."
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "klok-woord-001",
+      "type": "choice",
+      "level": "M6",
+      "skill": "over-en-voor",
+      "prompt": "Hoe zeg je deze tijd?",
+      "sentence": "De klok wijst 3:15.",
+      "options": [
+        "half 4",
+        "kwart voor 3",
+        "kwart over 4",
+        "kwart over 3"
+      ],
+      "answer": 3,
+      "explain": "15 minuten na 3 uur is kwart over 3."
+    },
+    {
+      "id": "klok-woord-002",
+      "type": "choice",
+      "level": "M6",
+      "skill": "over-en-voor",
+      "prompt": "Hoe zeg je deze tijd?",
+      "sentence": "De klok wijst 8:30.",
+      "options": [
+        "kwart over 8",
+        "half 8",
+        "half 10",
+        "half 9"
+      ],
+      "answer": 3,
+      "explain": "8:30 is half 9. Bij half zeg je altijd het volgende uur: het is al halfweg naar 9."
+    },
+    {
+      "id": "klok-woord-003",
+      "type": "choice",
+      "level": "M6",
+      "skill": "over-en-voor",
+      "prompt": "Welke tijd is dit?",
+      "sentence": "Het is 6 minuten voor 8.",
+      "options": [
+        "8:06",
+        "7:06",
+        "8:54",
+        "7:54"
+      ],
+      "answer": 3,
+      "explain": "6 minuten voor 8 is net voor 8 uur: 60 - 6 = 54. Dus 7:54."
+    },
+    {
+      "id": "klok-woord-004",
+      "type": "choice",
+      "level": "M6",
+      "skill": "over-en-voor",
+      "prompt": "Hoe zeg je deze tijd?",
+      "sentence": "De klok wijst 4:50.",
+      "options": [
+        "10 minuten voor 4",
+        "10 minuten over 5",
+        "10 minuten voor 5",
+        "10 minuten over 4"
+      ],
+      "answer": 2,
+      "explain": "Na de 45 kijk je naar het volgende uur. 4:50 is 10 minuten voor 5."
+    },
+    {
+      "id": "klok-woord-005",
+      "type": "type",
+      "level": "M6",
+      "skill": "over-en-voor",
+      "prompt": "Schrijf de tijd met cijfers, zoals 7:15.",
+      "sentence": "Het is 5 minuten over 9.",
+      "answer": [
+        "9:05",
+        "09:05",
+        "9.05",
+        "09.05"
+      ],
+      "explain": "5 minuten over 9 is 5 minuten na 9 uur: 9:05."
+    },
+    {
+      "id": "klok-woord-006",
+      "type": "choice",
+      "level": "M6",
+      "skill": "wijzers",
+      "prompt": "Hoe laat is het?",
+      "sentence": "Grote wijzer op de 12. Kleine wijzer op de 6.",
+      "options": [
+        "half 7",
+        "kwart over 6",
+        "6 uur",
+        "12 uur"
+      ],
+      "answer": 2,
+      "explain": "De grote wijzer op de 12 betekent een heel uur. De kleine wijzer wijst het uur aan: 6 uur."
+    },
+    {
+      "id": "klok-woord-007",
+      "type": "choice",
+      "level": "M6",
+      "skill": "wijzers",
+      "prompt": "Hoe laat is het?",
+      "sentence": "Grote wijzer op de 6. Kleine wijzer tussen de 2 en de 3.",
+      "options": [
+        "kwart over 2",
+        "half 3",
+        "half 2",
+        "6 uur"
+      ],
+      "answer": 1,
+      "explain": "Grote wijzer op de 6 is half. De kleine wijzer is al voorbij de 2, op weg naar de 3: half 3."
+    },
+    {
+      "id": "klok-woord-008",
+      "type": "choice",
+      "level": "M6",
+      "skill": "wijzers",
+      "prompt": "Hoe laat is het?",
+      "sentence": "Grote wijzer op de 3. Kleine wijzer net na de 10.",
+      "options": [
+        "kwart voor 10",
+        "kwart over 11",
+        "half 11",
+        "kwart over 10"
+      ],
+      "answer": 3,
+      "explain": "Grote wijzer op de 3 is kwart over. De kleine wijzer is net voorbij de 10: kwart over 10."
+    },
+    {
+      "id": "klok-woord-009",
+      "type": "type",
+      "level": "M6",
+      "skill": "over-en-voor",
+      "prompt": "Schrijf de tijd met cijfers, zoals 7:15.",
+      "sentence": "Het is kwart voor 7.",
+      "answer": [
+        "6:45",
+        "06:45",
+        "6.45",
+        "06.45"
+      ],
+      "explain": "Kwart voor 7 is 15 minuten voor 7 uur: 6:45."
+    },
+    {
+      "id": "klok-woord-010",
+      "type": "choice",
+      "level": "E6",
+      "skill": "rond-half",
+      "prompt": "Hoe zeg je deze tijd?",
+      "sentence": "De klok wijst 7:40.",
+      "options": [
+        "10 minuten over half 7",
+        "10 minuten over half 8",
+        "10 minuten voor half 8",
+        "10 minuten over half 9"
+      ],
+      "answer": 1,
+      "explain": "7:40 is 10 minuten na half 8 (7:30). Dus 10 minuten over half 8."
+    },
+    {
+      "id": "klok-woord-011",
+      "type": "choice",
+      "level": "E6",
+      "skill": "rond-half",
+      "prompt": "Hoe zeg je deze tijd?",
+      "sentence": "De klok wijst 2:25.",
+      "options": [
+        "5 minuten voor half 4",
+        "5 minuten over half 3",
+        "5 minuten voor half 3",
+        "5 minuten voor half 2"
+      ],
+      "answer": 2,
+      "explain": "2:25 is 5 minuten voor 2:30, en 2:30 is half 3. Dus 5 minuten voor half 3."
+    },
+    {
+      "id": "klok-woord-012",
+      "type": "type",
+      "level": "E6",
+      "skill": "rond-half",
+      "prompt": "Schrijf de tijd met cijfers, zoals 7:15.",
+      "sentence": "Het is 8 minuten over half 6.",
+      "answer": [
+        "5:38",
+        "05:38",
+        "5.38",
+        "05.38"
+      ],
+      "explain": "Half 6 is 5:30. 8 minuten later is 5:38."
+    },
+    {
+      "id": "klok-woord-013",
+      "type": "type",
+      "level": "E6",
+      "skill": "rond-half",
+      "prompt": "Schrijf de tijd met cijfers, zoals 7:15.",
+      "sentence": "Het is 3 minuten voor half 11.",
+      "answer": [
+        "10:27",
+        "10.27"
+      ],
+      "explain": "Half 11 is 10:30. 3 minuten eerder is 10:27."
+    },
+    {
+      "id": "klok-woord-014",
+      "type": "choice",
+      "level": "E6",
+      "skill": "over-en-voor",
+      "prompt": "Welke tijd is dit?",
+      "sentence": "Het is 12 minuten voor 4.",
+      "options": [
+        "3:12",
+        "4:12",
+        "3:48",
+        "4:48"
+      ],
+      "answer": 2,
+      "explain": "12 minuten voor 4: 60 - 12 = 48. Het uur is nog 3, dus 3:48."
+    },
+    {
+      "id": "klok-woord-015",
+      "type": "choice",
+      "level": "E6",
+      "skill": "over-en-voor",
+      "prompt": "Hoe zeg je deze tijd?",
+      "sentence": "De klok wijst 11:57.",
+      "options": [
+        "3 minuten voor 12",
+        "3 minuten voor 11",
+        "3 minuten voor 1",
+        "3 minuten over 11"
+      ],
+      "answer": 0,
+      "explain": "11:57 is bijna 12 uur. Er missen nog 3 minuten: 3 minuten voor 12."
+    },
+    {
+      "id": "klok-woord-016",
+      "type": "choice",
+      "level": "E6",
+      "skill": "wijzers",
+      "prompt": "Hoe laat is het?",
+      "sentence": "Grote wijzer op de 8. Kleine wijzer tussen de 4 en de 5.",
+      "options": [
+        "10 minuten voor half 5",
+        "10 minuten over half 4",
+        "10 minuten over half 5",
+        "10 minuten over half 6"
+      ],
+      "answer": 2,
+      "explain": "Grote wijzer op de 8 is 40 minuten. De kleine wijzer is al voorbij de 4: 4:40, 10 minuten over half 5."
+    },
+    {
+      "id": "klok-woord-017",
+      "type": "choice",
+      "level": "E6",
+      "skill": "wijzers",
+      "prompt": "Hoe laat is het?",
+      "sentence": "Grote wijzer op de 4. Kleine wijzer net na de 9.",
+      "options": [
+        "10 minuten voor half 9",
+        "10 minuten voor half 11",
+        "10 minuten voor half 10",
+        "10 minuten over half 10"
+      ],
+      "answer": 2,
+      "explain": "Grote wijzer op de 4 is 20 minuten. De kleine wijzer is net voorbij de 9: 9:20, 10 minuten voor half 10."
+    },
+    {
+      "id": "klok-woord-018",
+      "type": "choice",
+      "level": "E6",
+      "skill": "rond-half",
+      "prompt": "Welke tijd is dit?",
+      "sentence": "Het is 1 minuut over half 2.",
+      "options": [
+        "1:31",
+        "2:31",
+        "1:29",
+        "2:29"
+      ],
+      "answer": 0,
+      "explain": "Half 2 is 1:30. 1 minuut later is 1:31."
+    }
+  ]
+}

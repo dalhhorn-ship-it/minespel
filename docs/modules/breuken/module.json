@@ -1,0 +1,56 @@
+{
+  "id": "breuken",
+  "title": "Breuken",
+  "subject": "rekenen",
+  "version": 1,
+  "language": "nl",
+  "description": "Wat is een breuk, breuken vergelijken, gelijkwaardige breuken, een breuk van een aantal en breuken optellen en aftrekken. Lessen, oefenvragen en toetsen voor groep 6.",
+  "levels": [
+    "M6",
+    "E6"
+  ],
+  "topics": [
+    "breuk-herkennen",
+    "breuken-vergelijken",
+    "gelijkwaardige-breuken",
+    "breuk-van-hoeveelheid",
+    "optellen-aftrekken"
+  ],
+  "exams": [
+    {
+      "id": "toets-breuken-m6",
+      "title": "Toets breuken M6",
+      "levels": [
+        "M6"
+      ],
+      "questionCount": 15,
+      "timeLimitMinutes": 15,
+      "passPercent": 70,
+      "mix": {
+        "breuk-herkennen": 1,
+        "breuken-vergelijken": 1,
+        "gelijkwaardige-breuken": 1,
+        "breuk-van-hoeveelheid": 1,
+        "optellen-aftrekken": 1
+      }
+    },
+    {
+      "id": "toets-breuken-e6",
+      "title": "Toets breuken E6",
+      "levels": [
+        "M6",
+        "E6"
+      ],
+      "questionCount": 25,
+      "timeLimitMinutes": 25,
+      "passPercent": 70,
+      "mix": {
+        "breuk-herkennen": 1,
+        "breuken-vergelijken": 1,
+        "gelijkwaardige-breuken": 1,
+        "breuk-van-hoeveelheid": 1,
+        "optellen-aftrekken": 1
+      }
+    }
+  ]
+}

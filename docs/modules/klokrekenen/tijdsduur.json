@@ -1,0 +1,274 @@
+{
+  "id": "tijdsduur",
+  "title": "Hoe lang duurt het?",
+  "groups": [
+    5,
+    6
+  ],
+  "lesson": {
+    "pages": [
+      {
+        "title": "Hoe lang duurt het?",
+        "skill": "hoe-lang",
+        "text": "Wil je weten hoe lang iets duurt? Tel van de begintijd naar de eindtijd. Ga over het hele uur heen in stapjes: eerst tot het hele uur, dan de rest.",
+        "examples": [
+          {
+            "good": "Van 8:45 tot 9:10: tot 9:00 is 15, dan nog 10. Samen 25 minuten.",
+            "bad": "9:10 - 8:45 = 65 minuten.",
+            "why": "Een uur heeft 60 minuten, niet 100. Tel in stapjes."
+          }
+        ],
+        "tip": "Spring eerst naar het hele uur."
+      },
+      {
+        "title": "Hoe laat is het dan?",
+        "skill": "eindtijd",
+        "text": "Weet je de begintijd en hoe lang iets duurt? Tel de minuten erbij op. Kom je over de 60? Dan begint een nieuw uur.",
+        "examples": [
+          {
+            "good": "11:40 plus 35 minuten: tot 12:00 is 20, dan nog 15. Dus 12:15."
+          }
+        ],
+        "tip": "60 minuten vol? Het uur gaat 1 omhoog."
+      },
+      {
+        "title": "Hoe laat begon het?",
+        "skill": "begintijd",
+        "text": "Weet je hoe laat iets stopt en hoe lang het duurt? Reken dan terug. Haal eerst de hele uren eraf, dan de minuten.",
+        "examples": [
+          {
+            "good": "Klaar om 16:00 na 1 uur en 15 minuten: 15:00, dan 14:45."
+          }
+        ],
+        "tip": "Terugrekenen is de klok achteruit draaien."
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "klok-duur-001",
+      "type": "type",
+      "level": "M6",
+      "skill": "hoe-lang",
+      "prompt": "Hoeveel minuten duurt het?",
+      "sentence": "Mila fietst om 8:10 weg. Om 8:25 is ze op school.",
+      "answer": [
+        "15",
+        "15 minuten"
+      ],
+      "explain": "Tel van 8:10 naar 8:25. Van 10 naar 25 is 15. Dat is 15 minuten."
+    },
+    {
+      "id": "klok-duur-002",
+      "type": "type",
+      "level": "M6",
+      "skill": "hoe-lang",
+      "prompt": "Hoeveel minuten duurt het?",
+      "sentence": "De les begint om 9:00 en stopt om 9:45.",
+      "answer": [
+        "45",
+        "45 minuten"
+      ],
+      "explain": "Tel van 9:00 naar 9:45. Dat is 45 minuten."
+    },
+    {
+      "id": "klok-duur-003",
+      "type": "type",
+      "level": "M6",
+      "skill": "hoe-lang",
+      "prompt": "Hoeveel minuten duurt het?",
+      "sentence": "Rex gaat om 2:30 zwemmen. Om 3:00 is hij klaar.",
+      "answer": [
+        "30",
+        "30 minuten"
+      ],
+      "explain": "Tel van 2:30 naar 3:00. Van half 3 tot 3 uur is een half uur. Dat is 30 minuten."
+    },
+    {
+      "id": "klok-duur-004",
+      "type": "type",
+      "level": "M6",
+      "skill": "eindtijd",
+      "prompt": "Hoe laat is het dan? Schrijf zoals 7:15.",
+      "sentence": "Het is 4:15. Over een half uur komt opa.",
+      "answer": [
+        "4:45",
+        "04:45",
+        "4.45",
+        "04.45"
+      ],
+      "explain": "Een half uur is 30 minuten. 15 + 30 = 45. Dus 4:45."
+    },
+    {
+      "id": "klok-duur-005",
+      "type": "type",
+      "level": "M6",
+      "skill": "eindtijd",
+      "prompt": "Hoe laat is het dan? Schrijf zoals 7:15.",
+      "sentence": "Het is 10:00. De taart moet 25 minuten in de oven.",
+      "answer": [
+        "10:25",
+        "10.25"
+      ],
+      "explain": "10:00 plus 25 minuten. Dus 10:25."
+    },
+    {
+      "id": "klok-duur-006",
+      "type": "choice",
+      "level": "M6",
+      "skill": "hoe-lang",
+      "prompt": "Hoe lang duurt de film?",
+      "sentence": "De film duurt van 7:00 tot 8:30.",
+      "options": [
+        "1 uur",
+        "2 uur en 30 minuten",
+        "30 minuten",
+        "1 uur en 30 minuten"
+      ],
+      "answer": 3,
+      "explain": "Van 7:00 tot 8:00 is 1 uur. Van 8:00 tot 8:30 is nog 30 minuten."
+    },
+    {
+      "id": "klok-duur-007",
+      "type": "type",
+      "level": "M6",
+      "skill": "hoe-lang",
+      "prompt": "Hoeveel minuten duurt het?",
+      "sentence": "Je loopt om 3:40 naar de sportclub. Om 3:55 ben je er.",
+      "answer": [
+        "15",
+        "15 minuten"
+      ],
+      "explain": "Tel van 3:40 naar 3:55. Van 40 naar 55 is 15. Dat is 15 minuten."
+    },
+    {
+      "id": "klok-duur-008",
+      "type": "type",
+      "level": "M6",
+      "skill": "eindtijd",
+      "prompt": "Hoe laat is het dan? Schrijf zoals 7:15.",
+      "sentence": "Het is 6:20. Over een kwartier gaan we eten.",
+      "answer": [
+        "6:35",
+        "06:35",
+        "6.35",
+        "06.35"
+      ],
+      "explain": "Een kwartier is 15 minuten. 20 + 15 = 35. Dus 6:35."
+    },
+    {
+      "id": "klok-duur-009",
+      "type": "type",
+      "level": "E6",
+      "skill": "hoe-lang",
+      "prompt": "Hoeveel minuten duurt het?",
+      "sentence": "Sam vertrekt om 8:45. Om 9:10 is hij bij de sportclub.",
+      "answer": [
+        "25",
+        "25 minuten"
+      ],
+      "explain": "Tel van 8:45 naar 9:10. Tot 9:00 is 15 minuten, dan nog 10. Dat is 25 minuten."
+    },
+    {
+      "id": "klok-duur-010",
+      "type": "type",
+      "level": "E6",
+      "skill": "hoe-lang",
+      "prompt": "Hoeveel minuten duurt het?",
+      "sentence": "De bus rijdt van 13:50 tot 14:35.",
+      "answer": [
+        "45",
+        "45 minuten"
+      ],
+      "explain": "Tel van 13:50 naar 14:35. Tot 14:00 is 10 minuten, dan nog 35. Dat is 45 minuten."
+    },
+    {
+      "id": "klok-duur-011",
+      "type": "choice",
+      "level": "E6",
+      "skill": "hoe-lang",
+      "prompt": "Hoe lang duurt het feest?",
+      "sentence": "Het feest duurt van 14:30 tot 17:15.",
+      "options": [
+        "3 uur en 45 minuten",
+        "2 uur en 15 minuten",
+        "2 uur en 45 minuten",
+        "3 uur en 15 minuten"
+      ],
+      "answer": 2,
+      "explain": "Van 14:30 tot 16:30 is 2 uur. Van 16:30 tot 17:15 is nog 45 minuten."
+    },
+    {
+      "id": "klok-duur-012",
+      "type": "type",
+      "level": "E6",
+      "skill": "eindtijd",
+      "prompt": "Hoe laat is het dan? Schrijf zoals 7:15.",
+      "sentence": "Het is 11:40. Over 35 minuten gaan we lunchen.",
+      "answer": [
+        "12:15",
+        "12.15"
+      ],
+      "explain": "Tot 12:00 is 20 minuten. Dan nog 15 minuten erbij. Dus 12:15."
+    },
+    {
+      "id": "klok-duur-013",
+      "type": "type",
+      "level": "E6",
+      "skill": "eindtijd",
+      "prompt": "Hoe laat is de film klaar? Schrijf zoals 20:15.",
+      "sentence": "De film begint om 19:30 en duurt 1 uur en 50 minuten.",
+      "answer": [
+        "21:20",
+        "21.20"
+      ],
+      "explain": "19:30 plus 1 uur is 20:30. Plus 50 minuten: eerst 30 tot 21:00, dan nog 20. Dus 21:20."
+    },
+    {
+      "id": "klok-duur-014",
+      "type": "type",
+      "level": "E6",
+      "skill": "begintijd",
+      "prompt": "Hoe laat moet je weg? Schrijf zoals 7:15.",
+      "sentence": "Je wilt om 8:30 op school zijn. Lopen duurt 20 minuten.",
+      "answer": [
+        "8:10",
+        "08:10",
+        "8.10",
+        "08.10"
+      ],
+      "explain": "Reken terug: 8:30 min 20 minuten. Dus 8:10."
+    },
+    {
+      "id": "klok-duur-015",
+      "type": "type",
+      "level": "E6",
+      "skill": "begintijd",
+      "prompt": "Hoe laat begon de training? Schrijf zoals 14:00.",
+      "sentence": "De training stopt om 16:00. Hij duurt 1 uur en 15 minuten.",
+      "answer": [
+        "14:45",
+        "14:45",
+        "14.45",
+        "14.45"
+      ],
+      "explain": "Reken terug: 16:00 min 1 uur is 15:00. Min 15 minuten is 14:45. Dus 14:45."
+    },
+    {
+      "id": "klok-duur-016",
+      "type": "choice",
+      "level": "E6",
+      "skill": "hoe-lang",
+      "prompt": "Hoe lang slaapt Lisa?",
+      "sentence": "Lisa slaapt van 20:45 tot 7:15.",
+      "options": [
+        "9 uur en 30 minuten",
+        "10 uur en 30 minuten",
+        "13 uur en 30 minuten",
+        "11 uur en 30 minuten"
+      ],
+      "answer": 1,
+      "explain": "Van 20:45 tot 6:45 is 10 uur. Van 6:45 tot 7:15 is nog 30 minuten."
+    }
+  ]
+}
