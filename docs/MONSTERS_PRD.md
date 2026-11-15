@@ -1,6 +1,6 @@
 # Product doc: Monsters and knights (v17 Ridders, v18 Zwarte bubbel, v16 Monstermol, v19 Ridderuitrusting, v20 Diepe edelstenen, v21 Meer uitrusting)
 
-**Status:** DRAFT, revised after review round 1 (2026-11-15). Not signed. The founder approved the direction (decision 128). Each release moves into docs/PRD.md section 12 and is signed there when it comes up at /release.
+**Status:** DRAFT, revised after review round 1 (2026-11-15). Not signed. The founder approved the direction (decision 130). Each release moves into docs/PRD.md section 12 and is signed there when it comes up at /release.
 
 **Companion to:** `docs/PRD.md` (the signed core), `docs/SHOP_PRD.md` (the Dinowinkel) and `docs/GAME_LOOP_PRD.md` (coins and balance). Backlog entries: `docs/BACKLOG.md`, sections v16 to v21. Review and answers: `docs/DISCUSSION.md`, "MONSTERS_PRD review round 1".
 
@@ -8,9 +8,11 @@
 
 **Criteria ids:** draft ids per release (MO17-1, MO18-1, ...). They get real AC numbers only when a release is scoped into PRD section 12, so they never clash with v3, v15 and v6.
 
+**Scoped (2026-11-15):** v17 and v18 are scoped together into `docs/PRD.md` section 12 as one release, 0.7.0, on one signoff (decision 134). The PRD text wins. Mapping: MO17-1 and MO17-3 to AC200, MO17-2 to AC201, MO17-10 to AC202, MO17-4 to AC203, MO17-5 and MO17-6 to AC204, MO17-7 to AC205, MO17-8 to AC206, MO17-9 and part of MO17-11 to AC207, MO17-11 and MO17-12 to AC208, MO17-13 to AC209, MO17-16 to AC210; MO18-1 and MO18-2 to AC211, MO18-3 to AC212, MO18-4 to AC213, MO18-5 to AC214, MO18-6 to AC215, MO18-7 to AC216, MO18-8 to AC217, MO18-9 to AC218, MO18-10 to AC219, MO18-11 to AC220, MO18-12 to AC221, MO18-13 to AC222, MO18-14 to AC223, MO18-15 to AC224, MO18-16 to AC225, MO18-18 to AC226, MO18-19 to AC227; MO17-14 and MO18-17 to AC228; MO17-15 and the version part of MO18-18 to AC229. Sections 2 and 3 below stay as the draft.
+
 **Founder request (2026-11-15, Dutch, short):** make the world deeper. Deep under the ground, warnings: do not dig further. If the kid does, a monster mole comes up and slowly walks to the animals. He teases them, they run away and make a sound. Stop him with a fence of blocks, by trapping him, or with the knight. Every 10 minutes a black bubble with a little monster inside. A tap on the bubble lets it out. It breaks blocks and teases animals; only a knight stops it. Sell knights, with a wide range of gear that makes them stronger, and let knights guard the animals. Add more rare stones, and make them expensive. Every feature can be switched on and off in the parent menu.
 
-**Founder answers (2026-11-15):** decision 128 (direction approved; questions not asked take this doc's recommendation), 129 (build order), 130 (bubble rules), 131 (gear width).
+**Founder answers (2026-11-15):** decision 130 (direction approved; questions not asked take this doc's recommendation), 131 (build order), 132 (bubble rules), 133 (gear width).
 
 **The one rule over everything:** no animal is ever eaten, hurt, lost or taken. "Plagen" means the animal jumps, makes its sound, runs a few blocks away and then carries on as before.
 
@@ -32,7 +34,7 @@
 | Shop | `src/app/shop-flow.ts` has three near copies of "buy with ledger in one transaction". `LedgerReason` has no knight, gear or stone. | V17a makes one shared buy helper that v19 and v20 reuse. |
 | Safety text | PRD 9 says villagers never break or place blocks. PRD 8 says no scary sounds, no angry dinos. | v17's signoff adds a "Ridders" line to PRD 8 and 9. v18's signoff adds a "Monsters" line. |
 
-### 1.2 Release order and what each needs (decision 129)
+### 1.2 Release order and what each needs (decision 131)
 
 Release ids stay; only the shipping order changed.
 
@@ -47,7 +49,7 @@ Release ids stay; only the shipping order changed.
 | 7 | **v20 Diepe edelstenen** | 8 new shiny stones deep below the stripes. I find one, save up and buy it. | v15 (veins) | S to M, 3 tasks |
 | later | **v21 Meer uitrusting** | The other 13 pieces of gear, a horse and a riding triceratops. | v19 | M, about 4 tasks |
 
-v6 Wat heb ik geleerd was set right after v15 by decision 124. Decision 129 does not name it. Its slot is MOQ15.
+v6 Wat heb ik geleerd was set right after v15 by decision 124. Decision 131 does not name it. Its slot is MOQ15.
 
 Nothing depends on a later release. v17 and v18 do not need v15 or the mole. v20 works with every monster switch off.
 
@@ -60,7 +62,7 @@ Nothing depends on a later release. v17 and v18 do not need v15 or the mole. v20
 * **Never harms the kid.** A monster never touches, pushes, follows, traps or blocks the kid, and never takes points, dinos, eggs, chickens, knights, gear or found blocks.
 * **Never harms an animal.** Teasing only (v18 4.3 In 6).
 * **Knights win kindly.** A knight never kills or hurts. He pokes, tickles and shouts "Wegwezen!". The monster leaves with a silly line. The knight never loses.
-* **A fight always lasts a moment.** The Moed bar never fills in less than 3 seconds, however many knights and however much gear (decision 131).
+* **A fight always lasts a moment.** The Moed bar never fills in less than 3 seconds, however many knights and however much gear (decision 133).
 * **Opt in by the kid.** The mole only comes when the kid digs past the stripes. Klodder only comes out when the kid taps the bubble. A bubble not tapped floats away.
 * **One at a time.** At most one mole and at most one bubble or Klodder in the world. At most 3 knights (2 if the v17 speed check fails, A9).
 * **Paused with the world.** Every monster clock and every live monster stops whenever the play timer stops: learning break, exam, shop, dino menu, parent area, background, portrait.
@@ -80,7 +82,7 @@ A new card **"Monsters en ridders"** in Ouders > Instellingen, behind the pincod
 
 v19 gear follows the Ridders row. v20 stones get no row: they are blocks (MOQ12 A, decided). Nothing bought is ever lost by a switch.
 
-**Defaults (MOQ1 A with decision 130).** "New install" means the release starts for the first time with no saved world. "Existing install" means there is already a saved world.
+**Defaults (MOQ1 A with decision 132).** "New install" means the release starts for the first time with no saved world. "Existing install" means there is already a saved world.
 
 | Row | New install | Existing install | Restored backup made before the row existed |
 |---|---|---|---|
@@ -118,6 +120,8 @@ The animal jumps, plays its own existing sound and runs 6 (plus or minus 1) bloc
 ---
 
 ## 2. v17 Ridders (ships after v3)
+
+**Scoped into `docs/PRD.md` section 12, part A (0.7.0), as AC200 to AC210, AC228 and AC229.**
 
 ### 2.1 Goal
 "I have my own knight. He marches in, salutes, follows me, stays where I say, or guards my animals and tells me they are all safe."
@@ -192,6 +196,8 @@ M, 5 tasks (architect A6).
 
 ## 3. v18 Zwarte bubbel (ships after v17)
 
+**Scoped into `docs/PRD.md` section 12, part B (0.7.0, with v17), as AC211 to AC229.**
+
 ### 3.1 Goal
 "Now and then a shiny black bubble floats by with a little monster inside. If I tap it, Klodder jumps out and makes a mess. My knight sends him off, and everything comes back."
 
@@ -203,15 +209,15 @@ M, 5 tasks (architect A6).
 5. Another time I do not tap the bubble. After a minute it floats up and away. Nothing happens.
 
 ### 3.3 In
-1. **The bubble clock (decision 130):** counts play time only, and only while all of these hold: master, Ridders and bubble rows on, the kid owns a knight or has at least 30 coins, and no bubble or Klodder is out. While a condition is false the clock keeps its time. At 10 minutes (MOQ11 A, decided) a bubble comes. If a learning break is due in under 60 seconds (`remainingPlayMs()`), the bubble waits until 30 seconds after the break. The clock is saved with the play timer (`persistPlayMs`), so a reload does not reset it.
+1. **The bubble clock (decision 132):** counts play time only, and only while all of these hold: master, Ridders and bubble rows on, the kid owns a knight or has at least 30 coins, and no bubble or Klodder is out. While a condition is false the clock keeps its time. At 10 minutes (MOQ11 A, decided) a bubble comes. If a learning break is due in under 60 seconds (`remainingPlayMs()`), the bubble waits until 30 seconds after the break. The clock is saved with the play timer (`persistPlayMs`), so a reload does not reset it.
 2. **The bubble:** floats in over 3 seconds to a spot 6 to 10 blocks in front of the kid at eye height, only where that spot is air and in view; else it waits and tries again every 5 seconds. It drifts slowly within 1 block. It is at least 80 px on screen. A tap pops it in Hakken or Bouwen mode, before any block behind it, using the same hit test as the knight. Not tapped in 60 seconds of play time: it floats up and away and the clock starts again.
 3. **Klodder:** small, round, silly, at most 6 meshes. Walks at 1.5 blocks per second. Every 4 seconds he nibbles one block he can reach, then sometimes teases an animal (1.7). After 20 blocks he only teases.
 4. **Which blocks (MOQ4 A, decided):** only cells the kid never changed, not within 3 blocks of any kid changed cell, never in a village site, never oersteen, water or lava, never a block under or next to the kid or an animal.
 5. **An overlay, never saved (architect A2):** a nibbled block is hidden for render and collision only. It is never written to the world diff. The world save writes those cells as their start block.
 6. **Teasing** of dinos and chickens as in 1.7 (not villagers, not knights). He never picks the same animal twice in a row.
 7. **The Moed bar:** a knight notices Klodder within 8 blocks (16 on Pas op de dieren), walks straight to him, and pops next to him after 3 seconds stuck, like a stuck dino (architect A5; v16 brings a real path search). He pokes with a soft "Tok!". A Moed bar over Klodder fills at the knights' Kracht per second (1 each without gear); Klodder needs 30. Never in less than 3 seconds (1.3). Full: "Wegwezen!", Klodder pops into a bubble that floats away with "Doei!". The knight goes back to his mode.
-8. **Klodder always tires (decision 130):** after 5 minutes of play time out he yawns "Ik ben moe", climbs into his bubble and floats away. Fixed, no option.
-9. **Every block comes back (decision 130):** when Klodder leaves for any reason, every nibbled block reappears with a soft "plop", spread over about 2 seconds, all within 3 seconds. A cell where the kid or an animal stands waits and retries each second until free. A cell the kid built in since then keeps the kid's block.
+8. **Klodder always tires (decision 132):** after 5 minutes of play time out he yawns "Ik ben moe", climbs into his bubble and floats away. Fixed, no option.
+9. **Every block comes back (decision 132):** when Klodder leaves for any reason, every nibbled block reappears with a soft "plop", spread over about 2 seconds, all within 3 seconds. A cell where the kid or an animal stands waits and retries each second until free. A cell the kid built in since then keeps the kid's block.
 10. **One hint (MOQ6 A, decided, reworded after qa Q1):** the first time ever that Klodder is out and the kid has no knight: "Klodder wordt vanzelf moe. Een ridder kan hem sneller wegsturen." Never again. It names no shop.
 11. **The bubble row** with its help line and defaults (1.4).
 12. **Save, backup, version:** the bubble clock and the hint flag. A version bump and a CHANGELOG line. A "Monsters" line in PRD 8 and 9.
@@ -339,7 +345,7 @@ M, 4 tasks.
 4. Klodder comes. My knight on his pony gets there faster.
 
 ### 5.3 In
-1. **Gear catalog (decision 131):** 8 items in 5 slots, all inside the 60 coin ceiling of `docs/GAME_LOOP_PRD.md` 1.3. One of each costs 210.
+1. **Gear catalog (decision 133):** 8 items in 5 slots, all inside the 60 coin ceiling of `docs/GAME_LOOP_PRD.md` 1.3. One of each costs 210.
 
 | Slot | Item (Dutch) | Coins | Does |
 |---|---|---|---|
@@ -352,7 +358,7 @@ M, 4 tasks.
 | Rug | Riddercape | 15 | Kracht +1 |
 | Rijdier | Pony | 50 | Speed +1.5 blocks per second |
 
-2. **Kracht cap (decision 131):** a knight has base Kracht 1, plus 1 for each worn item in Hoofd, Schild, Hand and Rug: at most 5. A bare knight sends the mole off in 15 seconds and Klodder in 30; a fully dressed one in 3 and 6. The 3 second minimum of 1.3 holds for any number of knights. Better items in a slot look better; they do not add more Kracht.
+2. **Kracht cap (decision 133):** a knight has base Kracht 1, plus 1 for each worn item in Hoofd, Schild, Hand and Rug: at most 5. A bare knight sends the mole off in 15 seconds and Klodder in 30; a fully dressed one in 3 and 6. The 3 second minimum of 1.3 holds for any number of knights. Better items in a slot look better; they do not add more Kracht.
 3. **One item, one knight**, like the hats of v12: a bought item is one thing in the wapenkast, worn by one knight at a time, moved for free. One item per slot. The Hand item replaces the wooden sword.
 4. **Uitrusten** in the knight menu: the knight shown as a static picture or on the main canvas (never a second renderer, architect A7), the wapenkast below, tap to wear, tap again to take off.
 5. **Gear shows in the world** on the knight, merged into his meshes (at most 6), one cached geometry per gear set. The Pony carries the knight.
@@ -400,7 +406,7 @@ M, 4 tasks.
 4. Now Maansteen is in my Diep tab for good. I build a shiny tower with it.
 
 ### 6.3 In
-1. **8 new blocks** (ids 43 to 50): Maansteen 80, Zonnesteen 100, Jade 120, Opaal 150, Topaas 180, Parelsteen 220, Drakensteen 300, Mollengoud 400. Prices stand (decision 128): the founder asked for expensive stones.
+1. **8 new blocks** (ids 43 to 50): Maansteen 80, Zonnesteen 100, Jade 120, Opaal 150, Topaas 180, Parelsteen 220, Drakensteen 300, Mollengoud 400. Prices stand (decision 130): the founder asked for expensive stones.
 2. **Veins come from v15** (architect A1): v15's terrain version places the vein spots below the stripes. Until v20 they look and mine like plain steen; v20 shows them. No terrain version in v20.
 3. **Find, then buy once (MOQ10 B, decided):** mining a vein block marks that stone found ("Je hebt X ontdekt!", the first time only). A found stone shows as a card in the Edelstenen section. Buying it once unlocks it for good, free and unlimited. A stone not found shows as a "?" card that cannot be bought. Found list copies the v11 `village.found` pattern.
 4. **Diep tab** in Alle blokken with 8 tiles and "N van de 8 gekocht". Found but not bought: picture, lock, "Koop in de Dinowinkel". Not found: "?" and "Ergens diep onder de grond".
@@ -465,20 +471,20 @@ The Kracht cap of 5 stays, so these add looks, speed, range and effects, never a
 ### 8.1 Still open
 
 * **MOQ14: v17 without any monster.** In v17 the knight buys, marches in, salutes, follows, stays, guards and reports "Alles veilig!", but meets no monster until v18. A (recommended): ship v17 like that; v18 comes right after. B: fold a first monster into v17. It does not fit 5 tasks (v17 is already 5), so v17 would split into two releases anyway. C: ship v17 and v18 as one signoff, built back to back, released together.
-* **MOQ15: Where v6 Wat heb ik geleerd goes.** Decision 124 put it right after v15; decision 129 lists v15, then v16, v19, v20 and does not name v6. A: right after v15, before v16 (keeps decision 124). B (recommended): after v20, following the order of decision 129 as said. C: right after v18, before v15.
+* **MOQ15: Where v6 Wat heb ik geleerd goes.** Decision 124 put it right after v15; decision 131 lists v15, then v16, v19, v20 and does not name v6. A: right after v15, before v16 (keeps decision 124). B (recommended): after v20, following the order of decision 131 as said. C: right after v18, before v15.
 
 ### 8.2 Decided
 
-* **MOQ1** Defaults: A, on for new and existing installs (decision 128), except the bubble row, off on existing installs (decision 130). Table in 1.4.
-* **MOQ2** Depth: C, the stripe layer and vein spots go into v15's terrain version (architect A1, accepted after decision 128).
-* **MOQ3** Mole tires after 10 minutes: A (decision 128).
-* **MOQ4** Klodder's blocks: A, only unchanged blocks, at most 20, all come back (decision 130), plus the 3 block zone (qa Q3).
-* **MOQ5** Safety valves: A, fixed (decision 130).
-* **MOQ6** Hint: A, one toast the first time, reworded with no shop pointer (decision 128, qa Q1).
-* **MOQ7** Knights: A, 30 coins, at most 3, not in the 25 (decision 128).
-* **MOQ8** Begeleiden: A, Pas op de dieren (decision 128).
-* **MOQ9** Gear: 8 items with a Kracht cap of 5 and a 3 second minimum fight; the rest in v21 (decision 131).
-* **MOQ10** Stones: B, find then buy once (decision 128).
-* **MOQ11** Bubble: A, every 10 minutes of play, fixed (decision 128), only with a knight or 30 coins (decision 130).
-* **MOQ12** No switch for stones: A (decision 128).
-* **MOQ13** Order: v17, v18, then v15, v16, v19, v20 (decision 129).
+* **MOQ1** Defaults: A, on for new and existing installs (decision 130), except the bubble row, off on existing installs (decision 132). Table in 1.4.
+* **MOQ2** Depth: C, the stripe layer and vein spots go into v15's terrain version (architect A1, accepted after decision 130).
+* **MOQ3** Mole tires after 10 minutes: A (decision 130).
+* **MOQ4** Klodder's blocks: A, only unchanged blocks, at most 20, all come back (decision 132), plus the 3 block zone (qa Q3).
+* **MOQ5** Safety valves: A, fixed (decision 132).
+* **MOQ6** Hint: A, one toast the first time, reworded with no shop pointer (decision 130, qa Q1).
+* **MOQ7** Knights: A, 30 coins, at most 3, not in the 25 (decision 130).
+* **MOQ8** Begeleiden: A, Pas op de dieren (decision 130).
+* **MOQ9** Gear: 8 items with a Kracht cap of 5 and a 3 second minimum fight; the rest in v21 (decision 133).
+* **MOQ10** Stones: B, find then buy once (decision 130).
+* **MOQ11** Bubble: A, every 10 minutes of play, fixed (decision 130), only with a knight or 30 coins (decision 132).
+* **MOQ12** No switch for stones: A (decision 130).
+* **MOQ13** Order: v17, v18, then v15, v16, v19, v20 (decision 131).
