@@ -1,7 +1,7 @@
 // Types and numbers of the monsters (v18 Zwarte bubbel, decision 135). No logic, so every monster file can import it.
 import type { SoundName } from '../audio/sound';
 import type { Rng } from '../core/rng';
-import type { Point } from '../dinos/dino-ai';
+import type { DinoState, Point } from '../dinos/dino-ai';
 import type { KnightState } from '../knights/knight-types';
 import type { Box } from '../world/build';
 import type { World } from '../world/world';
@@ -98,6 +98,8 @@ export interface MonsterContext {
   touch(x: number, z: number): void;
   say(text: string, ms?: number): void;
   play(name: SoundName): void;
+  /** The live dinos and chickens Klodder may tease (boot passes `dinoStore.dinos()`). */
+  animals?(): readonly DinoState[];
   /** Saves the hint flag (V18d). */
   markHintShown(): void;
   /** Hint flag as saved. */

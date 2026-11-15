@@ -8,7 +8,7 @@ import type { SoundName } from '../audio/sound';
 import { pickActor, screenPointOf } from '../game/actor-hit';
 import { aimFromScreen } from '../game/build-controller';
 import type { CreatureSystem } from '../game/game';
-import type { Point } from '../dinos/dino-ai';
+import type { DinoState, Point } from '../dinos/dino-ai';
 import type { KnightSystem } from '../knights/knight-system';
 import type { ActorView, GameRenderer } from '../render/renderer';
 import type { MonstersRecord } from '../storage/schema';
@@ -19,9 +19,12 @@ import type { World } from '../world/world';
 import { bubbleBox, bubbleGrow, createBubble, findBubbleSpot, stepBubble, BUBBLE_BASE_SIZE } from './bubble';
 import { createBubbleClock, type BubbleClock } from './bubble-clock';
 import { createKlodder, klodderBox, stepKlodder } from './klodder';
+import { cellBox } from './nibble';
+import { RESTORE_RETRY_MS } from './restore';
+import { moedFraction } from './moed';
 import { stepMoed } from './moed';
 import {
-  BUBBLE_TAP_REACH, CLOCK_POINTS, MONSTER_PRIORITY, type BubbleState, type KlodderState, type MonsterContext,
+  BUBBLE_TAP_REACH, CLOCK_POINTS, KLODDER_BOX, MONSTER_PRIORITY, type BubbleState, type KlodderState, type MonsterContext,
   type MonsterPhase, type MonsterStateView,
 } from './monster-types';
 import { stepTease, teaseNow } from './tease';
@@ -41,6 +44,10 @@ export interface MonsterSystemOptions {
   persist?: (change: (record: MonstersRecord) => MonstersRecord) => void;
   /** True when a box touches a dino, egg, chicken, villager or knight. Boot passes the game's own checks. */
   occupied?: (box: Box) => boolean;
+  /** The live dinos and chickens (`world.dinoStore.dinos()`): the ones Klodder teases. */
+  animals?: () => readonly DinoState[];
+  /** Draws the Moed bar over Klodder while a knight pokes him. */
+  moedBar?: { update(at: { x: number; y: number } | null, fraction: number): void };
   say?: (text: string, ms?: number) => void;
   sound?: { play(name: SoundName): void };
   rng?: Rng;
@@ -82,6 +89,7 @@ export function createMonsterSystem(options: MonsterSystemOptions): MonsterSyste
   let klodder: KlodderState | null = null;
   let hint = false;
   let drawn = 0;
+  let strayMs = 0;
   const touched = new Map<string, { x: number; z: number }>();
 
   const clock: BubbleClock = createBubbleClock({
@@ -120,6 +128,7 @@ export function createMonsterSystem(options: MonsterSystemOptions): MonsterSyste
       world, rng, dt, kid: kidPoint(), kidBox: kidBox(),
       occupied: (box) => options.occupied?.(box) ?? false,
       knights: () => options.knights.knights(),
+      animals: () => options.animals?.() ?? [],
       touch: touchCell,
       say: (text, ms) => options.say?.(text, ms),
       play: (name) => options.sound?.play(name),
@@ -132,9 +141,15 @@ export function createMonsterSystem(options: MonsterSystemOptions): MonsterSyste
     };
   }
 
-  /** Puts every hidden cell back at once (a switch went off, a world reset, a stray after Klodder left). */
-  function unhideAll(): void {
+  /**
+   * Puts hidden cells back by the safe rule: never into a cell the kid, an animal, a villager or a knight stands in
+   * (decision 135, AC217). Such a cell stays hidden and comes back when it is free (`step` asks again).
+   */
+  function restoreFree(): void {
+    const kid = kidBox();
     for (const c of world.hiddenCells()) {
+      const box = cellBox(c.x, c.y, c.z);
+      if (overlap(box, kid) || (options.occupied?.(box) ?? false)) continue;
       world.unhide(c.x, c.y, c.z);
       touchCell(c.x, c.z);
     }
@@ -150,7 +165,7 @@ export function createMonsterSystem(options: MonsterSystemOptions): MonsterSyste
     bubble = null;
     klodder = null;
     phase = 'idle';
-    unhideAll();
+    restoreFree();
     flushTouched();
     sync();
   }
@@ -163,9 +178,22 @@ export function createMonsterSystem(options: MonsterSystemOptions): MonsterSyste
     if (klodder) {
       views.push({ id: 'klodder', model: 'klodder', x: klodder.x, y: klodder.y, z: klodder.z, heading: klodder.heading, pose: klodder.pose });
     }
+    drawMoed();
     if (views.length === 0 && drawn === 0) return;
     drawn = views.length;
     options.renderer?.syncActors?.('monsters', views);
+  }
+
+  function drawMoed(): void {
+    const bar = options.moedBar;
+    if (!bar) return;
+    if (!klodder || klodder.pokers <= 0 || klodder.leaving) {
+      bar.update(null, 0);
+      return;
+    }
+    const { width, height } = options.viewport();
+    const at = screenPointOf(options.player.pose(), width, height, { x: klodder.x, y: klodder.y + KLODDER_BOX.height + 0.4, z: klodder.z });
+    bar.update(at, moedFraction(klodder));
   }
 
   function showBubble(): boolean {
@@ -257,7 +285,15 @@ export function createMonsterSystem(options: MonsterSystemOptions): MonsterSyste
         if (stepKlodder(klodder, ctx) === 'left') {
           klodder = null;
           phase = 'idle';
-          unhideAll();
+          restoreFree();
+        }
+      }
+      if (!klodder && world.hiddenCount() > 0) {
+        // Blocks left over after a switch went off or a cell was blocked: ask again every 500 ms (AC217).
+        strayMs += dt * 1000;
+        if (strayMs >= RESTORE_RETRY_MS) {
+          strayMs = 0;
+          restoreFree();
         }
       }
       flushTouched();

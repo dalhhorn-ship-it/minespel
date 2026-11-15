@@ -16,6 +16,7 @@ import { KNIGHT_PRIORITY, createKnightSystem, type KnightSystem } from '../knigh
 import { MONSTER_PRIORITY, createMonsterSystem, type MonsterSystem } from '../monsters/monster-system';
 import { openDb } from '../storage/db';
 import { createLogStore } from '../storage/log-store';
+import { createMoedBar } from '../ui/moed-bar';
 import { creatureSwitches, prepareMonsters, updateMonsters } from '../storage/monsters-store';
 import { createProgressStore } from '../storage/progress-store';
 import { createRecords, type Records } from '../storage/records';
@@ -280,6 +281,8 @@ export function createBoot(deps: BootDeps): Boot {
         void updateMonsters(db, change).catch(() => {});
       },
       occupied: (box) => world.dinoSystem.isOccupied(box) || world.villagerSystem.isOccupied(box) || knights.isOccupied?.(box) === true,
+      animals: () => world.dinoStore.dinos(),
+      moedBar: createMoedBar(),
       say: (text, ms) => say(text, ms),
       sound,
     });

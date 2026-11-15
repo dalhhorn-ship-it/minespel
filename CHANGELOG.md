@@ -4,11 +4,22 @@ Written so kids can read it too.
 
 ## Unreleased
 
-### Ridders (under construction)
+## 0.7.0
 
-* Behind the scenes, the game can now keep knights: they are saved with your world and come back after a backup restore. You cannot buy one yet.
-* In the Dinowinkel you can now buy a Ridder for 30 points (at most 3) and trade him in for 15. Parents get a card "Monsters en ridders" in Instellingen to switch knights on or off.
-* Tap a knight and a menu opens: Volg mij, Blijf hier or Pas op de dieren. A guard knight tells you how many dinos and chickens he watches. A friendly cartoon knight with a helmet, a tabard and a wooden sword, and a soft fanfare.
+### Ridders
+
+* In the Dinowinkel you can now buy a knight for 30 points (at most 3). He guards your animals. Trade him in for 15 points if you like.
+* Tap a knight and a menu opens: Volg mij, Blijf hier or Pas op de dieren. A guard knight tells you how many dinos and chickens he watches. He is a friendly cartoon knight with a helmet, a tabard and a wooden sword, and a soft fanfare.
+* Your knights are saved with your world and come back after a backup restore.
+* Papa or mama get a card "Monsters en ridders" in Instellingen to switch knights on or off.
+
+### Zwarte bubbel
+
+* After a while of playing, a little monster in a black bubble may come floating by. His name is Klodder. Tap the bubble and he jumps out, giggling.
+* Klodder is a bit silly. He nibbles a few blocks and teases your dinos and chickens, who jump and run away a bit, then come back. Nobody gets hurt.
+* Your knight sends him off. Watch the little bar over Klodder fill up: more knights make it go faster. Then Klodder floats away in his bubble and says "Doei!". If nobody sends him off, he gets tired by himself after 5 minutes.
+* Every block he nibbled comes back, always, and your own building is never touched. Nothing he does is ever saved.
+* Papa or mama can switch the Zwarte bubbel in Instellingen, on the same card. It only works when Ridders is on. For a game that was there before, it starts switched off.
 
 ## 0.6.0 (2026-11-15)
 

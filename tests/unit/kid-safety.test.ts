@@ -17,7 +17,15 @@ const KNIGHT_FILES = [
   'src/ui/shop-knights.ts',
   'src/ui/parent/monsters-card.ts',
   'src/app/knight-flow.ts',
+  // v18 Zwarte bubbel: Klodder, the bubble, the Moed bar and the model.
+  ...readdirSync('src/monsters')
+    .filter((f) => f.endsWith('.ts') && !f.endsWith('.test.ts'))
+    .map((f) => `src/monsters/${f}`),
+  'src/ui/moed-bar.ts',
+  'src/render/klodder-model.ts',
 ];
+
+const NETWORK = /\b(fetch|XMLHttpRequest|WebSocket|EventSource|sendBeacon)\b|https?:\/\//;
 
 /** Every string literal and template piece of a source file. */
 function literals(file: string): string[] {
@@ -32,9 +40,16 @@ function literals(file: string): string[] {
   return out;
 }
 
+describe('no network in the knights and monsters (AC225)', () => {
+  it('AC225: no knight or monster file calls fetch, a socket or a beacon, or holds a web address', () => {
+    const bad = KNIGHT_FILES.filter((f) => NETWORK.test(readFileSync(f, 'utf8').replace(/\/\/.*$/gm, '')));
+    expect(bad).toEqual([]);
+  });
+});
+
 describe('knight strings (AC228)', () => {
   it('AC228: the scan reads every knight file and finds strings', () => {
-    expect(KNIGHT_FILES.length).toBeGreaterThanOrEqual(9);
+    expect(KNIGHT_FILES.length).toBeGreaterThanOrEqual(20);
     for (const f of KNIGHT_FILES) expect(literals(f).length, f).toBeGreaterThan(0);
   });
   it('AC228: no string literal holds a banned word as a whole word', () => {

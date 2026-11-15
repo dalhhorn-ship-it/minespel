@@ -1,6 +1,7 @@
 /* The Moed bar over Klodder (v18, AC216): a thin soft bar, never red, no text. */
 .moed-bar {
-  position: absolute;
+  position: fixed;
+  z-index: 20;
   width: 72px;
   height: 12px;
   margin-left: -36px;

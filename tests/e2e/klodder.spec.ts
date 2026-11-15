@@ -78,4 +78,29 @@ test.describe('Klodder (V18b)', () => {
     expect(s.phase).toBe('idle');
     expect(s.hiddenCount).toBe(0);
   });
+
+  test('AC220: Klodder teases a real dino: it runs off and comes back to its spot', async ({ page }) => {
+    await prepare(page);
+    await readState(page, 'addEgg', 'triceratops', false);
+    await readState(page, 'stepDinos', 40);
+    const dinos = await readState<Array<{ id: string; x: number; z: number }>>(page, 'dinos');
+    expect(dinos).toHaveLength(1);
+    const id = dinos[0]!.id;
+    await readState(page, 'setDinoMode', id, 'stay');
+    expect(await readState(page, 'spawnKlodder')).toBe(true);
+    const at = (await readState<Array<{ x: number; z: number }>>(page, 'dinos'))[0]!;
+    const home = { x: at.x, z: at.z };
+    expect(await readState(page, 'teaseNow')).toBe(true);
+    let far = 0;
+    for (let i = 0; i < 30; i++) {
+      await readState(page, 'fastForward', 200);
+      const d = (await readState<Array<{ x: number; z: number }>>(page, 'dinos'))[0]!;
+      far = Math.max(far, Math.hypot(d.x - home.x, d.z - home.z));
+    }
+    // Pen walls or a cliff may cut the run short, so only a clear move counts.
+    expect(far).toBeGreaterThan(1.5);
+    await readState(page, 'fastForward', 6000);
+    const back = (await readState<Array<{ x: number; z: number }>>(page, 'dinos'))[0]!;
+    expect(Math.hypot(back.x - home.x, back.z - home.z)).toBeLessThanOrEqual(3.5);
+  });
 });

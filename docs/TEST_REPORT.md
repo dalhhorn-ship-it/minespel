@@ -1,5 +1,22 @@
 # Test report
 
+## v18 Zwarte bubbel (0.7.0, part B), V18e closing task
+
+Automated part: see the numbers below. AC210 and AC227 (speed on the founder's oldest iPad) and the look and sound checks are OPEN: they cannot run here.
+
+| Check | Result |
+|---|---|
+| AC224, `tests/e2e/monsters-pause.spec.ts`: 8 pause states (learning break, exam, Dinowinkel, dino menu, knight menu, parent area, background, portrait) times a bubble, Klodder, a guard knight with Klodder and a running clock: nothing moves in the state, all goes on after it | 32 passed (Chromium local, iPad landscape) |
+| AC225, same spec: no request beyond the app's own files in a 60 s session with a knight and Klodder; points and knights unchanged after Klodder | 3 passed |
+| AC228, `tests/unit/kid-safety.test.ts`: no banned word in any string of `src/knights/`, `src/monsters/`, the Moed bar and the models; no network call in those files; sound caps; reduced motion in `src/render/klodder-model.test.ts` and the e2e spec | passed: `npm test` 148 files, 1305 tests; the reduced motion check passes in the e2e spec |
+| AC223, `tests/e2e/monsters-card.spec.ts`: the Zwarte bubbel row, greyed note, switch off with Klodder out, existing install Uit | 4 passed |
+
+### Open for the founder
+
+* **AC210** (3 knights) and **AC227** (Klodder, 3 knights and 25 shop dinos in view, Klodder nibbling, a knight sending him off): on the oldest iPad from the home screen icon with the fps counter, 2 minutes. Target: 95 percent of frames at 33 ms or less and none over 200 ms. Result: not run yet. If the knight check fails, the cap becomes 2 knights.
+* Look and listen: Klodder is silly, not scary; the sounds are soft.
+* The "Check before shipping" list of PRD section 12 on the test deploy: new install (bubble Aan), existing install (bubble Uit), a hard kill while Klodder is out (world whole), hand the iPad to the kid.
+
 ## v17 Ridders (0.7.0, part A), V17e safety
 
 Automated part PASS. AC210 (speed on the founder's oldest iPad) is OPEN: it cannot run here.

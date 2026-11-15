@@ -111,3 +111,94 @@ test.describe('Monsters en ridders card (V17c)', () => {
     await expect(toggle(page, 'monsters-knights')).toHaveText('Aan');
   });
 });
+
+const HELP_BUBBLE =
+  'Na 10 minuten spelen komt soms een bubbel. Tikt je kind erop, dan sloopt Klodder een paar blokken tot een ridder hem wegstuurt. Alles komt terug.';
+
+test.describe('Zwarte bubbel row (V18e, AC223)', () => {
+  test('AC223: a new install shows the row Aan with its exact help line', async ({ page }) => {
+    await openApp(page);
+    await setupPin(page);
+    await openSettings(page);
+    await toggle(page, 'monsters-bubble').scrollIntoViewIfNeeded();
+    await expect(page.locator('[data-testid="monsters-bubble"] .parent-switch-help').first()).toHaveText(HELP_BUBBLE);
+    await expect(toggle(page, 'monsters-bubble')).toHaveText('Aan');
+    const box = (await toggle(page, 'monsters-bubble').boundingBox())!;
+    expect(box.height).toBeGreaterThanOrEqual(44);
+  });
+
+  test('AC223: Ridders off greys the row with its note and keeps its value, and no bubble comes', async ({ page }) => {
+    await openApp(page);
+    await setupPin(page);
+    await readState(page, 'addKnight', 'stay');
+    await openSettings(page);
+    await toggle(page, 'monsters-knights').scrollIntoViewIfNeeded();
+    await toggle(page, 'monsters-knights').tap();
+    await expect(page.locator('[data-testid="monsters-bubble"]')).toHaveAttribute('data-greyed', 'true');
+    await expect(page.locator('[data-testid="monsters-bubble-note"]')).toHaveText('Werkt alleen met Ridders aan');
+    await expect(toggle(page, 'monsters-bubble')).toHaveText('Aan');
+    await closeParent(page);
+    // The world picks up the switches a moment after the parent area closes.
+    await page.waitForTimeout(500);
+    await readState(page, 'resetPlayTimer', 600);
+    await readState(page, 'fastForward', 700_000);
+    expect((await readState<{ phase: string }>(page, 'monsterState')).phase).toBe('idle');
+    expect(await readState(page, 'bubbleClockMs')).toBe(0);
+  });
+
+  test('AC223: switching the bubble off with Klodder out removes him and every block is back', async ({ page }) => {
+    await openApp(page);
+    await setupPin(page);
+    await readState(page, 'setCreatureSeed', 5);
+    await readState(page, 'resetPlayTimer', 600);
+    await readState(page, 'addKnight', 'stay');
+    await readState(page, 'spawnKlodder');
+    await readState(page, 'fastForward', 20_000);
+    await openSettings(page);
+    await toggle(page, 'monsters-bubble').scrollIntoViewIfNeeded();
+    await toggle(page, 'monsters-bubble').tap();
+    await expect(toggle(page, 'monsters-bubble')).toHaveText('Uit');
+    await closeParent(page);
+    await expect.poll(async () => (await readState<{ phase: string }>(page, 'monsterState')).phase).toBe('idle');
+    await readState(page, 'fastForward', 2000);
+    expect((await readState<{ hiddenCount: number }>(page, 'monsterState')).hiddenCount).toBe(0);
+  });
+
+  test('AC223: an existing install (a world record, no monsters record) has the row Uit and the clock does not move', async ({ page }) => {
+    await openApp(page);
+    await setupPin(page);
+    await readState(page, 'markWorldDirty');
+    await readState(page, 'flushSave');
+    await page.evaluate(
+      () =>
+        new Promise<void>((resolve, reject) => {
+          const open = indexedDB.open('dino-blokwereld');
+          open.onerror = () => reject(open.error);
+          open.onsuccess = () => {
+            const tx = open.result.transaction('kv', 'readwrite');
+            const store = tx.objectStore('kv');
+            store.delete('monsters');
+            const get = store.get('settings');
+            get.onsuccess = () => {
+              const rest = { ...(get.result ?? {}) };
+              delete rest.bubbleEnabled;
+              store.put(rest, 'settings');
+            };
+            tx.oncomplete = () => resolve();
+            tx.onerror = () => reject(tx.error);
+          };
+        }),
+    );
+    await page.reload();
+    await openApp(page);
+    await readState(page, 'addKnight', 'stay');
+    await openSettings(page);
+    await toggle(page, 'monsters-bubble').scrollIntoViewIfNeeded();
+    await expect(toggle(page, 'monsters-bubble')).toHaveText('Uit');
+    await closeParent(page);
+    await readState(page, 'resetPlayTimer', 600);
+    await readState(page, 'fastForward', 700_000);
+    expect(await readState(page, 'bubbleClockMs')).toBe(0);
+    expect((await readState<{ phase: string }>(page, 'monsterState')).phase).toBe('idle');
+  });
+});

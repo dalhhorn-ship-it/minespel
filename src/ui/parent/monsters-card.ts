@@ -1,4 +1,4 @@
-// The parent card "Monsters en ridders" (v17, AC208). Rows with a help line each; V18e adds the bubble row.
+// The parent card "Monsters en ridders" (v17, AC208). Rows with a help line each, the last one is the Zwarte bubbel row (V18e).
 // A greyed row keeps its own value and shows that it does not act now.
 import type { SettingsRecord } from '../../storage/schema';
 import { el } from '../dom';
@@ -7,10 +7,14 @@ import { onTap } from '../tap';
 export const HELP_MASTER = 'Zet alles hieronder in één keer aan of uit.';
 export const HELP_KNIGHTS = 'Ridders koop je in de Dinowinkel. Ze volgen, wachten of passen op de dieren.';
 
+export const HELP_BUBBLE =
+  'Na 10 minuten spelen komt soms een bubbel. Tikt je kind erop, dan sloopt Klodder een paar blokken tot een ridder hem wegstuurt. Alles komt terug.';
+export const NOTE_BUBBLE_NEEDS_KNIGHTS = 'Werkt alleen met Ridders aan';
+
 export interface MonstersCardOptions {
   settings: SettingsRecord;
   /** Saves one switch. The screen draws again after it. */
-  onToggle: (key: 'monstersEnabled' | 'knightsEnabled', next: boolean) => void;
+  onToggle: (key: 'monstersEnabled' | 'knightsEnabled' | 'bubbleEnabled', next: boolean) => void;
   /** Registers a function that removes the tap handlers. */
   addCleanup: (cleanup: () => void) => void;
   now?: () => number;
@@ -23,6 +27,8 @@ export function monstersRow(opts: {
   help: string;
   testid: string;
   greyed?: boolean;
+  /** Shown under the help line while the row is greyed. */
+  greyedNote?: string;
   onToggle: (next: boolean) => void;
   addCleanup: (cleanup: () => void) => void;
   now?: () => number;
@@ -42,6 +48,9 @@ export function monstersRow(opts: {
     [
       el('div', { class: 'parent-row' }, [el('span', { text: opts.label }), btn]),
       el('p', { class: 'parent-switch-help', text: opts.help }),
+      ...(opts.greyed && opts.greyedNote
+        ? [el('p', { class: 'parent-switch-help parent-switch-note', text: opts.greyedNote, attrs: { 'data-testid': `${opts.testid}-note` } })]
+        : []),
     ],
   );
 }
@@ -49,6 +58,8 @@ export function monstersRow(opts: {
 export function createMonstersCard(options: MonstersCardOptions): HTMLElement {
   const master = options.settings.monstersEnabled !== false;
   const knights = options.settings.knightsEnabled !== false;
+  // A missing bubble switch reads as Uit (decision 135).
+  const bubble = options.settings.bubbleEnabled === true;
   const common = { addCleanup: options.addCleanup, now: options.now };
   return el('div', { class: 'parent-card parent-monsters', attrs: { 'data-testid': 'monsters-card' } }, [
     el('strong', { text: 'Monsters en ridders' }),
@@ -59,6 +70,11 @@ export function createMonstersCard(options: MonstersCardOptions): HTMLElement {
     monstersRow({
       ...common, label: 'Ridders', checked: knights, help: HELP_KNIGHTS, testid: 'monsters-knights', greyed: !master,
       onToggle: (v) => options.onToggle('knightsEnabled', v),
+    }),
+    monstersRow({
+      ...common, label: 'Zwarte bubbel', checked: bubble, help: HELP_BUBBLE, testid: 'monsters-bubble',
+      greyed: !master || !knights, greyedNote: NOTE_BUBBLE_NEEDS_KNIGHTS,
+      onToggle: (v) => options.onToggle('bubbleEnabled', v),
     }),
   ]);
 }
