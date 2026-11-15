@@ -208,12 +208,12 @@ export function createDinoStore(options: DinoStoreOptions): DinoStore {
   }
 
   async function saveNow(): Promise<void> {
-    if (records) {
-      await records.put('dinos', toRecord());
-    }
-    if (queue) {
-      await queue.flushNow();
-    }
+    // Both writes start in this tick, so the save is queued behind the tap at once. Waiting for the
+    // first to commit before the second began left a gap in which a quick close or reload lost it.
+    const writes: Promise<unknown>[] = [];
+    if (records) writes.push(records.put('dinos', toRecord()));
+    if (queue) writes.push(queue.flushNow());
+    await Promise.all(writes);
   }
 
   function spawnEggInMemory(kind: DinoKindId, golden = false): WorldEgg {

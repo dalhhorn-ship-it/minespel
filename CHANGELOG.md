@@ -7,6 +7,7 @@ Written so kids can read it too.
 ### Dino's
 
 * Dino's and chickens now stay where they hatch instead of always walking after you. Pick Volg mij in the dino menu to let one follow. The new button Allemaal blijven stops every follower at once. The Dinofluit still calls them, then they stay near you. Animals from older saves are set to Blijf hier once.
+* Allemaal blijven is now saved at once, so a quick reload or close no longer makes the dinos follow again.
 
 ### Leren
 

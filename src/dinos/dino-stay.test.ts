@@ -55,6 +55,22 @@ describe('dinos stay by default (decision 122)', () => {
     db.close();
   });
 
+  it('Allemaal blijven starts its write in the tap itself, before any await', async () => {
+    const { db, records, make } = await setup();
+    const store = make();
+    const a = store.hatchEgg((await store.addEgg('compy')).id)!;
+    store.setDinoMode(a.id, 'follow');
+    await store.saveNow();
+    const put = vi.spyOn(records, 'put');
+    store.stayAll();
+    expect(put).toHaveBeenCalled();
+    for (const call of put.mock.calls) {
+      expect((call[1] as DinosRecord).dinos.map((d) => d.mode)).toEqual(['stay']);
+    }
+    await store.saveNow();
+    db.close();
+  });
+
   it('an old save without the flag is switched to Blijf hier once, at the current spot', async () => {
     const { db, records, make } = await setup();
     const old = {
