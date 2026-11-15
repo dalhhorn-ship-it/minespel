@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { AIR, GRAS, OERSTEEN, STEEN } from './blocks';
+import { AIR, GRAS, OERSTEEN, STEEN, VEIN_BLOCKS, WAARSCHUWSTEEN } from './blocks';
 import { mineBlock, placeBlock, type Aim, type Box } from './build';
 import { EYE_HEIGHT } from './physics';
 import { WORLD_HEIGHT, WORLD_SIZE } from './terrain';
@@ -45,6 +45,15 @@ describe('mineBlock', () => {
     const r = mineBlock(w, east(20, 5.5, 20.5));
     expect(r).toEqual({ ok: false, reason: 'unminable' });
     expect(w.get(22, 5, 20)).toBe(OERSTEEN);
+  });
+
+  it('AC233: Waarschuwsteen and a vein block are mined like steen and leave air', () => {
+    for (const id of [WAARSCHUWSTEEN, VEIN_BLOCKS[0] as number, VEIN_BLOCKS[7] as number]) {
+      const w = flatWorld();
+      w.set(22, 5, 20, id);
+      expect(mineBlock(w, east(20, 5.5, 20.5))).toEqual({ ok: true, x: 22, y: 5, z: 20, block: id });
+      expect(w.get(22, 5, 20)).toBe(AIR);
+    }
   });
 
   it('does nothing when aiming at open sky', () => {

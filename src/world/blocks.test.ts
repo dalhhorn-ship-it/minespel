@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   AIR, BLADEREN, BLOCKS, GLAS, IJS, LAVA, MAX_BLOCK_ID, OBSIDIAAN, OERSTEEN, PLACEABLE_BLOCKS,
-  RARE_BLOCKS, STEEN, VUUR, VUURSTEEN, WATER, blockInfo, isCutout, isMinable, isPlaceable, isSolid,
+  RARE_BLOCKS, STEEN, VEIN_BLOCKS, VUUR, VUURSTEEN, WAARSCHUWSTEEN, WATER, blockInfo, isCutout, isMinable, isPlaceable, isSolid,
 } from './blocks';
 
 describe('blocks', () => {
@@ -16,7 +16,24 @@ describe('blocks', () => {
       expect(isSolid(id)).toBe(true);
       expect(PLACEABLE_BLOCKS).not.toContain(id);
     }
-    expect(MAX_BLOCK_ID).toBe(41);
+    expect(RARE_BLOCKS).not.toContain(MAX_BLOCK_ID);
+  });
+
+  it('AC233: Waarschuwsteen 42 and the vein blocks 43 to 50 are solid, minable, not placeable, not in the lists', () => {
+    expect(WAARSCHUWSTEEN).toBe(42);
+    expect(VEIN_BLOCKS).toEqual([43, 44, 45, 46, 47, 48, 49, 50]);
+    expect(MAX_BLOCK_ID).toBe(50);
+    expect(blockInfo(42).name).toBe('waarschuwsteen');
+    expect(VEIN_BLOCKS.map((id) => blockInfo(id).name)).toEqual([
+      'ader 1', 'ader 2', 'ader 3', 'ader 4', 'ader 5', 'ader 6', 'ader 7', 'ader 8',
+    ]);
+    for (let id = 42; id <= 50; id++) {
+      expect(isSolid(id)).toBe(true);
+      expect(isMinable(id)).toBe(true);
+      expect(isCutout(id)).toBe(false);
+      expect(isPlaceable(id)).toBe(false);
+      expect(PLACEABLE_BLOCKS).not.toContain(id);
+    }
   });
 
   it('has 32 placeable blocks, all with a name (CR1, CR2, CR4)', () => {

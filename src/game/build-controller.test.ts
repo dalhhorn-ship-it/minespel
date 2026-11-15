@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { AIR, GRAS, OBSIDIAAN, OERSTEEN, STEEN, VUUR, WOL_ROOD } from '../world/blocks';
+import { AIR, GRAS, OBSIDIAAN, OERSTEEN, STEEN, VEIN_BLOCKS, VUUR, WAARSCHUWSTEEN, WOL_ROOD } from '../world/blocks';
 import { WORLD_HEIGHT, WORLD_SIZE } from '../world/terrain';
 import { World } from '../world/world';
 import { EYE_HEIGHT, createPlayer } from '../world/physics';
@@ -95,6 +95,18 @@ describe('build controller', () => {
     far.c.tap(500, 350);
     expect(far.world.get(20, 6, 30)).toBe(GRAS);
     expect(far.play).not.toHaveBeenCalled();
+  });
+
+  it('AC233: mining Waarschuwsteen or a vein block plays only the pop sound', () => {
+    for (const id of [WAARSCHUWSTEEN, VEIN_BLOCKS[3] as number]) {
+      const s = setup(0, 0);
+      s.world.set(20, 6, 24, id);
+      s.c.tap(500, 350);
+      expect(s.world.get(20, 6, 24)).toBe(AIR);
+      expect(s.onBlockChanged).toHaveBeenCalledWith(20, 24);
+      expect(s.play).toHaveBeenCalledTimes(1);
+      expect(s.play).toHaveBeenCalledWith('pop');
+    }
   });
 
   it('AC5: Bouwen puts the selected block against the face, with thunk', () => {

@@ -107,7 +107,7 @@ function home(x: number, padY: number, z: number): HomeSpot {
  * more than 10 blocks from the start spot and the obsidiaan gate, and every tree either fully
  * inside a site (cleared) or fully outside it (untouched).
  */
-export const VILLAGE_SITES: readonly VillageSite[] = [
+export const LEGACY_VILLAGE_SITES: readonly VillageSite[] = [
   {
     id: 'noord',
     x0: 16, z0: 3, x1: 32, z1: 10,
@@ -140,6 +140,29 @@ export const VILLAGE_SITES: readonly VillageSite[] = [
     homes: [home(8, 10, 35), home(15, 10, 35)],
   },
 ];
+
+/** The sites the game uses. Until the big world switch (V15b) this is the legacy list. */
+export const VILLAGE_SITES: readonly VillageSite[] = LEGACY_VILLAGE_SITES;
+
+/**
+ * Where the legacy 64 x 64 x 64 world sits inside the 128 x 128 x 80 world (v15): 32 blocks in x and z,
+ * 10 blocks up (so legacy oersteen at y 0 becomes the steen at y 10, above the deep ground).
+ */
+export const MOVE = { x: 32, y: 10, z: 32 } as const;
+
+/** A site moved by `MOVE`: rectangle, `padY`, houses and homes. House cells follow from `padY`. */
+export function moveSite(site: VillageSite): VillageSite {
+  return {
+    ...site,
+    x0: site.x0 + MOVE.x,
+    z0: site.z0 + MOVE.z,
+    x1: site.x1 + MOVE.x,
+    z1: site.z1 + MOVE.z,
+    padY: site.padY + MOVE.y,
+    houses: site.houses.map((h) => ({ ...h, x: h.x + MOVE.x, z: h.z + MOVE.z })),
+    homes: site.homes.map((h) => ({ x: h.x + MOVE.x, y: h.y + MOVE.y, z: h.z + MOVE.z })),
+  };
+}
 
 /** The site rectangle plus the margin: every cell that belongs to the site, at any height. */
 export function siteRegion(site: VillageSite): SiteRegion {
