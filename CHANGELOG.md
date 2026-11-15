@@ -10,6 +10,7 @@ Written so kids can read it too.
 
 ### Leren
 
+* In Examens the parent now picks the lesson first (for example Engels: Runaway), then sees only the tests of that lesson. The question before starting names the lesson too.
 * New English lessons from the song Runaway: travel words, asking for your train at the station and telling the time in English. 69 questions and 4 tests.
 * New English lessons: Hoe laat is het? Learn to tell the time in English, and why half drie is half past two. 136 questions and 4 tests.
 

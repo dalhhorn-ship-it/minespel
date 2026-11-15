@@ -25,6 +25,7 @@ async function startFromParent(page: Page): Promise<void> {
   await loginAsParent(page);
   await page.locator('.parent-nav-btn[data-section="examens"]').tap();
   await expect(page.locator('[data-testid="parent-exams"]')).toBeVisible();
+  await page.locator(`[data-lesson="${REKENEN}"]`).tap();
   await page.locator(`[data-exam="${REKENEN}/${REKENEN_EXAM}"]`).tap();
   await expect(page.locator('[data-testid="exam-begin"]')).toBeVisible();
 }
@@ -50,6 +51,8 @@ test.describe('parent starts and stops an exam (T51d, v2)', () => {
     await loginAsParent(page);
     await page.locator('.parent-nav-btn[data-section="examens"]').tap();
     await expect(page.locator('[data-testid="parent-exams"]')).toBeVisible();
+    await expect(page.locator('[data-exam]')).toHaveCount(0);
+    await page.locator(`[data-lesson="${REKENEN}"]`).tap();
     await expect(page.locator('[data-exam]').first()).toBeVisible();
 
     await page.locator(`[data-exam="${REKENEN}/${REKENEN_EXAM}"]`).tap();
@@ -64,6 +67,24 @@ test.describe('parent starts and stops an exam (T51d, v2)', () => {
     await expect(page.locator('[data-testid="exam-number"]')).toHaveText(/^Vraag 1 van \d+$/);
   });
 
+  test('AC72: Examens picks the lesson first, shows only its exams and Terug goes back', async ({ page }) => {
+    await openApp(page);
+    await setupPin(page);
+    await loginAsParent(page);
+    await page.locator('.parent-nav-btn[data-section="examens"]').tap();
+    await expect(page.locator('[data-subject]').first()).toBeVisible();
+    await page.locator(`[data-lesson="${REKENEN}"]`).tap();
+    await expect(page.locator('[data-testid="exam-lesson-title"]')).toBeVisible();
+    const ids = await page.locator('[data-exam]').evaluateAll((els) => els.map((e) => e.getAttribute('data-exam') ?? ''));
+    expect(ids.length).toBeGreaterThan(0);
+    expect(ids.every((id) => id.startsWith(`${REKENEN}/`))).toBe(true);
+    const label = await page.locator(`[data-exam="${REKENEN}/${REKENEN_EXAM}"]`).getAttribute('aria-label');
+    expect(label).toContain(await page.locator('[data-testid="exam-lesson-title"]').innerText());
+    await page.locator('[data-testid="exam-lessons-back"]').tap();
+    await expect(page.locator('[data-exam]')).toHaveCount(0);
+    await expect(page.locator(`[data-lesson="${REKENEN}"]`)).toBeVisible();
+  });
+
   test('AC72: every built in exam starts without a warning', async ({ page }) => {
     // Loops over every exam of every module (16 since the folder modules), about 3 s each.
     test.setTimeout(180_000);
@@ -71,12 +92,22 @@ test.describe('parent starts and stops an exam (T51d, v2)', () => {
     await setupPin(page);
     await loginAsParent(page);
     await page.locator('.parent-nav-btn[data-section="examens"]').tap();
-    const buttons = page.locator('[data-exam]');
-    await expect(buttons.first()).toBeVisible();
+    const lessonButtons = page.locator('[data-lesson]');
+    await expect(lessonButtons.first()).toBeVisible();
+    const lessons = await lessonButtons.evaluateAll((els) => els.map((e) => e.getAttribute('data-lesson') ?? ''));
+    // Collect every exam id: open each lesson and come back to the lesson list.
+    const ids: string[] = [];
+    for (const lesson of lessons) {
+      await page.locator(`[data-lesson="${lesson}"]`).tap();
+      const found = await page.locator('[data-exam]').evaluateAll((els) => els.map((e) => e.getAttribute('data-exam') ?? ''));
+      expect(found.length).toBeGreaterThan(0);
+      ids.push(...found);
+      await page.locator('[data-testid="exam-lessons-back"]').tap();
+    }
     // Every exam button is a built in exam with enough items: a tap starts it at once.
-    const ids = await buttons.evaluateAll((els) => els.map((e) => e.getAttribute('data-exam') ?? ''));
     expect(ids.length).toBeGreaterThan(0);
     for (const id of ids) {
+      await page.locator(`[data-lesson="${id.split('/')[0]}"]`).tap();
       await page.locator(`[data-exam="${id}"]`).tap();
       await expect(page.locator('[data-testid="exam-warning"]')).toHaveCount(0);
       await expect(page.locator('[data-testid="exam-begin"]')).toBeVisible();
@@ -130,6 +161,7 @@ test.describe('parent starts and stops an exam (T51d, v2)', () => {
     await typePin(page, '1234');
     await page.locator('[data-testid="parent-shell"]').waitFor();
     await page.locator('.parent-nav-btn[data-section="examens"]').tap();
+    await page.locator(`[data-lesson="${REKENEN}"]`).tap();
     await page.locator(`[data-exam="${REKENEN}/${REKENEN_EXAM}"]`).tap();
     await expect(page.locator('[data-testid="exam-message"]')).toHaveText('Beëindig eerst de pauze');
     expect(await readState<boolean>(page, 'isExamActive')).toBe(false);
