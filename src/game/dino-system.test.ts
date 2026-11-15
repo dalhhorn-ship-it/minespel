@@ -107,4 +107,23 @@ describe('dino-system (T42)', () => {
     expect(Math.hypot(dino.x - START_SPOT.x, dino.z - START_SPOT.z)).toBeLessThan(3.5);
     system.dispose();
   });
+
+  it('decision 122: whistle brings a Blijf hier dino, which stays after; Allemaal blijven stops followers', async () => {
+    const { store, system, player } = setup();
+    const a = store.hatchEgg((await store.addEgg('compy')).id)!;
+    const b = store.hatchEgg((await store.addEgg('compy')).id)!;
+    expect(a.mode).toBe('stay');
+    expect(system.followingCount()).toBe(0);
+    store.setDinoMode(b.id, 'follow');
+    expect(system.followingCount()).toBe(1);
+    expect(system.whistle()).toBe(2);
+    for (let i = 0; i < 60 * 12; i++) system.step(1 / 60);
+    expect(Math.hypot(a.x - player.player.x, a.z - player.player.z)).toBeLessThan(6);
+    expect(a.mode).toBe('stay');
+    expect(b.mode).toBe('follow');
+    expect(system.stayAll()).toBe(1);
+    expect(b.mode).toBe('stay');
+    expect(system.followingCount()).toBe(0);
+    system.dispose();
+  });
 });

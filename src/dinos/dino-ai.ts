@@ -78,6 +78,8 @@ export interface DinoState {
   chasing: boolean;
   /** Seconds left of a Dinofluit call (decision 114). Missing or 0: not called. Never saved. */
   called?: number;
+  /** True while a called dino was on Blijf hier before the whistle: when the call ends it stays where it stands. Never saved. */
+  callStay?: boolean;
 }
 
 export type DinoEvent = 'popped' | null;
@@ -103,7 +105,7 @@ function aheadOf(player: Point, yaw: number, x: number, z: number): number {
 
 export function createDino(spot: HatchSpot, grown = false): DinoState {
   return {
-    kind: spot.kind, golden: spot.golden, mode: 'follow',
+    kind: spot.kind, golden: spot.golden, mode: 'stay',
     x: spot.x, y: spot.y, z: spot.z, vy: 0, onGround: false, heading: 0,
     growth: grown ? GROW_SECONDS : 0, stayX: spot.x, stayZ: spot.z,
     goal: null, idleLeft: 0.5, goalLeft: 0, stuckTime: 0, farTime: 0, chasing: false,
@@ -155,9 +157,25 @@ function resetMotion(d: DinoState): void {
   d.stuckTime = 0; d.farTime = 0; d.chasing = false; d.called = 0;
 }
 
-/** Starts a Dinofluit call: the dino follows the kid from now on and walks slowly to them (decision 114). */
+/** Ends a Blijf hier call early: the dino stays where it stands, whatever it was before. Used by Allemaal blijven. */
+export function stayHere(d: DinoState): void {
+  d.called = 0;
+  d.callStay = false;
+  d.mode = 'stay';
+  d.stayX = d.x;
+  d.stayZ = d.z;
+  d.goal = null;
+  d.chasing = false;
+  d.farTime = 0;
+  d.stuckTime = 0;
+}
+
+/**
+ * Starts a Dinofluit call: the dino walks slowly to the kid (decision 114). A dino that did not follow
+ * stays where it reaches the kid when the call ends (decision 122). One that followed keeps following.
+ */
 export function callDino(d: DinoState): void {
-  d.mode = 'follow';
+  d.callStay = isCalled(d) ? d.callStay === true : d.mode !== 'follow';
   d.called = CALL_SECONDS;
   d.chasing = false;
   d.farTime = 0;
@@ -170,21 +188,34 @@ export function isCalled(d: Pick<DinoState, 'called'>): boolean {
   return (d.called ?? 0) > 0;
 }
 
+/** The call is over: a dino that was not following stays around the spot where it is now (decision 122). */
+function endCall(d: DinoState): void {
+  d.called = 0;
+  if (d.callStay) {
+    d.mode = 'stay';
+    d.stayX = d.x;
+    d.stayZ = d.z;
+  }
+  d.callStay = false;
+}
+
 /** One step of a called dino: straight to the kid at CALL_SPEED. Pops only when stuck too long. */
 function stepCalled(world: World, d: DinoState, player: Point, rng: Rng, dt: number, opts: StepOptions): DinoEvent {
   d.called = Math.max(0, (d.called ?? 0) - dt);
   d.farTime = 0;
   const dist = Math.hypot(player.x - d.x, player.z - d.z);
   if (dist <= CALL_ARRIVED) {
-    d.called = 0;
     d.goal = null;
     d.idleLeft = 0.5;
     physics(world, d, 0, 0, dt, opts.box);
+    endCall(d);
     return null;
   }
   if (d.stuckTime >= STUCK_SECONDS) {
-    d.called = 0;
-    return popNextTo(world, d, player, rng, opts.box, opts.playerYaw) ? 'popped' : (d.stuckTime = 0, null);
+    const popped = popNextTo(world, d, player, rng, opts.box, opts.playerYaw);
+    if (!popped) d.stuckTime = 0;
+    endCall(d);
+    return popped ? 'popped' : null;
   }
   const dirX = (player.x - d.x) / dist, dirZ = (player.z - d.z) / dist;
   d.goal = { x: player.x, z: player.z };
@@ -192,6 +223,7 @@ function stepCalled(world: World, d: DinoState, player: Point, rng: Rng, dt: num
   d.heading = Math.atan2(dirX, dirZ);
   if (d.onGround && moved < CALL_SPEED * dt * 0.25) d.stuckTime += dt;
   else if (moved >= CALL_SPEED * dt * 0.25) d.stuckTime = 0;
+  if (!isCalled(d)) endCall(d);
   return null;
 }
 

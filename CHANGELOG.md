@@ -4,6 +4,10 @@ Written so kids can read it too.
 
 ## Unreleased
 
+### Dino's
+
+* Dino's and chickens now stay where they hatch instead of always walking after you. Pick Volg mij in the dino menu to let one follow. The new button Allemaal blijven stops every follower at once. The Dinofluit still calls them, then they stay near you. Animals from older saves are set to Blijf hier once.
+
 ### Leren
 
 * New English lessons from the song Runaway: travel words, asking for your train at the station and telling the time in English. 69 questions and 4 tests.

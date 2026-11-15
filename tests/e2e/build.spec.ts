@@ -144,7 +144,10 @@ test.describe('mine and build', () => {
     for (let i = 0; i < 12; i++) {
       await readState(page, 'addEgg', ['compy', 'triceratops', 'stegosaurus', 'brachiosaurus'][i % 4]!, false);
     }
-    await readState(page, 'stepDinos', 30);
+    await readState(page, 'stepDinos', 6);
+    // New dinos stay by default (decision 122): the kid sets Volg mij on all 12.
+    for (const d of await readState<Array<{ id: string }>>(page, 'dinos')) await readState(page, 'setDinoMode', d.id, 'follow');
+    await readState(page, 'stepDinos', 24);
     await flatten(page);
     await readState(page, 'stepDinos', 10);
     const vp = page.viewportSize()!;

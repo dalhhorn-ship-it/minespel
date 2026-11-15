@@ -31,7 +31,7 @@
 | Acceptance criteria | docs/releases/v11.md | AC178 to AC191 (14) |
 | Acceptance criteria | docs/releases/v2.md | AC155 to AC165 (11) |
 | Acceptance criteria | docs/releases/v9.md | AC166 to AC171 (6) |
-| Decisions | docs/DECISIONS.md | 87 to 121 (35) |
+| Decisions | docs/DECISIONS.md | 87 to 122 (36) |
 | Decisions | docs/archive/decisions-1-86.md | 1 to 86 (86) |
 | Tasks | docs/DISCUSSION.md | V11a, V11b, V11c, V11d, V11e (5) |
 | Tasks | docs/PLAN.md | T18, T19, T55b, T55a, T53a, T21, T32, T52, T56, T22, T61, T62, … (19) |
@@ -42,12 +42,12 @@
 
 | File | Lines | Summary |
 |---|---:|---|
-| CHANGELOG.md | 137 | Written so kids can read it too. Sections: Unreleased:5, 0.5.0 (2026-10-24):32, 0.4.0 (2026-10-24):45, 0.3.0 (2026-10-22):55, 0.2.0 (2026-10-19):63, 0.1.0 (2026-10-19):85 |
+| CHANGELOG.md | 141 | Written so kids can read it too. Sections: Unreleased:5, 0.5.0 (2026-10-24):36, 0.4.0 (2026-10-24):49, 0.3.0 (2026-10-22):59, 0.2.0 (2026-10-19):67, 0.1.0 (2026-10-19):89 |
 | CLAUDE.md | 71 | A free 3D block world with dinos and short learning breaks (Dutch: taal, rekenen,… |
 | README.md | 78 | Dino Blokwereld is a free 3D block world for kids, played in Dutch on an iPad. Walk… |
 | docs/ARCHITECTURE.md | 393 | Written by the architect after PRD signoff (2026-10-17). Source of truth for how Dino… Sections: Stack and why:5, Folder structure:27, Modules and data flow:186, How modules are loaded:230, State and storage:271, Security and kid safety in…:301, How to run:310, How to test:323, How to deploy:356, Conventions for developers:365, Risks:379 |
-| docs/BACKLOG.md | 177 | Not signed. Changing this file never closes the PRD gate (decision 80). The signed… Sections: Next steps (founder order):5, Rules:20, Ranked backlog:30, Dropped:133, Later:154 |
-| docs/DECISIONS.md | 43 | Every notable decision. Founder decisions are marked NEEDS FOUNDER until answered, then… |
+| docs/BACKLOG.md | 179 | Not signed. Changing this file never closes the PRD gate (decision 80). The signed… Sections: Next steps (founder order):5, Rules:21, Ranked backlog:31, Dropped:135, Later:156 |
+| docs/DECISIONS.md | 44 | Every notable decision. Founder decisions are marked NEEDS FOUNDER until answered, then… |
 | docs/DISCUSSION.md | 96 | Review rounds between agents. Newest at the bottom. Keep it short: who said what, what… |
 | docs/FACTORY.md | 113 | Moved out of CLAUDE.md on 2026-10-26 (decision 104) so it is read only when needed. The… |
 | docs/FRICTION.md | 53 | The operator adds a line whenever something goes wrong or feels slow, so /retro has real… |

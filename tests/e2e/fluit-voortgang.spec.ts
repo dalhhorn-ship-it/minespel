@@ -49,7 +49,8 @@ test.describe('Dinofluit (decision 114)', () => {
 
     await fingerTap(page, '[data-testid="hud-fluit"]');
     const after = await readState<DinoRow[]>(page, 'dinos');
-    expect(after[0]?.mode).toBe('follow');
+    // Decision 122: a Blijf hier dino is called, but it does not follow for good.
+    expect(after[0]?.mode).toBe('stay');
     expect(after[0]?.called ?? 0).toBeGreaterThan(0);
     expect(await readState<string>(page, 'currentScreen')).toBe('world');
 

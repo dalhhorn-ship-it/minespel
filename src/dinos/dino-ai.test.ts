@@ -23,7 +23,10 @@ function flatWorld(): World {
 }
 
 function dinoAt(x: number, z: number, kind: DinoKindId = 'compy'): DinoState {
-  return createDino({ kind, golden: false, x, y: GY, z }, true);
+  // New dinos start on Blijf hier (decision 122). These tests are about following, so they ask for Volg mij.
+  const d = createDino({ kind, golden: false, x, y: GY, z }, true);
+  d.mode = 'follow';
+  return d;
 }
 
 function run(w: World, d: DinoState, player: Point, seconds: number, fps = 60, seed = 1): void {
@@ -38,6 +41,16 @@ function run(w: World, d: DinoState, player: Point, seconds: number, fps = 60, s
 const dist = (d: DinoState, p: Point): number => Math.hypot(d.x - p.x, d.z - p.z);
 
 describe('dino ai', () => {
+  it('AC17: a new dino starts on Blijf hier around its spot and does not follow (decision 122)', () => {
+    const w = flatWorld();
+    const d = createDino({ kind: 'compy', golden: false, x: 10.5, y: GY, z: 10.5 }, true);
+    expect(d.mode).toBe('stay');
+    expect([d.stayX, d.stayZ]).toEqual([10.5, 10.5]);
+    const player = { x: 40.5, y: GY, z: 40.5 };
+    run(w, d, player, 20);
+    expect(dist(d, { x: 10.5, y: GY, z: 10.5 })).toBeLessThanOrEqual(WANDER_RADIUS + 0.7);
+  });
+
   it('follows the player and ends within 8 blocks after 5 seconds of standing still (AC17)', () => {
     const w = flatWorld();
     const d = dinoAt(10.5, 10.5);
