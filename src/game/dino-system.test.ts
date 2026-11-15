@@ -108,7 +108,7 @@ describe('dino-system (T42)', () => {
     system.dispose();
   });
 
-  it('decision 122: whistle brings a Blijf hier dino, which stays after; Allemaal blijven stops followers', async () => {
+  it('decision 122: whistle brings a stay dino, which stays after; Allemaal vrij stops followers', async () => {
     const { store, system, player } = setup();
     const a = store.hatchEgg((await store.addEgg('compy')).id)!;
     const b = store.hatchEgg((await store.addEgg('compy')).id)!;
@@ -118,7 +118,8 @@ describe('dino-system (T42)', () => {
     expect(system.followingCount()).toBe(1);
     expect(system.whistle()).toBe(2);
     for (let i = 0; i < 60 * 12; i++) system.step(1 / 60);
-    expect(Math.hypot(a.x - player.player.x, a.z - player.player.z)).toBeLessThan(6);
+    // The call ended near the kid, so its spot is there; after that it roams around the spot (decision 128).
+    expect(Math.hypot(a.stayX - player.player.x, a.stayZ - player.player.z)).toBeLessThan(6);
     expect(a.mode).toBe('stay');
     expect(b.mode).toBe('follow');
     expect(system.stayAll()).toBe(1);

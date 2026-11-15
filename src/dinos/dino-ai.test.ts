@@ -4,7 +4,7 @@ import { AIR, STEEN } from '../world/blocks';
 import { WORLD_HEIGHT, WORLD_SIZE } from '../world/terrain';
 import { World } from '../world/world';
 import {
-  BEHIND_MARGIN, CLOSE_ENOUGH, FAR_DISTANCE, viewForward, WANDER_RADIUS, createDino, dinoCollides, popNextTo, stepDino, type DinoState, type Point,
+  BEHIND_MARGIN, BEHIND_DISTANCE, DINO_SPEED, CLOSE_ENOUGH, FAR_DISTANCE, FOLLOW_RADIUS, ROAM_RADIUS, ROAM_SPEED, viewForward, WANDER_RADIUS, createDino, dinoCollides, popNextTo, stepDino, type DinoState, type Point,
 } from './dino-ai';
 import { GROW_SECONDS } from './egg';
 import { DINO_KIND_IDS, type DinoKindId } from './kinds';
@@ -48,7 +48,7 @@ describe('dino ai', () => {
     expect([d.stayX, d.stayZ]).toEqual([10.5, 10.5]);
     const player = { x: 40.5, y: GY, z: 40.5 };
     run(w, d, player, 20);
-    expect(dist(d, { x: 10.5, y: GY, z: 10.5 })).toBeLessThanOrEqual(WANDER_RADIUS + 0.7);
+    expect(dist(d, { x: 10.5, y: GY, z: 10.5 })).toBeLessThanOrEqual(ROAM_RADIUS + 0.7);
   });
 
   it('follows the player and ends within 8 blocks after 5 seconds of standing still (AC17)', () => {
@@ -88,15 +88,48 @@ describe('dino ai', () => {
     expect(CLOSE_ENOUGH).toBeLessThan(WANDER_RADIUS);
   });
 
-  it('on Blijf hier stays within 3 blocks of its spot and does not follow', () => {
+  it('decision 128: a stay dino roams farther than 3 blocks, never beyond ROAM_RADIUS, inside the world', () => {
     const w = flatWorld();
     const d = dinoAt(30.5, 30.5);
     d.mode = 'stay';
     const player = { x: 50.5, y: GY, z: 50.5 };
     const rng = createRng(7);
-    for (let i = 0; i < 60 * 40; i++) {
+    let farthest = 0;
+    for (let i = 0; i < 60 * 600; i++) {
       stepDino(w, d, player, rng, 1 / 60);
-      expect(Math.hypot(d.x - 30.5, d.z - 30.5)).toBeLessThanOrEqual(WANDER_RADIUS + 0.7);
+      const r = Math.hypot(d.x - 30.5, d.z - 30.5);
+      farthest = Math.max(farthest, r);
+      expect(r).toBeLessThanOrEqual(ROAM_RADIUS + 0.7);
+      expect(d.x).toBeGreaterThan(0);
+      expect(d.x).toBeLessThan(WORLD_SIZE);
+      expect(d.z).toBeGreaterThan(0);
+      expect(d.z).toBeLessThan(WORLD_SIZE);
+    }
+    expect(farthest).toBeGreaterThan(WANDER_RADIUS + 2);
+    expect(ROAM_SPEED).toBeLessThan(DINO_SPEED);
+  });
+
+  it('decision 128: a stay dino near the world edge stays in bounds', () => {
+    const w = flatWorld();
+    const d = dinoAt(2.5, WORLD_SIZE - 2.5);
+    d.mode = 'stay';
+    const rng = createRng(3);
+    for (let i = 0; i < 60 * 300; i++) {
+      stepDino(w, d, { x: 40.5, y: GY, z: 40.5 }, rng, 1 / 60);
+      expect(d.x).toBeGreaterThan(0);
+      expect(d.z).toBeLessThan(WORLD_SIZE);
+    }
+  });
+
+  it('decision 128: a follower still keeps to the follow radius, not the roam radius', () => {
+    const w = flatWorld();
+    const d = dinoAt(20.5, 20.5);
+    d.mode = 'follow';
+    const player = { x: 20.5, y: GY, z: 20.5 };
+    const rng = createRng(5);
+    for (let i = 0; i < 60 * 120; i++) {
+      stepDino(w, d, player, rng, 1 / 60, { playerYaw: 0 });
+      expect(dist(d, player)).toBeLessThanOrEqual(BEHIND_DISTANCE + FOLLOW_RADIUS + 1.5);
     }
   });
 
@@ -284,7 +317,7 @@ describe('followers keep the view clear (decision 112)', () => {
     const d = dinoAt(32.5, 35);
     d.mode = 'stay';
     run(w, d, { x: 32.5, y: GY, z: 32.5 }, 5);
-    expect(Math.hypot(d.x - 32.5, d.z - 35)).toBeLessThanOrEqual(WANDER_RADIUS + 0.6);
+    expect(Math.hypot(d.x - 32.5, d.z - 35)).toBeLessThanOrEqual(ROAM_RADIUS + 0.6);
   });
 });
 
