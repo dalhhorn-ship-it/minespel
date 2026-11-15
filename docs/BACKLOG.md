@@ -10,12 +10,13 @@ Not signed. Changing this file never closes the PRD gate (decision 80). The sign
 4. **v11 Dorp (0.5.0), shipped 2026-10-24** (decisions 94 and 95): villages with houses, villagers who ask a question from the lesson content, a silly dance or "Respect bruuuuu!" and a rare block for a right answer. Its section is archived in `docs/releases/v11.md`. The bigger world is a later release of its own.
 5. **Live under Unreleased** (decisions 111 to 116): Dinofluit, Voortgang, Inruilen and a herd of 25, the follow dino fix, Bijzondere dino's and R2e. They are on `main` and get their version with 0.6.0.
 6. **v3 Dino's veilig (0.6.0), next** (decisions 90 and 119): backup and restore, Alles wissen, Volume, the app version, and a lock on the learning break only to end it. Its section is in `docs/PRD.md` section 12, waiting for the founder's signoff.
-7. **v6 Wat heb ik geleerd (0.7.0)**, after v3, with its own signoff (decisions 91, 115 and 119). It grows into a parent learning dashboard. v4 and v5 come after it.
-8. **Taal spelling check (T65)** runs beside the next release (decision 81). It is the human content check from AC124: QA reads 5 items per Taal topic against woordenlijst.org, and the founder or a teacher reads 20 items. It is mostly reading and needs no code.
+7. **v15 Grote wereld (0.7.0)**, right after v3, with its own signoff (founder pick 2026-11-15, decision 124). The world goes from 64 x 64 to 128 x 128 and the kid can dig about 20 blocks deep instead of 10. The kid's current world stays as the middle. It starts with a speed test at 128 x 128 on the founder's oldest iPad.
+8. **v6 Wat heb ik geleerd (0.8.0)**, after v15, with its own signoff (decisions 91, 115 and 119). It grows into a parent learning dashboard. v4 and v5 come after it.
+9. **Taal spelling check (T65)** runs beside the next release (decision 81). It is the human content check from AC124: QA reads 5 items per Taal topic against woordenlijst.org, and the founder or a teacher reads 20 items. It is mostly reading and needs no code.
 
 On hold: the save on refresh fix (decision 72).
 
-Versions follow shipping order: v10 shipped as 0.4.0 and v11 as 0.5.0; next v3 as 0.6.0, then v6 as 0.7.0. v9 and v10 got their ids because v7 and v8 are never reused.
+Versions follow shipping order: v10 shipped as 0.4.0 and v11 as 0.5.0; next v3 as 0.6.0, then v15 as 0.7.0 and v6 as 0.8.0. v9 and v10 got their ids because v7 and v8 are never reused.
 
 ## Rules
 
@@ -38,12 +39,13 @@ Versions follow shipping order: v10 shipped as 0.4.0 and v11 as 0.5.0; next v3 a
 | | **v10 Punten voor elke ronde** | Every round of oefenen pays, not only the first one. Papa or mama picks how much a mistake costs: Makkelijk, Normaal or Moeilijk. | S | High. A bug the kid hit, so it goes first. | about 3, the operator or architect cuts them | shipped (0.4.0, 2026-10-24), see `docs/releases/v10.md` |
 | | **v11 Dorp** | Villages with houses; a villager asks a question when I come close; a right answer gives a silly dance or "Respect bruuuuu!" and a rare block; 8 rare blocks to find. | M | High. A founder and kid wish, learning inside the world. | V11a to V11e (architect review) | shipped (0.5.0, 2026-10-24), see `docs/releases/v11.md` |
 | 1 | **v3 Dino's veilig** | A backup file keeps the world, dinos and points safe, even on a wiped or new iPad. Papa or mama can end a break with the pincode. | M | High, as insurance. Losing a herd of dinos would hurt the most. | T18, T19, T53a, T55 | next (0.6.0, decisions 90 and 119), scoped in `docs/PRD.md` section 12 |
-| 2 | **v6 Wat heb ik geleerd** | A parent learning dashboard: is my kid really learning? Right on the first try per topic over time, topics that got better or got stuck, the hardest questions, exam results, and learning time against play time. All worked out on the iPad, behind the gate. | M, may grow to L | High for the parent (decision 91). Through the parent, who can then switch on what is hard. | T21, T56, T61, plus dashboard tasks the architect cuts | candidate, after v3 (decisions 91, 94 and 119), 0.7.0 |
-| 3 | **v12 Dino-Hoed** | Hats, bows, capes and sunglasses for my dinos, from 5 to 60 coins. Each dino looks different. | S to M | High. A cheap, happy coin sink that keeps kids earning after they own every dino. | about 3, cut at `/release` | candidate, after v6 (founder pick 2026-11-06) |
-| 4 | **v13 Dino-Eten** | A food truck: I buy food for my herd, each dino likes its own food, I drag it on and it skips with hearts. Sums on the price board. | S to M | Medium to high. A small daily coin sink with Rekenen. No dino can starve. | about 3, cut at `/release` | candidate, after v6 (founder pick 2026-11-06) |
-| 5 | **v14 Bouw-Opdracht** | A villager asks for a build ("een toren van 3 bij 3 en 5 hoog"). I build it, tap Klaar and the game counts the blocks. | M to L | High. Rekenen inside the building kids love. | about 5, cut at `/release` | candidate, after v6 (founder pick 2026-11-06) |
-| 6 | **v4 Altijd spelen** | The game starts without internet, never shows a blank screen, and two open tabs never fight over the save. | M | Medium to high. Protects saves, and the kids notice when it is missing. | T52, T22, new first start task | later (after v3) |
-| 7 | **v5 Veilig en juist** | Nothing reaches the internet, everything fits with the big font, and the game is smooth on the family iPad. | M | Medium. Mostly invisible, but it protects what the kids learn and see. | T63, T62, T32, T64 (T65 runs now, decision 81) | candidate |
+| 2 | **v15 Grote wereld** | A world twice as wide each way (128 x 128) and twice as deep to dig (about 20 blocks). Everything I built stays, in the middle, with new land around it. | M to L | High. A founder and kid wish (decisions 94 and 124). | speed test first, then about 4, cut by the architect at `/release` | candidate, right after v3 (founder pick 2026-11-15), 0.7.0 |
+| 3 | **v6 Wat heb ik geleerd** | A parent learning dashboard: is my kid really learning? Right on the first try per topic over time, topics that got better or got stuck, the hardest questions, exam results, and learning time against play time. All worked out on the iPad, behind the gate. | M, may grow to L | High for the parent (decision 91). Through the parent, who can then switch on what is hard. | T21, T56, T61, plus dashboard tasks the architect cuts | candidate, after v15 (decisions 91, 94, 119 and 124), 0.8.0 |
+| 4 | **v12 Dino-Hoed** | Hats, bows, capes and sunglasses for my dinos, from 5 to 60 coins. Each dino looks different. | S to M | High. A cheap, happy coin sink that keeps kids earning after they own every dino. | about 3, cut at `/release` | candidate, after v6 (founder pick 2026-11-06) |
+| 5 | **v13 Dino-Eten** | A food truck: I buy food for my herd, each dino likes its own food, I drag it on and it skips with hearts. Sums on the price board. | S to M | Medium to high. A small daily coin sink with Rekenen. No dino can starve. | about 3, cut at `/release` | candidate, after v6 (founder pick 2026-11-06) |
+| 6 | **v14 Bouw-Opdracht** | A villager asks for a build ("een toren van 3 bij 3 en 5 hoog"). I build it, tap Klaar and the game counts the blocks. | M to L | High. Rekenen inside the building kids love. | about 5, cut at `/release` | candidate, after v6 (founder pick 2026-11-06) |
+| 7 | **v4 Altijd spelen** | The game starts without internet, never shows a blank screen, and two open tabs never fight over the save. | M | Medium to high. Protects saves, and the kids notice when it is missing. | T52, T22, new first start task | later (after v3) |
+| 8 | **v5 Veilig en juist** | Nothing reaches the internet, everything fits with the big font, and the game is smooth on the family iPad. | M | Medium. Mostly invisible, but it protects what the kids learn and see. | T63, T62, T32, T64 (T65 runs now, decision 81) | candidate |
 | | **v7 Eigen woorden** | | | | T40, T54, T57, T59 | dropped (decision 79) |
 | | **v8 Modules delen** | | | | T53b, T20, T58, T60 | dropped (decision 79) |
 
@@ -154,7 +156,7 @@ Dropped by the founder (decision 79). New lessons and questions come through the
 ## Later
 
 Not planned in any release. Each would need the founder to pick it first.
-* Bigger world (decision 94 wants it as its own release after v11; it starts with a speed spike at 128 x 128 on the oldest iPad, see the architect review in `docs/DISCUSSION.md`). More biomes, caves, flowing water and lava, day and night, weather. (Water and lava as plain blocks are in v1.)
+* Bigger than 128 x 128 (v15 is ranked; past 128 the world needs meshing near the player only, see `docs/DISCUSSION.md`). More biomes, caves, flowing water and lava, day and night, weather. (Water and lava as plain blocks are in v1.)
 * More block types beyond the 32 in v1, crafting, tools, chests to store blocks, doors.
 * Wild dinos, taming with food, earning blocks.
 * Creative mode (floating is in v1), riding dinos, dino eggs found in the world, baby dinos that grow up over days, more dino kinds, dino skins, selling or swapping dinos.
