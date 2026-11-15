@@ -16,6 +16,8 @@
 .number-field { min-width: 240px; }
 
 .kid-keyboard { display: flex; flex-direction: column; gap: 8px; width: 100%; max-width: 960px; touch-action: manipulation; }
+.kb-panel { display: flex; flex-direction: column; gap: 8px; }
+.kb-panel[hidden] { display: none; }
 .kb-row { display: flex; justify-content: center; gap: 8px; }
 .kb-key {
   box-sizing: border-box; flex: 1 1 0; max-width: 88px; min-width: 56px; height: clamp(52px, 8.2vh, 68px); padding: 0;
@@ -25,8 +27,12 @@
 }
 .kb-key.kb-wide { max-width: 120px; flex-grow: 1.4; background: #cfcfcf; }
 .kb-shift[aria-pressed='true'] { background: var(--mc-green); color: var(--on-grass); }
+.kb-key.kb-accent { max-width: 140px; flex-grow: 1.6; background: #cfcfcf; }
+.kb-accent[aria-pressed='true'] { background: var(--mc-green); color: var(--on-grass); }
+.kb-row-accent-ends { justify-content: space-between; }
+.kb-row-accent-ends .kb-key.kb-wide { max-width: 120px; flex-grow: 0; width: 120px; }
 .kb-space { max-width: none; flex-grow: 5; }
-.kb-key.kb-done { max-width: 200px; flex-grow: 2; }
+.kb-key.kb-done { max-width: 240px; flex-grow: 2.4; }
 .kb-key.kb-key:disabled { background: var(--malus); border-color: var(--mc-edge); color: var(--paper); box-shadow: none; text-shadow: none; }
 
 .number-pad { display: grid; grid-template-columns: repeat(3, 96px); gap: 8px; touch-action: manipulation; }
