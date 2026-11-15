@@ -7,7 +7,7 @@ Founder: "Maak de wereld dieper ... monster mol, zwarte bubbel, ridders, uitrust
 * v3 Dino's veilig (0.6.0) is live: PR #25 merged to main (f5aea78) with green WebKit CI. T53a done (24c3519), verify.sh and verifier PASS.
 * Draft `docs/MONSTERS_PRD.md` (v16 to v21), reviewed by architect and qa (`docs/DISCUSSION.md`, MONSTERS_PRD review round 1). Decisions 130 to 134. Shipping order: v17 and v18 together as 0.7.0, then v15, v16, v19, v20, v21.
 * PRD section 12 holds v17 Ridders and v18 Zwarte bubbel, AC200 to AC229. **Signed by the founder today** (0efd63f), the build gate is open. Any PRD edit closes it.
-* The architect was writing the task plan (V17a.., V18a.. in `docs/PLAN.md`, decision 135) when this note was made. Its doc edits may be uncommitted: check `git status`, then commit them.
+* The task plan is in `docs/PLAN.md` (V17a to V17e, V18a to V18e, decision 135). Order: V17a, then V17b + V17c + V17d in parallel, V17e, V18a, then V18b + V18c + V18d in parallel, V18e. A developer was started on V17a when this note was made: check `git status` and `git log`.
 * Branch claude/jolly-fermi-z0vak4, merged with main after PR #25. No open PR.
 
 ## Next steps
