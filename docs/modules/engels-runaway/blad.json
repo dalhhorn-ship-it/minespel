@@ -48,13 +48,13 @@
             "good": "socks = sokken"
           },
           {
-            "good": "Excuse me. = Sorry, mag ik iets vragen?"
+            "good": "Excuse me. = Sorry."
           },
           {
             "good": "When does the train to Oxford leave? = Wanneer vertrekt de trein naar Oxford?"
           },
           {
-            "good": "The train leaves at twelve o'clock. = De trein vertrekt om twaalf uur."
+            "good": "The train leaves at twelve o’clock. = De trein vertrekt om twaalf uur."
           },
           {
             "good": "From which platform? = Van welk perron?"
@@ -66,10 +66,10 @@
             "good": "Thank you. = Dankjewel."
           },
           {
-            "good": "You're welcome. = Graag gedaan."
+            "good": "You’re welcome. = Graag gedaan."
           },
           {
-            "good": "eleven o'clock = 11:00"
+            "good": "eleven o’clock = 11:00"
           },
           {
             "good": "a quarter past eleven = 11:15"
@@ -597,42 +597,42 @@
       "skill": "blad-zin-betekenis",
       "prompt": "Wat betekent 'Excuse me.'?",
       "options": [
-        "Sorry, mag ik iets vragen?",
+        "Sorry.",
         "Wanneer vertrekt de trein naar Oxford?",
         "De trein vertrekt om twaalf uur.",
         "Van welk perron?"
       ],
       "answer": 0,
-      "explain": "Op het blad staat: Excuse me. = Sorry, mag ik iets vragen?"
+      "explain": "Op het blad staat: Excuse me. = Sorry."
     },
     {
       "id": "rw-bl-038",
       "type": "choice",
       "level": "M6",
       "skill": "blad-zin-engels",
-      "prompt": "Hoe zeg je 'Sorry, mag ik iets vragen?' in het Engels?",
+      "prompt": "Hoe zeg je 'Sorry.' in het Engels?",
       "options": [
         "Excuse me.",
         "When does the train to Oxford leave?",
-        "The train leaves at twelve o'clock.",
+        "The train leaves at twelve o’clock.",
         "From which platform?"
       ],
       "answer": 0,
-      "explain": "Op het blad staat: Sorry, mag ik iets vragen? = Excuse me."
+      "explain": "Op het blad staat: Sorry. = Excuse me."
     },
     {
       "id": "rw-bl-039",
       "type": "type",
       "level": "E6",
       "skill": "blad-zin-schrijven",
-      "prompt": "Schrijf in het Engels, precies zoals op het blad: 'Sorry, mag ik iets vragen?'",
+      "prompt": "Schrijf in het Engels, precies zoals op het blad: 'Sorry.'",
       "answer": [
         "Excuse me.",
         "excuse me.",
         "Excuse me",
         "excuse me"
       ],
-      "explain": "Op het blad staat: Sorry, mag ik iets vragen? = Excuse me. Let op elke letter."
+      "explain": "Op het blad staat: Sorry. = Excuse me. Let op elke letter."
     },
     {
       "id": "rw-bl-040",
@@ -656,7 +656,7 @@
       "skill": "blad-zin-engels",
       "prompt": "Hoe zeg je 'Wanneer vertrekt de trein naar Oxford?' in het Engels?",
       "options": [
-        "The train leaves at twelve o'clock.",
+        "The train leaves at twelve o’clock.",
         "When does the train to Oxford leave?",
         "From which platform?",
         "It leaves from platform 10."
@@ -683,7 +683,7 @@
       "type": "choice",
       "level": "M6",
       "skill": "blad-zin-betekenis",
-      "prompt": "Wat betekent 'The train leaves at twelve o'clock.'?",
+      "prompt": "Wat betekent 'The train leaves at twelve o’clock.'?",
       "options": [
         "Van welk perron?",
         "Hij vertrekt van perron 10.",
@@ -691,7 +691,7 @@
         "Dankjewel."
       ],
       "answer": 2,
-      "explain": "Op het blad staat: The train leaves at twelve o'clock. = De trein vertrekt om twaalf uur."
+      "explain": "Op het blad staat: The train leaves at twelve o’clock. = De trein vertrekt om twaalf uur."
     },
     {
       "id": "rw-bl-044",
@@ -702,11 +702,11 @@
       "options": [
         "From which platform?",
         "It leaves from platform 10.",
-        "The train leaves at twelve o'clock.",
+        "The train leaves at twelve o’clock.",
         "Thank you."
       ],
       "answer": 2,
-      "explain": "Op het blad staat: De trein vertrekt om twaalf uur. = The train leaves at twelve o'clock."
+      "explain": "Op het blad staat: De trein vertrekt om twaalf uur. = The train leaves at twelve o’clock."
     },
     {
       "id": "rw-bl-045",
@@ -715,16 +715,16 @@
       "skill": "blad-zin-schrijven",
       "prompt": "Schrijf in het Engels, precies zoals op het blad: 'De trein vertrekt om twaalf uur.'",
       "answer": [
-        "The train leaves at twelve o'clock.",
         "The train leaves at twelve o’clock.",
-        "the train leaves at twelve o'clock.",
+        "The train leaves at twelve o'clock.",
         "the train leaves at twelve o’clock.",
-        "The train leaves at twelve o'clock",
+        "the train leaves at twelve o'clock.",
         "The train leaves at twelve o’clock",
-        "the train leaves at twelve o'clock",
-        "the train leaves at twelve o’clock"
+        "The train leaves at twelve o'clock",
+        "the train leaves at twelve o’clock",
+        "the train leaves at twelve o'clock"
       ],
-      "explain": "Op het blad staat: De trein vertrekt om twaalf uur. = The train leaves at twelve o'clock. Let op elke letter."
+      "explain": "Op het blad staat: De trein vertrekt om twaalf uur. = The train leaves at twelve o’clock. Let op elke letter."
     },
     {
       "id": "rw-bl-046",
@@ -750,7 +750,7 @@
       "options": [
         "It leaves from platform 10.",
         "Thank you.",
-        "You're welcome.",
+        "You’re welcome.",
         "From which platform?"
       ],
       "answer": 3,
@@ -780,7 +780,7 @@
         "Hij vertrekt van perron 10.",
         "Dankjewel.",
         "Graag gedaan.",
-        "Sorry, mag ik iets vragen?"
+        "Sorry."
       ],
       "answer": 0,
       "explain": "Op het blad staat: It leaves from platform 10. = Hij vertrekt van perron 10."
@@ -794,7 +794,7 @@
       "options": [
         "It leaves from platform 10.",
         "Thank you.",
-        "You're welcome.",
+        "You’re welcome.",
         "Excuse me."
       ],
       "answer": 0,
@@ -823,7 +823,7 @@
       "options": [
         "Graag gedaan.",
         "Dankjewel.",
-        "Sorry, mag ik iets vragen?",
+        "Sorry.",
         "Wanneer vertrekt de trein naar Oxford?"
       ],
       "answer": 1,
@@ -836,7 +836,7 @@
       "skill": "blad-zin-engels",
       "prompt": "Hoe zeg je 'Dankjewel.' in het Engels?",
       "options": [
-        "You're welcome.",
+        "You’re welcome.",
         "Thank you.",
         "Excuse me.",
         "When does the train to Oxford leave?"
@@ -863,15 +863,15 @@
       "type": "choice",
       "level": "M6",
       "skill": "blad-zin-betekenis",
-      "prompt": "Wat betekent 'You're welcome.'?",
+      "prompt": "Wat betekent 'You’re welcome.'?",
       "options": [
-        "Sorry, mag ik iets vragen?",
+        "Sorry.",
         "Wanneer vertrekt de trein naar Oxford?",
         "Graag gedaan.",
         "De trein vertrekt om twaalf uur."
       ],
       "answer": 2,
-      "explain": "Op het blad staat: You're welcome. = Graag gedaan."
+      "explain": "Op het blad staat: You’re welcome. = Graag gedaan."
     },
     {
       "id": "rw-bl-056",
@@ -882,11 +882,11 @@
       "options": [
         "Excuse me.",
         "When does the train to Oxford leave?",
-        "You're welcome.",
-        "The train leaves at twelve o'clock."
+        "You’re welcome.",
+        "The train leaves at twelve o’clock."
       ],
       "answer": 2,
-      "explain": "Op het blad staat: Graag gedaan. = You're welcome."
+      "explain": "Op het blad staat: Graag gedaan. = You’re welcome."
     },
     {
       "id": "rw-bl-057",
@@ -895,16 +895,16 @@
       "skill": "blad-zin-schrijven",
       "prompt": "Schrijf in het Engels, precies zoals op het blad: 'Graag gedaan.'",
       "answer": [
-        "You're welcome.",
         "You’re welcome.",
-        "you're welcome.",
+        "You're welcome.",
         "you’re welcome.",
-        "You're welcome",
+        "you're welcome.",
         "You’re welcome",
-        "you're welcome",
-        "you’re welcome"
+        "You're welcome",
+        "you’re welcome",
+        "you're welcome"
       ],
-      "explain": "Op het blad staat: Graag gedaan. = You're welcome. Let op elke letter."
+      "explain": "Op het blad staat: Graag gedaan. = You’re welcome. Let op elke letter."
     },
     {
       "id": "rw-bl-058",
@@ -913,20 +913,20 @@
       "skill": "blad-klok-engels",
       "prompt": "Hoe zeg je 11:00 in het Engels?",
       "options": [
-        "eleven o'clock",
+        "eleven o’clock",
         "a quarter past eleven",
         "half past eleven",
         "a quarter to twelve"
       ],
       "answer": 0,
-      "explain": "Op het blad staat: 11:00 = eleven o'clock."
+      "explain": "Op het blad staat: 11:00 = eleven o’clock."
     },
     {
       "id": "rw-bl-059",
       "type": "choice",
       "level": "M6",
       "skill": "blad-klok-tijd",
-      "prompt": "Hoe laat is 'eleven o'clock'?",
+      "prompt": "Hoe laat is 'eleven o’clock'?",
       "options": [
         "11:00",
         "11:15",
@@ -934,7 +934,7 @@
         "11:45"
       ],
       "answer": 0,
-      "explain": "Op het blad staat: eleven o'clock = 11:00."
+      "explain": "Op het blad staat: eleven o’clock = 11:00."
     },
     {
       "id": "rw-bl-060",
@@ -943,12 +943,12 @@
       "skill": "blad-klok-schrijven",
       "prompt": "Schrijf 11:00 in het Engels, precies zoals op het blad.",
       "answer": [
-        "eleven o'clock",
         "eleven o’clock",
-        "Eleven o'clock",
-        "Eleven o’clock"
+        "eleven o'clock",
+        "Eleven o’clock",
+        "Eleven o'clock"
       ],
-      "explain": "Op het blad staat: 11:00 = eleven o'clock."
+      "explain": "Op het blad staat: 11:00 = eleven o’clock."
     },
     {
       "id": "rw-bl-061",
@@ -960,7 +960,7 @@
         "half past eleven",
         "a quarter past eleven",
         "a quarter to twelve",
-        "eleven o'clock"
+        "eleven o’clock"
       ],
       "answer": 1,
       "explain": "Op het blad staat: 11:15 = a quarter past eleven."
@@ -1000,7 +1000,7 @@
       "prompt": "Hoe zeg je 11:30 in het Engels?",
       "options": [
         "a quarter to twelve",
-        "eleven o'clock",
+        "eleven o’clock",
         "half past eleven",
         "a quarter past eleven"
       ],
@@ -1041,7 +1041,7 @@
       "skill": "blad-klok-engels",
       "prompt": "Hoe zeg je 11:45 in het Engels?",
       "options": [
-        "eleven o'clock",
+        "eleven o’clock",
         "a quarter past eleven",
         "half past eleven",
         "a quarter to twelve"

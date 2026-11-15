@@ -2,6 +2,8 @@
 
 Source: a photo of an English school sheet from the founder on 2026-11-15 (Blink Engels groep 5-6 niveau b, song "Runaway", song 4, lesson 2). The sheet has three parts: Words to know, Phrases and Zo zeg je hoe laat het is. No photo is kept in the repo.
 
+The exact sheet text is in `BRON.md`, transcribed from the founder's photo of 2026-11-15 and the single source for every sheet word, phrase and meaning here (decision 127). On the sheet Excuse me. means Sorry.; the earlier longer meaning was made up and is fixed in the lesson, rw-zi-001 and the `blad` topic.
+
 The words and phrases on the sheet are what the kid has to learn, so they appear as they are. Every question sentence around them is newly written.
 
 | Source part | Topic | Skills | Question styles |

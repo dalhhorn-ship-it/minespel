@@ -2,6 +2,8 @@
 """Check a learning module against the format in docs/modules/README.md.
 
 Usage: python3 docs/modules/validate.py docs/modules/<module-id>
+A folder with a `blad` topic also needs BRON.md, and every option, typed
+answer and lesson example in that topic must be sheet text from it (decision 127).
 Prints every problem found and exits with 1 if there are any.
 """
 import json
@@ -136,6 +138,50 @@ def check_lesson(where, lesson):
             err(w, "'skill' must be a non empty string when present")
 
 
+# Decision 127: a sheet module keeps the sheet's text in BRON.md, and the
+# topic `blad` (Toets: precies van het blad) may only use that text.
+SHEET_TOPIC = "blad"
+
+
+def sheet_norm(text):
+    """Compare sheet text loosely only where typed answers allow it: the
+    straight or curly apostrophe, the end mark, and a capital first letter."""
+    t = " ".join(str(text).split()).replace("\u2019", "'").rstrip(".!?")
+    return t[:1].lower() + t[1:]
+
+
+def sheet_entries(folder):
+    """Both sides of every '- English = Nederlands' line in BRON.md."""
+    out = set()
+    for line in (folder / "BRON.md").read_text(encoding="utf-8").splitlines():
+        if line.startswith("- ") and " = " in line:
+            a, b = line[2:].split(" = ", 1)
+            out.add(sheet_norm(a))
+            out.add(sheet_norm(b))
+    return out
+
+
+def check_sheet_topic(folder, data):
+    if not (folder / "BRON.md").exists():
+        err(f"{SHEET_TOPIC}.json", "a blad topic needs a BRON.md with the sheet text (decision 127)")
+        return
+    sheet = sheet_entries(folder)
+    for page in (data.get("lesson") or {}).get("pages") or []:
+        for ex in page.get("examples") or []:
+            for side in str(ex.get("good", "")).split(" = "):
+                if sheet_norm(side) not in sheet:
+                    err(f"{SHEET_TOPIC}.json lesson", f"{side!r} is not in BRON.md")
+    for it in data.get("items") or []:
+        texts = []
+        if isinstance(it.get("options"), list):
+            texts += it["options"]
+        if it.get("type") == "type" and isinstance(it.get("answer"), list):
+            texts += it["answer"]
+        for t in texts:
+            if sheet_norm(t) not in sheet:
+                err(f"{SHEET_TOPIC}.json item {it.get('id')}", f"{t!r} is not in BRON.md")
+
+
 def main(folder):
     folder = Path(folder)
     mod = json.loads((folder / "module.json").read_text(encoding="utf-8"))
@@ -162,6 +208,8 @@ def main(folder):
         if not is_text(data.get("title")):
             err(path.name, "missing 'title'")
         check_lesson(path.name, data.get("lesson"))
+        if topic == SHEET_TOPIC:
+            check_sheet_topic(folder, data)
         items = data.get("items") or []
         seen_q = set()
         for n, it in enumerate(items):

@@ -13,7 +13,7 @@
         "text": "Een Engelse zin vertaal je niet altijd woord voor woord. Kijk wat de hele zin wil zeggen.",
         "examples": [
           {
-            "good": "Excuse me. = Sorry, mag ik iets vragen?"
+            "good": "Excuse me. = Sorry."
           },
           {
             "good": "From which platform? = Van welk perron?"
@@ -83,13 +83,13 @@
       "skill": "zin-betekenis",
       "prompt": "Wat betekent 'Excuse me.'?",
       "options": [
-        "Sorry, mag ik iets vragen?",
+        "Sorry.",
         "Dankjewel.",
         "Graag gedaan.",
         "Tot ziens."
       ],
       "answer": 0,
-      "explain": "Excuse me zeg je als je beleefd iemands aandacht vraagt. In het Nederlands: sorry."
+      "explain": "Excuse me. betekent Sorry. Je zegt het beleefd als je iemand iets wilt vragen."
     },
     {
       "id": "rw-zi-002",

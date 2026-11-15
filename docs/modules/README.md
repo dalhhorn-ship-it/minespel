@@ -16,12 +16,25 @@ Every folder here with a `module.json` is a built in module. The game loads them
 
 A folder may also hold a `COVERAGE.md` that says which source the content is based on. The validator and the game only read the `.json` files.
 
+## Sheet modules: the sheet is the only source (decision 127)
+
+For every module made from a school sheet, a workbook page or a test:
+
+* `BRON.md` in the module folder holds a verbatim transcription of every word, phrase, meaning and example on the source: same spelling, same punctuation (also the curly ’), same Dutch meaning, in the source's own parts. Write it before any item. Each pair goes on its own line as `- English = Nederlands` (for a clock time `- 11:15 = a quarter past eleven`). No photos in the repo.
+* The operator shows the transcription to the founder, and the founder confirms it before the module ships. A `BRON.md` that is not confirmed yet says so at the top, in bold.
+* Every sheet word, phrase and meaning in lessons and items is copied exactly from `BRON.md`. Never invent or "improve" a meaning, and never add a second meaning.
+* The topic `blad` (Precies van het blad) and its exam "Toets: precies van het blad" use only `BRON.md` text, also for every wrong option. Prompt wrappers like "Wat betekent ...?" are fine; new sentences, situations, names and made up distractors are not.
+* Practice topics may put sheet words in new sentences, so the kid learns to use them. The sheet words and meanings in them stay exact.
+* `validate.py` checks this: a folder with a `blad` topic needs `BRON.md`, and every option, typed answer and lesson example of `blad` must be a line side in `BRON.md`. It ignores only the straight or curly apostrophe, the end mark and a capital first letter. The app's `validate.ts` does not have this rule, because `BRON.md` is not part of a module bundle.
+
 ## Folder layout
 
 ```
 docs/modules/<module-id>/
   module.json        about the module, its topics and its exams
   <topic-id>.json    one file per topic: the lesson plus the questions
+  BRON.md            sheet modules only: the verbatim sheet text (decision 127)
+  COVERAGE.md        optional: which source parts map to which topics
 ```
 
 Check a module with:
@@ -177,6 +190,7 @@ Besides the fields and types above, it fails on:
 * a `type` item without an accepted answer;
 * a sentence over 15 words at M6 or E6, or over 20 words at M7 or E7;
 * an empty lesson page `skill`;
+* a `blad` topic without `BRON.md`, or a `blad` option, typed answer or lesson example that is not sheet text from `BRON.md` (decision 127);
 * too few items per level, an exam that asks for more items than exist, duplicate ids.
 
 ## Rules for writing content

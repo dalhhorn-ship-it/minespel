@@ -2,6 +2,8 @@
 
 Source: a photo of an English school sheet from the founder on 2026-10-24 (song "Beautiful People", song 3, lesson 2). The sheet has three parts: Words to know, Phrases and Zo moedig je iemand aan. No photo is kept in the repo.
 
+The sheet text is in `BRON.md` (decision 127). It is rebuilt from the lessons and NOT YET CHECKED against the sheet: the founder still has to send a photo. The `blad` topic is made from it.
+
 The words and phrases on the sheet are what the kid has to learn, so they appear as they are. Every question sentence around them is newly written.
 
 | Source part | Topic | Skills | Question styles |
