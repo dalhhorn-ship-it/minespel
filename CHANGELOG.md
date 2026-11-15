@@ -4,6 +4,10 @@ Written so kids can read it too.
 
 ## Unreleased
 
+### Leren
+
+* New English lessons from the song Runaway: travel words, asking for your train at the station and telling the time in English. 69 questions and 4 tests.
+
 ### Leerpauze
 
 * A small grey lock on the lesson, question and teach moment of a learning break. After the pincode a parent can only end the break or go back to it (T55b, AC199).

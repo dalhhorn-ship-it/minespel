@@ -1,0 +1,438 @@
+{
+  "id": "zinnen",
+  "title": "Phrases",
+  "groups": [
+    5,
+    6
+  ],
+  "lesson": {
+    "pages": [
+      {
+        "title": "Wat betekent de Engelse zin?",
+        "skill": "zin-betekenis",
+        "text": "Een Engelse zin vertaal je niet altijd woord voor woord. Kijk wat de hele zin wil zeggen.",
+        "examples": [
+          {
+            "good": "Excuse me. = Sorry, mag ik iets vragen?"
+          },
+          {
+            "good": "From which platform? = Van welk perron?"
+          },
+          {
+            "good": "You're welcome. = Graag gedaan.",
+            "bad": "You're welcome. = Jij bent welkom.",
+            "why": "Op thank you zeg je you're welcome. Dat betekent graag gedaan."
+          }
+        ],
+        "tip": "Platform is het perron op het station, waar je op de trein wacht."
+      },
+      {
+        "title": "Van Nederlands naar Engels",
+        "skill": "zin-engels",
+        "text": "Nu andersom. Let op de kleine woorden. Om twaalf uur is at twelve o'clock. Van perron 10 is from platform 10.",
+        "examples": [
+          {
+            "good": "De trein vertrekt om twaalf uur. = The train leaves at twelve o'clock."
+          },
+          {
+            "good": "Hij vertrekt van perron 10. = It leaves from platform 10."
+          }
+        ],
+        "tip": "Leave betekent vertrekken: weggaan."
+      },
+      {
+        "title": "Welke zin past?",
+        "skill": "zin-gebruiken",
+        "text": "Op het station heb je een klein gesprek. Eerst vraag je om aandacht. Dan stel je je vraag. Daarna bedank je.",
+        "examples": [
+          {
+            "good": "Excuse me. When does the train to Oxford leave?"
+          },
+          {
+            "good": "Thank you. You're welcome."
+          }
+        ],
+        "tip": "Excuse me komt eerst, thank you aan het eind."
+      },
+      {
+        "title": "Maak de zin af",
+        "skill": "zin-afmaken",
+        "text": "Er mist een woord in de zin. Ken je de hele zin? Dan weet je welk woord er mist.",
+        "examples": [
+          {
+            "good": "When does the train to Oxford leave?"
+          },
+          {
+            "good": "It leaves from platform 10."
+          },
+          {
+            "good": "You're welcome.",
+            "bad": "Your welcome.",
+            "why": "You're is kort voor you are. Your betekent jouw."
+          }
+        ],
+        "tip": "Speel het gesprek na met iemand thuis. Een is de reiziger, een werkt op het station."
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "rw-zi-001",
+      "type": "choice",
+      "level": "M6",
+      "skill": "zin-betekenis",
+      "prompt": "Wat betekent 'Excuse me.'?",
+      "options": [
+        "Sorry, mag ik iets vragen?",
+        "Dankjewel.",
+        "Graag gedaan.",
+        "Tot ziens."
+      ],
+      "answer": 0,
+      "explain": "Excuse me zeg je als je beleefd iemands aandacht vraagt. In het Nederlands: sorry."
+    },
+    {
+      "id": "rw-zi-002",
+      "type": "choice",
+      "level": "M6",
+      "skill": "zin-betekenis",
+      "prompt": "Wat betekent 'Thank you.'?",
+      "options": [
+        "Graag gedaan.",
+        "Van welk perron?",
+        "Dankjewel.",
+        "Sorry."
+      ],
+      "answer": 2,
+      "explain": "Thank you betekent dankjewel."
+    },
+    {
+      "id": "rw-zi-003",
+      "type": "choice",
+      "level": "M6",
+      "skill": "zin-betekenis",
+      "prompt": "Wat betekent 'You're welcome.'?",
+      "options": [
+        "Welkom thuis.",
+        "Graag gedaan.",
+        "Dankjewel.",
+        "Jij bent welkom hier."
+      ],
+      "answer": 1,
+      "explain": "You're welcome zeg je terug als iemand thank you zegt. Het betekent graag gedaan."
+    },
+    {
+      "id": "rw-zi-004",
+      "type": "choice",
+      "level": "M6",
+      "skill": "zin-betekenis",
+      "prompt": "Wat betekent 'From which platform?'?",
+      "options": [
+        "Van welk perron?",
+        "Hoe laat is het?",
+        "Waar is het station?",
+        "Welke trein?"
+      ],
+      "answer": 0,
+      "explain": "Platform is perron. From which = van welk. Dus: van welk perron?"
+    },
+    {
+      "id": "rw-zi-005",
+      "type": "choice",
+      "level": "M6",
+      "skill": "zin-betekenis",
+      "prompt": "Wat betekent 'When does the train to Oxford leave?'?",
+      "options": [
+        "Wanneer komt de trein uit Oxford aan?",
+        "Waar is de trein naar Oxford?",
+        "Wanneer vertrekt de trein naar Oxford?",
+        "Hoe laat is het in Oxford?"
+      ],
+      "answer": 2,
+      "explain": "When = wanneer, leave = vertrekken, to = naar. Wanneer vertrekt de trein naar Oxford?"
+    },
+    {
+      "id": "rw-zi-006",
+      "type": "choice",
+      "level": "M6",
+      "skill": "zin-engels",
+      "prompt": "Hoe zeg je 'Dankjewel.' in het Engels?",
+      "options": [
+        "You're welcome.",
+        "Thank you.",
+        "Excuse me.",
+        "From which platform?"
+      ],
+      "answer": 1,
+      "explain": "Dankjewel is thank you."
+    },
+    {
+      "id": "rw-zi-007",
+      "type": "choice",
+      "level": "M6",
+      "skill": "zin-engels",
+      "prompt": "Hoe zeg je 'Hij vertrekt van perron 10.' in het Engels?",
+      "options": [
+        "It leaves at ten o'clock.",
+        "It arrives at platform 10.",
+        "It leaves from platform 10.",
+        "From which platform?"
+      ],
+      "answer": 2,
+      "explain": "Vertrekken is leave, van perron is from platform. It leaves from platform 10."
+    },
+    {
+      "id": "rw-zi-008",
+      "type": "choice",
+      "level": "M6",
+      "skill": "zin-engels",
+      "prompt": "Hoe zeg je 'De trein vertrekt om twaalf uur.' in het Engels?",
+      "options": [
+        "The train leaves at twelve o'clock.",
+        "The train leaves from platform 12.",
+        "The train leaves at half past twelve.",
+        "The bus leaves at twelve o'clock."
+      ],
+      "answer": 0,
+      "explain": "Om twaalf uur = at twelve o'clock. The train leaves at twelve o'clock."
+    },
+    {
+      "id": "rw-zi-009",
+      "type": "find-error",
+      "level": "M6",
+      "skill": "zin-engels",
+      "prompt": "Welk Engels woord is fout geschreven?",
+      "words": [
+        "Thank",
+        "yu."
+      ],
+      "answer": 1,
+      "correction": "you",
+      "explain": "Thank you schrijf je met ou: you."
+    },
+    {
+      "id": "rw-zi-010",
+      "type": "type",
+      "level": "M6",
+      "skill": "zin-afmaken",
+      "prompt": "Schrijf het woord dat mist. Het betekent: Graag gedaan.",
+      "sentence": "You're ... .",
+      "answer": [
+        "welcome",
+        "Welcome"
+      ],
+      "explain": "Graag gedaan is you're welcome."
+    },
+    {
+      "id": "rw-zi-011",
+      "type": "choice",
+      "level": "E6",
+      "skill": "zin-gebruiken",
+      "prompt": "Je wilt een vrouw op het station iets vragen. Wat zeg je eerst?",
+      "options": [
+        "Excuse me.",
+        "You're welcome.",
+        "Thank you.",
+        "It leaves from platform 10."
+      ],
+      "answer": 0,
+      "explain": "Je vraagt beleefd om aandacht: excuse me."
+    },
+    {
+      "id": "rw-zi-012",
+      "type": "choice",
+      "level": "E6",
+      "skill": "zin-gebruiken",
+      "prompt": "Iemand helpt je met je zware koffer. Wat zeg je?",
+      "options": [
+        "Excuse me.",
+        "Thank you.",
+        "You're welcome.",
+        "From which platform?"
+      ],
+      "answer": 1,
+      "explain": "Iemand helpt je, dus je bedankt: thank you."
+    },
+    {
+      "id": "rw-zi-013",
+      "type": "choice",
+      "level": "E6",
+      "skill": "zin-gebruiken",
+      "prompt": "Een jongen zegt 'Thank you.' tegen jou. Wat zeg je terug?",
+      "options": [
+        "Thank you.",
+        "Excuse me.",
+        "You're welcome.",
+        "When does the train leave?"
+      ],
+      "answer": 2,
+      "explain": "Op thank you zeg je: you're welcome. Graag gedaan."
+    },
+    {
+      "id": "rw-zi-014",
+      "type": "choice",
+      "level": "E6",
+      "skill": "zin-gebruiken",
+      "prompt": "Je weet hoe laat je trein gaat, maar niet waar. Wat vraag je?",
+      "options": [
+        "From which platform?",
+        "Thank you.",
+        "Excuse me.",
+        "You're welcome."
+      ],
+      "answer": 0,
+      "explain": "Je wilt weten van welk perron: from which platform?"
+    },
+    {
+      "id": "rw-zi-015",
+      "type": "choice",
+      "level": "E6",
+      "skill": "zin-gebruiken",
+      "prompt": "Je wilt weten hoe laat de trein naar Oxford gaat. Wat vraag je?",
+      "options": [
+        "From which platform?",
+        "When does the train to Oxford leave?",
+        "It leaves from platform 10.",
+        "You're welcome."
+      ],
+      "answer": 1,
+      "explain": "Wanneer vertrekt de trein? When does the train to Oxford leave?"
+    },
+    {
+      "id": "rw-zi-016",
+      "type": "type",
+      "level": "E6",
+      "skill": "zin-afmaken",
+      "prompt": "Schrijf het woord dat mist. Het betekent: Wanneer vertrekt de trein naar Oxford?",
+      "sentence": "When does the train to Oxford ... ?",
+      "answer": [
+        "leave",
+        "Leave"
+      ],
+      "explain": "Vertrekken is leave. When does the train to Oxford leave?"
+    },
+    {
+      "id": "rw-zi-017",
+      "type": "type",
+      "level": "E6",
+      "skill": "zin-afmaken",
+      "prompt": "Schrijf het woord dat mist. Het betekent: Van welk perron?",
+      "sentence": "From which ... ?",
+      "answer": [
+        "platform",
+        "Platform"
+      ],
+      "explain": "Perron is platform. From which platform?"
+    },
+    {
+      "id": "rw-zi-018",
+      "type": "type",
+      "level": "E6",
+      "skill": "zin-afmaken",
+      "prompt": "Schrijf het woord dat mist. Het betekent: De trein vertrekt om twaalf uur.",
+      "sentence": "The train leaves at twelve ... .",
+      "answer": [
+        "o'clock",
+        "O'clock",
+        "o’clock",
+        "O’clock"
+      ],
+      "explain": "Een heel uur is o'clock. Twaalf uur = twelve o'clock."
+    },
+    {
+      "id": "rw-zi-019",
+      "type": "type",
+      "level": "E6",
+      "skill": "zin-afmaken",
+      "prompt": "Schrijf het woord dat mist. Het betekent: Hij vertrekt van perron 10.",
+      "sentence": "It leaves ... platform 10.",
+      "answer": [
+        "from",
+        "From"
+      ],
+      "explain": "Van perron = from platform. It leaves from platform 10."
+    },
+    {
+      "id": "rw-zi-020",
+      "type": "choice",
+      "level": "E6",
+      "skill": "zin-afmaken",
+      "prompt": "Welk woord past op de stippen? Het betekent: Wanneer vertrekt de trein naar Oxford?",
+      "sentence": "... does the train to Oxford leave?",
+      "options": [
+        "Where",
+        "When",
+        "What",
+        "Which"
+      ],
+      "answer": 1,
+      "explain": "Wanneer is when. Where is waar."
+    },
+    {
+      "id": "rw-zi-021",
+      "type": "choice",
+      "level": "E6",
+      "skill": "zin-afmaken",
+      "prompt": "Welk woord past op de stippen? Het betekent: Van welk perron?",
+      "sentence": "From ... platform?",
+      "options": [
+        "when",
+        "who",
+        "which",
+        "where"
+      ],
+      "answer": 2,
+      "explain": "Welk is which. From which platform?"
+    },
+    {
+      "id": "rw-zi-022",
+      "type": "find-error",
+      "level": "E6",
+      "skill": "zin-afmaken",
+      "prompt": "Welk Engels woord is fout geschreven?",
+      "words": [
+        "The",
+        "train",
+        "leafs",
+        "at",
+        "twelve",
+        "o'clock."
+      ],
+      "answer": 2,
+      "correction": "leaves",
+      "explain": "Hij vertrekt = it leaves, met ves."
+    },
+    {
+      "id": "rw-zi-023",
+      "type": "find-error",
+      "level": "E6",
+      "skill": "zin-afmaken",
+      "prompt": "Welk Engels woord is fout geschreven?",
+      "words": [
+        "When",
+        "does",
+        "the",
+        "train",
+        "to",
+        "Oxford",
+        "leave?"
+      ],
+      "answer": -1,
+      "explain": "Alles is goed geschreven."
+    },
+    {
+      "id": "rw-zi-024",
+      "type": "find-error",
+      "level": "E6",
+      "skill": "zin-afmaken",
+      "prompt": "Welk Engels woord is fout geschreven?",
+      "words": [
+        "Your",
+        "welcome."
+      ],
+      "answer": 0,
+      "correction": "You're",
+      "explain": "You're is kort voor you are. Your betekent jouw."
+    }
+  ]
+}

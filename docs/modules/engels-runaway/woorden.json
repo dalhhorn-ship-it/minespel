@@ -1,0 +1,474 @@
+{
+  "id": "woorden",
+  "title": "Words to know",
+  "groups": [
+    5,
+    6
+  ],
+  "lesson": {
+    "pages": [
+      {
+        "title": "Wat betekent het Engelse woord?",
+        "skill": "woord-betekenis",
+        "text": "Dit zijn de woorden van het liedje Runaway. Ze gaan over op reis gaan: hoe je reist en wat je meeneemt. Leer ze in paren: eerst Engels, dan Nederlands.",
+        "examples": [
+          {
+            "good": "plane = vliegtuig"
+          },
+          {
+            "good": "boat = boot"
+          },
+          {
+            "good": "charger = oplader"
+          },
+          {
+            "good": "time = tijd"
+          }
+        ],
+        "tip": "Bus en station zijn in het Engels en het Nederlands hetzelfde woord."
+      },
+      {
+        "title": "Van Nederlands naar Engels",
+        "skill": "woord-engels",
+        "text": "Nu andersom. Je denkt aan het Nederlandse woord en zoekt het Engelse. Zeg het woord hardop, dat helpt.",
+        "examples": [
+          {
+            "good": "fiets = bike"
+          },
+          {
+            "good": "trein = train"
+          },
+          {
+            "good": "motor = motorbike",
+            "bad": "motor = motor",
+            "why": "Een motor om op te rijden heet in het Engels motorbike."
+          }
+        ],
+        "tip": "Motorbike is een bike met een motor."
+      },
+      {
+        "title": "Welk woord past in de zin?",
+        "skill": "woord-in-zin",
+        "text": "Lees eerst wat de zin betekent. Zoek dan het woord dat past.",
+        "examples": [
+          {
+            "good": "I brush my teeth with my toothbrush."
+          },
+          {
+            "good": "My tablet is empty. Where is the charger?"
+          }
+        ],
+        "tip": "Wat heb je nodig in de zin? Een ding om mee te reizen, of iets voor in je koffer?"
+      },
+      {
+        "title": "Schrijf het woord goed",
+        "skill": "woord-spellen",
+        "text": "Sommige woorden schrijf je anders dan je ze zegt. Kijk goed naar de letters.",
+        "examples": [
+          {
+            "good": "train",
+            "bad": "trian",
+            "why": "Eerst de a, dan de i."
+          },
+          {
+            "good": "socks",
+            "bad": "sokcs",
+            "why": "Eerst de c, dan de k."
+          },
+          {
+            "good": "toothbrush = tooth + brush"
+          },
+          {
+            "good": "underwear = under + wear"
+          }
+        ],
+        "tip": "Lange woorden zijn vaak twee korte woorden aan elkaar."
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "rw-wo-001",
+      "type": "choice",
+      "level": "M6",
+      "skill": "woord-betekenis",
+      "prompt": "Wat betekent 'plane'?",
+      "options": [
+        "fiets",
+        "vliegtuig",
+        "boot",
+        "trein"
+      ],
+      "answer": 1,
+      "explain": "Plane betekent vliegtuig. Een plane vliegt door de lucht."
+    },
+    {
+      "id": "rw-wo-002",
+      "type": "choice",
+      "level": "M6",
+      "skill": "woord-betekenis",
+      "prompt": "Wat betekent 'charger'?",
+      "options": [
+        "oplader",
+        "tandenborstel",
+        "station",
+        "sokken"
+      ],
+      "answer": 0,
+      "explain": "Charger betekent oplader. Daarmee laad je een tablet of telefoon op."
+    },
+    {
+      "id": "rw-wo-003",
+      "type": "choice",
+      "level": "M6",
+      "skill": "woord-betekenis",
+      "prompt": "Wat betekent 'toothbrush'?",
+      "options": [
+        "ondergoed",
+        "oplader",
+        "tandenborstel",
+        "tijd"
+      ],
+      "answer": 2,
+      "explain": "Toothbrush betekent tandenborstel. Tooth is tand, brush is borstel."
+    },
+    {
+      "id": "rw-wo-004",
+      "type": "choice",
+      "level": "M6",
+      "skill": "woord-betekenis",
+      "prompt": "Wat betekent 'underwear'?",
+      "options": [
+        "sokken",
+        "ondergoed",
+        "trein",
+        "boot"
+      ],
+      "answer": 1,
+      "explain": "Underwear betekent ondergoed. Under is onder, wear is dragen."
+    },
+    {
+      "id": "rw-wo-005",
+      "type": "choice",
+      "level": "M6",
+      "skill": "woord-engels",
+      "prompt": "Hoe zeg je 'fiets' in het Engels?",
+      "options": [
+        "boat",
+        "bus",
+        "bike",
+        "plane"
+      ],
+      "answer": 2,
+      "explain": "Fiets is bike in het Engels."
+    },
+    {
+      "id": "rw-wo-006",
+      "type": "choice",
+      "level": "M6",
+      "skill": "woord-engels",
+      "prompt": "Hoe zeg je 'sokken' in het Engels?",
+      "options": [
+        "shoes",
+        "socks",
+        "charger",
+        "time"
+      ],
+      "answer": 1,
+      "explain": "Sokken is socks in het Engels. Shoes zijn schoenen."
+    },
+    {
+      "id": "rw-wo-007",
+      "type": "choice",
+      "level": "M6",
+      "skill": "woord-engels",
+      "prompt": "Hoe zeg je 'trein' in het Engels?",
+      "options": [
+        "train",
+        "plane",
+        "time",
+        "boat"
+      ],
+      "answer": 0,
+      "explain": "Trein is train in het Engels. Je schrijft ai."
+    },
+    {
+      "id": "rw-wo-008",
+      "type": "choice",
+      "level": "M6",
+      "skill": "woord-engels",
+      "prompt": "Hoe zeg je 'motor' in het Engels?",
+      "options": [
+        "bike",
+        "motorbike",
+        "boat",
+        "train"
+      ],
+      "answer": 1,
+      "explain": "Een motor om op te rijden heet motorbike: een fiets met een motor."
+    },
+    {
+      "id": "rw-wo-009",
+      "type": "type",
+      "level": "M6",
+      "skill": "woord-betekenis",
+      "prompt": "Schrijf het Nederlandse woord voor 'boat'.",
+      "answer": [
+        "boot",
+        "Boot"
+      ],
+      "explain": "Boat betekent boot."
+    },
+    {
+      "id": "rw-wo-010",
+      "type": "type",
+      "level": "M6",
+      "skill": "woord-spellen",
+      "prompt": "Schrijf het Engelse woord voor 'tijd'.",
+      "answer": [
+        "time",
+        "Time"
+      ],
+      "explain": "Tijd is time in het Engels. Het eindigt op een e."
+    },
+    {
+      "id": "rw-wo-011",
+      "type": "type",
+      "level": "M6",
+      "skill": "woord-spellen",
+      "prompt": "Schrijf het Engelse woord voor 'trein'.",
+      "answer": [
+        "train",
+        "Train"
+      ],
+      "explain": "Trein is train in het Engels, met ai."
+    },
+    {
+      "id": "rw-wo-012",
+      "type": "choice",
+      "level": "M6",
+      "skill": "woord-betekenis",
+      "prompt": "Wat betekent 'time'?",
+      "options": [
+        "trein",
+        "tijd",
+        "station",
+        "motor"
+      ],
+      "answer": 1,
+      "explain": "Time betekent tijd. What time is it? = Hoe laat is het?"
+    },
+    {
+      "id": "rw-wo-013",
+      "type": "choice",
+      "level": "E6",
+      "skill": "woord-in-zin",
+      "prompt": "Welk woord past op de stippen? Het betekent: Ik poets mijn tanden met mijn tandenborstel.",
+      "sentence": "I brush my teeth with my ... .",
+      "options": [
+        "toothbrush",
+        "charger",
+        "socks",
+        "bike"
+      ],
+      "answer": 0,
+      "explain": "Tandenborstel is toothbrush."
+    },
+    {
+      "id": "rw-wo-014",
+      "type": "choice",
+      "level": "E6",
+      "skill": "woord-in-zin",
+      "prompt": "Welk woord past op de stippen? Het betekent: Mijn tablet is leeg. Waar is de oplader?",
+      "sentence": "My tablet is empty. Where is the ... ?",
+      "options": [
+        "socks",
+        "time",
+        "charger",
+        "boat"
+      ],
+      "answer": 2,
+      "explain": "Oplader is charger."
+    },
+    {
+      "id": "rw-wo-015",
+      "type": "choice",
+      "level": "E6",
+      "skill": "woord-in-zin",
+      "prompt": "Welk woord past op de stippen? Het betekent: De boot vaart over het meer.",
+      "sentence": "The ... sails on the lake.",
+      "options": [
+        "bus",
+        "boat",
+        "train",
+        "bike"
+      ],
+      "answer": 1,
+      "explain": "Een boot vaart over het water: boat."
+    },
+    {
+      "id": "rw-wo-016",
+      "type": "choice",
+      "level": "E6",
+      "skill": "woord-in-zin",
+      "prompt": "Welk woord past op de stippen? Het betekent: Ik doe warme sokken aan.",
+      "sentence": "I put on warm ... .",
+      "options": [
+        "socks",
+        "bikes",
+        "planes",
+        "trains"
+      ],
+      "answer": 0,
+      "explain": "Sokken is socks."
+    },
+    {
+      "id": "rw-wo-017",
+      "type": "choice",
+      "level": "E6",
+      "skill": "woord-in-zin",
+      "prompt": "Welk woord past op de stippen? Het betekent: We wachten in de regen op de bus.",
+      "sentence": "We wait for the ... in the rain.",
+      "options": [
+        "toothbrush",
+        "bus",
+        "time",
+        "underwear"
+      ],
+      "answer": 1,
+      "explain": "Bus is in het Engels ook bus."
+    },
+    {
+      "id": "rw-wo-018",
+      "type": "choice",
+      "level": "E6",
+      "skill": "woord-in-zin",
+      "prompt": "Welk woord past op de stippen? Het betekent: Het is tijd voor school.",
+      "sentence": "It is ... for school.",
+      "options": [
+        "train",
+        "plane",
+        "time",
+        "station"
+      ],
+      "answer": 2,
+      "explain": "Tijd is time. It is time for school."
+    },
+    {
+      "id": "rw-wo-019",
+      "type": "type",
+      "level": "E6",
+      "skill": "woord-spellen",
+      "prompt": "Schrijf het Engelse woord voor 'tandenborstel'.",
+      "answer": [
+        "toothbrush",
+        "Toothbrush"
+      ],
+      "explain": "Tandenborstel is toothbrush: tooth (tand) en brush (borstel) aan elkaar."
+    },
+    {
+      "id": "rw-wo-020",
+      "type": "type",
+      "level": "E6",
+      "skill": "woord-spellen",
+      "prompt": "Schrijf het Engelse woord voor 'ondergoed'.",
+      "answer": [
+        "underwear",
+        "Underwear"
+      ],
+      "explain": "Ondergoed is underwear: under (onder) en wear (dragen) aan elkaar."
+    },
+    {
+      "id": "rw-wo-021",
+      "type": "type",
+      "level": "E6",
+      "skill": "woord-spellen",
+      "prompt": "Schrijf het Engelse woord voor 'oplader'.",
+      "answer": [
+        "charger",
+        "Charger"
+      ],
+      "explain": "Oplader is charger. Let op de g in het midden."
+    },
+    {
+      "id": "rw-wo-022",
+      "type": "type",
+      "level": "E6",
+      "skill": "woord-spellen",
+      "prompt": "Schrijf het Engelse woord voor 'vliegtuig'.",
+      "answer": [
+        "plane",
+        "Plane"
+      ],
+      "explain": "Vliegtuig is plane. Het eindigt op een e."
+    },
+    {
+      "id": "rw-wo-023",
+      "type": "find-error",
+      "level": "E6",
+      "skill": "woord-spellen",
+      "prompt": "Welk Engels woord is fout geschreven?",
+      "words": [
+        "The",
+        "trian",
+        "is",
+        "late."
+      ],
+      "answer": 1,
+      "correction": "train",
+      "explain": "Trein is train: eerst a, dan i."
+    },
+    {
+      "id": "rw-wo-024",
+      "type": "find-error",
+      "level": "E6",
+      "skill": "woord-spellen",
+      "prompt": "Welk Engels woord is fout geschreven?",
+      "words": [
+        "I",
+        "pack",
+        "my",
+        "sokcs",
+        "and",
+        "my",
+        "charger."
+      ],
+      "answer": 3,
+      "correction": "socks",
+      "explain": "Sokken is socks: eerst c, dan k."
+    },
+    {
+      "id": "rw-wo-025",
+      "type": "find-error",
+      "level": "E6",
+      "skill": "woord-spellen",
+      "prompt": "Welk Engels woord is fout geschreven?",
+      "words": [
+        "The",
+        "plane",
+        "flies",
+        "over",
+        "the",
+        "station."
+      ],
+      "answer": -1,
+      "explain": "Alles is goed geschreven: plane en station."
+    },
+    {
+      "id": "rw-wo-026",
+      "type": "find-error",
+      "level": "E6",
+      "skill": "woord-spellen",
+      "prompt": "Welk Engels woord is fout geschreven?",
+      "words": [
+        "My",
+        "motorbyke",
+        "is",
+        "red."
+      ],
+      "answer": 1,
+      "correction": "motorbike",
+      "explain": "Motor is motorbike, net als bike met een i."
+    }
+  ]
+}
