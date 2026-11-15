@@ -1,6 +1,6 @@
 # PRD: Dino Blokwereld (working title)
 
-Status: READY FOR SIGNOFF
+Status: APPROVED by Founder on 2026-11-15
 
 This signoff archives v3 Dino's veilig (built, goes live as 0.6.0 with the merge) and scopes v17 Ridders and v18 Zwarte bubbel together as one release, 0.7.0 (decisions 130 to 134).
 
