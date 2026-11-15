@@ -4,6 +4,11 @@ Written so kids can read it too.
 
 ## Unreleased
 
+### Grote wereld (in progress)
+
+* The world is now 128 x 128 blocks and 80 high. Your old world is the middle of it, with new land around it and a lot more ground to dig through. Everything you built and everything you own moves along: your spot, your animals, your knights and your villages.
+* The move happens once when the game starts. If the iPad switches off halfway, the old save stays whole and the move runs again.
+
 ## 0.7.0
 
 ### Ridders

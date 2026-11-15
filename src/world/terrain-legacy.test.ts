@@ -4,8 +4,8 @@ import {
   LEGACY_CELL_COUNT, LEGACY_HEIGHT, LEGACY_SEED, LEGACY_SIZE, LEGACY_START_SPOT, generateLegacyTerrain, legacyCellIndex,
   stampVillages,
 } from './terrain-legacy';
-import { START_SPOT, generateTerrain } from './terrain';
-import { LEGACY_VILLAGE_SITES, VILLAGE_SITES, houseCells, inRegion, siteRegion } from './village-layout';
+import { START_SPOT } from './terrain';
+import { LEGACY_VILLAGE_SITES, VILLAGE_SITES, houseCells, inRegion, moveSite, siteRegion } from './village-layout';
 
 /** FNV-1a over every cell. */
 function hash(blocks: Uint8Array): string {
@@ -54,11 +54,9 @@ describe('legacy terrain (the 0.7.0 generator, V15a)', () => {
     expect(hash(generateLegacyTerrain(LEGACY_SEED, 2))).toBe(before);
   });
 
-  it('terrain.ts still gives the same worlds and start spot (same values, still 64)', () => {
-    expect(generateTerrain(LEGACY_SEED, 1)).toEqual(generateLegacyTerrain(LEGACY_SEED, 1));
-    expect(generateTerrain()).toEqual(generateLegacyTerrain(LEGACY_SEED, 2));
-    expect(START_SPOT).toEqual(LEGACY_START_SPOT);
-    expect(VILLAGE_SITES).toBe(LEGACY_VILLAGE_SITES);
+  it('terrain.ts gives the moved start spot and sites (V15b switch), the legacy spot stays here', () => {
+    expect(START_SPOT).toEqual({ x: LEGACY_START_SPOT.x + 32, y: LEGACY_START_SPOT.y + 10, z: LEGACY_START_SPOT.z + 32 });
+    expect(VILLAGE_SITES).toEqual(LEGACY_VILLAGE_SITES.map(moveSite));
   });
 
   it('AC178: version 1 and version 2 are the same in every cell outside the three village sites', () => {

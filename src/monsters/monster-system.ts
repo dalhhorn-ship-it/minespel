@@ -14,7 +14,7 @@ import type { ActorView, GameRenderer } from '../render/renderer';
 import type { MonstersRecord } from '../storage/schema';
 import type { CreatureSwitches } from '../storage/monsters-store';
 import type { Box } from '../world/build';
-import { CHUNK_SIZE } from '../world/terrain';
+import { CHUNK_SIZE, WORLD_HEIGHT } from '../world/terrain';
 import type { World } from '../world/world';
 import { bubbleBox, bubbleGrow, createBubble, findBubbleSpot, stepBubble, BUBBLE_BASE_SIZE } from './bubble';
 import { createBubbleClock, type BubbleClock } from './bubble-clock';
@@ -156,7 +156,7 @@ export function createMonsterSystem(options: MonsterSystemOptions): MonsterSyste
   }
 
   function groundBelow(p: Point): Point {
-    let y = Math.min(Math.floor(p.y), 62);
+    let y = Math.min(Math.floor(p.y), WORLD_HEIGHT - 2);
     while (y > 0 && world.get(Math.floor(p.x), y, Math.floor(p.z)) === 0) y--;
     return { x: p.x, y: y + 1, z: p.z };
   }

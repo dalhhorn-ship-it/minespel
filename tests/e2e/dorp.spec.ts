@@ -3,8 +3,9 @@ import { STEEN, RARE_BLOCKS } from '../../src/world/blocks';
 import {
   CURRENT_TERRAIN_VERSION, START_SPOT, WORLD_HEIGHT, WORLD_SEED, cellIndex, generateTerrain,
 } from '../../src/world/terrain';
-import { VILLAGE_SITES, siteRegion } from '../../src/world/village-layout';
-import { killApp, openApp, readState } from './helpers/app';
+import { LEGACY_SEED, LEGACY_START_SPOT, generateLegacyTerrain, legacyCellIndex } from '../../src/world/terrain-legacy';
+import { LEGACY_VILLAGE_SITES, VILLAGE_SITES, siteRegion } from '../../src/world/village-layout';
+import { fromLegacy, killApp, openApp, readState } from './helpers/app';
 import { loginAsParent, setupPin } from './helpers/gate';
 import {
   SEEN_ANSWER, SEEN_ITEM_ID, bubble, buildState, cardState, fingerTap, fingerTapText, getKv, openCardAt,
@@ -158,18 +159,24 @@ test.describe('villages and villagers', () => {
 // ---------------------------------------------------------------- an old 0.4.0 save (AC179)
 
 test.describe('an old 0.4.0 save', () => {
-  /** The ground height of terrain version 1 at one column. */
+  // An old 0.4.0 save is a diff against the 64 x 64 x 64 world of terrain version 1: every spot below is in
+  // that legacy world. After the open it stands at `fromLegacy(...)` in the big world (V15b).
+  const legacyV1 = generateLegacyTerrain(LEGACY_SEED, 1);
+
+  /** The ground height of terrain version 1 (legacy coordinates) at one column. */
   function groundTop(x: number, z: number): number {
-    const t = generateTerrain(WORLD_SEED, 1);
-    for (let y = WORLD_HEIGHT - 1; y >= 0; y--) if ((t[cellIndex(x, y, z)] ?? 0) !== 0) return y;
+    for (let y = 63; y >= 0; y--) if ((legacyV1[legacyCellIndex(x, y, z)] ?? 0) !== 0) return y;
     return 0;
   }
 
-  /** A cell the kid built just above the ground, as a version 1 diff entry. */
+  /** A cell the kid built just above the ground, as a version 1 diff entry (legacy coordinates). */
   function kidCell(x: number, z: number): { x: number; y: number; z: number; entry: number } {
     const y = groundTop(x, z) + 1;
-    return { x, y, z, entry: cellIndex(x, y, z) * 256 + STEEN };
+    return { x, y, z, entry: legacyCellIndex(x, y, z) * 256 + STEEN };
   }
+
+  /** Where a legacy cell is after the move. */
+  const moved = (c: { x: number; y: number; z: number }) => fromLegacy(c.x, c.y, c.z);
 
   async function openWithOldSave(page: Page, cells: Array<{ entry: number }>, player?: { x: number; y: number; z: number }): Promise<void> {
     await openApp(page);
@@ -209,24 +216,26 @@ test.describe('an old 0.4.0 save', () => {
   });
 
   test('AC179: a site the kid changed keeps every cell, the other sites get houses, the second start changes nothing', async ({ page }) => {
-    const r0 = siteRegion(VILLAGE_SITES[0]!);
+    const r0 = siteRegion(LEGACY_VILLAGE_SITES[0]!);
     const mine = kidCell(r0.x0 + 2, r0.z0 + 2);
-    const sx = Math.floor(START_SPOT.x);
-    const sz = Math.floor(START_SPOT.z);
+    const sx = Math.floor(LEGACY_START_SPOT.x);
+    const sz = Math.floor(LEGACY_START_SPOT.z);
     const outside = kidCell(sx + 3, sz + 3);
-    const player = { x: START_SPOT.x, y: groundTop(sx, sz) + 2, z: START_SPOT.z };
+    const player = { x: LEGACY_START_SPOT.x, y: groundTop(sx, sz) + 2, z: LEGACY_START_SPOT.z };
     await openWithOldSave(page, [mine, outside], player);
 
     // The cells the kid changed are exactly as before.
-    expect(await readState<number>(page, 'blockAt', mine.x, mine.y, mine.z)).toBe(STEEN);
-    expect(await readState<number>(page, 'blockAt', outside.x, outside.y, outside.z)).toBe(STEEN);
+    const mineAt = moved(mine);
+    const outsideAt = moved(outside);
+    expect(await readState<number>(page, 'blockAt', mineAt.x, mineAt.y, mineAt.z)).toBe(STEEN);
+    expect(await readState<number>(page, 'blockAt', outsideAt.x, outsideAt.y, outsideAt.z)).toBe(STEEN);
     // The changed site gets no house, the other two do.
     const sites = await readState<Array<{ hasHouses: boolean }>>(page, 'villageSites');
     expect(sites.map((s) => s.hasHouses)).toEqual([false, true, true]);
     // The player stands where they stood.
     const p = await readState<{ x: number; z: number }>(page, 'player');
-    expect(p.x).toBeCloseTo(player.x, 0);
-    expect(p.z).toBeCloseTo(player.z, 0);
+    expect(p.x).toBeCloseTo(player.x + 32, 0);
+    expect(p.z).toBeCloseTo(player.z + 32, 0);
     // The villagers of the changed site stand on the ground there (none inside a block).
     for (const v of (await villagers(page)).filter((x) => x.site === VILLAGE_SITES[0]!.id)) {
       expect(await readState<number>(page, 'blockAt', Math.floor(v.position.x), Math.floor(v.position.y + 0.5), Math.floor(v.position.z))).toBe(0);
@@ -238,20 +247,23 @@ test.describe('an old 0.4.0 save', () => {
     await page.reload();
     await page.waitForFunction(() => (window as unknown as { __dino?: Record<string, () => unknown> }).__dino?.ready?.() === true);
     expect(await siteHash(page)).toBe(hash);
-    expect(await readState<number>(page, 'blockAt', mine.x, mine.y, mine.z)).toBe(STEEN);
-    expect(await readState<number>(page, 'blockAt', outside.x, outside.y, outside.z)).toBe(STEEN);
+    expect(await readState<number>(page, 'blockAt', mineAt.x, mineAt.y, mineAt.z)).toBe(STEEN);
+    expect(await readState<number>(page, 'blockAt', outsideAt.x, outsideAt.y, outsideAt.z)).toBe(STEEN);
     expect(await readState<boolean>(page, 'hasWorldV1')).toBe(false);
   });
 
   test('AC179: changes in all three sites give no houses at all and every cell stays', async ({ page }) => {
-    const cells = VILLAGE_SITES.map((s) => {
+    const cells = LEGACY_VILLAGE_SITES.map((s) => {
       const r = siteRegion(s);
       return kidCell(r.x0 + 1, r.z0 + 1);
     });
     await openWithOldSave(page, cells);
     const sites = await readState<Array<{ hasHouses: boolean }>>(page, 'villageSites');
     expect(sites.map((s) => s.hasHouses)).toEqual([false, false, false]);
-    for (const c of cells) expect(await readState<number>(page, 'blockAt', c.x, c.y, c.z)).toBe(STEEN);
+    for (const c of cells) {
+      const at = moved(c);
+      expect(await readState<number>(page, 'blockAt', at.x, at.y, at.z)).toBe(STEEN);
+    }
     expect(await villagers(page)).toHaveLength(8);
   });
 
@@ -880,7 +892,7 @@ test.describe('safety', () => {
 
 /** Ground height of terrain version 2 at a column (the new world), for placing test blocks. */
 function groundY(x: number, z: number): number {
-  const t = generateTerrain(WORLD_SEED, CURRENT_TERRAIN_VERSION);
+  const t = generateTerrain(WORLD_SEED);
   const ix = Math.floor(x);
   const iz = Math.floor(z);
   for (let y = WORLD_HEIGHT - 1; y >= 0; y--) if ((t[cellIndex(ix, y, iz)] ?? 0) !== 0) return y;

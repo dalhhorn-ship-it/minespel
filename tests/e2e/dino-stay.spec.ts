@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { openApp, readState } from './helpers/app';
+import { fromLegacy, openApp, readState } from './helpers/app';
 
 // Dinos stay by default and Allemaal vrij (decision 122). Real finger taps on the iPad profile.
 
@@ -37,7 +37,9 @@ test.describe('Dinos stay by default (decision 122)', () => {
 
     // Walk far away: a stay dino roams, but within about 12 blocks of its spot (decision 128).
     const [a, b] = dinos as [DinoRow, DinoRow];
-    await readState(page, 'placePlayer', 50.5, 15, 50.5, 0);
+    // The 0.7.0 spot (50.5, 15, 50.5), at the same place in the big world.
+    const faraway = fromLegacy(50.5, 15, 50.5);
+    await readState(page, 'placePlayer', faraway.x, faraway.y, faraway.z, 0);
     await readState(page, 'stepDinos', 15);
     const far = await readState<DinoRow[]>(page, 'dinos');
     expect(Math.hypot(far[0]!.x - a.x, far[0]!.z - a.z)).toBeLessThan(13);

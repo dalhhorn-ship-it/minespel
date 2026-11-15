@@ -141,9 +141,6 @@ export const LEGACY_VILLAGE_SITES: readonly VillageSite[] = [
   },
 ];
 
-/** The sites the game uses. Until the big world switch (V15b) this is the legacy list. */
-export const VILLAGE_SITES: readonly VillageSite[] = LEGACY_VILLAGE_SITES;
-
 /**
  * Where the legacy 64 x 64 x 64 world sits inside the 128 x 128 x 80 world (v15): 32 blocks in x and z,
  * 10 blocks up (so legacy oersteen at y 0 becomes the steen at y 10, above the deep ground).
@@ -163,6 +160,9 @@ export function moveSite(site: VillageSite): VillageSite {
     homes: site.homes.map((h) => ({ x: h.x + MOVE.x, y: h.y + MOVE.y, z: h.z + MOVE.z })),
   };
 }
+
+/** The sites the game uses: the legacy sites moved into the middle of the big world (v15). */
+export const VILLAGE_SITES: readonly VillageSite[] = LEGACY_VILLAGE_SITES.map(moveSite);
 
 /** The site rectangle plus the margin: every cell that belongs to the site, at any height. */
 export function siteRegion(site: VillageSite): SiteRegion {

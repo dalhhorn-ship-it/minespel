@@ -3,9 +3,12 @@ import { createRng } from '../core/rng';
 import { boxCollides } from '../dinos/dino-ai';
 import { DANCE_SECONDS, VILLAGER_BOX, VILLAGER_LOOKS } from '../villagers/villager';
 import { AIR, STEEN, RARE_BLOCKS } from '../world/blocks';
-import { VILLAGE_SITES } from '../world/village-layout';
+import { MOVE, VILLAGE_SITES } from '../world/village-layout';
 import { World } from '../world/world';
 import { createVillagerSystem, STEP_DISTANCE } from './villager-system';
+
+/** A spot of the 0.7.0 world (where the tests were written), moved into the big world. */
+const at = (x: number, y: number, z: number) => ({ x: x + MOVE.x, y: y + MOVE.y, z: z + MOVE.z });
 
 const dist = (a: { x: number; z: number }, b: { x: number; z: number }): number => Math.hypot(a.x - b.x, a.z - b.z);
 
@@ -33,7 +36,7 @@ describe('villager system (V11c)', () => {
   });
 
   it('AC180: 2 minutes on a fake clock stay within 3 blocks of home, never inside a block, player and blocks untouched', () => {
-    const { world, player, sys } = setup({ player: { x: 36, y: 12, z: 22 } });
+    const { world, player, sys } = setup({ player: at(36, 12, 22) });
     const before = world.diff().length;
     const spot = { ...player.player };
     const rng = createRng(3);
@@ -72,7 +75,7 @@ describe('villager system (V11c)', () => {
   });
 
   it('AC180: after the app is closed and reopened every villager starts at its home spot', () => {
-    const first = setup({ player: { x: 36, y: 12, z: 22 } });
+    const first = setup({ player: at(36, 12, 22) });
     for (let i = 0; i < 30 * 40; i++) first.sys.step(1 / 30);
     expect(first.sys.villagers().some((v) => dist(v, v.home) > 0.3)).toBe(true);
     const again = setup({ world: first.world });
@@ -89,7 +92,7 @@ describe('villager system (V11c)', () => {
         for (let y = 1; y < 30; y++) world.set(x, y, z, y <= ground ? STEEN : AIR);
       }
     }
-    const { sys } = setup({ world, player: { x: 12, y: 12, z: 20 } });
+    const { sys } = setup({ world, player: at(12, 12, 20) });
     const mine = sys.villagers().filter((v) => v.site === 'west');
     expect(mine).toHaveLength(2);
     for (const v of mine) {
@@ -100,12 +103,12 @@ describe('villager system (V11c)', () => {
   });
 
   it('AC180: a villager is not stepped when the player is farther than 24 blocks', () => {
-    const far = setup({ player: { x: 16 + STEP_DISTANCE + 8, y: 12, z: 5 } });
+    const far = setup({ player: at(16 + STEP_DISTANCE + 8, 12, 5) });
     const start = far.sys.villagers().map((v) => [v.x, v.z]);
     for (let i = 0; i < 30 * 20; i++) far.sys.step(1 / 30);
     // villager 0 (noord) is 32 blocks from the player and stands still
     expect(far.sys.villagers()[0] && [far.sys.villagers()[0]!.x, far.sys.villagers()[0]!.z]).toEqual(start[0]);
-    const near = setup({ player: { x: 18, y: 12, z: 20 } });
+    const near = setup({ player: at(18, 12, 20) });
     for (let i = 0; i < 30 * 20; i++) near.sys.step(1 / 30);
     expect(dist(near.sys.villagers()[0]!, near.sys.villagers()[0]!.home)).toBeGreaterThan(0.05);
   });
@@ -120,17 +123,17 @@ describe('villager system (V11c)', () => {
   });
 
   it('villagers turn to a close player and wave', () => {
-    const { sys } = setup({ player: { x: 18.5, y: 10, z: 6.5 } });
+    const { sys } = setup({ player: at(18.5, 10, 6.5) });
     for (let i = 0; i < 90; i++) sys.step(1 / 30);
     const v = sys.villagers()[0]!;
     expect(v.waving).toBe(true);
     if (!v.goal) {
-      expect(v.heading).toBeCloseTo(Math.atan2(18.5 - v.x, 6.5 - v.z), 1);
+      expect(v.heading).toBeCloseTo(Math.atan2(18.5 + MOVE.x - v.x, 6.5 + MOVE.z - v.z), 1);
     }
   });
 
   it('dance runs about 2 seconds, keeps the villager in place and ends by itself', () => {
-    const { sys, syncVillagers } = setup({ player: { x: 36, y: 12, z: 22 } });
+    const { sys, syncVillagers } = setup({ player: at(36, 12, 22) });
     expect(sys.dance('nope')).toBe(false);
     const v = sys.villagers()[2]!;
     const home = { x: v.x, z: v.z };
@@ -147,17 +150,17 @@ describe('villager system (V11c)', () => {
   });
 
   it('stillMode: villagers stand at home and only turn to the player', () => {
-    const { sys } = setup({ player: { x: 18.5, y: 10, z: 4.5 }, stillMode: true });
+    const { sys } = setup({ player: at(18.5, 10, 4.5), stillMode: true });
     const v = sys.villagers()[0]!;
     for (let i = 0; i < 30 * 30; i++) sys.step(1 / 30);
     expect([v.x, v.z]).toEqual([v.home.x, v.home.z]);
     expect(v.waving).toBe(false);
-    expect(v.heading).toBeCloseTo(Math.atan2(18.5 - v.x, 4.5 - v.z), 1);
+    expect(v.heading).toBeCloseTo(Math.atan2(18.5 + MOVE.x - v.x, 4.5 + MOVE.z - v.z), 1);
     expect(sys.stillMode()).toBe(true);
   });
 
   it('setStillMode(true) sends wandering villagers back home', () => {
-    const { sys } = setup({ player: { x: 36, y: 12, z: 22 } });
+    const { sys } = setup({ player: at(36, 12, 22) });
     for (let i = 0; i < 30 * 40; i++) sys.step(1 / 30);
     sys.setStillMode(true);
     for (const v of sys.villagers()) expect([v.x, v.z]).toEqual([v.home.x, v.home.z]);

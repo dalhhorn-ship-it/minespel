@@ -1,7 +1,11 @@
 import { expect, test, type Page } from '@playwright/test';
 import { STEEN } from '../../src/world/blocks';
 import { cellIndex } from '../../src/world/terrain';
-import { killApp, openApp, readState } from './helpers/app';
+import { fromLegacy, killApp, openApp, readState } from './helpers/app';
+
+// The 0.7.0 spots of these tests (7, 25, 7) and (12.5, 25, 14.5), at the same place in the big world.
+const CELL = fromLegacy(7, 25, 7);
+const SPOT = fromLegacy(12.5, 25, 14.5);
 
 interface Pose {
   x: number;
@@ -11,13 +15,16 @@ interface Pose {
 }
 
 async function build(page: Page) {
-  await page.evaluate((stone) => {
-    const h = (window as unknown as { __dino: Record<string, (...a: unknown[]) => unknown> }).__dino;
-    h.setBlock!(7, 25, 7, stone);
-    h.markWorldDirty!();
-    h.placePlayer!(12.5, 25, 14.5, 1.1);
-    h.setBuildState!({ mode: 'bouwen', hotbar: [12, 9, 10, 3, 1, 2, 7, 6], selected: 5 });
-  }, STEEN);
+  await page.evaluate(
+    ({ stone, cell, spot }) => {
+      const h = (window as unknown as { __dino: Record<string, (...a: unknown[]) => unknown> }).__dino;
+      h.setBlock!(cell.x, cell.y, cell.z, stone);
+      h.markWorldDirty!();
+      h.placePlayer!(spot.x, spot.y, spot.z, 1.1);
+      h.setBuildState!({ mode: 'bouwen', hotbar: [12, 9, 10, 3, 1, 2, 7, 6], selected: 5 });
+    },
+    { stone: STEEN, cell: CELL, spot: SPOT },
+  );
 }
 
 test.describe('saving the world', () => {
@@ -26,12 +33,12 @@ test.describe('saving the world', () => {
     await build(page);
     // No flush: the queue must write by itself (within about 2 seconds). Wait until the player AND the
     // world block (7,25,7) are both in storage.
-    const entry = cellIndex(7, 25, 7) * 256 + STEEN;
+    const entry = cellIndex(CELL.x, CELL.y, CELL.z) * 256 + STEEN;
     await expect
       .poll(
         () =>
           page.evaluate(
-            (want) =>
+            ({ want, spotX }) =>
               new Promise<boolean>((resolve) => {
                 const open = indexedDB.open('dino-blokwereld');
                 open.onerror = () => resolve(false);
@@ -45,7 +52,7 @@ test.describe('saving the world', () => {
                     const p = player.result as { x?: number } | undefined;
                     const w = world.result as { diff?: ArrayLike<number> } | undefined;
                     db.close();
-                    resolve(p?.x !== undefined && Math.abs(p.x - 12.5) < 0.1 && Array.from(w?.diff ?? []).includes(want));
+                    resolve(p?.x !== undefined && Math.abs(p.x - spotX) < 0.1 && Array.from(w?.diff ?? []).includes(want));
                   };
                   tx.onerror = () => {
                     db.close();
@@ -53,16 +60,16 @@ test.describe('saving the world', () => {
                   };
                 };
               }),
-            entry,
+            { want: entry, spotX: SPOT.x },
           ),
         { timeout: 6000 },
       )
       .toBe(true);
     const fresh = await killApp(page);
-    expect(await readState<number>(fresh, 'blockAt', 7, 25, 7)).toBe(STEEN);
+    expect(await readState<number>(fresh, 'blockAt', CELL.x, CELL.y, CELL.z)).toBe(STEEN);
     const p = await readState<Pose>(fresh, 'player');
-    expect(p.x).toBeCloseTo(12.5, 1);
-    expect(p.z).toBeCloseTo(14.5, 1);
+    expect(p.x).toBeCloseTo(SPOT.x, 1);
+    expect(p.z).toBeCloseTo(SPOT.z, 1);
     expect(p.yaw).toBeCloseTo(1.1, 2);
     const b = await readState<{ mode: string; hotbar: number[]; selected: number }>(fresh, 'buildState');
     expect(b).toEqual({ mode: 'bouwen', hotbar: [12, 9, 10, 3, 1, 2, 7, 6], selected: 5 });
@@ -74,7 +81,7 @@ test.describe('saving the world', () => {
     await readState(page, 'flushSave');
     await page.reload();
     await page.waitForFunction(() => (window as unknown as { __dino?: Record<string, () => unknown> }).__dino?.ready?.() === true);
-    expect(await readState<number>(page, 'blockAt', 7, 25, 7)).toBe(STEEN);
+    expect(await readState<number>(page, 'blockAt', CELL.x, CELL.y, CELL.z)).toBe(STEEN);
   });
 
   test('resetWorld brings back the start world and it stays that way after a reopen', async ({ page }) => {
@@ -82,16 +89,16 @@ test.describe('saving the world', () => {
     await build(page);
     await readState(page, 'flushSave');
     await readState(page, 'resetWorld');
-    expect(await readState<number>(page, 'blockAt', 7, 25, 7)).toBe(0);
+    expect(await readState<number>(page, 'blockAt', CELL.x, CELL.y, CELL.z)).toBe(0);
     await readState(page, 'flushSave');
     await page.reload();
     await page.waitForFunction(() => (window as unknown as { __dino?: Record<string, () => unknown> }).__dino?.ready?.() === true);
-    expect(await readState<number>(page, 'blockAt', 7, 25, 7)).toBe(0);
+    expect(await readState<number>(page, 'blockAt', CELL.x, CELL.y, CELL.z)).toBe(0);
   });
 
   test('a first start with no save works', async ({ page }) => {
     await openApp(page);
-    expect(await readState<number>(page, 'blockAt', 7, 25, 7)).toBe(0);
+    expect(await readState<number>(page, 'blockAt', CELL.x, CELL.y, CELL.z)).toBe(0);
     expect(await readState<boolean>(page, 'gameRunning')).toBe(true);
   });
 });

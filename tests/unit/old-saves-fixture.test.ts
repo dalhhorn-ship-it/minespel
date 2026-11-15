@@ -1,5 +1,6 @@
 // The old save builder (tests/fixtures/move/old-saves.ts) against the 0.7.0 code that is still in place (V15a).
-// V15b removes the World cases when it switches the world size; it keeps the shape cases.
+// V15b switched the world size, so the 0.7.0 `World` class is gone: the diff cases now replay the same `set` calls on
+// a legacy array and scan it (the 0.7.0 `World.diff()` rule: every cell that differs from the start world).
 import { describe, expect, it } from 'vitest';
 import { deserializeDino, deserializeEgg, serializeDino, serializeEgg } from '../../src/dinos/dino-store';
 import { createDino } from '../../src/dinos/dino-ai';
@@ -8,14 +9,16 @@ import { KNIGHT_MODES, defaultKv, type KnightRecord } from '../../src/storage/sc
 import { AIR, PLANKEN, SMARAGD, isPlaceable } from '../../src/world/blocks';
 import { LEGACY_SEED, generateLegacyTerrain, legacyCellIndex } from '../../src/world/terrain-legacy';
 import { WORLD_SEED } from '../../src/world/terrain';
-import { World } from '../../src/world/world';
 import { inRegion, siteRegion, LEGACY_VILLAGE_SITES } from '../../src/world/village-layout';
 import { hutChanges, legacyDiff, save040, save070 } from '../fixtures/move/old-saves';
 
 function worldDiffAfter(version: 1 | 2, changes: readonly (readonly number[])[]): Uint32Array {
-  const w = new World(WORLD_SEED, version);
-  for (const [x, y, z, id] of changes) w.set(x as number, y as number, z as number, id as number);
-  return w.diff();
+  const start = generateLegacyTerrain(WORLD_SEED, version);
+  const blocks = start.slice();
+  for (const [x, y, z, id] of changes) blocks[legacyCellIndex(x as number, y as number, z as number)] = id as number;
+  const out: number[] = [];
+  for (let i = 0; i < blocks.length; i++) if (blocks[i] !== start[i]) out.push(i * 256 + (blocks[i] as number));
+  return Uint32Array.from(out);
 }
 
 describe('old save builder', () => {
@@ -40,8 +43,9 @@ describe('old save builder', () => {
   it('AC235: the 0.7.0 save holds the hut, 6 holes and a smaragd', () => {
     const s = save070();
     const base = generateLegacyTerrain(LEGACY_SEED, 2);
-    const w = new World();
-    w.applyDiff(s.world.diff);
+    const w = generateLegacyTerrain(LEGACY_SEED, 2);
+    for (const e of s.world.diff) w[Math.floor(e / 256)] = e % 256;
+    const get = (x: number, y: number, z: number): number => w[legacyCellIndex(x, y, z)] as number;
     let planken = 0;
     let holes = 0;
     let smaragd = 0;
@@ -61,10 +65,10 @@ describe('old save builder', () => {
     }
     // The door: 2 cells high in the middle of the front wall.
     const floor = hutChanges(base, 38, 18)[0]?.[1] as number;
-    expect(w.get(40, floor + 1, 22)).toBe(AIR);
-    expect(w.get(40, floor + 2, 22)).toBe(AIR);
-    expect(w.get(40, floor + 3, 22)).toBe(PLANKEN);
-    expect(w.get(38, floor + 1, 18)).toBe(PLANKEN);
+    expect(get(40, floor + 1, 22)).toBe(AIR);
+    expect(get(40, floor + 2, 22)).toBe(AIR);
+    expect(get(40, floor + 3, 22)).toBe(PLANKEN);
+    expect(get(38, floor + 1, 18)).toBe(PLANKEN);
   });
 
   it('AC236: the 0.4.0 save has the hut clear of every site and one change inside site oost', () => {

@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { EGG_HATCH_SECONDS } from '../../src/dinos/egg';
 import { START_SPOT } from '../../src/world/terrain';
-import { openApp, readState } from './helpers/app';
+import { fromLegacy, openApp, readState } from './helpers/app';
 
 test.describe('dinos in the world and sky floating controls (T42)', () => {
   test('spawns an egg next to the player, hatches after 5s of play, brings follow dinos on teleportHome, and supports Up/Down floating', async ({
@@ -33,7 +33,8 @@ test.describe('dinos in the world and sky floating controls (T42)', () => {
     await readState(page, 'setDinoMode', dinosAfter[0]!.id, 'follow');
 
     // Move player far away, then teleportHome -> follow dino comes along to START_SPOT (AC106)
-    await readState(page, 'placePlayer', 10.5, 15, 10.5, 0);
+    const faraway = fromLegacy(10.5, 15, 10.5);
+    await readState(page, 'placePlayer', faraway.x, faraway.y, faraway.z, 0);
     await readState(page, 'teleportHome');
     const dinosAtHome = await readState<Array<{ x: number; z: number }>>(page, 'dinos');
     const dist = Math.hypot(

@@ -4,7 +4,7 @@ import { checkBackup } from './backup-check';
 import { getAll, haltWrites, openDb, put, get } from './db';
 import { createRecords } from './records';
 import { prepareMonsters } from './monsters-store';
-import { STORE_NAMES, defaultKv, type KvName } from './schema';
+import { SCHEMA_VERSION, STORE_NAMES, defaultKv, type KvName } from './schema';
 
 const FIXTURES = import.meta.glob('../../tests/fixtures/backups/*', { eager: true, query: '?raw', import: 'default' }) as Record<string, string>;
 const fixture = (name: string): string => FIXTURES[`../../tests/fixtures/backups/${name}`] ?? '';
@@ -37,7 +37,7 @@ async function seed(db: IDBDatabase) {
     rotation: { weights: { a: 2 }, topicPointers: { b: 1 }, lessonsSeen: ['x'] },
     switches: { modules: { m: true } },
     stats: { playMsPerDay: { '2026-11-01': 1000 } },
-    meta: { schemaVersion: 1, appVersion: '0.5.0', lastBackup: null, createdAt: '2026-10-01T00:00:00.000Z' },
+    meta: { schemaVersion: SCHEMA_VERSION, appVersion: '0.5.0', lastBackup: null, createdAt: '2026-10-01T00:00:00.000Z' },
     village: { found: [34, 41], cooldownMs: 1234, lastVillager: 'noord-1' },
     monsters: { knights: [{ id: 'k1', mode: 'stay', spot: { x: 5, y: 9, z: 6 }, boughtFor: 30 }], bubbleClockMs: 4000, hintShown: true },
     gate: { salt: 's', pinHash: 'h', wrongTries: 2, blockedUntil: 99, resetWrongTries: 1 },
@@ -64,7 +64,7 @@ describe('backup file', () => {
   it('AC131: the header holds the app name, the format version and the date', async () => {
     const db = await fresh();
     const f = await buildBackup(db, { now: new Date('2026-11-06T10:00:00Z'), appVersion: '0.6.0' });
-    expect(f).toMatchObject({ app: 'dino-blokwereld', format: 1, createdAt: '2026-11-06T10:00:00.000Z', appVersion: '0.6.0', schemaVersion: 1 });
+    expect(f).toMatchObject({ app: 'dino-blokwereld', format: 1, createdAt: '2026-11-06T10:00:00.000Z', appVersion: '0.6.0', schemaVersion: SCHEMA_VERSION });
     db.close();
   });
 
@@ -255,7 +255,7 @@ describe('backup file', () => {
     if (!r.ok) return;
     await replaceAll(db, r.data, { appVersion: '0.6.0' });
     expect(await createRecords(db).get('meta')).toEqual({
-      schemaVersion: 1, appVersion: '0.6.0', lastBackup: '2026-10-30T09:15:00.000Z', createdAt: '2026-10-01T10:00:00.000Z',
+      schemaVersion: SCHEMA_VERSION, appVersion: '0.6.0', lastBackup: '2026-10-30T09:15:00.000Z', createdAt: '2026-10-01T10:00:00.000Z',
     });
     db.close();
   });

@@ -24,7 +24,14 @@ function createStores(db: IDBDatabase, tx: IDBTransaction): void {
   }
 }
 
-export const MIGRATIONS: MigrationStep[] = [{ to: 1, run: createStores }];
+/**
+ * Version 2 (v15, decision 138) changes no store. It is a rollback guard: a 0.7.0 build cannot open a 0.8.0
+ * database, so it never reads the big world as a small one and saves over it.
+ */
+export const MIGRATIONS: MigrationStep[] = [
+  { to: 1, run: createStores },
+  { to: 2, run: () => {} },
+];
 
 /** Runs every step with `oldVersion < to <= newVersion`, in order. */
 export function runMigrations(

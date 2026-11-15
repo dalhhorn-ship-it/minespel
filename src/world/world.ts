@@ -1,12 +1,12 @@
 import { AIR } from './blocks';
 import {
-  CELL_COUNT, CURRENT_TERRAIN_VERSION, WORLD_HEIGHT, WORLD_SEED, WORLD_SIZE, cellIndex, generateTerrain,
-  type TerrainVersion,
+  CELL_COUNT, CURRENT_TERRAIN_VERSION, WORLD_HEIGHT, WORLD_SEED, WORLD_SIZE, cellIndex, type TerrainVersion,
 } from './terrain';
+import { startWorld } from './terrain-v3';
 
 /**
  * The voxel world: a flat block array plus the diff against the fixed start world.
- * The start world is terrain version 2 (with the villages), so a new game and "Wereld opnieuw beginnen" get them.
+ * The start world is terrain version 3 (the big world), so a new game and "Wereld opnieuw beginnen" get it.
  */
 export class World {
   private readonly blocks: Uint8Array;
@@ -17,10 +17,18 @@ export class World {
    * `blocks`, so `diff()` and the save never see them. Never saved, never emits `changed`.
    */
   private readonly hidden = new Set<number>();
+  /**
+   * Every index that was written with a new block by `set` or `applyDiff` since the last `reset`: `diff()` only
+   * looks at these (V15b fast diff). `isTouched` is a flag per cell, `touched` the list, so a write costs a few
+   * array accesses and a save costs the changes, not 1.3 million cells.
+   */
+  private readonly isTouched = new Uint8Array(CELL_COUNT);
+  private touched: number[] = [];
 
-  constructor(seed: number = WORLD_SEED, version: TerrainVersion = CURRENT_TERRAIN_VERSION) {
-    this.terrainVersion = version;
-    this.start = generateTerrain(seed, version);
+  constructor(seed: number = WORLD_SEED) {
+    this.terrainVersion = CURRENT_TERRAIN_VERSION;
+    // The cached start world is read only: it is never written, `blocks` is the copy that changes.
+    this.start = startWorld(seed);
     this.blocks = this.start.slice();
   }
 
@@ -82,7 +90,10 @@ export class World {
   set(x: number, y: number, z: number, id: number): boolean {
     if (!this.inBounds(x, y, z)) return false;
     const i = cellIndex(x, y, z);
-    this.blocks[i] = id;
+    if (this.blocks[i] !== id) {
+      this.blocks[i] = id;
+      this.touch(i);
+    }
     // The kid's block wins over a nibble.
     if (this.hidden.size > 0) this.hidden.delete(i);
     return true;
@@ -91,7 +102,7 @@ export class World {
   /** Changed cells as `cellIndex * 256 + blockId`, in cell order. */
   diff(): Uint32Array {
     const out: number[] = [];
-    for (let i = 0; i < CELL_COUNT; i++) {
+    for (const i of Uint32Array.from(this.touched).sort()) {
       const b = this.blocks[i] ?? 0;
       if (b !== this.start[i]) out.push(i * 256 + b);
     }
@@ -101,18 +112,36 @@ export class World {
   /** Puts the start world back, then applies a diff. Entries out of range are ignored. */
   applyDiff(diff: ArrayLike<number>): void {
     this.hidden.clear();
+    this.clearTouched();
     this.blocks.set(this.start);
     for (let k = 0; k < diff.length; k++) {
       const entry = diff[k] ?? 0;
       const index = Math.floor(entry / 256);
-      if (index >= 0 && index < CELL_COUNT) this.blocks[index] = entry % 256;
+      if (index >= 0 && index < CELL_COUNT) {
+        this.blocks[index] = entry % 256;
+        this.touch(index);
+      }
     }
   }
 
   /** Back to the start world. */
   reset(): void {
     this.hidden.clear();
+    this.clearTouched();
     this.blocks.set(this.start);
+  }
+
+  private touch(i: number): void {
+    if (this.isTouched[i] === 0) {
+      this.isTouched[i] = 1;
+      this.touched.push(i);
+    }
+  }
+
+  private clearTouched(): void {
+    if (this.touched.length > CELL_COUNT / 8) this.isTouched.fill(0);
+    else for (const i of this.touched) this.isTouched[i] = 0;
+    this.touched = [];
   }
 
   static fromDiff(diff: ArrayLike<number>, seed: number = WORLD_SEED): World {

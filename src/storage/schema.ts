@@ -3,7 +3,7 @@
 // adds a step in migrate.ts and a fixture of the old shape in tests/fixtures/saves/.
 
 export const DB_NAME = 'dino-blokwereld';
-export const SCHEMA_VERSION = 1;
+export const SCHEMA_VERSION = 2;
 
 export const STORE_NAMES = ['kv', 'progress', 'answers', 'breaks', 'exams', 'ledger', 'ownModules'] as const;
 export type StoreName = (typeof STORE_NAMES)[number];

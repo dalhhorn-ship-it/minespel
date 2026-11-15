@@ -1,7 +1,7 @@
 // Backup in the parent area (T53a): AC87 end to end, AC194, AC195, AC197, AC198, AC152 (restore part).
 import { expect, test, type Page } from '@playwright/test';
 import pkg from '../../package.json' with { type: 'json' };
-import { openApp, readState } from './helpers/app';
+import { fromLegacy, openApp, readState } from './helpers/app';
 import { loginAsParent, setupPin } from './helpers/gate';
 
 declare global {
@@ -78,7 +78,8 @@ test.describe('Backup (T53a)', () => {
     await openApp(page);
     await setupPin(page, '1234');
     await readState(page, 'setPoints', 42);
-    await readState(page, 'setBlock', 7, 25, 7, 3);
+    const cell = fromLegacy(7, 25, 7);
+    await readState(page, 'setBlock', cell.x, cell.y, cell.z, 3);
     await readState(page, 'markWorldDirty');
     await readState(page, 'flushSave');
     await openExport(page);
@@ -107,7 +108,7 @@ test.describe('Backup (T53a)', () => {
     await pickRestore(page, file.name, file.text);
     await page.locator('[data-testid="restore-yes"]').tap();
     await expect.poll(() => readState<number>(page, 'points').catch(() => -1)).toBe(42);
-    await expect.poll(() => readState<number>(page, 'blockAt', 7, 25, 7).catch(() => -1)).toBe(3);
+    await expect.poll(() => readState<number>(page, 'blockAt', cell.x, cell.y, cell.z).catch(() => -1)).toBe(3);
     // This iPad's own (new) pincode is kept, the old one is not.
     await loginAsParent(page, '4321');
   });
