@@ -12,7 +12,8 @@ Not signed. Changing this file never closes the PRD gate (decision 80). The sign
 6. **v3 Dino's veilig (0.6.0), next** (decisions 90 and 119): backup and restore, Alles wissen, Volume, the app version, and a lock on the learning break only to end it. Its section is in `docs/PRD.md` section 12, waiting for the founder's signoff.
 7. **v15 Grote wereld (0.7.0)**, right after v3, with its own signoff (founder pick 2026-11-15, decision 124). The world goes from 64 x 64 to 128 x 128 and the kid can dig about 20 blocks deep instead of 10. The kid's current world stays as the middle. It starts with a speed test at 128 x 128 on the founder's oldest iPad.
 8. **v6 Wat heb ik geleerd (0.8.0)**, after v15, with its own signoff (decisions 91, 115 and 119). It grows into a parent learning dashboard. v4 and v5 come after it.
-9. **Taal spelling check (T65)** runs beside the next release (decision 81). It is the human content check from AC124: QA reads 5 items per Taal topic against woordenlijst.org, and the founder or a teacher reads 20 items. It is mostly reading and needs no code.
+9. **Monsters en ridders (v16 to v20)**, drafted on 2026-11-15 in `docs/MONSTERS_PRD.md` (founder request). Candidates after v15; they have no rank yet. The founder picks the slot and answers MOQ1 to MOQ13 at `/release`.
+10. **Taal spelling check (T65)** runs beside the next release (decision 81). It is the human content check from AC124: QA reads 5 items per Taal topic against woordenlijst.org, and the founder or a teacher reads 20 items. It is mostly reading and needs no code.
 
 On hold: the save on refresh fix (decision 72).
 
@@ -40,6 +41,11 @@ Versions follow shipping order: v10 shipped as 0.4.0 and v11 as 0.5.0; next v3 a
 | | **v11 Dorp** | Villages with houses; a villager asks a question when I come close; a right answer gives a silly dance or "Respect bruuuuu!" and a rare block; 8 rare blocks to find. | M | High. A founder and kid wish, learning inside the world. | V11a to V11e (architect review) | shipped (0.5.0, 2026-10-24), see `docs/releases/v11.md` |
 | 1 | **v3 Dino's veilig** | A backup file keeps the world, dinos and points safe, even on a wiped or new iPad. Papa or mama can end a break with the pincode. | M | High, as insurance. Losing a herd of dinos would hurt the most. | T18, T19, T53a, T55 | next (0.6.0, decisions 90 and 119), scoped in `docs/PRD.md` section 12 |
 | 2 | **v15 Grote wereld** | A world twice as wide each way (128 x 128) and twice as deep to dig (about 20 blocks). Everything I built stays, in the middle, with new land around it. | M to L | High. A founder and kid wish (decisions 94 and 124). | speed test first, then about 4, cut by the architect at `/release` | candidate, right after v3 (founder pick 2026-11-15), 0.7.0 |
+| | **v16 Monstermol** | Warning stripes deep down. If I dig past them, a silly mole comes up and teases my animals (they run off and squeak, never hurt). I build a fence to stop him. A parent switch. | M | High. A founder wish; building a fence is play with blocks. | about 5 (V16a to V16e), cut at `/release` | candidate, after v15 (needs its depth) and v3 (backup). Founder picks the slot. Draft: `docs/MONSTERS_PRD.md` section 2 |
+| | **v17 Ridders** | I buy a knight for 30 coins. He follows me, stays, or guards my animals, and chases the mole away. | M | High. A founder wish and a new coin sink. | about 4 (V17a to V17d) | candidate, after v16. Draft: `docs/MONSTERS_PRD.md` section 3 |
+| | **v18 Zwarte bubbel** | Every 10 minutes of play a black bubble floats by. I tap it, Klodder jumps out and makes a mess, my knight pops him back into his bubble and the blocks come back. | M | Medium to high. Exciting, but a pressure mechanic (founder questions MOQ4 to MOQ6). | about 4 (V18a to V18d) | candidate, after v17 (only a knight stops Klodder). Draft: `docs/MONSTERS_PRD.md` section 4 |
+| | **v19 Ridderuitrusting** | Helmets, shields, swords, capes, a pony and banners for my knights, 10 to 120 coins. They look great and win faster. | M | Medium to high. A wide coin sink with big goals. | about 4 (V19a to V19d) | candidate, after v17. Draft: `docs/MONSTERS_PRD.md` section 5 |
+| | **v20 Diepe edelstenen** | 8 new shiny stones deep below the stripes. I find one, save up (80 to 400 coins) and buy it, then build with it as much as I like. | S to M | Medium. A long coin goal that makes digging deep worth it. | about 3 (V20a to V20c) | candidate, after v15; best after v16. Draft: `docs/MONSTERS_PRD.md` section 6 |
 | 3 | **v6 Wat heb ik geleerd** | A parent learning dashboard: is my kid really learning? Right on the first try per topic over time, topics that got better or got stuck, the hardest questions, exam results, and learning time against play time. All worked out on the iPad, behind the gate. | M, may grow to L | High for the parent (decision 91). Through the parent, who can then switch on what is hard. | T21, T56, T61, plus dashboard tasks the architect cuts | candidate, after v15 (decisions 91, 94, 119 and 124), 0.8.0 |
 | 4 | **v12 Dino-Hoed** | Hats, bows, capes and sunglasses for my dinos, from 5 to 60 coins. Each dino looks different. | S to M | High. A cheap, happy coin sink that keeps kids earning after they own every dino. | about 3, cut at `/release` | candidate, after v6 (founder pick 2026-11-06) |
 | 5 | **v13 Dino-Eten** | A food truck: I buy food for my herd, each dino likes its own food, I drag it on and it skips with hearts. Sums on the price board. | S to M | Medium to high. A small daily coin sink with Rekenen. No dino can starve. | about 3, cut at `/release` | candidate, after v6 (founder pick 2026-11-06) |
@@ -92,6 +98,41 @@ Open plan tasks: 13 in v3 to v6, 4 of them in v3 (v6 may get more for the dashbo
 * **Out:** nothing else.
 * **Size:** M, may grow to L with the dashboard. If it is more than 5 tasks, product splits it into two small releases at `/release`, and the first part must be useful to the parent on its own (for example Overzicht with the key stats first, the drill down views second). **Tasks:** T21 (results queries), T56 (Overzicht, Pauzes, Examens), T61 (Per onderdeel, Over tijd, Lastige vragen), plus dashboard tasks the architect cuts.
 * **Criteria:** AC89, AC90, AC91, AC92, AC134, plus new criteria for the dashboard stats when it is scoped.
+
+### v16 Monstermol
+* **Status:** candidate, after v15 and v3. Founder request 2026-11-15. Draft: `docs/MONSTERS_PRD.md` section 2.
+* **Goal:** deep down there are warning stripes; dig past them and a silly monster mole comes up and teases the animals, until the kid fences them in or traps him.
+* **In:** a layer of Waarschuwsteen about 5 layers above oersteen (diff safe), two warnings, the mole (one at a time, slow, never breaks blocks), teasing (the animal jumps, squeaks, runs off a few blocks and goes back), give up when no path to an animal for 10 seconds, the parent card "Monsters en ridders" with a master row and a Monstermol row.
+* **Kid safety:** no animal is ever eaten, hurt or lost. Silly, not scary. Only after the kid's own dig past two warnings.
+* **Size:** M, about 5 tasks. Needs the v15 depth (founder question MOQ2).
+
+### v17 Ridders
+* **Status:** candidate, after v16. Draft: `docs/MONSTERS_PRD.md` section 3.
+* **Goal:** a knight the kid buys, who follows, stays or guards the animals and chases the mole away.
+* **In:** a Ridders section in the Dinowinkel (30 coins, at most 3, not in the herd of 25, MOQ7), trade in for half, modes Volg mij, Blijf hier and Pas op de dieren (MOQ8), a Moed bar that sends the mole off, the Ridders switch.
+* **Kid safety:** game coins only. Knights never hurt anything; they poke and shout "Wegwezen!".
+* **Size:** M, about 4 tasks.
+
+### v18 Zwarte bubbel
+* **Status:** candidate, after v17. Draft: `docs/MONSTERS_PRD.md` section 4.
+* **Goal:** every 10 minutes of play a black bubble floats by; a tap lets Klodder out, who breaks blocks and teases animals until a knight pops him back into his bubble.
+* **In:** a play time bubble clock that never lands next to a learning break, the bubble (60 seconds, then it floats away), Klodder (one at a time, one block per 4 seconds, only blocks the kid never changed, at most 20, all back when he leaves, MOQ4), tired after 5 minutes (MOQ5), one hint to the knight shop (MOQ6), the bubble switch, only with Ridders on.
+* **Kid safety:** a pressure mechanic to buy a knight, with coins from learning only. Safety valves and the parent switch keep it kind.
+* **Size:** M, about 4 tasks.
+
+### v19 Ridderuitrusting
+* **Status:** candidate, after v17. Draft: `docs/MONSTERS_PRD.md` section 5.
+* **Goal:** a wide range of gear that makes knights look great and win faster.
+* **In:** 21 items in 8 slots (Hoofd, Schild, Hand, Lijf, Rug, Voeten, Rijdier, Vlag), 10 to 120 coins, one item one knight, an Uitrusten screen, gear in the world, Kracht, speed and range.
+* **Coins:** 6 items cost more than the 60 coin ceiling of `docs/GAME_LOOP_PRD.md` 1.3, on purpose (MOQ9).
+* **Size:** M, about 4 tasks.
+
+### v20 Diepe edelstenen
+* **Status:** candidate, after v15, best after v16. Draft: `docs/MONSTERS_PRD.md` section 6.
+* **Goal:** 8 expensive new stones that make digging deep worth it.
+* **In:** 8 blocks (Maansteen 80 to Mollengoud 400) in veins below the stripes, found by mining, then bought once in a new Edelstenen section and free and unlimited after that (MOQ10), a Diep tab in Alle blokken, kept after "Wereld opnieuw beginnen".
+* **Coins:** 80 to 400 breaks the 60 coin ceiling on purpose. Today every block is free, so "duur" needs this new buy once step.
+* **Size:** S to M, about 3 tasks.
 
 ### v12 Dino-Hoed
 * **Status:** candidate, after v6. From the game loop brainstorm, picked by the founder on 2026-11-06.
