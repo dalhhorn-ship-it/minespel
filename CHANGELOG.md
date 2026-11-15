@@ -2,7 +2,11 @@
 
 Written so kids can read it too.
 
-## Unreleased
+## 0.6.0 (2026-11-15)
+
+### Backup
+
+* Papa or mama can now keep your world and dinos safe in a backup. In the parent area, open Import & Export and tap Backup maken. The file keeps everything except the pincode. Tap Backup terugzetten and pick the file to bring it all back.
 
 ### Dino's
 

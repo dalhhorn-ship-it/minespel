@@ -187,6 +187,18 @@ describe('backup file', () => {
     db.close();
   });
 
+  it('AC197: afterClear throwing (a simulated kill) leaves all the old data', async () => {
+    const db = await fresh();
+    await seed(db);
+    const before = await dump(db);
+    const checked = checkBackup(backupText(await buildBackup(db)));
+    if (!checked.ok) throw new Error('fixture');
+    const data = { ...checked.data, kv: { ...checked.data.kv, economy: { points: 1 } } };
+    await expect(replaceAll(db, data, { afterClear: () => { throw new Error('killed'); } })).rejects.toThrow('killed');
+    expect(await dump(db)).toEqual(before);
+    db.close();
+  });
+
   it('AC197: meta gets this build and the date of the backup after a restore', async () => {
     const db = await fresh();
     const r = checkBackup(fixture('v050-old-shapes.json'));

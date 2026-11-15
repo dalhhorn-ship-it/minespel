@@ -392,3 +392,8 @@
 .progress-hard-head { display: flex; justify-content: space-between; gap: 12px; }
 .progress-hard-count { white-space: nowrap; font-weight: 700; }
 .progress-hard-meta, .progress-hard-explain { font-size: 14px; color: var(--progress-muted); }
+
+.parent-import-export { display: flex; flex-direction: column; gap: 14px; }
+.parent-card-title { margin: 0; font-size: 18px; font-weight: 800; }
+.parent-btn[aria-disabled='true'] { opacity: 0.5; }
+.parent-note-error { color: #9e2a2b; font-weight: 700; }
