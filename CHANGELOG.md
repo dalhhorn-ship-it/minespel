@@ -10,6 +10,8 @@ Written so kids can read it too.
 
 ### Dino's
 
+* Dino's, chickens and villagers now avoid lava and fire. They stop at the edge, never walk in, and one that ends up in lava walks out. Water is unchanged.
+* Dino's and chickens that do not follow you now walk around freely, up to about 12 blocks from their spot, and come back. In the dino menu Blijf hier is now Vrij rondlopen, and the button Allemaal blijven is now Allemaal vrij.
 * Dino's and chickens now stay where they hatch instead of always walking after you. Pick Volg mij in the dino menu to let one follow. The new button Allemaal blijven stops every follower at once. The Dinofluit still calls them, then they stay near you. Animals from older saves are set to Blijf hier once.
 * Allemaal blijven is now saved at once, so a quick reload or close no longer makes the dinos follow again.
 

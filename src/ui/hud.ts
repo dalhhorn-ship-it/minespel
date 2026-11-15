@@ -28,7 +28,7 @@ export interface HudOptions {
   onLookNudge?: (turnX: number, tiltY: number) => void;
   /** Optional Dinofluit button (decision 114). It stays hidden until `setFluit(true)`. */
   onFluit?: () => void;
-  /** Optional Allemaal blijven button (decision 122). It shows only while `setStayVisible(true)`. */
+  /** Optional Allemaal vrij button (decision 122). It shows only while `setStayVisible(true)`. */
   onStayAll?: () => void;
 }
 
@@ -43,7 +43,7 @@ export interface Hud {
   setMode(mode: BuildMode): void;
   /** Shows the Dinofluit button once the kid owns the fluit (decision 114). */
   setFluit(owned: boolean): void;
-  /** Shows Allemaal blijven while at least one animal follows the kid (decision 122). */
+  /** Shows Allemaal vrij while at least one animal follows the kid (decision 122). */
   setStayVisible(visible: boolean): void;
   destroy(): void;
 }
@@ -99,10 +99,10 @@ export function createHud(options: HudOptions): Hud {
   if (fluit) fluit.hidden = true;
   const stayAll = options.onStayAll
     ? button(
-        '\u{1F43E} Allemaal blijven',
+        '\u{1F43E} Allemaal vrij',
         'hud-stay',
         options.onStayAll,
-        { 'data-testid': 'hud-stay', 'aria-label': 'Allemaal blijven: alle dino\'s blijven hier' },
+        { 'data-testid': 'hud-stay', 'aria-label': 'Allemaal vrij: alle dino\'s lopen vrij rond' },
         HUD_TAP_MOVE_LIMIT,
       )
     : null;
