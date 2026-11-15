@@ -1,0 +1,454 @@
+{
+  "id": "kwart",
+  "title": "Kwart over en kwart voor",
+  "groups": [
+    6,
+    7
+  ],
+  "lesson": {
+    "pages": [
+      {
+        "title": "A quarter past",
+        "skill": "quarter-past",
+        "text": "Kwart over is in het Engels a quarter past. Past betekent over, net als bij half past. Je mag ook quarter past zeggen, zonder a.",
+        "examples": [
+          {
+            "good": "3:15 = a quarter past three = kwart over drie"
+          },
+          {
+            "good": "8:15 = quarter past eight"
+          },
+          {
+            "good": "3:15 = a quarter past three",
+            "bad": "3:15 = a quarter to three",
+            "why": "To betekent voor. A quarter to three is kwart voor drie: 2:45."
+          }
+        ],
+        "tip": "Quarter = kwart. Een kwart van een uur is 15 minuten."
+      },
+      {
+        "title": "A quarter to",
+        "skill": "quarter-to",
+        "text": "Kwart voor is a quarter to. To betekent voor. Je zegt het uur dat eraan komt, net als in het Nederlands.",
+        "examples": [
+          {
+            "good": "6:45 = a quarter to seven = kwart voor zeven"
+          },
+          {
+            "good": "6:45 = a quarter to seven",
+            "bad": "6:45 = a quarter to six",
+            "why": "Je zegt het uur dat eraan komt. Om 6:45 komt zeven eraan."
+          }
+        ],
+        "tip": "Bij kwart is het uur in beide talen hetzelfde. Alleen bij half is het anders."
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "ek-kw-001",
+      "type": "choice",
+      "level": "M6",
+      "skill": "quarter-past",
+      "prompt": "Hoe zeg je 2:15 in het Engels?",
+      "options": [
+        "a quarter to two",
+        "a quarter past two",
+        "half past two",
+        "a quarter past three"
+      ],
+      "answer": 1,
+      "explain": "Kwart over twee: a quarter past two. Past betekent over."
+    },
+    {
+      "id": "ek-kw-002",
+      "type": "choice",
+      "level": "M6",
+      "skill": "quarter-to",
+      "prompt": "Hoe zeg je 10:45 in het Engels?",
+      "options": [
+        "a quarter to eleven",
+        "a quarter past ten",
+        "a quarter to ten",
+        "half past ten"
+      ],
+      "answer": 0,
+      "explain": "10:45 is kwart voor elf: a quarter to eleven. To betekent voor."
+    },
+    {
+      "id": "ek-kw-003",
+      "type": "choice",
+      "level": "M6",
+      "skill": "quarter-past",
+      "prompt": "Welke tijd is 'a quarter past six'?",
+      "options": [
+        "5:45",
+        "6:45",
+        "6:15",
+        "6:30"
+      ],
+      "answer": 2,
+      "explain": "A quarter past six is kwart over zes: 6:15."
+    },
+    {
+      "id": "ek-kw-004",
+      "type": "choice",
+      "level": "M6",
+      "skill": "quarter-to",
+      "prompt": "Welke tijd is 'a quarter to four'?",
+      "options": [
+        "4:15",
+        "3:45",
+        "4:45",
+        "3:15"
+      ],
+      "answer": 1,
+      "explain": "A quarter to four is kwart voor vier: 3:45."
+    },
+    {
+      "id": "ek-kw-005",
+      "type": "choice",
+      "level": "M6",
+      "skill": "quarter-to",
+      "prompt": "Wat betekent 'to' in 'a quarter to one'?",
+      "options": [
+        "voor",
+        "over",
+        "na",
+        "kwart"
+      ],
+      "answer": 0,
+      "explain": "To betekent voor. A quarter to one is kwart voor één."
+    },
+    {
+      "id": "ek-kw-006",
+      "type": "type",
+      "level": "M6",
+      "skill": "quarter-past",
+      "prompt": "Schrijf het woord dat mist. Het is 7:15. Het betekent: Het is kwart over zeven.",
+      "sentence": "It's a ... past seven.",
+      "answer": [
+        "quarter",
+        "Quarter"
+      ],
+      "explain": "Kwart is quarter: It's a quarter past seven."
+    },
+    {
+      "id": "ek-kw-007",
+      "type": "type",
+      "level": "M6",
+      "skill": "quarter-to",
+      "prompt": "Schrijf het woord dat mist. Het betekent: De dino eet om kwart voor twaalf.",
+      "sentence": "The dino eats at a quarter ... twelve.",
+      "answer": [
+        "to",
+        "To"
+      ],
+      "explain": "Kwart voor is a quarter to: a quarter to twelve."
+    },
+    {
+      "id": "ek-kw-008",
+      "type": "choice",
+      "level": "M6",
+      "skill": "quarter-past",
+      "prompt": "Het is kwart over vijf. Welke zin is goed?",
+      "options": [
+        "It's a quarter past five.",
+        "It's a quarter to five.",
+        "It's a quarter past four.",
+        "It's half past five."
+      ],
+      "answer": 0,
+      "explain": "Kwart over vijf: It's a quarter past five."
+    },
+    {
+      "id": "ek-kw-009",
+      "type": "find-error",
+      "level": "M6",
+      "skill": "quarter-to",
+      "prompt": "Welk woord is fout? Het is 1:45.",
+      "words": [
+        "It's",
+        "a",
+        "quarter",
+        "to",
+        "two."
+      ],
+      "answer": -1,
+      "correction": null,
+      "explain": "Geen fout. 1:45 is kwart voor twee: a quarter to two."
+    },
+    {
+      "id": "ek-kw-010",
+      "type": "choice",
+      "level": "E6",
+      "skill": "quarter-to",
+      "prompt": "Je zus vraagt in het Engels hoe laat het is. Het is kwart voor negen. Wat zeg je?",
+      "options": [
+        "It's a quarter past nine.",
+        "It's a quarter to nine.",
+        "It's a quarter to eight.",
+        "It's half past eight."
+      ],
+      "answer": 1,
+      "explain": "Kwart voor negen: It's a quarter to nine. To betekent voor."
+    },
+    {
+      "id": "ek-kw-011",
+      "type": "choice",
+      "level": "E6",
+      "skill": "quarter-past",
+      "prompt": "'The block shop opens at a quarter past nine.' Hoe laat gaat de winkel open?",
+      "options": [
+        "kwart voor negen",
+        "kwart over negen",
+        "kwart voor tien",
+        "half tien"
+      ],
+      "answer": 1,
+      "explain": "A quarter past nine is kwart over negen: 9:15."
+    },
+    {
+      "id": "ek-kw-012",
+      "type": "type",
+      "level": "E6",
+      "skill": "quarter-to",
+      "prompt": "Schrijf het woord dat mist. Het betekent: We gaan om kwart voor vier zwemmen.",
+      "sentence": "We go swimming at a quarter ... four.",
+      "answer": [
+        "to",
+        "To"
+      ],
+      "explain": "Kwart voor vier is a quarter to four."
+    },
+    {
+      "id": "ek-kw-013",
+      "type": "type",
+      "level": "E6",
+      "skill": "quarter-past",
+      "prompt": "Schrijf wat mist. Het betekent: De bel gaat om kwart over tien.",
+      "sentence": "The bell rings at ... past ten.",
+      "answer": [
+        "a quarter",
+        "A quarter",
+        "quarter",
+        "Quarter"
+      ],
+      "explain": "Kwart over tien is a quarter past ten. Zonder a mag ook."
+    },
+    {
+      "id": "ek-kw-014",
+      "type": "type",
+      "level": "E6",
+      "skill": "quarter-to",
+      "prompt": "Schrijf wat mist. Het betekent: Papa komt om kwart voor zes.",
+      "sentence": "Dad comes at ... to six.",
+      "answer": [
+        "a quarter",
+        "A quarter",
+        "quarter",
+        "Quarter"
+      ],
+      "explain": "Kwart voor zes is a quarter to six. Zonder a mag ook."
+    },
+    {
+      "id": "ek-kw-015",
+      "type": "find-error",
+      "level": "E6",
+      "skill": "quarter-past",
+      "prompt": "Welk woord is fout? Het is 4:15.",
+      "words": [
+        "The",
+        "raptor",
+        "naps",
+        "at",
+        "a",
+        "quarter",
+        "to",
+        "four."
+      ],
+      "answer": 6,
+      "correction": "past",
+      "explain": "4:15 is kwart over vier. Over is past: a quarter past four."
+    },
+    {
+      "id": "ek-kw-016",
+      "type": "find-error",
+      "level": "E6",
+      "skill": "quarter-to",
+      "prompt": "Welk woord is fout? Het is 7:45.",
+      "words": [
+        "At",
+        "a",
+        "quarter",
+        "to",
+        "seven",
+        "we",
+        "build",
+        "a",
+        "tower."
+      ],
+      "answer": 4,
+      "correction": "eight",
+      "explain": "7:45 is kwart voor acht. Je zegt het uur dat eraan komt: a quarter to eight."
+    },
+    {
+      "id": "ek-kw-017",
+      "type": "find-error",
+      "level": "E6",
+      "skill": "quarter-to",
+      "prompt": "Welk woord is fout geschreven? Het is 12:45.",
+      "words": [
+        "It's",
+        "a",
+        "quater",
+        "to",
+        "one."
+      ],
+      "answer": 2,
+      "correction": "quarter",
+      "explain": "Kwart schrijf je als quarter, met ar. It's a quarter to one."
+    },
+    {
+      "id": "ek-kw-018",
+      "type": "choice",
+      "level": "E6",
+      "skill": "quarter-to",
+      "prompt": "Iemand zegt: 'It's quarter to twelve.' Hoe laat is het?",
+      "options": [
+        "12:15",
+        "11:45",
+        "12:45",
+        "11:15"
+      ],
+      "answer": 1,
+      "explain": "Quarter to twelve is kwart voor twaalf: 11:45. Zonder a mag ook."
+    },
+    {
+      "id": "ek-kw-019",
+      "type": "type",
+      "level": "M7",
+      "skill": "quarter-past",
+      "prompt": "Schrijf in het Engels: kwart over acht.",
+      "answer": [
+        "a quarter past eight",
+        "A quarter past eight",
+        "quarter past eight",
+        "Quarter past eight"
+      ],
+      "explain": "Kwart over acht is a quarter past eight. Zonder a mag ook."
+    },
+    {
+      "id": "ek-kw-020",
+      "type": "type",
+      "level": "M7",
+      "skill": "quarter-to",
+      "prompt": "Schrijf in het Engels: kwart voor één.",
+      "answer": [
+        "a quarter to one",
+        "A quarter to one",
+        "quarter to one",
+        "Quarter to one"
+      ],
+      "explain": "Kwart voor één is a quarter to one. To betekent voor."
+    },
+    {
+      "id": "ek-kw-021",
+      "type": "type",
+      "level": "M7",
+      "skill": "quarter-to",
+      "prompt": "Schrijf in het Nederlands: a quarter to three.",
+      "answer": [
+        "kwart voor drie",
+        "Kwart voor drie"
+      ],
+      "explain": "A quarter to three is kwart voor drie: 2:45."
+    },
+    {
+      "id": "ek-kw-022",
+      "type": "choice",
+      "level": "M7",
+      "skill": "quarter-past",
+      "prompt": "Welke zin hoort bij 12:15?",
+      "options": [
+        "It's a quarter to twelve.",
+        "It's a quarter past twelve.",
+        "It's a quarter past one.",
+        "It's a quarter to one."
+      ],
+      "answer": 1,
+      "explain": "12:15 is kwart over twaalf: It's a quarter past twelve."
+    },
+    {
+      "id": "ek-kw-023",
+      "type": "choice",
+      "level": "M7",
+      "skill": "quarter-to",
+      "prompt": "Bij 'a quarter to five': hoeveel minuten is het nog tot vijf uur?",
+      "options": [
+        "5",
+        "15",
+        "30",
+        "45"
+      ],
+      "answer": 1,
+      "explain": "Een kwart is 15 minuten. To: nog 15 minuten tot vijf uur, dus 4:45."
+    },
+    {
+      "id": "ek-kw-024",
+      "type": "choice",
+      "level": "M7",
+      "skill": "quarter-to",
+      "prompt": "Het is 3:45. Mila zegt: 'It's a quarter past four.' Wat is goed?",
+      "options": [
+        "Mila heeft gelijk.",
+        "It's a quarter to four.",
+        "It's a quarter past three.",
+        "It's half past three."
+      ],
+      "answer": 1,
+      "explain": "3:45 is kwart voor vier: a quarter to four. Na half zeg je to."
+    },
+    {
+      "id": "ek-kw-025",
+      "type": "find-error",
+      "level": "M7",
+      "skill": "quarter-past",
+      "prompt": "Welk woord is fout? De trein komt om kwart over elf.",
+      "words": [
+        "Our",
+        "train",
+        "comes",
+        "at",
+        "quarter",
+        "past",
+        "eleven."
+      ],
+      "answer": -1,
+      "correction": null,
+      "explain": "Geen fout. Kwart over elf is quarter past eleven. Met of zonder a is allebei goed."
+    },
+    {
+      "id": "ek-kw-026",
+      "type": "find-error",
+      "level": "M7",
+      "skill": "quarter-past",
+      "prompt": "Welk woord is fout? Het is 9:15.",
+      "words": [
+        "At",
+        "a",
+        "quarter",
+        "past",
+        "ten",
+        "my",
+        "brother",
+        "feeds",
+        "the",
+        "dino."
+      ],
+      "answer": 4,
+      "correction": "nine",
+      "explain": "9:15 is kwart over negen. Bij past zeg je het uur dat voorbij is: a quarter past nine."
+    }
+  ]
+}

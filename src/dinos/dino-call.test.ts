@@ -34,13 +34,51 @@ describe('Dinofluit call (decision 114)', () => {
     expect(CALL_SPEED).toBeLessThan(DINO_SPEED);
   });
 
-  it('turns a Blijf hier dino into a follower and starts the call', () => {
+  it('starts the call for a Blijf hier dino, which stays after the call (decision 122)', () => {
     const d = createDino({ kind: 'compy', golden: false, x: 10.5, y: GY, z: 10.5 }, true);
     d.mode = 'stay';
     callDino(d);
-    expect(d.mode).toBe('follow');
     expect(isCalled(d)).toBe(true);
     expect(d.called).toBe(CALL_SECONDS);
+  });
+
+  it('decision 122: a Blijf hier dino stays where it reached the kid when the call ends', () => {
+    const w = flatWorld();
+    const d = createDino({ kind: 'compy', golden: false, x: 10.5, y: GY, z: 18.5 }, true);
+    const player = { x: 10.5, y: GY, z: 10.5 };
+    callDino(d);
+    run(w, d, player, 6);
+    expect(isCalled(d)).toBe(false);
+    expect(d.mode).toBe('stay');
+    // The stay spot is where it reached the kid, not the old spot.
+    expect(Math.hypot(d.stayX - player.x, d.stayZ - player.z)).toBeLessThanOrEqual(CALL_ARRIVED + 0.1);
+    expect(dist(d, player)).toBeLessThanOrEqual(CALL_ARRIVED + 3.5);
+    // The kid walks away: it does not follow.
+    run(w, d, { x: 40.5, y: GY, z: 40.5 }, 15);
+    expect(dist(d, player)).toBeLessThanOrEqual(CALL_ARRIVED + 3.5);
+  });
+
+  it('decision 122: a dino that followed before the whistle keeps following', () => {
+    const w = flatWorld();
+    const d = createDino({ kind: 'compy', golden: false, x: 10.5, y: GY, z: 18.5 }, true);
+    d.mode = 'follow';
+    callDino(d);
+    run(w, d, { x: 10.5, y: GY, z: 10.5 }, 6);
+    expect(isCalled(d)).toBe(false);
+    expect(d.mode).toBe('follow');
+  });
+
+  it('decision 122: a call that times out also leaves a Blijf hier dino on stay', () => {
+    const w = flatWorld();
+    const d = createDino({ kind: 'compy', golden: false, x: 5.5, y: GY, z: 5.5 }, true);
+    callDino(d);
+    const rng = createRng(3);
+    for (let i = 0; i < Math.round((CALL_SECONDS + 1) * 60); i++) {
+      stepDino(w, d, { x: d.x + 20, y: GY, z: d.z }, rng, 1 / 60);
+    }
+    expect(d.mode).toBe('stay');
+    expect(Math.abs(d.stayX - d.x)).toBeLessThan(3.5);
+    expect(d.stayX).toBeGreaterThan(40);
   });
 
   it('walks to the kid at the slow speed and never pops while it can walk', () => {

@@ -1,0 +1,508 @@
+{
+  "id": "minuten",
+  "title": "Minuten over en voor",
+  "groups": [
+    6,
+    7
+  ],
+  "lesson": {
+    "pages": [
+      {
+        "title": "Minuten over: past",
+        "skill": "minuten-past",
+        "text": "Tot en met half zeg je past: zoveel minuten over het uur dat voorbij is. Je telt in stappen van vijf: five past, ten past, a quarter past, twenty past, twenty-five past, half past.",
+        "examples": [
+          {
+            "good": "3:05 = five past three"
+          },
+          {
+            "good": "3:20 = twenty past three"
+          },
+          {
+            "good": "3:25 = twenty-five past three"
+          }
+        ],
+        "tip": "Twintig is twenty. Vijfentwintig schrijf je met een streepje: twenty-five."
+      },
+      {
+        "title": "Minuten voor: to",
+        "skill": "minuten-to",
+        "text": "Na half zeg je to: zoveel minuten tot het volgende uur. Tel dus wat er nog mist tot het hele uur. Om 3:40 mist nog twintig minuten tot vier: twenty to four.",
+        "examples": [
+          {
+            "good": "3:35 = twenty-five to four"
+          },
+          {
+            "good": "3:50 = ten to four"
+          },
+          {
+            "good": "3:55 = five to four"
+          },
+          {
+            "good": "3:40 = twenty to four",
+            "bad": "3:40 = forty past three",
+            "why": "Na half zeg je to. Nog twintig minuten tot vier: twenty to four."
+          }
+        ],
+        "tip": "Grote wijzer rechts op de klok: past. Grote wijzer links: to."
+      },
+      {
+        "title": "Vijf voor half en tien over half",
+        "skill": "rond-half",
+        "text": "In het Nederlands reken je rond half: vijf voor half drie (2:25) of tien over half drie (2:40). Dat kan niet in het Engels. Maak er eerst cijfers van. Kijk dan: voor half is het past, na half is het to.",
+        "examples": [
+          {
+            "good": "vijf voor half drie = 2:25 = twenty-five past two"
+          },
+          {
+            "good": "tien over half drie = 2:40 = twenty to three"
+          },
+          {
+            "good": "vijf voor half drie = twenty-five past two",
+            "bad": "vijf voor half drie = five to half past three",
+            "why": "Zo zeg je het niet in het Engels. Maak eerst 2:25 en zeg dan twenty-five past two."
+          }
+        ],
+        "tip": "Stap 1: maak er cijfers van. Stap 2: voor of na half? Stap 3: past met het oude uur, to met het nieuwe uur."
+      },
+      {
+        "title": "Andere minuten",
+        "skill": "andere-minuten",
+        "text": "Is het geen stap van vijf, zoals 3:07? Zeg dan het aantal minuten met het woord minutes erbij: seven minutes past three. Na half werkt het net zo met to: 3:52 is eight minutes to four.",
+        "examples": [
+          {
+            "good": "3:07 = seven minutes past three"
+          },
+          {
+            "good": "3:52 = eight minutes to four"
+          },
+          {
+            "good": "3:07 = seven minutes past three",
+            "bad": "3:07 = seven past three",
+            "why": "Bij minuten die geen stap van vijf zijn, zeg je minutes erbij."
+          }
+        ],
+        "tip": "Five, ten, twenty en twenty-five: minutes hoeft niet. Andere getallen: minutes moet erbij."
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "ek-mn-001",
+      "type": "choice",
+      "level": "M6",
+      "skill": "minuten-past",
+      "prompt": "Hoe zeg je 6:05 in het Engels?",
+      "options": [
+        "five to six",
+        "five past six",
+        "six o'clock",
+        "five past five"
+      ],
+      "answer": 1,
+      "explain": "6:05 is vijf over zes: five past six. Past betekent over."
+    },
+    {
+      "id": "ek-mn-002",
+      "type": "choice",
+      "level": "M6",
+      "skill": "minuten-past",
+      "prompt": "Hoe zeg je 1:10 in het Engels?",
+      "options": [
+        "ten past one",
+        "ten to one",
+        "ten past two",
+        "one o'clock"
+      ],
+      "answer": 0,
+      "explain": "1:10 is tien over één: ten past one."
+    },
+    {
+      "id": "ek-mn-003",
+      "type": "choice",
+      "level": "M6",
+      "skill": "minuten-to",
+      "prompt": "Hoe zeg je 8:55 in het Engels?",
+      "options": [
+        "five past eight",
+        "five to eight",
+        "five to nine",
+        "five past nine"
+      ],
+      "answer": 2,
+      "explain": "8:55 is vijf voor negen: five to nine. To betekent voor."
+    },
+    {
+      "id": "ek-mn-004",
+      "type": "choice",
+      "level": "M6",
+      "skill": "minuten-to",
+      "prompt": "Hoe zeg je 4:50 in het Engels?",
+      "options": [
+        "ten past four",
+        "ten to five",
+        "ten to four",
+        "ten past five"
+      ],
+      "answer": 1,
+      "explain": "4:50 is tien voor vijf: ten to five."
+    },
+    {
+      "id": "ek-mn-005",
+      "type": "choice",
+      "level": "M6",
+      "skill": "minuten-past",
+      "prompt": "Welke tijd is 'twenty past five'?",
+      "options": [
+        "5:20",
+        "4:40",
+        "5:40",
+        "6:20"
+      ],
+      "answer": 0,
+      "explain": "Twenty past five is twintig minuten over vijf: 5:20."
+    },
+    {
+      "id": "ek-mn-006",
+      "type": "choice",
+      "level": "M6",
+      "skill": "minuten-to",
+      "prompt": "Welke tijd is 'ten to seven'?",
+      "options": [
+        "7:10",
+        "6:50",
+        "7:50",
+        "6:10"
+      ],
+      "answer": 1,
+      "explain": "Ten to seven is tien voor zeven: 6:50."
+    },
+    {
+      "id": "ek-mn-007",
+      "type": "type",
+      "level": "M6",
+      "skill": "minuten-past",
+      "prompt": "Schrijf het woord dat mist. Het is 9:10. Het betekent: Het is tien over negen.",
+      "sentence": "It's ten ... nine.",
+      "answer": [
+        "past",
+        "Past"
+      ],
+      "explain": "Tien over negen: ten past nine. Over is past."
+    },
+    {
+      "id": "ek-mn-008",
+      "type": "type",
+      "level": "M6",
+      "skill": "minuten-to",
+      "prompt": "Schrijf het woord dat mist. Het betekent: Oma belt om vijf voor drie.",
+      "sentence": "Grandma calls at five ... three.",
+      "answer": [
+        "to",
+        "To"
+      ],
+      "explain": "Vijf voor drie: five to three. Voor is to."
+    },
+    {
+      "id": "ek-mn-009",
+      "type": "choice",
+      "level": "M6",
+      "skill": "minuten-to",
+      "prompt": "Wanneer zeg je 'to'?",
+      "options": [
+        "Tot half: de grote wijzer tussen de 12 en de 6.",
+        "Na half: de grote wijzer tussen de 6 en de 12.",
+        "Alleen bij een heel uur."
+      ],
+      "answer": 1,
+      "explain": "Na half zeg je to: hoeveel minuten nog tot het volgende uur."
+    },
+    {
+      "id": "ek-mn-010",
+      "type": "choice",
+      "level": "E6",
+      "skill": "minuten-past",
+      "prompt": "Hoe zeg je 2:25 in het Engels?",
+      "options": [
+        "twenty-five to two",
+        "twenty-five past two",
+        "twenty-five to three",
+        "five to half past two"
+      ],
+      "answer": 1,
+      "explain": "2:25 is voor half, dus past: twenty-five past two."
+    },
+    {
+      "id": "ek-mn-011",
+      "type": "choice",
+      "level": "E6",
+      "skill": "minuten-to",
+      "prompt": "Hoe zeg je 7:35 in het Engels?",
+      "options": [
+        "twenty-five past seven",
+        "twenty-five to eight",
+        "twenty-five to seven",
+        "five past half past seven"
+      ],
+      "answer": 1,
+      "explain": "7:35 is na half, dus to. Nog 25 minuten tot acht: twenty-five to eight."
+    },
+    {
+      "id": "ek-mn-012",
+      "type": "choice",
+      "level": "E6",
+      "skill": "rond-half",
+      "prompt": "Hoe zeg je 'vijf voor half vier' in het Engels?",
+      "options": [
+        "five to half past four",
+        "twenty-five past three",
+        "twenty-five to four",
+        "five to four"
+      ],
+      "answer": 1,
+      "explain": "Vijf voor half vier is 3:25. Dat is voor half, dus past: twenty-five past three."
+    },
+    {
+      "id": "ek-mn-013",
+      "type": "choice",
+      "level": "E6",
+      "skill": "rond-half",
+      "prompt": "Hoe zeg je 'tien over half zes' in het Engels?",
+      "options": [
+        "twenty to six",
+        "ten past half past six",
+        "twenty past five",
+        "ten to six"
+      ],
+      "answer": 0,
+      "explain": "Tien over half zes is 5:40. Na half, dus to: nog 20 minuten tot zes, twenty to six."
+    },
+    {
+      "id": "ek-mn-014",
+      "type": "choice",
+      "level": "E6",
+      "skill": "rond-half",
+      "prompt": "Hoe zeg je 'vijf over half elf' in het Engels?",
+      "options": [
+        "twenty-five past ten",
+        "twenty-five to eleven",
+        "five past half past eleven",
+        "twenty-five to ten"
+      ],
+      "answer": 1,
+      "explain": "Vijf over half elf is 10:35. Na half, dus to: twenty-five to eleven."
+    },
+    {
+      "id": "ek-mn-015",
+      "type": "type",
+      "level": "E6",
+      "skill": "rond-half",
+      "prompt": "Schrijf het getal dat mist. Het betekent: Het feest begint om tien voor half acht.",
+      "sentence": "The party starts at ... past seven.",
+      "answer": [
+        "twenty",
+        "Twenty"
+      ],
+      "explain": "Tien voor half acht is 7:20. Voor half, dus past: twenty past seven."
+    },
+    {
+      "id": "ek-mn-016",
+      "type": "type",
+      "level": "E6",
+      "skill": "rond-half",
+      "prompt": "Schrijf het getal dat mist. Het betekent: We eten om vijf over half zes.",
+      "sentence": "We eat at ... to six.",
+      "answer": [
+        "twenty-five",
+        "Twenty-five",
+        "twenty five",
+        "Twenty five"
+      ],
+      "explain": "Vijf over half zes is 5:35. Na half, dus to: twenty-five to six."
+    },
+    {
+      "id": "ek-mn-017",
+      "type": "find-error",
+      "level": "E6",
+      "skill": "minuten-to",
+      "prompt": "Welk woord is fout? Het is 3:40.",
+      "words": [
+        "The",
+        "dinos",
+        "sleep",
+        "at",
+        "twenty",
+        "past",
+        "four",
+        "today."
+      ],
+      "answer": 5,
+      "correction": "to",
+      "explain": "3:40 is na half, dus to: twenty to four. Twenty past four is 4:20."
+    },
+    {
+      "id": "ek-mn-018",
+      "type": "find-error",
+      "level": "E6",
+      "skill": "rond-half",
+      "prompt": "Welk woord is fout? De bus komt om vijf voor half negen.",
+      "words": [
+        "The",
+        "bus",
+        "comes",
+        "at",
+        "twenty-five",
+        "past",
+        "eight."
+      ],
+      "answer": -1,
+      "correction": null,
+      "explain": "Geen fout. Vijf voor half negen is 8:25: twenty-five past eight."
+    },
+    {
+      "id": "ek-mn-019",
+      "type": "find-error",
+      "level": "E6",
+      "skill": "minuten-past",
+      "prompt": "Welk woord is fout geschreven? Het is 11:20.",
+      "words": [
+        "It's",
+        "twinty",
+        "past",
+        "eleven."
+      ],
+      "answer": 1,
+      "correction": "twenty",
+      "explain": "Twintig schrijf je als twenty, met een e. It's twenty past eleven."
+    },
+    {
+      "id": "ek-mn-020",
+      "type": "type",
+      "level": "M7",
+      "skill": "rond-half",
+      "prompt": "Schrijf in het Engels: vijf voor half twee.",
+      "answer": [
+        "twenty-five past one",
+        "Twenty-five past one",
+        "twenty five past one",
+        "Twenty five past one"
+      ],
+      "explain": "Vijf voor half twee is 1:25. Voor half, dus past: twenty-five past one."
+    },
+    {
+      "id": "ek-mn-021",
+      "type": "type",
+      "level": "M7",
+      "skill": "rond-half",
+      "prompt": "Schrijf in het Engels: tien over half negen.",
+      "answer": [
+        "twenty to nine",
+        "Twenty to nine"
+      ],
+      "explain": "Tien over half negen is 8:40. Na half, dus to: twenty to nine."
+    },
+    {
+      "id": "ek-mn-022",
+      "type": "type",
+      "level": "M7",
+      "skill": "rond-half",
+      "prompt": "Schrijf in het Nederlands: twenty-five to four.",
+      "answer": [
+        "vijf over half vier",
+        "Vijf over half vier"
+      ],
+      "explain": "Twenty-five to four is 3:35. In het Nederlands: vijf over half vier."
+    },
+    {
+      "id": "ek-mn-023",
+      "type": "type",
+      "level": "M7",
+      "skill": "rond-half",
+      "prompt": "Schrijf in het Nederlands: twenty past ten.",
+      "answer": [
+        "tien voor half elf",
+        "Tien voor half elf",
+        "twintig over tien",
+        "Twintig over tien"
+      ],
+      "explain": "Twenty past ten is 10:20. In het Nederlands: tien voor half elf (of twintig over tien)."
+    },
+    {
+      "id": "ek-mn-024",
+      "type": "choice",
+      "level": "M7",
+      "skill": "andere-minuten",
+      "prompt": "Hoe zeg je 3:07 in het Engels?",
+      "options": [
+        "seven past three",
+        "seven minutes past three",
+        "seven minutes to three",
+        "three minutes past seven"
+      ],
+      "answer": 1,
+      "explain": "7 is geen stap van vijf, dus minutes erbij: seven minutes past three."
+    },
+    {
+      "id": "ek-mn-025",
+      "type": "choice",
+      "level": "M7",
+      "skill": "andere-minuten",
+      "prompt": "Hoe zeg je 6:52 in het Engels?",
+      "options": [
+        "eight minutes to seven",
+        "eight minutes past six",
+        "eight minutes past seven",
+        "eight minutes to six"
+      ],
+      "answer": 0,
+      "explain": "6:52 is na half, dus to. Nog 8 minuten tot zeven: eight minutes to seven."
+    },
+    {
+      "id": "ek-mn-026",
+      "type": "type",
+      "level": "M7",
+      "skill": "andere-minuten",
+      "prompt": "Schrijf het woord dat mist. Het is 9:13. Het betekent: Het is dertien minuten over negen.",
+      "sentence": "It's thirteen ... past nine.",
+      "answer": [
+        "minutes",
+        "Minutes"
+      ],
+      "explain": "13 is geen stap van vijf, dus minutes erbij: thirteen minutes past nine."
+    },
+    {
+      "id": "ek-mn-027",
+      "type": "find-error",
+      "level": "M7",
+      "skill": "andere-minuten",
+      "prompt": "Welk woord is fout? Het is 4:58.",
+      "words": [
+        "It's",
+        "two",
+        "minutes",
+        "past",
+        "five."
+      ],
+      "answer": 3,
+      "correction": "to",
+      "explain": "4:58 is na half: nog 2 minuten tot vijf. Dus to: two minutes to five."
+    },
+    {
+      "id": "ek-mn-028",
+      "type": "find-error",
+      "level": "M7",
+      "skill": "andere-minuten",
+      "prompt": "Welk woord is fout? Het is 12:04.",
+      "words": [
+        "It's",
+        "four",
+        "minutes",
+        "past",
+        "twelve."
+      ],
+      "answer": -1,
+      "correction": null,
+      "explain": "Geen fout. 4 is geen stap van vijf, dus minutes erbij: four minutes past twelve."
+    }
+  ]
+}

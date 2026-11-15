@@ -1,0 +1,484 @@
+{
+  "id": "vragen",
+  "title": "Vragen hoe laat het is",
+  "groups": [
+    6,
+    7
+  ],
+  "lesson": {
+    "pages": [
+      {
+        "title": "What time is it?",
+        "skill": "what-time",
+        "text": "Wil je weten hoe laat het is? Vraag dan: What time is it? Het antwoord begint met It's. It's is kort voor It is.",
+        "examples": [
+          {
+            "good": "What time is it? It's three o'clock."
+          },
+          {
+            "good": "What time is it?",
+            "bad": "How late is it?",
+            "why": "Hoe laat vertaal je niet woord voor woord. Je zegt: What time is it?"
+          }
+        ],
+        "tip": "Hoe laat = what time. Niet how late!"
+      },
+      {
+        "title": "Om ... uur: at",
+        "skill": "at-time",
+        "text": "Wil je zeggen wanneer iets gebeurt? Gebruik dan at, zoals om in het Nederlands. Vraag het met What time ...?",
+        "examples": [
+          {
+            "good": "School starts at half past eight."
+          },
+          {
+            "good": "What time does the film start? At seven o'clock."
+          },
+          {
+            "good": "The film starts at seven o'clock.",
+            "bad": "The film starts on seven o'clock.",
+            "why": "Bij een tijd hoort at, niet on of in."
+          }
+        ],
+        "tip": "Om zeven uur = at seven o'clock."
+      },
+      {
+        "title": "It's time for ...",
+        "skill": "time-for",
+        "text": "It's time for ... betekent: het is tijd voor ... Zo zeg je dat iets nu moet gebeuren. Komt er een werkwoord achter, zoals go? Dan zeg je It's time to ...",
+        "examples": [
+          {
+            "good": "It's time for bed. = Het is bedtijd."
+          },
+          {
+            "good": "It's time to go. = Het is tijd om te gaan."
+          },
+          {
+            "good": "It's time for lunch.",
+            "bad": "It's time of lunch.",
+            "why": "Tijd voor is time for, niet time of."
+          }
+        ],
+        "tip": "Tijd voor iets = time for. Tijd om iets te doen = time to."
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "ek-vr-001",
+      "type": "choice",
+      "level": "M6",
+      "skill": "what-time",
+      "prompt": "Hoe vraag je in het Engels hoe laat het is?",
+      "options": [
+        "How late is it?",
+        "What time is it?",
+        "What clock is it?",
+        "How time is it?"
+      ],
+      "answer": 1,
+      "explain": "Hoe laat is het? = What time is it? Hoe laat vertaal je niet woord voor woord."
+    },
+    {
+      "id": "ek-vr-002",
+      "type": "choice",
+      "level": "M6",
+      "skill": "what-time",
+      "prompt": "Wat betekent 'What time is it?'",
+      "options": [
+        "Hoe laat is het?",
+        "Hoe gaat het?",
+        "Waar is de klok?",
+        "Hoe oud ben je?"
+      ],
+      "answer": 0,
+      "explain": "What time is it? betekent: Hoe laat is het?"
+    },
+    {
+      "id": "ek-vr-003",
+      "type": "choice",
+      "level": "M6",
+      "skill": "what-time",
+      "prompt": "Welk antwoord past bij 'What time is it?'",
+      "options": [
+        "It's four o'clock.",
+        "It's a dino.",
+        "I'm fine.",
+        "It's Monday."
+      ],
+      "answer": 0,
+      "explain": "Op What time is it? zeg je de tijd: It's four o'clock."
+    },
+    {
+      "id": "ek-vr-004",
+      "type": "type",
+      "level": "M6",
+      "skill": "what-time",
+      "prompt": "Schrijf het woord dat mist. Het betekent: Hoe laat is het?",
+      "sentence": "What ... is it?",
+      "answer": [
+        "time",
+        "Time"
+      ],
+      "explain": "Hoe laat is het? = What time is it? Tijd is time."
+    },
+    {
+      "id": "ek-vr-005",
+      "type": "choice",
+      "level": "M6",
+      "skill": "at-time",
+      "prompt": "Welk woord moet op de stippen? Het betekent: Ik sta om zeven uur op.",
+      "sentence": "I get up ... seven o'clock.",
+      "options": [
+        "on",
+        "at",
+        "in",
+        "to"
+      ],
+      "answer": 1,
+      "explain": "Om bij een tijd is at: I get up at seven o'clock."
+    },
+    {
+      "id": "ek-vr-006",
+      "type": "type",
+      "level": "M6",
+      "skill": "at-time",
+      "prompt": "Schrijf het woord dat mist. Het betekent: De school begint om half negen.",
+      "sentence": "School starts ... half past eight.",
+      "answer": [
+        "at",
+        "At"
+      ],
+      "explain": "Om bij een tijd is at: School starts at half past eight."
+    },
+    {
+      "id": "ek-vr-007",
+      "type": "choice",
+      "level": "M6",
+      "skill": "time-for",
+      "prompt": "Wat betekent 'It's time for bed'?",
+      "options": [
+        "Het is bedtijd.",
+        "Het bed is klaar.",
+        "Ik heb een nieuw bed.",
+        "Het is tijd om op te staan."
+      ],
+      "answer": 0,
+      "explain": "It's time for ... is: het is tijd voor ... It's time for bed: het is bedtijd."
+    },
+    {
+      "id": "ek-vr-008",
+      "type": "type",
+      "level": "M6",
+      "skill": "time-for",
+      "prompt": "Schrijf het woord dat mist. Het betekent: Het is tijd voor de lunch.",
+      "sentence": "It's time ... lunch.",
+      "answer": [
+        "for",
+        "For"
+      ],
+      "explain": "Tijd voor = time for: It's time for lunch."
+    },
+    {
+      "id": "ek-vr-009",
+      "type": "find-error",
+      "level": "M6",
+      "skill": "what-time",
+      "prompt": "Welk woord is fout?",
+      "words": [
+        "What",
+        "time",
+        "is",
+        "it?"
+      ],
+      "answer": -1,
+      "correction": null,
+      "explain": "Geen fout. Zo vraag je hoe laat het is: What time is it?"
+    },
+    {
+      "id": "ek-vr-010",
+      "type": "choice",
+      "level": "E6",
+      "skill": "what-time",
+      "prompt": "Je wilt weten hoe laat het is. Wat vraag je aan je juf?",
+      "options": [
+        "Excuse me, what time is it?",
+        "Excuse me, how late is it?",
+        "Excuse me, what time it is?",
+        "Excuse me, how many clock is it?"
+      ],
+      "answer": 0,
+      "explain": "Hoe laat is het? = What time is it? Eerst time, dan is it. Excuse me is beleefd: pardon."
+    },
+    {
+      "id": "ek-vr-011",
+      "type": "choice",
+      "level": "E6",
+      "skill": "at-time",
+      "prompt": "Welk antwoord past bij 'What time does the dino show start?'",
+      "options": [
+        "At three o'clock.",
+        "On three o'clock.",
+        "In three o'clock.",
+        "It's a dino."
+      ],
+      "answer": 0,
+      "explain": "Bij een tijd hoort at: At three o'clock."
+    },
+    {
+      "id": "ek-vr-012",
+      "type": "type",
+      "level": "E6",
+      "skill": "at-time",
+      "prompt": "Schrijf het woord dat mist. Het betekent: Hoe laat begint de les?",
+      "sentence": "What time does the lesson ... ?",
+      "answer": [
+        "start",
+        "Start"
+      ],
+      "explain": "Hoe laat begint ...? = What time does ... start?"
+    },
+    {
+      "id": "ek-vr-013",
+      "type": "type",
+      "level": "E6",
+      "skill": "what-time",
+      "prompt": "Schrijf wat mist. Het betekent: Het is kwart over twee.",
+      "sentence": "... a quarter past two.",
+      "answer": [
+        "It's",
+        "it's",
+        "It’s",
+        "it’s",
+        "It is",
+        "it is"
+      ],
+      "explain": "Het antwoord begint met It's (It is): It's a quarter past two."
+    },
+    {
+      "id": "ek-vr-014",
+      "type": "find-error",
+      "level": "E6",
+      "skill": "at-time",
+      "prompt": "Welk woord is fout?",
+      "words": [
+        "We",
+        "play",
+        "football",
+        "on",
+        "four",
+        "o'clock."
+      ],
+      "answer": 3,
+      "correction": "at",
+      "explain": "Bij een tijd hoort at, niet on: at four o'clock."
+    },
+    {
+      "id": "ek-vr-015",
+      "type": "find-error",
+      "level": "E6",
+      "skill": "time-for",
+      "prompt": "Welk woord is fout?",
+      "words": [
+        "It's",
+        "time",
+        "of",
+        "bed,",
+        "little",
+        "dino."
+      ],
+      "answer": 2,
+      "correction": "for",
+      "explain": "Tijd voor is time for: It's time for bed."
+    },
+    {
+      "id": "ek-vr-016",
+      "type": "choice",
+      "level": "E6",
+      "skill": "time-for",
+      "prompt": "Het is half acht 's ochtends. Je moet naar school. Wat zegt mama?",
+      "options": [
+        "It's time for school!",
+        "It's time for bed!",
+        "It's time for dinner!"
+      ],
+      "answer": 0,
+      "explain": "'s Ochtends ga je naar school: It's time for school!"
+    },
+    {
+      "id": "ek-vr-017",
+      "type": "choice",
+      "level": "E6",
+      "skill": "what-time",
+      "prompt": "Je vriend zegt: 'It's half past three.' Hoe laat is het?",
+      "options": [
+        "half drie",
+        "half vier",
+        "drie uur",
+        "kwart over drie"
+      ],
+      "answer": 1,
+      "explain": "Half past three is 3:30. In het Nederlands is dat half vier."
+    },
+    {
+      "id": "ek-vr-018",
+      "type": "find-error",
+      "level": "E6",
+      "skill": "at-time",
+      "prompt": "Welk woord is fout?",
+      "words": [
+        "My",
+        "sister",
+        "goes",
+        "to",
+        "bed",
+        "at",
+        "eight",
+        "o'clock."
+      ],
+      "answer": -1,
+      "correction": null,
+      "explain": "Geen fout. Bij een tijd hoort at: at eight o'clock."
+    },
+    {
+      "id": "ek-vr-019",
+      "type": "type",
+      "level": "M7",
+      "skill": "what-time",
+      "prompt": "Schrijf de vraag in het Engels: Hoe laat is het?",
+      "answer": [
+        "What time is it?",
+        "what time is it?",
+        "What time is it",
+        "what time is it"
+      ],
+      "explain": "Hoe laat is het? = What time is it?"
+    },
+    {
+      "id": "ek-vr-020",
+      "type": "type",
+      "level": "M7",
+      "skill": "at-time",
+      "prompt": "Schrijf in het Engels met o'clock: om negen uur.",
+      "answer": [
+        "at nine o'clock",
+        "At nine o'clock",
+        "at nine o’clock",
+        "At nine o’clock"
+      ],
+      "explain": "Om bij een tijd is at: at nine o'clock."
+    },
+    {
+      "id": "ek-vr-021",
+      "type": "type",
+      "level": "M7",
+      "skill": "time-for",
+      "prompt": "Schrijf het woord dat mist. Het betekent: Het is tijd om naar huis te gaan.",
+      "sentence": "It's time ... go home.",
+      "answer": [
+        "to",
+        "To"
+      ],
+      "explain": "Tijd om iets te doen: time to. It's time to go home."
+    },
+    {
+      "id": "ek-vr-022",
+      "type": "choice",
+      "level": "M7",
+      "skill": "time-for",
+      "prompt": "Welk woord moet op de stippen? Het betekent: Het is tijd voor het avondeten.",
+      "sentence": "It's time ... dinner.",
+      "options": [
+        "for",
+        "to",
+        "at",
+        "on"
+      ],
+      "answer": 0,
+      "explain": "Tijd voor iets: time for. It's time for dinner."
+    },
+    {
+      "id": "ek-vr-023",
+      "type": "choice",
+      "level": "M7",
+      "skill": "at-time",
+      "prompt": "Welk antwoord past bij 'What time do you have breakfast?'",
+      "options": [
+        "I have breakfast at seven o'clock.",
+        "I have breakfast on seven o'clock.",
+        "It's breakfast.",
+        "Yes, I do."
+      ],
+      "answer": 0,
+      "explain": "Je zegt een tijd met at: I have breakfast at seven o'clock."
+    },
+    {
+      "id": "ek-vr-024",
+      "type": "find-error",
+      "level": "M7",
+      "skill": "at-time",
+      "prompt": "Welk woord is fout?",
+      "words": [
+        "What",
+        "time",
+        "does",
+        "the",
+        "block",
+        "shop",
+        "opens?"
+      ],
+      "answer": 6,
+      "correction": "open?",
+      "explain": "Na does komt het werkwoord zonder s: What time does the block shop open?"
+    },
+    {
+      "id": "ek-vr-025",
+      "type": "find-error",
+      "level": "M7",
+      "skill": "at-time",
+      "prompt": "Welk woord is fout?",
+      "words": [
+        "The",
+        "dino",
+        "show",
+        "starts",
+        "at",
+        "a",
+        "quarter",
+        "to",
+        "five."
+      ],
+      "answer": -1,
+      "correction": null,
+      "explain": "Geen fout. Bij een tijd hoort at: at a quarter to five."
+    },
+    {
+      "id": "ek-vr-026",
+      "type": "choice",
+      "level": "M7",
+      "skill": "at-time",
+      "prompt": "Hoe zeg je: 'We spelen om tien voor half vier.'",
+      "options": [
+        "We play at twenty past three.",
+        "We play at ten to half past four.",
+        "We play at twenty to four.",
+        "We play on twenty past three."
+      ],
+      "answer": 0,
+      "explain": "Tien voor half vier is 3:20: twenty past three. Bij een tijd hoort at."
+    },
+    {
+      "id": "ek-vr-027",
+      "type": "type",
+      "level": "M7",
+      "skill": "what-time",
+      "prompt": "Schrijf het woord dat mist. Het betekent: Hoe laat ga je naar bed?",
+      "sentence": "What ... do you go to bed?",
+      "answer": [
+        "time",
+        "Time"
+      ],
+      "explain": "Hoe laat = what time: What time do you go to bed?"
+    }
+  ]
+}

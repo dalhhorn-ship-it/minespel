@@ -53,3 +53,80 @@ describe('Punten setting (v10)', () => {
     expect(pressed(screen.element)).toEqual(['moeilijk']);
   });
 });
+
+describe('Volume, version and Alles wissen (v3)', () => {
+  const slider = (root: HTMLElement) => root.querySelector('[data-testid="volume-setting"]') as HTMLInputElement;
+  const buttonText = (root: HTMLElement) => [...root.querySelectorAll('button')].map((b) => b.textContent);
+  const byText = (root: HTMLElement, t: string) => [...root.querySelectorAll('button')].find((b) => b.textContent === t);
+
+  it('AC192: Volume shows 70 on a new game and saves the chosen value as 0 to 1', () => {
+    const { screen, onUpdateSettings } = make(defaultKv('settings'));
+    const s = slider(screen.element);
+    expect(s.min).toBe('0');
+    expect(s.max).toBe('100');
+    expect(s.value).toBe('70');
+    s.value = '40';
+    s.dispatchEvent(new Event('change'));
+    expect(onUpdateSettings.mock.calls[0]?.[0]).toMatchObject({ volume: 0.4 });
+    expect(slider(screen.element).value).toBe('40');
+  });
+
+  it('AC192: a saved Volume of 0 shows 0', () => {
+    expect(slider(make({ ...defaultKv('settings'), volume: 0 }).screen.element).value).toBe('0');
+  });
+
+  it('AC135: the version shows at the bottom', () => {
+    const root = make(defaultKv('settings')).screen.element;
+    const last = root.lastElementChild as HTMLElement;
+    expect(last.getAttribute('data-testid')).toBe('app-version');
+    expect(last.textContent).toBe(`Versie ${__APP_VERSION__}`);
+  });
+
+  function makeWipe(onWipeAll: () => Promise<void> | void) {
+    let tick = 0;
+    return createSettingsScreen({
+      settings: defaultKv('settings'),
+      isBreakActive: false,
+      onUpdateSettings: () => undefined,
+      onStartBreakNow: () => undefined,
+      onEndBreakNow: () => undefined,
+      onChangePin: () => undefined,
+      onWipeAll,
+      now: () => (tick += 1000),
+    });
+  }
+
+  it('AC193: two confirms with different words, and Annuleren at either step changes nothing', () => {
+    const onWipeAll = vi.fn();
+    const root = makeWipe(onWipeAll).element;
+    tap(byText(root, 'Alles wissen'));
+    expect(buttonText(root)).toContain('Ja, ga verder');
+    tap(byText(root, 'Annuleren'));
+    expect(buttonText(root)).toContain('Alles wissen');
+    tap(byText(root, 'Alles wissen'));
+    tap(byText(root, 'Ja, ga verder'));
+    expect(buttonText(root)).toContain('Ja, wis alles echt');
+    expect(buttonText(root)).not.toContain('Ja, ga verder');
+    tap(byText(root, 'Annuleren'));
+    expect(onWipeAll).not.toHaveBeenCalled();
+    expect(buttonText(root)).toContain('Alles wissen');
+  });
+
+  it('AC193: only the second confirm wipes', () => {
+    const onWipeAll = vi.fn();
+    const root = makeWipe(onWipeAll).element;
+    tap(byText(root, 'Alles wissen'));
+    tap(byText(root, 'Ja, ga verder'));
+    expect(onWipeAll).not.toHaveBeenCalled();
+    tap(byText(root, 'Ja, wis alles echt'));
+    expect(onWipeAll).toHaveBeenCalledTimes(1);
+  });
+
+  it('AC193: a failed wipe says nothing changed', async () => {
+    const root = makeWipe(() => Promise.reject(new Error('x'))).element;
+    tap(byText(root, 'Alles wissen'));
+    tap(byText(root, 'Ja, ga verder'));
+    tap(byText(root, 'Ja, wis alles echt'));
+    await vi.waitFor(() => expect(root.textContent).toContain('Er is niets veranderd'));
+  });
+});

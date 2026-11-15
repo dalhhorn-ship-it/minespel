@@ -57,7 +57,8 @@
   flex-direction: column;
   gap: var(--gap);
 }
-.hud-btn.hud-fluit { white-space: nowrap; }
+.hud-btn.hud-fluit, .hud-btn.hud-stay { white-space: nowrap; }
+.hud-btn.hud-stay[hidden] { display: none; }
 .hud-btn.hud-fluit[hidden] { display: none; }
 .hud-btn.hud-fluit.hud-fluit-playing { background: var(--grass); color: var(--on-grass); }
 .hud-jump {

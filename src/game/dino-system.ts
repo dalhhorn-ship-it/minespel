@@ -7,6 +7,7 @@ import { createRng, type Rng } from '../core/rng';
 import {
   callDino,
   dinoBounds,
+  isCalled,
   popNextTo,
   stepDino,
   type Point,
@@ -164,6 +165,10 @@ export interface DinoSystem {
   onPlayerTeleported(spot: Point): void;
   /** The Dinofluit (decision 114): every dino and chicken follows and walks slowly to the kid. Returns how many. */
   whistle(): number;
+  /** Allemaal blijven (decision 122): every following animal stays where it is, with a puff. Returns how many. */
+  stayAll(): number;
+  /** How many animals follow the kid now. The HUD shows Allemaal blijven while this is above 0. */
+  followingCount(): number;
   showHearts(screenX?: number, screenY?: number): void;
   dispose(): void;
 }
@@ -237,12 +242,16 @@ export function createDinoSystem(options: DinoSystemOptions): DinoSystem {
 
       // 2. Step dinos
       const dinosList = options.store.dinos();
+      const calledBefore = dinosList.map((d) => isCalled(d));
       for (const dino of dinosList) {
         const ev = stepDino(options.world, dino, playerSpot, rng, dt, { playerYaw });
         if (ev === 'popped') {
           showPuff(dino.golden);
         }
       }
+
+      // 2b. A call that ended turned a dino to Blijf hier: save it (decision 122).
+      if (dinosList.some((d, i) => calledBefore[i] && !isCalled(d))) options.store.markDirty();
 
       // 3. Periodically mark dirty when eggs or dinos exist so playSeconds and positions save
       if (eggsSnapshot.length > 0 || dinosList.length > 0) {
@@ -286,6 +295,19 @@ export function createDinoSystem(options: DinoSystemOptions): DinoSystem {
       for (const d of all) callDino(d);
       if (all.length > 0) options.store.markDirty();
       return all.length;
+    },
+    stayAll() {
+      const n = options.store.stayAll();
+      if (n > 0) {
+        options.sound?.play('chirp');
+        showPuff();
+      }
+      return n;
+    },
+    followingCount() {
+      let n = 0;
+      for (const d of options.store.dinos()) if (d.mode === 'follow') n++;
+      return n;
     },
     showHearts,
     dispose() {

@@ -171,6 +171,10 @@ export function createGame(options: GameOptions): Game {
     onFluit: () => {
       playFluit();
     },
+    // No loop guard: the button works while paused too, and it saves at once (decision 122).
+    onStayAll: () => {
+      dinoSystem.stayAll();
+    },
   });
   let fluitOwned = false;
   let fluitGlow: ReturnType<typeof setTimeout> | null = null;
@@ -258,6 +262,7 @@ export function createGame(options: GameOptions): Game {
     frame(dt, now) {
       player.update(dt);
       dinoSystem.step(dt);
+      hud.setStayVisible(dinoSystem.followingCount() > 0);
       villagerSystem.step(dt);
       if (dinos) stepSpikeDinos(world, dinos, dt);
       renderer.setCamera(player.pose());

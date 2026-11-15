@@ -88,6 +88,8 @@ export interface WorldRecord {
 export interface DinosRecord {
   dinos: Record<string, unknown>[];
   eggs: Record<string, unknown>[];
+  /** True once the one time switch of decision 122 ran: every saved animal was put on Blijf hier. Missing in older saves. */
+  staySwitched?: boolean;
 }
 export interface EconomyRecord {
   points: number;

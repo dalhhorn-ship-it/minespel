@@ -1,0 +1,503 @@
+{
+  "id": "uur-en-half",
+  "title": "Een heel uur en half",
+  "groups": [
+    6,
+    7
+  ],
+  "lesson": {
+    "pages": [
+      {
+        "title": "Een heel uur: o'clock",
+        "skill": "oclock",
+        "text": "Staat de grote wijzer precies op de 12? Dan is het een heel uur. In het Engels zeg je het getal en dan o'clock. O'clock zeg je alleen bij een heel uur.",
+        "examples": [
+          {
+            "good": "5:00 = five o'clock"
+          },
+          {
+            "good": "12:00 = twelve o'clock"
+          },
+          {
+            "good": "5:30 = half past five",
+            "bad": "5:30 = half past five o'clock",
+            "why": "Bij half past komt geen o'clock. O'clock hoort alleen bij een heel uur."
+          }
+        ],
+        "tip": "O'clock betekent: van de klok. Je zegt het alleen bij hele uren."
+      },
+      {
+        "title": "Half past",
+        "skill": "half-past",
+        "text": "Staat de grote wijzer op de 6? Dan is het een half uur over het uur. In het Engels zeg je half past en dan het uur dat net voorbij is. Past betekent over.",
+        "examples": [
+          {
+            "good": "4:30 = half past four"
+          },
+          {
+            "good": "10:30 = half past ten"
+          }
+        ],
+        "tip": "Half past = half over. Het uur na past is al geweest."
+      },
+      {
+        "title": "Pas op: half werkt anders!",
+        "skill": "half-valkuil",
+        "text": "In het Nederlands kijk je bij half vooruit naar het volgende uur: half drie is 2:30. In het Engels kijk je terug naar het uur dat net voorbij is: 2:30 is half past two. Het Engelse getal is dus één lager.",
+        "examples": [
+          {
+            "good": "half drie = 2:30 = half past two",
+            "bad": "half drie = half past three",
+            "why": "Half past three is 3:30. Dat is in het Nederlands half vier."
+          },
+          {
+            "good": "half negen = 8:30 = half past eight"
+          },
+          {
+            "good": "half één = 12:30 = half past twelve"
+          }
+        ],
+        "tip": "Van Nederlands naar Engels: het getal min één. Van Engels naar Nederlands: het getal plus één."
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "ek-uh-001",
+      "type": "choice",
+      "level": "M6",
+      "skill": "oclock",
+      "prompt": "Hoe zeg je 9:00 in het Engels?",
+      "options": [
+        "half past nine",
+        "nine o'clock",
+        "half past eight",
+        "half past ten"
+      ],
+      "answer": 1,
+      "explain": "Een heel uur: het getal en dan o'clock. 9:00 is nine o'clock."
+    },
+    {
+      "id": "ek-uh-002",
+      "type": "choice",
+      "level": "M6",
+      "skill": "oclock",
+      "prompt": "Welke tijd is 'eleven o'clock'?",
+      "options": [
+        "11:30",
+        "10:30",
+        "11:00",
+        "12:00"
+      ],
+      "answer": 2,
+      "explain": "O'clock is een heel uur. Eleven o'clock is 11:00."
+    },
+    {
+      "id": "ek-uh-003",
+      "type": "choice",
+      "level": "M6",
+      "skill": "half-past",
+      "prompt": "Hoe zeg je 4:30 in het Engels?",
+      "options": [
+        "half past four",
+        "half past five",
+        "four o'clock",
+        "half past three"
+      ],
+      "answer": 0,
+      "explain": "4:30 is een half uur over vier: half past four. Past betekent over."
+    },
+    {
+      "id": "ek-uh-004",
+      "type": "choice",
+      "level": "M6",
+      "skill": "half-past",
+      "prompt": "Welke tijd is 'half past ten'?",
+      "options": [
+        "9:30",
+        "10:30",
+        "11:30",
+        "10:00"
+      ],
+      "answer": 1,
+      "explain": "Half past ten is een half uur over tien: 10:30."
+    },
+    {
+      "id": "ek-uh-005",
+      "type": "type",
+      "level": "M6",
+      "skill": "oclock",
+      "prompt": "Schrijf het woord dat mist. Het is 6:00. Het betekent: Het is zes uur.",
+      "sentence": "It's six ... .",
+      "answer": [
+        "o'clock",
+        "O'clock",
+        "o’clock",
+        "O’clock"
+      ],
+      "explain": "Een heel uur is o'clock: It's six o'clock."
+    },
+    {
+      "id": "ek-uh-006",
+      "type": "type",
+      "level": "M6",
+      "skill": "half-past",
+      "prompt": "Schrijf het woord dat mist. Het is 3:30. Het betekent: Het is half vier.",
+      "sentence": "It's half ... three.",
+      "answer": [
+        "past",
+        "Past"
+      ],
+      "explain": "Half past three: een half uur over drie. Past betekent over."
+    },
+    {
+      "id": "ek-uh-007",
+      "type": "choice",
+      "level": "M6",
+      "skill": "half-valkuil",
+      "prompt": "Hoe zeg je 'half drie' in het Engels?",
+      "options": [
+        "half past three",
+        "half past two",
+        "two o'clock",
+        "half past one"
+      ],
+      "answer": 1,
+      "explain": "Half drie is 2:30. Engels kijkt terug naar het uur dat voorbij is: half past two."
+    },
+    {
+      "id": "ek-uh-008",
+      "type": "choice",
+      "level": "M6",
+      "skill": "half-valkuil",
+      "prompt": "Wat is 'half past seven' in het Nederlands?",
+      "options": [
+        "half zeven",
+        "half acht",
+        "zeven uur",
+        "half negen"
+      ],
+      "answer": 1,
+      "explain": "Half past seven is 7:30. In het Nederlands kijk je vooruit naar acht: half acht."
+    },
+    {
+      "id": "ek-uh-009",
+      "type": "find-error",
+      "level": "M6",
+      "skill": "oclock",
+      "prompt": "Welk woord is fout? Het is 8:00.",
+      "words": [
+        "The",
+        "dino",
+        "wakes",
+        "up",
+        "at",
+        "eight",
+        "o'clock."
+      ],
+      "answer": -1,
+      "correction": null,
+      "explain": "Geen fout. 8:00 is een heel uur: eight o'clock."
+    },
+    {
+      "id": "ek-uh-010",
+      "type": "choice",
+      "level": "M6",
+      "skill": "half-valkuil",
+      "prompt": "Het is half vijf. Welke klok klopt?",
+      "options": [
+        "5:30",
+        "4:30",
+        "4:00",
+        "5:00"
+      ],
+      "answer": 1,
+      "explain": "Half vijf is een half uur voor vijf: 4:30. In het Engels is dat half past four."
+    },
+    {
+      "id": "ek-uh-011",
+      "type": "choice",
+      "level": "E6",
+      "skill": "half-valkuil",
+      "prompt": "In het Nederlands zeg je half tien. Wat zeg je in het Engels?",
+      "options": [
+        "half past ten",
+        "half past nine",
+        "nine o'clock",
+        "half past eleven"
+      ],
+      "answer": 1,
+      "explain": "Half tien is 9:30. Engels kijkt terug naar negen: half past nine."
+    },
+    {
+      "id": "ek-uh-012",
+      "type": "choice",
+      "level": "E6",
+      "skill": "half-valkuil",
+      "prompt": "Sam zegt: 'Lunch is at half past twelve.' Hoe laat is de lunch?",
+      "options": [
+        "half twaalf",
+        "half één",
+        "twaalf uur",
+        "half elf"
+      ],
+      "answer": 1,
+      "explain": "Half past twelve is 12:30. In het Nederlands is dat half één."
+    },
+    {
+      "id": "ek-uh-013",
+      "type": "type",
+      "level": "E6",
+      "skill": "half-valkuil",
+      "prompt": "Schrijf het getal dat mist. Het betekent: Het is half zes.",
+      "sentence": "It's half past ... .",
+      "answer": [
+        "five",
+        "Five"
+      ],
+      "explain": "Half zes is 5:30. Engels kijkt terug naar vijf: half past five."
+    },
+    {
+      "id": "ek-uh-014",
+      "type": "type",
+      "level": "E6",
+      "skill": "half-valkuil",
+      "prompt": "Schrijf het getal dat mist. Het betekent: De dino slaapt om half negen.",
+      "sentence": "The dino sleeps at half past ... .",
+      "answer": [
+        "eight",
+        "Eight"
+      ],
+      "explain": "Half negen is 8:30. In het Engels: half past eight, het getal is één lager."
+    },
+    {
+      "id": "ek-uh-015",
+      "type": "type",
+      "level": "E6",
+      "skill": "half-valkuil",
+      "prompt": "Schrijf het getal dat mist. Het betekent: Mama komt om half vier thuis.",
+      "sentence": "Mum comes home at half past ... .",
+      "answer": [
+        "three",
+        "Three"
+      ],
+      "explain": "Half vier is 3:30. In het Engels: half past three."
+    },
+    {
+      "id": "ek-uh-016",
+      "type": "find-error",
+      "level": "E6",
+      "skill": "half-valkuil",
+      "prompt": "Welk woord is fout? We eten om half twee.",
+      "words": [
+        "We",
+        "eat",
+        "at",
+        "half",
+        "past",
+        "two",
+        "today."
+      ],
+      "answer": 5,
+      "correction": "one",
+      "explain": "Half twee is 1:30. In het Engels kijk je terug naar één: half past one."
+    },
+    {
+      "id": "ek-uh-017",
+      "type": "find-error",
+      "level": "E6",
+      "skill": "half-valkuil",
+      "prompt": "Welk woord is fout? De film begint om half elf.",
+      "words": [
+        "The",
+        "film",
+        "starts",
+        "at",
+        "half",
+        "past",
+        "ten."
+      ],
+      "answer": -1,
+      "correction": null,
+      "explain": "Geen fout. Half elf is 10:30: half past ten."
+    },
+    {
+      "id": "ek-uh-018",
+      "type": "choice",
+      "level": "E6",
+      "skill": "half-valkuil",
+      "prompt": "Welke zin past bij 'Het is half acht'?",
+      "options": [
+        "It's half past eight.",
+        "It's half past seven.",
+        "It's seven o'clock.",
+        "It's half past six."
+      ],
+      "answer": 1,
+      "explain": "Half acht is 7:30. In het Engels: It's half past seven."
+    },
+    {
+      "id": "ek-uh-019",
+      "type": "find-error",
+      "level": "E6",
+      "skill": "oclock",
+      "prompt": "Welk woord is fout? Het is 5:00.",
+      "words": [
+        "At",
+        "four",
+        "o'clock",
+        "we",
+        "feed",
+        "the",
+        "dinos."
+      ],
+      "answer": 1,
+      "correction": "five",
+      "explain": "5:00 is een heel uur: five o'clock."
+    },
+    {
+      "id": "ek-uh-020",
+      "type": "choice",
+      "level": "M7",
+      "skill": "half-valkuil",
+      "prompt": "Welke zin is goed voor 'half één'?",
+      "options": [
+        "It's half past one.",
+        "It's half past twelve.",
+        "It's twelve o'clock.",
+        "It's half past eleven."
+      ],
+      "answer": 1,
+      "explain": "Half één is 12:30. Het uur dat voorbij is, is twaalf: half past twelve."
+    },
+    {
+      "id": "ek-uh-021",
+      "type": "choice",
+      "level": "M7",
+      "skill": "half-valkuil",
+      "prompt": "Tim leest: 'The bus comes at half past one.' Hij denkt: half één. Wat is goed?",
+      "options": [
+        "Tim heeft gelijk.",
+        "De bus komt om half twee.",
+        "De bus komt om één uur.",
+        "De bus komt om half twaalf."
+      ],
+      "answer": 1,
+      "explain": "Half past one is 1:30. In het Nederlands is dat half twee: het getal plus één."
+    },
+    {
+      "id": "ek-uh-022",
+      "type": "type",
+      "level": "M7",
+      "skill": "half-valkuil",
+      "prompt": "Schrijf in het Engels: half elf.",
+      "answer": [
+        "half past ten",
+        "Half past ten"
+      ],
+      "explain": "Half elf is 10:30. In het Engels: half past ten."
+    },
+    {
+      "id": "ek-uh-023",
+      "type": "type",
+      "level": "M7",
+      "skill": "half-valkuil",
+      "prompt": "Schrijf in het Engels: half één.",
+      "answer": [
+        "half past twelve",
+        "Half past twelve"
+      ],
+      "explain": "Half één is 12:30. In het Engels: half past twelve."
+    },
+    {
+      "id": "ek-uh-024",
+      "type": "type",
+      "level": "M7",
+      "skill": "half-past",
+      "prompt": "Schrijf in het Nederlands: half past four.",
+      "answer": [
+        "half vijf",
+        "Half vijf"
+      ],
+      "explain": "Half past four is 4:30. In het Nederlands: half vijf, het getal plus één."
+    },
+    {
+      "id": "ek-uh-025",
+      "type": "type",
+      "level": "M7",
+      "skill": "oclock",
+      "prompt": "Schrijf de hele zin in het Engels: Het is tien uur.",
+      "answer": [
+        "It's ten o'clock.",
+        "it's ten o'clock.",
+        "It’s ten o’clock.",
+        "it’s ten o’clock.",
+        "It is ten o'clock.",
+        "it is ten o'clock.",
+        "It is ten o’clock.",
+        "it is ten o’clock.",
+        "It's ten o'clock",
+        "it's ten o'clock",
+        "It’s ten o’clock",
+        "it’s ten o’clock",
+        "It is ten o'clock",
+        "it is ten o'clock",
+        "It is ten o’clock",
+        "it is ten o’clock"
+      ],
+      "explain": "Een heel uur: It's ten o'clock."
+    },
+    {
+      "id": "ek-uh-026",
+      "type": "find-error",
+      "level": "M7",
+      "skill": "half-valkuil",
+      "prompt": "Welk woord is fout? Opa zegt: het is half zeven.",
+      "words": [
+        "Grandpa",
+        "says",
+        "it's",
+        "half",
+        "past",
+        "seven",
+        "now."
+      ],
+      "answer": 5,
+      "correction": "six",
+      "explain": "Half zeven is 6:30. In het Engels kijk je terug naar zes: half past six."
+    },
+    {
+      "id": "ek-uh-027",
+      "type": "find-error",
+      "level": "M7",
+      "skill": "half-valkuil",
+      "prompt": "Welk woord is fout? De les begint om half twaalf.",
+      "words": [
+        "Our",
+        "lesson",
+        "starts",
+        "at",
+        "half",
+        "past",
+        "eleven."
+      ],
+      "answer": -1,
+      "correction": null,
+      "explain": "Geen fout. Half twaalf is 11:30: half past eleven."
+    },
+    {
+      "id": "ek-uh-028",
+      "type": "choice",
+      "level": "M7",
+      "skill": "half-valkuil",
+      "prompt": "Je hoort 'half past three'. Hoe maak je er Nederlands van?",
+      "options": [
+        "Tel één op bij het getal: half vier.",
+        "Haal één van het getal af: half twee.",
+        "Houd hetzelfde getal: half drie."
+      ],
+      "answer": 0,
+      "explain": "Half past three is 3:30. Nederlands kijkt vooruit: het getal plus één, dus half vier."
+    }
+  ]
+}

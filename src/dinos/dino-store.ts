@@ -12,6 +12,7 @@ import type { World } from '../world/world';
 import {
   boxCollides,
   createDino,
+  stayHere,
   type DinoMode,
   type DinoState,
   type Point,
@@ -95,7 +96,7 @@ export function deserializeDino(raw: Record<string, unknown>, idx: number): Worl
   const z = num(raw.z, 32.5);
   const golden = Boolean(raw.golden);
   const base = createDino({ kind, golden, x, y, z }, true);
-  base.mode = raw.mode === 'stay' ? 'stay' : 'follow';
+  base.mode = raw.mode === 'follow' ? 'follow' : 'stay';
   base.heading = num(raw.heading, 0);
   base.growth = Math.max(0, Math.min(GROW_SECONDS, num(raw.growth, GROW_SECONDS)));
   base.stayX = num(raw.stayX, x);
@@ -166,6 +167,8 @@ export interface DinoStore {
   /** Hatches an egg into a baby dino at the egg's spot. */
   hatchEgg(eggId: string): WorldDino | null;
   setDinoMode(id: string, mode: DinoMode): WorldDino | undefined;
+  /** Allemaal blijven (decision 122): every following animal stays where it is now. Saves at once. Returns how many. */
+  stayAll(): number;
   setDinoName(id: string, name: string): WorldDino | undefined;
   subscribe(listener: () => void): () => void;
   attachPersistence(records: Records, queue?: SaveQueue | null): void;
@@ -188,6 +191,7 @@ export function createDinoStore(options: DinoStoreOptions): DinoStore {
     return {
       dinos: dinosList.map(serializeDino),
       eggs: eggsList.map(serializeEgg),
+      staySwitched: true,
     };
   }
 
@@ -237,6 +241,7 @@ export function createDinoStore(options: DinoStoreOptions): DinoStore {
         notify();
         return;
       }
+      const switched = raw.staySwitched === true;
       dinosList = Array.isArray(raw.dinos)
         ? raw.dinos
             .map((r, i) => deserializeDino(r as Record<string, unknown>, i))
@@ -247,6 +252,12 @@ export function createDinoStore(options: DinoStoreOptions): DinoStore {
             .map((r, i) => deserializeEgg(r as Record<string, unknown>, i))
             .filter((e): e is WorldEgg => e !== null)
         : [];
+      if (!switched) {
+        // Decision 122, once: a save from before the switch puts every animal on Blijf hier where it stands.
+        for (const d of dinosList) stayHere(d);
+        // Save at once, so a crash cannot run the switch again and lose a later Volg mij.
+        if (dinosList.length > 0) void saveNow();
+      }
       notify();
     },
     async load() {
@@ -321,6 +332,20 @@ export function createDinoStore(options: DinoStoreOptions): DinoStore {
       void saveNow();
       notify();
       return d;
+    },
+    stayAll() {
+      let n = 0;
+      for (const d of dinosList) {
+        if (d.mode !== 'follow') continue;
+        stayHere(d);
+        n++;
+      }
+      if (n > 0) {
+        markDirty();
+        void saveNow();
+        notify();
+      }
+      return n;
     },
     setDinoName(id, name) {
       const d = dinosList.find((item) => item.id === id);

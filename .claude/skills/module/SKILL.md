@@ -8,6 +8,7 @@ You are the operator. A module is pure content: one folder in `docs/modules/<mod
 
 ## 1. Read the source
 
+0. Sheet modules (decision 127, the full rule is in `docs/modules/README.md`, "Sheet modules"): first write `docs/modules/<module-id>/BRON.md`, a verbatim transcription of every word, phrase, meaning and example on the source, one `- English = Nederlands` line per pair, in the source's parts. Same spelling, same punctuation (also the curly ’), same Dutch meaning. Show it to the founder and get it confirmed before the module ships; until then it says "NOT YET CHECKED" at the top. Never invent, "improve" or add a meaning: if a meaning is not readable on the photo, ask.
 1. Look at every photo or screenshot. For each question write one line in a scratch table: number, section heading of the book, question style (pick the right word, fill in letters, put a mark, which word is a ..., type the form), and the exact rule or skill it tests.
 2. Group the lines into topics (one topic per rule family, 3 to 8 topics per module) and skills (one skill per exact rule). Keep the book's sections as the exam parts.
 3. Read the existing modules in `docs/modules/`. If a skill is already well covered there, say so. Only make what is missing or what the founder asked for.
@@ -24,6 +25,8 @@ For every topic write a lesson with one page per skill, set the page `skill` to 
 
 ## 3. Write the questions (practice)
 
+* Sheet words, phrases and meanings are always copied exactly from `BRON.md`, in lessons and in every item. Practice items may put them in new sentences; the words and meanings themselves stay exact.
+* Add the topic `blad` (title "Precies van het blad"): only `BRON.md` text, also for every wrong option. Every word and phrase both ways (choice at the lower level, typed at the higher level), with prompt wrappers like "Wat betekent '...'?" and no new sentences, situations or names. Its lesson is one page that lists the sheet. `validate.py` checks it against `BRON.md`.
 * Never copy a question, sentence or name from the source. Copy the style and the skill only. Use dinos, blocks, nature, school and family.
 * Use the item types from `docs/modules/README.md`. Map the book's styles like this:
   * "In welke zin is het woord goed gespeld?" or "Omcirkel het goede antwoord": `choice`.
@@ -40,7 +43,7 @@ For big modules, write the JSON with a small one off script in the scratchpad (h
 
 ## 4. Make the exams
 
-In `module.json` add one exam per book section (same parts as the source, for example "deel 1" and "deel 2"), plus one full exam over every topic. Set `questionCount` like the source, `timeLimitMinutes` about one minute per question, `passPercent: 70`, and `mix` weights that follow how many questions the source gives each topic.
+Sheet modules also get "Toets: precies van het blad": `mix` only on `blad`, about one question per sheet word and phrase, all levels of the `blad` items, one minute per question, `passPercent: 70`. In `module.json` add one exam per book section (same parts as the source, for example "deel 1" and "deel 2"), plus one full exam over every topic. Set `questionCount` like the source, `timeLimitMinutes` about one minute per question, `passPercent: 70`, and `mix` weights that follow how many questions the source gives each topic.
 
 ## 5. Check
 

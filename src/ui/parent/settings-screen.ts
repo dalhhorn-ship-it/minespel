@@ -21,6 +21,10 @@ export interface SettingsScreenOptions {
   onEndBreakNow: () => Promise<void> | void;
   onChangePin: () => void;
   onResetWorld?: () => Promise<void> | void;
+  /** Alles wissen after both confirms. May throw: the screen then says nothing changed (AC193). */
+  onWipeAll?: () => Promise<void> | void;
+  /** Shown at the bottom (AC135). Default: the version in package.json. */
+  appVersion?: string;
   now?: () => number;
 }
 
@@ -29,9 +33,13 @@ export interface SettingsScreen {
   destroy(): void;
 }
 
+const volumeOf = (s: SettingsRecord): number => (typeof s.volume === 'number' ? Math.min(1, Math.max(0, s.volume)) : 0.7);
+
 export function createSettingsScreen(options: SettingsScreenOptions): SettingsScreen {
   let current: SettingsRecord = { ...options.settings };
   let confirmResetWorld = false;
+  let wipeStep: 0 | 1 | 2 = 0;
+  let wipeFailed = false;
   let cleanups: Array<() => void> = [];
   const root = el('div', { class: 'parent-settings' });
 
@@ -44,6 +52,49 @@ export function createSettingsScreen(options: SettingsScreenOptions): SettingsSc
     current = { ...current, [key]: value };
     void options.onUpdateSettings(current);
     render();
+  }
+
+  /** Alles wissen (AC193): two confirms with different words, Annuleren at either step changes nothing. */
+  function wipeSection(): HTMLElement {
+    const wrap = el('div', { class: 'parent-wipe' });
+    const button = (text: string, danger: boolean, run: () => void) => {
+      const b = el('button', { class: danger ? 'parent-btn parent-btn-danger' : 'parent-btn', text, attrs: { type: 'button' } });
+      cleanups.push(onTap(b, run, { now: options.now }));
+      return b;
+    };
+    const cancel = () => button('Annuleren', false, () => { wipeStep = 0; render(); });
+    if (wipeFailed) {
+      wrap.append(el('p', { class: 'parent-note', text: 'Wissen is niet gelukt. Er is niets veranderd.', attrs: { role: 'alert' } }));
+    }
+    if (wipeStep === 0) {
+      wrap.append(el('div', { class: 'parent-btn-row' }, [
+        button('Alles wissen', true, () => { wipeFailed = false; wipeStep = 1; render(); }),
+      ]));
+    } else if (wipeStep === 1) {
+      wrap.append(
+        el('p', { text: 'Alles wissen? Je dino’s, punten, voortgang en de pincode gaan weg.' }),
+        el('div', { class: 'parent-btn-row' }, [button('Ja, ga verder', true, () => { wipeStep = 2; render(); }), cancel()]),
+      );
+    } else {
+      wrap.append(
+        el('p', { text: 'Weet je het echt zeker? Dit kan niet terug. Daarna begint een nieuw spel.' }),
+        el('div', { class: 'parent-btn-row' }, [
+          button('Ja, wis alles echt', true, () => {
+            wipeStep = 0;
+            void (async () => {
+              try {
+                await options.onWipeAll?.();
+              } catch {
+                wipeFailed = true;
+                render();
+              }
+            })();
+          }),
+          cancel(),
+        ]),
+      );
+    }
+    return wrap;
   }
 
   function render() {
@@ -127,6 +178,29 @@ export function createSettingsScreen(options: SettingsScreenOptions): SettingsSc
       makeToggleRow('Geluidseffecten', current.soundEffectsEnabled !== false, (v) =>
         updateField('soundEffectsEnabled', v),
       ),
+    );
+
+    // Volume (AC192): 0 to 100, saved as 0 to 1.
+    const volumeValue = el('span', { class: 'parent-volume-value', text: String(Math.round(volumeOf(current) * 100)), attrs: { 'data-testid': 'volume-value' } });
+    const volumeInput = el('input', {
+      class: 'parent-input parent-volume',
+      attrs: {
+        type: 'range', min: '0', max: '100', step: '5', 'aria-label': 'Volume',
+        value: String(Math.round(volumeOf(current) * 100)), 'data-testid': 'volume-setting',
+      },
+    }) as HTMLInputElement;
+    const onVolumeInput = () => {
+      volumeValue.textContent = volumeInput.value;
+    };
+    const onVolumeChange = () => updateField('volume', Number(volumeInput.value) / 100);
+    volumeInput.addEventListener('input', onVolumeInput);
+    volumeInput.addEventListener('change', onVolumeChange);
+    cleanups.push(() => {
+      volumeInput.removeEventListener('input', onVolumeInput);
+      volumeInput.removeEventListener('change', onVolumeChange);
+    });
+    displayCard.append(
+      el('div', { class: 'parent-row' }, [el('span', { text: 'Volume' }), volumeInput, volumeValue]),
     );
 
     // Punten card (AC172): three big choices, each with one short line.
@@ -247,7 +321,14 @@ export function createSettingsScreen(options: SettingsScreenOptions): SettingsSc
       }
     }
 
-    root.append(title, breakCard, displayCard, pointsCard, actionsCard);
+    if (options.onWipeAll) actionsCard.append(wipeSection());
+
+    const versionLine = el('p', {
+      class: 'parent-version',
+      text: `Versie ${options.appVersion ?? __APP_VERSION__}`,
+      attrs: { 'data-testid': 'app-version' },
+    });
+    root.append(title, breakCard, displayCard, pointsCard, actionsCard, versionLine);
   }
 
   render();

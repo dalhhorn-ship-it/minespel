@@ -1,0 +1,88 @@
+{
+  "id": "engels-klok",
+  "title": "Engels: hoe laat is het?",
+  "subject": "engels",
+  "version": 1,
+  "language": "nl",
+  "description": "Klok lezen in het Engels: heel uur, half, kwart, minuten over en voor, de digitale klok, a.m. en p.m. en vragen hoe laat het is. Met de grote valkuil: half drie is half past two. Lessen, oefenvragen en toetsen voor groep 6 en 7.",
+  "levels": [
+    "M6",
+    "E6",
+    "M7"
+  ],
+  "topics": [
+    "uur-en-half",
+    "kwart",
+    "minuten",
+    "digitaal",
+    "vragen"
+  ],
+  "exams": [
+    {
+      "id": "toets-ek-uur-kwart",
+      "title": "Toets Heel uur, half en kwart",
+      "levels": [
+        "M6",
+        "E6",
+        "M7"
+      ],
+      "questionCount": 12,
+      "timeLimitMinutes": 12,
+      "passPercent": 70,
+      "mix": {
+        "uur-en-half": 2,
+        "kwart": 1
+      }
+    },
+    {
+      "id": "toets-ek-minuten",
+      "title": "Toets Minuten over en voor",
+      "levels": [
+        "M6",
+        "E6",
+        "M7"
+      ],
+      "questionCount": 10,
+      "timeLimitMinutes": 10,
+      "passPercent": 70,
+      "mix": {
+        "minuten": 1
+      }
+    },
+    {
+      "id": "toets-ek-digitaal-vragen",
+      "title": "Toets Digitaal en vragen",
+      "levels": [
+        "M6",
+        "E6",
+        "M7"
+      ],
+      "questionCount": 10,
+      "timeLimitMinutes": 10,
+      "passPercent": 70,
+      "mix": {
+        "digitaal": 1,
+        "vragen": 1
+      }
+    },
+    {
+      "id": "toets-ek-alles",
+      "title": "Toets Hoe laat is het?",
+      "levels": [
+        "M6",
+        "E6",
+        "M7"
+      ],
+      "questionCount": 25,
+      "timeLimitMinutes": 25,
+      "passPercent": 70,
+      "mix": {
+        "uur-en-half": 2,
+        "kwart": 1,
+        "minuten": 2,
+        "digitaal": 1,
+        "vragen": 1
+      }
+    }
+  ]
+}

@@ -286,6 +286,7 @@ export function createBoot(deps: BootDeps): Boot {
         stop: () => examFlow.stop(),
       },
       sound,
+      db,
       onResetWorld: () => {
         world.resetWorld();
       },

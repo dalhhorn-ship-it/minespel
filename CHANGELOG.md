@@ -4,9 +4,18 @@ Written so kids can read it too.
 
 ## Unreleased
 
+### Dino's
+
+* Dino's and chickens now stay where they hatch instead of always walking after you. Pick Volg mij in the dino menu to let one follow. The new button Allemaal blijven stops every follower at once. The Dinofluit still calls them, then they stay near you. Animals from older saves are set to Blijf hier once.
+
 ### Leren
 
+* The typing keyboard now looks like the iPad keyboard. The bottom row has an accent key (é ë), a wide space bar and Klaar. Tap the accent key to pick é, è, ë, ï, ö, ü, ' or -, and you go back to the letters.
+* In Examens the parent now picks the lesson first (for example Engels: Runaway), then sees only the tests of that lesson. The question before starting names the lesson too.
 * New English lessons from the song Runaway: travel words, asking for your train at the station and telling the time in English. 69 questions and 4 tests.
+* New English lessons: Hoe laat is het? Learn to tell the time in English, and why half drie is half past two. 136 questions and 4 tests.
+* Toets Precies van het blad bij Runaway en Beautiful People: a test that asks only the words and phrases from the school sheet, nothing made up around them.
+* Fixed in Runaway: Excuse me. now means Sorry., just like on the school sheet.
 
 ### Leerpauze
 

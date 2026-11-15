@@ -19,6 +19,7 @@ function tap(node: Element): void {
   fire(node, 'pointerdown');
   fire(node, 'pointerup');
 }
+const accentKey = (root: Element) => root.querySelector('.kb-accent') as HTMLButtonElement;
 const keyByText = (root: Element, text: string) =>
   [...root.querySelectorAll('button')].find((b) => b.textContent === text) as HTMLButtonElement;
 const item = (over: Partial<TypeItem> = {}): TypeItem => ({ id: 't', type: 'type', answer: ['x'], ...over }) as TypeItem;
@@ -28,6 +29,7 @@ describe('kid keyboard', () => {
     const kb = createKidKeyboard({ onChar: () => {}, onBackspace: () => {}, onDone: () => {} });
     for (const c of [...LETTER_ROWS.join(''), ...SPECIAL_KEYS]) expect(keyByText(kb.el, c)).toBeTruthy();
     for (const c of ['é', 'è', 'ë', 'ï', 'ö', 'ü', "'", '-', 'spatie', 'Klaar']) expect(keyByText(kb.el, c)).toBeTruthy();
+    expect(kb.el.querySelectorAll('.kb-bottom').length).toBe(1);
     expect(kb.el.querySelector('input, textarea, [contenteditable]')).toBeNull();
     expect(kb.el.querySelectorAll('button').length).toBeGreaterThan(30);
   });
@@ -76,16 +78,82 @@ describe('kid keyboard', () => {
     expect(chars).toEqual(['a']);
   });
 
-  it('shift capitalises one letter, also é', () => {
+  it('AC57: bottom row is accent key, wide space bar, Klaar, and there is no separate accent or space row', () => {
+    const kb = createKidKeyboard({ onChar: () => {}, onBackspace: () => {}, onDone: () => {} });
+    const bottom = kb.el.querySelector('.kb-bottom') as Element;
+    expect([...bottom.children].map((b) => b.textContent)).toEqual(['é ë', 'spatie', 'Klaar']);
+    expect(bottom.children[0]?.getAttribute('aria-label')).toBe('Letters met streepjes');
+    // The direct rows are the letter panel, the accent panel and the bottom row. Letters are rows 1 to 3.
+    const letters = [...kb.el.querySelectorAll('.kb-letters .kb-row')].map((r) => [...r.children].map((b) => b.textContent).join(''));
+    expect(letters).toEqual(['qwertyuiop', 'asdfghjkl', '⇧zxcvbnm⌫']);
+    expect(kb.el.querySelector('.kb-letters .kb-space, .kb-letters .kb-done, .kb-letters .kb-accent')).toBeNull();
+  });
+
+  it('AC57: the accent key shows the accent panel, one accent types one char and returns to the letters', () => {
     const chars: string[] = [];
     const kb = createKidKeyboard({ onChar: (c) => chars.push(c), onBackspace: () => {}, onDone: () => {} });
-    tap(kb.el.querySelector('.kb-shift') as Element);
+    const letters = kb.el.querySelector('.kb-letters') as HTMLElement;
+    const accents = kb.el.querySelector('.kb-accents') as HTMLElement;
+    expect(letters.hidden).toBe(false);
+    expect(accents.hidden).toBe(true);
+    tap(accentKey(kb.el));
+    expect(kb.isAccentPanel()).toBe(true);
+    expect(letters.hidden).toBe(true);
+    expect(accents.hidden).toBe(false);
+    expect(accentKey(kb.el).textContent).toBe('abc');
+    expect(accentKey(kb.el).getAttribute('aria-label')).toBe('Terug naar letters');
+    expect([...accents.querySelectorAll('.kb-char')].map((b) => b.textContent)).toEqual(SPECIAL_KEYS);
+    tap(keyByText(accents, 'ë'));
+    expect(chars).toEqual(['ë']);
+    expect(kb.isAccentPanel()).toBe(false);
+    expect(letters.hidden).toBe(false);
+    expect(accents.hidden).toBe(true);
+    expect(accentKey(kb.el).textContent).toBe('é ë');
+  });
+
+  it('AC57: abc on the accent key goes back without typing', () => {
+    const chars: string[] = [];
+    const kb = createKidKeyboard({ onChar: (c) => chars.push(c), onBackspace: () => {}, onDone: () => {} });
+    tap(accentKey(kb.el));
+    tap(accentKey(kb.el));
+    expect(kb.isAccentPanel()).toBe(false);
+    expect(chars).toEqual([]);
+  });
+
+  it('AC57: shift capitalises one letter, also an accent through the accent panel', () => {
+    const chars: string[] = [];
+    const kb = createKidKeyboard({ onChar: (c) => chars.push(c), onBackspace: () => {}, onDone: () => {} });
+    tap(kb.el.querySelector('.kb-letters .kb-shift') as Element);
     expect(kb.isShift()).toBe(true);
+    tap(accentKey(kb.el));
+    expect(keyByText(kb.el.querySelector('.kb-accents') as Element, 'É')).toBeTruthy();
     tap(keyByText(kb.el, 'É'));
     expect(chars).toEqual(['É']);
     expect(kb.isShift()).toBe(false);
+    tap(accentKey(kb.el));
     tap(keyByText(kb.el, 'é'));
     expect(chars).toEqual(['É', 'é']);
+    // Shift can also be set on the accent panel itself.
+    tap(accentKey(kb.el));
+    tap(kb.el.querySelector('.kb-accents .kb-shift') as Element);
+    tap(keyByText(kb.el, 'ü'.toUpperCase()));
+    expect(chars).toEqual(['É', 'é', 'Ü']);
+    expect(kb.el.querySelector('.kb-letters .kb-shift')?.getAttribute('aria-pressed')).toBe('false');
+  });
+
+  it('AC57: fast taps on accent key, accent and space are one character each', () => {
+    const chars: string[] = [];
+    const kb = createKidKeyboard({ onChar: (c) => chars.push(c), onBackspace: () => {}, onDone: () => {} });
+    const quick = (node: Element, t: number) => {
+      vi.spyOn(performance, 'now').mockReturnValue(t);
+      fire(node, 'pointerdown');
+      fire(node, 'pointerup');
+    };
+    quick(accentKey(kb.el), 7000);
+    quick(keyByText(kb.el, 'é'), 7040);
+    quick(keyByText(kb.el, 'spatie'), 7080);
+    quick(keyByText(kb.el, 'spatie'), 7120);
+    expect(chars).toEqual(['é', ' ', ' ']);
   });
 
   it('Klaar does nothing while grey', () => {
@@ -110,6 +178,7 @@ describe('type view', () => {
     const klaar = keyByText(v.el, 'Klaar');
     expect(klaar.disabled).toBe(true);
     tap(keyByText(v.el, 'z'));
+    tap(accentKey(v.el));
     tap(keyByText(v.el, 'ë'));
     tap(keyByText(v.el, 'n'));
     expect(v.getText()).toBe('zën');

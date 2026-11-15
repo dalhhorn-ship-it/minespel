@@ -268,6 +268,8 @@ describe('parental controls flow (T48a, T48b, T49, T50)', () => {
     try {
       await t.parentFlow.open('examens');
       await t.typePin('1234');
+      await vi.waitFor(() => expect(t.host.querySelector('[data-lesson]')).not.toBeNull());
+      tap(t.host.querySelector('[data-lesson]')!);
       await vi.waitFor(() => expect(t.host.querySelector('[data-exam]')).not.toBeNull());
       const btn = t.host.querySelector('[data-exam]')!;
       tap(btn);

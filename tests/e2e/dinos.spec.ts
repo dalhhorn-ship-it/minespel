@@ -28,6 +28,9 @@ test.describe('dinos in the world and sky floating controls (T42)', () => {
     expect(eggsAfter).toHaveLength(0);
     expect(dinosAfter).toHaveLength(1);
     expect(dinosAfter[0]?.kind).toBe('compy');
+    // A hatched dino starts on Blijf hier (decision 122). The kid picks Volg mij for this one.
+    expect((dinosAfter[0] as { mode?: string }).mode).toBe('stay');
+    await readState(page, 'setDinoMode', dinosAfter[0]!.id, 'follow');
 
     // Move player far away, then teleportHome -> follow dino comes along to START_SPOT (AC106)
     await readState(page, 'placePlayer', 10.5, 15, 10.5, 0);
