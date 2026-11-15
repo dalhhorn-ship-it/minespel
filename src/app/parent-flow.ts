@@ -7,7 +7,8 @@ import type { Catalog } from '../content/catalog';
 import { today, type Clock } from '../core/clock';
 import { computeProgress, type ProgressStats } from '../learning/progress-stats';
 import type { Rng } from '../core/rng';
-import { replaceAll } from '../storage/backup';
+import { registerHook } from '../dev/e2e-hooks';
+import { backupFileName, backupText, buildBackup, markBackupMade, replaceAll } from '../storage/backup';
 import type { LogStore } from '../storage/log-store';
 import type { ProgressStore } from '../storage/progress-store';
 import type { Records } from '../storage/records';
@@ -64,6 +65,13 @@ export function createParentFlow(options: ParentFlowOptions): ParentFlow {
   let stopCard: ExamStopCard | null = null;
   let breakEndCard: BreakEndCard | null = null;
   let openState = false;
+  /** E2E only: the next restore throws right after the clear, like a kill halfway (AC197). */
+  let killNextRestore = false;
+  if (__E2E__) {
+    registerHook('killNextRestore', () => {
+      killNextRestore = true;
+    });
+  }
 
   function clearViews() {
     if (gateView) {
@@ -206,6 +214,29 @@ export function createParentFlow(options: ParentFlowOptions): ParentFlow {
             // One transaction, nothing else writes meanwhile. On success the halt stays on and the page reloads.
             await replaceAll(options.db!, null, { appVersion: __APP_VERSION__ });
             (options.reload ?? (() => location.reload()))();
+          }
+        : undefined,
+      backup: options.db
+        ? {
+            lastBackup: (await options.records.get('meta')).lastBackup,
+            prepare: async () => {
+              const now = new Date();
+              const file = await buildBackup(options.db!, { now, appVersion: __APP_VERSION__ });
+              return new File([backupText(file)], backupFileName(now), { type: 'application/json' });
+            },
+            onBackupMade: async () => {
+              await markBackupMade(options.db!);
+              return (await options.records.get('meta')).lastBackup;
+            },
+            onRestore: async (data) => {
+              const kill = killNextRestore;
+              killNextRestore = false;
+              await replaceAll(options.db!, data, {
+                appVersion: __APP_VERSION__,
+                afterClear: __E2E__ && kill ? () => { throw new Error('killed'); } : undefined,
+              });
+              (options.reload ?? (() => location.reload()))();
+            },
           }
         : undefined,
       appVersion: __APP_VERSION__,

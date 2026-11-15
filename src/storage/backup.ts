@@ -166,6 +166,8 @@ export interface ReplaceOptions {
   halt?: () => void;
   /** This build's version for `meta`. Default: the one already stored on this iPad. */
   appVersion?: string;
+  /** Test only: runs inside the transaction right after the clear. Throw here to simulate a kill (AC197). */
+  afterClear?: () => void;
 }
 
 /**
@@ -184,6 +186,7 @@ export async function replaceAll(db: IDBDatabase, data: BackupData | null, optio
       const gate = data ? await request<unknown>(kvStore.get('gate')) : undefined;
       const oldMeta = data ? await request<{ appVersion?: unknown } | undefined>(kvStore.get('meta')) : undefined;
       for (const name of STORE_NAMES) await request(tx.objectStore(name).clear());
+      options.afterClear?.();
       if (gate !== undefined) await request(kvStore.put(gate, 'gate'));
       if (!data) return;
       for (const name of BACKUP_KV_NAMES) {

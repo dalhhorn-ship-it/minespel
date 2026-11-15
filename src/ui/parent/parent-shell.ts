@@ -9,6 +9,7 @@ import { el } from '../dom';
 import { onTap } from '../tap';
 import { createContentScreen } from './content-screen';
 import { createExamsScreen, type ExamPlanInfo } from './exams-screen';
+import { createImportExportScreen, type ImportExportOptions } from './import-export-screen';
 import { createProgressScreen } from './progress-screen';
 import type { ProgressStats } from '../../learning/progress-stats';
 import { createSettingsScreen } from './settings-screen';
@@ -53,6 +54,8 @@ export interface ParentShellOptions {
   onChangePin: () => void;
   onResetWorld?: () => Promise<void> | void;
   onWipeAll?: () => Promise<void> | void;
+  /** Backup and restore (T53a). Without it the section says it is not available. */
+  backup?: Omit<ImportExportOptions, 'now'>;
   appVersion?: string;
   onClose: () => void;
   now?: () => number;
@@ -216,6 +219,13 @@ export function createParentShell(options: ParentShellOptions): ParentShell {
         return;
       }
       const view = createProgressScreen({ stats: options.learningStats });
+      main.append(view.element);
+      sectionCleanup = () => view.destroy();
+      return;
+    }
+
+    if (activeSection === 'import-export' && options.backup) {
+      const view = createImportExportScreen({ ...options.backup, now: options.now });
       main.append(view.element);
       sectionCleanup = () => view.destroy();
       return;
