@@ -1,0 +1,77 @@
+{
+  "id": "engels-runaway",
+  "title": "Engels: Runaway",
+  "subject": "engels",
+  "version": 1,
+  "language": "nl",
+  "description": "Engelse woorden en zinnen uit het liedje Runaway: reizen, op het station en hoe laat het is. Lessen, oefenvragen en toetsen voor groep 5 en 6.",
+  "levels": [
+    "M6",
+    "E6"
+  ],
+  "topics": [
+    "woorden",
+    "zinnen",
+    "klok"
+  ],
+  "exams": [
+    {
+      "id": "toets-rw-woorden",
+      "title": "Toets Words to know",
+      "levels": [
+        "M6",
+        "E6"
+      ],
+      "questionCount": 12,
+      "timeLimitMinutes": 12,
+      "passPercent": 70,
+      "mix": {
+        "woorden": 1
+      }
+    },
+    {
+      "id": "toets-rw-zinnen",
+      "title": "Toets Phrases",
+      "levels": [
+        "M6",
+        "E6"
+      ],
+      "questionCount": 8,
+      "timeLimitMinutes": 8,
+      "passPercent": 70,
+      "mix": {
+        "zinnen": 1
+      }
+    },
+    {
+      "id": "toets-rw-klok",
+      "title": "Toets Zo zeg je hoe laat het is",
+      "levels": [
+        "M6",
+        "E6"
+      ],
+      "questionCount": 8,
+      "timeLimitMinutes": 8,
+      "passPercent": 70,
+      "mix": {
+        "klok": 1
+      }
+    },
+    {
+      "id": "toets-rw-alles",
+      "title": "Toets Runaway",
+      "levels": [
+        "M6",
+        "E6"
+      ],
+      "questionCount": 20,
+      "timeLimitMinutes": 20,
+      "passPercent": 70,
+      "mix": {
+        "woorden": 2,
+        "zinnen": 1,
+        "klok": 1
+      }
+    }
+  ]
+}

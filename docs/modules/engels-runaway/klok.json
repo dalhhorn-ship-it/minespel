@@ -1,0 +1,345 @@
+{
+  "id": "klok",
+  "title": "Zo zeg je hoe laat het is",
+  "groups": [
+    5,
+    6
+  ],
+  "lesson": {
+    "pages": [
+      {
+        "title": "Een heel uur",
+        "skill": "klok-heel-uur",
+        "text": "Is het precies een heel uur? Zeg dan het getal en o'clock.",
+        "examples": [
+          {
+            "good": "11:00 = eleven o'clock"
+          },
+          {
+            "good": "3:00 = three o'clock"
+          }
+        ],
+        "tip": "O'clock zeg je alleen bij een heel uur."
+      },
+      {
+        "title": "Half",
+        "skill": "klok-half",
+        "text": "Bij half zeg je half past en het uur dat net voorbij is. Past betekent over. Let op: in het Nederlands tel je naar het volgende uur.",
+        "examples": [
+          {
+            "good": "11:30 = half past eleven",
+            "bad": "11:30 = half twelve",
+            "why": "Half past eleven is een half uur over elf. In het Nederlands zeg je half twaalf."
+          },
+          {
+            "good": "6:30 = half past six = half zeven"
+          }
+        ],
+        "tip": "Half past: je kijkt naar het uur dat al geweest is."
+      },
+      {
+        "title": "Kwart over en kwart voor",
+        "skill": "klok-kwart",
+        "text": "Kwart over is a quarter past. Kwart voor is a quarter to.",
+        "examples": [
+          {
+            "good": "11:15 = a quarter past eleven"
+          },
+          {
+            "good": "11:45 = a quarter to twelve",
+            "bad": "11:45 = a quarter past twelve",
+            "why": "Kwart voor is to, niet past."
+          }
+        ],
+        "tip": "Past = over, to = voor. Net als in het Nederlands."
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "rw-kl-001",
+      "type": "choice",
+      "level": "M6",
+      "skill": "klok-heel-uur",
+      "prompt": "Hoe zeg je 7:00 in het Engels?",
+      "options": [
+        "half past seven",
+        "seven o'clock",
+        "a quarter past seven",
+        "a quarter to seven"
+      ],
+      "answer": 1,
+      "explain": "Een heel uur is o'clock: seven o'clock."
+    },
+    {
+      "id": "rw-kl-002",
+      "type": "choice",
+      "level": "M6",
+      "skill": "klok-heel-uur",
+      "prompt": "Hoe laat is 'three o'clock'?",
+      "options": [
+        "3:30",
+        "3:15",
+        "3:00",
+        "2:30"
+      ],
+      "answer": 2,
+      "explain": "O'clock is een heel uur. Three o'clock is 3:00."
+    },
+    {
+      "id": "rw-kl-003",
+      "type": "choice",
+      "level": "M6",
+      "skill": "klok-kwart",
+      "prompt": "Hoe zeg je 4:15 in het Engels?",
+      "options": [
+        "a quarter past four",
+        "a quarter to four",
+        "half past four",
+        "four o'clock"
+      ],
+      "answer": 0,
+      "explain": "Kwart over vier: a quarter past four. Past betekent over."
+    },
+    {
+      "id": "rw-kl-004",
+      "type": "choice",
+      "level": "M6",
+      "skill": "klok-kwart",
+      "prompt": "Hoe laat is 'a quarter to nine'?",
+      "options": [
+        "9:15",
+        "8:45",
+        "9:45",
+        "8:15"
+      ],
+      "answer": 1,
+      "explain": "To betekent voor. Kwart voor negen is 8:45."
+    },
+    {
+      "id": "rw-kl-005",
+      "type": "choice",
+      "level": "M6",
+      "skill": "klok-half",
+      "prompt": "Hoe zeg je 6:30 in het Engels?",
+      "options": [
+        "half past seven",
+        "six o'clock",
+        "half past six",
+        "a quarter past six"
+      ],
+      "answer": 2,
+      "explain": "6:30 is half past six: een half uur over zes. In het Nederlands zeg je half zeven."
+    },
+    {
+      "id": "rw-kl-006",
+      "type": "choice",
+      "level": "M6",
+      "skill": "klok-half",
+      "prompt": "Hoe laat is 'half past two'?",
+      "options": [
+        "1:30",
+        "2:30",
+        "2:00",
+        "2:15"
+      ],
+      "answer": 1,
+      "explain": "Half past two is een half uur over twee: 2:30."
+    },
+    {
+      "id": "rw-kl-007",
+      "type": "type",
+      "level": "M6",
+      "skill": "klok-heel-uur",
+      "prompt": "Schrijf het getal in het Engels. Het is 4:00.",
+      "sentence": "It's ... o'clock.",
+      "answer": [
+        "four",
+        "Four"
+      ],
+      "explain": "Vier uur is four o'clock."
+    },
+    {
+      "id": "rw-kl-008",
+      "type": "choice",
+      "level": "M6",
+      "skill": "klok-kwart",
+      "prompt": "Wat betekent 'past' in 'a quarter past five'?",
+      "options": [
+        "voor",
+        "over",
+        "half",
+        "uur"
+      ],
+      "answer": 1,
+      "explain": "Past betekent over. A quarter past five is kwart over vijf."
+    },
+    {
+      "id": "rw-kl-009",
+      "type": "choice",
+      "level": "E6",
+      "skill": "klok-half",
+      "prompt": "In het Nederlands is het half negen. Hoe zeg je dat in het Engels?",
+      "options": [
+        "half past nine",
+        "half past eight",
+        "a quarter to nine",
+        "eight o'clock"
+      ],
+      "answer": 1,
+      "explain": "Half negen is 8:30. In het Engels tel je vanaf acht: half past eight."
+    },
+    {
+      "id": "rw-kl-010",
+      "type": "choice",
+      "level": "E6",
+      "skill": "klok-half",
+      "prompt": "Iemand zegt 'half past ten'. Hoe zeg je dat in het Nederlands?",
+      "options": [
+        "half tien",
+        "tien uur",
+        "half elf",
+        "kwart over tien"
+      ],
+      "answer": 2,
+      "explain": "Half past ten is 10:30. In het Nederlands is dat half elf."
+    },
+    {
+      "id": "rw-kl-011",
+      "type": "choice",
+      "level": "E6",
+      "skill": "klok-kwart",
+      "prompt": "Het is kwart voor drie. Hoe zeg je dat in het Engels?",
+      "options": [
+        "a quarter past three",
+        "a quarter to three",
+        "a quarter to two",
+        "half past two"
+      ],
+      "answer": 1,
+      "explain": "Kwart voor is a quarter to. A quarter to three."
+    },
+    {
+      "id": "rw-kl-012",
+      "type": "choice",
+      "level": "E6",
+      "skill": "klok-kwart",
+      "prompt": "Het is kwart over twaalf. Hoe zeg je dat in het Engels?",
+      "options": [
+        "a quarter to twelve",
+        "half past twelve",
+        "a quarter past twelve",
+        "twelve o'clock"
+      ],
+      "answer": 2,
+      "explain": "Kwart over is a quarter past. A quarter past twelve."
+    },
+    {
+      "id": "rw-kl-013",
+      "type": "type",
+      "level": "E6",
+      "skill": "klok-kwart",
+      "prompt": "Schrijf het woord dat mist. Het is 5:45.",
+      "sentence": "It's a quarter ... six.",
+      "answer": [
+        "to",
+        "To"
+      ],
+      "explain": "5:45 is kwart voor zes: a quarter to six."
+    },
+    {
+      "id": "rw-kl-014",
+      "type": "type",
+      "level": "E6",
+      "skill": "klok-kwart",
+      "prompt": "Schrijf het woord dat mist. Het is 9:15.",
+      "sentence": "It's a quarter ... nine.",
+      "answer": [
+        "past",
+        "Past"
+      ],
+      "explain": "9:15 is kwart over negen: a quarter past nine."
+    },
+    {
+      "id": "rw-kl-015",
+      "type": "type",
+      "level": "E6",
+      "skill": "klok-half",
+      "prompt": "Schrijf het getal in het Engels. Het is 1:30.",
+      "sentence": "It's half past ... .",
+      "answer": [
+        "one",
+        "One"
+      ],
+      "explain": "1:30 is half past one. Je telt vanaf één."
+    },
+    {
+      "id": "rw-kl-016",
+      "type": "type",
+      "level": "E6",
+      "skill": "klok-heel-uur",
+      "prompt": "Schrijf het woord dat mist. Het is 12:00.",
+      "sentence": "It's twelve ... .",
+      "answer": [
+        "o'clock",
+        "O'clock",
+        "o’clock",
+        "O’clock"
+      ],
+      "explain": "Een heel uur is o'clock: twelve o'clock."
+    },
+    {
+      "id": "rw-kl-017",
+      "type": "find-error",
+      "level": "E6",
+      "skill": "klok-kwart",
+      "prompt": "Welk Engels woord is fout geschreven?",
+      "words": [
+        "The",
+        "bus",
+        "leaves",
+        "at",
+        "a",
+        "quarter",
+        "pass",
+        "ten."
+      ],
+      "answer": 6,
+      "correction": "past",
+      "explain": "Over is past, met een t."
+    },
+    {
+      "id": "rw-kl-018",
+      "type": "find-error",
+      "level": "E6",
+      "skill": "klok-half",
+      "prompt": "Welk Engels woord is fout geschreven?",
+      "words": [
+        "The",
+        "boat",
+        "leaves",
+        "at",
+        "half",
+        "past",
+        "three."
+      ],
+      "answer": -1,
+      "explain": "Alles is goed geschreven."
+    },
+    {
+      "id": "rw-kl-019",
+      "type": "choice",
+      "level": "E6",
+      "skill": "klok-kwart",
+      "prompt": "De trein vertrekt om 7:45. Wat zegt de man op het station?",
+      "options": [
+        "The train leaves at a quarter past seven.",
+        "The train leaves at half past seven.",
+        "The train leaves at a quarter to eight.",
+        "The train leaves at seven o'clock."
+      ],
+      "answer": 2,
+      "explain": "7:45 is kwart voor acht: a quarter to eight."
+    }
+  ]
+}
