@@ -9,6 +9,7 @@ Founder: build v3 Dino's veilig (0.6.0), then v15 Grote wereld (0.7.0), then v6 
 * Branch claude/trusting-hypatia-amvord = main plus nothing. Uncommitted: none after this note.
 
 ## Decisions
+* 129 animals avoid lava and fire (370a2a7).
 * 128 animals roam freely 12 blocks when not following (166603d), texts Vrij rondlopen and Allemaal vrij.
 * 122 dinos stay, 123 klok module, 124 v15 Grote wereld right after v3 (keep the kid's world in the middle), 125 Examens by lesson, 126 keyboard like the iPad, 127 sheet is the only source (BRON.md, founder confirms, validate.py check).
 
