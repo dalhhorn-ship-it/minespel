@@ -3,6 +3,7 @@ import { BACKUP_KV_NAMES, backupFileName, backupText, buildBackup, decodeValue, 
 import { checkBackup } from './backup-check';
 import { getAll, haltWrites, openDb, put, get } from './db';
 import { createRecords } from './records';
+import { prepareMonsters } from './monsters-store';
 import { STORE_NAMES, defaultKv, type KvName } from './schema';
 
 const FIXTURES = import.meta.glob('../../tests/fixtures/backups/*', { eager: true, query: '?raw', import: 'default' }) as Record<string, string>;
@@ -38,6 +39,7 @@ async function seed(db: IDBDatabase) {
     stats: { playMsPerDay: { '2026-11-01': 1000 } },
     meta: { schemaVersion: 1, appVersion: '0.5.0', lastBackup: null, createdAt: '2026-10-01T00:00:00.000Z' },
     village: { found: [34, 41], cooldownMs: 1234, lastVillager: 'noord-1' },
+    monsters: { knights: [{ id: 'k1', mode: 'stay', spot: { x: 5, y: 9, z: 6 }, boughtFor: 30 }], bubbleClockMs: 4000, hintShown: true },
     gate: { salt: 's', pinHash: 'h', wrongTries: 2, blockedUntil: 99, resetWrongTries: 1 },
     worldV1: { diff: Uint32Array.from([1]) },
     session: { running: true },
@@ -168,6 +170,53 @@ describe('backup file', () => {
     expect((await records.get('settings')).pointsMode).toBe('normaal'); // the default fills the gap
     expect((await records.get('world')).terrainVersion).toBeUndefined();
     expect((await getAll<{ kind: string }>(db, 'ledger')).map((l) => l.kind)).toEqual(['malus', 'break']);
+    db.close();
+  });
+
+  it('AC209 AC226: a backup made with 2 knights restores them with their modes, the clock, the hint and the switches', async () => {
+    const db = await fresh();
+    const r = checkBackup(fixture('v070-monsters.json'));
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    await replaceAll(db, r.data);
+    haltWrites(false); // the page reloads after a real restore
+    const records = createRecords(db);
+    const m = await records.get('monsters');
+    expect(m.knights.map((k) => [k.id, k.mode, k.spot])).toEqual([['ridder-1', 'follow', null], ['ridder-2', 'guard', { x: 41.5, y: 12, z: 39.5 }]]);
+    expect([m.bubbleClockMs, m.hintShown]).toEqual([120_000, true]);
+    const st = await records.get('settings');
+    expect([st.monstersEnabled, st.knightsEnabled, st.bubbleEnabled]).toEqual([true, true, true]);
+    // The first start rule does not run again: the record exists.
+    expect(await prepareMonsters(db)).toBeNull();
+    expect((await records.get('settings')).bubbleEnabled).toBe(true);
+    db.close();
+  });
+
+  it('AC209 AC226: a backup made with 2 knights round trips through build and check', async () => {
+    const db = await fresh();
+    await seed(db);
+    const text = backupText(await buildBackup(db));
+    const checked = checkBackup(text);
+    expect(checked.ok).toBe(true);
+    if (!checked.ok) return;
+    expect(checked.data.kv.monsters).toEqual({ knights: [{ id: 'k1', mode: 'stay', spot: { x: 5, y: 9, z: 6 }, boughtFor: 30 }], bubbleClockMs: 4000, hintShown: true });
+    db.close();
+  });
+
+  it('AC209 AC226: a backup from 0.6.0 restores with no knights, a clock at 0, no hint and the bubble Uit', async () => {
+    const db = await fresh();
+    const r = checkBackup(fixture('v060-no-monsters.json'));
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    await replaceAll(db, r.data);
+    haltWrites(false); // the page reloads after a real restore
+    expect(await get(db, 'kv', 'monsters')).toBeUndefined();
+    // After the reload the first start rule sees an existing install.
+    expect((await prepareMonsters(db))?.bubbleEnabled).toBe(false);
+    const records = createRecords(db);
+    expect(await records.get('monsters')).toEqual({ knights: [], bubbleClockMs: 0, hintShown: false });
+    const st = await records.get('settings');
+    expect([st.monstersEnabled, st.knightsEnabled, st.bubbleEnabled]).toEqual([true, true, false]);
     db.close();
   });
 

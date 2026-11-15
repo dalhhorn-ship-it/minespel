@@ -19,6 +19,7 @@ import type { GameRenderer, RendererFactory } from '../render/renderer';
 import { createHud, type Hud } from '../ui/hud';
 import { createVillageBubble, type VillageBubble } from '../ui/village-bubble';
 import { el } from '../ui/dom';
+import type { Box } from '../world/build';
 import { World } from '../world/world';
 import { createLoop } from './loop';
 import { createPlayerController, type PlayerController } from './player-controller';
@@ -39,7 +40,23 @@ export interface GameEvents {
   changed: ChangedEvent;
 }
 
+/**
+ * A creature layer beside the dinos and villagers (knights now, monsters in v18, decision 135).
+ * `step` runs every frame after the villagers. A world tap asks `handleTap` by priority (monsters 10, knights 20,
+ * lowest first) before the dinos and the build. `isOccupied` joins the build check.
+ */
+export interface CreatureSystem {
+  step(dt: number): void;
+  handleTap?(x: number, y: number): boolean;
+  isOccupied?(box: Box): boolean;
+  /** After Wereld opnieuw beginnen: `spot` is where the kid stands now. */
+  onWorldReset?(spot: { x: number; y: number; z: number }): void;
+  dispose?(): void;
+}
+
 export interface Game {
+  /** The element that holds the canvas, HUD and overlays. */
+  readonly container: HTMLElement;
   readonly world: World;
   readonly player: PlayerController;
   readonly renderer: GameRenderer;
@@ -58,6 +75,13 @@ export interface Game {
   setFluitOwned(owned: boolean): void;
   /** Plays the Dinofluit: every dino and chicken walks slowly to the kid. Returns how many were called. */
   playFluit(): number;
+  /** Adds a creature layer. Lower priority gets the tap first. Returns a function that removes it. */
+  addCreatures(system: CreatureSystem, priority: number): () => void;
+  /**
+   * Steps the dinos, villagers and creatures in 1/30 s steps with no drawing, `ms` in all. Only while the loop
+   * runs (so never in a pause, a menu or a break). Returns the ms done. For tests and the fast forward hook.
+   */
+  advanceWorld(ms: number): number;
   /** Stops the world: no steps, no drawing. Safe to call twice. */
   pause(): void;
   resume(): void;
@@ -99,6 +123,9 @@ export interface GameOptions {
   onVillageBubbleTapped?: () => void;
 }
 
+/** Step of `advanceWorld`: 1/30 s. */
+const ADVANCE_STEP_MS = 1000 / 30;
+
 const SILENT_UNLOCK = { isUnlocked: () => false, watch: () => {}, whenUnlocked: () => {} };
 
 export function createGame(options: GameOptions): Game {
@@ -117,6 +144,7 @@ export function createGame(options: GameOptions): Game {
   const stick = createStick();
   const sound = options.sound ?? createSound({ unlock: options.audioUnlock ?? SILENT_UNLOCK });
   const effects = createEffects(options.container, doc);
+  const creatures: { system: CreatureSystem; priority: number }[] = [];
   const tapWorld: { fn: ((x: number, y: number) => void) | null } = { fn: null }; // set once the build controller exists
   let loopRunning = () => false;
   const look = createLook({ onTap: (x, y) => tapWorld.fn?.(x, y) });
@@ -202,11 +230,13 @@ export function createGame(options: GameOptions): Game {
     effects,
     sound,
     viewport: () => ({ width: win.innerWidth, height: win.innerHeight }),
-    isOccupied: (box) => dinoSystem.isOccupied(box) || villagerSystem.isOccupied(box),
+    isOccupied: (box) =>
+      dinoSystem.isOccupied(box) || villagerSystem.isOccupied(box) || creatures.some((c) => c.system.isOccupied?.(box) === true),
     canAct: () => loopRunning(),
   });
   tapWorld.fn = (x, y) => {
     if (!loopRunning()) return;
+    for (const c of creatures) if (c.system.handleTap?.(x, y)) return;
     if (dinoSystem.handleTap(x, y)) return;
     build.tap(x, y);
   };
@@ -258,12 +288,19 @@ export function createGame(options: GameOptions): Game {
   const fps: FpsCounter = createFpsCounter(search, doc.body);
 
   let frames = 0;
+  /** One world step without drawing: dinos, villagers, creatures. */
+  const stepWorld = (dt: number) => {
+    dinoSystem.step(dt);
+    villagerSystem.step(dt);
+    for (const c of [...creatures]) c.system.step(dt);
+  };
   const loop = createLoop({
     frame(dt, now) {
       player.update(dt);
       dinoSystem.step(dt);
       hud.setStayVisible(dinoSystem.followingCount() > 0);
       villagerSystem.step(dt);
+      for (const c of [...creatures]) c.system.step(dt);
       if (dinos) stepSpikeDinos(world, dinos, dt);
       renderer.setCamera(player.pose());
       renderer.render();
@@ -328,6 +365,7 @@ export function createGame(options: GameOptions): Game {
   }
 
   return {
+    container: options.container,
     world,
     player,
     renderer,
@@ -347,6 +385,21 @@ export function createGame(options: GameOptions): Game {
       hud.setFluit(owned);
     },
     playFluit,
+    addCreatures(system, priority) {
+      const entry = { system, priority };
+      creatures.push(entry);
+      creatures.sort((a, b) => a.priority - b.priority);
+      return () => {
+        const i = creatures.indexOf(entry);
+        if (i >= 0) creatures.splice(i, 1);
+      };
+    },
+    advanceWorld(ms) {
+      if (!loop.running || !(ms > 0) || !Number.isFinite(ms)) return 0;
+      const steps = Math.floor((ms * 30) / 1000 + 1e-9);
+      for (let i = 0; i < steps; i++) stepWorld(ADVANCE_STEP_MS / 1000);
+      return Math.round(steps * ADVANCE_STEP_MS);
+    },
     pause() {
       manualPause = true;
       update();
@@ -368,6 +421,8 @@ export function createGame(options: GameOptions): Game {
       renderer.setWorld(world);
       emitChanged('world');
       teleportHome();
+      const p = player.player;
+      for (const c of [...creatures]) c.system.onWorldReset?.({ x: p.x, y: p.y, z: p.z });
     },
     on(event, listener) {
       const set = listeners[event] as Set<typeof listener>;
@@ -389,6 +444,7 @@ export function createGame(options: GameOptions): Game {
       villageBubble.destroy();
       hotbar.destroy();
       grid.destroy();
+      for (const c of creatures.splice(0)) c.system.dispose?.();
       dinoSystem.dispose();
       effects.dispose();
       stick.element.remove();

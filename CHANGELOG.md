@@ -2,6 +2,12 @@
 
 Written so kids can read it too.
 
+## Unreleased
+
+### Ridders (under construction)
+
+* Behind the scenes, the game can now keep knights: they are saved with your world and come back after a backup restore. You cannot buy one yet.
+
 ## 0.6.0 (2026-11-15)
 
 ### Backup

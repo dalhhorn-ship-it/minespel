@@ -51,6 +51,7 @@ export const KV_NAMES = [
   'stats',
   'meta',
   'village',
+  'monsters',
 ] as const;
 export type KvName = (typeof KV_NAMES)[number];
 
@@ -67,6 +68,12 @@ export interface SettingsRecord {
   soundEffectsEnabled: boolean;
   /** "Punten": what a mistake costs (v10). Missing in a save from 0.3.0, read as 'normaal'. */
   pointsMode?: 'makkelijk' | 'normaal' | 'moeilijk';
+  /** "Monsters en ridders" master switch (v17). Missing reads as Aan. */
+  monstersEnabled?: boolean;
+  /** "Ridders" (v17). Missing reads as Aan. */
+  knightsEnabled?: boolean;
+  /** "Zwarte bubbel" (v18). Missing reads as Uit; the first start rule sets it (decision 135). */
+  bubbleEnabled?: boolean;
   [key: string]: unknown;
 }
 export interface PlayerRecord {
@@ -140,6 +147,27 @@ export interface VillageRecord {
   lastVillager: string | null;
 }
 
+export type KnightMode = 'follow' | 'stay' | 'guard';
+export const KNIGHT_MODES: readonly KnightMode[] = ['follow', 'stay', 'guard'];
+
+/** One bought knight. Only mode and spot are saved, never the live position (decision 135). */
+export interface KnightRecord {
+  id: string;
+  mode: KnightMode;
+  /** Where a stay or guard knight stands. Null for a follower. */
+  spot: { x: number; y: number; z: number } | null;
+  /** Points paid, so a trade in can be checked later. */
+  boughtFor: number;
+}
+
+/** v17 Ridders and v18 Zwarte bubbel: the knights, the bubble clock and the hint flag. */
+export interface MonstersRecord {
+  knights: KnightRecord[];
+  /** Play milliseconds since the last bubble, 0 to 600 000. */
+  bubbleClockMs: number;
+  hintShown: boolean;
+}
+
 export interface KvRecords {
   settings: SettingsRecord;
   player: PlayerRecord;
@@ -156,6 +184,7 @@ export interface KvRecords {
   stats: StatsRecord;
   meta: MetaRecord;
   village: VillageRecord;
+  monsters: MonstersRecord;
 }
 
 /** Fresh copies every call, so nobody shares or mutates a default. */
@@ -169,6 +198,9 @@ export const KV_DEFAULTS: { [K in KvName]: () => KvRecords[K] } = {
     breakWarningEnabled: true,
     soundEffectsEnabled: true,
     pointsMode: 'normaal',
+    monstersEnabled: true,
+    knightsEnabled: true,
+    bubbleEnabled: false,
   }),
   player: () => ({ x: 0, y: 0, z: 0, yaw: 0, pitch: 0, hotbar: [], selectedSlot: 0, mode: 'mine' }),
   world: () => ({ diff: new Uint32Array(0) }),
@@ -183,6 +215,7 @@ export const KV_DEFAULTS: { [K in KvName]: () => KvRecords[K] } = {
   stats: () => ({ playMsPerDay: {} }),
   meta: () => ({ schemaVersion: SCHEMA_VERSION, appVersion: '', lastBackup: null, createdAt: null }),
   village: () => ({ found: [], cooldownMs: 0, lastVillager: null }),
+  monsters: () => ({ knights: [], bubbleClockMs: 0, hintShown: false }),
 };
 
 export function defaultKv<K extends KvName>(name: K): KvRecords[K] {

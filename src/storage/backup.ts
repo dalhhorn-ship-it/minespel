@@ -14,7 +14,7 @@ export const MAX_BACKUP_BYTES = 20 * 1024 * 1024;
  * worldV1 (the old 0.4.0 copy), session (a running break or exam) and timers.
  */
 export const BACKUP_KV_NAMES = [
-  'settings', 'player', 'world', 'dinos', 'economy', 'rotation', 'switches', 'stats', 'meta', 'village',
+  'settings', 'player', 'world', 'dinos', 'economy', 'rotation', 'switches', 'stats', 'meta', 'village', 'monsters',
 ] as const satisfies readonly KvName[];
 export type BackupKvName = (typeof BACKUP_KV_NAMES)[number];
 

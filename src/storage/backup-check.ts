@@ -2,12 +2,14 @@
 // The save rules are reused from the code that enforces them, not copied.
 import { MAX_CHICKENS, MAX_SHOP_DINOS, chickenCount, shopDinoCount } from '../core/economy';
 import { cleanDiff } from '../game/world-save';
+import { MAX_KNIGHTS } from '../knights/knight-types';
 import { filterDinoNameDraft } from '../ui/name-screen';
 import {
   BACKUP_APP, BACKUP_FORMAT, BACKUP_KV_NAMES, KEYED_STORES, LOG_STORES, MAX_BACKUP_BYTES, decodeValue,
   type BackupData, type BackupKvName,
 } from './backup';
-import { SCHEMA_VERSION, STORE_NAMES } from './schema';
+import { WORLD_HEIGHT, WORLD_SIZE } from '../world/terrain';
+import { KNIGHT_MODES, SCHEMA_VERSION, STORE_NAMES } from './schema';
 
 export const MSG_TOO_BIG = 'Dit bestand is te groot voor een backup. Er is niets veranderd.';
 export const MSG_NOT_JSON = 'Dit bestand is geen backup van Dino Blokwereld. Er is niets veranderd.';
@@ -40,7 +42,10 @@ function validSettings(s: Record<string, unknown>): boolean {
     optional(s.newLessonsEnabled, (v) => typeof v === 'boolean') &&
     optional(s.breakWarningEnabled, (v) => typeof v === 'boolean') &&
     optional(s.soundEffectsEnabled, (v) => typeof v === 'boolean') &&
-    optional(s.pointsMode, (v) => v === 'makkelijk' || v === 'normaal' || v === 'moeilijk')
+    optional(s.pointsMode, (v) => v === 'makkelijk' || v === 'normaal' || v === 'moeilijk') &&
+    optional(s.monstersEnabled, (v) => typeof v === 'boolean') &&
+    optional(s.knightsEnabled, (v) => typeof v === 'boolean') &&
+    optional(s.bubbleEnabled, (v) => typeof v === 'boolean')
   );
 }
 
@@ -61,6 +66,23 @@ function validWorld(w: Record<string, unknown>): boolean {
   return optional(w.terrainVersion, (v) => isWhole(v, 1));
 }
 
+/** A spot is null or a point inside the world. */
+const inside = (n: unknown, max: number): boolean => isNum(n) && n >= 0 && n <= max;
+const validSpot = (x: unknown): boolean =>
+  x === null || (isObj(x) && inside(x.x, WORLD_SIZE) && inside(x.y, WORLD_HEIGHT) && inside(x.z, WORLD_SIZE));
+
+function validKnight(k: unknown): boolean {
+  return isObj(k) && typeof k.id === 'string' && k.id.length >= 1 && k.id.length <= 40 &&
+    KNIGHT_MODES.includes(k.mode as never) && validSpot(k.spot) && isWhole(k.boughtFor);
+}
+
+function validMonsters(v: Record<string, unknown>): boolean {
+  return optional(v.knights, (x) => Array.isArray(x) && x.length <= MAX_KNIGHTS && x.every(validKnight) &&
+      new Set(x.map((k) => (k as { id: string }).id)).size === x.length) &&
+    optional(v.bubbleClockMs, (x) => isNum(x) && x >= 0 && x <= 600_000) &&
+    optional(v.hintShown, (x) => typeof x === 'boolean');
+}
+
 function validKv(name: BackupKvName, v: Record<string, unknown>): boolean {
   switch (name) {
     case 'settings': return validSettings(v);
@@ -68,6 +90,7 @@ function validKv(name: BackupKvName, v: Record<string, unknown>): boolean {
     case 'world': return validWorld(v);
     case 'economy':
       return optional(v.points, (x) => isWhole(x)) && optional(v.practicePointsToday, (x) => isWhole(x)) && optional(v.fluit, (x) => typeof x === 'boolean');
+    case 'monsters': return validMonsters(v);
     case 'village':
       return optional(v.found, (x) => Array.isArray(x) && x.every((b) => isWhole(b, 34) && b <= 41)) &&
         optional(v.cooldownMs, (x) => isNum(x) && x >= 0) &&

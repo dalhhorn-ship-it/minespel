@@ -1,0 +1,24 @@
+/* The speech line (v17): one short line at the top centre, under the top bar. Never takes a tap. */
+.speech-line {
+  position: fixed;
+  z-index: 4;
+  left: 50%;
+  transform: translateX(-50%);
+  top: calc(var(--safe-top) + var(--touch-min) + var(--gap) * 2);
+  max-width: min(420px, 50vw);
+  padding: 8px calc(var(--gap) * 2);
+  border: 4px solid var(--ink);
+  border-radius: var(--radius);
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-stack);
+  font-size: calc(var(--font-body) * var(--font-scale, 1));
+  font-weight: 800;
+  line-height: 1.2;
+  text-align: center;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+.speech-line[hidden] { display: none; }

@@ -46,4 +46,9 @@ describe('v11 village record', () => {
     defaultKv('village').found.push(35);
     expect(defaultKv('village').found).toEqual([]);
   });
+  it('AC226: monsters on, Ridders on, bubble off, and an empty monsters record', () => {
+    const d = defaultKv('settings');
+    expect([d.monstersEnabled, d.knightsEnabled, d.bubbleEnabled]).toEqual([true, true, false]);
+    expect(defaultKv('monsters')).toEqual({ knights: [], bubbleClockMs: 0, hintShown: false });
+  });
 });
