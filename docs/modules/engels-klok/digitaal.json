@@ -1,0 +1,491 @@
+{
+  "id": "digitaal",
+  "title": "Digitaal, a.m. en p.m.",
+  "groups": [
+    6,
+    7
+  ],
+  "lesson": {
+    "pages": [
+      {
+        "title": "Zoals op de digitale klok",
+        "skill": "digitaal",
+        "text": "Je mag ook gewoon de cijfers zeggen, zoals op een digitale klok. Eerst het uur, dan de minuten. Staat er een nul voor de minuten? Zeg dan oh.",
+        "examples": [
+          {
+            "good": "2:30 = two thirty"
+          },
+          {
+            "good": "9:45 = nine forty-five"
+          },
+          {
+            "good": "7:05 = seven oh five",
+            "bad": "7:05 = seven five",
+            "why": "De nul zeg je als oh: seven oh five."
+          }
+        ],
+        "tip": "Oh klinkt als de letter o. Zo zeg je de nul."
+      },
+      {
+        "title": "a.m. en p.m.",
+        "skill": "am-pm",
+        "text": "In het Engels tel je meestal maar tot 12. Daarom zeg je a.m. voor de ochtend, voor 12 uur 's middags. Na 12 uur 's middags zeg je p.m.: de middag en de avond.",
+        "examples": [
+          {
+            "good": "7 uur 's ochtends = 7 a.m."
+          },
+          {
+            "good": "7 uur 's avonds = 7 p.m."
+          },
+          {
+            "good": "8 uur 's avonds = 8 p.m.",
+            "bad": "8 uur 's avonds = 8 a.m.",
+            "why": "'s Avonds is na 12 uur 's middags, dus p.m."
+          }
+        ],
+        "tip": "Ochtend: a.m. Middag en avond: p.m. Om 12 uur 's middags zeg je vaak gewoon noon."
+      },
+      {
+        "title": "Geen 24 uur",
+        "skill": "24-uur",
+        "text": "In Nederland zeg je soms 14:00 of veertien uur. In het Engels zeg je dat bijna nooit als je praat. Haal 12 van het uur af en zeg p.m. erachter: 14:00 is 2 p.m.",
+        "examples": [
+          {
+            "good": "14:00 = 2 p.m. = two p.m."
+          },
+          {
+            "good": "19:30 = 7:30 p.m. = seven thirty p.m."
+          },
+          {
+            "good": "14:00 = two o'clock",
+            "bad": "14:00 = fourteen o'clock",
+            "why": "Fourteen o'clock bestaat niet. Na 12 begin je weer bij 1."
+          }
+        ],
+        "tip": "Uur boven de 12? Min 12, en p.m. erachter."
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "ek-dg-001",
+      "type": "choice",
+      "level": "M6",
+      "skill": "digitaal",
+      "prompt": "Hoe zeg je 2:30 zoals op een digitale klok?",
+      "options": [
+        "two thirty",
+        "two three",
+        "thirty two",
+        "two thirteen"
+      ],
+      "answer": 0,
+      "explain": "Eerst het uur, dan de minuten: two thirty."
+    },
+    {
+      "id": "ek-dg-002",
+      "type": "choice",
+      "level": "M6",
+      "skill": "digitaal",
+      "prompt": "Hoe zeg je 9:45 zoals op een digitale klok?",
+      "options": [
+        "nine fourteen",
+        "nine forty-five",
+        "forty-five nine",
+        "nine fifty-four"
+      ],
+      "answer": 1,
+      "explain": "Eerst het uur, dan de minuten: nine forty-five."
+    },
+    {
+      "id": "ek-dg-003",
+      "type": "choice",
+      "level": "M6",
+      "skill": "digitaal",
+      "prompt": "Welke tijd is 'six fifteen'?",
+      "options": [
+        "6:50",
+        "6:15",
+        "5:15",
+        "6:05"
+      ],
+      "answer": 1,
+      "explain": "Six is het uur, fifteen zijn de minuten: 6:15. Fifteen is vijftien, fifty is vijftig."
+    },
+    {
+      "id": "ek-dg-004",
+      "type": "choice",
+      "level": "M6",
+      "skill": "am-pm",
+      "prompt": "Je ontbijt om 7 uur 's ochtends. Hoe schrijf je dat in het Engels?",
+      "options": [
+        "7 a.m.",
+        "7 p.m."
+      ],
+      "answer": 0,
+      "explain": "De ochtend is voor 12 uur 's middags: a.m. Dus 7 a.m."
+    },
+    {
+      "id": "ek-dg-005",
+      "type": "choice",
+      "level": "M6",
+      "skill": "am-pm",
+      "prompt": "Je gaat om 8 uur 's avonds naar bed. Hoe schrijf je dat in het Engels?",
+      "options": [
+        "8 a.m.",
+        "8 p.m."
+      ],
+      "answer": 1,
+      "explain": "De avond is na 12 uur 's middags: p.m. Dus 8 p.m."
+    },
+    {
+      "id": "ek-dg-006",
+      "type": "choice",
+      "level": "M6",
+      "skill": "am-pm",
+      "prompt": "Wat betekent p.m.?",
+      "options": [
+        "Voor 12 uur 's middags: de ochtend.",
+        "Na 12 uur 's middags: de middag en de avond.",
+        "Precies 12 uur."
+      ],
+      "answer": 1,
+      "explain": "P.m. is na 12 uur 's middags. A.m. is de ochtend."
+    },
+    {
+      "id": "ek-dg-007",
+      "type": "type",
+      "level": "M6",
+      "skill": "digitaal",
+      "prompt": "Schrijf het getal dat mist. Het is 4:30. Het betekent: Het is half vijf.",
+      "sentence": "It's four ... .",
+      "answer": [
+        "thirty",
+        "Thirty"
+      ],
+      "explain": "Zoals op de digitale klok: four thirty. Dertig is thirty."
+    },
+    {
+      "id": "ek-dg-008",
+      "type": "choice",
+      "level": "M6",
+      "skill": "24-uur",
+      "prompt": "Hoe zeg je 15:00 in het Engels?",
+      "options": [
+        "fifteen o'clock",
+        "3 p.m.",
+        "3 a.m.",
+        "5 p.m."
+      ],
+      "answer": 1,
+      "explain": "15 min 12 is 3. Het is middag, dus p.m.: 3 p.m."
+    },
+    {
+      "id": "ek-dg-009",
+      "type": "find-error",
+      "level": "M6",
+      "skill": "am-pm",
+      "prompt": "Welk woord is fout? Je staat om 7 uur 's ochtends op.",
+      "words": [
+        "I",
+        "get",
+        "up",
+        "at",
+        "7",
+        "a.m."
+      ],
+      "answer": -1,
+      "correction": null,
+      "explain": "Geen fout. De ochtend is a.m.: 7 a.m."
+    },
+    {
+      "id": "ek-dg-010",
+      "type": "choice",
+      "level": "E6",
+      "skill": "digitaal",
+      "prompt": "Hoe zeg je 7:05 zoals op een digitale klok?",
+      "options": [
+        "seven five",
+        "seven oh five",
+        "seven fifty",
+        "five seven"
+      ],
+      "answer": 1,
+      "explain": "De nul zeg je als oh: seven oh five."
+    },
+    {
+      "id": "ek-dg-011",
+      "type": "choice",
+      "level": "E6",
+      "skill": "digitaal",
+      "prompt": "Welke tijd is 'eleven oh eight'?",
+      "options": [
+        "11:08",
+        "11:80",
+        "8:11",
+        "11:18"
+      ],
+      "answer": 0,
+      "explain": "Oh is de nul. Eleven oh eight is 11:08."
+    },
+    {
+      "id": "ek-dg-012",
+      "type": "type",
+      "level": "E6",
+      "skill": "digitaal",
+      "prompt": "Schrijf het woord dat mist. Het betekent: De bus gaat om vijf over drie.",
+      "sentence": "The bus leaves at three ... five.",
+      "answer": [
+        "oh",
+        "Oh",
+        "o",
+        "O"
+      ],
+      "explain": "3:05: de nul zeg je als oh. Three oh five."
+    },
+    {
+      "id": "ek-dg-013",
+      "type": "type",
+      "level": "E6",
+      "skill": "digitaal",
+      "prompt": "Schrijf het getal dat mist. Het is 8:45. Het betekent: Het is kwart voor negen.",
+      "sentence": "It's eight ... .",
+      "answer": [
+        "forty-five",
+        "Forty-five",
+        "forty five",
+        "Forty five"
+      ],
+      "explain": "Zoals op de digitale klok: eight forty-five. Veertig is forty, met or."
+    },
+    {
+      "id": "ek-dg-014",
+      "type": "type",
+      "level": "E6",
+      "skill": "24-uur",
+      "prompt": "Schrijf het getal dat mist. Het betekent: De zwemles is om 16:00.",
+      "sentence": "Swimming class is at ... p.m.",
+      "answer": [
+        "four",
+        "Four",
+        "4"
+      ],
+      "explain": "16 min 12 is 4. Het is middag, dus 4 p.m."
+    },
+    {
+      "id": "ek-dg-015",
+      "type": "choice",
+      "level": "E6",
+      "skill": "24-uur",
+      "prompt": "Op het rooster staat 20:00. Wat zeg je in het Engels?",
+      "options": [
+        "8 a.m.",
+        "8 p.m.",
+        "10 p.m.",
+        "twenty o'clock"
+      ],
+      "answer": 1,
+      "explain": "20 min 12 is 8. Het is avond, dus p.m.: 8 p.m."
+    },
+    {
+      "id": "ek-dg-016",
+      "type": "choice",
+      "level": "E6",
+      "skill": "am-pm",
+      "prompt": "De dino's spelen om half elf 's ochtends. Welke tijd klopt?",
+      "options": [
+        "10:30 a.m.",
+        "10:30 p.m.",
+        "11:30 a.m.",
+        "11:30 p.m."
+      ],
+      "answer": 0,
+      "explain": "Half elf is 10:30. Het is ochtend, dus a.m.: 10:30 a.m."
+    },
+    {
+      "id": "ek-dg-017",
+      "type": "find-error",
+      "level": "E6",
+      "skill": "am-pm",
+      "prompt": "Welk woord is fout? We eten om 6 uur 's avonds.",
+      "words": [
+        "We",
+        "have",
+        "dinner",
+        "at",
+        "6",
+        "a.m."
+      ],
+      "answer": 5,
+      "correction": "p.m.",
+      "explain": "'s Avonds is na 12 uur 's middags, dus p.m.: 6 p.m."
+    },
+    {
+      "id": "ek-dg-018",
+      "type": "find-error",
+      "level": "E6",
+      "skill": "24-uur",
+      "prompt": "Welk woord is fout? Het feest is om 14:00.",
+      "words": [
+        "The",
+        "party",
+        "is",
+        "at",
+        "fourteen",
+        "o'clock."
+      ],
+      "answer": 4,
+      "correction": "two",
+      "explain": "Fourteen o'clock bestaat niet. 14 min 12 is 2: two o'clock, of 2 p.m."
+    },
+    {
+      "id": "ek-dg-019",
+      "type": "type",
+      "level": "M7",
+      "skill": "digitaal",
+      "prompt": "Schrijf zoals op een digitale klok: 6:50.",
+      "answer": [
+        "six fifty",
+        "Six fifty"
+      ],
+      "explain": "Eerst het uur, dan de minuten: six fifty. Vijftig is fifty."
+    },
+    {
+      "id": "ek-dg-020",
+      "type": "type",
+      "level": "M7",
+      "skill": "digitaal",
+      "prompt": "Schrijf zoals op een digitale klok: 10:35.",
+      "answer": [
+        "ten thirty-five",
+        "Ten thirty-five",
+        "ten thirty five",
+        "Ten thirty five"
+      ],
+      "explain": "Eerst het uur, dan de minuten: ten thirty-five."
+    },
+    {
+      "id": "ek-dg-021",
+      "type": "type",
+      "level": "M7",
+      "skill": "24-uur",
+      "prompt": "Schrijf 17:00 met p.m. Gebruik cijfers, zoals 3 p.m.",
+      "answer": [
+        "5 p.m.",
+        "5 pm",
+        "5 P.M.",
+        "5 PM",
+        "5p.m.",
+        "5pm",
+        "5P.M.",
+        "5PM",
+        "5:00 p.m.",
+        "5:00 pm",
+        "5:00 P.M.",
+        "5:00 PM",
+        "5:00p.m.",
+        "5:00pm",
+        "5:00P.M.",
+        "5:00PM"
+      ],
+      "explain": "17 min 12 is 5. Het is middag, dus 5 p.m."
+    },
+    {
+      "id": "ek-dg-022",
+      "type": "type",
+      "level": "M7",
+      "skill": "24-uur",
+      "prompt": "Schrijf 21:30 met p.m. Gebruik cijfers, zoals 3:15 p.m.",
+      "answer": [
+        "9:30 p.m.",
+        "9:30 pm",
+        "9:30 P.M.",
+        "9:30 PM",
+        "9:30p.m.",
+        "9:30pm",
+        "9:30P.M.",
+        "9:30PM"
+      ],
+      "explain": "21 min 12 is 9. Het is avond, dus 9:30 p.m."
+    },
+    {
+      "id": "ek-dg-023",
+      "type": "choice",
+      "level": "M7",
+      "skill": "digitaal",
+      "prompt": "Welke tijd zegt hetzelfde als 'twenty to ten'?",
+      "options": [
+        "nine forty",
+        "ten twenty",
+        "nine twenty",
+        "ten forty"
+      ],
+      "answer": 0,
+      "explain": "Twenty to ten is 9:40. Zoals op de digitale klok: nine forty."
+    },
+    {
+      "id": "ek-dg-024",
+      "type": "choice",
+      "level": "M7",
+      "skill": "digitaal",
+      "prompt": "Welke tijd zegt hetzelfde als 'one fifteen'?",
+      "options": [
+        "a quarter to one",
+        "a quarter past one",
+        "a quarter past fifteen",
+        "half past one"
+      ],
+      "answer": 1,
+      "explain": "One fifteen is 1:15. Dat is kwart over één: a quarter past one."
+    },
+    {
+      "id": "ek-dg-025",
+      "type": "choice",
+      "level": "M7",
+      "skill": "am-pm",
+      "prompt": "Het vliegtuig van de familie vertrekt om 6 a.m. Wanneer is dat?",
+      "options": [
+        "om zes uur 's ochtends",
+        "om zes uur 's avonds",
+        "om zestien uur"
+      ],
+      "answer": 0,
+      "explain": "A.m. is de ochtend: zes uur 's ochtends."
+    },
+    {
+      "id": "ek-dg-026",
+      "type": "find-error",
+      "level": "M7",
+      "skill": "digitaal",
+      "prompt": "Welk woord is fout? Het is 9:05.",
+      "words": [
+        "It's",
+        "nine",
+        "oh",
+        "five."
+      ],
+      "answer": -1,
+      "correction": null,
+      "explain": "Geen fout. De nul zeg je als oh: nine oh five."
+    },
+    {
+      "id": "ek-dg-027",
+      "type": "find-error",
+      "level": "M7",
+      "skill": "24-uur",
+      "prompt": "Welk woord is fout? Je leest tot 22:00.",
+      "words": [
+        "I",
+        "read",
+        "in",
+        "bed",
+        "until",
+        "ten",
+        "a.m."
+      ],
+      "answer": 6,
+      "correction": "p.m.",
+      "explain": "22 min 12 is 10. Het is avond, dus p.m.: ten p.m."
+    }
+  ]
+}

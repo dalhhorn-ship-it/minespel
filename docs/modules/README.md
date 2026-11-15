@@ -12,6 +12,7 @@ Every folder here with a `module.json` is a built in module. The game loads them
 | `kofschip/` | 't Kofschip: verleden tijd en voltooid deelwoord | M6, E6 |
 | `engels-beautiful-people/` | Engels: woorden en zinnen uit het liedje Beautiful People | M6, E6 |
 | `engels-runaway/` | Engels: reizen, op het station en hoe laat het is, uit het liedje Runaway | M6, E6 |
+| `engels-klok/` | Engels: hoe laat is het? Klok lezen in het Engels en waarom half anders werkt | M6, E6, M7 |
 
 A folder may also hold a `COVERAGE.md` that says which source the content is based on. The validator and the game only read the `.json` files.
 
