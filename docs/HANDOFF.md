@@ -1,31 +1,24 @@
-# Handoff, 2026-11-15 evening, v3 part 2 live, T53a next
+# Handoff, 2026-11-15 19:35, v17 Ridders and v18 Zwarte bubbel build (plan in progress)
 
 ## Task
-Founder: build v3 Dino's veilig (0.6.0), then v15 Grote wereld (0.7.0), then v6 (0.8.0). Plus founder requests from 2026-11-15, all live now.
+Founder: "Maak de wereld dieper ... monster mol, zwarte bubbel, ridders, uitrusting, zeldzame stenen, aan en uit in het oudermenu", then "OK bouw zo volgorde 1-3", "stop testing, build what we just discussed and push that live. Fix the rest in parallel, we need to deliver this fast", "outsource to cheaper models if possible".
 
 ## State
-* Live on main (PRs #20 782f336, #21 6499bff, #22 375bf27; Workers Builds deploys): T55a 7096c88 (verifier PASS); dinos stay by default plus Allemaal blijven 284331f, 1327c26, save race fix 3d16b7e; module engels-klok 6e68bf9; sheet exams plus Runaway fixed to the real sheet 402cc69, 041376d; Examens pick the lesson first 049fdc2; kid keyboard like the iPad dad0a84; Beautiful People blad exam hidden 5b165e1.
-* Full check.sh after #20 (local Chromium, WebKit blocked): 161 passed, 1 failed (the save race, fixed in #22). CI on WebKit not yet checked for #22.
-* Branch claude/trusting-hypatia-amvord = main plus nothing. Uncommitted: none after this note.
-
-## Decisions
-* 129 animals avoid lava and fire (370a2a7).
-* 128 animals roam freely 12 blocks when not following (166603d), texts Vrij rondlopen and Allemaal vrij.
-* 122 dinos stay, 123 klok module, 124 v15 Grote wereld right after v3 (keep the kid's world in the middle), 125 Examens by lesson, 126 keyboard like the iPad, 127 sheet is the only source (BRON.md, founder confirms, validate.py check).
+* v3 Dino's veilig (0.6.0) is live: PR #25 merged to main (f5aea78) with green WebKit CI. T53a done (24c3519), verify.sh and verifier PASS.
+* Draft `docs/MONSTERS_PRD.md` (v16 to v21), reviewed by architect and qa (`docs/DISCUSSION.md`, MONSTERS_PRD review round 1). Decisions 130 to 134. Shipping order: v17 and v18 together as 0.7.0, then v15, v16, v19, v20, v21.
+* PRD section 12 holds v17 Ridders and v18 Zwarte bubbel, AC200 to AC229. **Signed by the founder today** (0efd63f), the build gate is open. Any PRD edit closes it.
+* The architect was writing the task plan (V17a.., V18a.. in `docs/PLAN.md`, decision 135) when this note was made. Its doc edits may be uncommitted: check `git status`, then commit them.
+* Branch claude/jolly-fermi-z0vak4, merged with main after PR #25. No open PR.
 
 ## Next steps
-1. Check CI on main for #22 (WebKit is the truth).
-2. /build V3-C: T53a (grep "| T53a " docs/PLAN.md). Tell the developer: make the backup file when the section opens and call shareFile straight from the tap; pass appVersion (__APP_VERSION__) to replaceAll; reload after; set 0.6.0 and the CHANGELOG (AC198). Unreleased already holds many lines; they all go into 0.6.0. Do NOT commit before verify.sh runs on the uncommitted tree.
-3. /qa (AC192 to AC199), /ship 0.6.0. Then /release v15 (speed test at 128 x 128 first).
+1. If `docs/PLAN.md` has no V17 rows, launch `architect` in release mode again (brief: parallel safe tasks, every file named, seams task first).
+2. /build: sonnet developers, parallel where the plan says files do not overlap. Tell developers NOT to commit; run `./scripts/verify.sh task <ids>` on the working tree, then the operator commits. One haiku verifier per batch.
+3. Founder asked for speed: skip the extra review rounds and the separate qa play session. Keep `./scripts/check.sh` once at the end and green CI.
+4. Push once, open one PR, merge when CI is green (the founder said push live for this build), version 0.7.0 and CHANGELOG.
+5. Update `docs/STATUS.md` (stale: still says v11). Open founder question MOQ15: where v6 goes (assumed after v20).
 
 ## Watch out
-* Alles wissen is live but Backup maken is not yet (T53a). Founder was warned.
-* Founder waits to send a photo of the Beautiful People sheet. Then fix docs/modules/engels-beautiful-people/BRON.md, rerun scratchpad blad.py (may be gone; it regenerates blad.json from BRON.md), rename blad.json.wacht-op-foto back, re-add topic and exam to module.json (see that COVERAGE.md).
-* Founder rule: sheet exams use only sheet text, never invent anything.
-* PRD 4.8 keyboard wording (line 246) needs an update at the next scope signoff (decision 126). T55a file list in PLAN lacks settings-screen.test.ts (verifier note).
-* verify.sh only checks the working tree; developers must run it before committing (FRICTION 2026-11-15).
-* exam.spec.ts:254 AC112 flake (TD22). Open verifier gaps: AC192 40 percent loudness not e2e tested; validate.py blad check accepts either side of a BRON line.
-* danfactory backflow branch still has no PR (founder never answered).
-
-## Pointers
-* docs/BACKLOG.md v15 row; docs/modules/README.md section on sheet modules; tests/e2e/dino-stay.spec.ts.
+* A second session works in this repo (branch claude/trusting-hypatia-amvord, decisions 128 and 129, animals roam and avoid lava). Fetch main before taking a decision number and before pushing.
+* WebKit does not download in this sandbox; e2e runs in local Chromium. `tests/e2e/exam.spec.ts:254` AC112 is flake TD22 (1 in 3, with and without changes). Do not skip it.
+* The stop hook asks to commit and push every turn; do not commit agents' half done work.
+* Context hook: big docs are read by slice only.
