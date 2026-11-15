@@ -1,24 +1,26 @@
-# Handoff, 2026-11-15 19:35, v17 Ridders and v18 Zwarte bubbel build (plan in progress)
+# Handoff, 2026-11-15 21:00, overnight build of v15 Grote wereld and v16 Monstermol
 
 ## Task
-Founder: "Maak de wereld dieper ... monster mol, zwarte bubbel, ridders, uitrusting, zeldzame stenen, aan en uit in het oudermenu", then "OK bouw zo volgorde 1-3", "stop testing, build what we just discussed and push that live. Fix the rest in parallel, we need to deliver this fast", "outsource to cheaper models if possible".
+Founder (asleep, looks again tomorrow): "ok kun je de mol en grote wereld ook bouwen", "ga zo door, ik kijk morgen", "outsource to cheaper models if possible". Earlier: "push that live" for Ridders and bubble.
 
 ## State
-* v3 Dino's veilig (0.6.0) is live: PR #25 merged to main (f5aea78) with green WebKit CI. T53a done (24c3519), verify.sh and verifier PASS.
-* Draft `docs/MONSTERS_PRD.md` (v16 to v21), reviewed by architect and qa (`docs/DISCUSSION.md`, MONSTERS_PRD review round 1). Decisions 130 to 134. Shipping order: v17 and v18 together as 0.7.0, then v15, v16, v19, v20, v21.
-* PRD section 12 holds v17 Ridders and v18 Zwarte bubbel, AC200 to AC229. **Signed by the founder today** (0efd63f), the build gate is open. Any PRD edit closes it.
-* The task plan is in `docs/PLAN.md` (V17a to V17e, V18a to V18e, decision 135). Order: V17a, then V17b + V17c + V17d in parallel, V17e, V18a, then V18b + V18c + V18d in parallel, V18e. A developer was started on V17a when this note was made: check `git status` and `git log`.
-* Branch claude/jolly-fermi-z0vak4, merged with main after PR #25. No open PR.
+* **Live on main:** 0.6.0 (PR #25) and **0.7.0 v17 Ridders + v18 Zwarte bubbel** (PR #26, merged 8c29fbd, green WebKit CI).
+* PRD section 12 also holds v15 (AC230 to AC243) and v16 (AC244 to AC257), stamped on the standing approval (decisions 136, 137). The gate is open. Plan: V15a to V15e, V16a to V16e in `docs/PLAN.md` (decision 138).
+* V15a done (b5301d0). A developer was building **V15b** (the switch to 128 x 128 x 80 and the move of old saves) when this note was made: check `git status`.
+* Branch claude/jolly-fermi-z0vak4, merged with main after PR #26. No open PR.
 
 ## Next steps
-1. If `docs/PLAN.md` has no V17 rows, launch `architect` in release mode again (brief: parallel safe tasks, every file named, seams task first).
-2. /build: sonnet developers, parallel where the plan says files do not overlap. Tell developers NOT to commit; run `./scripts/verify.sh task <ids>` on the working tree, then the operator commits. One haiku verifier per batch.
-3. Founder asked for speed: skip the extra review rounds and the separate qa play session. Keep `./scripts/check.sh` once at the end and green CI.
-4. Push once, open one PR, merge when CI is green (the founder said push live for this build), version 0.7.0 and CHANGELOG.
-5. Update `docs/STATUS.md` (stale: still says v11). Open founder question MOQ15: where v6 goes (assumed after v20).
+1. V15b: `./scripts/verify.sh task V15b --no-check`, full `./scripts/check.sh`, commit. Then V15c + V15d in parallel, then V15e (0.8.0). Then V16a, V16b + V16c in parallel, V16d, V16e (0.9.0).
+2. Developers do not commit; the operator commits after the check. verify.sh does not read file names inside brackets in a plan row.
+3. Push the branch after each verified task. **Do not merge v15 or v16 to main**: v15 waits for the founder's test on the oldest iPad (AC241; fallback `?near=1`), v16 builds on v15. Open one PR for 0.8.0 plus 0.9.0 only when the founder says so.
+4. Update `docs/STATUS.md` (stale, still says v11) with what is live and what waits for the founder.
+
+## For the founder tomorrow
+* iPad checks open: AC210 and AC227 (0.7.0 speed with knights and Klodder), AC241 (big world speed and cold start), AC256.
+* Open question MOQ15: where v6 goes (assumed after v20).
+* PRD changes no longer need a tap for scope the founder asked for (decision 136).
 
 ## Watch out
-* A second session works in this repo (branch claude/trusting-hypatia-amvord, decisions 128 and 129, animals roam and avoid lava). Fetch main before taking a decision number and before pushing.
-* WebKit does not download in this sandbox; e2e runs in local Chromium. `tests/e2e/exam.spec.ts:254` AC112 is flake TD22 (1 in 3, with and without changes). Do not skip it.
-* The stop hook asks to commit and push every turn; do not commit agents' half done work.
-* Context hook: big docs are read by slice only.
+* A second session works in this repo (decisions 128, 129). Fetch main before a decision number and before pushing.
+* e2e runs in local Chromium here. `tests/e2e/exam.spec.ts:254` AC112 is flake TD22 (1 in 3). Do not skip it.
+* The stop hook asks to commit and push every turn; never commit a developer's half done work.
