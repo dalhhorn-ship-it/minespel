@@ -120,9 +120,14 @@ test.describe('Knights in the save (V17a)', () => {
     const chooser = page.waitForEvent('filechooser');
     await page.locator('[data-testid="backup-restore"]').tap();
     await (await chooser).setFiles({ name: 'v060.json', mimeType: 'application/json', buffer: nodeBuffer.from(JSON.stringify(v060)) as never });
+    // Mark this page; the restore reloads it by itself, so the mark disappears once the new page is up.
+    await page.evaluate(() => { (window as unknown as { __beforeRestore?: boolean }).__beforeRestore = true; });
     await page.locator('[data-testid="restore-yes"]').tap();
+    await page.waitForFunction(() => {
+      const w = window as unknown as { __beforeRestore?: boolean; __dino?: { ready?: () => boolean } };
+      return w.__beforeRestore === undefined && w.__dino?.ready?.() === true;
+    }, undefined, { timeout: 20_000 });
     await expect.poll(() => readState<number>(page, 'points').catch(() => -1), { timeout: 20_000 }).toBe(12);
-    await reopen(page); // the restore reloads the page by itself; this makes sure it is done
     expect(await readState<number>(page, 'points')).toBe(12);
     expect(await knights(page)).toEqual([]);
     const settings = (await kvGet<{ bubbleEnabled?: boolean; monstersEnabled?: boolean; knightsEnabled?: boolean }>(page, 'settings'))!;

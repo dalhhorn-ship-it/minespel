@@ -43,7 +43,7 @@
 
 | File | Lines | Summary |
 |---|---:|---|
-| CHANGELOG.md | 153 | Written so kids can read it too. Sections: 0.6.0 (2026-11-15):5, 0.5.0 (2026-10-24):48, 0.4.0 (2026-10-24):61, 0.3.0 (2026-10-22):71, 0.2.0 (2026-10-19):79, 0.1.0 (2026-10-19):101 |
+| CHANGELOG.md | 161 | Written so kids can read it too. Sections: Unreleased:5, 0.6.0 (2026-11-15):13, 0.5.0 (2026-10-24):56, 0.4.0 (2026-10-24):69, 0.3.0 (2026-10-22):79, 0.2.0 (2026-10-19):87, 0.1.0 (2026-10-19):109 |
 | CLAUDE.md | 71 | A free 3D block world with dinos and short learning breaks (Dutch: taal, rekenen,… |
 | README.md | 78 | Dino Blokwereld is a free 3D block world for kids, played in Dutch on an iPad. Walk… |
 | docs/ARCHITECTURE.md | 395 | Written by the architect after PRD signoff (2026-10-17). Source of truth for how Dino… Sections: Stack and why:5, Folder structure:27, Modules and data flow:186, How modules are loaded:232, State and storage:273, Security and kid safety in…:303, How to run:312, How to test:325, How to deploy:358, Conventions for developers:367, Risks:381 |

@@ -15,7 +15,7 @@ import type { World } from '../world/world';
 import type { KnightFlow } from '../app/knight-flow';
 import { createKnightBody, defaultKnightRng, placeAtSpot, placeNearKid, stepKnight } from './knight-ai';
 import {
-  KNIGHT_BOX, KNIGHT_TAP_REACH, MAX_KNIGHTS, toRecord,
+  KNIGHT_BOX, KNIGHT_TAP_REACH, MAX_KNIGHTS, SALUTE_GAP_MS, toRecord,
   type KnightMode, type KnightRecord, type KnightState,
 } from './knight-types';
 
@@ -74,7 +74,7 @@ export function createKnightSystem(options: KnightSystemOptions): KnightSystem {
   const stateFrom = (r: KnightRecord): KnightState => ({
     id: r.id, mode: r.mode, spot: r.spot ? { ...r.spot } : null, boughtFor: r.boughtFor,
     body: createKnightBody(r.spot ?? kid()),
-    chase: null, saluteClockMs: 0, visible: true,
+    chase: null, saluteClockMs: SALUTE_GAP_MS, visible: true,
   });
   function kid(): Point {
     const p = options.player.player;
@@ -85,6 +85,7 @@ export function createKnightSystem(options: KnightSystemOptions): KnightSystem {
   function nearKid(k: KnightState): void {
     placeNearKid(options.world, k, kid(), rng, options.player.yaw);
     k.chase = null;
+    k.saluteClockMs = 0;
     if (k.mode !== 'follow') takeSpot(k);
     placed.add(k.id);
   }

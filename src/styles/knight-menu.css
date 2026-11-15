@@ -1,0 +1,82 @@
+/* Knight menu (V17d, AC203). Same look as the dino menu; every button is at least 56 x 56 points. */
+.knight-menu-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  background: rgba(15, 24, 36, 0.72);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
+.knight-menu-card {
+  width: min(520px, 94vw);
+  max-height: 92vh;
+  background: #fffdf7;
+  border: 4px solid #1f2d3d;
+  border-radius: 28px;
+  padding: 24px 28px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  color: #1f2d3d;
+  font-family: var(--font-stack);
+  font-size: calc(var(--font-body, 20px) * var(--kid-scale, 1));
+}
+
+.knight-menu-title {
+  margin: 0;
+  font-size: calc(28px * var(--kid-scale, 1));
+  font-weight: 800;
+}
+
+.knight-menu-status {
+  margin: 0;
+  padding: 10px 14px;
+  border-radius: 14px;
+  background: #eef6ff;
+  border: 2px solid #90caf9;
+  color: #133b63;
+  font-weight: 700;
+  text-align: center;
+}
+
+.knight-menu-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.knight-menu-btn {
+  min-width: 56px;
+  min-height: 60px;
+  padding: 12px 18px;
+  border-radius: 16px;
+  border: 3px solid #1f2d3d;
+  background: #f4efe3;
+  color: #1f2d3d;
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+  touch-action: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.knight-menu-btn[aria-pressed='true'] {
+  background: #2e7d32;
+  border-color: #1b5e20;
+  color: #ffffff;
+}
+
+.knight-menu-btn-close {
+  background: #1f2d3d;
+  color: #ffffff;
+}

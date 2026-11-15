@@ -69,7 +69,7 @@ export interface ExamInput {
 }
 export type ExamRecord = ExamInput & { id: number };
 
-export type LedgerReason = 'break' | 'practice' | 'shop' | 'tradein' | 'malus';
+export type LedgerReason = 'break' | 'practice' | 'shop' | 'knight' | 'tradein' | 'malus';
 
 export interface LedgerInput {
   ts: number;

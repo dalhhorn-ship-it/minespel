@@ -375,6 +375,19 @@ function physics(world: World, d: DinoState, dirX: number, dirZ: number, dt: num
   return Math.hypot(d.x - ox, d.z - oz);
 }
 
+/**
+ * One straight walking step toward `target` at `speed` blocks per second, with hops, walls and the lava and fire
+ * rule of `physics`. Turns the body to face the target. Returns the horizontal distance moved (V17b `stepToward`).
+ */
+export function walkToward(world: World, d: DinoState, target: { x: number; z: number }, dt: number, speed: number, box?: StepOptions['box']): number {
+  const gx = target.x - d.x, gz = target.z - d.z;
+  const len = Math.hypot(gx, gz);
+  const dirX = len > 1e-6 ? gx / len : 0, dirZ = len > 1e-6 ? gz / len : 0;
+  const moved = physics(world, d, dirX, dirZ, dt, box, speed);
+  if (len > 1e-6) d.heading = Math.atan2(dirX, dirZ);
+  return moved;
+}
+
 /** Moves a dino out of a block (for example one placed on top of it), or pops it to the player. */
 function rescue(world: World, d: DinoState, player: Point, rng: Rng, opts: StepOptions): DinoEvent {
   for (let up = 1; up <= 3; up++) {

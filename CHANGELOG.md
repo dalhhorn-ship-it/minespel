@@ -7,6 +7,8 @@ Written so kids can read it too.
 ### Ridders (under construction)
 
 * Behind the scenes, the game can now keep knights: they are saved with your world and come back after a backup restore. You cannot buy one yet.
+* In the Dinowinkel you can now buy a Ridder for 30 points (at most 3) and trade him in for 15. Parents get a card "Monsters en ridders" in Instellingen to switch knights on or off.
+* Tap a knight and a menu opens: Volg mij, Blijf hier or Pas op de dieren. A guard knight tells you how many dinos and chickens he watches. A friendly cartoon knight with a helmet, a tabard and a wooden sword, and a soft fanfare.
 
 ## 0.6.0 (2026-11-15)
 

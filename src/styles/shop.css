@@ -529,3 +529,20 @@
   font-size: calc(16px * var(--kid-scale, 1));
   color: #1f2d3d;
 }
+
+/* Ridders (v17): one card under the Dinofluit and a line per knight. */
+.shop-art-knight {
+  background: linear-gradient(180deg, #eceff1 0%, #b0bec5 100%);
+  font-size: 30px;
+  line-height: 1;
+}
+.shop-knights {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.shop-knight-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}

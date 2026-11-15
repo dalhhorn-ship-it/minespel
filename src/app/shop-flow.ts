@@ -19,6 +19,10 @@ import {
   type ShopView,
   type ShopViewState,
 } from '../ui/shop';
+import { creatureSwitches } from '../storage/monsters-store';
+import { createKnightEconomy, type KnightEconomy } from '../knights/knight-economy';
+import { KNIGHT_TRADEIN } from '../knights/knight-types';
+import type { KnightSystem } from '../knights/knight-system';
 import type { ScreenManager } from './screens';
 
 const MSG_NO_STORE = 'De winkel kan nu even niet kopen. Probeer het zo nog eens!';
@@ -38,6 +42,8 @@ export interface ShopFlowOptions {
   now?: () => number;
   /** Called after the Dinofluit was bought, so the world shows its button (decision 114). */
   onFluitBought?: () => void;
+  /** The knight system (v17). Without it, or without `db`, the shop shows no Ridders section. */
+  knights?: Pick<KnightSystem, 'add' | 'remove' | 'knights'>;
 }
 
 export interface ShopFlow {
@@ -48,6 +54,10 @@ export interface ShopFlow {
   tradeIn(dinoId: string): Promise<boolean>;
   /** Buys the Dinofluit once (decision 114). False when it is owned or the points are short. */
   buyFluit(): Promise<boolean>;
+  /** Buys a knight for 30 points (AC201). */
+  buyKnight(): Promise<boolean>;
+  /** Trades a knight in for 15 points (AC202). */
+  tradeInKnight(id: string): Promise<boolean>;
   destroy(): void;
 }
 
@@ -81,11 +91,18 @@ export function createShopFlow(options: ShopFlowOptions): ShopFlow {
       eggs = (raw.eggs ?? []) as unknown as ShopEggSummary[];
     }
 
+    let knightList: ShopViewState['knights'];
+    if (options.knights && options.db && options.records) {
+      const sw = creatureSwitches(await options.records.get('settings'));
+      if (sw.knights) knightList = options.knights.knights().map((k) => ({ id: k.id }));
+    }
+
     return {
       points,
       dinos,
       eggs,
       fluit,
+      knights: knightList,
       toastMessage: lastToast,
     };
   }
@@ -316,6 +333,30 @@ export function createShopFlow(options: ShopFlowOptions): ShopFlow {
     return next;
   }
 
+  const knightEconomy: KnightEconomy | null =
+    options.knights && options.db ? createKnightEconomy({ db: options.db, knights: options.knights, clock }) : null;
+
+  /** Knight buys and trade ins share the purchase lock with the other buys. */
+  function lockedKnight(run: (e: KnightEconomy) => Promise<boolean>, toast: string): Promise<boolean> {
+    const economy = knightEconomy;
+    if (!economy) return Promise.resolve(false);
+    const next = buyLock
+      .then(async () => {
+        const ok = await run(economy);
+        if (ok) {
+          options.sound?.play('clink');
+          lastToast = toast;
+        }
+        if (activeView) activeView.render(await readViewState());
+        return ok;
+      })
+      .catch(() => false);
+    buyLock = next;
+    return next;
+  }
+  const buyKnight = () => lockedKnight((e) => e.buy(), 'Hoera! Je ridder staat naast je in de wereld!');
+  const tradeInKnight = (id: string) => lockedKnight((e) => e.tradeIn(id), `Dag ridder! Je kreeg ${KNIGHT_TRADEIN} punten terug.`);
+
   function clear() {
     if (activeView) {
       activeView.destroy();
@@ -340,6 +381,8 @@ export function createShopFlow(options: ShopFlowOptions): ShopFlow {
         onBuyFluit: async () => {
           await buyFluit();
         },
+        onBuyKnight: knightEconomy ? async () => { await buyKnight(); } : undefined,
+        onTradeInKnight: knightEconomy ? async (id) => { await tradeInKnight(id); } : undefined,
         onEarnCoins: options.onEarnCoins
           ? () => {
               clear();
@@ -364,6 +407,8 @@ export function createShopFlow(options: ShopFlowOptions): ShopFlow {
     buyChicken: () => buyEgg('kip'),
     tradeIn: tradeInDino,
     buyFluit,
+    buyKnight,
+    tradeInKnight,
     destroy() {
       clear();
     },
@@ -375,6 +420,7 @@ export function createShopFlow(options: ShopFlowOptions): ShopFlow {
     registerHook('buyChickenInShop', () => flow.buyChicken());
     registerHook('tradeInInShop', (dinoId: string) => flow.tradeIn(dinoId));
     registerHook('buyFluitInShop', () => flow.buyFluit());
+    registerHook('buyKnightInShop', () => flow.buyKnight());
   }
 
   return flow;

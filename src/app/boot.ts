@@ -232,6 +232,34 @@ export function createBoot(deps: BootDeps): Boot {
     });
     applySettingsToRuntime(settings, { sound, timerDriver });
 
+    // The Dinofluit button shows once the kid owns the fluit (decision 114).
+    const economy = await records.get('economy');
+    world.setFluitOwned(ownsFluit(economy));
+
+    // The knights (v17). Every switch and points change happens on another screen, so settings and points are
+    // read again each time the screen goes back to the world.
+    let knightsRef: KnightSystem | null = null;
+    const knights = createKnightSystem({
+      world: world.world,
+      player: world.player,
+      renderer: world.renderer,
+      flow: createKnightFlow({
+        screens,
+        sound,
+        setMode: (id, mode) => knightsRef?.setMode(id, mode),
+        animals: () => world.dinoStore.dinos(),
+      }),
+      viewport: () => ({ width: window.innerWidth, height: window.innerHeight }),
+      persist: (change) => {
+        // A refused write (a restore is running) is fine: the page reloads and the saved record wins.
+        void updateMonsters(db, (m) => ({ ...m, knights: change(m.knights) })).catch(() => {});
+      },
+    });
+    knightsRef = knights;
+    knights.load((await records.get('monsters')).knights);
+    knights.applySwitches(creatureSwitches(settings));
+    knights.setPoints(economy.points);
+    world.addCreatures(knights, KNIGHT_PRIORITY);
     const shopFlow = createShopFlow({
       screens,
       db,
@@ -244,28 +272,8 @@ export function createBoot(deps: BootDeps): Boot {
         void breakFlow.startBreak({ early: true });
       },
       onFluitBought: () => world.setFluitOwned(true),
+      knights,
     });
-    // The Dinofluit button shows once the kid owns the fluit (decision 114).
-    const economy = await records.get('economy');
-    world.setFluitOwned(ownsFluit(economy));
-
-    // The knights (v17). Every switch and points change happens on another screen, so settings and points are
-    // read again each time the screen goes back to the world.
-    const knights = createKnightSystem({
-      world: world.world,
-      player: world.player,
-      renderer: world.renderer,
-      flow: createKnightFlow(),
-      viewport: () => ({ width: window.innerWidth, height: window.innerHeight }),
-      persist: (change) => {
-        // A refused write (a restore is running) is fine: the page reloads and the saved record wins.
-        void updateMonsters(db, (m) => ({ ...m, knights: change(m.knights) })).catch(() => {});
-      },
-    });
-    knights.load((await records.get('monsters')).knights);
-    knights.applySwitches(creatureSwitches(settings));
-    knights.setPoints(economy.points);
-    world.addCreatures(knights, KNIGHT_PRIORITY);
     screens.subscribe((kind) => {
       if (kind !== 'world') return;
       void Promise.all([records.get('settings'), records.get('economy')])

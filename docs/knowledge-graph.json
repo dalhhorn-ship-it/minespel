@@ -1,6 +1,6 @@
 {"generated_by": "scripts/docs_index.py",
  "nodes": [
-  {"id": "CHANGELOG.md", "title": "Changelog", "lines": 153, "ids": {}},
+  {"id": "CHANGELOG.md", "title": "Changelog", "lines": 161, "ids": {}},
   {"id": "CLAUDE.md", "title": "Dino Blokwereld (minespel)", "lines": 71, "ids": {}},
   {"id": "README.md", "title": "Dino Blokwereld", "lines": 78, "ids": {}},
   {"id": "docs/ARCHITECTURE.md", "title": "Architecture", "lines": 395, "ids": {}},

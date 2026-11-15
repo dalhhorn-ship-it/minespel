@@ -13,7 +13,8 @@ export type SoundName =
   | 'chirp'
   | 'fanfare'
   | 'tick'
-  | 'fluit';
+  | 'fluit'
+  | 'ridder';
 
 export const SOUND_NAMES: readonly SoundName[] = [
   'pop',
@@ -26,6 +27,7 @@ export const SOUND_NAMES: readonly SoundName[] = [
   'fanfare',
   'tick',
   'fluit',
+  'ridder',
 ];
 
 export interface SoundOptions {
@@ -151,6 +153,11 @@ const RECIPES: Record<SoundName, (c: Ctx, out: AudioNode, t: number) => void> = 
   fluit: (c, o, t) => {
     tone(c, o, t, { from: 1100, to: 1600, dur: 0.22, gain: 0.35 });
     tone(c, o, t, { from: 1300, to: 2100, at: 0.3, dur: 0.35, gain: 0.35 });
+  },
+  // Ridder: a short soft fanfare, three notes, under 1.5 s and quieter than fanfare (V17d).
+  ridder: (c, o, t) => {
+    [392, 494, 587].forEach((f, i) => tone(c, o, t, { type: 'triangle', from: f, at: i * 0.12, dur: 0.22, gain: 0.3 }));
+    tone(c, o, t, { type: 'triangle', from: 784, at: 0.36, dur: 0.4, gain: 0.3 });
   },
 };
 

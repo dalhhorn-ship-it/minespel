@@ -4,6 +4,7 @@ import { pointsModeOf, type PointsMode } from '../../core/economy';
 import type { SettingsRecord } from '../../storage/schema';
 import { el } from '../dom';
 import { onTap } from '../tap';
+import { createMonstersCard } from './monsters-card';
 
 const POINTS_CHOICES: { mode: PointsMode; label: string; line: string }[] = [
   { mode: 'makkelijk', label: 'Makkelijk', line: 'Een foutje kost geen punten.' },
@@ -223,6 +224,14 @@ export function createSettingsScreen(options: SettingsScreenOptions): SettingsSc
     }
     pointsCard.append(choiceRow);
 
+    // Monsters en ridders card (AC208)
+    const monstersCard = createMonstersCard({
+      settings: current,
+      onToggle: (key, next) => updateField(key, next),
+      addCleanup: (c) => cleanups.push(c),
+      now: options.now,
+    });
+
     // Direct actions card (AC94, AC95)
     const actionsCard = el('div', { class: 'parent-card' });
     const startBreakBtn = el('button', {
@@ -328,7 +337,7 @@ export function createSettingsScreen(options: SettingsScreenOptions): SettingsSc
       text: `Versie ${options.appVersion ?? __APP_VERSION__}`,
       attrs: { 'data-testid': 'app-version' },
     });
-    root.append(title, breakCard, displayCard, pointsCard, actionsCard, versionLine);
+    root.append(title, breakCard, displayCard, pointsCard, monstersCard, actionsCard, versionLine);
   }
 
   render();

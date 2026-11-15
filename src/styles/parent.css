@@ -397,3 +397,9 @@
 .parent-card-title { margin: 0; font-size: 18px; font-weight: 800; }
 .parent-btn[aria-disabled='true'] { opacity: 0.5; }
 .parent-note-error { color: #9e2a2b; font-weight: 700; }
+
+/* Monsters en ridders card (v17): a help line under each switch, a greyed row keeps its value. */
+.parent-switch { display: flex; flex-direction: column; gap: 2px; }
+.parent-switch .parent-btn { min-width: 64px; min-height: 48px; }
+.parent-switch-help { margin: 0 0 6px; font-size: 14px; color: #5a6470; }
+.parent-switch-greyed { opacity: 0.5; }

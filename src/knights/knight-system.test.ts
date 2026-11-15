@@ -99,13 +99,13 @@ describe('knight system skeleton', () => {
     s.system.step(1 / 30);
     expect(s.syncActors).toHaveBeenCalledTimes(1);
   });
-  it('the stub AI leaves a knight where he stands', () => {
+  it('AC204: a knight on Blijf hier stays within 1 block of where he stands', () => {
     const s = setup();
-    s.system.add(rec('a'));
+    s.system.add(rec('a', 'stay'));
     const k = s.system.knights()[0]!;
-    const before = [k.body.x, k.body.y, k.body.z];
+    const before = [k.body.x, k.body.z];
     for (let i = 0; i < 90; i++) s.system.step(1 / 30);
-    expect([k.body.x, k.body.y, k.body.z]).toEqual(before);
+    expect(Math.hypot(k.body.x - before[0]!, k.body.z - before[1]!)).toBeLessThanOrEqual(1);
   });
   it('a tap on a knight opens his menu and takes the tap; a tap elsewhere does not', () => {
     const s = setup();

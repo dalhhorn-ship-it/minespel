@@ -41,7 +41,7 @@ describe('progress stats (decision 115)', () => {
           answer('2026-10-20', false),
         ],
         breaks: [brk('2026-10-26', 4), brk('2026-10-20', 3)],
-        ledger: [ledger('2026-10-26', 8, 'break'), ledger('2026-10-27', -40, 'shop'), ledger('2026-10-27', 20, 'tradein')],
+        ledger: [ledger('2026-10-26', 8, 'break'), ledger('2026-10-27', -40, 'shop'), ledger('2026-10-27', 20, 'tradein'), ledger('2026-10-27', -30, 'knight'), ledger('2026-10-27', 15, 'tradein')],
         stats: { playMsPerDay: { '2026-10-26': 20 * 60_000, '2026-10-19': 5 * 60_000 } },
       }),
     );
@@ -54,7 +54,8 @@ describe('progress stats (decision 115)', () => {
     expect(w.learnMs).toBe(4 * 60_000);
     expect(w.playMs).toBe(20 * 60_000);
     expect(w.pointsEarned).toBe(8);
-    expect(w.pointsSpent).toBe(40);
+    // AC201, AC202: a knight counts as spent, the +15 trade in is not earned.
+    expect(w.pointsSpent).toBe(70);
     expect(w.daysActive).toBe(3);
     expect(s.report.lastWeek).toMatchObject({ start: '2026-10-19', questions: 1, pct: 0, playMs: 5 * 60_000 });
     expect(s.report.lines[0]).toContain('3 vragen');
