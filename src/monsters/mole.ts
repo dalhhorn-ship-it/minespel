@@ -10,6 +10,9 @@
 //  * `mole.x`, `y`, `z` are the feet centre; only `stepMole` (the follower) moves him, never physics.
 import type { DinoState, Point } from '../dinos/dino-ai';
 import type { Box } from '../world/build';
+import { isSolid } from '../world/blocks';
+import type { World } from '../world/world';
+import { freeMoleChasers } from './mole-moed';
 import { isMoleTarget } from './mole-wake';
 import { findMolePath, nearKid, stepCells, isStandCell } from './mole-path';
 import { followPath } from './path-follow';
@@ -37,6 +40,19 @@ function idOf(a: DinoState): string {
   return id;
 }
 
+/**
+ * True when the mole in cell `here` may tease the animal in cell `a`: the same cell or a side neighbour, or a diagonal
+ * one with at least one of the two cells between free (not blocked 2 high). A fence 2 high stops him (AC249); he never
+ * teases across a wall corner.
+ */
+export function canTeaseFrom(world: World, here: Cell, a: Cell): boolean {
+  if (Math.abs(a.x - here.x) > 1 || Math.abs(a.z - here.z) > 1 || Math.abs(a.y - here.y) > 1) return false;
+  if (a.x === here.x || a.z === here.z) return true;
+  const y = Math.max(here.y, a.y);
+  const open = (x: number, z: number): boolean => !isSolid(world.get(x, y, z)) && !isSolid(world.get(x, y + 1, z));
+  return open(a.x, here.z) || open(here.x, a.z);
+}
+
 /** He comes up at `at` (feet centre) after the rumble. */
 export function createMole(at: Point, digColumn: { x: number; z: number }): MoleState {
   return {
@@ -61,6 +77,7 @@ export function stepMole(mole: MoleState, ctx: MonsterContext): void {
     // He sinks into the ground over LEAVE_MS; the system plays `plop` and removes him.
     mole.pose = 'sink';
     mole.path = null;
+    freeMoleChasers(ctx);
     mole.y -= (ctx.dt * 1000 / LEAVE_MS) * MOLE_BOX.height;
     return;
   }
@@ -75,6 +92,12 @@ export function stepMole(mole: MoleState, ctx: MonsterContext): void {
   };
   if (mole.outMs >= MOLE_TIRED_MS) return leave('Ik ga slapen', 'geeuw');
   if (mole.pose === 'rise' && mole.phaseMs >= RISE_MS) mole.pose = 'walk';
+  // While a knight pokes him he stands still (V16d).
+  if (mole.pokers > 0) {
+    mole.path = null;
+    mole.searchMs = 0;
+    return;
+  }
 
   const here: Cell = { x: Math.floor(mole.x), y: Math.round(mole.y), z: Math.floor(mole.z) };
   const kid: Cell = { x: Math.floor(ctx.kid.x), y: Math.floor(ctx.kid.y), z: Math.floor(ctx.kid.z) };
@@ -106,7 +129,7 @@ export function stepMole(mole: MoleState, ctx: MonsterContext): void {
 
   // The tease: within 1 block (cells) of a target animal.
   for (const a of candidates) {
-    if (Math.abs(Math.floor(a.x) - here.x) <= 1 && Math.abs(Math.floor(a.z) - here.z) <= 1 && Math.abs(Math.floor(a.y) - here.y) <= 1) {
+    if (canTeaseFrom(ctx.world, here, { x: Math.floor(a.x), y: Math.floor(a.y), z: Math.floor(a.z) })) {
       ctx.say('Boe!', 2000);
       ctx.play('boe');
       teaseAnimal(ctx.world, a, ctx.rng, ctx.play);
@@ -134,6 +157,7 @@ export function stepMole(mole: MoleState, ctx: MonsterContext): void {
         for (let dz = -1; dz <= 1; dz++) {
           for (let y = ay - 1; y <= ay + 1; y++) {
             if (!isStandCell(ctx.world, ax + dx, y, az + dz, 1)) continue;
+            if (!canTeaseFrom(ctx.world, { x: ax + dx, y, z: az + dz }, { x: ax, y: ay, z: az })) continue;
             goals.push({ x: ax + dx, y, z: az + dz });
             owner.push({ cell: { x: ax + dx, y, z: az + dz }, id: idOf(a) });
           }

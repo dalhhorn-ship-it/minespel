@@ -6,7 +6,7 @@ import { createRng } from '../core/rng';
 import { callDino, createDino, type DinoState } from '../dinos/dino-ai';
 import type { KnightState } from '../knights/knight-types';
 import type { World } from '../world/world';
-import { createMole, moleBox, stepMole } from './mole';
+import { canTeaseFrom, createMole, moleBox, stepMole } from './mole';
 import { FENCE_MS, LEAVE_MS, LONELY_MS, MOLE_TIRED_MS, type Cell, type MoleState, type MonsterContext } from './monster-types';
 
 let world: World;
@@ -167,6 +167,50 @@ describe('the fence rule (v16, AC249)', () => {
     box(w, PEN2.x0 - 1, PEN2.x0 - 1, PEN2.z0 + 2, PEN2.z0 + 2, GY, GY + 1, 0);
     const inside = animal(PEN2.x0 + 2.5, PEN2.z0 + 2.5);
     const r = start(w, { x: PEN2.x0 - 7.5, z: PEN2.z0 + 2.5 }, [inside]);
+    r.until(() => r.teased.length > 0, 30_000);
+    expect(r.teased[0]).toBe(inside);
+  });
+});
+
+describe('no tease across a wall (v16, AC249)', () => {
+  /** A pen 2 high whose four corner cells are left open: closed for walking, but a corner touches the animal diagonally. */
+  const CORNERS = { x0: 85, x1: 87, z0: 60, z1: 62 };
+  function cornerlessPen(height: number): World {
+    const w = buildMoleMap();
+    ring(w, CORNERS, height);
+    for (const x of [CORNERS.x0 - 1, CORNERS.x1 + 1]) {
+      for (const z of [CORNERS.z0 - 1, CORNERS.z1 + 1]) box(w, x, x, z, z, GY, GY + 1, 0);
+    }
+    return w;
+  }
+
+  it('AC249: canTeaseFrom: a diagonal with both side cells blocked 2 high is no tease, one open side is', () => {
+    const w = cornerlessPen(2);
+    const animalCell = { x: CORNERS.x0, y: GY, z: CORNERS.z0 };
+    expect(canTeaseFrom(w, { x: CORNERS.x0 - 1, y: GY, z: CORNERS.z0 - 1 }, animalCell)).toBe(false);
+    // A gap in the wall at the side makes the diagonal a way.
+    box(w, CORNERS.x0 - 1, CORNERS.x0 - 1, CORNERS.z0, CORNERS.z0, GY, GY + 1, 0);
+    expect(canTeaseFrom(w, { x: CORNERS.x0 - 1, y: GY, z: CORNERS.z0 - 1 }, animalCell)).toBe(true);
+    // The same cell, a side neighbour and a cell 2 away.
+    expect(canTeaseFrom(w, animalCell, animalCell)).toBe(true);
+    expect(canTeaseFrom(w, { x: CORNERS.x0 - 1, y: GY, z: CORNERS.z0 }, animalCell)).toBe(true);
+    expect(canTeaseFrom(w, { x: CORNERS.x0 - 2, y: GY, z: CORNERS.z0 }, animalCell)).toBe(false);
+  });
+
+  it('AC249: an animal in a corner of a pen 2 high is not teased through the corner: Hmpf, no tease', () => {
+    const w = cornerlessPen(2);
+    const inside = animal(CORNERS.x0 + 0.5, CORNERS.z0 + 0.5);
+    const r = start(w, { x: CORNERS.x0 - 7.5, z: CORNERS.z0 - 7.5 }, [inside]);
+    r.until(() => r.mole.phase === 'leaving', 20_000);
+    expect(sayTimes(r, 'Hmpf! Ik kan er niet bij.')).toHaveLength(1);
+    expect(r.teased).toHaveLength(0);
+    expect(sayTimes(r, 'Boe!')).toHaveLength(0);
+  });
+
+  it('AC249: the same pen 1 high is stepped over and teased', () => {
+    const w = cornerlessPen(1);
+    const inside = animal(CORNERS.x0 + 0.5, CORNERS.z0 + 0.5);
+    const r = start(w, { x: CORNERS.x0 - 7.5, z: CORNERS.z0 - 7.5 }, [inside]);
     r.until(() => r.teased.length > 0, 30_000);
     expect(r.teased[0]).toBe(inside);
   });

@@ -107,6 +107,8 @@ export function createMonsterSystem(options: MonsterSystemOptions): MonsterSyste
   let hint = false;
   // The mole slot (v16): next to the bubble and Klodder slot. Every clock runs on loop dt.
   let moleOn = false;
+  /** The switches last applied, for the e2e hook `creatureSwitches` (a test waits for them instead of a fixed time). */
+  let applied: CreatureSwitches | null = null;
   let mole: MoleState | null = null;
   let loopMs = 0;
   const began: MoleStateView['began'] = { rumble: null, out: null, leaving: null };
@@ -336,6 +338,7 @@ export function createMonsterSystem(options: MonsterSystemOptions): MonsterSyste
       hint = record.hintShown === true;
     },
     applySwitches(sw) {
+      applied = { ...sw };
       const was = bubbleOn;
       bubbleOn = sw.bubble;
       if (was && !bubbleOn && phase !== 'idle') clear();
@@ -404,7 +407,6 @@ export function createMonsterSystem(options: MonsterSystemOptions): MonsterSyste
     step(dt) {
       if (!(dt > 0) || !Number.isFinite(dt)) return;
       loopMs += dt * 1000;
-      stepMoleSlot(dt);
       if (bubble) {
         if (stepBubble(bubble, dt * 1000, eye(), options.viewport().height) === 'gone') {
           bubble = null;
@@ -420,6 +422,8 @@ export function createMonsterSystem(options: MonsterSystemOptions): MonsterSyste
           restoreFree();
         }
       }
+      // After Klodder's step, so a knight whose chase points to Klodder switches only when the mole is nearer (V16d).
+      stepMoleSlot(dt);
       if (!klodder && world.hiddenCount() > 0) {
         // Blocks left over after a switch went off or a cell was blocked: ask again every 500 ms (AC217).
         strayMs += dt * 1000;
@@ -478,6 +482,7 @@ export function createMonsterSystem(options: MonsterSystemOptions): MonsterSyste
     registerHook('spawnKlodder', () => system.spawnKlodder());
     registerHook('teaseNow', () => system.teaseNow());
     registerHook('moleState', () => system.moleState());
+    registerHook('creatureSwitches', () => applied);
     registerHook('findMolePath', (from: Cell, to: Cell, headroom = 1): Cell[] | null =>
       findMolePath(world, from, [to], { headroom } satisfies PathOptions));
     registerHook('bubbleScreenPoint', () => {

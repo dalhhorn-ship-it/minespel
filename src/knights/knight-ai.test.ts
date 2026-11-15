@@ -4,6 +4,7 @@ import { hazardAt } from '../dinos/dino-ai';
 import { LAVA } from '../world/blocks';
 import { START_SPOT } from '../world/terrain';
 import { World } from '../world/world';
+import { box, buildMoleMap, GY, PEN2 } from '../../tests/fixtures/maps/mole-map';
 import { createKnightBody, stepKnight, stepToward } from './knight-ai';
 import { KNIGHT_BOX, SALUTE_GAP_MS, type KnightMode, type KnightState } from './knight-types';
 
@@ -129,5 +130,45 @@ describe('knight ai', () => {
     const k = make('follow', sx, sz, world);
     k.saluteClockMs = SALUTE_GAP_MS * 2;
     expect(stepKnight(k, { world, rng: createRng(1), player: { x: sx + 1, y, z: sz }, playerYaw: 0, dt: DT })).toBeNull();
+  });
+
+  it('AC251: a chasing knight walks through the gap in a wall 2 high to the target and arrives', () => {
+    const world = buildMoleMap();
+    box(world, 88, 88, 0, 127, GY, GY + 1, STONE);
+    box(world, 88, 88, 30, 30, GY, GY + 1, 0);
+    const k = make('guard', 84.5, 10.5, world);
+    k.chase = { x: 91.5, z: 10.5, y: GY };
+    const rng = createRng(2);
+    const kid = { x: 5.5, y: GY, z: 5.5 };
+    let t = 0, maxJump = 0, throughGap = false;
+    while (k.chase && t < 120) {
+      const x = k.body.x, z = k.body.z;
+      stepKnight(k, { world, rng, player: kid, playerYaw: 0, dt: DT });
+      maxJump = Math.max(maxJump, Math.hypot(k.body.x - x, k.body.z - z));
+      if (x < 88 && k.body.x >= 88 && Math.abs(k.body.z - 30.5) < 1) throughGap = true;
+      t += DT;
+    }
+    expect(k.chase).toBeNull();
+    expect(throughGap).toBe(true);
+    expect(maxJump).toBeLessThan(0.3);
+    expect(Math.hypot(k.body.x - 91.5, k.body.z - 10.5)).toBeLessThanOrEqual(1.3);
+  });
+  it('AC251: with no path a chasing knight still pops next to the target after 3 s stuck', () => {
+    const world = buildMoleMap();
+    const k = make('guard', PEN2.x0 + 2.5, PEN2.z0 + 2.5, world);
+    const tx = PEN2.x0 - 6.5, tz = PEN2.z0 + 2.5;
+    k.chase = { x: tx, z: tz, y: GY };
+    const rng = createRng(2);
+    const kid = { x: 5.5, y: GY, z: 5.5 };
+    let t = 0, popped = -1, px = k.body.x;
+    while (k.chase && t < 20) {
+      t += DT;
+      stepKnight(k, { world, rng, player: kid, playerYaw: 0, dt: DT });
+      if (Math.abs(k.body.x - px) > 1.5) popped = t;
+      px = k.body.x;
+    }
+    expect(popped).toBeGreaterThanOrEqual(3);
+    expect(popped).toBeLessThanOrEqual(5.5);
+    expect(Math.hypot(k.body.x - tx, k.body.z - tz)).toBeLessThan(3);
   });
 });

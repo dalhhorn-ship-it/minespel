@@ -247,6 +247,10 @@ async function restore(page: Page, text: string, expected: string) {
   const chooser = page.waitForEvent('filechooser');
   await page.locator('[data-testid="backup-restore"]').tap();
   await (await chooser).setFiles({ name: 'dino.json', mimeType: 'application/json', buffer: nodeBuffer.from(text) as never });
+  // A marker on this document: the reloaded page does not have it, so a ready page without it is the new one.
+  await page.evaluate(() => {
+    (window as unknown as { __beforeRestore?: boolean }).__beforeRestore = true;
+  });
   await page.locator('[data-testid="restore-yes"]').tap();
   // The page reloads: wait until the saved settings answer with the restored value.
   await expect
@@ -267,18 +271,26 @@ async function restore(page: Page, text: string, expected: string) {
         .catch(() => 'reloading'),
     )
     .toBe(expected);
-  await openApp(page);
+  await page.waitForFunction(() => {
+    const w = window as unknown as { __beforeRestore?: boolean; __dino?: Record<string, () => unknown> };
+    return !w.__beforeRestore && w.__dino?.ready?.() === true;
+  });
 }
+const switchesBefore = new WeakMap<Page, string>();
+const appliedSwitches = async (page: Page) => JSON.stringify(await readState(page, 'creatureSwitches'));
 async function switchMole(page: Page, id: string) {
   await openSettings(page);
   await toggle(page, id).scrollIntoViewIfNeeded();
+  switchesBefore.set(page, await appliedSwitches(page));
   await toggle(page, id).tap();
 }
-/** Back in the world, with a moment for the world to read the switches again. */
+/** Back in the world, once the world has read the changed switches (the hook `creatureSwitches`). */
 async function backToWorld(page: Page) {
   await closeParent(page);
   await expect.poll(() => readState<boolean>(page, 'isPlayRunning')).toBe(true);
-  await page.waitForTimeout(800);
+  const before = switchesBefore.get(page);
+  if (before !== undefined) await expect.poll(() => appliedSwitches(page)).not.toBe(before);
+  switchesBefore.delete(page);
 }
 async function digColumn(page: Page) {
   const pose = await readState<{ x: number; z: number }>(page, 'player');
