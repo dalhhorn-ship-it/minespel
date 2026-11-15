@@ -1,5 +1,6 @@
 import { registerHook } from '../dev/e2e-hooks';
 import { transact, request } from './db';
+import { recordsSettled } from './records';
 import type { KvName } from './schema';
 
 export interface SaveQueueOptions {
@@ -17,7 +18,7 @@ export interface SaveQueue {
   register(name: KvName, read: () => unknown): void;
   /** Marks a record changed. It is written within `delayMs`. */
   markDirty(name: KvName): void;
-  /** Writes all dirty records now, in one transaction. */
+  /** Writes all dirty records now, in one transaction, and waits for record writes already started. */
   flushNow(): Promise<void>;
   /** Flushes when the page is hidden (not after simulateKill). Returns a detach function. */
   attachPageListeners(doc?: Document, win?: Window): () => void;
@@ -61,7 +62,8 @@ export function createSaveQueue(options: SaveQueueOptions): SaveQueue {
 
   function flushNow(): Promise<void> {
     chain = chain.then(flushOnce);
-    return chain;
+    // Also wait for fire and forget record writes (the parent settings), so "flushed" means "on disk".
+    return chain.then(recordsSettled);
   }
 
   const queue: SaveQueue = {

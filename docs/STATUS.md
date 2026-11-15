@@ -1,13 +1,13 @@
 # Status
 
-**Phase:** small releases. 0.1.0, 0.2.0, 0.3.0, R1 and 0.4.0 Punten voor elke ronde are shipped (0.4.0 merged 2026-10-24).
-**Current release:** v11 Dorp (0.5.0, decisions 94 to 97), PRD signed 2026-10-24. V11a to V11e done.
-**Next step:** v11 Dorp built and verified (V11a to V11e, villager fix), CI green on the iPad browser. Ship 0.5.0 with the founder. Then refactor round R2 (decisions 99 to 101, docs/archive/TECH_REVIEW.md), then v3 backup (0.6.0), v6 parent dashboard (0.7.0).
-**2026-10-26, health audit on branch `claude/cool-allen-1mjpbu`:** lean CLAUDE.md (process in `docs/FACTORY.md`, platform in `docs/PLATFORM.md`), PLAN holds only open tasks, screenshots out of git, `scripts/smoke.sh` (about a minute), the full UI review only on request (decision 106), WebKit runs in the cloud sandbox, and refactor round R2a to R2d done (decisions 103 to 110; R2e on hold, then built on 2026-10-26 by decision 116: UI review in 3 specs, one boot per size, about 50 percent faster). The founder approved; it was pushed to `main` (32c260f) on 2026-10-26, which deploys through Workers Builds.
-**2026-10-26, founder requests on branch `claude/admiring-wozniak-hz8h2w`:** Inruilen and a herd of 25 (decision 111), follow dinos walk behind the kid so taps mine and build again (bug fix, decision 112), 10 Bijzondere dino's (decision 113). Full check green. Waits for the founder to merge to `main`. The founder should check speed with 25 dinos on the oldest iPad.
-**2026-10-26, founder requests on branch `claude/exciting-pasteur-i9ier9`:** the Dinofluit in the Dinowinkel (decision 114) and Voortgang, learning stats with charts and a week report for the parent (decision 115, a first slice of v6). Full check green (149 WebKit e2e). Waits for the founder to merge to `main`.
-**Next in the backlog:** see docs/BACKLOG.md. On hold: the save on refresh fix (decision 72). Founder iPad check AC165 still open.
-**Blockers:** none. This cloud session cannot push tags or to main directly (HTTP 403), so main is updated through a pull request.
+**Phase:** small releases. Live on `main`: 0.6.0 v3 Dino's veilig (PR #25) and **0.7.0 v17 Ridders and v18 Zwarte bubbel** (PR #26), both merged 2026-11-15 with green WebKit CI.
+**Built, not live:** **0.8.0 v15 Grote wereld** and **0.9.0 v16 Monstermol** on branch `claude/jolly-fermi-z0vak4` (V15a to V15e, V16a to V16e, decisions 136 to 139). No pull request yet.
+**Next step:** the founder tests on the oldest iPad, on a test deploy (a founder action): AC210 and AC227 (speed with knights and Klodder, already live), AC241 (the big world: speed and cold start; set Kijkafstand to Dichtbij in Ouders > Instellingen if it stutters) and AC256 (the mole). The list is in `docs/TEST_REPORT.md` and PRD section 12, "Check before shipping". Then open one pull request for 0.8.0 and 0.9.0, CI on WebKit, and the founder says when it merges.
+**Fixed on the branch, still wrong in live 0.7.0:** a tap on the left part of the black bubble may not pop it; the first tap after boot can be read as a drag; a parent setting can be lost when the app is closed within a few milliseconds of the tap (older than 0.7.0, now waited for by the flush).
+**Last full check (local Chromium, 2026-11-15):** 1477 unit tests pass; e2e 327 passed, 1 failed (`points-v9.spec.ts:383`, fixed after that run and then 15 of 15). The whole e2e suite has not run again after that last fix. `exam.spec.ts:254` AC112 is still flake TD22.
+**After that:** v19 Ridderuitrusting (8 items), v20 Diepe edelstenen, v21 Meer uitrusting, v6 (open founder question MOQ15: where v6 goes). Draft: `docs/MONSTERS_PRD.md`.
+**Rule change:** PRD changes for scope the founder asked for are stamped by the operator (standing approval, decision 136).
+**Blockers:** none. This cloud session cannot push to main directly, so main is updated through a pull request. A second session also works in this repo: fetch main before a decision number.
 
 ## Done
 * **2026-10-18: Gemini's build is the truth** (decision 50). `main` holds the Gemini2 code, live on Cloudflare Worker `minespel`. Claude's G0 to G6 branch is set aside (commit `4067f07` in history).

@@ -4,16 +4,15 @@
 Founder (asleep, looks again tomorrow): "ok kun je de mol en grote wereld ook bouwen", "ga zo door, ik kijk morgen", "outsource to cheaper models if possible". Earlier: "push that live" for Ridders and bubble.
 
 ## State
-* **Live on main:** 0.6.0 (PR #25) and **0.7.0 v17 Ridders + v18 Zwarte bubbel** (PR #26, merged 8c29fbd, green WebKit CI).
-* PRD section 12 also holds v15 (AC230 to AC243) and v16 (AC244 to AC257), stamped on the standing approval (decisions 136, 137). The gate is open. Plan: V15a to V15e, V16a to V16e in `docs/PLAN.md` (decision 138).
-* V15a done (b5301d0). A developer was building **V15b** (the switch to 128 x 128 x 80 and the move of old saves) when this note was made: check `git status`.
-* Branch claude/jolly-fermi-z0vak4, merged with main after PR #26. No open PR.
+* **Live on main:** 0.6.0 (PR #25) and 0.7.0 v17 Ridders + v18 Zwarte bubbel (PR #26).
+* **Built on the branch, not live:** 0.8.0 v15 Grote wereld and 0.9.0 v16 Monstermol, all 10 tasks done and pushed. See `docs/STATUS.md` for the test numbers and what is open.
+* Branch claude/jolly-fermi-z0vak4. No open PR.
 
 ## Next steps
-1. V15b: `./scripts/verify.sh task V15b --no-check`, full `./scripts/check.sh`, commit. Then V15c + V15d in parallel, then V15e (0.8.0). Then V16a, V16b + V16c in parallel, V16d, V16e (0.9.0).
-2. Developers do not commit; the operator commits after the check. verify.sh does not read file names inside brackets in a plan row.
-3. Push the branch after each verified task. **Do not merge v15 or v16 to main**: v15 waits for the founder's test on the oldest iPad (AC241; fallback `?near=1`), v16 builds on v15. Open one PR for 0.8.0 plus 0.9.0 only when the founder says so.
-4. Update `docs/STATUS.md` (stale, still says v11) with what is live and what waits for the founder.
+1. Run `./scripts/check.sh` once more (the last fix came after the last full run).
+2. Wait for the founder's iPad test (AC241, AC256, AC210, AC227). Do not merge v15 or v16 before it.
+3. On the founder's word: one pull request for 0.8.0 and 0.9.0, green CI, merge.
+4. Then /release for v19 Ridderuitrusting (standing approval, decision 136).
 
 ## For the founder tomorrow
 * iPad checks open: AC210 and AC227 (0.7.0 speed with knights and Klodder), AC241 (big world speed and cold start), AC256.

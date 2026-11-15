@@ -32,7 +32,7 @@
 | Acceptance criteria | docs/releases/v2.md | AC155 to AC165 (11) |
 | Acceptance criteria | docs/releases/v3.md | AC192 to AC199 (8) |
 | Acceptance criteria | docs/releases/v9.md | AC166 to AC171 (6) |
-| Decisions | docs/DECISIONS.md | 87 to 138 (52) |
+| Decisions | docs/DECISIONS.md | 87 to 139 (53) |
 | Decisions | docs/archive/decisions-1-86.md | 1 to 86 (86) |
 | Tasks | docs/DISCUSSION.md | V11a, V11b, V11c, V11d, V11e (5) |
 | Tasks | docs/PLAN.md | T18, T19, T55b, T55a, T53a, T21, T32, T52, T56, T22, T61, T62, … (39) |
@@ -43,17 +43,17 @@
 
 | File | Lines | Summary |
 |---|---:|---|
-| CHANGELOG.md | 172 | Written so kids can read it too. Sections: Unreleased:5, 0.7.0:7, 0.6.0 (2026-11-15):24, 0.5.0 (2026-10-24):67, 0.4.0 (2026-10-24):80, 0.3.0 (2026-10-22):90, 0.2.0 (2026-10-19):98, 0.1.0 (2026-10-19):120 |
+| CHANGELOG.md | 198 | Written so kids can read it too. Sections: Unreleased:5, 0.9.0:7, 0.8.0:21, 0.7.0:33, 0.6.0 (2026-11-15):50, 0.5.0 (2026-10-24):93, 0.4.0 (2026-10-24):106, 0.3.0 (2026-10-22):116, 0.2.0 (2026-10-19):124, 0.1.0 (2026-10-19):146 |
 | CLAUDE.md | 71 | A free 3D block world with dinos and short learning breaks (Dutch: taal, rekenen,… |
 | README.md | 78 | Dino Blokwereld is a free 3D block world for kids, played in Dutch on an iPad. Walk… |
 | docs/ARCHITECTURE.md | 402 | Written by the architect after PRD signoff (2026-10-17). Source of truth for how Dino… Sections: Stack and why:5, Folder structure:27, Modules and data flow:189, How modules are loaded:239, State and storage:280, Security and kid safety in…:310, How to run:319, How to test:332, How to deploy:365, Conventions for developers:374, Risks:388 |
 | docs/BACKLOG.md | 238 | Not signed. Changing this file never closes the PRD gate (decision 80). The signed… Sections: Next steps (founder order):5, Rules:23, Ranked backlog:33, Dropped:194, Later:215 |
-| docs/DECISIONS.md | 60 | Every notable decision. Founder decisions are marked NEEDS FOUNDER until answered, then… |
+| docs/DECISIONS.md | 61 | Every notable decision. Founder decisions are marked NEEDS FOUNDER until answered, then… |
 | docs/DISCUSSION.md | 164 | Review rounds between agents. Newest at the bottom. Keep it short: who said what, what… Sections: v11 Dorp: architect…:7, MONSTERS_PRD review round 1…:99 |
 | docs/FACTORY.md | 113 | Moved out of CLAUDE.md on 2026-10-26 (decision 104) so it is read only when needed. The… |
-| docs/FRICTION.md | 58 | The operator adds a line whenever something goes wrong or feels slow, so /retro has real… |
+| docs/FRICTION.md | 60 | The operator adds a line whenever something goes wrong or feels slow, so /retro has real… |
 | docs/GAME_LOOP_PRD.md | 349 | Status: Draft, not signed. Each release moves into docs/PRD.md section 12 and is signed… Sections: 1. The game loop:13, 2. v12 Dino-Hoed:53, 3. v13 Dino-Eten:134, 4. v14 Bouw-Opdracht:214, 5. Order and dependencies:332, 6. Not picked yet:338 |
-| docs/HANDOFF.md | 24 | Founder: "Maak de wereld dieper ... monster mol, zwarte bubbel, ridders, uitrusting,… |
+| docs/HANDOFF.md | 25 | Founder (asleep, looks again tomorrow): "ok kun je de mol en grote wereld ook bouwen",… |
 | docs/IDEA.md | 81 | "Create a 3D minecraft education kind of game but then also with dinosaurs, and every 5… |
 | docs/MONSTERS_PRD.md | 492 | Status: DRAFT, revised after review round 1 (2026-11-15). Not signed. The founder… Sections: 1. How it fits the game today:23, 2. v17 Ridders (ships after…:124, 3. v18 Zwarte bubbel (ships…:199, 4. v16 Monstermol (ships…:276, 5. v19 Ridderuitrusting:338, 6. v20 Diepe edelstenen:399, 7. v21 Meer uitrusting…:445, 8. Founder questions:471 |
 | docs/PLAN.md | 136 | Task graph written by the architect on 2026-10-17 from the signed PRD. The operator… Sections: How to read this:6, Milestones:15, Tasks:34, Task notes:78 |
@@ -61,9 +61,9 @@
 | docs/PRD.md | 1149 | Status: APPROVED by Founder (standing approval, decision 136) on 2026-11-15 Sections: 1. Summary:9, 2. Users:14, 3. Goals and success:21, 4. What the app is today (v1…:31, 5. Release backlog:391, 6. User flows:394, 7. Acceptance criteria:483, 8. Look, sound and feel:727, 9. Kid safety and privacy:741, 10. Constraints:757, 11. Risks and decisions:768, 12. Releases:852 |
 | docs/RETRO.md | 25 | Written by /retro. Newest at the bottom. Factory level learnings are also saved in… |
 | docs/SHOP_PRD.md | 108 | Document Status: Approved Addendum (docs/SHOP_PRD.md — companion to docs/PRD.md) |
-| docs/STATUS.md | 55 | Phase: small releases. 0.1.0, 0.2.0, 0.3.0, R1 and 0.4.0 Punten voor elke ronde are… |
+| docs/STATUS.md | 55 | Phase: small releases. Live on main: 0.6.0 v3 Dino's veilig (PR #25) and 0.7.0 v17… |
 | docs/TECH-DEBT.md | 34 | Known tech debt in one table. Major means it can cost the kids their builds or points.… |
-| docs/TEST_REPORT.md | 245 | Automated part: see the numbers below. AC210 and AC227 (speed on the founder's oldest… Sections: v18 Zwarte bubbel (0.7.0,…:3, v17 Ridders (0.7.0, part A),…:20, v11 Dorp (0.5.0):33, R1 Boot safety (R1d):117, v9 Eerlijke punten (0.3.0):135, v2 Gouden ei (0.2.0):160, Summary:232, Acceptance criteria coverage:235, Bugs:239, Kid safety and accessibility:243, Screenshots:245 |
+| docs/TEST_REPORT.md | 294 | Automated part PASS. AC256 (speed on the founder's oldest iPad) and AC241 (v15, the big… Sections: v16 Monstermol (0.9.0), V16e…:3, v15 Grote wereld (0.8.0),…:27, v18 Zwarte bubbel (0.7.0,…:52, v17 Ridders (0.7.0, part A),…:69, v11 Dorp (0.5.0):82, R1 Boot safety (R1d):166, v9 Eerlijke punten (0.3.0):184, v2 Gouden ei (0.2.0):209, Summary:281, Acceptance criteria coverage:284, Bugs:288, Kid safety and accessibility:292, Screenshots:294 |
 | docs/UI_REVIEW.md | 159 | Screenshots are not in git (44 MB). Run npm run test:e2e:ui-review to regenerate them in… Sections: How this was done:10, Why the founder sees buttons…:21, Screen map:30, Findings:58, Way back, in the same place?:135, What is good and should stay:142, Questions for the founder:153 |
 | docs/archive/CONTENT_CHECK.md | 215 | Date: 2026-10-22. By: QA. F1 to F7 and F10 are fixed (see the "Fixed" line under each).… Sections: How this was done:5, Overall result:40, Findings:48, What checked out (no finding):159, Top 5 to fix:170, 20 items for the founder or…:178, Lookup list for…:207, For the founder:211 |
 | docs/archive/DISCUSSION-to-v10.md | 309 | Moved out of docs/DISCUSSION.md on 2026-10-26 (decision 105). Unchanged. Sections: PRD review round 1:5, Architecture review:159, Architecture review (qa view):187, M1 milestone review:264 |
