@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { openDb } from '../storage/db';
 import { createRecords } from '../storage/records';
 import type { DinosRecord } from '../storage/schema';
@@ -99,6 +99,28 @@ describe('dinos stay by default (decision 122)', () => {
     await store.load();
     expect(store.dinos()).toHaveLength(1);
     expect(store.dinos()[0]!.mode).toBe('stay');
+    db.close();
+  });
+
+  it('the switch writes the flag straight away, without a later save (a crash cannot rerun it)', async () => {
+    const { db, records, make } = await setup();
+    await records.put('dinos', { dinos: [oldDino('d1', 'follow', 12, 13)], eggs: [] } as DinosRecord);
+    const store = make();
+    store.restoreFromRecord(await records.get('dinos'));
+    await vi.waitFor(async () => {
+      const saved = await records.get('dinos');
+      expect(saved.staySwitched).toBe(true);
+      expect((saved.dinos[0] as { mode: string }).mode).toBe('stay');
+    });
+    db.close();
+  });
+
+  it('restoring a record without staySwitched, like an old backup, runs the switch', async () => {
+    const { db, make } = await setup();
+    const store = make();
+    store.restoreFromRecord({ dinos: [oldDino('d1', 'follow', 7, 8)], eggs: [] } as DinosRecord);
+    expect(store.getDino('d1')?.mode).toBe('stay');
+    expect([store.getDino('d1')!.stayX, store.getDino('d1')!.stayZ]).toEqual([7, 8]);
     db.close();
   });
 });

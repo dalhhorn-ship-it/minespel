@@ -86,6 +86,20 @@ describe('game', () => {
     expect(s.render).toHaveBeenCalledTimes(4);
   });
 
+  it('decision 122: Allemaal blijven works while the loop is paused', () => {
+    const s = setup();
+    const chicken = s.game.dinoStore.spawnChickenInMemory();
+    s.game.dinoStore.setDinoMode(chicken.id, 'follow');
+    runFrames(2);
+    const btn = s.container.querySelector<HTMLButtonElement>('[data-testid="hud-stay"]')!;
+    expect(btn.hidden).toBe(false);
+    s.game.pause();
+    expect(s.game.isRunning()).toBe(false);
+    btn.dispatchEvent(new PointerEvent('pointerdown', { pointerId: 1, clientX: 5, clientY: 5, bubbles: true }));
+    btn.dispatchEvent(new PointerEvent('pointerup', { pointerId: 1, clientX: 5, clientY: 5, bubbles: true }));
+    expect(s.game.dinoStore.getDino(chicken.id)?.mode).toBe('stay');
+  });
+
   it('stays paused in portrait and when too small, and resumes when the guard clears', () => {
     const s = setup();
     s.setGuard({ portrait: true, tooSmall: false });

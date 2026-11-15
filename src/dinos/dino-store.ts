@@ -255,7 +255,8 @@ export function createDinoStore(options: DinoStoreOptions): DinoStore {
       if (!switched) {
         // Decision 122, once: a save from before the switch puts every animal on Blijf hier where it stands.
         for (const d of dinosList) stayHere(d);
-        if (dinosList.length > 0) markDirty();
+        // Save at once, so a crash cannot run the switch again and lose a later Volg mij.
+        if (dinosList.length > 0) void saveNow();
       }
       notify();
     },

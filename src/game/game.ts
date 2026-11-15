@@ -171,8 +171,9 @@ export function createGame(options: GameOptions): Game {
     onFluit: () => {
       playFluit();
     },
+    // No loop guard: the button works while paused too, and it saves at once (decision 122).
     onStayAll: () => {
-      if (loopRunning()) dinoSystem.stayAll();
+      dinoSystem.stayAll();
     },
   });
   let fluitOwned = false;
