@@ -7,6 +7,7 @@ import type { Catalog } from '../content/catalog';
 import { today, type Clock } from '../core/clock';
 import { computeProgress, type ProgressStats } from '../learning/progress-stats';
 import type { Rng } from '../core/rng';
+import { replaceAll } from '../storage/backup';
 import type { LogStore } from '../storage/log-store';
 import type { ProgressStore } from '../storage/progress-store';
 import type { Records } from '../storage/records';
@@ -40,6 +41,10 @@ export interface ParentFlowOptions {
   exams?: ParentExams;
   sound?: Sound;
   onResetWorld?: () => Promise<void> | void;
+  /** The open database: Alles wissen empties it in one safe replace (AC193). */
+  db?: IDBDatabase;
+  /** Test seam. Default: reload the page into a new game. */
+  reload?: () => void;
 }
 
 export interface ParentFlow {
@@ -196,6 +201,14 @@ export function createParentFlow(options: ParentFlowOptions): ParentFlow {
             await options.onResetWorld?.();
           }
         : undefined,
+      onWipeAll: options.db
+        ? async () => {
+            // One transaction, nothing else writes meanwhile. On success the halt stays on and the page reloads.
+            await replaceAll(options.db!, null, { appVersion: __APP_VERSION__ });
+            (options.reload ?? (() => location.reload()))();
+          }
+        : undefined,
+      appVersion: __APP_VERSION__,
       onClose: () => {
         close();
       },

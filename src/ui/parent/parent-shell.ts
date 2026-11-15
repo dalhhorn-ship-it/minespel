@@ -52,6 +52,8 @@ export interface ParentShellOptions {
   onEndBreakNow: () => Promise<void> | void;
   onChangePin: () => void;
   onResetWorld?: () => Promise<void> | void;
+  onWipeAll?: () => Promise<void> | void;
+  appVersion?: string;
   onClose: () => void;
   now?: () => number;
 }
@@ -141,6 +143,8 @@ export function createParentShell(options: ParentShellOptions): ParentShell {
         onEndBreakNow: options.onEndBreakNow,
         onChangePin: options.onChangePin,
         onResetWorld: options.onResetWorld,
+        onWipeAll: options.onWipeAll,
+        appVersion: options.appVersion,
         now: options.now,
       });
       main.append(view.element);

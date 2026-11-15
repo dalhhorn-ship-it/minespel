@@ -5,6 +5,8 @@ type Fs = { globSync(p: string): string[]; readFileSync(p: string, enc: string):
 const fs = (globalThis as unknown as { process: { getBuiltinModule(n: string): unknown } }).process.getBuiltinModule('node:fs') as Fs;
 const { globSync, readFileSync } = fs;
 
+const APP_VERSION = (JSON.parse(readFileSync('package.json', 'utf8')) as { version: string }).version;
+
 const TEST_GLOBS = ['src/**/*.test.ts', 'tests/unit/**/*.test.ts'];
 
 /** Node test files that still leak state when workers are shared. Each keeps isolation. One line reason each. */
@@ -32,6 +34,7 @@ const common = {
 export default defineConfig(({ mode }) => ({
   define: {
     __E2E__: JSON.stringify(mode === 'e2e'),
+    __APP_VERSION__: JSON.stringify(APP_VERSION),
   },
   server: { host: true },
   build: { target: 'safari15' },
@@ -39,15 +42,15 @@ export default defineConfig(({ mode }) => ({
     projects: [
       // Node tests share a worker (no isolation): much faster start up.
       {
-        define: { __E2E__: false },
+        define: { __E2E__: false, __APP_VERSION__: JSON.stringify(APP_VERSION) },
         test: { name: 'node', environment: 'node', isolate: false, include: nodeShared, ...common },
       },
       {
-        define: { __E2E__: false },
+        define: { __E2E__: false, __APP_VERSION__: JSON.stringify(APP_VERSION) },
         test: { name: 'node-isolated', environment: 'node', isolate: true, include: nodeIsolated, ...common },
       },
       {
-        define: { __E2E__: false },
+        define: { __E2E__: false, __APP_VERSION__: JSON.stringify(APP_VERSION) },
         test: { name: 'jsdom', environment: 'jsdom', isolate: true, include: jsdomFiles, ...common },
       },
     ],
