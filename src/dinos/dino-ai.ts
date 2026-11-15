@@ -1,7 +1,7 @@
 // Dino behaviour: follow, stay, wander, hop one block, never inside a block, pop next to the player.
 // Pure and frame rate independent: every function takes dt in seconds. No DOM, no storage.
 import type { Rng } from '../core/rng';
-import { isSolid } from '../world/blocks';
+import { isSolid, LAVA, VUUR } from '../world/blocks';
 import { GRAVITY, MAX_FALL_SPEED, MAX_FRAME_TIME } from '../world/physics';
 import { WORLD_SIZE } from '../world/terrain';
 import type { World } from '../world/world';
@@ -130,6 +130,62 @@ export function dinoBounds(d: Pick<DinoState, 'kind' | 'growth' | 'x' | 'y' | 'z
   return [d.x - h, d.y, d.z - h, d.x + h, d.y + height, d.z + h];
 }
 
+/** Decision 129: animals never walk onto lava. Fire burns too, so it counts the same. */
+const isHazard = (id: number): boolean => id === LAVA || id === VUUR;
+
+function hazardCell(world: World, x: number, y: number, z: number): boolean {
+  if (x < 0 || z < 0 || x >= WORLD_SIZE || z >= WORLD_SIZE || y < 0) return false;
+  return isHazard(world.get(x, y, z));
+}
+
+/** Is a box with this footprint, feet at (px, py, pz), in lava or fire, or standing on it? Looks at the feet and ground cells only. */
+export function hazardAt(world: World, px: number, py: number, pz: number, side: number): boolean {
+  const h = side / 2;
+  const x0 = Math.floor(px - h), x1 = Math.floor(px + h - EPS);
+  const z0 = Math.floor(pz - h), z1 = Math.floor(pz + h - EPS);
+  const yf = Math.floor(py + 1e-3);
+  for (let x = x0; x <= x1; x++) {
+    for (let z = z0; z <= z1; z++) {
+      if (hazardCell(world, x, yf, z) || hazardCell(world, x, yf - 1, z)) return true;
+    }
+  }
+  return false;
+}
+
+/** True when a hazard is in the column of the cell around (x, z), or in its eight neighbours, near the height y. */
+function hazardNear(world: World, x: number, y: number, z: number): boolean {
+  const cx = Math.floor(x), cz = Math.floor(z), cy = Math.floor(y);
+  for (let dx = -1; dx <= 1; dx++) {
+    for (let dz = -1; dz <= 1; dz++) {
+      for (let dy = -3; dy <= 1; dy++) {
+        if (hazardCell(world, cx + dx, cy + dy, cz + dz)) return true;
+      }
+    }
+  }
+  return false;
+}
+
+/** The centre of the nearest cell around the dino that is not hazard, searched in growing rings. */
+function nearestSafe(world: World, d: DinoState, side: number): { x: number; z: number } | null {
+  const cx = Math.floor(d.x), cz = Math.floor(d.z);
+  for (let r = 1; r <= 8; r++) {
+    let best: { x: number; z: number } | null = null;
+    let bestD = Infinity;
+    for (let dx = -r; dx <= r; dx++) {
+      for (let dz = -r; dz <= r; dz++) {
+        if (Math.max(Math.abs(dx), Math.abs(dz)) !== r) continue;
+        const x = cx + dx + 0.5, z = cz + dz + 0.5;
+        if (x < 1 || z < 1 || x >= WORLD_SIZE - 1 || z >= WORLD_SIZE - 1) continue;
+        if (hazardAt(world, x, d.y, z, side)) continue;
+        const dd = Math.hypot(x - d.x, z - d.z);
+        if (dd < bestD) { bestD = dd; best = { x, z }; }
+      }
+    }
+    if (best) return best;
+  }
+  return null;
+}
+
 function blocked(world: World, x: number, y: number, z: number): boolean {
   if (x < 0 || z < 0 || x >= WORLD_SIZE || z >= WORLD_SIZE || y < 0) return true;
   return isSolid(world.get(x, y, z));
@@ -253,7 +309,7 @@ function popAt(world: World, d: DinoState, player: Point, rng: Rng, box?: StepOp
       for (const dy of [0, 1, -1, 2, -2, 3, -3]) {
         const y = baseY + dy;
         if (y < 0) continue;
-        if (!boxCollides(world, x, y, z, side, height) && boxCollides(world, x, y - 0.05, z, side, height)) {
+        if (!boxCollides(world, x, y, z, side, height) && boxCollides(world, x, y - 0.05, z, side, height) && !hazardAt(world, x, y, z, side)) {
           d.x = x; d.y = y; d.z = z;
           resetMotion(d);
           d.onGround = true;
@@ -265,31 +321,37 @@ function popAt(world: World, d: DinoState, player: Point, rng: Rng, box?: StepOp
   return false;
 }
 
-function pickGoal(d: DinoState, ax: number, az: number, rng: Rng, radius: number, behind?: { player: Point; yaw: number }, goalTime = 4): void {
+function pickGoal(world: World, d: DinoState, ax: number, az: number, rng: Rng, radius: number, behind?: { player: Point; yaw: number }, goalTime = 4): void {
   const lim = (v: number): number => Math.min(WORLD_SIZE - 1, Math.max(1, v));
   for (let tries = 0; tries < 6; tries++) {
     const a = rng.next() * Math.PI * 2;
     const r = Math.sqrt(rng.next()) * radius;
     const goal = { x: lim(ax + Math.cos(a) * r), z: lim(az + Math.sin(a) * r) };
     if (behind && aheadOf(behind.player, behind.yaw, goal.x, goal.z) > -BEHIND_MARGIN) continue;
+    if (hazardNear(world, goal.x, d.y, goal.z)) continue;
     d.goal = goal;
     d.goalLeft = goalTime;
     return;
   }
+  if (hazardNear(world, lim(ax), d.y, lim(az))) { d.goal = null; d.idleLeft = 0.5; return; }
   d.goal = { x: lim(ax), z: lim(az) };
   d.goalLeft = goalTime;
 }
 
 /** One small physics step. Returns the horizontal distance moved. */
-function physics(world: World, d: DinoState, dirX: number, dirZ: number, dt: number, box?: StepOptions['box'], speed = DINO_SPEED): number {
+function physics(world: World, d: DinoState, dirX: number, dirZ: number, dt: number, box?: StepOptions['box'], speed = DINO_SPEED, free = false, out?: { lava: boolean }): number {
   const { side, height } = box ?? dinoBox(d);
   const ox = d.x, oz = d.z;
   const mx = dirX * speed * dt, mz = dirZ * speed * dt;
   let hitWall = false;
-  if (mx !== 0 && !boxCollides(world, d.x + mx, d.y, d.z, side, height)) d.x += mx;
-  else if (mx !== 0) hitWall = true;
-  if (mz !== 0 && !boxCollides(world, d.x, d.y, d.z + mz, side, height)) d.z += mz;
-  else if (mz !== 0) hitWall = true;
+  // Lava and fire act like a wall, unless the dino is already in it and walks out.
+  const lavaAt = (x: number, z: number): boolean => !free && hazardAt(world, x, d.y, z, side);
+  if (mx !== 0 && !boxCollides(world, d.x + mx, d.y, d.z, side, height)) {
+    if (lavaAt(d.x + mx, d.z)) { if (out) out.lava = true; } else d.x += mx;
+  } else if (mx !== 0) hitWall = true;
+  if (mz !== 0 && !boxCollides(world, d.x, d.y, d.z + mz, side, height)) {
+    if (lavaAt(d.x, d.z + mz)) { if (out) out.lava = true; } else d.z += mz;
+  } else if (mz !== 0) hitWall = true;
 
   // Hop: only when blocked, on the ground, and one block higher is free.
   if (hitWall && d.onGround) {
@@ -346,6 +408,19 @@ export function stepDino(world: World, d: DinoState, player: Point, rng: Rng, dt
 }
 
 function stepOnce(world: World, d: DinoState, player: Point, rng: Rng, dt: number, opts: StepOptions): DinoEvent {
+  if (d.onGround && hazardAt(world, d.x, d.y, d.z, (opts.box ?? dinoBox(d)).side)) {
+    // In lava (old save, or lava placed under it): walk out to the nearest safe cell.
+    const safe = nearestSafe(world, d, (opts.box ?? dinoBox(d)).side);
+    if (safe) {
+      const len = Math.hypot(safe.x - d.x, safe.z - d.z) || 1;
+      const dx = (safe.x - d.x) / len, dz = (safe.z - d.z) / len;
+      physics(world, d, dx, dz, dt, opts.box, DINO_SPEED, true);
+      d.heading = Math.atan2(dx, dz);
+      d.goal = null;
+      d.stuckTime = 0;
+      return null;
+    }
+  }
   if (isCalled(d)) return stepCalled(world, d, player, rng, dt, opts);
   const follow = d.mode === 'follow';
   const yaw = follow && opts.playerYaw !== undefined && Number.isFinite(opts.playerYaw) ? opts.playerYaw : undefined;
@@ -392,7 +467,7 @@ function stepOnce(world: World, d: DinoState, player: Point, rng: Rng, dt: numbe
     }
   } else {
     d.idleLeft -= dt;
-    if (d.idleLeft <= 0) pickGoal(d, ax, az, rng, radius, yaw !== undefined ? { player, yaw } : undefined, roam ? 12 : 4);
+    if (d.idleLeft <= 0) pickGoal(world, d, ax, az, rng, radius, yaw !== undefined ? { player, yaw } : undefined, roam ? 12 : 4);
   }
 
   let dirX = 0, dirZ = 0;
@@ -401,7 +476,9 @@ function stepOnce(world: World, d: DinoState, player: Point, rng: Rng, dt: numbe
     const len = Math.hypot(gx, gz);
     if (len > 0.05) { dirX = gx / len; dirZ = gz / len; }
   }
-  const moved = physics(world, d, dirX, dirZ, dt, opts.box, roam ? ROAM_SPEED : DINO_SPEED);
+  const lavaOut = { lava: false };
+  const moved = physics(world, d, dirX, dirZ, dt, opts.box, roam ? ROAM_SPEED : DINO_SPEED, false, lavaOut);
+  if (lavaOut.lava && !d.chasing) { d.goal = null; d.idleLeft = 0.5 + rng.next(); }
   if (dirX !== 0 || dirZ !== 0) {
     d.heading = Math.atan2(dirX, dirZ);
     if (d.onGround && moved < (roam ? ROAM_SPEED : DINO_SPEED) * dt * 0.25) d.stuckTime += dt;

@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import { createRng } from '../core/rng';
-import { AIR, STEEN } from '../world/blocks';
+import { AIR, LAVA, STEEN } from '../world/blocks';
 import { WORLD_HEIGHT, WORLD_SIZE } from '../world/terrain';
 import { World } from '../world/world';
 import {
-  BEHIND_MARGIN, BEHIND_DISTANCE, DINO_SPEED, CLOSE_ENOUGH, FAR_DISTANCE, FOLLOW_RADIUS, ROAM_RADIUS, ROAM_SPEED, viewForward, WANDER_RADIUS, createDino, dinoCollides, popNextTo, stepDino, type DinoState, type Point,
+  BEHIND_MARGIN, BEHIND_DISTANCE, DINO_SPEED, CLOSE_ENOUGH, FAR_DISTANCE, FOLLOW_RADIUS, ROAM_RADIUS, ROAM_SPEED, viewForward, WANDER_RADIUS, createDino, dinoCollides, hazardAt, popNextTo, stepDino, type DinoState, type Point,
 } from './dino-ai';
 import { GROW_SECONDS } from './egg';
 import { DINO_KIND_IDS, type DinoKindId } from './kinds';
@@ -321,3 +321,76 @@ describe('followers keep the view clear (decision 112)', () => {
   });
 });
 
+
+describe('AC: animals avoid lava (decision 129)', () => {
+  /** A flat world with a lava pool (floor top replaced by lava) in x 20..29, z 20..29 and a lava strip across x 38..41. */
+  function lavaWorld(): World {
+    const w = flatWorld();
+    for (let x = 20; x < 30; x++) for (let z = 20; z < 30; z++) w.set(x, FLOOR, z, LAVA);
+    for (let x = 38; x < 42; x++) for (let z = 0; z < WORLD_SIZE; z++) w.set(x, FLOOR, z, LAVA);
+    return w;
+  }
+  const side = (): number => 0.6;
+  const inLava = (w: World, d: DinoState): boolean => hazardAt(w, d.x, d.y, d.z, side()) && d.onGround;
+
+  it('roaming 600 simulated seconds never enters lava', () => {
+    for (const seed of [1, 2, 3]) {
+      const w = lavaWorld();
+      const d = createDino({ kind: 'compy', golden: false, x: 18.5, y: GY, z: 18.5 }, true);
+      const rng = createRng(seed);
+      const player = { x: 60.5, y: GY, z: 60.5 };
+      for (let i = 0; i < 600 * 20; i++) {
+        stepDino(w, d, player, rng, 1 / 20);
+        const h = 0.05;
+        expect([w.get(Math.floor(d.x - h), FLOOR, Math.floor(d.z - h)), w.get(Math.floor(d.x + h), FLOOR, Math.floor(d.z + h))]).not.toContain(LAVA);
+      }
+    }
+  });
+
+  it('a follower with lava between it and the player never enters it', () => {
+    const w = lavaWorld();
+    const d = dinoAt(36.5, 10.5);
+    const rng = createRng(4);
+    const player = { x: 44.5, y: GY, z: 10.5 };
+    for (let i = 0; i < 60 * 30; i++) {
+      stepDino(w, d, player, rng, 1 / 60);
+      expect(d.x < 37.95 || d.x > 42.05 || !d.onGround).toBe(true);
+      expect(inLava(w, d)).toBe(false);
+    }
+  });
+
+  it('goal picking skips lava', () => {
+    const w = lavaWorld();
+    const d = createDino({ kind: 'compy', golden: false, x: 31.5, y: GY, z: 24.5 }, true);
+    d.stayX = 31.5; d.stayZ = 24.5;
+    const rng = createRng(9);
+    for (let i = 0; i < 20 * 120; i++) {
+      stepDino(w, d, { x: 60.5, y: GY, z: 60.5 }, rng, 1 / 20);
+      if (d.goal) {
+        const gx = Math.floor(d.goal.x), gz = Math.floor(d.goal.z);
+        for (let dx = -1; dx <= 1; dx++) for (let dz = -1; dz <= 1; dz++) expect(w.get(gx + dx, FLOOR, gz + dz)).not.toBe(LAVA);
+      }
+    }
+  });
+
+  it('the pop spot is never lava', () => {
+    const w = flatWorld();
+    // Lava on every ground cell within 2.2 blocks of the player on one side: the spot must be on the other side.
+    const player = { x: 30.5, y: GY, z: 30.5 };
+    for (let x = 25; x < 31; x++) for (let z = 20; z < 41; z++) w.set(x, FLOOR, z, LAVA);
+    for (let seed = 1; seed <= 20; seed++) {
+      const d = dinoAt(5.5, 5.5);
+      expect(popNextTo(w, d, player, createRng(seed))).toBe(true);
+      expect(w.get(Math.floor(d.x), FLOOR, Math.floor(d.z))).not.toBe(LAVA);
+    }
+  });
+
+  it('a dino placed on lava leaves it', () => {
+    const w = lavaWorld();
+    const d = createDino({ kind: 'compy', golden: false, x: 25.5, y: GY, z: 25.5 }, true);
+    d.onGround = true;
+    const rng = createRng(2);
+    for (let i = 0; i < 60 * 10; i++) stepDino(w, d, { x: 60.5, y: GY, z: 60.5 }, rng, 1 / 60);
+    expect(hazardAt(w, d.x, d.y, d.z, 0.6)).toBe(false);
+  });
+});
