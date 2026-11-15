@@ -2,7 +2,7 @@
 // `save070()` is the shape 0.7.0 wrote (terrain version 2); `save040()` is a 0.4.0 save (no `terrainVersion`).
 // Shapes are written out by hand on purpose: they freeze what 0.7.0 saved, so a later change to the
 // serializers does not change the fixture. `tests/unit/old-saves-fixture.test.ts` proves them against the 0.7.0 code.
-// V15c adds `backupV060()` and `backupV070()`.
+// `backupV060()` and `backupV070()` (V15c) wrap them as format 1 backup files.
 import type {
   DinosRecord, EconomyRecord, KnightRecord, MonstersRecord, PlayerRecord, SettingsRecord, VillageRecord, WorldRecord,
 } from '../../../src/storage/schema';
@@ -154,4 +154,40 @@ export function save040(): OldSave {
       breakWarningEnabled: true, soundEffectsEnabled: true,
     },
   };
+}
+
+/** A diff as a backup file writes it: `{ "$u32": base64 }`, little endian. */
+function encodeDiff(diff: Uint32Array): { $u32: string } {
+  const bytes = new Uint8Array(diff.length * 4);
+  const view = new DataView(bytes.buffer);
+  diff.forEach((n, i) => view.setUint32(i * 4, n, true));
+  let bin = '';
+  for (const b of bytes) bin += String.fromCharCode(b);
+  return { $u32: btoa(bin) };
+}
+
+function backupText(appVersion: string, createdAt: string, save: OldSave, withMonsters: boolean): string {
+  const settings: Record<string, unknown> = { ...save.settings };
+  if (!withMonsters) for (const k of ['monstersEnabled', 'knightsEnabled', 'bubbleEnabled']) delete settings[k];
+  const kv: Record<string, unknown> = {
+    settings,
+    player: save.player,
+    world: { diff: encodeDiff(save.world.diff), terrainVersion: 2 },
+    dinos: save.dinos,
+    economy: save.economy,
+    village: save.village,
+    meta: { schemaVersion: 1, appVersion, lastBackup: null, createdAt },
+  };
+  if (withMonsters) kv.monsters = save.monsters;
+  return JSON.stringify({ app: 'dino-blokwereld', format: 1, createdAt, appVersion, schemaVersion: 1, kv, stores: {} });
+}
+
+/** The text of a backup file made by 0.6.0: format 1, terrain version 2, no knights, no monsters record. */
+export function backupV060(): string {
+  return backupText('0.6.0', '2026-11-12T09:00:00.000Z', save070(), false);
+}
+
+/** The text of a backup file made by 0.7.0: format 1, terrain version 2, 2 knights with spots. */
+export function backupV070(): string {
+  return backupText('0.7.0', '2026-11-20T09:15:00.000Z', save070(), true);
 }

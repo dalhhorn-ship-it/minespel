@@ -7,9 +7,14 @@ export interface Quality {
   fogNear: number;
   /** Everything is fog colour from here on. Also the view distance. */
   fogFar: number;
+  /**
+   * Near mode (speed fallback step 1, v15): only chunks near the player have a mesh. Off by default, `?near=1` turns
+   * it on. Turning it on for everybody is a change of the default only.
+   */
+  near: boolean;
 }
 
-export const DEFAULT_QUALITY: Quality = { pixelRatioCap: 2, fogNear: 28, fogFar: 60 };
+export const DEFAULT_QUALITY: Quality = { pixelRatioCap: 2, fogNear: 28, fogFar: 60, near: false };
 
 /** Pixel ratio for a device: never above the cap, never below 1. */
 export function pixelRatioFor(devicePixelRatio: number, quality: Quality): number {
@@ -25,7 +30,7 @@ function num(params: URLSearchParams, key: string, min: number, max: number): nu
 }
 
 /**
- * Lets the spike try fallbacks without a rebuild: `?pr=1.5&fog=40` (fog is the far distance, near is half of it).
+ * Lets the spike try fallbacks without a rebuild: `?pr=1.5&fog=40` and `?near=1` (fog is the far distance, near is half of it).
  * Anything unreadable is ignored.
  */
 export function qualityFromSearch(search: string, base: Quality = DEFAULT_QUALITY): Quality {
@@ -36,5 +41,6 @@ export function qualityFromSearch(search: string, base: Quality = DEFAULT_QUALIT
     pixelRatioCap: pr ?? base.pixelRatioCap,
     fogNear: fog === null ? base.fogNear : Math.round(fog / 2),
     fogFar: fog ?? base.fogFar,
+    near: params.has('near') ? params.get('near') === '1' : base.near,
   };
 }

@@ -8,6 +8,7 @@ Written so kids can read it too.
 
 * The world is now 128 x 128 blocks and 80 high. Your old world is the middle of it, with new land around it and a lot more ground to dig through. Everything you built and everything you own moves along: your spot, your animals, your knights and your villages.
 * The move happens once when the game starts. If the iPad switches off halfway, the old save stays whole and the move runs again.
+* The game only draws what the camera can see, and the view ends where the fog ends. Nothing looks different. `?near=1` in the address is a spare switch that builds only the chunks near you, in case an older iPad is slow.
 
 ## 0.7.0
 

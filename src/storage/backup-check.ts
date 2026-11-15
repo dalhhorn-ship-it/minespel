@@ -9,6 +9,7 @@ import {
   type BackupData, type BackupKvName,
 } from './backup';
 import { WORLD_HEIGHT, WORLD_SIZE } from '../world/terrain';
+import { LEGACY_CELL_COUNT, LEGACY_HEIGHT, LEGACY_SIZE } from '../world/terrain-legacy';
 import { KNIGHT_MODES, SCHEMA_VERSION, STORE_NAMES } from './schema';
 
 export const MSG_TOO_BIG = 'Dit bestand is te groot voor een backup. Er is niets veranderd.';
@@ -59,44 +60,66 @@ function validDinos(d: Record<string, unknown>): boolean {
   return shopDinoCount(d.dinos, d.eggs) <= MAX_SHOP_DINOS && chickenCount(d.dinos) <= MAX_CHICKENS;
 }
 
-function validWorld(w: Record<string, unknown>): boolean {
+/** What a backup format allows: the world it was made in (decision 138). Format 1 is the 64 world of 0.4.0 to 0.7.0. */
+interface Bounds {
+  size: number;
+  height: number;
+  cells: number;
+  terrainVersions: readonly (number | undefined)[];
+  needsWorld: boolean;
+}
+const BOUNDS: Record<number, Bounds> = {
+  1: { size: LEGACY_SIZE, height: LEGACY_HEIGHT, cells: LEGACY_CELL_COUNT, terrainVersions: [undefined, 1, 2], needsWorld: false },
+  2: { size: WORLD_SIZE, height: WORLD_HEIGHT, cells: WORLD_SIZE * WORLD_HEIGHT * WORLD_SIZE, terrainVersions: [3], needsWorld: true },
+};
+
+function validWorld(w: Record<string, unknown>, b: Bounds): boolean {
   const diff = w.diff;
   if (!(diff instanceof Uint32Array)) return false;
-  if (cleanDiff(diff).length !== diff.length) return false;
-  return optional(w.terrainVersion, (v) => isWhole(v, 1));
+  if (cleanDiff(diff, b.cells).length !== diff.length) return false;
+  return b.terrainVersions.includes(w.terrainVersion as number | undefined);
 }
 
-/** A spot is null or a point inside the world. */
+/** A coordinate is a number inside the world; a missing one is left to the loaders. */
 const inside = (n: unknown, max: number): boolean => isNum(n) && n >= 0 && n <= max;
-const validSpot = (x: unknown): boolean =>
-  x === null || (isObj(x) && inside(x.x, WORLD_SIZE) && inside(x.y, WORLD_HEIGHT) && inside(x.z, WORLD_SIZE));
+const insideOrMissing = (n: unknown, max: number): boolean => n === undefined || n === null || inside(n, max);
+const validSpot = (x: unknown, b: Bounds): boolean =>
+  x === null || (isObj(x) && inside(x.x, b.size) && inside(x.y, b.height) && inside(x.z, b.size));
 
-function validKnight(k: unknown): boolean {
-  return isObj(k) && typeof k.id === 'string' && k.id.length >= 1 && k.id.length <= 40 &&
-    KNIGHT_MODES.includes(k.mode as never) && validSpot(k.spot) && isWhole(k.boughtFor);
+/** Every position of an animal or egg: x, y, z and the stay spot. */
+function validCreatureSpots(list: Record<string, unknown>[], b: Bounds): boolean {
+  return list.every((d) =>
+    insideOrMissing(d.x, b.size) && insideOrMissing(d.y, b.height) && insideOrMissing(d.z, b.size) &&
+    insideOrMissing(d.stayX, b.size) && insideOrMissing(d.stayZ, b.size));
 }
 
-function validMonsters(v: Record<string, unknown>): boolean {
-  return optional(v.knights, (x) => Array.isArray(x) && x.length <= MAX_KNIGHTS && x.every(validKnight) &&
+function validKnight(k: unknown, b: Bounds): boolean {
+  return isObj(k) && typeof k.id === 'string' && k.id.length >= 1 && k.id.length <= 40 &&
+    KNIGHT_MODES.includes(k.mode as never) && validSpot(k.spot, b) && isWhole(k.boughtFor);
+}
+
+function validMonsters(v: Record<string, unknown>, b: Bounds): boolean {
+  return optional(v.knights, (x) => Array.isArray(x) && x.length <= MAX_KNIGHTS && x.every((k) => validKnight(k, b)) &&
       new Set(x.map((k) => (k as { id: string }).id)).size === x.length) &&
     optional(v.bubbleClockMs, (x) => isNum(x) && x >= 0 && x <= 600_000) &&
     optional(v.hintShown, (x) => typeof x === 'boolean');
 }
 
-function validKv(name: BackupKvName, v: Record<string, unknown>): boolean {
+function validKv(name: BackupKvName, v: Record<string, unknown>, b: Bounds): boolean {
   switch (name) {
     case 'settings': return validSettings(v);
-    case 'dinos': return validDinos(v);
-    case 'world': return validWorld(v);
+    case 'dinos': return validDinos(v) && validCreatureSpots(v.dinos as Record<string, unknown>[], b) && validCreatureSpots(v.eggs as Record<string, unknown>[], b);
+    case 'world': return validWorld(v, b);
     case 'economy':
       return optional(v.points, (x) => isWhole(x)) && optional(v.practicePointsToday, (x) => isWhole(x)) && optional(v.fluit, (x) => typeof x === 'boolean');
-    case 'monsters': return validMonsters(v);
+    case 'monsters': return validMonsters(v, b);
     case 'village':
       return optional(v.found, (x) => Array.isArray(x) && x.every((b) => isWhole(b, 34) && b <= 41)) &&
         optional(v.cooldownMs, (x) => isNum(x) && x >= 0) &&
         optional(v.lastVillager, (x) => x === null || typeof x === 'string');
     case 'player':
       return (['x', 'y', 'z', 'yaw', 'pitch'] as const).every((k) => optional(v[k], isNum)) &&
+        insideOrMissing(v.x, b.size) && insideOrMissing(v.y, b.height) && insideOrMissing(v.z, b.size) &&
         optional(v.hotbar, (x) => Array.isArray(x) && x.every((b) => isWhole(b)));
     case 'stats':
       return optional(v.playMsPerDay, (x) => isObj(x) && Object.values(x).every((n) => isNum(n) && n >= 0));
@@ -119,18 +142,20 @@ export function checkBackup(text: string): BackupCheck {
     }
     if (!isObj(file) || file.app !== BACKUP_APP) return bad(MSG_WRONG_APP);
     if (typeof file.format === 'number' && file.format > BACKUP_FORMAT) return bad(MSG_NEWER);
-    if (file.format !== BACKUP_FORMAT) return bad(MSG_BAD_VALUES);
+    const bounds = typeof file.format === 'number' ? BOUNDS[file.format] : undefined;
+    if (!bounds) return bad(MSG_BAD_VALUES);
     if (isWhole(file.schemaVersion, 1) && file.schemaVersion > SCHEMA_VERSION) return bad(MSG_NEWER);
     if (!isWhole(file.schemaVersion, 1)) return bad(MSG_BAD_VALUES);
     if (typeof file.createdAt !== 'string' || Number.isNaN(Date.parse(file.createdAt))) return bad(MSG_BAD_VALUES);
     if (typeof file.appVersion !== 'string') return bad(MSG_BAD_VALUES);
     if (!isObj(file.kv) || !isObj(file.stores)) return bad(MSG_BAD_VALUES);
 
+    if (bounds.needsWorld && !isObj(file.kv.world)) return bad(MSG_BAD_VALUES);
     const kv: BackupData['kv'] = {};
     for (const [name, raw] of Object.entries(file.kv)) {
       if (!(BACKUP_KV_NAMES as readonly string[]).includes(name)) return bad(MSG_BAD_VALUES);
       const value = decodeValue(raw);
-      if (!isObj(value) || !validKv(name as BackupKvName, value)) return bad(MSG_BAD_VALUES);
+      if (!isObj(value) || !validKv(name as BackupKvName, value, bounds)) return bad(MSG_BAD_VALUES);
       kv[name as BackupKvName] = value;
     }
 

@@ -21,7 +21,15 @@ describe('qualityFromSearch', () => {
     expect(qualityFromSearch('')).toEqual(DEFAULT_QUALITY);
   });
   it('reads pr and fog', () => {
-    expect(qualityFromSearch('?pr=1.5&fog=40')).toEqual({ pixelRatioCap: 1.5, fogNear: 20, fogFar: 40 });
+    expect(qualityFromSearch('?pr=1.5&fog=40')).toEqual({ pixelRatioCap: 1.5, fogNear: 20, fogFar: 40, near: false });
+  });
+  it('AC240: near mode is off by default and on with ?near=1 only', () => {
+    expect(DEFAULT_QUALITY.near).toBe(false);
+    expect(qualityFromSearch('').near).toBe(false);
+    expect(qualityFromSearch('?near=1').near).toBe(true);
+    expect(qualityFromSearch('?near=0').near).toBe(false);
+    expect(qualityFromSearch('?near=yes').near).toBe(false);
+    expect(qualityFromSearch('?near=1&fog=40')).toEqual({ pixelRatioCap: 2, fogNear: 20, fogFar: 40, near: true });
   });
   it('clamps and ignores junk', () => {
     expect(qualityFromSearch('?pr=99&fog=abc').pixelRatioCap).toBe(3);
