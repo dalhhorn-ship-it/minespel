@@ -184,7 +184,7 @@
       "type": "find-error",
       "level": "M6",
       "skill": "what-time",
-      "prompt": "Welk woord is fout?",
+      "prompt": "Welk woord is fout? Of is alles goed?",
       "words": [
         "What",
         "time",

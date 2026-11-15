@@ -14,7 +14,7 @@ Written so kids can read it too.
 * In Examens the parent now picks the lesson first (for example Engels: Runaway), then sees only the tests of that lesson. The question before starting names the lesson too.
 * New English lessons from the song Runaway: travel words, asking for your train at the station and telling the time in English. 69 questions and 4 tests.
 * New English lessons: Hoe laat is het? Learn to tell the time in English, and why half drie is half past two. 136 questions and 4 tests.
-* Toets Precies van het blad bij Runaway en Beautiful People: a test that asks only the words and phrases from the school sheet, nothing made up around them.
+* Toets Precies van het blad bij Runaway: a test that asks only the words and phrases from the school sheet, nothing made up around them. Beautiful People gets it once its sheet is checked against a photo.
 * Fixed in Runaway: Excuse me. now means Sorry., just like on the school sheet.
 
 ### Leerpauze
