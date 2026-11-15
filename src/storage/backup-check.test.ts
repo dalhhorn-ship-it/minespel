@@ -104,4 +104,60 @@ describe('checkBackup', () => {
     }
     expect(checkBackup(undefined as unknown as string).ok).toBe(false);
   });
+
+  describe('AC209 AC226: the monsters record and the three switches', () => {
+    const base = JSON.parse(load('v070-monsters.json')) as { kv: Record<string, Record<string, unknown>> };
+    const withKv = (name: string, value: unknown): string => JSON.stringify({ ...base, kv: { ...base.kv, [name]: value } });
+    const knight = (id: string, mode = 'follow', spot: unknown = null) => ({ id, mode, spot, boughtFor: 30 });
+    const monsters = (over: Record<string, unknown>) => withKv('monsters', { knights: [], bubbleClockMs: 0, hintShown: false, ...over });
+    const refused = { ok: false, message: MSG_BAD_VALUES };
+
+    it('a file made with 0.7.0 passes and keeps both knights', () => {
+      const r = checkBackup(load('v070-monsters.json'));
+      expect(r.ok).toBe(true);
+      if (r.ok) expect((r.data.kv.monsters as { knights: unknown[] }).knights).toHaveLength(2);
+    });
+    it('a file from 0.6.0 without monsters passes', () => {
+      const r = checkBackup(load('v060-no-monsters.json'));
+      expect(r.ok).toBe(true);
+      if (r.ok) expect(r.data.kv.monsters).toBeUndefined();
+    });
+    it('4 knights are refused, 3 pass', () => {
+      expect(checkBackup(monsters({ knights: [knight('a'), knight('b'), knight('c')] })).ok).toBe(true);
+      expect(checkBackup(monsters({ knights: [knight('a'), knight('b'), knight('c'), knight('d')] }))).toEqual(refused);
+    });
+    it('an unknown mode is refused', () => {
+      expect(checkBackup(monsters({ knights: [knight('a', 'vlieg')] }))).toEqual(refused);
+    });
+    it('an id that is not a string, is empty or is over 40 characters is refused', () => {
+      expect(checkBackup(monsters({ knights: [knight('x'.repeat(41))] }))).toEqual(refused);
+      expect(checkBackup(monsters({ knights: [knight('x'.repeat(40))] })).ok).toBe(true);
+      expect(checkBackup(monsters({ knights: [{ ...knight('a'), id: 5 }] }))).toEqual(refused);
+      expect(checkBackup(monsters({ knights: [knight('')] }))).toEqual(refused);
+    });
+    it('a spot outside the world is refused, a spot inside and null pass', () => {
+      expect(checkBackup(monsters({ knights: [knight('a', 'stay', { x: 10, y: 12, z: 10 })] })).ok).toBe(true);
+      expect(checkBackup(monsters({ knights: [knight('a', 'stay', { x: 200, y: 12, z: 10 })] }))).toEqual(refused);
+      expect(checkBackup(monsters({ knights: [knight('a', 'stay', { x: -1, y: 12, z: 10 })] }))).toEqual(refused);
+      expect(checkBackup(monsters({ knights: [knight('a', 'stay', { x: 1, y: 'hoog', z: 10 })] }))).toEqual(refused);
+    });
+    it('a clock below 0 or over 600 000 is refused, 0 and 600 000 pass', () => {
+      expect(checkBackup(monsters({ bubbleClockMs: -1 }))).toEqual(refused);
+      expect(checkBackup(monsters({ bubbleClockMs: 600_001 }))).toEqual(refused);
+      expect(checkBackup(monsters({ bubbleClockMs: 0 })).ok).toBe(true);
+      expect(checkBackup(monsters({ bubbleClockMs: 600_000 })).ok).toBe(true);
+    });
+    it('a hint flag that is not a boolean is refused', () => {
+      expect(checkBackup(monsters({ hintShown: 'ja' }))).toEqual(refused);
+    });
+    it('two knights with one id are refused', () => {
+      expect(checkBackup(monsters({ knights: [knight('a'), knight('a')] }))).toEqual(refused);
+    });
+    it('the three switches must be booleans when present', () => {
+      for (const key of ['monstersEnabled', 'knightsEnabled', 'bubbleEnabled']) {
+        expect(checkBackup(withKv('settings', { ...base.kv.settings, [key]: 'aan' }))).toEqual(refused);
+        expect(checkBackup(withKv('settings', { ...base.kv.settings, [key]: false })).ok).toBe(true);
+      }
+    });
+  });
 });

@@ -3,6 +3,8 @@ name: signoff
 description: Get the founder's approval of the PRD with a simple yes in chat. A hook stamps it so the build can start. Runs at the end of /prd, or when the founder says the PRD looks good.
 ---
 
+**Standing approval (decision 136, 2026-11-15).** The founder does not approve every PRD change. If the PRD change scopes something the founder asked for in chat, and it does not go beyond that request or touch a Gate 2 topic (CLAUDE.md), skip the question in step 3: check step 1, run `./scripts/signoff.sh "Founder (standing approval, decision 136)"`, check with `./scripts/signoff.sh --check`, log one line in `docs/DECISIONS.md`, commit as in step 5 and show the step 2 summary to the founder afterwards. In every other case run the steps below.
+
 You are the operator.
 
 1. Read `docs/PRD.md`. Check it has `Status: READY FOR SIGNOFF`, numbered acceptance criteria, a filled kid safety section and no `NEEDS FOUNDER` items in `docs/DECISIONS.md`. If anything is missing, fix it with `/prd` steps first.

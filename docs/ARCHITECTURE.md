@@ -71,7 +71,9 @@ src/
     rng.ts                  seeded random (mulberry32)
   world/                    pure voxel logic
     blocks.ts               block ids, Dutch names, flags (solid, cutout, minable, placeable)
-    terrain.ts              fixed seed world generation, WORLD_SIZE constant (64 or 48), terrain version 1 or 2
+    terrain.ts              WORLD_SIZE and WORLD_HEIGHT, cellIndex, START_SPOT, the current start world (v15: 128 x 128 x 80, terrain version 3)
+    terrain-legacy.ts       v15: the 0.7.0 generator at 64, versions 1 and 2, byte for byte, only for moving old saves
+    terrain-v3.ts           v15: terrain version 3 (the legacy v2 world at the move, deep ground, stripes, veins, new land), MOVE
     village-layout.ts       v11: the 3 village sites, house templates, villager home spots (no random numbers)
     world.ts                World: get and set blocks, diff against the start world, (de)serialize
     raycast.ts              voxel ray walk (Amanatides and Woo) for taps
@@ -99,6 +101,7 @@ src/
     build-controller.ts     taps to raycast to mine or place
     dino-system.ts          dinos and eggs in the world, hatching, tap hits
     world-save.ts           world diff, player and hotbar to the save queue
+    world-move.ts           v15: pure move of an old save to the big world (diff remap, spots, the v1 village stamp)
   dinos/
     kinds.ts                Compy, Triceratops, Stegosaurus, Brachiosaurus: size, price, box size
     dino-ai.ts              follow, stay and wander, hop one block, stuck pop, Dinofluit call (decision 114), pure
@@ -223,6 +226,12 @@ The same `break-session` runs three modes: `break` (bonus), `practice` (no bonus
 * **The village record.** `kv` `village`: `{ found, cooldownMs, lastVillager }`. A new record with a default, so no `SCHEMA_VERSION` bump. It is not part of the world, so Wereld opnieuw beginnen keeps it. Villager positions are never saved.
 * **The villager system beside the dino system.** `villagers/` holds the villager state, shaped like a dino in `stay` mode. `game/villager-system.ts` steps them with `dino-ai.ts` (the box size comes from the caller), skips villagers farther than 24 blocks, gives `nearest`, `dance` and `isOccupied`. `game.ts` joins its `isOccupied` with the dino one for building. `render/villager-models.ts` and `render/villager-render.ts` draw them like dinos. Villagers never use the dino store, the shop, the 12 dino cap or the dino menu. The question goes through `app/village-flow.ts`: `ui/village-bubble.ts` (a DOM button), `ui/village-card.ts` on the `kid-overlay` layer (so the play timer stops) with the normal question views and `answer-check`, and the pure `learning/village-question.ts`. It picks one seen item (box 1 to 5) with `selection` and a rotation pick that saves nothing, logs the answer with context `dorp`, moves the box only on the first try and never touches points, the ledger, break records or the session. The 3 minute cooldown ticks only while the play timer runs.
 
+**Ridders and Klodder (v17, v18, 0.7.0, decision 135).** Knights live in `knights/` (`knight-system.ts` steps them with `dino-ai.ts` and the knight box, never in the dino store) and the bubble and Klodder in `monsters/` (one state machine in `monster-system.ts`, pure parts in `bubble-clock.ts`, `bubble.ts`, `klodder.ts`, `nibble.ts`, `restore.ts`, `tease.ts`, `moed.ts`). Both plug into `game.addCreatures(system, priority)` (step, tap, `isOccupied`, world reset) and draw through `renderer.syncActors`. Saved: kv `monsters` (knights with mode and spot, bubble clock, hint flag) and three booleans in `settings`, written through `storage/monsters-store.ts`, one transaction per write. Klodder's nibbles are a hidden cell overlay in `World`: drawing, walking and taps see air, `diff()` and the save never do, so nothing he does is ever saved. The bubble clock counts on the play timer; every live monster clock runs on the game loop, so it stops whenever the world stops. Lines go through `ui/speech.ts` as plain text.
+
+**Grote wereld (v15, 0.8.0, decision 138).** The world is 128 x 128 x 80. `terrain-v3.ts` copies the legacy terrain version 2 world (from `terrain-legacy.ts`) into the middle at the move (x + 32, y + 10, z + 32), puts deep ground with the Waarschuwsteen layer at y 5 and the vein blocks at y 1 to 4 under every column, and grows new land around it. The start world is cached per seed. At boot, after `prepareMonsters`, `storage/world-move-store.ts` moves an old save (terrain version 1 or 2) in one kv transaction with `game/world-move.ts`: every diff entry and every saved spot (player, dinos, eggs, chickens, stay spots, knight spots) gets the move. A new install gets a version 3 world record at once. A failed move plays the start world without saving. `SCHEMA_VERSION` 2 keeps a rolled back 0.7.0 from opening the big world. Backups are format 2; format 1 files restore as they are and move on the reload. See `docs/PLAN.md` task notes for v15.
+
+**Monstermol (v16, 0.9.0, decision 138).** A second slot in `monsters/monster-system.ts` next to the bubble and Klodder: `mole-warnings.ts` (toast and card on the `mined` event), `mole-wake.ts` (rumble and spawn spot), `mole.ts` (his rules), `mole-path.ts` (the walk rule and a bounded breadth first search, also used by knights chasing a monster), `path-follow.ts` (moves along the found cells, no physics), `mole-moed.ts` (knights send him off). Only the `moleEnabled` switch in `settings` is saved.
+
 **Rendering details.** Chunks of 16 x 16 x 32. Only faces next to air or a cut out block are built. Each face gets a fixed brightness (top 1.0, sides 0.8 and 0.6, bottom 0.5) as vertex colour, so there are no lights and no shadows. One `MeshBasicMaterial` with the atlas and `alphaTest` for glass and leaves. Linear fog hides the edge. Pixel ratio is `min(devicePixelRatio, 2)`; the spike may lower it to 1.5. Dinos are boxes grouped per dino; golden dinos use a gold colour. At most 12 shop dinos plus golden dinos, about 5 meshes each.
 
 **Context loss (AC109).** If headless WebKit has no WebGL, AC109 is proven with a unit test on a fake renderer lifecycle and by hand on the iPad. The renderer listens for `webglcontextlost` (calls `preventDefault`) and `webglcontextrestored`. On restore it rebuilds the atlas, all chunk meshes and dino meshes from game state. If no restore comes within 1.5 seconds, it throws the canvas away and makes a new renderer. Game state never lives in three.js objects, so nothing is lost.
@@ -282,7 +291,7 @@ One IndexedDB database `dino-blokwereld`, `SCHEMA_VERSION` in `storage/schema.ts
 | `ledger` | auto id | point changes: ts, day, delta, reason (break, practice, shop; `malus` only in rows written before 0.3.0) |
 | `ownModules` | module id | module bundle |
 
-`kv` records: `settings`, `player` (position, look, hotbar, selected slot, mode), `world` (diff, `terrainVersion` from v11), `worldV1` (v11 only: the untouched pre v11 world record, or null), `dinos` (dinos and eggs with kind, golden, name, mode, position, stay spot, hatch time left), `economy` (points, practice points earned today and its day), `timers` (play time left, exam time left), `rotation` (round robin weights, topic pointers, lessons seen), `switches` (tree, levels, overrides, weights), `session` (running break or exam, or the exam end screen), `gate` (salt, PIN hash, wrong tries, blocked until, reset wrong tries), `stats` (play ms per day), `meta` (schema version, app version, last backup date, created date), `village` (v11: found rare blocks, cooldown, last villager).
+`kv` records: `settings`, `player` (position, look, hotbar, selected slot, mode), `world` (diff, `terrainVersion` from v11), `worldV1` (v11 only: the untouched pre v11 world record, or null), `dinos` (dinos and eggs with kind, golden, name, mode, position, stay spot, hatch time left), `economy` (points, practice points earned today and its day), `timers` (play time left, exam time left), `rotation` (round robin weights, topic pointers, lessons seen), `switches` (tree, levels, overrides, weights), `session` (running break or exam, or the exam end screen), `gate` (salt, PIN hash, wrong tries, blocked until, reset wrong tries), `stats` (play ms per day), `meta` (schema version, app version, last backup date, created date), `village` (v11: found rare blocks, cooldown, last villager), `monsters` (0.7.0: knights with id, mode, spot and price, bubble clock, hint flag).
 
 **World diff.** The start world is made from the fixed seed. The save holds only changed cells as a `Uint32Array` of `cellIndex * 256 + blockId`. A world with 10 000 changes is 40 KB.
 
@@ -349,7 +358,7 @@ Test hooks (`src/dev/e2e-hooks.ts`), e2e build only: read state (player position
 * After T48b, `openApp` passes the first start with a test PIN, and `loginAsParent` opens the parent area through the gate.
 * Contrast: `src/ui/contrast.ts` computes ratios; a unit test checks the kid colour tokens, the a11y audit checks rendered screens (AC141).
 * Multi touch in e2e is synthetic pointer events; real two finger play is checked on the iPad (T64).
-* Tests read `WORLD_SIZE`, never a literal 64, because the spike may change it to 48.
+* Tests read `WORLD_SIZE` and `WORLD_HEIGHT`, never a literal 64, 128 or 80. A test about an old save uses the `LEGACY_*` constants, `legacyCellIndex` and the builder in `tests/fixtures/move/old-saves.ts`; an e2e spot from before v15 is written as `fromLegacy(x, y, z)`.
 
 Rules: every task adds tests that fail without its change. Pure logic is tested with unit tests, screens with jsdom unit tests plus at least one e2e spec per flow. Checks marked (iPad) in the PRD are done by hand on the real iPad at milestones and written in `docs/TEST_REPORT.md`.
 

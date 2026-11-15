@@ -22,4 +22,4 @@ You are the operator. Follow the discussion rules in `docs/FACTORY.md`.
    * Decisions they made
    Then run the `/signoff` steps: ask the founder in chat to approve or change it.
 
-Never stamp the PRD without the founder picking Approve in this chat.
+Stamp the PRD only by the `/signoff` steps: the founder's Approve in chat, or the standing approval of decision 136 for scope the founder asked for.

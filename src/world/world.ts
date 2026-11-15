@@ -12,6 +12,11 @@ export class World {
   private readonly blocks: Uint8Array;
   private readonly start: Uint8Array;
   readonly terrainVersion: TerrainVersion;
+  /**
+   * The hidden cell overlay (v18, decision 135): cells Klodder has nibbled. They read as air but the block stays in
+   * `blocks`, so `diff()` and the save never see them. Never saved, never emits `changed`.
+   */
+  private readonly hidden = new Set<number>();
 
   constructor(seed: number = WORLD_SEED, version: TerrainVersion = CURRENT_TERRAIN_VERSION) {
     this.terrainVersion = version;
@@ -29,13 +34,57 @@ export class World {
   /** Block id at a cell. Outside the world is air. */
   get(x: number, y: number, z: number): number {
     if (!this.inBounds(x, y, z)) return AIR;
-    return this.blocks[cellIndex(x, y, z)] ?? AIR;
+    const i = cellIndex(x, y, z);
+    if (this.hidden.size > 0 && this.hidden.has(i)) return AIR;
+    return this.blocks[i] ?? AIR;
+  }
+
+  /** Hides a cell (it reads air). False when out of bounds or already hidden. Never saved, never emits `changed`. */
+  hide(x: number, y: number, z: number): boolean {
+    if (!this.inBounds(x, y, z)) return false;
+    const i = cellIndex(x, y, z);
+    if (this.hidden.has(i)) return false;
+    this.hidden.add(i);
+    return true;
+  }
+
+  /** Shows a hidden cell again. False when it was not hidden. */
+  unhide(x: number, y: number, z: number): boolean {
+    if (!this.inBounds(x, y, z)) return false;
+    return this.hidden.delete(cellIndex(x, y, z));
+  }
+
+  isHidden(x: number, y: number, z: number): boolean {
+    return this.inBounds(x, y, z) && this.hidden.has(cellIndex(x, y, z));
+  }
+
+  hiddenCount(): number {
+    return this.hidden.size;
+  }
+
+  /** Every hidden cell in the order it was hidden. */
+  hiddenCells(): { x: number; y: number; z: number }[] {
+    return [...this.hidden].map((i) => {
+      const x = i % WORLD_SIZE;
+      const z = Math.floor(i / WORLD_SIZE) % WORLD_SIZE;
+      return { x, y: Math.floor(i / (WORLD_SIZE * WORLD_SIZE)), z };
+    });
+  }
+
+  /** True when the real block (hidden or not) equals the start world. Out of bounds counts as unchanged. */
+  isUnchanged(x: number, y: number, z: number): boolean {
+    if (!this.inBounds(x, y, z)) return true;
+    const i = cellIndex(x, y, z);
+    return this.blocks[i] === this.start[i];
   }
 
   /** Sets a block. Returns false when out of bounds. Rules (oersteen, reach) live in build.ts. */
   set(x: number, y: number, z: number, id: number): boolean {
     if (!this.inBounds(x, y, z)) return false;
-    this.blocks[cellIndex(x, y, z)] = id;
+    const i = cellIndex(x, y, z);
+    this.blocks[i] = id;
+    // The kid's block wins over a nibble.
+    if (this.hidden.size > 0) this.hidden.delete(i);
     return true;
   }
 
@@ -51,6 +100,7 @@ export class World {
 
   /** Puts the start world back, then applies a diff. Entries out of range are ignored. */
   applyDiff(diff: ArrayLike<number>): void {
+    this.hidden.clear();
     this.blocks.set(this.start);
     for (let k = 0; k < diff.length; k++) {
       const entry = diff[k] ?? 0;
@@ -61,6 +111,7 @@ export class World {
 
   /** Back to the start world. */
   reset(): void {
+    this.hidden.clear();
     this.blocks.set(this.start);
   }
 

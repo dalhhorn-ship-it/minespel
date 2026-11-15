@@ -277,3 +277,35 @@ describe('timer driver (T41)', () => {
     });
   });
 });
+
+describe('play time listener (v18, AC211)', () => {
+  it('AC211: onPlayElapsed gets play time only while play runs, also from advancePlayMs', async () => {
+    const db = await openDb({ name: `timer-listener-${Math.random()}` });
+    try {
+      const records = createRecords(db);
+      const clock = createFakeClock(new Date('2026-11-15T12:00:00Z').getTime());
+      const screens = createScreenManager({ host: document.createElement('div') });
+      const guard = { state: () => ({ portrait: false, tooSmall: false }), subscribe: () => () => undefined };
+      const onPlayElapsed = vi.fn();
+      const driver = createTimerDriver({
+        clock, screens, guard, records,
+        initialBreakEveryMinutes: 5, initialPlayMsLeft: null, initialWarningEnabled: false,
+        onBreakDue: vi.fn(), onPlayElapsed, autoStartInterval: false,
+      });
+      clock.advance(1000);
+      driver.step();
+      expect(onPlayElapsed).toHaveBeenLastCalledWith(1000);
+      driver.advancePlayMs(2500);
+      expect(onPlayElapsed).toHaveBeenLastCalledWith(2500);
+      const calls = onPlayElapsed.mock.calls.length;
+      screens.showKidOverlay(document.createElement('div'));
+      clock.advance(1000);
+      driver.step();
+      driver.advancePlayMs(1000);
+      expect(onPlayElapsed).toHaveBeenCalledTimes(calls);
+      driver.destroy();
+    } finally {
+      db.close();
+    }
+  });
+});

@@ -11,16 +11,23 @@ import type { Rng } from '../core/rng';
 import type { Game } from '../game/game';
 import { createWorldSave, type WorldSave } from '../game/world-save';
 import type { ScreenGuard } from '../platform/screen-guard';
+import { registerHook } from '../dev/e2e-hooks';
+import { KNIGHT_PRIORITY, createKnightSystem, type KnightSystem } from '../knights/knight-system';
+import { MONSTER_PRIORITY, createMonsterSystem, type MonsterSystem } from '../monsters/monster-system';
 import { openDb } from '../storage/db';
 import { createLogStore } from '../storage/log-store';
+import { createMoedBar } from '../ui/moed-bar';
+import { creatureSwitches, prepareMonsters, updateMonsters } from '../storage/monsters-store';
 import { createProgressStore } from '../storage/progress-store';
 import { createRecords, type Records } from '../storage/records';
 import { createSaveQueue, type SaveQueue } from '../storage/save-queue';
 import { createSessionStore, type SessionStore } from '../storage/session-store';
 import type { CountdownView } from '../ui/countdown';
+import { say } from '../ui/speech';
 import { createWaitingCard, type WaitingCard } from '../ui/waiting-card';
 import { createBreakFlow, type BreakFlow } from './break-flow';
 import { loadCatalog } from './content-loader';
+import { createKnightFlow } from './knight-flow';
 import { createExamFlow, type ExamFlow } from './exam-flow';
 import { createParentFlow, type ParentFlow } from './parent-flow';
 import { createPracticeFlow, type PracticeFlow } from './practice-flow';
@@ -136,6 +143,10 @@ export interface App {
   practiceFlow: PracticeFlow;
   examFlow: ExamFlow;
   villageFlow: VillageFlow;
+  /** The knights (v17). Buying and the menu use it. */
+  knights: KnightSystem;
+  /** The bubble clock, the bubble and Klodder (v18). */
+  monsters: MonsterSystem;
 }
 
 export interface BootDeps {
@@ -186,8 +197,12 @@ export function createBoot(deps: BootDeps): Boot {
 
     const catalog = await loadCatalog(db);
     const getCatalog = () => catalog;
-    const [settings, timers] = await Promise.all([records.get('settings'), records.get('timers')]);
+    // First 0.7.0 start rule (decision 135): before settings are read, so the bubble default is in place.
+    const prepared = await prepareMonsters(db);
+    const [settings, timers] = await Promise.all([prepared ?? records.get('settings'), records.get('timers')]);
 
+    // The monsters (v18) are built below; the timer and the break flow reach them through this reference.
+    let monstersRef: MonsterSystem | null = null;
     const breakFlow = createBreakFlow({
       clock: systemClock,
       rng,
@@ -204,6 +219,7 @@ export function createBoot(deps: BootDeps): Boot {
       },
       onBreakFinished: () => {
         timerDriver.resetPlayTimer();
+        monstersRef?.onBreakFinished();
       },
     });
     const timerDriver: TimerDriver = createTimerDriver({
@@ -216,6 +232,7 @@ export function createBoot(deps: BootDeps): Boot {
       initialBreakEveryMinutes: settings.breakEveryMinutes || 5,
       initialPlayMsLeft: timers.playMsLeft,
       initialWarningEnabled: settings.breakWarningEnabled !== false,
+      onPlayElapsed: (ms) => monstersRef?.onPlayElapsed(ms),
       onBreakDue: () => {
         // The play timer does not run during an exam, but never start a break over one (AC66).
         if (examFlow.isActive()) return;
@@ -224,6 +241,55 @@ export function createBoot(deps: BootDeps): Boot {
     });
     applySettingsToRuntime(settings, { sound, timerDriver });
 
+    // The Dinofluit button shows once the kid owns the fluit (decision 114).
+    const economy = await records.get('economy');
+    world.setFluitOwned(ownsFluit(economy));
+
+    // The knights (v17). Every switch and points change happens on another screen, so settings and points are
+    // read again each time the screen goes back to the world.
+    let knightsRef: KnightSystem | null = null;
+    const knights = createKnightSystem({
+      world: world.world,
+      player: world.player,
+      renderer: world.renderer,
+      flow: createKnightFlow({
+        screens,
+        sound,
+        setMode: (id, mode) => knightsRef?.setMode(id, mode),
+        animals: () => world.dinoStore.dinos(),
+      }),
+      viewport: () => ({ width: window.innerWidth, height: window.innerHeight }),
+      persist: (change) => {
+        // A refused write (a restore is running) is fine: the page reloads and the saved record wins.
+        void updateMonsters(db, (m) => ({ ...m, knights: change(m.knights) })).catch(() => {});
+      },
+    });
+    knightsRef = knights;
+    knights.load((await records.get('monsters')).knights);
+    knights.applySwitches(creatureSwitches(settings));
+    knights.setPoints(economy.points);
+    world.addCreatures(knights, KNIGHT_PRIORITY);
+    // The bubble and Klodder (v18). The clock counts play time only, and only with the bubble switch on.
+    const monsters = createMonsterSystem({
+      world: world.world,
+      player: world.player,
+      renderer: world.renderer,
+      knights,
+      viewport: () => ({ width: window.innerWidth, height: window.innerHeight }),
+      remainingPlayMs: () => timerDriver.remainingPlayMs(),
+      persist: (change) => {
+        void updateMonsters(db, change).catch(() => {});
+      },
+      occupied: (box) => world.dinoSystem.isOccupied(box) || world.villagerSystem.isOccupied(box) || knights.isOccupied?.(box) === true,
+      animals: () => world.dinoStore.dinos(),
+      moedBar: createMoedBar(),
+      say: (text, ms) => say(text, ms),
+      sound,
+    });
+    monstersRef = monsters;
+    monsters.load(await records.get('monsters'));
+    monsters.applySwitches(creatureSwitches(settings));
+    world.addCreatures(monsters, MONSTER_PRIORITY);
     const shopFlow = createShopFlow({
       screens,
       db,
@@ -236,9 +302,35 @@ export function createBoot(deps: BootDeps): Boot {
         void breakFlow.startBreak({ early: true });
       },
       onFluitBought: () => world.setFluitOwned(true),
+      knights,
     });
-    // The Dinofluit button shows once the kid owns the fluit (decision 114).
-    world.setFluitOwned(ownsFluit(await records.get('economy')));
+    screens.subscribe((kind) => {
+      if (kind !== 'world') return;
+      void Promise.all([records.get('settings'), records.get('economy')])
+        .then(([s, e]) => {
+          knights.applySwitches(creatureSwitches(s));
+          monsters.applySwitches(creatureSwitches(s));
+          knights.setPoints(e.points);
+        })
+        .catch(() => {});
+    });
+    if (__E2E__) {
+      registerHook('setCreatureSeed', (n: number) => {
+        knights.setSeed(n);
+        monsters.setSeed(n);
+      });
+      // Plays time forward in 1000 ms chunks while the game runs. Returns the ms done.
+      registerHook('fastForward', (ms: number) => {
+        let done = 0;
+        while (done < ms && world.isRunning()) {
+          const chunk = Math.min(1000, ms - done);
+          timerDriver.advancePlayMs(chunk);
+          if (world.advanceWorld(chunk) === 0) break;
+          done += chunk;
+        }
+        return done;
+      });
+    }
     const practiceFlow = createPracticeFlow({
       screens,
       clock: systemClock,
@@ -307,7 +399,7 @@ export function createBoot(deps: BootDeps): Boot {
     return {
       app: {
         queue, records, catalog: getCatalog, timerDriver, breakFlow, parentFlow, shopFlow,
-        practiceFlow, examFlow, villageFlow,
+        practiceFlow, examFlow, villageFlow, knights, monsters,
       },
       sessionStore,
     };

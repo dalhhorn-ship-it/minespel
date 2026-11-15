@@ -243,4 +243,101 @@ describe('game', () => {
     const pressed = [...s.container.querySelectorAll('.hotbar-slot')].map((b) => b.getAttribute('aria-pressed'));
     expect(pressed.indexOf('true')).toBe(6);
   });
+
+  describe('creature layers (V17a, decision 135)', () => {
+    /** A quick short touch on the right half of the screen. */
+    function tapRight(s: ReturnType<typeof setup>) {
+      for (const type of ['pointerdown', 'pointerup']) {
+        s.container.dispatchEvent(new PointerEvent(type, { pointerId: 7, clientX: 900, clientY: 300, bubbles: true }));
+      }
+    }
+
+    it('AC209: a creature with priority 10 gets the tap before priority 20 and before the dinos', () => {
+      const s = setup();
+      const calls: string[] = [];
+      const dinoTap = vi.spyOn(s.game.dinoSystem, 'handleTap').mockImplementation(() => { calls.push('dinos'); return false; });
+      s.game.addCreatures({ step() {}, handleTap: () => { calls.push('20'); return false; } }, 20);
+      s.game.addCreatures({ step() {}, handleTap: () => { calls.push('10'); return true; } }, 10);
+      runFrames(1);
+      tapRight(s);
+      expect(calls).toEqual(['10']);
+      expect(dinoTap).not.toHaveBeenCalled();
+    });
+
+    it('a creature that does not take the tap passes it on in priority order, then to the dinos', () => {
+      const s = setup();
+      const calls: string[] = [];
+      vi.spyOn(s.game.dinoSystem, 'handleTap').mockImplementation(() => { calls.push('dinos'); return true; });
+      s.game.addCreatures({ step() {}, handleTap: () => { calls.push('20'); return false; } }, 20);
+      s.game.addCreatures({ step() {}, handleTap: () => { calls.push('10'); return false; } }, 10);
+      runFrames(1);
+      tapRight(s);
+      expect(calls).toEqual(['10', '20', 'dinos']);
+    });
+
+    it('no creature layer: the tap still goes to the dinos', () => {
+      const s = setup();
+      const dinoTap = vi.spyOn(s.game.dinoSystem, 'handleTap').mockReturnValue(true);
+      runFrames(1);
+      tapRight(s);
+      expect(dinoTap).toHaveBeenCalledTimes(1);
+    });
+
+    it('creatures step every frame after the villagers, and the remover stops it', () => {
+      const s = setup();
+      const step = vi.fn();
+      const remove = s.game.addCreatures({ step }, 10);
+      runFrames(3);
+      expect(step).toHaveBeenCalledTimes(3);
+      remove();
+      runFrames(2);
+      expect(step).toHaveBeenCalledTimes(3);
+    });
+
+    it('AC209: isOccupied joins the creatures for building: an occupied spot gets no block', () => {
+      const s = setup();
+      const seen = vi.fn(() => true);
+      s.game.addCreatures({ step() {}, isOccupied: seen }, 20);
+      s.game.setBuildState({ mode: 'bouwen' });
+      s.game.player.pitch = -1.2;
+      const before = s.game.world.diff().length;
+      runFrames(1);
+      for (const type of ['pointerdown', 'pointerup']) {
+        s.container.dispatchEvent(new PointerEvent(type, { pointerId: 8, clientX: 900, clientY: 384, bubbles: true }));
+      }
+      expect(seen).toHaveBeenCalled();
+      expect(s.game.world.diff().length).toBe(before);
+    });
+
+    it('AC209: resetWorld calls onWorldReset after the player is home', () => {
+      const s = setup();
+      const spots: { x: number; y: number; z: number }[] = [];
+      const order: string[] = [];
+      s.game.on('teleported', () => order.push('teleported'));
+      s.game.addCreatures({ step() {}, onWorldReset: (spot) => { order.push('reset'); spots.push(spot); } }, 20);
+      s.game.player.player.x += 5;
+      s.game.resetWorld();
+      expect(order).toEqual(['teleported', 'reset']);
+      expect(spots[0]!.x).toBeCloseTo(s.game.player.player.x, 5);
+      expect(spots[0]!.z).toBeCloseTo(s.game.player.player.z, 5);
+    });
+
+    it('advanceWorld steps the creatures in 1/30 s steps, only while the loop runs', () => {
+      const s = setup();
+      const dts: number[] = [];
+      s.game.addCreatures({ step: (dt) => dts.push(dt) }, 20);
+      expect(s.game.advanceWorld(1000)).toBe(1000);
+      expect(dts).toHaveLength(30);
+      expect(dts[0]).toBeCloseTo(1 / 30, 6);
+      expect(s.game.frameCount()).toBe(0);
+      s.game.pause();
+      expect(s.game.advanceWorld(1000)).toBe(0);
+      expect(dts).toHaveLength(30);
+    });
+
+    it('the game exposes its container', () => {
+      const s = setup();
+      expect(s.game.container).toBe(s.container);
+    });
+  });
 });

@@ -35,7 +35,7 @@ Commit locally after each task, but do not push. Push once, when the whole relea
 
 1. Launch `product` to write the release section in `docs/PRD.md` section 12: goal, in, out, and new acceptance criteria that continue the AC numbers. Section 12 holds only this next release. In the same edit, product moves the section of the release that shipped before it to `docs/releases/vN.md` (unchanged) and its criteria into section 7, so that is one signoff. It marks the release `next` in `docs/BACKLOG.md` and sets `Status: READY FOR SIGNOFF`.
 2. Only if the release touches a Gate 2 topic (kid safety, money, accounts, platform), add a quick `architect` or `qa` review. Otherwise skip the review round.
-3. Run the `/signoff` steps. The summary is short: what the kids get, the new ACs, what is left out.
+3. Run the `/signoff` steps (standing approval when the founder asked for this release in chat, decision 136; otherwise the question). The summary is short: what the kids get, the new ACs, what is left out.
 
 ## 3. Plan and build
 

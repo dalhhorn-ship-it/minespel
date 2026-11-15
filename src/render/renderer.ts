@@ -12,11 +12,13 @@ import type { VillagerState } from '../villagers/villager';
 import { CHUNK_SIZE } from '../world/terrain';
 import { createAtlasTexture } from './atlas';
 import { CHUNKS_PER_SIDE, buildChunkGeometry, chunksTouchedBy, type WorldView } from './chunk-mesh';
+import { createActorSceneSync, type ActorGroup, type ActorView } from './actor-render';
 import { createDinoSceneSync } from './dino-render';
 import { createVillagerSceneSync } from './villager-render';
 import { DEFAULT_QUALITY, pixelRatioFor, type Quality } from './quality';
 
 export { CHUNK_SIZE };
+export type { ActorGroup, ActorView };
 
 export interface CameraPose {
   /** Eye position in world coordinates. */
@@ -46,6 +48,8 @@ export interface GameRenderer {
   syncDinos?(dinos: readonly WorldDino[], eggs: readonly WorldEgg[]): void;
   /** Syncs the village people into the 3D scene (V11c). They are not dinos. */
   syncVillagers?(villagers: readonly VillagerState[]): void;
+  /** Syncs one group of creature actors (knights, monsters) into the 3D scene (v17, decision 135). */
+  syncActors?(group: ActorGroup, actors: readonly ActorView[]): void;
   render(): void;
   dispose(): void;
 }
@@ -83,6 +87,8 @@ const createPlainWebGlRenderer: RendererFactory = ({ canvas, quality = DEFAULT_Q
   scene.add(dinoSync.group);
   const villagerSync = createVillagerSceneSync();
   scene.add(villagerSync.group);
+  const actorSync = createActorSceneSync();
+  scene.add(actorSync.group);
 
   const spikeGroup = new Group();
   scene.add(spikeGroup);
@@ -174,6 +180,9 @@ const createPlainWebGlRenderer: RendererFactory = ({ canvas, quality = DEFAULT_Q
     syncVillagers(villagers) {
       villagerSync.sync(villagers);
     },
+    syncActors(group, actors) {
+      actorSync.sync(group, actors);
+    },
     render() {
       spikeDinos.forEach((d, i) => {
         const g = spikeGroups[i];
@@ -188,6 +197,7 @@ const createPlainWebGlRenderer: RendererFactory = ({ canvas, quality = DEFAULT_Q
       chunks.clear();
       dinoSync.dispose();
       villagerSync.dispose();
+      actorSync.dispose();
       clearSpike();
       spikeGeometry.dispose();
       for (const m of spikeMaterials.values()) m.dispose();
@@ -209,6 +219,7 @@ export const createNullRenderer: RendererFactory = ({ canvas }) => ({
   setSpikeDinos() {},
   syncDinos() {},
   syncVillagers() {},
+  syncActors() {},
   render() {},
   dispose() {},
 });
@@ -238,6 +249,7 @@ export function withContextRecovery(inner: RendererFactory): RendererFactory {
     let worldDinos: readonly WorldDino[] = [];
     let worldEggs: readonly WorldEgg[] = [];
     let villagers: readonly VillagerState[] = [];
+    const actors = new Map<ActorGroup, readonly ActorView[]>();
     let lost = false;
     let disposed = false;
     let generation = 0;
@@ -255,6 +267,7 @@ export function withContextRecovery(inner: RendererFactory): RendererFactory {
       if (dinos) core.setSpikeDinos(dinos);
       if (worldDinos.length > 0 || worldEggs.length > 0) core.syncDinos?.(worldDinos, worldEggs);
       if (villagers.length > 0) core.syncVillagers?.(villagers);
+      for (const [group, list] of actors) if (list.length > 0) core.syncActors?.(group, list);
       if (pose) core.setCamera(pose);
     };
 
@@ -363,6 +376,10 @@ export function withContextRecovery(inner: RendererFactory): RendererFactory {
       syncVillagers(list) {
         villagers = list;
         if (!lost) core.syncVillagers?.(list);
+      },
+      syncActors(group, list) {
+        actors.set(group, list);
+        if (!lost) core.syncActors?.(group, list);
       },
       render() {
         if (!lost) core.render();

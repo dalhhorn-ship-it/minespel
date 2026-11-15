@@ -13,7 +13,15 @@ export type SoundName =
   | 'chirp'
   | 'fanfare'
   | 'tick'
-  | 'fluit';
+  | 'fluit'
+  | 'ridder'
+  | 'bubbel'
+  | 'plop'
+  | 'hihihi'
+  | 'knabbel'
+  | 'tok'
+  | 'boing'
+  | 'doei';
 
 export const SOUND_NAMES: readonly SoundName[] = [
   'pop',
@@ -26,7 +34,41 @@ export const SOUND_NAMES: readonly SoundName[] = [
   'fanfare',
   'tick',
   'fluit',
+  'ridder',
+  'bubbel',
+  'plop',
+  'hihihi',
+  'knabbel',
+  'tok',
+  'boing',
+  'doei',
 ];
+
+/**
+ * Length in seconds and loudest gain of every sound. AC228 caps them: under 1.5 s and a peak at or below the loudest
+ * 0.6.0 sound. tests/unit/kid-safety.test.ts checks these numbers against the real recipes. Part B adds its rows here.
+ */
+export const SOUND_SPECS: Record<SoundName, { seconds: number; peak: number }> = {
+  pop: { seconds: 0.1, peak: 0.6 },
+  thunk: { seconds: 0.14, peak: 0.8 },
+  chime: { seconds: 0.47, peak: 0.5 },
+  hmm: { seconds: 0.48, peak: 0.5 },
+  clink: { seconds: 0.18, peak: 0.35 },
+  crack: { seconds: 0.13, peak: 0.7 },
+  chirp: { seconds: 0.18, peak: 0.35 },
+  fanfare: { seconds: 1.1, peak: 0.5 },
+  tick: { seconds: 0.03, peak: 0.12 },
+  fluit: { seconds: 0.65, peak: 0.35 },
+  ridder: { seconds: 0.76, peak: 0.3 },
+  // Part B (v18), placeholder recipes until V18e: soft, short, never scary.
+  bubbel: { seconds: 0.4, peak: 0.2 },
+  plop: { seconds: 0.12, peak: 0.3 },
+  hihihi: { seconds: 0.5, peak: 0.25 },
+  knabbel: { seconds: 0.2, peak: 0.2 },
+  tok: { seconds: 0.08, peak: 0.25 },
+  boing: { seconds: 0.3, peak: 0.25 },
+  doei: { seconds: 0.55, peak: 0.25 },
+};
 
 export interface SoundOptions {
   unlock: Pick<AudioUnlock, 'isUnlocked' | 'watch' | 'whenUnlocked'>;
@@ -151,6 +193,29 @@ const RECIPES: Record<SoundName, (c: Ctx, out: AudioNode, t: number) => void> = 
   fluit: (c, o, t) => {
     tone(c, o, t, { from: 1100, to: 1600, dur: 0.22, gain: 0.35 });
     tone(c, o, t, { from: 1300, to: 2100, at: 0.3, dur: 0.35, gain: 0.35 });
+  },
+  // Ridder: a short soft fanfare, three notes, under 1.5 s and quieter than fanfare (V17d).
+  ridder: (c, o, t) => {
+    [392, 494, 587].forEach((f, i) => tone(c, o, t, { type: 'triangle', from: f, at: i * 0.12, dur: 0.22, gain: 0.3 }));
+    tone(c, o, t, { type: 'triangle', from: 784, at: 0.36, dur: 0.4, gain: 0.3 });
+  },
+  // Part B placeholders (V18e makes the final ones): a soft bubble, its pop, Klodder's giggle, a nibble, a poke, a
+  // boing for a teased animal and a goodbye. Every one under 1.5 s and at or below 0.3.
+  bubbel: (c, o, t) => tone(c, o, t, { from: 300, to: 600, dur: 0.4, gain: 0.2 }),
+  plop: (c, o, t) => tone(c, o, t, { from: 700, to: 300, dur: 0.12, gain: 0.3 }),
+  hihihi: (c, o, t) => {
+    [0, 0.15, 0.3].forEach((at) => tone(c, o, t, { type: 'triangle', from: 600, to: 900, at, dur: 0.1, gain: 0.25 }));
+    tone(c, o, t, { type: 'triangle', from: 900, to: 700, at: 0.4, dur: 0.1, gain: 0.25 });
+  },
+  knabbel: (c, o, t) => {
+    tone(c, o, t, { from: 400, to: 250, dur: 0.1, gain: 0.2 });
+    tone(c, o, t, { from: 400, to: 250, at: 0.1, dur: 0.1, gain: 0.2 });
+  },
+  tok: (c, o, t) => tone(c, o, t, { type: 'triangle', from: 300, to: 200, dur: 0.08, gain: 0.25 }),
+  boing: (c, o, t) => tone(c, o, t, { type: 'triangle', from: 250, to: 700, dur: 0.3, gain: 0.25 }),
+  doei: (c, o, t) => {
+    tone(c, o, t, { type: 'triangle', from: 700, dur: 0.2, gain: 0.25 });
+    tone(c, o, t, { type: 'triangle', from: 500, at: 0.25, dur: 0.3, gain: 0.25 });
   },
 };
 

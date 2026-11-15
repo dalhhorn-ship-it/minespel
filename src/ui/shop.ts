@@ -22,6 +22,7 @@ import { EGG_HATCH_SECONDS } from '../dinos/egg';
 import { DINO_KINDS, SHOP_KINDS, SPECIAL_KINDS, type DinoKind, type DinoKindId } from '../dinos/kinds';
 import { el } from './dom';
 import { onTap } from './tap';
+import { createKnightsSection, type KnightShopState } from './shop-knights';
 
 export interface ShopDinoSummary {
   id?: string;
@@ -44,6 +45,8 @@ export interface ShopViewState {
   eggs: readonly ShopEggSummary[];
   /** True when the kid owns the Dinofluit (decision 114). */
   fluit?: boolean;
+  /** Set when Ridders are on: the knights the kid owns. Missing: the Ridders section does not show (AC200). */
+  knights?: readonly { id: string }[];
   toastMessage?: string | null;
 }
 
@@ -55,6 +58,9 @@ export interface ShopViewOptions {
   onTradeIn?: (dinoId: string) => Promise<void> | void;
   /** Buys the Dinofluit. Without it the shop shows no fluit card (decision 114). */
   onBuyFluit?: () => Promise<void> | void;
+  /** Buys a knight and trades one in by id (v17). Without them the shop shows no Ridders section. */
+  onBuyKnight?: () => Promise<unknown> | unknown;
+  onTradeInKnight?: (id: string) => Promise<unknown> | unknown;
   onClose: () => void;
   /** Optional shortcut to override the countdown and earn coins immediately. */
   onEarnCoins?: () => void;
@@ -144,6 +150,12 @@ export function createShopView(options: ShopViewOptions): ShopView {
   let confirmingTradeId: string | null = null;
   let purchaseInFlight = false;
   const cleanups: Array<() => void> = [];
+  const knightsSection = createKnightsSection({
+    onBuy: () => options.onBuyKnight?.(),
+    onTradeIn: (id) => options.onTradeInKnight?.(id),
+    onChange: () => renderView(),
+    now: options.now,
+  });
 
   const modal = el('div', {
     class: 'shop-modal pause-card scrollable',
@@ -627,6 +639,10 @@ export function createShopView(options: ShopViewOptions): ShopView {
     );
     modal.append(chickenCoop);
     if (options.onBuyFluit) modal.append(fluitCard());
+    if (options.onBuyKnight && state.knights) {
+      const ks: KnightShopState = { points: state.points, knights: state.knights };
+      modal.append(knightsSection.render(ks, loaded));
+    }
 
     // Live "Mijn Dino-verzameling" showcase
     const collectionItems: HTMLElement[] = [];
@@ -677,6 +693,7 @@ export function createShopView(options: ShopViewOptions): ShopView {
     },
     destroy() {
       clearCleanups();
+      knightsSection.destroy();
       root.remove();
     },
   };

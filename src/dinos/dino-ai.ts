@@ -1,7 +1,7 @@
 // Dino behaviour: follow, stay, wander, hop one block, never inside a block, pop next to the player.
 // Pure and frame rate independent: every function takes dt in seconds. No DOM, no storage.
 import type { Rng } from '../core/rng';
-import { isSolid, LAVA, VUUR } from '../world/blocks';
+import { isSolid, LAVA, VUUR, WATER } from '../world/blocks';
 import { GRAVITY, MAX_FALL_SPEED, MAX_FRAME_TIME } from '../world/physics';
 import { WORLD_SIZE } from '../world/terrain';
 import type { World } from '../world/world';
@@ -42,6 +42,20 @@ export const BEHIND_MARGIN = 0.75;
 export const CALL_SECONDS = 40;
 export const CALL_SPEED = 2;
 export const CALL_ARRIVED = 2.5;
+/**
+ * Teased by Klodder (v18, decision 135): the animal runs a safe straight step of FLEE_BLOCKS (plus or minus 1) at
+ * FLEE_SPEED for at most FLEE_SECONDS, then walks back to within FLEE_HOME of where it stood. Gives up the walk
+ * back after FLEE_BACK_GIVEUP seconds so it can never be stuck in this state.
+ */
+export const FLEE_SPEED = 3;
+export const FLEE_SECONDS = 3;
+export const FLEE_BLOCKS = 6;
+export const FLEE_HOME = 1.5;
+export const FLEE_BACK_GIVEUP = 8;
+/** A roaming animal stands still at least this long after a run, and until FLEE_CALM seconds after the tease began. */
+export const FLEE_IDLE = 8;
+/** AC220: 10 s after a tease a roaming animal is still home, so roaming only starts again after this many seconds. */
+export const FLEE_CALM = 10;
 
 const EPS = 1e-4;
 const SUB_STEP = 1 / 60;
@@ -84,6 +98,21 @@ export interface DinoState {
   called?: number;
   /** True while a called dino was on Blijf hier before the whistle: when the call ends it stays where it stands. Never saved. */
   callStay?: boolean;
+  /**
+   * A tease in progress (v18). `left` above 0: running to (x, z). At 0 or below: walking back to (backX, backZ),
+   * counting down to -FLEE_BACK_GIVEUP. Never saved.
+   */
+  flee?: FleeState;
+}
+
+export interface FleeState {
+  x: number;
+  z: number;
+  left: number;
+  backX: number;
+  backZ: number;
+  /** Seconds since the tease began. */
+  age?: number;
 }
 
 export type DinoEvent = 'popped' | null;
@@ -375,6 +404,102 @@ function physics(world: World, d: DinoState, dirX: number, dirZ: number, dt: num
   return Math.hypot(d.x - ox, d.z - oz);
 }
 
+/**
+ * One straight walking step toward `target` at `speed` blocks per second, with hops, walls and the lava and fire
+ * rule of `physics`. Turns the body to face the target. Returns the horizontal distance moved (V17b `stepToward`).
+ */
+export function walkToward(world: World, d: DinoState, target: { x: number; z: number }, dt: number, speed: number, box?: StepOptions['box']): number {
+  const gx = target.x - d.x, gz = target.z - d.z;
+  const len = Math.hypot(gx, gz);
+  const dirX = len > 1e-6 ? gx / len : 0, dirZ = len > 1e-6 ? gz / len : 0;
+  const moved = physics(world, d, dirX, dirZ, dt, box, speed);
+  if (len > 1e-6) d.heading = Math.atan2(dirX, dirZ);
+  return moved;
+}
+
+/** True when the cell at the feet and head of a box standing at (x, y, z) is free and it stands on dry, safe ground. */
+function standable(world: World, x: number, y: number, z: number, side: number, height: number): boolean {
+  if (y < 0 || boxCollides(world, x, y, z, side, height)) return false;
+  if (!boxCollides(world, x, y - 0.05, z, side, height)) return false;
+  if (hazardAt(world, x, y, z, side)) return false;
+  const h = side / 2;
+  const yg = Math.floor(y + 1e-3) - 1;
+  for (let cx = Math.floor(x - h); cx <= Math.floor(x + h - EPS); cx++) {
+    for (let cz = Math.floor(z - h); cz <= Math.floor(z + h - EPS); cz++) {
+      if (world.get(cx, yg, cz) === WATER || world.get(cx, yg + 1, cz) === WATER) return false;
+    }
+  }
+  return true;
+}
+
+/**
+ * Probes the straight line from the animal to (tx, tz), every 0.25 block: step up at most 1, drop at most 1 (and at
+ * most 1 over the whole line), no water, lava or fire, no wall, inside the world, and the end has an open neighbour.
+ */
+function fleePathOk(world: World, d: DinoState, tx: number, tz: number, side: number, height: number): boolean {
+  if (tx < 1 || tz < 1 || tx >= WORLD_SIZE - 1 || tz >= WORLD_SIZE - 1) return false;
+  const len = Math.hypot(tx - d.x, tz - d.z);
+  const steps = Math.ceil(len / 0.25);
+  let y = Math.floor(d.y + 1e-3);
+  const y0 = y;
+  let px = d.x, pz = d.z;
+  for (let i = 1; i <= steps; i++) {
+    const x = d.x + ((tx - d.x) * i) / steps, z = d.z + ((tz - d.z) * i) / steps;
+    let found = false;
+    for (const ny of [y, y + 1, y - 1]) {
+      if (!standable(world, x, ny, z, side, height)) continue;
+      // Stepping up needs room to hop, as `physics` does.
+      if (ny > y && boxCollides(world, px, y + 1.05, pz, side, height)) continue;
+      y = ny;
+      found = true;
+      break;
+    }
+    if (!found || y < y0 - 1) return false;
+    px = x; pz = z;
+  }
+  for (const [dx, dz] of [[1, 0], [-1, 0], [0, 1], [0, -1]] as const) {
+    if (!boxCollides(world, tx + dx * side, y, tz + dz * side, side, height)) return true;
+  }
+  return false;
+}
+
+/**
+ * Klodder teases this animal (v18). It jumps. When a safe spot FLEE_BLOCKS (plus or minus 1) away exists (8 tries) it
+ * also runs there and then walks back; with no such spot it only jumps. Returns true when it will run.
+ */
+export function startFlee(world: World, d: DinoState, rng: Rng, box?: StepOptions['box']): boolean {
+  if (d.onGround) { d.vy = HOP_SPEED; d.onGround = false; }
+  d.flee = undefined;
+  const { side, height } = box ?? dinoBox(d);
+  for (let tries = 0; tries < 8; tries++) {
+    const a = rng.next() * Math.PI * 2;
+    const r = FLEE_BLOCKS - 1 + rng.next() * 2;
+    const tx = d.x + Math.cos(a) * r, tz = d.z + Math.sin(a) * r;
+    if (!fleePathOk(world, d, tx, tz, side, height)) continue;
+    d.flee = { x: tx, z: tz, left: FLEE_SECONDS, backX: d.x, backZ: d.z };
+    d.goal = null;
+    d.chasing = false;
+    d.stuckTime = 0;
+    return true;
+  }
+  // Only a jump: it stays here and stands still for a while, like after a run.
+  if (d.mode !== 'follow') { d.goal = null; d.idleLeft = Math.max(d.idleLeft, FLEE_CALM); }
+  return false;
+}
+
+/** One small step of a tease: run out, then walk back (a follower goes straight back to following). */
+function stepFlee(world: World, d: DinoState, f: FleeState, dt: number, box?: StepOptions['box']): void {
+  const end = (): void => { d.flee = undefined; d.goal = null; d.idleLeft = d.mode === 'follow' ? 1 : Math.max(FLEE_IDLE, FLEE_CALM - (f.age ?? 0)); d.stuckTime = 0; d.farTime = 0; };
+  f.left -= dt;
+  f.age = (f.age ?? 0) + dt;
+  if (f.left > 0) {
+    if (Math.hypot(f.x - d.x, f.z - d.z) < 0.3) f.left = 0;
+    else { walkToward(world, d, { x: f.x, z: f.z }, dt, FLEE_SPEED, box); return; }
+  }
+  if (d.mode === 'follow' || Math.hypot(f.backX - d.x, f.backZ - d.z) <= FLEE_HOME || f.left <= -FLEE_BACK_GIVEUP) { end(); return; }
+  walkToward(world, d, { x: f.backX, z: f.backZ }, dt, FLEE_SPEED, box);
+}
+
 /** Moves a dino out of a block (for example one placed on top of it), or pops it to the player. */
 function rescue(world: World, d: DinoState, player: Point, rng: Rng, opts: StepOptions): DinoEvent {
   for (let up = 1; up <= 3; up++) {
@@ -421,7 +546,14 @@ function stepOnce(world: World, d: DinoState, player: Point, rng: Rng, dt: numbe
       return null;
     }
   }
-  if (isCalled(d)) return stepCalled(world, d, player, rng, dt, opts);
+  if (isCalled(d)) {
+    d.flee = undefined;
+    return stepCalled(world, d, player, rng, dt, opts);
+  }
+  if (d.flee) {
+    stepFlee(world, d, d.flee, dt, opts.box);
+    return null;
+  }
   const follow = d.mode === 'follow';
   const yaw = follow && opts.playerYaw !== undefined && Number.isFinite(opts.playerYaw) ? opts.playerYaw : undefined;
   const roam = !follow && opts.radius === undefined;

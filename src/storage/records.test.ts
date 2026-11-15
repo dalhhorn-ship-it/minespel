@@ -16,6 +16,9 @@ const samples: { [K in KvName]: KvRecords[K] } = {
     breakWarningEnabled: false,
     soundEffectsEnabled: false,
     pointsMode: 'moeilijk',
+    monstersEnabled: false,
+    knightsEnabled: false,
+    bubbleEnabled: true,
   },
   player: {
     x: 1,
@@ -53,6 +56,7 @@ const samples: { [K in KvName]: KvRecords[K] } = {
     createdAt: '2026-10-01',
   },
   village: { found: [35, 39], cooldownMs: 90_000, lastVillager: 'v3' },
+  monsters: { knights: [{ id: 'k1', mode: 'guard', spot: { x: 3, y: 9, z: 4 }, boughtFor: 30 }], bubbleClockMs: 5000, hintShown: true },
 };
 
 describe('records', () => {
@@ -121,6 +125,9 @@ describe('records', () => {
       breakWarningEnabled: true,
       soundEffectsEnabled: true,
       pointsMode: 'normaal',
+      monstersEnabled: true,
+      knightsEnabled: true,
+      bubbleEnabled: false,
     });
     db.close();
   });

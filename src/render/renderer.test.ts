@@ -28,6 +28,7 @@ describe('createRenderer', () => {
     r.setQuality(DEFAULT_QUALITY);
     r.setSpikeDinos(null);
     r.syncVillagers?.([]);
+    r.syncActors?.('knights', []);
     r.render();
     r.dispose();
   });
@@ -53,6 +54,7 @@ describe('withContextRecovery', () => {
         setQuality: () => void calls.push('quality'),
         setSpikeDinos: (d) => void calls.push(d ? 'dinos' : 'nodinos'),
         syncVillagers: () => void calls.push('villagers'),
+        syncActors: (g) => void calls.push(`actors-${g}`),
         render: () => void calls.push('render'),
         dispose,
       };
@@ -101,6 +103,17 @@ describe('withContextRecovery', () => {
     lose(canvas);
     canvas.dispatchEvent(new Event('webglcontextrestored'));
     expect(made[1]?.calls).toEqual(['resize', 'world', 'dinos', 'villagers', 'camera']);
+  });
+
+  it('V17a: the knights are shown again after the context comes back, and none are sent when there were none', () => {
+    const { made, canvas, r } = setup();
+    lose(canvas);
+    canvas.dispatchEvent(new Event('webglcontextrestored'));
+    expect(made[1]?.calls).not.toContain('actors-knights');
+    r.syncActors?.('knights', [{ id: 'k', model: 'knight', x: 1, y: 2, z: 3, heading: 0 }]);
+    lose(canvas);
+    canvas.dispatchEvent(new Event('webglcontextrestored'));
+    expect(made[2]?.calls).toEqual(['resize', 'world', 'dinos', 'actors-knights', 'camera']);
   });
 
   it('makes a new canvas in the same place when there is no restore in 1.5 seconds', () => {
