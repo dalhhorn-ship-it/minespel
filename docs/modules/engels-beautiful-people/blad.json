@@ -1,0 +1,861 @@
+{
+  "id": "blad",
+  "title": "Precies van het blad",
+  "groups": [
+    6,
+    7
+  ],
+  "lesson": {
+    "pages": [
+      {
+        "title": "Het blad van Beautiful People",
+        "text": "Dit staat op het blad. Leer de woorden en zinnen precies zoals ze hier staan: eerst het Engels, dan het Nederlands. In deze toets komt alleen wat op het blad staat.",
+        "examples": [
+          {
+            "good": "courage = moed"
+          },
+          {
+            "good": "power = kracht"
+          },
+          {
+            "good": "outdoors = buiten"
+          },
+          {
+            "good": "push yourself = jezelf uitdagen"
+          },
+          {
+            "good": "energy = energie"
+          },
+          {
+            "good": "balance = evenwicht"
+          },
+          {
+            "good": "running = rennen"
+          },
+          {
+            "good": "challenge = uitdaging"
+          },
+          {
+            "good": "technique = techniek"
+          },
+          {
+            "good": "I want to try rafting. = Ik wil raften proberen."
+          },
+          {
+            "good": "I'm not sure I can do it. = Ik weet niet zeker of ik het kan."
+          },
+          {
+            "good": "You are in good shape. = Je bent in goede conditie."
+          },
+          {
+            "good": "You just need the courage. = Je moet alleen de moed hebben."
+          },
+          {
+            "good": "Keep going! = Ga door!"
+          },
+          {
+            "good": "You can do it! = Je kunt het!"
+          },
+          {
+            "good": "Don't stress. = Maak je niet druk."
+          },
+          {
+            "good": "Let's push on. = Laten we doorgaan."
+          },
+          {
+            "good": "Go for it! = Ga ervoor!"
+          }
+        ],
+        "tip": "Dek het Nederlands af en zeg wat het Engels betekent. Dan andersom."
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "bp-bl-001",
+      "type": "choice",
+      "level": "M6",
+      "skill": "blad-woord-betekenis",
+      "prompt": "Wat betekent 'courage'?",
+      "options": [
+        "moed",
+        "kracht",
+        "buiten",
+        "jezelf uitdagen"
+      ],
+      "answer": 0,
+      "explain": "Op het blad staat: courage = moed."
+    },
+    {
+      "id": "bp-bl-002",
+      "type": "choice",
+      "level": "M6",
+      "skill": "blad-woord-engels",
+      "prompt": "Hoe zeg je 'moed' in het Engels?",
+      "options": [
+        "courage",
+        "power",
+        "outdoors",
+        "push yourself"
+      ],
+      "answer": 0,
+      "explain": "Op het blad staat: moed = courage."
+    },
+    {
+      "id": "bp-bl-003",
+      "type": "type",
+      "level": "E6",
+      "skill": "blad-woord-schrijven",
+      "prompt": "Schrijf in het Engels, precies zoals op het blad: 'moed'",
+      "answer": [
+        "courage",
+        "Courage"
+      ],
+      "explain": "Op het blad staat: moed = courage. Let op elke letter."
+    },
+    {
+      "id": "bp-bl-004",
+      "type": "choice",
+      "level": "M6",
+      "skill": "blad-woord-betekenis",
+      "prompt": "Wat betekent 'power'?",
+      "options": [
+        "buiten",
+        "kracht",
+        "jezelf uitdagen",
+        "energie"
+      ],
+      "answer": 1,
+      "explain": "Op het blad staat: power = kracht."
+    },
+    {
+      "id": "bp-bl-005",
+      "type": "choice",
+      "level": "M6",
+      "skill": "blad-woord-engels",
+      "prompt": "Hoe zeg je 'kracht' in het Engels?",
+      "options": [
+        "outdoors",
+        "power",
+        "push yourself",
+        "energy"
+      ],
+      "answer": 1,
+      "explain": "Op het blad staat: kracht = power."
+    },
+    {
+      "id": "bp-bl-006",
+      "type": "type",
+      "level": "E6",
+      "skill": "blad-woord-schrijven",
+      "prompt": "Schrijf in het Engels, precies zoals op het blad: 'kracht'",
+      "answer": [
+        "power",
+        "Power"
+      ],
+      "explain": "Op het blad staat: kracht = power. Let op elke letter."
+    },
+    {
+      "id": "bp-bl-007",
+      "type": "choice",
+      "level": "M6",
+      "skill": "blad-woord-betekenis",
+      "prompt": "Wat betekent 'outdoors'?",
+      "options": [
+        "jezelf uitdagen",
+        "energie",
+        "buiten",
+        "evenwicht"
+      ],
+      "answer": 2,
+      "explain": "Op het blad staat: outdoors = buiten."
+    },
+    {
+      "id": "bp-bl-008",
+      "type": "choice",
+      "level": "M6",
+      "skill": "blad-woord-engels",
+      "prompt": "Hoe zeg je 'buiten' in het Engels?",
+      "options": [
+        "push yourself",
+        "energy",
+        "outdoors",
+        "balance"
+      ],
+      "answer": 2,
+      "explain": "Op het blad staat: buiten = outdoors."
+    },
+    {
+      "id": "bp-bl-009",
+      "type": "type",
+      "level": "E6",
+      "skill": "blad-woord-schrijven",
+      "prompt": "Schrijf in het Engels, precies zoals op het blad: 'buiten'",
+      "answer": [
+        "outdoors",
+        "Outdoors"
+      ],
+      "explain": "Op het blad staat: buiten = outdoors. Let op elke letter."
+    },
+    {
+      "id": "bp-bl-010",
+      "type": "choice",
+      "level": "M6",
+      "skill": "blad-woord-betekenis",
+      "prompt": "Wat betekent 'push yourself'?",
+      "options": [
+        "energie",
+        "evenwicht",
+        "rennen",
+        "jezelf uitdagen"
+      ],
+      "answer": 3,
+      "explain": "Op het blad staat: push yourself = jezelf uitdagen."
+    },
+    {
+      "id": "bp-bl-011",
+      "type": "choice",
+      "level": "M6",
+      "skill": "blad-woord-engels",
+      "prompt": "Hoe zeg je 'jezelf uitdagen' in het Engels?",
+      "options": [
+        "energy",
+        "balance",
+        "running",
+        "push yourself"
+      ],
+      "answer": 3,
+      "explain": "Op het blad staat: jezelf uitdagen = push yourself."
+    },
+    {
+      "id": "bp-bl-012",
+      "type": "type",
+      "level": "E6",
+      "skill": "blad-woord-schrijven",
+      "prompt": "Schrijf in het Engels, precies zoals op het blad: 'jezelf uitdagen'",
+      "answer": [
+        "push yourself",
+        "Push yourself"
+      ],
+      "explain": "Op het blad staat: jezelf uitdagen = push yourself. Let op elke letter."
+    },
+    {
+      "id": "bp-bl-013",
+      "type": "choice",
+      "level": "M6",
+      "skill": "blad-woord-betekenis",
+      "prompt": "Wat betekent 'energy'?",
+      "options": [
+        "energie",
+        "evenwicht",
+        "rennen",
+        "uitdaging"
+      ],
+      "answer": 0,
+      "explain": "Op het blad staat: energy = energie."
+    },
+    {
+      "id": "bp-bl-014",
+      "type": "choice",
+      "level": "M6",
+      "skill": "blad-woord-engels",
+      "prompt": "Hoe zeg je 'energie' in het Engels?",
+      "options": [
+        "energy",
+        "balance",
+        "running",
+        "challenge"
+      ],
+      "answer": 0,
+      "explain": "Op het blad staat: energie = energy."
+    },
+    {
+      "id": "bp-bl-015",
+      "type": "type",
+      "level": "E6",
+      "skill": "blad-woord-schrijven",
+      "prompt": "Schrijf in het Engels, precies zoals op het blad: 'energie'",
+      "answer": [
+        "energy",
+        "Energy"
+      ],
+      "explain": "Op het blad staat: energie = energy. Let op elke letter."
+    },
+    {
+      "id": "bp-bl-016",
+      "type": "choice",
+      "level": "M6",
+      "skill": "blad-woord-betekenis",
+      "prompt": "Wat betekent 'balance'?",
+      "options": [
+        "rennen",
+        "evenwicht",
+        "uitdaging",
+        "techniek"
+      ],
+      "answer": 1,
+      "explain": "Op het blad staat: balance = evenwicht."
+    },
+    {
+      "id": "bp-bl-017",
+      "type": "choice",
+      "level": "M6",
+      "skill": "blad-woord-engels",
+      "prompt": "Hoe zeg je 'evenwicht' in het Engels?",
+      "options": [
+        "running",
+        "balance",
+        "challenge",
+        "technique"
+      ],
+      "answer": 1,
+      "explain": "Op het blad staat: evenwicht = balance."
+    },
+    {
+      "id": "bp-bl-018",
+      "type": "type",
+      "level": "E6",
+      "skill": "blad-woord-schrijven",
+      "prompt": "Schrijf in het Engels, precies zoals op het blad: 'evenwicht'",
+      "answer": [
+        "balance",
+        "Balance"
+      ],
+      "explain": "Op het blad staat: evenwicht = balance. Let op elke letter."
+    },
+    {
+      "id": "bp-bl-019",
+      "type": "choice",
+      "level": "M6",
+      "skill": "blad-woord-betekenis",
+      "prompt": "Wat betekent 'running'?",
+      "options": [
+        "uitdaging",
+        "techniek",
+        "rennen",
+        "moed"
+      ],
+      "answer": 2,
+      "explain": "Op het blad staat: running = rennen."
+    },
+    {
+      "id": "bp-bl-020",
+      "type": "choice",
+      "level": "M6",
+      "skill": "blad-woord-engels",
+      "prompt": "Hoe zeg je 'rennen' in het Engels?",
+      "options": [
+        "challenge",
+        "technique",
+        "running",
+        "courage"
+      ],
+      "answer": 2,
+      "explain": "Op het blad staat: rennen = running."
+    },
+    {
+      "id": "bp-bl-021",
+      "type": "type",
+      "level": "E6",
+      "skill": "blad-woord-schrijven",
+      "prompt": "Schrijf in het Engels, precies zoals op het blad: 'rennen'",
+      "answer": [
+        "running",
+        "Running"
+      ],
+      "explain": "Op het blad staat: rennen = running. Let op elke letter."
+    },
+    {
+      "id": "bp-bl-022",
+      "type": "choice",
+      "level": "M6",
+      "skill": "blad-woord-betekenis",
+      "prompt": "Wat betekent 'challenge'?",
+      "options": [
+        "techniek",
+        "moed",
+        "kracht",
+        "uitdaging"
+      ],
+      "answer": 3,
+      "explain": "Op het blad staat: challenge = uitdaging."
+    },
+    {
+      "id": "bp-bl-023",
+      "type": "choice",
+      "level": "M6",
+      "skill": "blad-woord-engels",
+      "prompt": "Hoe zeg je 'uitdaging' in het Engels?",
+      "options": [
+        "technique",
+        "courage",
+        "power",
+        "challenge"
+      ],
+      "answer": 3,
+      "explain": "Op het blad staat: uitdaging = challenge."
+    },
+    {
+      "id": "bp-bl-024",
+      "type": "type",
+      "level": "E6",
+      "skill": "blad-woord-schrijven",
+      "prompt": "Schrijf in het Engels, precies zoals op het blad: 'uitdaging'",
+      "answer": [
+        "challenge",
+        "Challenge"
+      ],
+      "explain": "Op het blad staat: uitdaging = challenge. Let op elke letter."
+    },
+    {
+      "id": "bp-bl-025",
+      "type": "choice",
+      "level": "M6",
+      "skill": "blad-woord-betekenis",
+      "prompt": "Wat betekent 'technique'?",
+      "options": [
+        "techniek",
+        "moed",
+        "kracht",
+        "buiten"
+      ],
+      "answer": 0,
+      "explain": "Op het blad staat: technique = techniek."
+    },
+    {
+      "id": "bp-bl-026",
+      "type": "choice",
+      "level": "M6",
+      "skill": "blad-woord-engels",
+      "prompt": "Hoe zeg je 'techniek' in het Engels?",
+      "options": [
+        "technique",
+        "courage",
+        "power",
+        "outdoors"
+      ],
+      "answer": 0,
+      "explain": "Op het blad staat: techniek = technique."
+    },
+    {
+      "id": "bp-bl-027",
+      "type": "type",
+      "level": "E6",
+      "skill": "blad-woord-schrijven",
+      "prompt": "Schrijf in het Engels, precies zoals op het blad: 'techniek'",
+      "answer": [
+        "technique",
+        "Technique"
+      ],
+      "explain": "Op het blad staat: techniek = technique. Let op elke letter."
+    },
+    {
+      "id": "bp-bl-028",
+      "type": "choice",
+      "level": "M6",
+      "skill": "blad-zin-betekenis",
+      "prompt": "Wat betekent 'I want to try rafting.'?",
+      "options": [
+        "Ik wil raften proberen.",
+        "Ik weet niet zeker of ik het kan.",
+        "Je bent in goede conditie.",
+        "Je moet alleen de moed hebben."
+      ],
+      "answer": 0,
+      "explain": "Op het blad staat: I want to try rafting. = Ik wil raften proberen."
+    },
+    {
+      "id": "bp-bl-029",
+      "type": "choice",
+      "level": "M6",
+      "skill": "blad-zin-engels",
+      "prompt": "Hoe zeg je 'Ik wil raften proberen.' in het Engels?",
+      "options": [
+        "I want to try rafting.",
+        "I'm not sure I can do it.",
+        "You are in good shape.",
+        "You just need the courage."
+      ],
+      "answer": 0,
+      "explain": "Op het blad staat: Ik wil raften proberen. = I want to try rafting."
+    },
+    {
+      "id": "bp-bl-030",
+      "type": "type",
+      "level": "E6",
+      "skill": "blad-zin-schrijven",
+      "prompt": "Schrijf in het Engels, precies zoals op het blad: 'Ik wil raften proberen.'",
+      "answer": [
+        "I want to try rafting.",
+        "i want to try rafting.",
+        "I want to try rafting",
+        "i want to try rafting"
+      ],
+      "explain": "Op het blad staat: Ik wil raften proberen. = I want to try rafting. Let op elke letter."
+    },
+    {
+      "id": "bp-bl-031",
+      "type": "choice",
+      "level": "M6",
+      "skill": "blad-zin-betekenis",
+      "prompt": "Wat betekent 'I'm not sure I can do it.'?",
+      "options": [
+        "Je bent in goede conditie.",
+        "Ik weet niet zeker of ik het kan.",
+        "Je moet alleen de moed hebben.",
+        "Ik wil raften proberen."
+      ],
+      "answer": 1,
+      "explain": "Op het blad staat: I'm not sure I can do it. = Ik weet niet zeker of ik het kan."
+    },
+    {
+      "id": "bp-bl-032",
+      "type": "choice",
+      "level": "M6",
+      "skill": "blad-zin-engels",
+      "prompt": "Hoe zeg je 'Ik weet niet zeker of ik het kan.' in het Engels?",
+      "options": [
+        "You are in good shape.",
+        "I'm not sure I can do it.",
+        "You just need the courage.",
+        "I want to try rafting."
+      ],
+      "answer": 1,
+      "explain": "Op het blad staat: Ik weet niet zeker of ik het kan. = I'm not sure I can do it."
+    },
+    {
+      "id": "bp-bl-033",
+      "type": "type",
+      "level": "E6",
+      "skill": "blad-zin-schrijven",
+      "prompt": "Schrijf in het Engels, precies zoals op het blad: 'Ik weet niet zeker of ik het kan.'",
+      "answer": [
+        "I'm not sure I can do it.",
+        "I’m not sure I can do it.",
+        "i'm not sure I can do it.",
+        "i’m not sure I can do it.",
+        "I'm not sure I can do it",
+        "I’m not sure I can do it",
+        "i'm not sure I can do it",
+        "i’m not sure I can do it"
+      ],
+      "explain": "Op het blad staat: Ik weet niet zeker of ik het kan. = I'm not sure I can do it. Let op elke letter."
+    },
+    {
+      "id": "bp-bl-034",
+      "type": "choice",
+      "level": "M6",
+      "skill": "blad-zin-betekenis",
+      "prompt": "Wat betekent 'You are in good shape.'?",
+      "options": [
+        "Je moet alleen de moed hebben.",
+        "Ik wil raften proberen.",
+        "Je bent in goede conditie.",
+        "Ik weet niet zeker of ik het kan."
+      ],
+      "answer": 2,
+      "explain": "Op het blad staat: You are in good shape. = Je bent in goede conditie."
+    },
+    {
+      "id": "bp-bl-035",
+      "type": "choice",
+      "level": "M6",
+      "skill": "blad-zin-engels",
+      "prompt": "Hoe zeg je 'Je bent in goede conditie.' in het Engels?",
+      "options": [
+        "You just need the courage.",
+        "I want to try rafting.",
+        "You are in good shape.",
+        "I'm not sure I can do it."
+      ],
+      "answer": 2,
+      "explain": "Op het blad staat: Je bent in goede conditie. = You are in good shape."
+    },
+    {
+      "id": "bp-bl-036",
+      "type": "type",
+      "level": "E6",
+      "skill": "blad-zin-schrijven",
+      "prompt": "Schrijf in het Engels, precies zoals op het blad: 'Je bent in goede conditie.'",
+      "answer": [
+        "You are in good shape.",
+        "you are in good shape.",
+        "You are in good shape",
+        "you are in good shape"
+      ],
+      "explain": "Op het blad staat: Je bent in goede conditie. = You are in good shape. Let op elke letter."
+    },
+    {
+      "id": "bp-bl-037",
+      "type": "choice",
+      "level": "M6",
+      "skill": "blad-zin-betekenis",
+      "prompt": "Wat betekent 'You just need the courage.'?",
+      "options": [
+        "Ik wil raften proberen.",
+        "Ik weet niet zeker of ik het kan.",
+        "Je bent in goede conditie.",
+        "Je moet alleen de moed hebben."
+      ],
+      "answer": 3,
+      "explain": "Op het blad staat: You just need the courage. = Je moet alleen de moed hebben."
+    },
+    {
+      "id": "bp-bl-038",
+      "type": "choice",
+      "level": "M6",
+      "skill": "blad-zin-engels",
+      "prompt": "Hoe zeg je 'Je moet alleen de moed hebben.' in het Engels?",
+      "options": [
+        "I want to try rafting.",
+        "I'm not sure I can do it.",
+        "You are in good shape.",
+        "You just need the courage."
+      ],
+      "answer": 3,
+      "explain": "Op het blad staat: Je moet alleen de moed hebben. = You just need the courage."
+    },
+    {
+      "id": "bp-bl-039",
+      "type": "type",
+      "level": "E6",
+      "skill": "blad-zin-schrijven",
+      "prompt": "Schrijf in het Engels, precies zoals op het blad: 'Je moet alleen de moed hebben.'",
+      "answer": [
+        "You just need the courage.",
+        "you just need the courage.",
+        "You just need the courage",
+        "you just need the courage"
+      ],
+      "explain": "Op het blad staat: Je moet alleen de moed hebben. = You just need the courage. Let op elke letter."
+    },
+    {
+      "id": "bp-bl-040",
+      "type": "choice",
+      "level": "M6",
+      "skill": "blad-aanmoedigen-betekenis",
+      "prompt": "Wat betekent 'Keep going!'?",
+      "options": [
+        "Ga door!",
+        "Je kunt het!",
+        "Maak je niet druk.",
+        "Laten we doorgaan."
+      ],
+      "answer": 0,
+      "explain": "Op het blad staat: Keep going! = Ga door!"
+    },
+    {
+      "id": "bp-bl-041",
+      "type": "choice",
+      "level": "M6",
+      "skill": "blad-aanmoedigen-engels",
+      "prompt": "Hoe zeg je 'Ga door!' in het Engels?",
+      "options": [
+        "Keep going!",
+        "You can do it!",
+        "Don't stress.",
+        "Let's push on."
+      ],
+      "answer": 0,
+      "explain": "Op het blad staat: Ga door! = Keep going!"
+    },
+    {
+      "id": "bp-bl-042",
+      "type": "type",
+      "level": "E6",
+      "skill": "blad-aanmoedigen-schrijven",
+      "prompt": "Schrijf in het Engels, precies zoals op het blad: 'Ga door!'",
+      "answer": [
+        "Keep going!",
+        "keep going!",
+        "Keep going",
+        "keep going"
+      ],
+      "explain": "Op het blad staat: Ga door! = Keep going! Let op elke letter."
+    },
+    {
+      "id": "bp-bl-043",
+      "type": "choice",
+      "level": "M6",
+      "skill": "blad-aanmoedigen-betekenis",
+      "prompt": "Wat betekent 'You can do it!'?",
+      "options": [
+        "Maak je niet druk.",
+        "Je kunt het!",
+        "Laten we doorgaan.",
+        "Ga ervoor!"
+      ],
+      "answer": 1,
+      "explain": "Op het blad staat: You can do it! = Je kunt het!"
+    },
+    {
+      "id": "bp-bl-044",
+      "type": "choice",
+      "level": "M6",
+      "skill": "blad-aanmoedigen-engels",
+      "prompt": "Hoe zeg je 'Je kunt het!' in het Engels?",
+      "options": [
+        "Don't stress.",
+        "You can do it!",
+        "Let's push on.",
+        "Go for it!"
+      ],
+      "answer": 1,
+      "explain": "Op het blad staat: Je kunt het! = You can do it!"
+    },
+    {
+      "id": "bp-bl-045",
+      "type": "type",
+      "level": "E6",
+      "skill": "blad-aanmoedigen-schrijven",
+      "prompt": "Schrijf in het Engels, precies zoals op het blad: 'Je kunt het!'",
+      "answer": [
+        "You can do it!",
+        "you can do it!",
+        "You can do it",
+        "you can do it"
+      ],
+      "explain": "Op het blad staat: Je kunt het! = You can do it! Let op elke letter."
+    },
+    {
+      "id": "bp-bl-046",
+      "type": "choice",
+      "level": "M6",
+      "skill": "blad-aanmoedigen-betekenis",
+      "prompt": "Wat betekent 'Don't stress.'?",
+      "options": [
+        "Laten we doorgaan.",
+        "Ga ervoor!",
+        "Maak je niet druk.",
+        "Ga door!"
+      ],
+      "answer": 2,
+      "explain": "Op het blad staat: Don't stress. = Maak je niet druk."
+    },
+    {
+      "id": "bp-bl-047",
+      "type": "choice",
+      "level": "M6",
+      "skill": "blad-aanmoedigen-engels",
+      "prompt": "Hoe zeg je 'Maak je niet druk.' in het Engels?",
+      "options": [
+        "Let's push on.",
+        "Go for it!",
+        "Don't stress.",
+        "Keep going!"
+      ],
+      "answer": 2,
+      "explain": "Op het blad staat: Maak je niet druk. = Don't stress."
+    },
+    {
+      "id": "bp-bl-048",
+      "type": "type",
+      "level": "E6",
+      "skill": "blad-aanmoedigen-schrijven",
+      "prompt": "Schrijf in het Engels, precies zoals op het blad: 'Maak je niet druk.'",
+      "answer": [
+        "Don't stress.",
+        "Don’t stress.",
+        "don't stress.",
+        "don’t stress.",
+        "Don't stress",
+        "Don’t stress",
+        "don't stress",
+        "don’t stress"
+      ],
+      "explain": "Op het blad staat: Maak je niet druk. = Don't stress. Let op elke letter."
+    },
+    {
+      "id": "bp-bl-049",
+      "type": "choice",
+      "level": "M6",
+      "skill": "blad-aanmoedigen-betekenis",
+      "prompt": "Wat betekent 'Let's push on.'?",
+      "options": [
+        "Ga ervoor!",
+        "Ga door!",
+        "Je kunt het!",
+        "Laten we doorgaan."
+      ],
+      "answer": 3,
+      "explain": "Op het blad staat: Let's push on. = Laten we doorgaan."
+    },
+    {
+      "id": "bp-bl-050",
+      "type": "choice",
+      "level": "M6",
+      "skill": "blad-aanmoedigen-engels",
+      "prompt": "Hoe zeg je 'Laten we doorgaan.' in het Engels?",
+      "options": [
+        "Go for it!",
+        "Keep going!",
+        "You can do it!",
+        "Let's push on."
+      ],
+      "answer": 3,
+      "explain": "Op het blad staat: Laten we doorgaan. = Let's push on."
+    },
+    {
+      "id": "bp-bl-051",
+      "type": "type",
+      "level": "E6",
+      "skill": "blad-aanmoedigen-schrijven",
+      "prompt": "Schrijf in het Engels, precies zoals op het blad: 'Laten we doorgaan.'",
+      "answer": [
+        "Let's push on.",
+        "Let’s push on.",
+        "let's push on.",
+        "let’s push on.",
+        "Let's push on",
+        "Let’s push on",
+        "let's push on",
+        "let’s push on"
+      ],
+      "explain": "Op het blad staat: Laten we doorgaan. = Let's push on. Let op elke letter."
+    },
+    {
+      "id": "bp-bl-052",
+      "type": "choice",
+      "level": "M6",
+      "skill": "blad-aanmoedigen-betekenis",
+      "prompt": "Wat betekent 'Go for it!'?",
+      "options": [
+        "Ga ervoor!",
+        "Ga door!",
+        "Je kunt het!",
+        "Maak je niet druk."
+      ],
+      "answer": 0,
+      "explain": "Op het blad staat: Go for it! = Ga ervoor!"
+    },
+    {
+      "id": "bp-bl-053",
+      "type": "choice",
+      "level": "M6",
+      "skill": "blad-aanmoedigen-engels",
+      "prompt": "Hoe zeg je 'Ga ervoor!' in het Engels?",
+      "options": [
+        "Go for it!",
+        "Keep going!",
+        "You can do it!",
+        "Don't stress."
+      ],
+      "answer": 0,
+      "explain": "Op het blad staat: Ga ervoor! = Go for it!"
+    },
+    {
+      "id": "bp-bl-054",
+      "type": "type",
+      "level": "E6",
+      "skill": "blad-aanmoedigen-schrijven",
+      "prompt": "Schrijf in het Engels, precies zoals op het blad: 'Ga ervoor!'",
+      "answer": [
+        "Go for it!",
+        "go for it!",
+        "Go for it",
+        "go for it"
+      ],
+      "explain": "Op het blad staat: Ga ervoor! = Go for it! Let op elke letter."
+    }
+  ]
+}

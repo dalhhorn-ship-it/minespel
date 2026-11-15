@@ -12,7 +12,8 @@
   "topics": [
     "woorden",
     "zinnen",
-    "klok"
+    "klok",
+    "blad"
   ],
   "exams": [
     {
@@ -71,6 +72,20 @@
         "woorden": 2,
         "zinnen": 1,
         "klok": 1
+      }
+    },
+    {
+      "id": "toets-rw-blad",
+      "title": "Toets: precies van het blad",
+      "levels": [
+        "M6",
+        "E6"
+      ],
+      "questionCount": 23,
+      "timeLimitMinutes": 23,
+      "passPercent": 70,
+      "mix": {
+        "blad": 1
       }
     }
   ]

@@ -12,7 +12,8 @@
   "topics": [
     "woorden",
     "zinnen",
-    "aanmoedigen"
+    "aanmoedigen",
+    "blad"
   ],
   "exams": [
     {
@@ -71,6 +72,20 @@
         "woorden": 2,
         "zinnen": 1,
         "aanmoedigen": 1
+      }
+    },
+    {
+      "id": "toets-bp-blad",
+      "title": "Toets: precies van het blad",
+      "levels": [
+        "M6",
+        "E6"
+      ],
+      "questionCount": 18,
+      "timeLimitMinutes": 18,
+      "passPercent": 70,
+      "mix": {
+        "blad": 1
       }
     }
   ]
