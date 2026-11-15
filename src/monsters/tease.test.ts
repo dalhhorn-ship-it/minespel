@@ -94,6 +94,13 @@ describe('Klodder teases the animals (v18, AC220, AC221)', () => {
     });
   });
 
+  it('AC220: Klodder also teases a chicken (kip) from the animal list', () => {
+    const { world, spots } = buildTeaseMap();
+    const kip = animal(spots.open[0]!.x, spots.open[0]!.z, 'stay', 'kip');
+    expect(teaseNow(makeCtx(world, createRng(1), vi.fn(), () => [kip]))).toBe(true);
+    expect(kip.vy > 0 || !!kip.flee).toBe(true);
+  });
+
   it('AC220: the pen stays closed: a penned animal never leaves it over 50 teases', () => {
     const { world, spots } = buildTeaseMap();
     const d = animal(spots.pen[0]!.x, spots.pen[0]!.z);

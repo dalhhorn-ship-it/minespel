@@ -99,7 +99,8 @@ test.describe('Klodder (V18b)', () => {
     }
     // Pen walls or a cliff may cut the run short, so only a clear move counts.
     expect(far).toBeGreaterThan(1.5);
-    await readState(page, 'fastForward', 6000);
+    // AC220: 10 s after the tease (6 s of the loop above, 4 s more) it is home and still calm.
+    await readState(page, 'fastForward', 4000);
     const back = (await readState<Array<{ x: number; z: number }>>(page, 'dinos'))[0]!;
     expect(Math.hypot(back.x - home.x, back.z - home.z)).toBeLessThanOrEqual(3.5);
   });

@@ -52,8 +52,10 @@ export const FLEE_SECONDS = 3;
 export const FLEE_BLOCKS = 6;
 export const FLEE_HOME = 1.5;
 export const FLEE_BACK_GIVEUP = 8;
-/** A roaming animal stands still this long after a tease, so it is near its spot 10 s later (AC220). */
+/** A roaming animal stands still at least this long after a run, and until FLEE_CALM seconds after the tease began. */
 export const FLEE_IDLE = 8;
+/** AC220: 10 s after a tease a roaming animal is still home, so roaming only starts again after this many seconds. */
+export const FLEE_CALM = 10;
 
 const EPS = 1e-4;
 const SUB_STEP = 1 / 60;
@@ -109,6 +111,8 @@ export interface FleeState {
   left: number;
   backX: number;
   backZ: number;
+  /** Seconds since the tease began. */
+  age?: number;
 }
 
 export type DinoEvent = 'popped' | null;
@@ -479,14 +483,15 @@ export function startFlee(world: World, d: DinoState, rng: Rng, box?: StepOption
     return true;
   }
   // Only a jump: it stays here and stands still for a while, like after a run.
-  if (d.mode !== 'follow') { d.goal = null; d.idleLeft = Math.max(d.idleLeft, FLEE_IDLE); }
+  if (d.mode !== 'follow') { d.goal = null; d.idleLeft = Math.max(d.idleLeft, FLEE_CALM); }
   return false;
 }
 
 /** One small step of a tease: run out, then walk back (a follower goes straight back to following). */
 function stepFlee(world: World, d: DinoState, f: FleeState, dt: number, box?: StepOptions['box']): void {
-  const end = (): void => { d.flee = undefined; d.goal = null; d.idleLeft = d.mode === 'follow' ? 1 : FLEE_IDLE; d.stuckTime = 0; d.farTime = 0; };
+  const end = (): void => { d.flee = undefined; d.goal = null; d.idleLeft = d.mode === 'follow' ? 1 : Math.max(FLEE_IDLE, FLEE_CALM - (f.age ?? 0)); d.stuckTime = 0; d.farTime = 0; };
   f.left -= dt;
+  f.age = (f.age ?? 0) + dt;
   if (f.left > 0) {
     if (Math.hypot(f.x - d.x, f.z - d.z) < 0.3) f.left = 0;
     else { walkToward(world, d, { x: f.x, z: f.z }, dt, FLEE_SPEED, box); return; }

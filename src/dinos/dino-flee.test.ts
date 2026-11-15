@@ -53,6 +53,19 @@ describe('the safe flee step (v18, AC220, AC221)', () => {
     }
   });
 
+  it('AC220: a roaming animal stays within 3 blocks of its spot until 10 s after the tease, for any seed', () => {
+    const { world, spots } = buildTeaseMap();
+    for (let seed = 1; seed <= 20; seed++) {
+      const d = mk(spots.open[0]!.x, spots.open[0]!.z);
+      d.mode = 'stay';
+      const home = { x: d.x, z: d.z };
+      startFlee(world, d, createRng(seed));
+      const rng = createRng(seed + 100);
+      for (let i = 0; i < 10 * 30; i++) stepDino(world, d, KID, rng, 1 / 30, {});
+      expect(Math.hypot(d.x - home.x, d.z - home.z)).toBeLessThanOrEqual(3);
+    }
+  });
+
   it('AC220: never into water, lava, off a cliff of 4, into a deep hole, outside the world or through a wall', () => {
     const { world, spots } = buildTeaseMap();
     const places = [spots.pond, spots.cliffTop, spots.cliffFoot, spots.hole, spots.corner, spots.lava, spots.pen[0]!];
