@@ -58,6 +58,8 @@ export interface GameEvents {
 export interface CreatureSystem {
   step(dt: number): void;
   handleTap?(x: number, y: number): boolean;
+  /** True when a finger landing at this point is a tap on this layer's thing (the bubble): it goes to the look owner even in the left half. */
+  wantsTap?(x: number, y: number): boolean;
   isOccupied?(box: Box): boolean;
   /** After Wereld opnieuw beginnen: `spot` is where the kid stands now. */
   onWorldReset?(spot: { x: number; y: number; z: number }): void;
@@ -160,7 +162,11 @@ export function createGame(options: GameOptions): Game {
   const tapWorld: { fn: ((x: number, y: number) => void) | null } = { fn: null }; // set once the build controller exists
   let loopRunning = () => false;
   const look = createLook({ onTap: (x, y) => tapWorld.fn?.(x, y) });
-  const router = createPointerRouter(options.container, { stick, look });
+  const router = createPointerRouter(options.container, {
+    stick,
+    look,
+    claimLook: (x, y) => loopRunning() && creatures.some((c) => c.system.wantsTap?.(x, y) === true),
+  });
   const listeners: { [K in keyof GameEvents]: Set<(p: GameEvents[K]) => void> } = { teleported: new Set(), changed: new Set(), mined: new Set() };
   const emitChanged = (kind: ChangedEvent['kind']) => {
     for (const l of [...listeners.changed]) l({ kind });

@@ -51,6 +51,51 @@ describe('look zone', () => {
   });
 });
 
+describe('first tap after boot (V16e)', () => {
+  it('V16e: a slow handler before the look zone does not turn a tap into a long press (the time of the event counts)', () => {
+    const root = document.createElement('div');
+    document.body.append(root);
+    const taps: Array<[number, number]> = [];
+    const look = createLook({ onTap: (x, y) => taps.push([x, y]) });
+    createPointerRouter(root, { stick: createStick(), look, splitX: () => 500 });
+    const at = (type: string, t: number, x: number) => {
+      const e = ptr(type, 1, x, 300);
+      Object.defineProperty(e, 'timeStamp', { value: t });
+      return e;
+    };
+    // The browser stamped the events 90 ms apart. A capture listener (the audio unlock) delayed the handler by 400 ms
+    // of real time, which must not count.
+    root.dispatchEvent(at('pointerdown', 1000, 700));
+    const until = performance.now() + 400;
+    while (performance.now() < until) { /* the audio unlock building its context */ }
+    root.dispatchEvent(at('pointerup', 1090, 700));
+    expect(taps).toEqual([[700, 300]]);
+  });
+});
+
+describe('claimed taps (V16e)', () => {
+  it('V16e: a finger on a claimed point in the left half is the look owner, so its tap arrives', () => {
+    const root = document.createElement('div');
+    document.body.append(root);
+    let time = 0;
+    const taps: Array<[number, number]> = [];
+    const stick = createStick();
+    const look = createLook({ onTap: (x, y) => taps.push([x, y]), now: () => time });
+    const router = createPointerRouter(root, { stick, look, splitX: () => 500, claimLook: (x) => x > 440 && x < 560 });
+    root.dispatchEvent(ptr('pointerdown', 1, 470, 300));
+    expect(router.ownerOf(1)).toBe('look');
+    time += 80;
+    root.dispatchEvent(ptr('pointerup', 1, 470, 300));
+    expect(taps).toEqual([[470, 300]]);
+    // Off the claimed point the left half is still the stick, and a second finger on a busy look zone stays a stick.
+    root.dispatchEvent(ptr('pointerdown', 2, 100, 300));
+    expect(router.ownerOf(2)).toBe('stick');
+    root.dispatchEvent(ptr('pointerdown', 3, 700, 300));
+    root.dispatchEvent(ptr('pointerdown', 4, 470, 300));
+    expect(router.ownerOf(4)).toBe(null);
+  });
+});
+
 describe('two fingers (AC8)', () => {
   it('stick and look work at the same time', () => {
     const s = setup();

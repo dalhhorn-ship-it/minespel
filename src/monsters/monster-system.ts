@@ -435,6 +435,12 @@ export function createMonsterSystem(options: MonsterSystemOptions): MonsterSyste
       flushTouched();
       sync();
     },
+    wantsTap(x, y) {
+      if (!bubble || bubble.stage === 'out') return false;
+      const { width, height } = options.viewport();
+      const aim = aimFromScreen(options.player.pose(), width, height, x, y);
+      return pickActor(aim, [{ id: 'bubble', box: bubbleBox(bubble) }], BUBBLE_TAP_REACH) !== null;
+    },
     handleTap(x, y) {
       if (phase === 'idle' && !(mole && mole.phase === 'out')) return false;
       const { width, height } = options.viewport();

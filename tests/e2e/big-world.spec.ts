@@ -91,6 +91,11 @@ test.describe('the big world (V15e)', () => {
       if (y >= 6 && y <= 9) expect([STEEN, KEISTEEN]).toContain(before);
       expect(await readState<boolean>(page, 'mineAt', x, y, z)).toBe(true);
       expect(await readState<number>(page, 'blockAt', x, y, z)).toBe(0);
+      // Mining the stripe block shows the Monstermol card (AC244, v16) and stops the loop until OK is tapped.
+      if (y === 5) {
+        await page.locator('[data-testid="mole-ok"]').tap();
+        await expect(page.locator('[data-testid="mole-card"]')).toBeHidden();
+      }
       dug++;
     }
     expect(dug).toBeGreaterThanOrEqual(18);
@@ -116,15 +121,15 @@ test.describe('the big world (V15e)', () => {
   });
 });
 
-test.describe('version 0.8.0 (AC242)', () => {
-  test('AC242: package.json says 0.8.0 and Instellingen shows it at the bottom', async ({ page }) => {
-    expect(pkg.version).toBe('0.8.0');
+test.describe('version 0.9.0 (AC242 became AC257 in v16)', () => {
+  test('AC257: package.json says 0.9.0 and Instellingen shows it at the bottom', async ({ page }) => {
+    expect(pkg.version).toBe('0.9.0');
     await openApp(page);
     await readState(page, 'openParentControls');
     await page.locator('.parent-gate').waitFor();
     await setupPinFromGate(page);
     await page.locator('.parent-nav-btn[data-section="instellingen"]').tap();
-    await expect(page.locator('.parent-settings')).toContainText('Versie 0.8.0');
+    await expect(page.locator('.parent-settings')).toContainText('Versie 0.9.0');
   });
 });
 

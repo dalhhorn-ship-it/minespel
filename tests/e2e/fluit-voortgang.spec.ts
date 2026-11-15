@@ -47,6 +47,11 @@ test.describe('Dinofluit (decision 114)', () => {
     expect(box.width).toBeGreaterThanOrEqual(56);
     expect(box.height).toBeGreaterThanOrEqual(56);
 
+    // The egg hatched next to the kid. A dino within 2.5 blocks of the kid ends its call on the very next loop step
+    // (CALL_ARRIVED), so whether the read below saw a running call depended on timing. Put the kid 15 blocks away,
+    // the call then runs for seconds.
+    const pose = await readState<{ x: number; y: number; z: number }>(page, 'player');
+    await readState(page, 'placePlayer', pose.x + 15, pose.y + 15, pose.z, 0);
     await fingerTap(page, '[data-testid="hud-fluit"]');
     const after = await readState<DinoRow[]>(page, 'dinos');
     // Decision 122: a Blijf hier dino is called, but it does not follow for good.
