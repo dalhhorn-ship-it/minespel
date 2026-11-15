@@ -12,19 +12,6 @@ interface MonsterState {
 
 const state = (page: Page) => readState<MonsterState>(page, 'monsterState');
 
-async function tapAt(page: Page, x: number, y: number) {
-  await page.evaluate(
-    ({ x, y }) => {
-      const target = document.querySelector('.world') as HTMLElement;
-      const fire = (type: string) =>
-        target.dispatchEvent(new PointerEvent(type, { pointerId: 7, pointerType: 'touch', clientX: x, clientY: y, bubbles: true }));
-      fire('pointerdown');
-      fire('pointerup');
-    },
-    { x, y },
-  );
-}
-
 /** A long play stretch with no learning break in the way, and a knight so the clock may run. */
 async function prepare(page: Page) {
   await openApp(page);
@@ -78,8 +65,26 @@ test.describe('Zwarte bubbel (V18a)', () => {
       const b = (await state(page)).bubble!;
       expect(Math.hypot(b.x - s.spot.x, b.y - s.spot.y, b.z - s.spot.z)).toBeLessThanOrEqual(1);
     }
-    const at = (await readState<{ x: number; y: number } | null>(page, 'bubbleScreenPoint'))!;
-    await tapAt(page, at.x, at.y);
+    // The first pointerup of a page makes the audio unlock build the sound context before the world sees the finger
+    // lift. On a busy machine that takes over 300 ms, and the game then reads the tap as a drag (it measures from
+    // pointerdown to pointerup). A first gesture that is not on the world gets that work done before the real tap.
+    await page.evaluate(() => document.dispatchEvent(new PointerEvent('pointerup', { pointerId: 99, pointerType: 'touch', bubbles: true })));
+    expect(await readState<boolean>(page, 'audioUnlocked')).toBe(true);
+    // The bubble floats straight ahead, so its middle sits on the line that splits the stick (left half) from the look
+    // zone (right half), and its drift moves it across that line from frame to frame. A tap on the middle is the stick's
+    // some of the time. So: read the point and tap in one step, on the right part of the bubble (it is 80 points wide
+    // or more), where the finger is in the look zone.
+    await page.evaluate(() => {
+      const hooks = (window as unknown as { __dino: Record<string, () => unknown> }).__dino;
+      const at = hooks.bubbleScreenPoint!() as { x: number; y: number };
+      const width = hooks.bubbleScreenWidth!() as number;
+      const x = Math.max(at.x + width / 4, window.innerWidth / 2 + 4);
+      const target = document.querySelector('.world') as HTMLElement;
+      const fire = (type: string) =>
+        target.dispatchEvent(new PointerEvent(type, { pointerId: 7, pointerType: 'touch', clientX: x, clientY: at.y, bubbles: true }));
+      fire('pointerdown');
+      fire('pointerup');
+    });
     expect((await state(page)).phase).toBe('klodder');
   });
 

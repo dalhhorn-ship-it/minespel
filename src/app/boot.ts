@@ -17,6 +17,7 @@ import { MONSTER_PRIORITY, createMonsterSystem, type MonsterSystem } from '../mo
 import { openDb } from '../storage/db';
 import { createLogStore } from '../storage/log-store';
 import { createMoedBar } from '../ui/moed-bar';
+import { viewDistanceOf } from '../render/quality';
 import { creatureSwitches, prepareMonsters, updateMonsters } from '../storage/monsters-store';
 import { moveOldSave } from '../storage/world-move-store';
 import { createProgressStore } from '../storage/progress-store';
@@ -243,7 +244,13 @@ export function createBoot(deps: BootDeps): Boot {
         void breakFlow.startBreak();
       },
     });
-    applySettingsToRuntime(settings, { sound, timerDriver });
+    // Kijkafstand (AC243): Ver is the quality the renderer was made with, so only Dichtbij has anything to apply at boot.
+    applySettingsToRuntime(settings, {
+      sound,
+      timerDriver,
+      renderer: viewDistanceOf(settings) === 'dichtbij' ? world.renderer : undefined,
+      search: window.location.search,
+    });
 
     // The Dinofluit button shows once the kid owns the fluit (decision 114).
     const economy = await records.get('economy');
@@ -382,6 +389,8 @@ export function createBoot(deps: BootDeps): Boot {
         stop: () => examFlow.stop(),
       },
       sound,
+      renderer: world.renderer,
+      search: window.location.search,
       db,
       onResetWorld: () => {
         world.resetWorld();

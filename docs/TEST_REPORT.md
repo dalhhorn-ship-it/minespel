@@ -1,5 +1,30 @@
 # Test report
 
+## v15 Grote wereld (0.8.0), V15e closing task
+
+Automated part: see the numbers below. AC241 (speed on the founder's oldest iPad) and AC256 (v16 speed with the mole) are OPEN: they cannot run here.
+
+Draw numbers, counted in `src/render/draw-budget.test.ts` (faces, no GPU). The 0.7.0 start frame is 4002 faces (`FACES_070_START`), the 0.7.0 world 9613 faces in all.
+
+| Check | Measured | Budget | Result |
+|---|---|---|---|
+| AC240 all faces of the version 3 world | 33 976 (3.5 times the 9 613 of 0.7.0) | at most 5 times | pass |
+| AC240 largest chunk mesh | 3 088 vertices | at most 65 536 | pass |
+| AC240 frame at the start spot (far plane 64) | 11 867 faces in 23 chunks (2.97 times) | at most 3.5 times (14 007) | pass |
+| Frame at (8, ground, 8) looking to the middle, Ver | 15 202 faces in 28 chunks (3.8 times) | AC240 sets no budget here; the test holds it at the measured number (decision 139) | reported |
+| AC243 Dichtbij, frame at (8, ground, 8) | 6 653 faces (1.66 times) | at most 3.5 times (14 007) | pass |
+| AC243 Dichtbij, frame at (12, ground, 12), diagonal to the middle | 8 191 faces (2.05 times) | at most 3.5 times (14 007) | pass |
+
+Browser specs (Chromium local, iPad landscape): `tests/e2e/big-world.spec.ts` (size 128 x 128 x 80, a walk to each of the 4 sides ending at the invisible wall, dig from the start spot to the stripes with the stripe block 42 at y 5 and oersteen at y 0, Ik zit vast, version 0.8.0, the Kijkafstand row and its 44 point targets), `tests/e2e/big-world-life.spec.ts` (the moved 0.7.0 builder save: villagers at home in the moved villages and a villager question, a guard knight's report, a roaming dino within 12 of its moved stay spot, a seeded Klodder that nibbles only cells AC215 allows, Wereld opnieuw beginnen and Alles wissen give terrain version 3). `big-world-speed.spec.ts` skips without WebGL.
+
+Two unstable specs from 0.7.0 were repaired (no assertion weakened): `monsters-card.spec.ts` "Ridders off greys the row" waited a fixed 500 ms for the world to read the switches again, so on a busy machine the bubble clock had already moved (12 of 12 failed with 6 workers, 12 of 12 pass now). `bubble.spec.ts` "floats in ... a tap opens Klodder": the first pointerup of a page lets the audio unlock build the sound context before the world sees the finger lift, which can take over 300 ms on a busy machine and reads as a drag, and the bubble is straight ahead on the line between the stick half and the look half (6 of 12 failed with 6 workers, 30 of 30 pass with 8).
+
+### Open for the founder
+
+* **AC241**: on the oldest iPad from the home screen icon with the fps counter, an existing install updated to 0.8.0, 3 knights, Klodder out, 25 shop dinos and 10 chickens, 2 minutes from the middle into the new land and back with mining and building. Target: 95 percent of frames at 33 ms or less and none over 200 ms; the world within 5 seconds from a cold start. Result: not run yet. If it fails: set Kijkafstand to Dichtbij (built, default Ver) and run again; step 1 (`?near=1`) does not lower the frame cost in a 128 x 128 world (decision 139).
+* **AC256** (v16, the mole teasing with 3 knights and 25 shop dinos in view): result not run yet, after v16.
+* The "Check before shipping" list of PRD section 12 on the test deploy: make a backup in 0.7.0 first, update the existing install and look for every build, animal and knight in the middle, walk into the new land, dig to the stripes, restore the 0.7.0 backup, hand the iPad to the kid.
+
 ## v18 Zwarte bubbel (0.7.0, part B), V18e closing task
 
 Automated part: see the numbers below. AC210 and AC227 (speed on the founder's oldest iPad) and the look and sound checks are OPEN: they cannot run here.

@@ -9,7 +9,7 @@ import {
   CHUNKS_PER_SIDE, NEAR_BUILD_RADIUS, NEAR_KEEP_RADIUS, buildChunkData, chunkKey, chunkOf, chunksTouchedBy, planNearChunks,
   type MeshData, type WorldView,
 } from './chunk-mesh';
-import { DEFAULT_QUALITY } from './quality';
+import { DEFAULT_QUALITY, qualityForView } from './quality';
 import { FAR_PAST_FOG } from './renderer';
 
 // AC240: the draw budget of the big world, counted in CI. No GPU needed: faces are counted, and the frame
@@ -131,6 +131,33 @@ describe('draw budget of the big world', () => {
   it('AC240: the camera far plane is the fog end plus 4', () => {
     expect(FAR_PAST_FOG).toBe(4);
     expect(FAR).toBe(DEFAULT_QUALITY.fogFar + 4);
+  });
+});
+
+describe('Kijkafstand Dichtbij (fallback step 2, AC243)', () => {
+  const dichtbij = qualityForView('dichtbij');
+  const farDichtbij = dichtbij.fogFar + FAR_PAST_FOG;
+
+  /** The frame with Dichtbij: the frustum with the shorter far plane, and only chunks within the draw radius. */
+  function dichtbijFrame(x: number, z: number): number {
+    const yaw = Math.atan2(WORLD_SIZE / 2 - x, WORLD_SIZE / 2 - z);
+    const pose: Pose = { x, y: groundAt(world, x, z) + EYE_HEIGHT, z, yaw, pitch: 0 };
+    const near = new Map<string, MeshData>();
+    for (const [key, data] of v3) {
+      const [cx, cz] = key.split(',').map(Number) as [number, number];
+      if (Math.max(Math.abs(cx - chunkOf(x)), Math.abs(cz - chunkOf(z))) <= (dichtbij.drawRadius ?? Infinity)) near.set(key, data);
+    }
+    return frameFaces(near, frustumFor(pose, farDichtbij)).faces;
+  }
+
+  it('AC243: Dichtbij ends the fog at 40 blocks and draws 3 chunks', () => {
+    expect(dichtbij.fogFar).toBe(40);
+    expect(dichtbij.drawRadius).toBe(3);
+  });
+
+  it('AC243: the frame at (8, ground, 8) and at the worst spot (12, 12) is at most 3.5 times the 0.7.0 start frame', () => {
+    expect(dichtbijFrame(8, 8)).toBeLessThanOrEqual(3.5 * FACES_070_START);
+    expect(dichtbijFrame(12, 12)).toBeLessThanOrEqual(3.5 * FACES_070_START);
   });
 });
 

@@ -74,6 +74,8 @@ export interface SettingsRecord {
   knightsEnabled?: boolean;
   /** "Zwarte bubbel" (v18). Missing reads as Uit; the first start rule sets it (decision 135). */
   bubbleEnabled?: boolean;
+  /** "Kijkafstand" (v15, AC243). Missing reads as Ver. */
+  viewDistance?: 'ver' | 'dichtbij';
   [key: string]: unknown;
 }
 export interface PlayerRecord {

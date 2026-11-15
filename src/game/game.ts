@@ -35,9 +35,19 @@ export interface ChangedEvent {
   kind: 'world' | 'build';
 }
 
+/** A block was mined by a tap or by `mineAt` (v15, for the mole of v16). */
+export interface MinedEvent {
+  x: number;
+  y: number;
+  z: number;
+  /** The block that was there. */
+  block: number;
+}
+
 export interface GameEvents {
   teleported: TeleportedEvent;
   changed: ChangedEvent;
+  mined: MinedEvent;
 }
 
 /**
@@ -94,6 +104,8 @@ export interface Game {
   teleportHome(): void;
   /** Puts every block back to the start world, saves that, and puts the player on the start spot. */
   resetWorld(): void;
+  /** Mines one cell like a tap (oersteen is refused). True when mined. For tests and tools. */
+  mineAt(x: number, y: number, z: number): boolean;
   on<K extends keyof GameEvents>(event: K, listener: (payload: GameEvents[K]) => void): () => void;
   /** Frames drawn since the start. */
   frameCount(): number;
@@ -149,7 +161,7 @@ export function createGame(options: GameOptions): Game {
   let loopRunning = () => false;
   const look = createLook({ onTap: (x, y) => tapWorld.fn?.(x, y) });
   const router = createPointerRouter(options.container, { stick, look });
-  const listeners: { [K in keyof GameEvents]: Set<(p: GameEvents[K]) => void> } = { teleported: new Set(), changed: new Set() };
+  const listeners: { [K in keyof GameEvents]: Set<(p: GameEvents[K]) => void> } = { teleported: new Set(), changed: new Set(), mined: new Set() };
   const emitChanged = (kind: ChangedEvent['kind']) => {
     for (const l of [...listeners.changed]) l({ kind });
   };
@@ -233,6 +245,9 @@ export function createGame(options: GameOptions): Game {
     isOccupied: (box) =>
       dinoSystem.isOccupied(box) || villagerSystem.isOccupied(box) || creatures.some((c) => c.system.isOccupied?.(box) === true),
     canAct: () => loopRunning(),
+    onMined: (x, y, z, block) => {
+      for (const l of [...listeners.mined]) l({ x, y, z, block });
+    },
   });
   tapWorld.fn = (x, y) => {
     if (!loopRunning()) return;
@@ -415,6 +430,7 @@ export function createGame(options: GameOptions): Game {
       refreshHotbar();
     },
     teleportHome,
+    mineAt: (x, y, z) => build.mineCell(x, y, z),
     resetWorld() {
       world.reset();
       villagerSystem.reset();

@@ -4,12 +4,20 @@ import { pointsModeOf, type PointsMode } from '../../core/economy';
 import type { SettingsRecord } from '../../storage/schema';
 import { el } from '../dom';
 import { onTap } from '../tap';
+import { viewDistanceOf, type ViewDistance } from '../../render/quality';
 import { createMonstersCard } from './monsters-card';
 
 const POINTS_CHOICES: { mode: PointsMode; label: string; line: string }[] = [
   { mode: 'makkelijk', label: 'Makkelijk', line: 'Een foutje kost geen punten.' },
   { mode: 'normaal', label: 'Normaal', line: 'Twee keer fout kost 1 punt.' },
   { mode: 'moeilijk', label: 'Moeilijk', line: 'Elke foute poging kost 1 punt.' },
+];
+
+export const HELP_VIEW_DISTANCE = 'Dichtbij maakt het spel sneller op een oudere iPad. Je kijkt dan minder ver.';
+
+const VIEW_CHOICES: { view: ViewDistance; label: string }[] = [
+  { view: 'ver', label: 'Ver' },
+  { view: 'dichtbij', label: 'Dichtbij' },
 ];
 
 export interface SettingsScreenOptions {
@@ -224,6 +232,23 @@ export function createSettingsScreen(options: SettingsScreenOptions): SettingsSc
     }
     pointsCard.append(choiceRow);
 
+    // Kijkafstand card (AC243): Ver is today's view, Dichtbij is the speed fallback.
+    const viewCard = el('div', { class: 'parent-card parent-view', attrs: { 'data-testid': 'view-setting' } });
+    viewCard.append(el('strong', { text: 'Kijkafstand' }));
+    const chosenView = viewDistanceOf(current);
+    const viewRow = el('div', { class: 'parent-points-row' });
+    for (const c of VIEW_CHOICES) {
+      const on = c.view === chosenView;
+      const btn = el('button', {
+        class: `parent-btn parent-view-choice ${on ? 'parent-btn-primary' : ''}`.trim(),
+        text: c.label,
+        attrs: { type: 'button', 'aria-pressed': String(on), 'data-view-distance': c.view },
+      });
+      cleanups.push(onTap(btn, () => updateField('viewDistance', c.view), { now: options.now }));
+      viewRow.append(btn);
+    }
+    viewCard.append(viewRow, el('p', { class: 'parent-switch-help', text: HELP_VIEW_DISTANCE }));
+
     // Monsters en ridders card (AC208)
     const monstersCard = createMonstersCard({
       settings: current,
@@ -337,7 +362,7 @@ export function createSettingsScreen(options: SettingsScreenOptions): SettingsSc
       text: `Versie ${options.appVersion ?? __APP_VERSION__}`,
       attrs: { 'data-testid': 'app-version' },
     });
-    root.append(title, breakCard, displayCard, pointsCard, monstersCard, actionsCard, versionLine);
+    root.append(title, breakCard, displayCard, pointsCard, viewCard, monstersCard, actionsCard, versionLine);
   }
 
   render();

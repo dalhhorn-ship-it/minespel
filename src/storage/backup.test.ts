@@ -1,3 +1,4 @@
+import { viewDistanceOf } from '../render/quality';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { BACKUP_KV_NAMES, backupFileName, backupText, buildBackup, decodeValue, encodeValue, markBackupMade, replaceAll } from './backup';
 import { checkBackup } from './backup-check';
@@ -189,6 +190,25 @@ describe('backup file', () => {
     // The first start rule does not run again: the record exists.
     expect(await prepareMonsters(db)).toBeNull();
     expect((await records.get('settings')).bubbleEnabled).toBe(true);
+    db.close();
+  });
+
+  it('AC243: Kijkafstand Dichtbij is held in the backup and comes back on restore, a file without it reads Ver', async () => {
+    const db = await fresh();
+    await seed(db);
+    await createRecords(db).put('settings', { ...defaultKv('settings'), viewDistance: 'dichtbij' });
+    const checked = checkBackup(backupText(await buildBackup(db)));
+    expect(checked.ok).toBe(true);
+    if (!checked.ok) return;
+    await replaceAll(db, checked.data);
+    haltWrites(false);
+    expect(viewDistanceOf(await createRecords(db).get('settings'))).toBe('dichtbij');
+    const old = checkBackup(fixture('v050-old-shapes.json'));
+    expect(old.ok).toBe(true);
+    if (!old.ok) return;
+    await replaceAll(db, old.data);
+    haltWrites(false);
+    expect(viewDistanceOf(await createRecords(db).get('settings'))).toBe('ver');
     db.close();
   });
 

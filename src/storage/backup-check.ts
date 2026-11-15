@@ -46,7 +46,8 @@ function validSettings(s: Record<string, unknown>): boolean {
     optional(s.pointsMode, (v) => v === 'makkelijk' || v === 'normaal' || v === 'moeilijk') &&
     optional(s.monstersEnabled, (v) => typeof v === 'boolean') &&
     optional(s.knightsEnabled, (v) => typeof v === 'boolean') &&
-    optional(s.bubbleEnabled, (v) => typeof v === 'boolean')
+    optional(s.bubbleEnabled, (v) => typeof v === 'boolean') &&
+    optional(s.viewDistance, (v) => v === 'ver' || v === 'dichtbij')
   );
 }
 

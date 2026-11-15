@@ -2,6 +2,8 @@
 // Sets `--font-scale` on the document root so kid screens scale by 25% while `.parent` stays at 16px.
 
 import type { Sound } from '../audio/sound';
+import { qualityForView, qualityFromSearch, viewDistanceOf } from '../render/quality';
+import type { GameRenderer } from '../render/renderer';
 import type { SettingsRecord } from '../storage/schema';
 import type { TimerDriver } from './timer-driver';
 
@@ -21,6 +23,9 @@ export function applySettingsToRuntime(
   deps: {
     sound?: Pick<Sound, 'setEnabled' | 'setVolume'>;
     timerDriver?: Pick<TimerDriver, 'setBreakEveryMinutes' | 'setBreakWarningEnabled'>;
+    /** Kijkafstand (AC243). `search` is the address query, so ?near= and ?pr= stay. */
+    renderer?: Pick<GameRenderer, 'setQuality'>;
+    search?: string;
     doc?: Document;
   },
 ): void {
@@ -29,4 +34,5 @@ export function applySettingsToRuntime(
   deps.sound?.setVolume(typeof settings.volume === 'number' ? settings.volume : 0.7);
   deps.timerDriver?.setBreakEveryMinutes(settings.breakEveryMinutes || 5);
   deps.timerDriver?.setBreakWarningEnabled(settings.breakWarningEnabled !== false);
+  deps.renderer?.setQuality(qualityForView(viewDistanceOf(settings), qualityFromSearch(deps.search ?? '')));
 }

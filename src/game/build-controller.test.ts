@@ -97,6 +97,48 @@ describe('build controller', () => {
     expect(far.play).not.toHaveBeenCalled();
   });
 
+  it('AC234 AC242: mineCell mines like a tap: pop, sound, onBlockChanged and one onMined with the old block', () => {
+    const onMined = vi.fn();
+    const s = setup(0, 0);
+    const c = createBuildController({
+      world: s.world, player: s.ctrl as never, onBlockChanged: s.onBlockChanged, effects: { pop: s.pop }, sound: { play: s.play },
+      viewport: () => ({ width: 1000, height: 700 }), onMined,
+    });
+    s.world.set(20, 6, 24, GRAS);
+    expect(c.mineCell(20, 6, 24)).toBe(true);
+    expect(s.world.get(20, 6, 24)).toBe(AIR);
+    expect(s.onBlockChanged).toHaveBeenCalledWith(20, 24);
+    expect(s.pop).toHaveBeenCalledWith(500, 350, GRAS);
+    expect(s.play).toHaveBeenCalledWith('pop');
+    expect(onMined).toHaveBeenCalledTimes(1);
+    expect(onMined).toHaveBeenCalledWith(20, 6, 24, GRAS);
+    // The tap reports a mined block the same way.
+    s.world.set(20, 6, 24, STEEN);
+    c.tap(500, 350);
+    expect(onMined).toHaveBeenCalledTimes(2);
+    expect(onMined).toHaveBeenLastCalledWith(20, 6, 24, STEEN);
+  });
+
+  it('AC234: mineCell refuses oersteen, air and cells outside the world, with no event and no sound', () => {
+    const onMined = vi.fn();
+    const s = setup(0, 0);
+    const c = createBuildController({
+      world: s.world, player: s.ctrl as never, onBlockChanged: s.onBlockChanged, effects: { pop: s.pop }, sound: { play: s.play },
+      viewport: () => ({ width: 1000, height: 700 }), onMined,
+    });
+    s.world.set(20, 0, 24, OERSTEEN);
+    expect(c.mineCell(20, 0, 24)).toBe(false);
+    expect(s.world.get(20, 0, 24)).toBe(OERSTEEN);
+    expect(c.mineCell(20, 9, 24)).toBe(false);
+    expect(c.mineCell(-1, 3, 3)).toBe(false);
+    expect(c.mineCell(3, WORLD_HEIGHT, 3)).toBe(false);
+    expect(c.mineCell(WORLD_SIZE, 3, 3)).toBe(false);
+    expect(c.mineCell(1.5, 3, 3)).toBe(false);
+    expect(onMined).not.toHaveBeenCalled();
+    expect(s.play).not.toHaveBeenCalled();
+    expect(s.onBlockChanged).not.toHaveBeenCalled();
+  });
+
   it('AC233: mining Waarschuwsteen or a vein block plays only the pop sound', () => {
     for (const id of [WAARSCHUWSTEEN, VEIN_BLOCKS[3] as number]) {
       const s = setup(0, 0);

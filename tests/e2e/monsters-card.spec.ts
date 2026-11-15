@@ -138,9 +138,18 @@ test.describe('Zwarte bubbel row (V18e, AC223)', () => {
     await expect(page.locator('[data-testid="monsters-bubble-note"]')).toHaveText('Werkt alleen met Ridders aan');
     await expect(toggle(page, 'monsters-bubble')).toHaveText('Aan');
     await closeParent(page);
-    // The world picks up the switches a moment after the parent area closes.
-    await page.waitForTimeout(500);
+    // The world reads the switches again a moment after the screen goes back to the world (an async read). While the
+    // knight still counts, the bubble clock moves with play time, so wait until it stands still: that is the switch
+    // taking effect, however slow the machine is. Then the clock starts again from 0.
     await readState(page, 'resetPlayTimer', 600);
+    await expect
+      .poll(async () => {
+        const before = await readState<number>(page, 'bubbleClockMs');
+        await readState(page, 'fastForward', 1000);
+        return (await readState<number>(page, 'bubbleClockMs')) - before;
+      })
+      .toBe(0);
+    await readState(page, 'setBubbleClockMs', 0);
     await readState(page, 'fastForward', 700_000);
     expect((await readState<{ phase: string }>(page, 'monsterState')).phase).toBe('idle');
     expect(await readState(page, 'bubbleClockMs')).toBe(0);

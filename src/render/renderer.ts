@@ -307,7 +307,8 @@ const createPlainWebGlRenderer: RendererFactory = ({ canvas, quality = DEFAULT_Q
       frustum.setFromProjectionMatrix(viewProjection);
       for (const m of chunks.values()) {
         const box = m.geometry.boundingBox;
-        m.visible = !box || frustum.intersectsBox(box);
+        const inRadius = q.drawRadius === null || chunkDistance(m.userData.cx as number, m.userData.cz as number) <= q.drawRadius;
+        m.visible = inRadius && (!box || frustum.intersectsBox(box));
       }
       frame = { drawn: 0, faces: 0, deepest: 0, farthest: 0 };
       gl.render(scene, camera);

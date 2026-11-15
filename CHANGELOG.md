@@ -4,11 +4,17 @@ Written so kids can read it too.
 
 ## Unreleased
 
-### Grote wereld (in progress)
+## 0.8.0
 
-* The world is now 128 x 128 blocks and 80 high. Your old world is the middle of it, with new land around it and a lot more ground to dig through. Everything you built and everything you own moves along: your spot, your animals, your knights and your villages.
-* The move happens once when the game starts. If the iPad switches off halfway, the old save stays whole and the move runs again.
-* The game only draws what the camera can see, and the view ends where the fog ends. Nothing looks different. `?near=1` in the address is a spare switch that builds only the chunks near you, in case an older iPad is slow.
+### Grote wereld
+
+* The world is now much bigger: 128 x 128 blocks and 80 high. You can walk far in every direction, and an invisible wall keeps you inside at the edge.
+* You can dig much deeper now, about 20 blocks down. Everything you built is still there in the middle of the big world, with new land with grass and trees all around it.
+* Deep down there is a striped layer. Under it you find hidden shiny blocks. At the very bottom the ground is too hard to dig.
+* Everything you own moves along: your spot, your animals, your knights and your villages. The move happens once when the game starts. If the iPad switches off halfway, the old save stays whole and the move runs again. An old backup still works too.
+* The game only draws what the camera can see, and the view ends where the fog ends. `?near=1` in the address is a spare switch that builds only the chunks near you.
+* New for papa or mama: a row "Kijkafstand" in Instellingen, with Ver (as before) and Dichtbij. Dichtbij makes the game faster on an older iPad, because you then look less far. It is saved with the settings and in the backup.
+* For the builders: two flaky browser tests are now steady (they waited on a clock instead of on what they needed).
 
 ## 0.7.0
 

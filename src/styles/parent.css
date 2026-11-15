@@ -322,6 +322,12 @@
   font-size: 18px;
 }
 
+.parent-view-choice {
+  flex: 1 1 140px;
+  min-height: 56px;
+  font-size: 18px;
+}
+
 .parent-points-line {
   font-size: 14px;
   font-weight: 600;

@@ -18,6 +18,7 @@ import { createGateScreen, type GateScreen } from '../ui/parent/gate-screen';
 import { createParentShell, type ParentSectionId, type ParentShell } from '../ui/parent/parent-shell';
 import type { BreakFlow } from './break-flow';
 import type { ScreenManager } from './screens';
+import type { GameRenderer } from '../render/renderer';
 import { applySettingsToRuntime } from './settings-apply';
 import type { TimerDriver } from './timer-driver';
 
@@ -41,6 +42,10 @@ export interface ParentFlowOptions {
   timerDriver?: TimerDriver;
   exams?: ParentExams;
   sound?: Sound;
+  /** Gets the Kijkafstand (AC243). */
+  renderer?: Pick<GameRenderer, 'setQuality'>;
+  /** The address query, so ?near= and ?pr= stay. */
+  search?: string;
   onResetWorld?: () => Promise<void> | void;
   /** The open database: Alles wissen empties it in one safe replace (AC193). */
   db?: IDBDatabase;
@@ -184,6 +189,8 @@ export function createParentFlow(options: ParentFlowOptions): ParentFlow {
         applySettingsToRuntime(next, {
           sound: options.sound,
           timerDriver: options.timerDriver,
+          renderer: options.renderer,
+          search: options.search,
         });
       },
       onUpdateSwitches: async (next) => {

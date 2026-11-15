@@ -162,6 +162,19 @@ describe('checkBackup', () => {
     });
   });
 
+  describe('AC243: Kijkafstand in the backup', () => {
+    const base = JSON.parse(load('v070-monsters.json')) as { kv: Record<string, Record<string, unknown>> };
+    const withKv = (name: string, value: unknown): string => JSON.stringify({ ...base, kv: { ...base.kv, [name]: value } });
+    it('AC243: viewDistance is optional, ver and dichtbij pass, anything else is refused', () => {
+      expect(checkBackup(withKv('settings', { ...base.kv.settings, viewDistance: 'dichtbij' })).ok).toBe(true);
+      expect(checkBackup(withKv('settings', { ...base.kv.settings, viewDistance: 'ver' })).ok).toBe(true);
+      expect(checkBackup(withKv('settings', { ...base.kv.settings, viewDistance: 'kort' })).ok).toBe(false);
+      const without = { ...base.kv.settings } as Record<string, unknown>;
+      delete without.viewDistance;
+      expect(checkBackup(withKv('settings', without)).ok).toBe(true);
+  });
+  });
+
   describe('AC238: bounds and terrain version per backup format', () => {
     const refused = { ok: false, message: MSG_BAD_VALUES };
     type Spot = { x: number; y: number; z: number };
