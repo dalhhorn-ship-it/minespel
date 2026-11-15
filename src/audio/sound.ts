@@ -30,6 +30,24 @@ export const SOUND_NAMES: readonly SoundName[] = [
   'ridder',
 ];
 
+/**
+ * Length in seconds and loudest gain of every sound. AC228 caps them: under 1.5 s and a peak at or below the loudest
+ * 0.6.0 sound. tests/unit/kid-safety.test.ts checks these numbers against the real recipes. Part B adds its rows here.
+ */
+export const SOUND_SPECS: Record<SoundName, { seconds: number; peak: number }> = {
+  pop: { seconds: 0.1, peak: 0.6 },
+  thunk: { seconds: 0.14, peak: 0.8 },
+  chime: { seconds: 0.47, peak: 0.5 },
+  hmm: { seconds: 0.48, peak: 0.5 },
+  clink: { seconds: 0.18, peak: 0.35 },
+  crack: { seconds: 0.13, peak: 0.7 },
+  chirp: { seconds: 0.18, peak: 0.35 },
+  fanfare: { seconds: 1.1, peak: 0.5 },
+  tick: { seconds: 0.03, peak: 0.12 },
+  fluit: { seconds: 0.65, peak: 0.35 },
+  ridder: { seconds: 0.76, peak: 0.3 },
+};
+
 export interface SoundOptions {
   unlock: Pick<AudioUnlock, 'isUnlocked' | 'watch' | 'whenUnlocked'>;
   /** Makes the AudioContext. Defaults to the browser one. Tests pass a fake. */

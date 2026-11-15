@@ -1,5 +1,18 @@
 # Test report
 
+## v17 Ridders (0.7.0, part A), V17e safety
+
+Automated part PASS. AC210 (speed on the founder's oldest iPad) is OPEN: it cannot run here.
+
+| Check | Result |
+|---|---|
+| AC207, `tests/e2e/knights-safety.spec.ts` (Chromium local): 3 knights, one per mode, 120 s: no block changed in a 61 x 61 area, kid position unchanged; Dinofluit and Allemaal vrij change no knight mode or spot | 2 passed |
+| AC228, `tests/unit/kid-safety.test.ts` and `src/core/kid-words.test.ts`: no banned word in any string of the knight files; every sound under 1.5 s and no louder than the loudest 0.6.0 sound; no growl, scream or roar in a sound name | passed |
+
+### Open for the founder: AC210 on the oldest iPad
+
+From the home screen icon, on the HTTPS test deploy, with the fps counter: 3 knights, 25 shop dinos and 10 chickens in view, walk for 2 minutes. Target: 95 percent of frames at 33 ms or less and none over 200 ms. Result: not run yet. If it fails, the cap becomes 2 knights and AC200 reads "Je hebt al 2 ridders!". Also look and listen: the knight looks friendly and the fanfare is soft.
+
 ## v11 Dorp (0.5.0)
 
 Result: PASS for everything that can run here. AC190 (fps on the oldest iPad) and the kid play check are still open for the founder.
