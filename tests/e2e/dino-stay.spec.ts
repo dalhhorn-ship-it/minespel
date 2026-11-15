@@ -55,12 +55,37 @@ test.describe('Dinos stay by default (decision 122)', () => {
     await fingerTap(page, '[data-testid="hud-stay"]');
     const after = await readState<DinoRow[]>(page, 'dinos');
     expect(after.map((d) => d.mode)).toEqual(['stay', 'stay']);
-    expect(after[0]!.stayX).toBeCloseTo(after[0]!.x, 3);
+    // The game loop keeps running between the tap and this read, so the dino may have moved a frame or
+    // two (up to about 0.2 block). The exact spot is asserted in src/dinos/dino-stay.test.ts.
+    expect(Math.hypot(after[0]!.stayX - after[0]!.x, after[0]!.stayZ - after[0]!.z)).toBeLessThan(0.5);
     await readState(page, 'stepDinos', 0.1);
     await expect(stay).toBeHidden();
     expect(await readState<string>(page, 'currentScreen')).toBe('world');
 
-    // Saved right away: still on Blijf hier after a reload.
+    // Saved right away: still on Blijf hier after a reload. The write starts in the tap itself, but
+    // IndexedDB commits it a few ms later; a reload in that gap aborts it, which no kid is fast enough
+    // to do. So wait until the saved record reads stay, then reload (never weaker than before).
+    await page.waitForFunction(
+      () =>
+        new Promise<boolean>((resolve) => {
+          const open = indexedDB.open('dino-blokwereld');
+          open.onerror = () => resolve(false);
+          open.onsuccess = () => {
+            const db = open.result;
+            const get = db.transaction('kv', 'readonly').objectStore('kv').get('dinos');
+            get.onerror = () => {
+              db.close();
+              resolve(false);
+            };
+            get.onsuccess = () => {
+              db.close();
+              const rec = get.result as { dinos?: { mode: string }[] } | undefined;
+              const dinos = rec?.dinos ?? [];
+              resolve(dinos.length === 2 && dinos.every((d) => d.mode === 'stay'));
+            };
+          };
+        }),
+    );
     await page.reload();
     await openApp(page);
     const reloaded = await readState<DinoRow[]>(page, 'dinos');
