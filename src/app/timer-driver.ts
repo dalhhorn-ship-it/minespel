@@ -32,6 +32,11 @@ export interface TimerDriverOptions {
   initialPlayMsLeft: number | null;
   initialWarningEnabled: boolean;
   onBreakDue: () => void;
+  /**
+   * Play time that was just counted, in ms (v18, decision 135). Called whenever the play timer counts, also from
+   * `advancePlayMs`, never while play does not run. The bubble clock listens.
+   */
+  onPlayElapsed?: (ms: number) => void;
   win?: Window;
   doc?: Document;
   /** Set false in unit tests to drive steps manually without setInterval. */
@@ -171,6 +176,7 @@ export function createTimerDriver(options: TimerDriverOptions): TimerDriver {
     options.countdownView?.update(after);
     persistPlayMs(after);
     recordPlayTime(counted);
+    options.onPlayElapsed?.(counted);
 
     if (warningEnabled && isTickTime(after)) {
       const sec = Math.ceil(after / 1000);

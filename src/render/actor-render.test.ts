@@ -22,9 +22,14 @@ describe('actor scene sync', () => {
     sync.sync('monsters', []);
     expect(sync.group.children[0]!.children).toHaveLength(1);
   });
-  it('a kind without a model file yet is skipped, not an error', () => {
+  it('V18a: Klodder and the bubble are drawn by their own models and removed when gone', () => {
     const sync = createActorSceneSync();
-    expect(() => sync.sync('monsters', [{ id: 'k', model: 'klodder', x: 0, y: 0, z: 0, heading: 0 }])).not.toThrow();
+    sync.sync('monsters', [
+      { id: 'klodder', model: 'klodder', x: 0, y: 0, z: 0, heading: 0 },
+      { id: 'bubble', model: 'bubble', x: 1, y: 2, z: 3, heading: 0, scale: 2 },
+    ]);
+    expect(sync.group.children[0]!.children).toHaveLength(2);
+    sync.sync('monsters', []);
     expect(sync.group.children[0]!.children).toHaveLength(0);
   });
   it('dispose empties everything', () => {

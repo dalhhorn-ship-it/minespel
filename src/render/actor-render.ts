@@ -1,8 +1,9 @@
-// Draws creature actors (knights now, Klodder and the bubble in v18) into one Group per group name.
+// Draws creature actors (knights, Klodder and the bubble) into one Group per group name.
 // Game state never lives here: the game hands over `ActorView`s every frame, meshes are cached per id and built
-// by the model file of each kind (decision 135). A kind without a model file yet is skipped.
+// by the model file of each kind (decision 135). 
 import { Group } from 'three';
 import { createKnightModel } from './knight-model';
+import { createBubbleModel, createKlodderModel } from './klodder-model';
 
 export type ActorGroup = 'knights' | 'monsters';
 
@@ -29,6 +30,8 @@ export interface ActorModel {
 
 const BUILDERS: Partial<Record<ActorView['model'], () => ActorModel>> = {
   knight: createKnightModel,
+  klodder: createKlodderModel,
+  bubble: createBubbleModel,
 };
 
 export interface ActorSceneSync {

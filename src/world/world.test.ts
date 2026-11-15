@@ -170,3 +170,53 @@ describe('villages in the world (v11)', () => {
   });
 });
 
+
+describe('hidden cell overlay (v18, decision 135)', () => {
+  const at = { x: 40, z: 40 };
+  const y = () => topSolid(new World(), at.x, at.z);
+
+  it('AC218: a hidden cell reads air, the block stays and diff() is unchanged', () => {
+    const w = new World();
+    const top = y();
+    const real = w.get(at.x, top, at.z);
+    const before = w.diff();
+    expect(w.hide(at.x, top, at.z)).toBe(true);
+    expect(w.get(at.x, top, at.z)).toBe(AIR);
+    expect(w.isHidden(at.x, top, at.z)).toBe(true);
+    expect(w.hiddenCount()).toBe(1);
+    expect(w.diff()).toEqual(before);
+    expect(w.isUnchanged(at.x, top, at.z)).toBe(true);
+    expect(w.hide(at.x, top, at.z)).toBe(false);
+    expect(w.unhide(at.x, top, at.z)).toBe(true);
+    expect(w.get(at.x, top, at.z)).toBe(real);
+    expect(w.unhide(at.x, top, at.z)).toBe(false);
+  });
+  it('AC218: set on a hidden cell clears it and the kid block wins', () => {
+    const w = new World();
+    const top = y();
+    w.hide(at.x, top, at.z);
+    w.set(at.x, top, at.z, ZAND);
+    expect(w.isHidden(at.x, top, at.z)).toBe(false);
+    expect(w.get(at.x, top, at.z)).toBe(ZAND);
+    expect(w.isUnchanged(at.x, top, at.z)).toBe(false);
+  });
+  it('AC218: reset and applyDiff clear every hidden cell', () => {
+    const w = new World();
+    const top = y();
+    w.hide(at.x, top, at.z);
+    w.hide(at.x + 1, top, at.z);
+    w.reset();
+    expect(w.hiddenCount()).toBe(0);
+    w.hide(at.x, top, at.z);
+    w.applyDiff([]);
+    expect(w.hiddenCount()).toBe(0);
+  });
+  it('AC218: hiddenCells lists the cells and out of bounds is refused', () => {
+    const w = new World();
+    const top = y();
+    w.hide(at.x, top, at.z);
+    expect(w.hiddenCells()).toEqual([{ x: at.x, y: top, z: at.z }]);
+    expect(w.hide(-1, 0, 0)).toBe(false);
+    expect(w.isUnchanged(-1, 0, 0)).toBe(true);
+  });
+});
