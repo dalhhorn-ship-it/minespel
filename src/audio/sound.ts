@@ -21,7 +21,11 @@ export type SoundName =
   | 'knabbel'
   | 'tok'
   | 'boing'
-  | 'doei';
+  | 'doei'
+  | 'rommel'
+  | 'boe'
+  | 'hmpf'
+  | 'geeuw';
 
 export const SOUND_NAMES: readonly SoundName[] = [
   'pop',
@@ -42,6 +46,10 @@ export const SOUND_NAMES: readonly SoundName[] = [
   'tok',
   'boing',
   'doei',
+  'rommel',
+  'boe',
+  'hmpf',
+  'geeuw',
 ];
 
 /**
@@ -68,6 +76,11 @@ export const SOUND_SPECS: Record<SoundName, { seconds: number; peak: number }> =
   tok: { seconds: 0.08, peak: 0.25 },
   boing: { seconds: 0.3, peak: 0.25 },
   doei: { seconds: 0.55, peak: 0.25 },
+  // Part v16 (V16a placeholders, V16c makes the final recipes): a low soft rumble, "Boe!", a pout and a yawn.
+  rommel: { seconds: 0.8, peak: 0.25 },
+  boe: { seconds: 0.25, peak: 0.25 },
+  hmpf: { seconds: 0.3, peak: 0.2 },
+  geeuw: { seconds: 0.9, peak: 0.2 },
 };
 
 export interface SoundOptions {
@@ -217,6 +230,11 @@ const RECIPES: Record<SoundName, (c: Ctx, out: AudioNode, t: number) => void> = 
     tone(c, o, t, { type: 'triangle', from: 700, dur: 0.2, gain: 0.25 });
     tone(c, o, t, { type: 'triangle', from: 500, at: 0.25, dur: 0.3, gain: 0.25 });
   },
+  // v16 placeholders, soft and short (V16c replaces the recipes, the names and caps stay).
+  rommel: (c, o, t) => tone(c, o, t, { type: 'triangle', from: 90, to: 70, dur: 0.8, gain: 0.25 }),
+  boe: (c, o, t) => tone(c, o, t, { type: 'triangle', from: 300, to: 450, dur: 0.25, gain: 0.25 }),
+  hmpf: (c, o, t) => tone(c, o, t, { type: 'triangle', from: 350, to: 200, dur: 0.3, gain: 0.2 }),
+  geeuw: (c, o, t) => tone(c, o, t, { type: 'triangle', from: 500, to: 250, dur: 0.9, gain: 0.2 }),
 };
 
 export function createSound(options: SoundOptions): Sound {

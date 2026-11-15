@@ -81,11 +81,11 @@ describe('knight system skeleton', () => {
     const k = s.system.knights()[0]!;
     const box: [number, number, number, number, number, number] = [k.body.x - 0.2, k.body.y, k.body.z - 0.2, k.body.x + 0.2, k.body.y + 1, k.body.z + 0.2];
     expect(s.system.isOccupied?.(box)).toBe(true);
-    s.system.applySwitches({ knights: false, bubble: false });
+    s.system.applySwitches({ knights: false, bubble: false, mole: false });
     expect(s.syncActors).toHaveBeenLastCalledWith('knights', []);
     expect(s.system.isOccupied?.(box)).toBe(false);
     expect(s.system.handleTap?.(512, 384)).toBe(false);
-    s.system.applySwitches({ knights: true, bubble: false });
+    s.system.applySwitches({ knights: true, bubble: false, mole: false });
     s.system.step(1 / 30);
     expect(s.syncActors).toHaveBeenLastCalledWith('knights', [expect.objectContaining({ id: 'a', model: 'knight' })]);
     expect(k.mode).toBe('stay');

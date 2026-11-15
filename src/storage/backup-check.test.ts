@@ -154,8 +154,9 @@ describe('checkBackup', () => {
     it('two knights with one id are refused', () => {
       expect(checkBackup(monsters({ knights: [knight('a'), knight('a')] }))).toEqual(refused);
     });
-    it('the three switches must be booleans when present', () => {
-      for (const key of ['monstersEnabled', 'knightsEnabled', 'bubbleEnabled']) {
+    it('AC254: the four switches must be booleans when present (moleEnabled is optional)', () => {
+      expect(checkBackup(withKv('settings', { ...base.kv.settings })).ok).toBe(true);
+      for (const key of ['monstersEnabled', 'knightsEnabled', 'bubbleEnabled', 'moleEnabled']) {
         expect(checkBackup(withKv('settings', { ...base.kv.settings, [key]: 'aan' }))).toEqual(refused);
         expect(checkBackup(withKv('settings', { ...base.kv.settings, [key]: false })).ok).toBe(true);
       }

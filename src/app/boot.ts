@@ -17,6 +17,7 @@ import { MONSTER_PRIORITY, createMonsterSystem, type MonsterSystem } from '../mo
 import { openDb } from '../storage/db';
 import { createLogStore } from '../storage/log-store';
 import { createMoedBar } from '../ui/moed-bar';
+import { createMoleCard, type MoleCard } from '../ui/mole-card';
 import { viewDistanceOf } from '../render/quality';
 import { creatureSwitches, prepareMonsters, updateMonsters } from '../storage/monsters-store';
 import { moveOldSave } from '../storage/world-move-store';
@@ -280,6 +281,8 @@ export function createBoot(deps: BootDeps): Boot {
     knights.applySwitches(creatureSwitches(settings));
     knights.setPoints(economy.points);
     world.addCreatures(knights, KNIGHT_PRIORITY);
+    let moleCard: MoleCard | null = null;
+    const reducedMotion = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
     // The bubble and Klodder (v18). The clock counts play time only, and only with the bubble switch on.
     const monsters = createMonsterSystem({
       world: world.world,
@@ -295,9 +298,24 @@ export function createBoot(deps: BootDeps): Boot {
       animals: () => world.dinoStore.dinos(),
       moedBar: createMoedBar(),
       say: (text, ms) => say(text, ms),
+      showMoleCard: () => {
+        // The card goes in the kid overlay, so the loop and the play timer stop until OK (AC244).
+        if (moleCard?.element.isConnected) return;
+        const card = createMoleCard({
+          onOk: () => {
+            card.destroy();
+            moleCard = null;
+            screens.showKidOverlay(null);
+          },
+        });
+        moleCard = card;
+        screens.showKidOverlay(card.element);
+      },
+      shake: reducedMotion ? undefined : (ms) => world.renderer.shake?.(ms),
       sound,
     });
     monstersRef = monsters;
+    world.on('mined', (e) => monsters.onMined(e.x, e.y, e.z, e.block));
     monsters.load(await records.get('monsters'));
     monsters.applySwitches(creatureSwitches(settings));
     world.addCreatures(monsters, MONSTER_PRIORITY);

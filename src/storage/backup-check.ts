@@ -47,6 +47,7 @@ function validSettings(s: Record<string, unknown>): boolean {
     optional(s.monstersEnabled, (v) => typeof v === 'boolean') &&
     optional(s.knightsEnabled, (v) => typeof v === 'boolean') &&
     optional(s.bubbleEnabled, (v) => typeof v === 'boolean') &&
+    optional(s.moleEnabled, (v) => typeof v === 'boolean') &&
     optional(s.viewDistance, (v) => v === 'ver' || v === 'dichtbij')
   );
 }

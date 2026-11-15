@@ -74,6 +74,8 @@ export interface SettingsRecord {
   knightsEnabled?: boolean;
   /** "Zwarte bubbel" (v18). Missing reads as Uit; the first start rule sets it (decision 135). */
   bubbleEnabled?: boolean;
+  /** "Monstermol" (v16). Missing reads as Aan, so a new install, an old install and an old backup all give Aan. */
+  moleEnabled?: boolean;
   /** "Kijkafstand" (v15, AC243). Missing reads as Ver. */
   viewDistance?: 'ver' | 'dichtbij';
   [key: string]: unknown;

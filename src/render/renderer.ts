@@ -52,6 +52,8 @@ export interface GameRenderer {
   syncVillagers?(villagers: readonly VillagerState[]): void;
   /** Syncs one group of creature actors (knights, monsters) into the 3D scene (v17, decision 135). */
   syncActors?(group: ActorGroup, actors: readonly ActorView[]): void;
+  /** A small camera shake that fades out within `ms` (at most 1000), v16. V16c writes it; boot calls it (not with reduced motion). */
+  shake?(ms: number): void;
   render(): void;
   dispose(): void;
 }
@@ -502,6 +504,10 @@ export function withContextRecovery(inner: RendererFactory): RendererFactory {
       syncActors(group, list) {
         actors.set(group, list);
         if (!lost) core.syncActors?.(group, list);
+      },
+      shake(ms) {
+        // The wrapper the app uses passes it on (V16c writes the shake inside the core renderer).
+        if (!lost) core.shake?.(ms);
       },
       render() {
         if (!lost) core.render();
