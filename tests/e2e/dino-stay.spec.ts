@@ -1,7 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 import { openApp, readState } from './helpers/app';
 
-// Dinos stay by default and Allemaal blijven (decision 122). Real finger taps on the iPad profile.
+// Dinos stay by default and Allemaal vrij (decision 122). Real finger taps on the iPad profile.
 
 interface DinoRow {
   id: string;
@@ -21,7 +21,7 @@ async function fingerTap(page: Page, selector: string): Promise<void> {
 }
 
 test.describe('Dinos stay by default (decision 122)', () => {
-  test('a new dino stays put and the button Allemaal blijven shows only while one follows', async ({ page }) => {
+  test('a new dino stays put and the button Allemaal vrij shows only while one follows', async ({ page }) => {
     await openApp(page);
     const stay = page.locator('[data-testid="hud-stay"]');
     await expect(stay).toBeHidden();
@@ -35,19 +35,19 @@ test.describe('Dinos stay by default (decision 122)', () => {
     await readState(page, 'stepDinos', 0.1);
     await expect(stay).toBeHidden();
 
-    // Walk far away: a Blijf hier dino stays near its spot.
+    // Walk far away: a stay dino roams, but within about 12 blocks of its spot (decision 128).
     const [a, b] = dinos as [DinoRow, DinoRow];
     await readState(page, 'placePlayer', 50.5, 15, 50.5, 0);
     await readState(page, 'stepDinos', 15);
     const far = await readState<DinoRow[]>(page, 'dinos');
-    expect(Math.hypot(far[0]!.x - a.x, far[0]!.z - a.z)).toBeLessThan(6);
+    expect(Math.hypot(far[0]!.x - a.x, far[0]!.z - a.z)).toBeLessThan(13);
 
     // Volg mij on both: the button shows, is a big target, and one tap stops them all.
     await readState(page, 'setDinoMode', a.id, 'follow');
     await readState(page, 'setDinoMode', b.id, 'follow');
     await readState(page, 'stepDinos', 0.1);
     await expect(stay).toBeVisible();
-    await expect(stay).toContainText('Allemaal blijven');
+    await expect(stay).toContainText('Allemaal vrij');
     const box = (await stay.boundingBox())!;
     expect(box.width).toBeGreaterThanOrEqual(56);
     expect(box.height).toBeGreaterThanOrEqual(56);

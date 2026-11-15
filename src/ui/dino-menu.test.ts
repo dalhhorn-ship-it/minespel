@@ -18,7 +18,7 @@ describe('dino-menu and name-screen (T45)', () => {
     expect(filterDinoNameDraft("Zëé-Rex'je")).toBe("Zëé-Rex'je");
   });
 
-  it('switches between Volg mij, Blijf hier, Knuffel, and Naam geven (AC16, AC18)', () => {
+  it('switches between Volg mij, Vrij rondlopen, Knuffel, and Naam geven (AC16, AC18)', () => {
     let time = 1000;
     const now = () => {
       time += 500;
@@ -46,7 +46,7 @@ describe('dino-menu and name-screen (T45)', () => {
     const buttons = () => Array.from(menu.element.querySelectorAll('button'));
     const findBtn = (txt: string) => buttons().find((b) => b.textContent?.includes(txt));
 
-    tap(findBtn('Blijf hier'));
+    tap(findBtn('Vrij rondlopen'));
     expect(modes).toEqual(['stay']);
 
     tap(findBtn('Volg mij'));

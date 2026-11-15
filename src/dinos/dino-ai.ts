@@ -13,6 +13,10 @@ export type DinoMode = 'follow' | 'stay';
 export const DINO_SPEED = 3;
 /** Wander radius around the player (follow) or the stay spot (stay). */
 export const WANDER_RADIUS = 3;
+/** Decision 128: an animal that does not follow (mode stay) roams freely this far around its spot. */
+export const ROAM_RADIUS = 12;
+/** Calm walking pace while roaming, blocks per second. */
+export const ROAM_SPEED = 2;
 /** A follower farther than this walks towards the player until it is within CLOSE_ENOUGH. */
 export const CLOSE_ENOUGH = 2;
 /** A follower farther than this for FAR_SECONDS pops next to the player (AC17). */
@@ -261,7 +265,7 @@ function popAt(world: World, d: DinoState, player: Point, rng: Rng, box?: StepOp
   return false;
 }
 
-function pickGoal(d: DinoState, ax: number, az: number, rng: Rng, radius: number, behind?: { player: Point; yaw: number }): void {
+function pickGoal(d: DinoState, ax: number, az: number, rng: Rng, radius: number, behind?: { player: Point; yaw: number }, goalTime = 4): void {
   const lim = (v: number): number => Math.min(WORLD_SIZE - 1, Math.max(1, v));
   for (let tries = 0; tries < 6; tries++) {
     const a = rng.next() * Math.PI * 2;
@@ -269,11 +273,11 @@ function pickGoal(d: DinoState, ax: number, az: number, rng: Rng, radius: number
     const goal = { x: lim(ax + Math.cos(a) * r), z: lim(az + Math.sin(a) * r) };
     if (behind && aheadOf(behind.player, behind.yaw, goal.x, goal.z) > -BEHIND_MARGIN) continue;
     d.goal = goal;
-    d.goalLeft = 4;
+    d.goalLeft = goalTime;
     return;
   }
   d.goal = { x: lim(ax), z: lim(az) };
-  d.goalLeft = 4;
+  d.goalLeft = goalTime;
 }
 
 /** One small physics step. Returns the horizontal distance moved. */
@@ -345,7 +349,8 @@ function stepOnce(world: World, d: DinoState, player: Point, rng: Rng, dt: numbe
   if (isCalled(d)) return stepCalled(world, d, player, rng, dt, opts);
   const follow = d.mode === 'follow';
   const yaw = follow && opts.playerYaw !== undefined && Number.isFinite(opts.playerYaw) ? opts.playerYaw : undefined;
-  const radius = opts.radius ?? (yaw !== undefined ? FOLLOW_RADIUS : WANDER_RADIUS);
+  const roam = !follow && opts.radius === undefined;
+  const radius = opts.radius ?? (roam ? ROAM_RADIUS : yaw !== undefined ? FOLLOW_RADIUS : WANDER_RADIUS);
   const distPlayer = Math.hypot(player.x - d.x, player.z - d.z);
 
   // A follower's home spot: behind the player when the view is known, else the player itself.
@@ -383,11 +388,11 @@ function stepOnce(world: World, d: DinoState, player: Point, rng: Rng, dt: numbe
     const anchorDist = Math.hypot(d.goal.x - ax, d.goal.z - az);
     if (gd < 0.2 || d.goalLeft <= 0 || anchorDist > radius + 0.5) {
       d.goal = null;
-      d.idleLeft = 1 + rng.next() * 2;
+      d.idleLeft = roam ? 2 + rng.next() * 4 : 1 + rng.next() * 2;
     }
   } else {
     d.idleLeft -= dt;
-    if (d.idleLeft <= 0) pickGoal(d, ax, az, rng, radius, yaw !== undefined ? { player, yaw } : undefined);
+    if (d.idleLeft <= 0) pickGoal(d, ax, az, rng, radius, yaw !== undefined ? { player, yaw } : undefined, roam ? 12 : 4);
   }
 
   let dirX = 0, dirZ = 0;
@@ -396,11 +401,11 @@ function stepOnce(world: World, d: DinoState, player: Point, rng: Rng, dt: numbe
     const len = Math.hypot(gx, gz);
     if (len > 0.05) { dirX = gx / len; dirZ = gz / len; }
   }
-  const moved = physics(world, d, dirX, dirZ, dt, opts.box);
+  const moved = physics(world, d, dirX, dirZ, dt, opts.box, roam ? ROAM_SPEED : DINO_SPEED);
   if (dirX !== 0 || dirZ !== 0) {
     d.heading = Math.atan2(dirX, dirZ);
-    if (d.onGround && moved < DINO_SPEED * dt * 0.25) d.stuckTime += dt;
-    else if (moved >= DINO_SPEED * dt * 0.25) d.stuckTime = 0;
+    if (d.onGround && moved < (roam ? ROAM_SPEED : DINO_SPEED) * dt * 0.25) d.stuckTime += dt;
+    else if (moved >= (roam ? ROAM_SPEED : DINO_SPEED) * dt * 0.25) d.stuckTime = 0;
   } else {
     d.stuckTime = 0;
   }

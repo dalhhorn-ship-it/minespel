@@ -105,7 +105,7 @@ describe('world HUD Dinofluit button (decision 114)', () => {
   });
 });
 
-describe('world HUD Allemaal blijven button (decision 122)', () => {
+describe('world HUD Allemaal vrij button (decision 122)', () => {
   it('shows only while an animal follows and calls onStayAll on a tap', () => {
     const onStayAll = vi.fn();
     const hud = createHud({ router, onJump: vi.fn(), onMode: vi.fn(), onPause: vi.fn(), onStayAll });
@@ -113,7 +113,7 @@ describe('world HUD Allemaal blijven button (decision 122)', () => {
     expect(btn.hidden).toBe(true);
     hud.setStayVisible(true);
     expect(btn.hidden).toBe(false);
-    expect(btn.textContent).toContain('Allemaal blijven');
+    expect(btn.textContent).toContain('Allemaal vrij');
     tap(btn);
     expect(onStayAll).toHaveBeenCalledTimes(1);
     hud.setStayVisible(false);

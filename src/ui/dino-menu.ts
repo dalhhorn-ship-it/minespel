@@ -1,5 +1,5 @@
 // Dino interaction menu when tapping a dino in the world (T45, AC16, AC18, AC23).
-// Actions: Volg mij, Blijf hier, Naam geven (opens NameScreen), Knuffel (hearts + chirp), Sluiten.
+// Actions: Volg mij, Vrij rondlopen, Naam geven (opens NameScreen), Knuffel (hearts + chirp), Sluiten.
 
 import '../styles/dino-menu.css';
 import type { DinoMode } from '../dinos/dino-ai';
@@ -97,7 +97,7 @@ export function createDinoMenu(options: DinoMenuOptions): DinoMenu {
     });
     const stayBtn = el('button', {
       class: 'dino-menu-btn',
-      text: 'Blijf hier',
+      text: 'Vrij rondlopen',
       attrs: {
         type: 'button',
         'aria-pressed': String(currentMode === 'stay'),
