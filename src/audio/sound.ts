@@ -230,11 +230,23 @@ const RECIPES: Record<SoundName, (c: Ctx, out: AudioNode, t: number) => void> = 
     tone(c, o, t, { type: 'triangle', from: 700, dur: 0.2, gain: 0.25 });
     tone(c, o, t, { type: 'triangle', from: 500, at: 0.25, dur: 0.3, gain: 0.25 });
   },
-  // v16 placeholders, soft and short (V16c replaces the recipes, the names and caps stay).
-  rommel: (c, o, t) => tone(c, o, t, { type: 'triangle', from: 90, to: 70, dur: 0.8, gain: 0.25 }),
-  boe: (c, o, t) => tone(c, o, t, { type: 'triangle', from: 300, to: 450, dur: 0.25, gain: 0.25 }),
-  hmpf: (c, o, t) => tone(c, o, t, { type: 'triangle', from: 350, to: 200, dur: 0.3, gain: 0.2 }),
-  geeuw: (c, o, t) => tone(c, o, t, { type: 'triangle', from: 500, to: 250, dur: 0.9, gain: 0.2 }),
+  // v16 final: a low soft rumble, a silly "bo-e", a small "hmpf" and a long yawn. All triangle tones, under 1 s, at or below 0.25.
+  rommel: (c, o, t) => {
+    tone(c, o, t, { type: 'triangle', from: 90, to: 70, dur: 0.8, gain: 0.25 });
+    tone(c, o, t, { type: 'triangle', from: 120, to: 85, at: 0.1, dur: 0.7, gain: 0.15 });
+  },
+  boe: (c, o, t) => {
+    tone(c, o, t, { type: 'triangle', from: 300, to: 380, dur: 0.12, gain: 0.25 });
+    tone(c, o, t, { type: 'triangle', from: 380, to: 520, at: 0.13, dur: 0.12, gain: 0.25 });
+  },
+  hmpf: (c, o, t) => {
+    tone(c, o, t, { type: 'triangle', from: 350, to: 260, dur: 0.15, gain: 0.2 });
+    tone(c, o, t, { type: 'triangle', from: 260, to: 180, at: 0.15, dur: 0.15, gain: 0.2 });
+  },
+  geeuw: (c, o, t) => {
+    tone(c, o, t, { type: 'triangle', from: 400, to: 600, dur: 0.4, gain: 0.2 });
+    tone(c, o, t, { type: 'triangle', from: 600, to: 250, at: 0.4, dur: 0.5, gain: 0.2 });
+  },
 };
 
 export function createSound(options: SoundOptions): Sound {

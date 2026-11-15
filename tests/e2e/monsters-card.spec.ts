@@ -1,6 +1,8 @@
 // The parent card "Monsters en ridders" (V17c, AC208).
 import { expect, test, type Page } from '@playwright/test';
 import v060 from '../fixtures/backups/v060-no-monsters.json' with { type: 'json' };
+import pkg from '../../package.json' with { type: 'json' };
+import { WAARSCHUWSTEEN } from '../../src/world/blocks';
 import { openApp, readState } from './helpers/app';
 import { loginAsParent, setupPin } from './helpers/gate';
 
@@ -209,5 +211,186 @@ test.describe('Zwarte bubbel row (V18e, AC223)', () => {
     await readState(page, 'fastForward', 700_000);
     expect(await readState(page, 'bubbleClockMs')).toBe(0);
     expect((await readState<{ phase: string }>(page, 'monsterState')).phase).toBe('idle');
+  });
+});
+
+const HELP_MOLE = 'Wie onder de gestreepte laag graaft, maakt de Monstermol wakker. Een hek of een ridder stopt hem.';
+
+declare global {
+  interface Window {
+    __shared?: { name: string; text: string }[];
+  }
+}
+async function stubShare(page: Page) {
+  await page.addInitScript(() => {
+    window.__shared = [];
+    (navigator as unknown as { canShare: () => boolean }).canShare = () => true;
+    (navigator as unknown as { share: (d: { files: File[] }) => Promise<void> }).share = async (d) => {
+      for (const f of d.files) window.__shared!.push({ name: f.name, text: await f.text() });
+    };
+  });
+}
+async function openExport(page: Page) {
+  await page.locator('.parent-nav-btn[data-section="import-export"]').tap();
+  await page.locator('.parent-import-export').waitFor();
+}
+async function makeBackup(page: Page): Promise<{ name: string; text: string }> {
+  const before = await page.evaluate(() => window.__shared!.length);
+  await page.locator('[data-testid="backup-make"]').tap();
+  await page.waitForFunction((n) => window.__shared!.length > n, before);
+  const files = await page.evaluate(() => window.__shared!);
+  return files[files.length - 1]!;
+}
+const nodeBuffer = (globalThis as unknown as { Buffer: { from: (s: string) => unknown } }).Buffer;
+async function restore(page: Page, text: string, expected: string) {
+  await openExport(page);
+  const chooser = page.waitForEvent('filechooser');
+  await page.locator('[data-testid="backup-restore"]').tap();
+  await (await chooser).setFiles({ name: 'dino.json', mimeType: 'application/json', buffer: nodeBuffer.from(text) as never });
+  await page.locator('[data-testid="restore-yes"]').tap();
+  // The page reloads: wait until the saved settings answer with the restored value.
+  await expect
+    .poll(() =>
+      page
+        .evaluate(
+          () =>
+            new Promise<string>((resolve) => {
+              const open = indexedDB.open('dino-blokwereld');
+              open.onerror = () => resolve('error');
+              open.onsuccess = () => {
+                const get = open.result.transaction('kv').objectStore('kv').get('settings');
+                get.onsuccess = () => resolve(String((get.result as { moleEnabled?: boolean } | undefined)?.moleEnabled));
+                get.onerror = () => resolve('error');
+              };
+            }),
+        )
+        .catch(() => 'reloading'),
+    )
+    .toBe(expected);
+  await openApp(page);
+}
+async function switchMole(page: Page, id: string) {
+  await openSettings(page);
+  await toggle(page, id).scrollIntoViewIfNeeded();
+  await toggle(page, id).tap();
+}
+/** Back in the world, with a moment for the world to read the switches again. */
+async function backToWorld(page: Page) {
+  await closeParent(page);
+  await expect.poll(() => readState<boolean>(page, 'isPlayRunning')).toBe(true);
+  await page.waitForTimeout(800);
+}
+async function digColumn(page: Page) {
+  const pose = await readState<{ x: number; z: number }>(page, 'player');
+  return { x: Math.floor(pose.x) + 4, z: Math.floor(pose.z) };
+}
+const phase = async (page: Page) => (await readState<{ phase: string }>(page, 'moleState')).phase;
+
+test.describe('Monstermol row (V16c, AC254)', () => {
+  test('AC254: a new install shows the row Aan with its exact help line and a 44 point target', async ({ page }) => {
+    await openApp(page);
+    await setupPin(page);
+    await openSettings(page);
+    await toggle(page, 'monsters-mole').scrollIntoViewIfNeeded();
+    await expect(page.locator('[data-testid="monsters-mole"] .parent-switch-help').first()).toHaveText(HELP_MOLE);
+    await expect(toggle(page, 'monsters-mole')).toHaveText('Aan');
+    const box = (await toggle(page, 'monsters-mole').boundingBox())!;
+    expect(box.width).toBeGreaterThanOrEqual(44);
+    expect(box.height).toBeGreaterThanOrEqual(44);
+  });
+
+  test('AC254: the master off greys the row and keeps its value', async ({ page }) => {
+    await openApp(page);
+    await setupPin(page);
+    await openSettings(page);
+    await toggle(page, 'monsters-master').scrollIntoViewIfNeeded();
+    await toggle(page, 'monsters-master').tap();
+    await expect(page.locator('[data-testid="monsters-mole"]')).toHaveAttribute('data-greyed', 'true');
+    await expect(toggle(page, 'monsters-mole')).toHaveText('Aan');
+  });
+
+  test('AC254: an existing install and a restored 0.8.0 backup (no mole switch) read Aan, a 0.9.0 backup keeps Uit', async ({ page }) => {
+    await stubShare(page);
+    await openApp(page);
+    await setupPin(page);
+    // A 0.9.0 backup with the row Uit holds the value.
+    await switchMole(page, 'monsters-mole');
+    await expect(toggle(page, 'monsters-mole')).toHaveText('Uit');
+    await openExport(page);
+    const off = await makeBackup(page);
+    expect(pkg.version).toBeTruthy();
+    expect((JSON.parse(off.text) as { kv: { settings: { moleEnabled?: boolean } } }).kv.settings.moleEnabled).toBe(false);
+    // Switch on again, then restore the Uit backup: the value comes back.
+    await page.locator('.parent-nav-btn[data-section="instellingen"]').tap();
+    await toggle(page, 'monsters-mole').scrollIntoViewIfNeeded();
+    await toggle(page, 'monsters-mole').tap();
+    await expect(toggle(page, 'monsters-mole')).toHaveText('Aan');
+    await restore(page, off.text, 'false');
+    await openSettings(page);
+    await toggle(page, 'monsters-mole').scrollIntoViewIfNeeded();
+    await expect(toggle(page, 'monsters-mole')).toHaveText('Uit');
+    // A backup from before 0.9.0 has no moleEnabled: restoring it gives Aan.
+    const old = JSON.parse(off.text) as { kv: { settings: Record<string, unknown> } };
+    delete old.kv.settings.moleEnabled;
+    await restore(page, JSON.stringify(old), 'undefined');
+    await openSettings(page);
+    await toggle(page, 'monsters-mole').scrollIntoViewIfNeeded();
+    await expect(toggle(page, 'monsters-mole')).toHaveText('Aan');
+  });
+
+  for (const which of ['monsters-mole', 'monsters-master']) {
+    test(`AC254: with ${which} off, digging past the stripes gives no toast, card or mole`, async ({ page }) => {
+      await openApp(page);
+      await setupPin(page);
+      await readState(page, 'setCreatureSeed', 5);
+      await readState(page, 'resetPlayTimer', 600);
+      await switchMole(page, which);
+      await backToWorld(page);
+      const c = await digColumn(page);
+      expect(await readState(page, 'mineAt', c.x, 6, c.z)).toBe(true);
+      await readState(page, 'setBlock', c.x, 5, c.z, WAARSCHUWSTEEN, 1);
+      expect(await readState(page, 'mineAt', c.x, 5, c.z)).toBe(true);
+      expect(await readState(page, 'mineAt', c.x, 3, c.z)).toBe(true);
+      await readState(page, 'fastForward', 5000);
+      await expect(page.locator('.speech-line')).toBeHidden();
+      await expect(page.locator('[data-testid="mole-card"]')).toHaveCount(0);
+      expect(await phase(page)).toBe('none');
+    });
+  }
+
+  test('AC254: switching Monstermol off during a rumble and with the mole out leaves neither in the world', async ({ page }) => {
+    await openApp(page);
+    await setupPin(page);
+    await readState(page, 'setCreatureSeed', 5);
+    await readState(page, 'resetPlayTimer', 600);
+    const c = await digColumn(page);
+    expect(await readState(page, 'mineAt', c.x, 3, c.z)).toBe(true);
+    expect(await phase(page)).toBe('rumble');
+    await switchMole(page, 'monsters-mole');
+    await backToWorld(page);
+    await readState(page, 'fastForward', 4000);
+    expect(await phase(page)).toBe('none');
+    // On again, a second dig brings the mole out, then off sends him down.
+    await switchMole(page, 'monsters-mole');
+    await backToWorld(page);
+    expect(await readState(page, 'mineAt', c.x, 2, c.z)).toBe(true);
+    await readState(page, 'fastForward', 3500);
+    expect(await phase(page)).toBe('out');
+    await switchMole(page, 'monsters-mole');
+    await backToWorld(page);
+    await readState(page, 'fastForward', 3000);
+    expect(await phase(page)).toBe('none');
+  });
+
+  test('AC254: Ridders off and Monstermol on still wakes the mole', async ({ page }) => {
+    await openApp(page);
+    await setupPin(page);
+    await readState(page, 'setCreatureSeed', 5);
+    await readState(page, 'resetPlayTimer', 600);
+    await switchMole(page, 'monsters-knights');
+    await backToWorld(page);
+    const c = await digColumn(page);
+    expect(await readState(page, 'mineAt', c.x, 3, c.z)).toBe(true);
+    expect(await phase(page)).toBe('rumble');
   });
 });

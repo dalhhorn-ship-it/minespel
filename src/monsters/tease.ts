@@ -27,6 +27,12 @@ export function resetTease(): void {
   waitS = -1;
 }
 
+/** One tease of one animal: it jumps, runs a safe step and plays its sound. Used by Klodder and the mole (v16). */
+export function teaseAnimal(world: MonsterContext['world'], animal: DinoState, rng: MonsterContext['rng'], play: MonsterContext['play']): void {
+  startFlee(world, animal, rng);
+  play('boing');
+}
+
 /** Klodder teases one dino or chicken now. Returns true when one was teased. */
 export function teaseNow(ctx: MonsterContext): boolean {
   const all = (ctx as TeaseContext).animals?.() ?? provider?.() ?? [];
@@ -34,8 +40,7 @@ export function teaseNow(ctx: MonsterContext): boolean {
   if (pool.length === 0) return false;
   const animal = pool[Math.min(pool.length - 1, Math.floor(ctx.rng.next() * pool.length))] as DinoState;
   last = animal;
-  startFlee(ctx.world, animal, ctx.rng);
-  ctx.play('boing');
+  teaseAnimal(ctx.world, animal, ctx.rng, ctx.play);
   return true;
 }
 

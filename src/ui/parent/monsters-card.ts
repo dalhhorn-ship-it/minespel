@@ -9,12 +9,14 @@ export const HELP_KNIGHTS = 'Ridders koop je in de Dinowinkel. Ze volgen, wachte
 
 export const HELP_BUBBLE =
   'Na 10 minuten spelen komt soms een bubbel. Tikt je kind erop, dan sloopt Klodder een paar blokken tot een ridder hem wegstuurt. Alles komt terug.';
+export const HELP_MOLE =
+  'Wie onder de gestreepte laag graaft, maakt de Monstermol wakker. Een hek of een ridder stopt hem.';
 export const NOTE_BUBBLE_NEEDS_KNIGHTS = 'Werkt alleen met Ridders aan';
 
 export interface MonstersCardOptions {
   settings: SettingsRecord;
   /** Saves one switch. The screen draws again after it. */
-  onToggle: (key: 'monstersEnabled' | 'knightsEnabled' | 'bubbleEnabled', next: boolean) => void;
+  onToggle: (key: 'monstersEnabled' | 'knightsEnabled' | 'bubbleEnabled' | 'moleEnabled', next: boolean) => void;
   /** Registers a function that removes the tap handlers. */
   addCleanup: (cleanup: () => void) => void;
   now?: () => number;
@@ -60,12 +62,18 @@ export function createMonstersCard(options: MonstersCardOptions): HTMLElement {
   const knights = options.settings.knightsEnabled !== false;
   // A missing bubble switch reads as Uit (decision 135).
   const bubble = options.settings.bubbleEnabled === true;
+  // A missing mole switch reads as Aan, for a new install, an existing one and an old backup (decision 138).
+  const mole = options.settings.moleEnabled !== false;
   const common = { addCleanup: options.addCleanup, now: options.now };
   return el('div', { class: 'parent-card parent-monsters', attrs: { 'data-testid': 'monsters-card' } }, [
     el('strong', { text: 'Monsters en ridders' }),
     monstersRow({
       ...common, label: 'Monsters en ridders', checked: master, help: HELP_MASTER, testid: 'monsters-master',
       onToggle: (v) => options.onToggle('monstersEnabled', v),
+    }),
+    monstersRow({
+      ...common, label: 'Monstermol', checked: mole, help: HELP_MOLE, testid: 'monsters-mole', greyed: !master,
+      onToggle: (v) => options.onToggle('moleEnabled', v),
     }),
     monstersRow({
       ...common, label: 'Ridders', checked: knights, help: HELP_KNIGHTS, testid: 'monsters-knights', greyed: !master,

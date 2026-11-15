@@ -67,6 +67,30 @@ export type RendererFactory = (options: RendererOptions) => GameRenderer;
 
 const SKY = 0x9ad7ff;
 
+/** The shake is never longer than this (v16, AC245). */
+export const MAX_SHAKE_MS = 1000;
+const SHAKE_SIZE = 0.05;
+
+/** The offset of the shake `elapsed` ms in, in blocks: small, fades out linearly, exactly 0 at `ms`. */
+export function shakeOffset(elapsed: number, ms: number): { x: number; y: number } {
+  if (ms <= 0 || elapsed < 0 || elapsed >= ms) return { x: 0, y: 0 };
+  const fade = 1 - elapsed / ms;
+  return { x: Math.sin(elapsed * 0.05) * SHAKE_SIZE * fade, y: Math.cos(elapsed * 0.07) * SHAKE_SIZE * fade };
+}
+
+/** Moves the camera by the shake and returns a function that puts it back exactly. */
+export function applyShake(camera: { position: { x: number; y: number } }, elapsed: number, ms: number): () => void {
+  const o = shakeOffset(elapsed, ms);
+  if (o.x === 0 && o.y === 0) return () => {};
+  const { x, y } = camera.position;
+  camera.position.x = x + o.x;
+  camera.position.y = y + o.y;
+  return () => {
+    camera.position.x = x;
+    camera.position.y = y;
+  };
+}
+
 /** The camera sees this far past the fog end. Beyond the fog end everything is sky colour, so nothing visible changes. */
 export const FAR_PAST_FOG = 4;
 
@@ -212,8 +236,15 @@ const createPlainWebGlRenderer: RendererFactory = ({ canvas, quality = DEFAULT_Q
     spikeDinos = [];
   }
 
+  let shakeStart = 0;
+  let shakeMs = 0;
+
   return {
     canvas,
+    shake(ms) {
+      shakeMs = Math.min(MAX_SHAKE_MS, Math.max(0, ms));
+      shakeStart = performance.now();
+    },
     setWorld(w) {
       world = w;
       if (q.near) {
@@ -304,6 +335,7 @@ const createPlainWebGlRenderer: RendererFactory = ({ canvas, quality = DEFAULT_Q
         for (const [cx, cz] of plan.build) rebuildChunk(cx, cz);
       }
       // Cull the chunks by their box against the view, then three draws what is left.
+      const unshake = applyShake(camera, performance.now() - shakeStart, shakeMs);
       camera.updateMatrixWorld();
       viewProjection.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse);
       frustum.setFromProjectionMatrix(viewProjection);
@@ -314,6 +346,7 @@ const createPlainWebGlRenderer: RendererFactory = ({ canvas, quality = DEFAULT_Q
       }
       frame = { drawn: 0, faces: 0, deepest: 0, farthest: 0 };
       gl.render(scene, camera);
+      unshake();
       lastFrame = frame;
     },
     dispose() {
