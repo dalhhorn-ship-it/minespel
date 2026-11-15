@@ -24,3 +24,5 @@ Typed answers accept a lower case or a capital first letter. "Buiten" also accep
 Overlap: no other module teaches English yet.
 
 The content still needs one check by a teacher or parent (AC124).
+
+**Hidden for now (founder, 2026-11-15):** the `blad` topic and its exam are parked in `blad.json.wacht-op-foto` and left out of `module.json`, because BRON.md is not yet checked against the sheet (decision 127). To bring them back: fix BRON.md from the photo, rerun the generator, rename the file to `blad.json`, and add the topic and the exam to `module.json` again.

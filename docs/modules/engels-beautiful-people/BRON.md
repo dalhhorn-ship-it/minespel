@@ -1,6 +1,6 @@
 # Bron: het blad van Beautiful People
 
-**NOT YET CHECKED against the sheet, waiting for a photo from the founder.**
+**NOT YET CHECKED. The blad topic and its exam are hidden (blad.json.wacht-op-foto) until the founder sends a photo and the list matches (founder, 2026-11-15) against the sheet, waiting for a photo from the founder.**
 
 These lists were reconstructed on 2026-11-15 from the module's own lessons and items, because no photo of the sheet was kept (the founder sent one on 2026-10-24). Once the founder sends a photo, replace every line with the exact text of the sheet, remove this warning, and regenerate the `blad` topic.
 
