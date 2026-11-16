@@ -1,23 +1,25 @@
-# Handoff, 2026-11-16, v22 to v24 ready for a pull request
+# Handoff, 2026-11-16, 0.13.0 to 0.15.0 are live
 
 ## Task
-Ship v22 Duidelijke mol en kompas (0.13.0), v23 Lavakip-bar (0.14.0) and v24 Geluid dichtbij (0.15.0). Code and docs are done on the branch. Next is the pull request to main, which waits for the founder's yes.
+Ship v22 Duidelijke mol en kompas (0.13.0), v23 Lavakip-bar (0.14.0) and v24 Geluid dichtbij (0.15.0). Done.
 
 ## State
-* **Live on main:** 0.6.0 to 0.12.0 (PR #25 to #28). Main is still at 0.12.0.
-* **Branch claude/jolly-fermi-z0vak4 at 0c676b4:** 0.13.0, 0.14.0 and 0.15.0. All 11 tasks V22a to V24c are done. Full check green in WebKit: 1922 unit tests, 487 e2e tests. Scope and design are in decisions 143 to 145.
-* PRD section 12 still holds v22 to v24. The next `/release` moves them to `docs/releases/` once merged.
+* **Live on main:** 0.6.0 to 0.15.0 (PR #25 to #29). PR #29 merged as 266836a with green WebKit CI on 25f2197. The founder said yes (decision 146).
+* Branch claude/jolly-fermi-z0vak4 equals main plus this note. No open PR.
+* PRD section 12 still holds v22 to v24 (shipped). The next `/release` moves them to `docs/releases/`.
+* CI went red five times on PR #29. One real bug (the Lavakip card read old points, fixed) and test races (fixed). See the 2026-11-16 lines in `docs/FRICTION.md`.
 
 ## Next steps
-1. Open a pull request from the branch to main. Merge at green CI, after the founder says yes (Gate 2, merging deploys).
-2. Founder iPad checks for v22 to v24: top section of `docs/TEST_REPORT.md`. The founder also has to listen to the new sounds.
+1. Founder iPad checks for v22 to v24: top section of `docs/TEST_REPORT.md`. The founder also has to listen to the new sounds.
+2. Six e2e cases fail when the suite runs with 7 workers on 4 cores (they pass on CI and with the default workers): `bubble.spec.ts:24`, `context-loss.spec.ts:38`, `guard.spec.ts:30`, `ridder-klodder.spec.ts:83`, `stones.spec.ts:25`, `world-move.spec.ts:124`. Find out for each if it is a test race or a real bug.
 3. `/retro` is due: send decision 136 and the friction lines to the factory.
 4. Open question MOQ15: where v6 Wat heb ik geleerd goes.
 
 ## Watch out
-* A second session works in this repo. Fetch main before a decision number (next free: 146) and before pushing.
-* Lesson: on this fast machine a whole e2e card cycle fits in the 350 ms double tap guard. Helpers must tap again or wait.
-* WebKit runs locally in the `minespel` environment (`npx playwright install webkit` once per container). Run the WebKit suite before a pull request: Chromium green was not enough for PR #27.
+* A second session works in this repo. Fetch main before a decision number (next free: 147) and before pushing.
+* A new e2e case must pass with `--repeat-each 6 --workers 3` before a push. A state the game reads again in the background (points, switches) needs a wait on the real condition in the test.
+* CI prints the error context of a red e2e case in the job log. Read that first. The artifact host is not reachable from this cloud session.
+* WebKit runs locally in the `minespel` environment (`npx playwright install webkit` once per container).
 * `tests/e2e/exam.spec.ts:254` AC112 is flake TD22. `loginAsParent` taps with force (see docs/FRICTION.md).
 * The e2e hook `knightMeshes` lives in `src/render/actor-render.ts`, not in the hooks file.
 
