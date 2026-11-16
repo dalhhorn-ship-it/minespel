@@ -1,0 +1,38 @@
+/* The lilac bubble pill (v22, AC303, AC306). Under the learning break pill, on the left. Calm: no pulse, no colour change. */
+.hud-bubble-slot {
+  top: calc(var(--safe-top) + var(--gap) * 2 + 76px);
+  left: calc(var(--safe-left) + var(--gap));
+  max-width: 55vw;
+  pointer-events: auto; /* an ignore zone: a tap on the pill reaches nothing */
+}
+.bubble-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 100%;
+  box-sizing: border-box;
+  padding: 4px 14px 4px 10px;
+  border-radius: 999px;
+  background: #e6d9fa;
+  border: 2px solid #7a5cb8;
+  color: #2d1f4d;
+  font-weight: 800;
+  font-size: 0.9em; /* the HUD size, so Groter lettertype grows it */
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.bubble-pill[hidden], .bubble-pill-arrow[hidden] { display: none; }
+.bubble-pill-picture { font-size: 1.2em; line-height: 1; }
+.bubble-pill-text { overflow: hidden; text-overflow: ellipsis; }
+.bubble-pill-arrow {
+  display: inline-block;
+  font-size: 1.2em;
+  line-height: 1;
+  transition: transform 0.25s ease-out;
+}
+@media (prefers-reduced-motion: reduce) {
+  .bubble-pill-arrow { transition: none; }
+}
