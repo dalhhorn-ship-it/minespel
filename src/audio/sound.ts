@@ -87,8 +87,8 @@ export const SOUND_SPECS: Record<SoundName, { seconds: number; peak: number }> =
   boe: { seconds: 0.25, peak: 0.25 },
   hmpf: { seconds: 0.3, peak: 0.2 },
   geeuw: { seconds: 0.9, peak: 0.2 },
-  // v23: the lavakip munch (placeholder until V23c). The near sounds come from near-recipes.ts (rows by V24a).
-  hap: { seconds: 0.2, peak: 0.2 },
+  // v23: the lavakip munch (two chomps and a squeak). The near sounds come from near-recipes.ts (rows by V24a).
+  hap: { seconds: 0.3, peak: 0.2 },
   ...NEAR_SPECS,
 };
 
@@ -275,8 +275,12 @@ const RECIPES: Record<SoundName, (c: Ctx, out: AudioNode, t: number) => void> = 
     tone(c, o, t, { type: 'triangle', from: 400, to: 600, dur: 0.4, gain: 0.2 });
     tone(c, o, t, { type: 'triangle', from: 600, to: 250, at: 0.4, dur: 0.5, gain: 0.2 });
   },
-  // v23 placeholder (V23c): a soft munch, under 0.3 s.
-  hap: (c, o, t) => tone(c, o, t, { type: 'triangle', from: 350, to: 200, dur: 0.2, gain: 0.2 }),
+  // v23: the lavakip munch, "hap-hap": two soft chomps and a happy squeak, 0.3 s.
+  hap: (c, o, t) => {
+    tone(c, o, t, { type: 'triangle', from: 350, to: 200, dur: 0.1, gain: 0.2 });
+    tone(c, o, t, { type: 'triangle', from: 350, to: 200, at: 0.1, dur: 0.1, gain: 0.2 });
+    tone(c, o, t, { type: 'triangle', from: 500, to: 700, at: 0.2, dur: 0.1, gain: 0.15 });
+  },
   ...NEAR_RECIPES,
 };
 

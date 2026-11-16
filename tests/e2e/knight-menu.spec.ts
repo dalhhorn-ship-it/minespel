@@ -25,6 +25,23 @@ async function flatten(page: Page) {
 
 interface Knight { id: string; mode: string; x: number; y: number; z: number }
 
+function kvPut(page: Page, name: string, value: unknown): Promise<void> {
+  return page.evaluate(
+    ({ key, v }) =>
+      new Promise<void>((resolve, reject) => {
+        const open = indexedDB.open('dino-blokwereld');
+        open.onerror = () => reject(open.error);
+        open.onsuccess = () => {
+          const tx = open.result.transaction('kv', 'readwrite');
+          tx.objectStore('kv').put(v, key);
+          tx.oncomplete = () => resolve();
+          tx.onerror = () => reject(tx.error);
+        };
+      }),
+    { key: name, v: value },
+  );
+}
+
 async function tapAt(page: Page, id: number, x: number, y: number) {
   await page.evaluate(
     ({ id, x, y }) => {
@@ -125,9 +142,14 @@ test.describe('Knight menu (V17d)', () => {
     expect((await readState<Knight[]>(page, 'knights'))[0]!.mode).toBe('guard');
   });
 
-  for (const big of [false, true]) {
-    test(`AC337: four mode buttons fit on screen with no overlap${big ? ' with Groter lettertype' : ''}`, async ({ page }) => {
+  for (const [big, lavakip] of [[false, false], [true, false], [false, true], [true, true]] as const) {
+    test(`AC337: four mode buttons fit on screen with no overlap${big ? ' with Groter lettertype' : ''}${lavakip ? ' and Lavakip geven (AC316)' : ''}`, async ({ page }) => {
       await openApp(page);
+      if (lavakip) {
+        await kvPut(page, 'lavakip', { bought: true, spot: null, carried: 1 });
+        await page.reload();
+        await openApp(page);
+      }
       await flatten(page);
       if (big) {
         await page.evaluate(() => {
@@ -145,10 +167,12 @@ test.describe('Knight menu (V17d)', () => {
         }),
       );
       expect(rects.slice(0, 4).map((r) => r.text)).toEqual(['Volg mij', 'Blijf hier', 'Pas op de dieren', 'Jaag monsters weg']);
-      // The whole menu shows with no scrolling: all four modes, Uitrusten and the way back. (The Lavakip geven option is
-      // drawn by V23c and joins this list then.)
+      // The whole menu shows with no scrolling: all four modes, Uitrusten, Lavakip geven (while one is carried) and the way back.
       const labels = rects.map((r) => r.text);
-      expect(labels).toEqual(expect.arrayContaining(['Volg mij', 'Blijf hier', 'Pas op de dieren', 'Jaag monsters weg', 'Uitrusten', 'Sluiten']));
+      expect(labels).toEqual(
+        expect.arrayContaining(['Volg mij', 'Blijf hier', 'Pas op de dieren', 'Jaag monsters weg', 'Uitrusten', 'Sluiten']),
+      );
+      expect(labels.includes('Lavakip geven'), 'Lavakip geven shows only with one carried').toBe(lavakip);
       const card = await page.evaluate(() => {
         const c = document.querySelector('.knight-menu-card') as HTMLElement;
         const r = c.getBoundingClientRect();
@@ -194,5 +218,23 @@ test.describe('Knight menu (V17d)', () => {
     await page.reload();
     await openApp(page);
     expect((await readState<Knight[]>(page, 'knights'))[0]!.mode).toBe('chase');
+  });
+
+  test('AC316: Lavakip geven in the knight menu closes it and gives the snack, mode unchanged', async ({ page }) => {
+    await openApp(page);
+    await kvPut(page, 'lavakip', { bought: true, spot: null, carried: 1 });
+    await page.reload();
+    await openApp(page);
+    await flatten(page);
+    const id = (await readState<string | null>(page, 'addKnight', 'stay'))!;
+    await openMenuOn(page, id);
+    const box = (await page.locator('.knight-menu-btn-lavakip').boundingBox())!;
+    expect(Math.min(box.width, box.height)).toBeGreaterThanOrEqual(56);
+    await tapSel(page, '.knight-menu-btn-lavakip', 12);
+    await expect(page.locator('.knight-menu-card')).toHaveCount(0);
+    await expect
+      .poll(async () => (await readState<{ snacking: { kind: string; id: string }[] }>(page, 'feedState')).snacking)
+      .toEqual([expect.objectContaining({ kind: 'knight', id })]);
+    expect((await readState<Knight[]>(page, 'knights'))[0]!.mode).toBe('stay');
   });
 });

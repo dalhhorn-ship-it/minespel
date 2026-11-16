@@ -21,7 +21,7 @@ import { createLavakipEconomy, type LavakipEconomy } from '../lavakip/lavakip-ec
 import { createBubblePill } from '../ui/bubble-pill';
 import { createLavakipCard } from '../ui/lavakip-card';
 import { createMoleTapCard, type MoleTapCard } from '../ui/mole-tap-card';
-import { createActorLabels, type ActorLabels } from '../ui/actor-labels';
+import { createActorLabels, labelPoint, type ActorLabels } from '../ui/actor-labels';
 import { createBubbleHudFlow, type BubbleHudFlow } from './bubble-hud-flow';
 import { readLavakip } from '../storage/lavakip-store';
 import { MONSTER_PRIORITY, createMonsterSystem, type MonsterSystem } from '../monsters/monster-system';
@@ -371,7 +371,14 @@ export function createBoot(deps: BootDeps): Boot {
       world: world.world,
       openCard: showLavakipCard,
     });
-    const feeder = createFeeder({ economy: lavakip });
+    const feeder = createFeeder({
+      economy: lavakip,
+      body: (t) => (t.kind === 'knight' ? knights.knights().find((k) => k.id === t.id)?.body ?? null : world.dinoStore.getDino(t.id) ?? null),
+      labels,
+      sound,
+      project: (p) => labelPoint(world.player.pose(), window.innerWidth, window.innerHeight, p),
+      reducedMotion,
+    });
     feederRef = feeder;
     // The bubble and Klodder (v18). The clock counts play time only, and only with the bubble switch on.
     const monsters = createMonsterSystem({
@@ -454,6 +461,7 @@ export function createBoot(deps: BootDeps): Boot {
     world.addCreatures(bar, LAVAKIP_BAR_PRIORITY);
     world.addCreatures(bubbleHud, LAVAKIP_BAR_PRIORITY);
     world.addCreatures(nearSounds, LAVAKIP_BAR_PRIORITY);
+    world.addCreatures({ step: (dt) => feeder.step(dt) }, LAVAKIP_BAR_PRIORITY + 5);
     world.addCreatures({ step: (dt) => labels.step(dt) }, LAVAKIP_BAR_PRIORITY + 10);
     // Every pause state (menu, break, portrait, hidden page): labels, pill and near sounds go quiet at once.
     const onRunning = (running: boolean) => {

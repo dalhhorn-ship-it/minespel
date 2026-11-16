@@ -25,7 +25,7 @@ export interface KnightMenuOptions {
   onClose: () => void;
   /** The Uitrusten button (v19): shown only when this is given. */
   onGear?: () => void;
-  /** "Lavakip geven" (v23, V23c draws the button): null or missing means no entry. */
+  /** "Lavakip geven" (v23, a button with its text when given): null or missing means no entry. */
   lavakip?: LavakipMenuOption | null;
   /** The guard report line, asked again whenever the mode is guard. */
   report?: () => string;
@@ -76,6 +76,27 @@ export function createKnightMenu(options: KnightMenuOptions): KnightMenu {
         })
       : null;
     if (gearBtn) cleanups.push(onTap(gearBtn, () => options.onGear?.(), { now: options.now }));
+    const lavakip = options.lavakip ?? null;
+    const lavakipBtn = lavakip
+      ? el('button', {
+          class: 'knight-menu-btn knight-menu-btn-lavakip',
+          text: lavakip.text,
+          attrs: { type: 'button', 'data-action': 'lavakip' },
+        })
+      : null;
+    if (lavakip && lavakipBtn) {
+      // The menu closes first, then the snack starts (AC316).
+      cleanups.push(
+        onTap(
+          lavakipBtn,
+          () => {
+            options.onClose();
+            lavakip.give();
+          },
+          { now: options.now },
+        ),
+      );
+    }
     const closeBtn = el('button', {
       class: 'knight-menu-btn knight-menu-btn-close',
       text: 'Sluiten',
@@ -88,7 +109,7 @@ export function createKnightMenu(options: KnightMenuOptions): KnightMenu {
       [
         el('h2', { class: 'knight-menu-title', text: 'Ridder' }),
         status,
-        el('div', { class: 'knight-menu-grid' }, gearBtn ? [...buttons, gearBtn] : buttons),
+        el('div', { class: 'knight-menu-grid' }, [...buttons, ...(gearBtn ? [gearBtn] : []), ...(lavakipBtn ? [lavakipBtn] : [])]),
         closeBtn,
       ],
     );
