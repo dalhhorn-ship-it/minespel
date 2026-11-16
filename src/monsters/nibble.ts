@@ -52,6 +52,8 @@ export function canNibble(ctx: MonsterContext, x: number, y: number, z: number, 
   if (id === AIR || id === OERSTEEN || id === WATER || id === LAVA || id === VUUR || !isSolid(id)) return false;
   if (world.get(x, y + 1, z) !== AIR) return false;
   if (inAnyVillage(x, z)) return false;
+  // The Lavakip-bar footprint and one block around it are never nibbled (AC314).
+  if (ctx.keepOut?.(x, y, z)) return false;
   if (k && Math.abs(k.x - (x + 0.5)) < 0.95 && Math.abs(k.z - (z + 0.5)) < 0.95) return false;
   const near = cellBox(x, y, z, 1);
   if (boxesOverlap(near, ctx.kidBox)) return false;

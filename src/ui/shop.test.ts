@@ -345,3 +345,19 @@ describe('shop view and shop flow (T47, AC20, AC110, AC149, AC150)', () => {
   });
 });
 
+describe('the Lavakip-bar section seam (decision 144, AC310)', () => {
+  const lavakip = { points: 100, bought: false, placed: false, carried: 0, canPlaceHere: true };
+  it('AC310: no section without a lavakip state, and none without the buy handler', () => {
+    const none = createShopView({ state: { points: 100, dinos: [], eggs: [] }, onBuy: () => {}, onBuyLavakipBar: () => {}, onClose: () => {} });
+    expect(none.element.querySelector('[data-testid="shop-lavakip"]')).toBeNull();
+    const noHandler = createShopView({ state: { points: 100, dinos: [], eggs: [], lavakip }, onBuy: () => {}, onClose: () => {} });
+    expect(noHandler.element.querySelector('[data-testid="shop-lavakip"]')).toBeNull();
+  });
+  it('AC310: with a state and the handler the section is mounted once and dropped on destroy', () => {
+    const view = createShopView({ state: { points: 100, dinos: [], eggs: [], lavakip }, onBuy: () => {}, onBuyLavakipBar: () => {}, onClose: () => {} });
+    expect(view.element.querySelectorAll('[data-testid="shop-lavakip"]')).toHaveLength(1);
+    view.render({ points: 100, dinos: [], eggs: [], lavakip });
+    expect(view.element.querySelectorAll('[data-testid="shop-lavakip"]')).toHaveLength(1);
+    expect(() => view.destroy()).not.toThrow();
+  });
+});

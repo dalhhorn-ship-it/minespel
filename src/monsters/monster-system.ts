@@ -19,22 +19,24 @@ import type { World } from '../world/world';
 import { bubbleBox, bubbleGrow, createBubble, findBubbleSpot, stepBubble, BUBBLE_BASE_SIZE } from './bubble';
 import { createBubbleClock, type BubbleClock } from './bubble-clock';
 import { createKlodder, klodderBox, stepKlodder } from './klodder';
-import { createMole, createRumble, moleBox, stepMole } from './mole';
-import { moleMoedFraction, stepMoleMoed } from './mole-moed';
 import { findMolePath, type PathOptions } from './mole-path';
-import { createMoleWarnings } from './mole-warnings';
-import { findMoleSpawn } from './mole-wake';
+import { readMoles } from './mole-save';
+import { createMoleSlot, WAKE_MAX_Y, WAKE_MIN_Y } from './mole-slot';
 import { cellBox } from './nibble';
 import { RESTORE_RETRY_MS } from './restore';
 import { moedFraction } from './moed';
 import { stepMoed } from './moed';
 import {
-  BUBBLE_TAP_REACH, CLOCK_POINTS, KLODDER_BOX, LEAVE_MS, MOLE_BOX, MONSTER_PRIORITY, RUMBLE_MS, type BubbleState, type Cell,
-  type KlodderState, type MoleState, type MoleStateView, type MonsterContext, type MonsterPhase, type MonsterStateView,
+  BUBBLE_EVERY_MS, BUBBLE_TAP_REACH, CLOCK_POINTS, KLODDER_BOX, MOLE_BOX, MONSTER_PRIORITY, type BubbleState, type Cell,
+  type ClockView, type KlodderState, type MoleStateView, type MonsterContext, type MonsterPhase, type MonsterStateView,
 } from './monster-types';
+import type { TargetList } from './targets';
+import { addTarget } from './targets';
 import { stepTease, teaseNow } from './tease';
+import type { SpeechKind } from '../ui/speech';
+import type { ActorLabels } from '../ui/actor-labels';
 
-export { MONSTER_PRIORITY };
+export { MONSTER_PRIORITY, WAKE_MAX_Y, WAKE_MIN_Y };
 
 export interface MonsterSystemOptions {
   world: World;
@@ -53,7 +55,15 @@ export interface MonsterSystemOptions {
   animals?: () => readonly DinoState[];
   /** Draws the Moed bar over Klodder while a knight pokes him. */
   moedBar?: { update(at: { x: number; y: number } | null, fraction: number): void };
-  say?: (text: string, ms?: number) => void;
+  say?: (text: string, ms?: number, kind?: SpeechKind) => void;
+  /** World labels (v22): Hihi!, Zzz, Gevangen!. Boot passes the shared pool. */
+  labels?: ActorLabels;
+  /** True for a cell no monster may take or stand on: the Lavakip-bar footprint and one block around it (v23). */
+  keepOut?: (x: number, y: number, z: number) => boolean;
+  /** True when a guard knight watches this animal (v22d). Missing: nobody is guarded. */
+  isGuarded?: (animal: DinoState) => boolean;
+  /** Shows the tap card of a mole (v22c: "Zzz... de Monstermol slaapt in zijn hok." with OK, on a caught mole). */
+  showMoleTapCard?: (mole: { id: number; caught: boolean }) => void;
   /** Shows the Monstermol card (boot puts it in the kid overlay, so the loop stops until OK). */
   showMoleCard?: () => void;
   /** The camera shake of the rumble. Boot passes none with reduced motion. */
@@ -84,13 +94,19 @@ export interface MonsterSystem extends CreatureSystem {
   setSeed(seed: number): void;
   /** v16: the kid mined a block. Warnings, the rumble and the wake rule (AC244 to AC246). */
   onMined(x: number, y: number, z: number, block: number): void;
-  /** v16: what the mole is doing, for tests and hooks. */
+  /** v16: what the mole is doing, for tests and hooks. Keeps every field and adds `moles` (v22). */
   moleState(): MoleStateView;
+  /** v22: a column changed (tap, build, tool). The moles recheck their pens near it. */
+  onBlockChanged(x: number, z: number): void;
+  /** v22: the bubble clock for the pill: does it run, is the bubble due and held, the play ms left. */
+  clockView(): ClockView;
+  /** v22 and v24: fills `list` with the bubble while it floats, Klodder and the moles (nobody allocates). */
+  collectTargets(list: TargetList): void;
+  /** v22: a tap on mole number `index` of `moleState().moles` (the e2e hook `tapMole`). */
+  tapMole(index: number): boolean;
+  /** v22: puts the free mole in the away state for `ms` loop ms (default 60 to 90 s). False when no mole is out (the e2e hook `sendMoleAway`). */
+  sendMoleAway(ms?: number): boolean;
 }
-
-/** The y levels that wake the mole: 1 to 4, under the stripes at 5. */
-export const WAKE_MIN_Y = 1;
-export const WAKE_MAX_Y = 4;
 
 const EPS = 1e-3;
 function overlap(a: Box, b: Box): boolean {
@@ -105,17 +121,9 @@ export function createMonsterSystem(options: MonsterSystemOptions): MonsterSyste
   let bubble: BubbleState | null = null;
   let klodder: KlodderState | null = null;
   let hint = false;
-  // The mole slot (v16): next to the bubble and Klodder slot. Every clock runs on loop dt.
-  let moleOn = false;
   /** The switches last applied, for the e2e hook `creatureSwitches` (a test waits for them instead of a fixed time). */
   let applied: CreatureSwitches | null = null;
-  let mole: MoleState | null = null;
   let loopMs = 0;
-  const began: MoleStateView['began'] = { rumble: null, out: null, leaving: null };
-  const warnings = createMoleWarnings({
-    say: (text, ms) => options.say?.(text, ms),
-    showCard: () => options.showMoleCard?.(),
-  });
   let drawn = 0;
   let strayMs = 0;
   const touched = new Map<string, { x: number; z: number }>();
@@ -136,6 +144,21 @@ export function createMonsterSystem(options: MonsterSystemOptions): MonsterSyste
     const k = kidPoint();
     return [k.x - 0.3, k.y, k.z - 0.3, k.x + 0.3, k.y + 1.8, k.z + 0.3];
   };
+
+  // The mole slot (v16, moved to mole-slot.ts in v22). Every clock runs on loop dt.
+  const slot = createMoleSlot({
+    world,
+    rng: () => rng,
+    context: (dt) => context(dt),
+    loopMs: () => loopMs,
+    kid: kidPoint,
+    animals: () => options.animals?.() ?? [],
+    say: (text, ms, kind) => (kind ? options.say?.(text, ms, kind) : options.say?.(text, ms)),
+    play: (name) => options.sound?.play(name),
+    shake: options.shake,
+    showMoleCard: options.showMoleCard,
+    showMoleTapCard: options.showMoleTapCard,
+  });
 
   function touchCell(x: number, z: number): void {
     const cx = Math.floor(x / CHUNK_SIZE);
@@ -158,8 +181,13 @@ export function createMonsterSystem(options: MonsterSystemOptions): MonsterSyste
       knights: () => options.knights.knights(),
       animals: () => options.animals?.() ?? [],
       touch: touchCell,
-      say: (text, ms) => options.say?.(text, ms),
+      say: (text, ms, kind) => (kind ? options.say?.(text, ms, kind) : options.say?.(text, ms)),
       play: (name) => options.sound?.play(name),
+      labels: options.labels,
+      hasKnightHelp: () => options.knights.knights().some((k) => k.visible !== false),
+      keepOut: (x, y, z) => options.keepOut?.(x, y, z) ?? false,
+      isGuarded: (animal) => options.isGuarded?.(animal) ?? false,
+      loopMs,
       markHintShown: () => {
         if (hint) return;
         hint = true;
@@ -206,9 +234,7 @@ export function createMonsterSystem(options: MonsterSystemOptions): MonsterSyste
     if (klodder) {
       views.push({ id: 'klodder', model: 'klodder', x: klodder.x, y: klodder.y, z: klodder.z, heading: klodder.heading, pose: klodder.pose });
     }
-    if (mole && (mole.phase === 'out' || mole.phase === 'leaving')) {
-      views.push({ id: 'mole', model: 'mole', x: mole.x, y: mole.y, z: mole.z, heading: mole.heading, pose: mole.pose });
-    }
+    slot.pushViews(views);
     drawMoed();
     if (views.length === 0 && drawn === 0) return;
     drawn = views.length;
@@ -225,17 +251,19 @@ export function createMonsterSystem(options: MonsterSystemOptions): MonsterSyste
       bar.update(at, moedFraction(klodder));
       return;
     }
-    if (mole && mole.phase === 'out' && mole.pokers > 0) {
+    const moleBar = slot.moedTarget();
+    if (moleBar) {
       const { width, height } = options.viewport();
-      const at = screenPointOf(options.player.pose(), width, height, { x: mole.x, y: mole.y + MOLE_BOX.height + 0.4, z: mole.z });
-      bar.update(at, moleMoedFraction(mole));
+      const at = screenPointOf(options.player.pose(), width, height, { x: moleBar.x, y: moleBar.y + MOLE_BOX.height + 0.4, z: moleBar.z });
+      bar.update(at, moleBar.fraction);
       return;
     }
     bar.update(null, 0);
   }
 
   function showBubble(): boolean {
-    if (phase !== 'idle') return false;
+    // No bubble during a rumble: the clock asks again in 5 s of play time (AC297).
+    if (phase !== 'idle' || slot.isRumbling()) return false;
     const e = eye();
     const spot = findBubbleSpot(world, e);
     if (!spot) return false;
@@ -257,78 +285,6 @@ export function createMonsterSystem(options: MonsterSystemOptions): MonsterSyste
     return true;
   }
 
-  function dropMole(): void {
-    mole = null;
-    began.rumble = began.out = began.leaving = null;
-  }
-
-  /** The kid dug below the stripes: a rumble when nothing else is out (AC245). */
-  function startRumble(x: number, y: number, z: number): void {
-    if (mole || phase !== 'idle') return;
-    mole = createRumble({ x, z }, y);
-    began.rumble = loopMs;
-    began.out = began.leaving = null;
-    options.say?.('Oei... de grond rommelt!', 3000);
-    options.sound?.play('rommel');
-    options.shake?.(800);
-  }
-
-  /** The rumble is over: pick a spot or give up (AC245, AC246). */
-  function wakeMole(m: MoleState): void {
-    if (phase !== 'idle') {
-      // A bubble or Klodder came meanwhile: no mole.
-      dropMole();
-      return;
-    }
-    const spot = findMoleSpawn(world, kidPoint(), m.digColumn, options.animals?.() ?? [], rng);
-    if (!spot) {
-      options.say?.('Hmm... toch maar niet.', 3000);
-      dropMole();
-      return;
-    }
-    mole = createMole(spot, m.digColumn);
-    began.out = loopMs;
-    options.say?.('Hihi! Waar zijn de dieren?', 3000);
-    options.sound?.play('plop');
-  }
-
-  function beginLeaving(m: MoleState): void {
-    m.phase = 'leaving';
-    m.phaseMs = 0;
-    m.pokers = 0;
-    m.path = null;
-    m.pose = 'sink';
-    began.leaving = loopMs;
-    options.sound?.play('plop');
-  }
-
-  function stepMoleSlot(dt: number): void {
-    const m = mole;
-    if (!m) return;
-    const ms = dt * 1000;
-    if (m.phase === 'rumble') {
-      m.phaseMs += ms;
-      if (m.phaseMs >= RUMBLE_MS) wakeMole(m);
-      return;
-    }
-    const ctx = context(dt);
-    if (m.phase === 'out') {
-      m.phaseMs += ms;
-      m.outMs += ms;
-      if (stepMoleMoed(m, ctx)) beginLeaving(m);
-      else {
-        stepMole(m, ctx);
-        if ((m.phase as string) === 'leaving') beginLeaving(m);
-      }
-      return;
-    }
-    if (m.phase === 'leaving') {
-      m.phaseMs += ms;
-      stepMole(m, ctx);
-      if (m.phaseMs >= LEAVE_MS) dropMole();
-    }
-  }
-
   const canRun = (): boolean =>
     bubbleOn && phase === 'idle' && (options.knights.knights().length > 0 || options.knights.points() >= CLOCK_POINTS);
 
@@ -336,23 +292,19 @@ export function createMonsterSystem(options: MonsterSystemOptions): MonsterSyste
     load(record) {
       clock.set(record.bubbleClockMs, false);
       hint = record.hintShown === true;
+      slot.load(readMoles(record));
     },
     applySwitches(sw) {
       applied = { ...sw };
       const was = bubbleOn;
       bubbleOn = sw.bubble;
       if (was && !bubbleOn && phase !== 'idle') clear();
-      moleOn = sw.mole;
-      if (!moleOn && mole) {
-        if (mole.phase === 'rumble') dropMole();
-        else if (mole.phase === 'out') beginLeaving(mole);
-      }
-      if (!moleOn) warnings.reset();
+      slot.applySwitch(sw.mole);
       sync();
     },
     onPlayElapsed(ms) {
       if (!(ms > 0)) return;
-      warnings.onPlayElapsed(ms);
+      slot.onPlayElapsed(ms);
       if (!clock.advance(ms, { canRun: canRun(), remainingPlayMs: options.remainingPlayMs() })) return;
       if (!showBubble()) clock.noSpot();
     },
@@ -391,19 +343,27 @@ export function createMonsterSystem(options: MonsterSystemOptions): MonsterSyste
       rng = createRng(seed);
     },
     onMined(x, y, z, block) {
-      if (!moleOn) return;
-      warnings.onMined(y, block);
-      if (y >= WAKE_MIN_Y && y <= WAKE_MAX_Y) startRumble(x, y, z);
+      slot.onMined(x, y, z, block, { bubbleOut: phase !== 'idle' });
     },
-    moleState() {
-      return {
-        phase: mole?.phase ?? 'none',
-        x: mole?.x ?? 0, y: mole?.y ?? 0, z: mole?.z ?? 0, heading: mole?.heading ?? 0,
-        target: mole?.target ?? null, noPathMs: mole?.noPathMs ?? 0, outMs: mole?.outMs ?? 0,
-        moed: mole?.moed ?? 0, pokers: mole?.pokers ?? 0,
-        loopMs, began: { ...began },
-      };
+    onBlockChanged(x, z) {
+      slot.onBlockChanged(x, z);
     },
+    clockView() {
+      return { runs: canRun(), held: clock.isDue(), msLeft: Math.max(0, BUBBLE_EVERY_MS - clock.ms()) };
+    },
+    collectTargets(list) {
+      if (bubble && bubble.stage !== 'out') addTarget(list, 'bubble', 'bubble', bubble.x, bubble.y, bubble.z);
+      if (klodder && !klodder.leaving) addTarget(list, 'klodder', 'klodder', klodder.x, klodder.y, klodder.z);
+      slot.collectTargets(list);
+    },
+    tapMole: (index) => slot.tapMole(index),
+    sendMoleAway(ms) {
+      const m = slot.freeMole();
+      if (!m) return false;
+      slot.sendAway(m, ms);
+      return true;
+    },
+    moleState: () => slot.view(),
     step(dt) {
       if (!(dt > 0) || !Number.isFinite(dt)) return;
       loopMs += dt * 1000;
@@ -423,7 +383,7 @@ export function createMonsterSystem(options: MonsterSystemOptions): MonsterSyste
         }
       }
       // After Klodder's step, so a knight whose chase points to Klodder switches only when the mole is nearer (V16d).
-      stepMoleSlot(dt);
+      slot.step(context(dt), { bubbleOut: phase !== 'idle' });
       if (!klodder && world.hiddenCount() > 0) {
         // Blocks left over after a switch went off or a cell was blocked: ask again every 500 ms (AC217).
         strayMs += dt * 1000;
@@ -442,14 +402,11 @@ export function createMonsterSystem(options: MonsterSystemOptions): MonsterSyste
       return pickActor(aim, [{ id: 'bubble', box: bubbleBox(bubble) }], BUBBLE_TAP_REACH) !== null;
     },
     handleTap(x, y) {
-      if (phase === 'idle' && !(mole && mole.phase === 'out')) return false;
+      if (phase === 'idle' && !slot.hasOut()) return false;
       const { width, height } = options.viewport();
       const aim = aimFromScreen(options.player.pose(), width, height, x, y);
-      if (mole && mole.phase === 'out') {
-        // A tap on the mole does nothing, and never mines or builds behind him.
-        const id = pickActor(aim, [{ id: 'mole', box: moleBox(mole) }], BUBBLE_TAP_REACH, world);
-        if (id) return true;
-      }
+      // A tap on a mole does nothing here, and never mines or builds behind him.
+      if (slot.handleTap(aim)) return true;
       if (bubble && bubble.stage !== 'out') {
         const id = pickActor(aim, [{ id: 'bubble', box: bubbleBox(bubble) }], BUBBLE_TAP_REACH);
         if (id) return showKlodder({ x: bubble.x, y: bubble.spot.y, z: bubble.z });
@@ -461,7 +418,7 @@ export function createMonsterSystem(options: MonsterSystemOptions): MonsterSyste
       return false;
     },
     isOccupied(box) {
-      if (mole && (mole.phase === 'out' || mole.phase === 'leaving') && overlap(box, moleBox(mole))) return true;
+      if (slot.isOccupied(box)) return true;
       return klodder !== null && overlap(box, klodderBox(klodder));
     },
     onWorldReset() {
@@ -469,13 +426,12 @@ export function createMonsterSystem(options: MonsterSystemOptions): MonsterSyste
       bubble = null;
       klodder = null;
       phase = 'idle';
-      dropMole();
-      warnings.reset();
+      slot.reset();
       flushTouched();
       sync();
     },
     dispose() {
-      dropMole();
+      slot.reset();
       clear();
     },
   };
@@ -488,6 +444,9 @@ export function createMonsterSystem(options: MonsterSystemOptions): MonsterSyste
     registerHook('spawnKlodder', () => system.spawnKlodder());
     registerHook('teaseNow', () => system.teaseNow());
     registerHook('moleState', () => system.moleState());
+    // Puts the free mole in the away state for `ms` loop ms (default 60 to 90 s): V22c tests away and back before V22d's bar exists.
+    registerHook('sendMoleAway', (ms?: number) => system.sendMoleAway(ms));
+    registerHook('tapMole', (index: number) => system.tapMole(index));
     registerHook('creatureSwitches', () => applied);
     registerHook('findMolePath', (from: Cell, to: Cell, headroom = 1): Cell[] | null =>
       findMolePath(world, from, [to], { headroom } satisfies PathOptions));

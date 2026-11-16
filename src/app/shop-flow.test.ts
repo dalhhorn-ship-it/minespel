@@ -154,4 +154,49 @@ describe('Dinowinkel buy with and without a dino store (AC150, R2d)', () => {
     expect(await flow.buyGear('pony')).toBe(false);
     expect(await flow.buyStone(43)).toBe(false);
   });
+
+  it('AC310: the Lavakip-bar buy shares the purchase lock and the stub gives no section and no buy', async () => {
+    const { screens, shown } = fakeScreens();
+    const economy = {
+      shopState: vi.fn(() => undefined),
+      buyBar: vi.fn(async () => false),
+      placeHere: vi.fn(async () => false),
+    };
+    const flow = createShopFlow({ screens, records: econRecords(), db: {} as IDBDatabase, lavakip: economy });
+    await flow.open();
+    expect(economy.shopState).toHaveBeenCalled();
+    expect(shown()?.querySelector('[data-testid="shop-lavakip"]')).toBeNull();
+    expect(await flow.buyLavakipBar()).toBe(false);
+    expect(await flow.placeLavakipBar()).toBe(false);
+    expect(economy.buyBar).toHaveBeenCalledTimes(1);
+    expect(economy.placeHere).toHaveBeenCalledTimes(1);
+  });
+
+  it('AC310: ten taps in a row on the Lavakip-bar buy reach the economy one after the other, never together', async () => {
+    const { screens } = fakeScreens();
+    let running = 0;
+    let worst = 0;
+    const economy = {
+      shopState: () => undefined,
+      buyBar: vi.fn(async () => {
+        running++;
+        worst = Math.max(worst, running);
+        await Promise.resolve();
+        running--;
+        return false;
+      }),
+      placeHere: vi.fn(async () => false),
+    };
+    const flow = createShopFlow({ screens, records: econRecords(), db: {} as IDBDatabase, lavakip: economy });
+    await Promise.all(Array.from({ length: 10 }, () => flow.buyLavakipBar()));
+    expect(economy.buyBar).toHaveBeenCalledTimes(10);
+    expect(worst).toBe(1);
+  });
+
+  it('AC310: without a lavakip economy nothing can be bought', async () => {
+    const { screens } = fakeScreens();
+    const flow = createShopFlow({ screens, records: econRecords() });
+    expect(await flow.buyLavakipBar()).toBe(false);
+    expect(await flow.placeLavakipBar()).toBe(false);
+  });
 });

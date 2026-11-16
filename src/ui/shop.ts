@@ -25,6 +25,8 @@ import { onTap } from './tap';
 import { createKnightsSection, type KnightShopState } from './shop-knights';
 import { createGearSection } from './shop-gear';
 import { createStonesSection } from './shop-stones';
+import { createLavakipSection } from './shop-lavakip';
+import type { LavakipShopState } from '../lavakip/lavakip-types';
 
 export interface ShopDinoSummary {
   id?: string;
@@ -53,6 +55,8 @@ export interface ShopViewState {
   gearOwned?: readonly string[];
   /** The found and bought stones (v20). The Edelstenen section shows when this is set, whatever the switches say. */
   stones?: { found: readonly number[]; bought: readonly number[] };
+  /** The Lavakip-bar section (v23). It shows only when this is set and `onBuyLavakipBar` is given. Missing until V23a. */
+  lavakip?: LavakipShopState;
   toastMessage?: string | null;
 }
 
@@ -71,6 +75,9 @@ export interface ShopViewOptions {
   onBuyGear?: (id: string) => Promise<unknown> | unknown;
   /** Buys a stone by vein id (v20). Without it the shop shows no Edelstenen section. */
   onBuyStone?: (id: number) => Promise<unknown> | unknown;
+  /** Buys the Lavakip-bar (v23) and puts it in front of the kid ("Zet hier neer"). Without `onBuyLavakipBar` the shop shows no Lavakip-bar section. */
+  onBuyLavakipBar?: () => Promise<unknown> | unknown;
+  onPlaceLavakipBar?: () => Promise<unknown> | unknown;
   onClose: () => void;
   /** Optional shortcut to override the countdown and earn coins immediately. */
   onEarnCoins?: () => void;
@@ -174,6 +181,13 @@ export function createShopView(options: ShopViewOptions): ShopView {
   });
   const stonesSection = createStonesSection({
     onBuy: (id) => options.onBuyStone?.(id),
+    onChange: () => renderView(),
+    now: options.now,
+  });
+
+  const lavakipSection = createLavakipSection({
+    onBuy: () => options.onBuyLavakipBar?.(),
+    onPlaceHere: () => options.onPlaceLavakipBar?.(),
     onChange: () => renderView(),
     now: options.now,
   });
@@ -670,6 +684,7 @@ export function createShopView(options: ShopViewOptions): ShopView {
     if (options.onBuyStone && state.stones) {
       modal.append(stonesSection.render({ points: state.points, found: state.stones.found, bought: state.stones.bought }, loaded));
     }
+    if (options.onBuyLavakipBar && state.lavakip) modal.append(lavakipSection.render(state.lavakip, loaded));
 
     // Live "Mijn Dino-verzameling" showcase
     const collectionItems: HTMLElement[] = [];
@@ -723,6 +738,7 @@ export function createShopView(options: ShopViewOptions): ShopView {
       knightsSection.destroy();
       gearSection.destroy();
       stonesSection.destroy();
+      lavakipSection.destroy();
       root.remove();
     },
   };

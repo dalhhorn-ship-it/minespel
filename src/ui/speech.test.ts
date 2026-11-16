@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { MAX_WAITING, clearSpeech, say } from './speech';
+import { MAX_WAITING, clearSpeech, say, toastLog } from './speech';
 
 const line = () => document.querySelector<HTMLElement>('.speech-line');
 
@@ -45,5 +45,23 @@ describe('say', () => {
     expect(line()?.hidden).toBe(false);
     vi.advanceTimersByTime(1);
     expect(line()?.hidden).toBe(true);
+  });
+});
+
+describe('decision 144: the kind of a line', () => {
+  it('a mole line behaves like any other line until V22b fills the channel', () => {
+    say('een', 1000);
+    say('mol', 1000, 'mole');
+    expect(line()?.textContent).toBe('een');
+    vi.advanceTimersByTime(1000);
+    expect(line()?.textContent).toBe('mol');
+    vi.advanceTimersByTime(1000);
+    expect(line()?.hidden).toBe(true);
+  });
+  it('toastLog is one empty array until V22b, and clearSpeech empties it', () => {
+    expect(toastLog()).toEqual([]);
+    expect(toastLog()).toBe(toastLog());
+    clearSpeech();
+    expect(toastLog()).toEqual([]);
   });
 });

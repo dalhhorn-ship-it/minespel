@@ -13,6 +13,17 @@ import { createWorldSave, type WorldSave } from '../game/world-save';
 import type { ScreenGuard } from '../platform/screen-guard';
 import { registerHook } from '../dev/e2e-hooks';
 import { KNIGHT_PRIORITY, createKnightSystem, type KnightSystem } from '../knights/knight-system';
+import { createNearSounds, type NearSounds } from '../audio/near-sounds';
+import type { WorldDino } from '../dinos/dino-store';
+import { createFeeder, type Feeder } from '../lavakip/feed';
+import { createLavakipBar, LAVAKIP_BAR_PRIORITY, type LavakipBar } from '../lavakip/lavakip-bar';
+import { createLavakipEconomy, type LavakipEconomy } from '../lavakip/lavakip-economy';
+import { createBubblePill } from '../ui/bubble-pill';
+import { createLavakipCard } from '../ui/lavakip-card';
+import { createMoleTapCard, type MoleTapCard } from '../ui/mole-tap-card';
+import { createActorLabels, type ActorLabels } from '../ui/actor-labels';
+import { createBubbleHudFlow, type BubbleHudFlow } from './bubble-hud-flow';
+import { readLavakip } from '../storage/lavakip-store';
 import { MONSTER_PRIORITY, createMonsterSystem, type MonsterSystem } from '../monsters/monster-system';
 import { openDb } from '../storage/db';
 import { createLogStore } from '../storage/log-store';
@@ -159,6 +170,16 @@ export interface App {
   gear: GearEconomy;
   /** The found and bought vein stones (v20). */
   stones: StonesFlow;
+  /** World labels (v22): the one pool of at most 16 nodes for Hihi!, Zzz, Gevangen!, the shield and the snack. */
+  labels: ActorLabels;
+  /** The pill under the learning break pill (v22). */
+  bubbleHud: BubbleHudFlow;
+  /** The near sounds (v24). */
+  nearSounds: NearSounds;
+  /** The Lavakip-bar: the economy, the truck in the world and the feeding (v23). */
+  lavakip: LavakipEconomy;
+  bar: LavakipBar;
+  feeder: Feeder;
 }
 
 export interface BootDeps {
@@ -270,6 +291,7 @@ export function createBoot(deps: BootDeps): Boot {
     // read again each time the screen goes back to the world.
     let knightsRef: KnightSystem | null = null;
     let gearRef: GearEconomy | null = null;
+    let feederRef: Feeder | null = null;
     const knights = createKnightSystem({
       world: world.world,
       player: world.player,
@@ -284,6 +306,7 @@ export function createBoot(deps: BootDeps): Boot {
           wear: (knightId, itemId, slot) => gearRef?.wear(knightId, itemId, slot) ?? Promise.resolve(false),
         },
         knightList: () => knightsRef?.knights().map((k) => ({ id: k.id })) ?? [],
+        feeder: () => feederRef ?? undefined,
       }),
       viewport: () => ({ width: window.innerWidth, height: window.innerHeight }),
       persist: (change) => {
@@ -311,7 +334,34 @@ export function createBoot(deps: BootDeps): Boot {
     knights.setPoints(economy.points);
     world.addCreatures(knights, KNIGHT_PRIORITY);
     let moleCard: MoleCard | null = null;
+    let moleTapCard: MoleTapCard | null = null;
     const reducedMotion = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    // v22: the world labels, one pool for everything that floats over an animal, a knight or a mole.
+    const labels = createActorLabels({ container: world.container });
+    // v23: the Lavakip-bar (record, economy, truck in the world, feeding). Nothing shows until V23a to V23c fill them.
+    const lavakip = createLavakipEconomy({ db, world: world.world, pose: () => world.player.pose() });
+    lavakip.load(readLavakip(move === 'failed' ? null : await records.get('lavakip')));
+    const showLavakipCard = () => {
+      const card = createLavakipCard({
+        carried: () => lavakip.state().carried,
+        points: () => knights.points(),
+        onOrder: () => lavakip.order(),
+        onClose: () => {
+          card.destroy();
+          screens.showKidOverlay(null);
+        },
+      });
+      screens.showKidOverlay(card.element);
+    };
+    const bar = createLavakipBar({
+      economy: lavakip,
+      renderer: world.renderer,
+      viewport: () => ({ width: window.innerWidth, height: window.innerHeight }),
+      player: world.player,
+      openCard: showLavakipCard,
+    });
+    const feeder = createFeeder({ economy: lavakip });
+    feederRef = feeder;
     // The bubble and Klodder (v18). The clock counts play time only, and only with the bubble switch on.
     const monsters = createMonsterSystem({
       world: world.world,
@@ -326,7 +376,23 @@ export function createBoot(deps: BootDeps): Boot {
       occupied: (box) => world.dinoSystem.isOccupied(box) || world.villagerSystem.isOccupied(box) || knights.isOccupied?.(box) === true,
       animals: () => world.dinoStore.dinos(),
       moedBar: createMoedBar(),
-      say: (text, ms) => say(text, ms),
+      say: (text, ms, kind) => say(text, ms, kind),
+      labels,
+      keepOut: (x, y, z) => bar.keepOut(x, y, z),
+      isGuarded: (animal) => knights.guardedBy((animal as WorldDino).id) !== null,
+      showMoleTapCard: () => {
+        // The card goes in the kid overlay, so the loop and the play timer stop until OK (AC298).
+        if (moleTapCard?.element.isConnected) return;
+        const card = createMoleTapCard({
+          onOk: () => {
+            card.destroy();
+            moleTapCard = null;
+            screens.showKidOverlay(null);
+          },
+        });
+        moleTapCard = card;
+        screens.showKidOverlay(card.element);
+      },
       showMoleCard: () => {
         // The card goes in the kid overlay, so the loop and the play timer stop until OK (AC244).
         if (moleCard?.element.isConnected) return;
@@ -348,9 +414,42 @@ export function createBoot(deps: BootDeps): Boot {
       monsters.onMined(e.x, e.y, e.z, e.block);
       stones.onMined(e.x, e.y, e.z, e.block);
     });
+    world.on('blockChanged', (e) => monsters.onBlockChanged(e.x, e.z));
     monsters.load(await records.get('monsters'));
     monsters.applySwitches(creatureSwitches(settings));
     world.addCreatures(monsters, MONSTER_PRIORITY);
+    // v22 to v24: the bar, the pill and the near sounds are creatures with no tap; the labels count their times down.
+    let currentSwitches = creatureSwitches(settings);
+    const bubbleHud = createBubbleHudFlow({
+      monsters,
+      view: createBubblePill(world.hud.bubbleSlot),
+      pose: () => {
+        const p = world.player.player;
+        return { x: p.x, y: p.y, z: p.z, yaw: world.player.yaw };
+      },
+      switches: () => currentSwitches,
+    });
+    const nearSounds = createNearSounds({
+      sound,
+      collectMonsters: (list) => monsters.collectTargets(list),
+      collectBar: (list) => bar.collectTargets(list),
+      pose: () => {
+        const p = world.player.player;
+        return { x: p.x, y: p.y, z: p.z, yaw: world.player.yaw };
+      },
+    });
+    world.addCreatures(bar, LAVAKIP_BAR_PRIORITY);
+    world.addCreatures(bubbleHud, LAVAKIP_BAR_PRIORITY);
+    world.addCreatures(nearSounds, LAVAKIP_BAR_PRIORITY);
+    world.addCreatures({ step: (dt) => labels.step(dt) }, LAVAKIP_BAR_PRIORITY + 10);
+    // Every pause state (menu, break, portrait, hidden page): labels, pill and near sounds go quiet at once.
+    const onRunning = (running: boolean) => {
+      labels.setRunning(running);
+      bubbleHud.setRunning(running);
+      nearSounds.setRunning(running);
+    };
+    world.onRunningChange(onRunning);
+    onRunning(world.isRunning());
     const shopFlow = createShopFlow({
       screens,
       db,
@@ -367,13 +466,15 @@ export function createBoot(deps: BootDeps): Boot {
       gear,
       stonesFlow: stones,
       stones: stonesEconomy,
+      lavakip,
     });
     screens.subscribe((kind) => {
       if (kind !== 'world') return;
       void Promise.all([records.get('settings'), records.get('economy')])
         .then(([s, e]) => {
-          knights.applySwitches(creatureSwitches(s));
-          monsters.applySwitches(creatureSwitches(s));
+          currentSwitches = creatureSwitches(s);
+          knights.applySwitches(currentSwitches);
+          monsters.applySwitches(currentSwitches);
           knights.setPoints(e.points);
         })
         .catch(() => {});
@@ -465,7 +566,7 @@ export function createBoot(deps: BootDeps): Boot {
     return {
       app: {
         queue, records, catalog: getCatalog, timerDriver, breakFlow, parentFlow, shopFlow,
-        practiceFlow, examFlow, villageFlow, knights, monsters, gear, stones,
+        practiceFlow, examFlow, villageFlow, knights, monsters, gear, stones, labels, bubbleHud, nearSounds, lavakip, bar, feeder,
       },
       sessionStore,
       moved: move !== 'failed',

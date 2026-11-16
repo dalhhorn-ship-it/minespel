@@ -176,4 +176,16 @@ describe('Klodder nibbles (v18, AC215)', () => {
     expect(t).toBeGreaterThanOrEqual(300_000);
     expect(t).toBeLessThan(304_000);
   });
+
+  it('AC314: a cell the context keeps out (the Lavakip-bar footprint and one block around it) is never nibbled', () => {
+    const world = new World();
+    const x = 40;
+    const z = 20;
+    const y = ground(world, x, z) - 1;
+    const { ctx } = makeCtx(world);
+    expect(canNibble(ctx(0.1), x, y, z)).toBe(true);
+    const keep = (kx: number, _ky: number, kz: number) => kx === x && kz === z;
+    expect(canNibble({ ...ctx(0.1), keepOut: keep }, x, y, z)).toBe(false);
+    expect(canNibble({ ...ctx(0.1), keepOut: keep }, x + 1, y, z)).toBe(true);
+  });
 });

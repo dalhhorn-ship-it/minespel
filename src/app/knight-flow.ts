@@ -4,6 +4,7 @@
 import type { Sound } from '../audio/sound';
 import { guardReport, type GuardAnimal } from '../knights/guard-report';
 import type { GearEconomy } from '../knights/gear-economy';
+import type { Feeder } from '../lavakip/feed';
 import type { KnightEvent, KnightMode, KnightState } from '../knights/knight-types';
 import { say } from '../ui/speech';
 import { createKnightMenu, type KnightMenu } from '../ui/knight-menu';
@@ -32,6 +33,8 @@ export interface KnightFlowDeps {
   gear?: Pick<GearEconomy, 'state' | 'wear'>;
   /** The knights in the order of the knight list, for "Bij Ridder N" (his number is his place plus 1). */
   knightList?: () => readonly { id: string }[];
+  /** The feeder (v23): the menu gets its "Lavakip geven" option for this knight. Boot sets it after the lavakip pieces exist. */
+  feeder?: () => Pick<Feeder, 'menuOption'> | undefined;
 }
 
 export function createKnightFlow(deps: KnightFlowDeps = {}): KnightFlow {
@@ -87,6 +90,7 @@ export function createKnightFlow(deps: KnightFlowDeps = {}): KnightFlow {
       mode: knight.mode,
       report: () => report(knight),
       onGear: deps.gear ? () => showGear(knight) : undefined,
+      lavakip: deps.feeder?.()?.menuOption({ kind: 'knight', id: knight.id }) ?? null,
       onModeChange: (mode) => {
         deps.setMode?.(knight.id, mode);
         deps.sound?.play('ridder');

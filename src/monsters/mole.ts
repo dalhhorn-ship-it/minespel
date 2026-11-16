@@ -56,6 +56,8 @@ export function canTeaseFrom(world: World, here: Cell, a: Cell): boolean {
 /** He comes up at `at` (feet centre) after the rumble. */
 export function createMole(at: Point, digColumn: { x: number; z: number }): MoleState {
   return {
+    id: 0, caught: false, home: { x: at.x, z: at.z }, dove: null, awayMs: 0, teaseWaitMs: 0, hmpfWaitMs: 0,
+    lonelySaid: false, reach: null, dirty: false, saveMs: 0,
     phase: 'out', x: at.x, y: at.y, z: at.z, heading: 0, phaseMs: 0, outMs: 0, noPathMs: 0, lonelyMs: 0, searchMs: 0,
     target: null, lastTeased: null, path: null, moed: 0, pokers: 0, digColumn: { ...digColumn }, pose: 'rise',
   };

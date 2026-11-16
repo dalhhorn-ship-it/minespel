@@ -109,3 +109,108 @@ describe('sound (AC99, AC100)', () => {
     expect(() => sound.setVolume(0.3)).not.toThrow();
   });
 });
+
+describe('the near voices (decision 144, AC323 AC325)', () => {
+  /** A fake context that also has a stereo panner and a smoothing gain, to see what the voices do. */
+  function setupNear(withPanner = true) {
+    const target = new EventTarget();
+    const unlock = createAudioUnlock(target);
+    const calls: { target: number; tc: number }[] = [];
+    const pans: number[] = [];
+    let cancelled = 0;
+    const made: FakeAudioContext[] = [];
+    const createContext = () => {
+      const c = new FakeAudioContext() as FakeAudioContext & Record<string, unknown>;
+      const baseGain = c.createGain.bind(c);
+      c.createGain = () => {
+        const g = baseGain() as ReturnType<typeof baseGain> & { gain: Record<string, unknown> };
+        g.gain.setTargetAtTime = (v: number, _t: number, tc: number) => void calls.push({ target: v, tc });
+        g.gain.cancelScheduledValues = () => void cancelled++;
+        return g;
+      };
+      if (withPanner) {
+        c.createStereoPanner = () => {
+          const p = { pan: { value: 0 }, connect: (n: unknown) => n, disconnect: () => undefined };
+          Object.defineProperty(p.pan, 'value', { get: () => pans[pans.length - 1] ?? 0, set: (v: number) => void pans.push(v) });
+          return p;
+        };
+      }
+      made.push(c);
+      return c as unknown as AudioContext;
+    };
+    const sound = createSound({ unlock, createContext });
+    const tap = () => target.dispatchEvent(new Event('pointerup'));
+    return { sound, tap, calls, pans, made, cancelled: () => cancelled };
+  }
+
+  it('AC323: nearVoices() is null before the first tap and gives the same two voices after', () => {
+    const { sound, tap } = setupNear();
+    expect(sound.nearVoices()).toBeNull();
+    tap();
+    const v = sound.nearVoices();
+    expect(v).toHaveLength(2);
+    expect(sound.nearVoices()).toBe(v);
+    expect(v?.[0]).not.toBe(v?.[1]);
+  });
+
+  it('AC323: set(level, pan) moves the gain with a 50 ms smoothing and sets the pan', () => {
+    const { sound, tap, calls, pans } = setupNear();
+    tap();
+    const [a] = sound.nearVoices() ?? [];
+    a?.set(0.5, -0.4);
+    expect(calls).toEqual([{ target: 0.5, tc: 0.05 }]);
+    expect(pans).toEqual([-0.4]);
+    expect(a?.level).toBe(0.5);
+    expect(a?.pan).toBe(-0.4);
+    a?.set(7, 3);
+    expect(a?.level).toBe(1);
+    expect(a?.pan).toBe(1);
+  });
+
+  it('AC325: with no stereo panner the pan stays 0', () => {
+    const { sound, tap, calls } = setupNear(false);
+    tap();
+    const [a] = sound.nearVoices() ?? [];
+    a?.set(0.3, 0.9);
+    expect(a?.pan).toBe(0);
+    expect(calls).toHaveLength(1);
+  });
+
+  it('AC326: silence() cancels and sets the gain to 0 at once', () => {
+    const { sound, tap, cancelled } = setupNear();
+    tap();
+    const [a] = sound.nearVoices() ?? [];
+    a?.set(0.8, 0);
+    a?.silence();
+    expect(a?.level).toBe(0);
+    expect(cancelled()).toBe(1);
+  });
+
+  it('AC324: a voice plays a near sound only with sound on and Volume above 0, and the voices do not break the other sounds', () => {
+    const { sound, tap, made } = setupNear();
+    tap();
+    const [a] = sound.nearVoices() ?? [];
+    const before = made[0]?.started ?? 0;
+    a?.play('blub');
+    expect(made[0]?.started).toBeGreaterThan(before);
+    const mid = made[0]?.started ?? 0;
+    sound.setEnabled(false);
+    a?.play('giechel');
+    sound.setEnabled(true);
+    sound.setVolume(0);
+    a?.play('giechel');
+    expect(made[0]?.started).toBe(mid);
+    sound.setVolume(0.5);
+    sound.play('pop');
+    expect(made[0]?.started).toBeGreaterThan(mid);
+  });
+
+  it('every near sound and hap is a sound name that plays and has a row', async () => {
+    const { SOUND_SPECS } = await import('./sound');
+    for (const n of ['blub', 'giechel', 'snuffel', 'snurk', 'sis', 'deuntje', 'hap'] as const) {
+      expect(SOUND_NAMES).toContain(n);
+      expect(SOUND_SPECS[n].seconds).toBeLessThan(1.5);
+      expect(SOUND_SPECS[n].peak).toBeLessThanOrEqual(0.8);
+    }
+  });
+});

@@ -44,10 +44,17 @@ export interface MinedEvent {
   block: number;
 }
 
+/** A column changed by a tap, a build or a tool (v22: the mole pens and the bar footprint look at it). */
+export interface BlockChangedEvent {
+  x: number;
+  z: number;
+}
+
 export interface GameEvents {
   teleported: TeleportedEvent;
   changed: ChangedEvent;
   mined: MinedEvent;
+  blockChanged: BlockChangedEvent;
 }
 
 /**
@@ -103,6 +110,8 @@ export interface Game {
   resume(): void;
   /** True while frames are being drawn. */
   isRunning(): boolean;
+  /** Calls the listener each time the loop starts or stops (pause, resume, portrait, tab hidden), with the new state. Returns a function that removes it. */
+  onRunningChange(listener: (running: boolean) => void): () => void;
   /** Mode, the 8 hotbar blocks and the selected slot. T37 saves these. */
   getBuildState(): BuildState;
   setBuildState(state: Partial<BuildState>): void;
@@ -171,7 +180,9 @@ export function createGame(options: GameOptions): Game {
     look,
     claimLook: (x, y) => loopRunning() && creatures.some((c) => c.system.wantsTap?.(x, y) === true),
   });
-  const listeners: { [K in keyof GameEvents]: Set<(p: GameEvents[K]) => void> } = { teleported: new Set(), changed: new Set(), mined: new Set() };
+  const listeners: { [K in keyof GameEvents]: Set<(p: GameEvents[K]) => void> } = { teleported: new Set(), changed: new Set(), mined: new Set(), blockChanged: new Set() };
+  const runningListeners = new Set<(running: boolean) => void>();
+  let lastRunning = false;
   const emitChanged = (kind: ChangedEvent['kind']) => {
     for (const l of [...listeners.changed]) l({ kind });
   };
@@ -248,6 +259,7 @@ export function createGame(options: GameOptions): Game {
     onBlockChanged: (x, z) => {
       renderer.blockChanged(x, z);
       emitChanged('world');
+      for (const l of [...listeners.blockChanged]) l({ x, z });
     },
     effects,
     sound,
@@ -374,6 +386,10 @@ export function createGame(options: GameOptions): Game {
     } else {
       loop.start();
     }
+    if (loop.running !== lastRunning) {
+      lastRunning = loop.running;
+      for (const l of [...runningListeners]) l(lastRunning);
+    }
   };
   loopRunning = () => loop.running;
   const unsubscribe = options.guard.subscribe((s) => {
@@ -442,6 +458,10 @@ export function createGame(options: GameOptions): Game {
       update();
     },
     isRunning: () => loop.running,
+    onRunningChange(listener) {
+      runningListeners.add(listener);
+      return () => runningListeners.delete(listener);
+    },
     getBuildState: () => build.getState(),
     setBuildState(state) {
       build.setState(state);

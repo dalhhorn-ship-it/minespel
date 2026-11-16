@@ -41,6 +41,7 @@ async function seed(db: IDBDatabase) {
     meta: { schemaVersion: SCHEMA_VERSION, appVersion: '0.5.0', lastBackup: null, createdAt: '2026-10-01T00:00:00.000Z' },
     village: { found: [34, 41], cooldownMs: 1234, lastVillager: 'noord-1' },
     monsters: { knights: [{ id: 'k1', mode: 'stay', spot: { x: 5, y: 9, z: 6 }, boughtFor: 30 }], bubbleClockMs: 4000, hintShown: true },
+    lavakip: { bought: true, spot: { x: 6, y: 9, z: 7 }, carried: 2 },
     gate: { salt: 's', pinHash: 'h', wrongTries: 2, blockedUntil: 99, resetWrongTries: 1 },
     worldV1: { diff: Uint32Array.from([1]) },
     session: { running: true },
@@ -65,7 +66,7 @@ describe('backup file', () => {
   it('AC131: the header holds the app name, the format version and the date', async () => {
     const db = await fresh();
     const f = await buildBackup(db, { now: new Date('2026-11-06T10:00:00Z'), appVersion: '0.6.0' });
-    expect(f).toMatchObject({ app: 'dino-blokwereld', format: 5, createdAt: '2026-11-06T10:00:00.000Z', appVersion: '0.6.0', schemaVersion: SCHEMA_VERSION });
+    expect(f).toMatchObject({ app: 'dino-blokwereld', format: 7, createdAt: '2026-11-06T10:00:00.000Z', appVersion: '0.6.0', schemaVersion: SCHEMA_VERSION });
     db.close();
   });
 
@@ -227,7 +228,7 @@ describe('backup file', () => {
     const db = await fresh();
     await seed(db);
     const file = await buildBackup(db);
-    expect(file.format).toBe(5);
+    expect(file.format).toBe(7);
     expect((JSON.parse(backupText(file)) as { kv: { world: { terrainVersion: number } } }).kv.world.terrainVersion).toBe(3);
     const before = await get(db, 'kv', 'world');
     const checked = checkBackup(backupText(file));
@@ -347,7 +348,7 @@ describe('backup file', () => {
       expect(stored.gear.owned).toHaveLength(5);
       expect(stored.gear.worn).toEqual({ 'ridder-1': { hoofd: 'leren-kap', rijdier: 'pony' }, 'ridder-2': { schild: 'ijzeren-schild' } });
       const again = await buildBackup(db);
-      expect(again.format).toBe(5);
+      expect(again.format).toBe(7);
       const second = checkBackup(backupText(again));
       expect(second.ok).toBe(true);
       expect((second.ok && (second.data.kv.monsters as { gear: unknown }).gear)).toEqual(stored.gear);
@@ -382,7 +383,7 @@ describe('backup file', () => {
       expect(stored.stones.found).toHaveLength(3);
       expect(stored.stones.bought).toHaveLength(2);
       const again = await buildBackup(db);
-      expect(again.format).toBe(5);
+      expect(again.format).toBe(7);
       const second = checkBackup(backupText(again));
       expect(second.ok && (second.data.kv.monsters as { stones: unknown }).stones).toEqual(stored.stones);
       db.close();
@@ -413,9 +414,60 @@ describe('backup file', () => {
       expect(stored.gear.owned).toHaveLength(9);
       expect(Object.keys(stored.gear.worn['ridder-1']!)).toHaveLength(8);
       const again = await buildBackup(db);
-      expect(again.format).toBe(5);
+      expect(again.format).toBe(7);
       const second = checkBackup(backupText(again));
       expect(second.ok && (second.data.kv.monsters as { gear: unknown }).gear).toEqual(stored.gear);
+      db.close();
+    });
+  });
+  describe('AC299 AC318: moles and lavakip in the backup (formats 6 and 7)', () => {
+    it('AC299: a 0.13.0 file (format 6) restores with its moles and the chase mode, and a new backup is format 7', async () => {
+      const r = checkBackup(fixture('v0130-moles.json'));
+      expect(r.ok).toBe(true);
+      if (!r.ok) return;
+      const db = await fresh();
+      await replaceAll(db, r.data);
+      haltWrites(false);
+      const stored = (await get(db, 'kv', 'monsters')) as { moles: unknown[]; knights: { mode: string }[] };
+      expect(stored.moles).toHaveLength(3);
+      expect(stored.knights[0]?.mode).toBe('chase');
+      expect(await get(db, 'kv', 'lavakip')).toBeUndefined();
+      const again = await buildBackup(db);
+      expect(again.format).toBe(7);
+      // Byte for byte: the monsters record comes back as it went in.
+      expect(JSON.stringify(again.kv.monsters)).toBe(JSON.stringify(JSON.parse(fixture('v0130-moles.json')).kv.monsters));
+      db.close();
+    });
+
+    it('AC318: a 0.14.0 file (format 7) round trips byte for byte', async () => {
+      const r = checkBackup(fixture('v0140-lavakip.json'));
+      expect(r.ok).toBe(true);
+      if (!r.ok) return;
+      const db = await fresh();
+      await replaceAll(db, r.data);
+      haltWrites(false);
+      const again = await buildBackup(db);
+      const want = JSON.parse(fixture('v0140-lavakip.json'));
+      expect(JSON.stringify(again.kv.lavakip)).toBe(JSON.stringify(want.kv.lavakip));
+      expect(JSON.stringify(again.kv.monsters)).toBe(JSON.stringify(want.kv.monsters));
+      expect(again.format).toBe(7);
+      db.close();
+    });
+
+    it('AC299 AC318: a 0.12.0 file restores with no moles, no lavakip record and its knight modes as they were', async () => {
+      const r = checkBackup(fixture('v0120-gear.json'));
+      expect(r.ok).toBe(true);
+      if (!r.ok) return;
+      const db = await fresh();
+      await replaceAll(db, r.data);
+      haltWrites(false);
+      const stored = (await get(db, 'kv', 'monsters')) as { moles?: unknown; knights: { mode: string }[] };
+      expect(stored.moles).toBeUndefined();
+      expect(stored.knights.map((k) => k.mode)).toEqual(['follow', 'guard']);
+      expect(await get(db, 'kv', 'lavakip')).toBeUndefined();
+      const again = await buildBackup(db);
+      expect('lavakip' in again.kv).toBe(false);
+      expect(BACKUP_KV_NAMES).toContain('lavakip');
       db.close();
     });
   });

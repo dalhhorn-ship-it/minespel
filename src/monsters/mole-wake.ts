@@ -6,6 +6,8 @@ import { shuffle } from '../core/rng';
 import { AIR, BLADEREN, BOOMSTAM, LAVA, WATER } from '../world/blocks';
 import { WORLD_HEIGHT, WORLD_SIZE } from '../world/terrain';
 import type { World } from '../world/world';
+import { LINE_COME_UP, LINE_NO_FIT } from './mole-lines';
+import type { MoleState, MonsterContext } from './monster-types';
 
 /** A spot must be within this many blocks of a target animal along x and z. */
 export const SPAWN_NEAR_ANIMAL = 16;
@@ -89,4 +91,21 @@ export function findMoleSpawn(
     return { x: c.x + 0.5, y, z: c.z + 0.5 };
   }
   return null;
+}
+
+/**
+ * The rumble is over (AC245, AC246): the spot where the mole comes up, or null with the no fit line said. `ctx` holds
+ * the world, the kid, the animals and the seeded rng; `digColumn` is where the kid dug. V22b changes the rule for no
+ * target animal and the no fit line.
+ */
+export function finishRumble(ctx: MonsterContext, digColumn: { x: number; z: number }): Point | null {
+  const spot = findMoleSpawn(ctx.world, ctx.kid, digColumn, ctx.animals?.() ?? [], ctx.rng);
+  if (!spot) ctx.say(LINE_NO_FIT, 3000);
+  return spot;
+}
+
+/** He came up (AC245): the line and the sound. V22b adds the "Hihi!" label and the help line. */
+export function announceMole(_mole: MoleState, ctx: MonsterContext): void {
+  ctx.say(LINE_COME_UP, 3000);
+  ctx.play('plop');
 }

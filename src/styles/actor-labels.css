@@ -1,0 +1,28 @@
+/* World labels (v22): short words and signs over an animal, a knight or a mole. They never take a tap. */
+.actor-label {
+  position: fixed;
+  z-index: 3;
+  left: 0;
+  top: 0;
+  max-width: 220px;
+  padding: 4px calc(var(--gap) * 1.5);
+  border: 3px solid var(--ink);
+  border-radius: var(--radius);
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-stack);
+  font-size: calc(var(--font-body) * var(--font-scale, 1));
+  font-weight: 800;
+  line-height: 1.15;
+  text-align: center;
+  white-space: nowrap;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+.actor-label[hidden] { display: none; }
+.actor-label-zzz { border-style: dashed; }
+.actor-label-sign { background: var(--paper); border-width: 4px; }
+.actor-label-shield { padding: 2px 8px; }
+.actor-label-snack { border-style: dotted; }

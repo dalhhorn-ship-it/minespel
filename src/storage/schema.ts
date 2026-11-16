@@ -52,6 +52,7 @@ export const KV_NAMES = [
   'meta',
   'village',
   'monsters',
+  'lavakip',
 ] as const;
 export type KvName = (typeof KV_NAMES)[number];
 
@@ -151,8 +152,9 @@ export interface VillageRecord {
   lastVillager: string | null;
 }
 
-export type KnightMode = 'follow' | 'stay' | 'guard';
-export const KNIGHT_MODES: readonly KnightMode[] = ['follow', 'stay', 'guard'];
+/** The four modes. `chase` (v22, "Jaag monsters weg") is saved like the others; a backup before format 6 never holds it. */
+export type KnightMode = 'follow' | 'stay' | 'guard' | 'chase';
+export const KNIGHT_MODES: readonly KnightMode[] = ['follow', 'stay', 'guard', 'chase'];
 
 /** One bought knight. Only mode and spot are saved, never the live position (decision 135). */
 export interface KnightRecord {
@@ -162,6 +164,15 @@ export interface KnightRecord {
   spot: { x: number; y: number; z: number } | null;
   /** Points paid, so a trade in can be checked later. */
   boughtFor: number;
+}
+
+/** One mole the kid dug up (v22). For an away mole the spot is where he dove under and `awayMs` the play time left. */
+export interface SavedMole {
+  x: number;
+  y: number;
+  z: number;
+  state: 'free' | 'away' | 'caught';
+  awayMs?: number;
 }
 
 /** v17 Ridders and v18 Zwarte bubbel: the knights, the bubble clock and the hint flag. */
@@ -177,6 +188,17 @@ export interface MonstersRecord {
   gear?: { owned: string[]; worn: Record<string, Partial<Record<string, string>>> };
   /** v20 stones: vein ids the kid found and bought. Optional too. Read it with `readStones` (stones-flow.ts). */
   stones?: { found: number[]; bought: number[] };
+  /** v22 moles: at most 4, at most 1 free or away. Optional and not in the defaults. Read it with `readMoles` (mole-save.ts). */
+  moles?: SavedMole[];
+}
+
+/** v23 Lavakip-bar: the food truck and the lavakip the kid carries. */
+export interface LavakipRecord {
+  bought: boolean;
+  /** The air cell above the ground at the min corner of the truck, or null (bought and null reads as the home spot). */
+  spot: { x: number; y: number; z: number } | null;
+  /** Lavakip ordered and not yet given away, 0 to 10. */
+  carried: number;
 }
 
 export interface KvRecords {
@@ -196,6 +218,7 @@ export interface KvRecords {
   meta: MetaRecord;
   village: VillageRecord;
   monsters: MonstersRecord;
+  lavakip: LavakipRecord;
 }
 
 /** Fresh copies every call, so nobody shares or mutates a default. */
@@ -227,6 +250,7 @@ export const KV_DEFAULTS: { [K in KvName]: () => KvRecords[K] } = {
   meta: () => ({ schemaVersion: SCHEMA_VERSION, appVersion: '', lastBackup: null, createdAt: null }),
   village: () => ({ found: [], cooldownMs: 0, lastVillager: null }),
   monsters: () => ({ knights: [], bubbleClockMs: 0, hintShown: false }),
+  lavakip: () => ({ bought: false, spot: null, carried: 0 }),
 };
 
 export function defaultKv<K extends KvName>(name: K): KvRecords[K] {

@@ -158,3 +158,36 @@ describe('v19 gear seams (AC264, AC265)', () => {
     expect(JSON.stringify(s.saved())).not.toContain('gear');
   });
 });
+
+describe('v22 seams (decision 144, AC337)', () => {
+  it('AC337: the fourth mode chase is saved with his spot, loaded and kept; a mode change to chase takes the spot', () => {
+    const s = setup();
+    s.system.add(rec('a'));
+    s.setSaved([rec('a')]);
+    expect(s.system.setMode('a', 'chase')).toBe(true);
+    const k = s.system.knights()[0]!;
+    expect(k.mode).toBe('chase');
+    expect(k.spot).not.toBeNull();
+    expect(s.saved()[0]).toMatchObject({ id: 'a', mode: 'chase', spot: expect.objectContaining({ x: k.body.x }) });
+    const t = setup();
+    t.system.load([rec('b', 'chase', { x: t.kid.x + 6, y: t.kid.y, z: t.kid.z })]);
+    expect(t.system.knights()[0]?.mode).toBe('chase');
+    t.system.step(0.1);
+    expect(Math.hypot(t.system.knights()[0]!.body.x - (t.kid.x + 6), t.system.knights()[0]!.body.z - t.kid.z)).toBeLessThan(1.5);
+  });
+  it('AC337: until V22d a chase knight acts as stay: he stays within 1 block of his spot for 60 s', () => {
+    const s = setup();
+    const spot = { x: s.kid.x + 6, y: s.kid.y, z: s.kid.z };
+    s.system.load([rec('c', 'chase', spot)]);
+    for (let i = 0; i < 600; i++) s.system.step(0.1);
+    const b = s.system.knights()[0]!.body;
+    expect(Math.hypot(b.x - spot.x, b.z - spot.z)).toBeLessThanOrEqual(1.1);
+  });
+  it('AC331: nobody is guarded until V22d: guardedBy is null and guardState is empty', () => {
+    const s = setup();
+    s.system.add(rec('g', 'guard'));
+    for (let i = 0; i < 30; i++) s.system.step(0.1);
+    expect(s.system.guardedBy('any-animal')).toBeNull();
+    expect(s.system.guardState()).toEqual([]);
+  });
+});

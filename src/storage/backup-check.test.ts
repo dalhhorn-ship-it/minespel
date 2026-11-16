@@ -308,9 +308,9 @@ describe('checkBackup', () => {
       expect(checkBackup(JSON.stringify(f))).toEqual(refused);
       expect(checkBackup(load('bad-newer-format.json'))).toEqual({ ok: false, message: MSG_NEWER });
     });
-    it('AC267: a format 6 file is a newer file for 0.12.0 (format 5 is its own)', () => {
+    it('AC267: a format 8 file is a newer file for 0.14.0 (format 7 is its own)', () => {
       const f = JSON.parse(load('v0100-gear.json'));
-      f.format = 6;
+      f.format = 8;
       expect(checkBackup(JSON.stringify(f))).toEqual({ ok: false, message: MSG_NEWER });
     });
   });
@@ -343,5 +343,42 @@ describe('checkBackup', () => {
       f.format = 4;
       expect(checkBackup(JSON.stringify(f)).ok).toBe(true);
     });
+  });
+  describe('AC299 AC318 AC337: the mole, lavakip and knight mode checks of formats 6 and 7', () => {
+    const refused = { ok: false, message: MSG_BAD_VALUES };
+    it('AC299: a 0.13.0 file with 2 caught and 1 away mole and a chase knight passes', () => {
+      expect(checkBackup(load('v0130-moles.json')).ok).toBe(true);
+    });
+    it('AC318: a 0.14.0 file with a bought bar passes', () => {
+      expect(checkBackup(load('v0140-lavakip.json')).ok).toBe(true);
+    });
+    it('AC318: a bought bar with no spot is allowed (read as the home spot)', () => {
+      const f = JSON.parse(load('v0140-lavakip.json'));
+      f.kv.lavakip.spot = null;
+      expect(checkBackup(JSON.stringify(f)).ok).toBe(true);
+    });
+    it('AC299 AC337: a format 5 file that holds moles or a chase knight is not trusted', () => {
+      expect(checkBackup(load('bad-v0120-moles.json'))).toEqual(refused);
+      expect(checkBackup(load('bad-v0120-chase-mode.json'))).toEqual(refused);
+    });
+    it('AC318: a format 6 file that holds a lavakip record is not trusted', () => {
+      expect(checkBackup(load('bad-v0130-lavakip.json'))).toEqual(refused);
+    });
+    it('AC299: format 6 and 7 files are accepted by number, and the older formats are unchanged', () => {
+      for (const format of [5, 6, 7]) {
+        const f = JSON.parse(load('v0120-gear.json'));
+        f.format = format;
+        expect(checkBackup(JSON.stringify(f)).ok).toBe(true);
+      }
+    });
+    for (const name of [
+      'bad-v0130-unknown-mode.json', 'bad-v0130-away-91.json', 'bad-v0130-away-minus.json', 'bad-v0130-five-moles.json',
+      'bad-v0130-two-free.json', 'bad-v0130-mole-outside.json', 'bad-v0140-carried-eleven.json', 'bad-v0140-carried-minus.json',
+      'bad-v0140-carried-half.json', 'bad-v0140-spot-outside.json', 'bad-v0140-spot-not-bought.json',
+    ]) {
+      it(`AC195: ${name} gets the friendly message`, () => {
+        expect(checkBackup(load(name))).toEqual(refused);
+      });
+    }
   });
 });

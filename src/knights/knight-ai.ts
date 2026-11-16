@@ -1,6 +1,7 @@
 // Knight behaviour (V17b): the three modes on `stepDino` with `KNIGHT_BOX`, `stepToward`, the salute, and placement.
 import { createRng, type Rng } from '../core/rng';
 import { createDino, popNextTo, stepDino, walkToward, type DinoState, type Point } from '../dinos/dino-ai';
+import { snackStep } from '../lavakip/snack';
 import { SEARCH_EVERY_MS, type Cell } from '../monsters/monster-types';
 import { findMolePath, isStandCell } from '../monsters/mole-path';
 import type { World } from '../world/world';
@@ -140,6 +141,8 @@ export function stepKnight(knight: KnightState, ctx: KnightAiContext): KnightEve
   const { world, rng, player, playerYaw, dt } = ctx;
   if (!(dt > 0) || !Number.isFinite(dt)) return null;
   const body = knight.body;
+  // A lavakip snack (v23) stands him still; it reads no rng and he does nothing else this frame.
+  if (snackStep(body, dt)) return null;
   const speed = walkSpeed(knight.gear);
   knight.saluteClockMs += dt * 1000;
   if (!knight.chase && knight.chasePath !== undefined) {

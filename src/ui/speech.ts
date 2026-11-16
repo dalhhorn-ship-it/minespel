@@ -2,14 +2,29 @@
 // textContent only, aria-live polite, no taps. At most 3 lines wait; a 4th is dropped. Never near the hotbar or the
 // Hakken and Bouwen buttons (it sits at the top). No sound here, no network.
 import '../styles/speech.css';
+import { registerHook } from '../dev/e2e-hooks';
 
 export const MAX_WAITING = 3;
 export const DEFAULT_SPEECH_MS = 2500;
 
+/** Who says the line. `mole` lines (v22) get their own channel: V22b drops waiting mole lines when a new one comes. */
+export type SpeechKind = 'mole';
+
 interface Line {
   text: string;
   ms: number;
+  kind?: SpeechKind;
 }
+
+/** One line that was shown, for the e2e hook `toastLog` (E2E builds only; V22b fills it). */
+export interface ToastLogEntry {
+  text: string;
+  /** Loop ms of play time when it showed. */
+  playMs: number;
+}
+const toastEntries: ToastLogEntry[] = [];
+/** The lines shown so far, oldest first. The same array every call. */
+export const toastLog = (): readonly ToastLogEntry[] => toastEntries;
 
 let node: HTMLElement | null = null;
 let queue: Line[] = [];
@@ -45,10 +60,10 @@ function next(): void {
   }, line.ms);
 }
 
-/** Shows `text` now, or after the line that is showing. At most 3 wait; more are dropped. */
-export function say(text: string, ms: number = DEFAULT_SPEECH_MS): void {
+/** Shows `text` now, or after the line that is showing. At most 3 wait; more are dropped. `kind` is `mole` for the mole's own lines. */
+export function say(text: string, ms: number = DEFAULT_SPEECH_MS, kind?: SpeechKind): void {
   if (typeof text !== 'string' || text.length === 0) return;
-  const line = { text, ms: Number.isFinite(ms) && ms > 0 ? ms : DEFAULT_SPEECH_MS };
+  const line: Line = { text, ms: Number.isFinite(ms) && ms > 0 ? ms : DEFAULT_SPEECH_MS, kind };
   if (!showing) {
     queue.push(line);
     next();
@@ -65,4 +80,7 @@ export function clearSpeech(): void {
   showing = false;
   node?.remove();
   node = null;
+  toastEntries.length = 0;
 }
+
+if (__E2E__) registerHook('toastLog', () => toastEntries.map((e) => ({ ...e })));

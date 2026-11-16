@@ -56,7 +56,8 @@ const samples: { [K in KvName]: KvRecords[K] } = {
     createdAt: '2026-10-01',
   },
   village: { found: [35, 39], cooldownMs: 90_000, lastVillager: 'v3' },
-  monsters: { knights: [{ id: 'k1', mode: 'guard', spot: { x: 3, y: 9, z: 4 }, boughtFor: 30 }], bubbleClockMs: 5000, hintShown: true },
+  monsters: { knights: [{ id: 'k1', mode: 'guard', spot: { x: 3, y: 9, z: 4 }, boughtFor: 30 }], bubbleClockMs: 5000, hintShown: true, moles: [{ x: 5, y: 9, z: 6, state: 'caught' }] },
+  lavakip: { bought: true, spot: { x: 7, y: 9, z: 8 }, carried: 2 },
 };
 
 describe('records', () => {

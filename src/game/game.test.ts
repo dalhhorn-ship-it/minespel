@@ -77,6 +77,32 @@ describe('game', () => {
     expect(seen).toHaveLength(1);
   });
 
+  it('decision 144: a tap mine fires blockChanged with the column', () => {
+    const { game } = setup();
+    const seen: unknown[] = [];
+    game.on('blockChanged', (e) => seen.push(e));
+    const { x, z } = START_SPOT;
+    const cx = Math.floor(x), cz = Math.floor(z), y = Math.floor(START_SPOT.y) - 1;
+    expect(game.mineAt(cx, y, cz)).toBe(true);
+    expect(seen).toEqual([{ x: cx, z: cz }]);
+  });
+
+  it('decision 144: onRunningChange fires on pause, resume and portrait, and the listener can be removed', () => {
+    const { game, setGuard } = setup();
+    const seen: boolean[] = [];
+    const off = game.onRunningChange((r) => seen.push(r));
+    game.pause();
+    game.pause();
+    game.resume();
+    setGuard({ portrait: true, tooSmall: false });
+    setGuard({ portrait: true, tooSmall: false });
+    setGuard({ portrait: false, tooSmall: false });
+    expect(seen).toEqual([false, true, false, true]);
+    off();
+    game.pause();
+    expect(seen).toEqual([false, true, false, true]);
+  });
+
   it('mounts a sized canvas, the hud and the stick, and draws frames', () => {
     const s = setup();
     expect(s.container.querySelector('canvas')?.style.width).toBe('100%');

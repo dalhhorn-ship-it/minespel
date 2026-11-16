@@ -72,6 +72,7 @@ function openDinoMenu(dino: WorldDino, screenX?: number, screenY?: number) {
     onModeChange: (mode) => game?.dinoStore.setDinoMode(dino.id, mode),
     onNameSave: (name) => game?.dinoStore.setDinoName(dino.id, name),
     onKnuffel: () => game?.dinoSystem.showHearts(screenX, screenY),
+    lavakip: boot.current()?.feeder.menuOption({ kind: 'dino', id: dino.id }) ?? null,
     onClose: () => {
       closeDinoMenu();
       screens.showWorld();

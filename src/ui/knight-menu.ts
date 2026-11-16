@@ -1,6 +1,7 @@
 // The knight menu when the kid taps a knight (AC203): Volg mij, Blijf hier, Pas op de dieren, and a way back.
 import '../styles/knight-menu.css';
 import type { KnightMode } from '../knights/knight-types';
+import type { LavakipMenuOption } from '../lavakip/lavakip-types';
 import { el } from './dom';
 import { onTap } from './tap';
 
@@ -8,12 +9,14 @@ export const MODE_LABELS: Record<KnightMode, string> = {
   follow: 'Volg mij',
   stay: 'Blijf hier',
   guard: 'Pas op de dieren',
+  chase: 'Jaag monsters weg',
 };
 
 const MODE_STATUS: Record<KnightMode, string> = {
   follow: 'Ik loop met je mee!',
   stay: 'Ik blijf hier staan.',
   guard: 'Ik hou de wacht bij deze plek.',
+  chase: 'Ik jaag monsters weg!',
 };
 
 export interface KnightMenuOptions {
@@ -22,6 +25,8 @@ export interface KnightMenuOptions {
   onClose: () => void;
   /** The Uitrusten button (v19): shown only when this is given. */
   onGear?: () => void;
+  /** "Lavakip geven" (v23, V23c draws the button): null or missing means no entry. */
+  lavakip?: LavakipMenuOption | null;
   /** The guard report line, asked again whenever the mode is guard. */
   report?: () => string;
   now?: () => number;

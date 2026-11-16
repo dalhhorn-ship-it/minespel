@@ -5,14 +5,16 @@ import { Group, type Mesh } from 'three';
 import { registerHook } from '../dev/e2e-hooks';
 import { createKnightModel } from './knight-model';
 import { createBubbleModel, createKlodderModel } from './klodder-model';
+import { createLavakipBarModel } from './lavakip-bar-model';
 import { createMoleModel } from './mole-model';
 
-export type ActorGroup = 'knights' | 'monsters';
+/** `props` (v23): things that stand in the world and are no creature, like the Lavakip-bar. */
+export type ActorGroup = 'knights' | 'monsters' | 'props';
 
 /** What the renderer needs to draw one creature. */
 export interface ActorView {
   id: string;
-  model: 'knight' | 'klodder' | 'bubble' | 'mole';
+  model: 'knight' | 'klodder' | 'bubble' | 'mole' | 'lavakip-bar';
   x: number;
   y: number;
   z: number;
@@ -37,6 +39,7 @@ const BUILDERS: Partial<Record<ActorView['model'], (look?: string) => ActorModel
   klodder: createKlodderModel,
   bubble: createBubbleModel,
   mole: createMoleModel,
+  'lavakip-bar': createLavakipBarModel,
 };
 
 export interface ActorSceneSync {

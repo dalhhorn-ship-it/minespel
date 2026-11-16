@@ -53,6 +53,16 @@ export interface KnightSystem extends CreatureSystem {
   /** Points of the kid, re-read every time the screen goes back to the world (V18 reads it for the bubble rule). */
   setPoints(points: number): void;
   points(): number;
+  /** The id of the knight who guards this animal (a dino or chicken id), or null (v22). V22d fills it; nobody is guarded until then. */
+  guardedBy(animalId: string): string | null;
+  /** Every guarded animal and who guards it, for the e2e hook `guardState` (v22). Empty until V22d. */
+  guardState(): GuardEntry[];
+}
+
+/** One row of `guardState()`. */
+export interface GuardEntry {
+  animalId: string;
+  knightId: string;
 }
 
 function bounds(k: KnightState): Box {
@@ -73,6 +83,8 @@ export function createKnightSystem(options: KnightSystemOptions): KnightSystem {
   let on = true;
   let points = 0;
   let drawn = 0;
+  /** animal id to knight id. V22d recomputes it every 1000 ms of loop time and nowhere else (reused, never per frame). */
+  const guards = new Map<string, string>();
 
   const stateFrom = (r: KnightRecord): KnightState => ({
     id: r.id, mode: r.mode, spot: r.spot ? { ...r.spot } : null, boughtFor: r.boughtFor,
@@ -182,6 +194,8 @@ export function createKnightSystem(options: KnightSystemOptions): KnightSystem {
       points = p;
     },
     points: () => points,
+    guardedBy: (animalId) => guards.get(animalId) ?? null,
+    guardState: () => [...guards].map(([animalId, knightId]) => ({ animalId, knightId })),
     step(dt) {
       if (!(dt > 0) || !Number.isFinite(dt)) return;
       for (const k of visible()) {
@@ -221,6 +235,7 @@ export function createKnightSystem(options: KnightSystemOptions): KnightSystem {
     let n = 0;
     registerHook('knights', () =>
       list.map((k) => ({ id: k.id, mode: k.mode, x: k.body.x, y: k.body.y, z: k.body.z, spot: k.spot ? { ...k.spot } : null })));
+    registerHook('guardState', () => system.guardState());
     registerHook('addKnight', (mode: KnightMode = 'follow') => {
       if (list.length >= MAX_KNIGHTS) return null;
       const id = `test-knight-${Date.now()}-${n++}`;

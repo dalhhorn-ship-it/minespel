@@ -90,4 +90,21 @@ describe('knight flow', () => {
     expect(layer.querySelector('.knight-menu-card')).not.toBeNull();
     expect(layer.querySelector('.gear-screen-card')).toBeNull();
   });
+  it('AC316: the menu asks the feeder for this knight and draws no extra button until V23c', () => {
+    const menuOption = vi.fn(() => null);
+    const layer = document.createElement('div');
+    const screens = {
+      showKidOverlay: vi.fn((n: HTMLElement | null) => layer.replaceChildren(...(n ? [n] : []))),
+      showWorld: vi.fn(),
+    };
+    const flow = createKnightFlow({ screens, say: vi.fn(), feeder: () => ({ menuOption }) });
+    flow.openMenu(knight('stay'));
+    expect(menuOption).toHaveBeenCalledWith({ kind: 'knight', id: 'a' });
+    expect([...layer.querySelectorAll('button')].map((b) => b.textContent)).toEqual(['Volg mij', 'Blijf hier', 'Pas op de dieren', 'Sluiten']);
+  });
+  it('AC337: a chase knight opens the menu with his own label and status', () => {
+    const s = setup();
+    s.flow.openMenu({ ...knight('stay'), mode: 'chase' } as KnightState);
+    expect(s.layer.querySelector('.knight-menu-status')?.textContent).toBe('Ik jaag monsters weg!');
+  });
 });

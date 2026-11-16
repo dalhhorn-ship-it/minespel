@@ -5,7 +5,7 @@ import { createRecords } from './records';
 import { SCHEMA_VERSION, STORE_NAMES, type KvName, type StoreName } from './schema';
 
 export const BACKUP_APP = 'dino-blokwereld';
-export const BACKUP_FORMAT = 5;
+export const BACKUP_FORMAT = 7;
 /** A file over this size is refused before it is read (AC195). */
 export const MAX_BACKUP_BYTES = 20 * 1024 * 1024;
 
@@ -14,7 +14,7 @@ export const MAX_BACKUP_BYTES = 20 * 1024 * 1024;
  * worldV1 (the old 0.4.0 copy), session (a running break or exam) and timers.
  */
 export const BACKUP_KV_NAMES = [
-  'settings', 'player', 'world', 'dinos', 'economy', 'rotation', 'switches', 'stats', 'meta', 'village', 'monsters',
+  'settings', 'player', 'world', 'dinos', 'economy', 'rotation', 'switches', 'stats', 'meta', 'village', 'monsters', 'lavakip',
 ] as const satisfies readonly KvName[];
 export type BackupKvName = (typeof BACKUP_KV_NAMES)[number];
 

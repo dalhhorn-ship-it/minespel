@@ -5,6 +5,7 @@ import '../styles/dino-menu.css';
 import type { DinoMode } from '../dinos/dino-ai';
 import type { WorldDino } from '../dinos/dino-store';
 import { DINO_KINDS } from '../dinos/kinds';
+import type { LavakipMenuOption } from '../lavakip/lavakip-types';
 import { el } from './dom';
 import { createNameScreen, type NameScreen } from './name-screen';
 import { onTap } from './tap';
@@ -15,6 +16,8 @@ export interface DinoMenuOptions {
   onNameSave: (name: string) => void;
   onKnuffel: () => void;
   onClose: () => void;
+  /** "Lavakip geven" (v23): null or missing means no entry. V23c draws the button; V22a only carries the type. */
+  lavakip?: LavakipMenuOption | null;
   now?: () => number;
 }
 
