@@ -27,6 +27,7 @@
 .break-header {
   flex: none;
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: var(--gap);
@@ -224,3 +225,28 @@
    44 x 44 comes from .lock-icon-btn. It sits in the header, so it never covers an answer or the number pad. */
 .break-lock { flex: none; }
 .break-lock[hidden] { display: none; }
+
+/* v25 Nog een keer: the label next to the dots and the line above the repeat question (AC342). Plain ink on paper, never red. */
+.break-repeat-left {
+  flex: none;
+  padding: 6px 12px;
+  border: 3px solid var(--mc-edge);
+  background: var(--paper);
+  font-size: var(--font-body, 18px);
+  font-weight: 800;
+  white-space: nowrap;
+}
+.break-repeat-left[hidden] { display: none; }
+
+.break-repeat-line {
+  margin: 0;
+  font-size: var(--font-large);
+  font-weight: 800;
+}
+
+.teach-note,
+.summary-alsnog {
+  margin: 0;
+  font-size: var(--font-large);
+  font-weight: 700;
+}

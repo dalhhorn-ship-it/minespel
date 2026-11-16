@@ -34,6 +34,10 @@ export interface TeachMomentOptions {
   teaching?: Teaching;
   /** Points really taken by this teach moment (1 means "-1 punt"). 0 or missing shows no line. */
   taken?: number;
+  /** v25: a line under the explain text, for the repeat card ("Die komt straks nog een keer."). */
+  note?: string;
+  /** v25: the button text, "Ik snap het" when missing. The repeat card says "Verder". */
+  buttonLabel?: string;
   onDone: () => void;
   now?: () => number;
 }
@@ -55,6 +59,8 @@ export function createTeachMoment(options: TeachMomentOptions): TeachMoment {
     scroll.append(el('p', { class: 'points-minus teach-minus', text: minusText(options.taken) }));
   }
 
+  if (options.note) scroll.append(el('p', { class: 'teach-note', text: options.note }));
+
   const t = options.teaching;
   if (t?.kind === 'page') {
     const box = el('div', { class: 'teach-lesson' }, [renderLessonPage(t.page)]);
@@ -65,7 +71,7 @@ export function createTeachMoment(options: TeachMomentOptions): TeachMoment {
     scroll.append(el('div', { class: 'teach-lesson teach-worked' }, [el('h3', { class: 'lesson-title', text: t.example.title }), list]));
   }
 
-  const button = el('button', { class: 'teach-done', text: 'Ik snap het', attrs: { type: 'button' } });
+  const button = el('button', { class: 'teach-done', text: options.buttonLabel ?? 'Ik snap het', attrs: { type: 'button' } });
   const footer = el('div', { class: 'teach-footer' }, [button]);
   root.append(scroll, footer);
 

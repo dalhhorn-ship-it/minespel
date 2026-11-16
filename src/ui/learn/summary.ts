@@ -17,6 +17,11 @@ export interface SummaryView {
   destroy(): void;
 }
 
+/** v25: "En 1 alsnog goed!" under the score, with the number of questions right on a repeat. */
+export function alsnogText(n: number): string {
+  return `En ${n} alsnog goed!`;
+}
+
 function formatEarned(earned: number): string {
   if (earned > 0) return earned === 1 ? '+1 punt verdiend' : `+${earned} punten verdiend`;
   if (earned < 0) return earned === -1 ? '-1 punt' : `${earned} punten`;
@@ -52,6 +57,12 @@ export function createSummaryView(options: SummaryViewOptions): SummaryView {
         : formatEarned(summary.earned);
     root.append(
       el('p', { class: summary.earned < 0 ? 'summary-points points-minus' : 'summary-points', text: pointsText }),
+    );
+  }
+
+  if ((summary.repeatRight ?? 0) > 0) {
+    root.append(
+      el('p', { class: 'summary-alsnog', text: alsnogText(summary.repeatRight ?? 0), attrs: { 'data-testid': 'summary-alsnog' } }),
     );
   }
 

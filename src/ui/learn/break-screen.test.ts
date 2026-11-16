@@ -2,13 +2,24 @@
 import { describe, expect, it } from 'vitest';
 import type { ChoiceItem, Lesson } from '../../content/format';
 import { itemFromId } from '../../content/rekenen/generator';
-import { reduce, startSession, type SessionEntry } from '../../learning/break-session';
+import { reduce, startSession, type SessionEntry, type SessionState } from '../../learning/break-session';
 import { defaultKv } from '../../storage/schema';
 import { createBreakScreen } from './break-screen';
 
 function tap(el: Element) {
   el.dispatchEvent(new MouseEvent('pointerdown', { bubbles: true }));
   el.dispatchEvent(new MouseEvent('pointerup', { bubbles: true }));
+}
+
+/** v25: three wrong repeats of the one teach moment question, each closed with Verder, until the summary. */
+function skipRepeats(start: SessionState): SessionState {
+  let state = start;
+  let at = 5000;
+  while (state.phase === 'question' && state.repeat?.on) {
+    state = reduce(state, { type: 'answer', response: { type: 'choice', index: 1 }, at: at++ }).state;
+    state = reduce(state, { type: 'understood', at: at++ }).state;
+  }
+  return state;
 }
 
 const sampleLesson: Lesson = {
@@ -129,8 +140,23 @@ describe('break-screen (T36)', () => {
     expect(screen.element.querySelector('.teach-minus')?.textContent).toBe('-1 punt');
     tap(screen.element.querySelector('.teach-done')!);
 
+    // v25 (AC338, AC339, AC342): question 3 comes back after the last question, no lesson, "Nog 1 te gaan", no points.
+    expect(screen.element.textContent).toContain('Deze proberen we nog een keer!');
+    expect(screen.element.querySelector('.break-repeat-left')?.textContent).toBe('Nog 1 te gaan');
+    expect(screen.element.querySelectorAll('.break-dot-done')).toHaveLength(3);
+    expect(screen.element.textContent).not.toContain('Stap voor stap:');
+    tapDigit('5');
+    tapDigit('6');
+    tapDone();
+    expect(screen.element.textContent).toContain('✓');
+    expect(screen.element.textContent).toContain('Goed zo! Nu weet je het.');
+    expect(screen.element.textContent).not.toContain('punt');
+    tap(screen.element.querySelector('.break-next-btn')!);
+
     // Summary screen: 2 van de 3 goed, +2 +1 -1 = +2 punten verdiend, new total 20, egg hint shown (AC34, AC176).
+    // v25 (AC343): the right repeat shows one extra line and changes no number.
     expect(screen.element.textContent).toContain('2 van de 3 goed!');
+    expect(screen.element.querySelector('.summary-alsnog')?.textContent).toBe('En 1 alsnog goed!');
     expect(screen.element.textContent).toContain('+2 punten verdiend');
     expect(screen.element.textContent).toContain('Totaal: 20 punten');
     expect(screen.element.textContent).toContain('Je kunt een ei kopen in de Dinowinkel!');
@@ -212,6 +238,7 @@ describe('break-screen (T36)', () => {
     state = reduce(state, { type: 'answer', response: wrong, at: 1500 }).state;
     state = reduce(state, { type: 'answer', response: wrong, at: 1600 }).state;
     state = reduce(state, { type: 'understood', at: 1700 }).state;
+    state = skipRepeats(state);
     const screen = createBreakScreen({ state, onAction: () => {} });
     const line = screen.element.querySelector('.summary-points');
     expect(line?.textContent).toBe('-2 punten');
@@ -233,6 +260,7 @@ describe('break-screen (T36)', () => {
     state = reduce(state, { type: 'answer', response: { type: 'choice', index: 1 }, at: (now += 500) }).state;
     state = reduce(state, { type: 'answer', response: { type: 'choice', index: 1 }, at: (now += 500) }).state;
     state = reduce(state, { type: 'understood', at: (now += 500) }).state;
+    state = skipRepeats(state);
 
     const screen = createBreakScreen({
       state,
@@ -399,5 +427,82 @@ describe('summary points (v10, AC35, AC175)', () => {
     expect(loaded.lastApplied).toBeUndefined();
     const screen = createBreakScreen({ state: loaded, onAction: () => {} });
     expect(screen.element.querySelector('.break-banner-right')?.textContent).toContain('Goed! +2 punten');
+  });
+});
+
+describe('v25 Nog een keer: repeat cards', () => {
+  const wrong = { type: 'choice', index: 1 } as const;
+  const start = (pointsMode: 'makkelijk' | 'normaal' | 'moeilijk' = 'normaal') => {
+    let { state } = startSession({
+      mode: 'break',
+      pointsMode,
+      entries: [{ item: choiceItem1, box: 0 }, { item: { ...choiceItem1, id: 'q2' }, box: 0 }],
+      economy: { ...defaultKv('economy'), points: 10 },
+      day: '2026-10-17',
+      at: 1000,
+    });
+    let at = 2000;
+    const send = (e: Parameters<typeof reduce>[1]) => {
+      state = reduce(state, e).state;
+    };
+    for (let i = 0; i < 2; i++) {
+      send({ type: 'answer', response: wrong, at: at++ });
+      send({ type: 'answer', response: wrong, at: at++ });
+      send({ type: 'understood', at: at++ });
+    }
+    return { get state() { return state; }, send, next: () => at++ };
+  };
+
+  it('AC340: a wrong repeat shows the answer and explain, the "straks" line, Verder, no lesson, no minus; the label stays', () => {
+    const g = start('moeilijk');
+    const screen = createBreakScreen({ state: g.state, lessonForItem: () => sampleLesson, onAction: () => {} });
+    expect(screen.element.querySelector('.break-repeat-left')?.textContent).toBe('Nog 2 te gaan');
+    g.send({ type: 'answer', response: wrong, at: g.next() });
+    screen.render(g.state);
+    const text = screen.element.textContent ?? '';
+    expect(text).toContain('Zo zit het:');
+    expect(text).toContain('loopt');
+    expect(text).toContain('Hij loopt is met stam + t.');
+    expect(text).toContain('Die komt straks nog een keer.');
+    expect(text).not.toContain('Regel 1');
+    expect(text).not.toContain('-1 punt');
+    expect(text).not.toContain('Net niet');
+    expect(screen.element.querySelector('.teach-done')?.textContent).toBe('Verder');
+    expect(screen.element.querySelector('.break-repeat-left')?.textContent).toBe('Nog 2 te gaan');
+    screen.destroy();
+  });
+
+  it('AC341: the third wrong repeat says "Goed geoefend!" instead ', () => {
+    const g = start();
+    for (let i = 0; i < 6; i++) {
+      g.send({ type: 'answer', response: wrong, at: g.next() });
+      if (i < 5) g.send({ type: 'understood', at: g.next() });
+    }
+    const screen = createBreakScreen({ state: g.state, onAction: () => {} });
+    expect(screen.element.textContent).toContain('Goed geoefend! Deze komt een andere keer terug.');
+    expect(screen.element.textContent).not.toContain('Die komt straks nog een keer.');
+    expect(screen.element.querySelector<HTMLElement>('.break-repeat-left')?.hidden).toBe(true);
+    screen.destroy();
+  });
+
+  it('AC343: with no right repeat no "alsnog" line shows', () => {
+    const g = start();
+    while (g.state.phase !== 'summary') {
+      g.send({ type: 'answer', response: wrong, at: g.next() });
+      g.send({ type: 'understood', at: g.next() });
+    }
+    const screen = createBreakScreen({ state: g.state, onAction: () => {} });
+    expect(screen.element.querySelector('.summary-alsnog')).toBeNull();
+    screen.destroy();
+  });
+
+  it('AC351: the new strings hold no banned word and are not "Fout"', async () => {
+    const { REPEAT_LINE, REPEAT_RIGHT, REPEAT_AGAIN, REPEAT_LAST, repeatLeftText } = await import('./break-screen');
+    const { alsnogText } = await import('./summary');
+    const { hasBannedWord } = await import('../../core/kid-words');
+    for (const t of [REPEAT_LINE, REPEAT_RIGHT, REPEAT_AGAIN, REPEAT_LAST, repeatLeftText(2), alsnogText(1)]) {
+      expect(hasBannedWord(t)).toBe(false);
+      expect(t).not.toMatch(/fout/i);
+    }
   });
 });
