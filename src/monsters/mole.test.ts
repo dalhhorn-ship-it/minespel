@@ -165,7 +165,8 @@ describe('the fence rule: he waits and never leaves (v22, AC249, AC295)', () => 
     expect(times.length).toBeGreaterThanOrEqual(25);
     for (let i = 1; i < times.length; i++) expect((times[i] as number) - (times[i - 1] as number)).toBeGreaterThanOrEqual(60_000 - DT * 1000);
     expect(r.teased).toHaveLength(0);
-  });
+    // 36 000 steps: about 3 seconds here, more on a busy CI runner, so this case gets its own time limit.
+  }, 30_000);
 
   it('AC295: walls 2 high around the mole are the same as a pen: he waits and says Hmpf once', () => {
     const w = buildMoleMap();
