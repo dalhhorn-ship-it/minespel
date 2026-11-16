@@ -1,12 +1,16 @@
 # Status
 
 **Phase:** small releases. Live on `main`: 0.6.0 to 0.9.0 (PR #25, #26, #27): v3 Dino's veilig, v17 Ridders, v18 Zwarte bubbel, v15 Grote wereld and v16 Monstermol.
-**Live on `main` since 2026-11-16 (PR #28, green WebKit CI):** 0.10.0 Ridderuitrusting, 0.11.0 Diepe edelstenen and 0.12.0 Meer uitrusting (V19a to V21c, decisions 140 to 142). With PR #25, #26 and #27 everything from 0.6.0 to 0.12.0 is live. Nothing is waiting on the branch.
-**Next step:** the founder checks on the iPad what could not be tested here (AC210, AC227, AC241, AC256, AC269, AC279, AC290: speed with knights, Klodder, the mole and full gear in the big world; Kijkafstand on Dichtbij is the reserve). The monster feature set is complete. Next in the backlog: v6 (open founder question MOQ15), then /release.
-**After that:** only v6 is left in the backlog (open founder question MOQ15: where v6 goes). Draft: `docs/MONSTERS_PRD.md`.
+**Live on `main`:** 0.6.0 to 0.12.0 (PR #25 to #28). The last one, PR #28, is 0.10.0 to 0.12.0 (v19 to v21, decisions 140 to 142).
+**Ready on branch `claude/jolly-fermi-z0vak4` at 0c676b4, not yet on main:** 0.13.0 Duidelijke mol en kompas (v22), 0.14.0 Lavakip-bar (v23) and 0.15.0 Geluid dichtbij (v24). All 11 tasks V22a to V24c are done (decisions 143 to 145). Full check green in WebKit: 1922 unit tests and 487 e2e tests.
+**Next step:** a pull request from the branch to `main`. Merge when CI is green. The merge deploys, so it waits for the founder's yes (Gate 2).
+**Founder iPad checks (v22 to v24):** the list is in the top section of `docs/TEST_REPORT.md`. In short: AC308 (v22, 2 minutes with 3 caught moles, 1 free mole, 3 knights, Klodder and 25 shop dinos), AC320 (v23, the bar and 5 feeds, the truck and lavakip look friendly), AC327 (v24, listen to the near sounds with the iPad sound on and turn left and right), and a hand-over test with the kid. The founder also still has to listen to the new sounds.
+**Older founder checks still open:** AC210, AC227, AC241, AC256, AC269, AC279 and AC290 (speed with knights, Klodder, the mole and full gear in the big world; Kijkafstand on Dichtbij is the reserve). See `docs/TEST_REPORT.md`.
+**Product guesses the founder may change:** a pen up to 6 x 6 counts as caught; a caught mole snores and walks free if the pen opens; at most 3 caught plus 1 free; "Jaag monsters weg" also chases Klodder; a knight guards 4 animals within 8 blocks; the bar costs 60 points, a lavakip 3, and at most 10 are carried; pill pictures are emoji.
+**After the merge:** PRD section 12 still holds v22 to v24. The next `/release` moves them to `docs/releases/`. Open: MOQ15 (where v6 Wat heb ik geleerd goes). Draft of the monster set: `docs/MONSTERS_PRD.md`. `/retro` is due (decision 136 and the friction lines).
 **Known flake:** `exam.spec.ts:254` AC112 is flake TD22.
 **Rule change:** PRD changes for scope the founder asked for are stamped by the operator (standing approval, decision 136).
-**Blockers:** none. This cloud session cannot push to main directly, so main is updated through a pull request. A second session also works in this repo: fetch main before a decision number.
+**Blockers:** the founder's yes to merge to `main` (Gate 2). This cloud session cannot push to main directly, so main is updated through a pull request. A second session also works in this repo: fetch main before a decision number (next free: 146).
 
 
 ## Done
