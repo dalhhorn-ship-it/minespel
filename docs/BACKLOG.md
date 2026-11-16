@@ -266,3 +266,8 @@ Not planned in any release. Each would need the founder to pick it first.
 * Renaming the app from inside the app (the kid may pick the final name later, see F12).
 * Custom domain for the hosted app.
 * Sync between devices, sharing modules online, any account or server.
+
+## Wishes of 2026-11-16 (not scoped yet)
+
+* **v26 Ridders, stop! (founder, kid wish).** Founder: "het kind vind het monster schattig en wil niet dat de ridders hem wegjagen. Geef me ridder controls waarmee ridders in een keer kunnen stoppen met wegjagen. Dit moet werken ook als een ridder al begonnen is." One control that makes every knight stop chasing at once, also in the middle of a chase. Scope after v25 is built, because a PRD edit closes the build gate. Open: which monsters it covers and whether it stays on.
+* **More monster kinds (founder).** Founder: "Kun je meer monstervarianten bedenken". Ideas given in chat on 2026-11-16. The founder and the kid pick; then it joins `docs/MONSTERS_PRD.md`.
