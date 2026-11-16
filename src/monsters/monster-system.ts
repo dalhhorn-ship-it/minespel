@@ -34,7 +34,7 @@ import type { TargetList } from './targets';
 import { addTarget } from './targets';
 import { stepTease, teaseNow } from './tease';
 import type { SpeechKind } from '../ui/speech';
-import type { ActorLabels } from '../ui/actor-labels';
+import { labelPoint, type ActorLabels } from '../ui/actor-labels';
 
 export { MONSTER_PRIORITY, WAKE_MAX_Y, WAKE_MIN_Y };
 
@@ -158,6 +158,12 @@ export function createMonsterSystem(options: MonsterSystemOptions): MonsterSyste
     shake: options.shake,
     showMoleCard: options.showMoleCard,
     showMoleTapCard: options.showMoleTapCard,
+    // V22c wiring: the moles are saved with the monsters record, and the labels over a caught mole follow the camera.
+    save: (list) => options.persist?.((m) => ({ ...m, moles: list })),
+    project: (p) => {
+      const { width, height } = options.viewport();
+      return labelPoint(options.player.pose(), width, height, p);
+    },
   });
 
   function touchCell(x: number, z: number): void {
@@ -396,9 +402,12 @@ export function createMonsterSystem(options: MonsterSystemOptions): MonsterSyste
       sync();
     },
     wantsTap(x, y) {
-      if (!bubble || bubble.stage === 'out') return false;
+      const showsBubble = bubble !== null && bubble.stage !== 'out';
+      if (!showsBubble && !slot.hasOut()) return false;
       const { width, height } = options.viewport();
       const aim = aimFromScreen(options.player.pose(), width, height, x, y);
+      if (slot.wantsTap(aim)) return true;
+      if (!bubble || !showsBubble) return false;
       return pickActor(aim, [{ id: 'bubble', box: bubbleBox(bubble) }], BUBBLE_TAP_REACH) !== null;
     },
     handleTap(x, y) {
@@ -431,7 +440,8 @@ export function createMonsterSystem(options: MonsterSystemOptions): MonsterSyste
       sync();
     },
     dispose() {
-      slot.reset();
+      // A teardown never erases the saved moles (AC299, AC335).
+      slot.dispose();
       clear();
     },
   };
@@ -450,6 +460,13 @@ export function createMonsterSystem(options: MonsterSystemOptions): MonsterSyste
     registerHook('creatureSwitches', () => applied);
     registerHook('findMolePath', (from: Cell, to: Cell, headroom = 1): Cell[] | null =>
       findMolePath(world, from, [to], { headroom } satisfies PathOptions));
+    // Where mole number `index` shows on the screen (css pixels, a little above his feet), or null: e2e taps the real spot.
+    registerHook('moleScreenPoint', (index: number) => {
+      const m = system.moleState().moles[index];
+      if (!m) return null;
+      const { width, height } = options.viewport();
+      return screenPointOf(options.player.pose(), width, height, { x: m.x, y: m.y + 0.5, z: m.z });
+    });
     registerHook('bubbleScreenPoint', () => {
       if (!bubble) return null;
       const { width, height } = options.viewport();

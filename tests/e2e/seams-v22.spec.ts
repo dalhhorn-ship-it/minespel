@@ -1,5 +1,5 @@
 // The seams of v22, v23 and v24 (V22a, decision 144): every new hook exists and gives its empty shape, the bubble slot is
-// empty, the shop shows no Lavakip-bar section yet, and the fourth knight mode is saved. No visible change from 0.12.0.
+// empty, the shop shows the Lavakip-bar card (V23a), and the fourth knight mode is saved. No visible change from 0.12.0.
 import { expect, test, type Page } from '@playwright/test';
 import { openApp, readState } from './helpers/app';
 
@@ -56,12 +56,14 @@ test.describe('Seams of v22 to v24 (V22a)', () => {
     await expect(page.getByText(/Bubbel over|Bubbel komt zo/)).toHaveCount(0);
   });
 
-  test('the shop shows no Lavakip-bar section yet and the buy does nothing', async ({ page }) => {
+  test('AC310: the shop shows the Lavakip-bar card, and with 0 points the buy does nothing', async ({ page }) => {
     await openApp(page);
     await readState(page, 'openShop');
     await expect(page.locator('[data-testid="shop-points"]')).not.toHaveText(/…/);
-    await expect(page.locator('[data-testid="shop-lavakip"]')).toHaveCount(0);
-    await expect(page.getByText('Lavakip')).toHaveCount(0);
+    await expect(page.locator('[data-testid="shop-lavakip"]')).toHaveCount(1);
+    await expect(page.locator('[data-testid="shop-lavakip"]').getByText('Lavakip')).not.toHaveCount(0);
+    expect(await readState(page, 'buyLavakipBarInShop')).toBe(false);
+    expect(await readState(page, 'lavakipState')).toEqual({ bought: false, spot: null, carried: 0 });
   });
 
   test('AC337: a chase knight is added, saved and kept after a restart', async ({ page }) => {

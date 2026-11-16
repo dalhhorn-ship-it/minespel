@@ -1,6 +1,8 @@
 // Saving the moles (v22, decision 144, AC299 and AC335). V22a holds the record, the backup check and the read; V22c
-// adds the writer (what the slot saves on every change of caught, freed, away or gone).
+// adds the writer (what the slot saves on every change of caught, freed, away or gone, and about every second while the
+// free mole walks or an away mole counts down).
 import type { SavedMole } from '../storage/schema';
+import type { MoleState } from './monster-types';
 
 export type { SavedMole };
 
@@ -55,4 +57,33 @@ export function readMoles(record: { moles?: unknown }): SavedMole[] {
     } else out.push({ x, y, z, state });
   }
   return out;
+}
+
+const round2 = (n: number): number => Math.round(n * 100) / 100;
+
+/**
+ * The row of one mole, or null for a rumble (nothing is saved of it, AC299). A caught mole and a free one keep their
+ * feet spot; an away mole (also one that is still sinking with `dove` set) keeps where he dove under and the play time
+ * left, a whole number from 0 to 90 000. `groundY` is the feet level where he dove, as he has sunk since.
+ */
+export function toSavedMole(m: Pick<MoleState, 'caught' | 'phase' | 'dove' | 'x' | 'y' | 'z' | 'awayMs'>, groundY: number): SavedMole | null {
+  if (m.phase === 'rumble' || m.phase === 'none') return null;
+  if (m.phase === 'away' || (m.phase === 'leaving' && m.dove)) {
+    const at = m.dove ?? m;
+    const awayMs = Math.min(MAX_AWAY_MS, Math.max(0, Math.round(m.awayMs)));
+    return { x: round2(at.x), y: round2(groundY), z: round2(at.z), state: 'away', awayMs };
+  }
+  if (m.phase !== 'out') return null;
+  return { x: round2(m.x), y: round2(m.y), z: round2(m.z), state: m.caught ? 'caught' : 'free' };
+}
+
+/** True when two lists hold the same rows (an away time within `awayTolerance` ms counts as the same), so nothing is written twice. */
+export function sameMoles(a: readonly SavedMole[], b: readonly SavedMole[], awayTolerance = 0): boolean {
+  if (a.length !== b.length) return false;
+  for (let i = 0; i < a.length; i++) {
+    const p = a[i] as SavedMole;
+    const q = b[i] as SavedMole;
+    if (p.x !== q.x || p.y !== q.y || p.z !== q.z || p.state !== q.state || Math.abs((p.awayMs ?? -1) - (q.awayMs ?? -1)) > awayTolerance) return false;
+  }
+  return true;
 }

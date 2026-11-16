@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { WORLD_HEIGHT, WORLD_SIZE } from '../world/terrain';
-import { checkMoles, readMoles } from './mole-save';
+import { checkMoles, readMoles, sameMoles, toSavedMole } from './mole-save';
 
 const ok = (raw: unknown) => checkMoles(raw, WORLD_SIZE, WORLD_HEIGHT);
 const caught = (x = 10) => ({ x, y: 12, z: 10, state: 'caught' });
@@ -44,5 +44,37 @@ describe('readMoles', () => {
   });
   it('an away mole with no time left value reads as 60 seconds', () => {
     expect(readMoles({ moles: [{ x: 5, y: 12, z: 5, state: 'away' }] })).toEqual([{ x: 5, y: 12, z: 5, state: 'away', awayMs: 60_000 }]);
+  });
+});
+
+describe('toSavedMole and sameMoles (AC299, AC335)', () => {
+  const base = { caught: false, dove: null, x: 10.123, y: 12, z: 20.456, awayMs: 0 };
+  it('AC299: a caught and a free mole keep their spot, a rumble is never saved', () => {
+    expect(toSavedMole({ ...base, phase: 'out', caught: true }, 12)).toEqual({ x: 10.12, y: 12, z: 20.46, state: 'caught' });
+    expect(toSavedMole({ ...base, phase: 'out' }, 12)).toEqual({ x: 10.12, y: 12, z: 20.46, state: 'free' });
+    expect(toSavedMole({ ...base, phase: 'rumble' }, 12)).toBeNull();
+  });
+  it('AC335: an away mole (also one still sinking) keeps where he dove and a whole away time from 0 to 90 000', () => {
+    const dove = { x: 3.5, z: 4.5 };
+    expect(toSavedMole({ ...base, phase: 'away', dove, awayMs: 40_000.4 }, 11)).toEqual({ x: 3.5, y: 11, z: 4.5, state: 'away', awayMs: 40_000 });
+    expect(toSavedMole({ ...base, phase: 'leaving', dove, awayMs: 75_000 }, 11)?.state).toBe('away');
+    expect(toSavedMole({ ...base, phase: 'away', dove, awayMs: -5 }, 11)?.awayMs).toBe(0);
+    expect(toSavedMole({ ...base, phase: 'away', dove, awayMs: 99_999 }, 11)?.awayMs).toBe(90_000);
+    expect(toSavedMole({ ...base, phase: 'leaving' }, 11)).toBeNull();
+  });
+  it('AC299: what the writer makes passes the backup check and reads back the same', () => {
+    const rows = [
+      toSavedMole({ ...base, phase: 'out', caught: true }, 12),
+      toSavedMole({ ...base, phase: 'away', dove: { x: 3.5, z: 4.5 }, awayMs: 40_000 }, 11),
+    ];
+    expect(ok(rows)).toBe(true);
+    expect(readMoles({ moles: rows })).toEqual(rows);
+  });
+  it('sameMoles compares rows, with a tolerance for the away time', () => {
+    const a = [{ x: 1, y: 2, z: 3, state: 'away' as const, awayMs: 40_000 }];
+    expect(sameMoles(a, [{ ...a[0]!, awayMs: 39_000 }])).toBe(false);
+    expect(sameMoles(a, [{ ...a[0]!, awayMs: 39_000 }], 2500)).toBe(true);
+    expect(sameMoles(a, [{ ...a[0]!, state: 'caught' as const }])).toBe(false);
+    expect(sameMoles(a, [])).toBe(false);
   });
 });

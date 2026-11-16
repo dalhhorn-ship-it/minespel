@@ -11,7 +11,7 @@ export const MOED_FULL = 30;
 export const MOED_MAX_RATE = MOED_FULL / 3;
 /** Pokers that count for the fill. */
 export const MOED_MAX_POKERS = 3;
-/** Follow and stay knights notice Klodder within this many blocks along each axis; guards within the second. */
+/** Follow and stay knights notice Klodder within this many blocks along each axis; guards and knights on Jaag monsters weg (AC337) within the second. */
 export const NOTICE_NEAR = 8;
 export const NOTICE_GUARD = 16;
 /** A knight this close pokes. */
@@ -59,7 +59,7 @@ export function stepMoed(k: KlodderState, ctx: MonsterContext): boolean {
       kn.chase = null;
       continue;
     }
-    const reach = (kn.mode === 'guard' ? NOTICE_GUARD : NOTICE_NEAR) + noticeBonus(kn.gear);
+    const reach = (kn.mode === 'guard' || kn.mode === 'chase' ? NOTICE_GUARD : NOTICE_NEAR) + noticeBonus(kn.gear);
     if (near(kn.body, k, reach)) {
       kn.chase = { x: k.x, z: k.z };
       if (pokes(kn, k)) {

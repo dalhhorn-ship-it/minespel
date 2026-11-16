@@ -46,13 +46,33 @@ function tone(ctx: Ctx, out: AudioNode, t0: number, o: NearTone): void {
   osc.stop(start + o.dur + 0.02);
 }
 
-/** Placeholders: one or three soft tones per sound, each at its row. V24a replaces them. */
+/** The final recipes: only soft triangle and sine tones, one at the row's peak, the end at the row's length. */
 export const NEAR_RECIPES: Record<NearName, Recipe> = {
-  blub: (c, o, t) => tone(c, o, t, { from: 300, to: 500, dur: 0.3, gain: 0.2 }),
-  giechel: (c, o, t) => tone(c, o, t, { from: 600, to: 800, dur: 0.5, gain: 0.2 }),
-  snuffel: (c, o, t) => tone(c, o, t, { from: 400, to: 300, dur: 0.4, gain: 0.2 }),
-  snurk: (c, o, t) => tone(c, o, t, { from: 250, to: 200, dur: 0.8, gain: 0.1 }),
-  sis: (c, o, t) => tone(c, o, t, { from: 900, to: 700, dur: 0.5, gain: 0.12 }),
+  // The black bubble: two wet little bubbles popping up.
+  blub: (c, o, t) => {
+    tone(c, o, t, { from: 300, to: 520, dur: 0.15, gain: 0.2 });
+    tone(c, o, t, { from: 380, to: 640, at: 0.12, dur: 0.18, gain: 0.16 });
+  },
+  // Klodder: a giggle of five quick rising and falling notes.
+  giechel: (c, o, t) => {
+    [620, 760, 640, 780, 700].forEach((f, i) =>
+      tone(c, o, t, { from: f, to: f * 1.12, at: i * 0.1, dur: 0.1, gain: i === 0 ? 0.2 : 0.17 }),
+    );
+  },
+  // The free mole: a nose that sniffs, three short puffs.
+  snuffel: (c, o, t) => {
+    [440, 400, 360].forEach((f, i) => tone(c, o, t, { from: f, to: f * 0.8, at: i * 0.13, dur: 0.1, gain: i === 0 ? 0.2 : 0.15 }));
+  },
+  // The caught mole: a soft sleepy snore, a high puff in and a low puff out. Quiet and short, not a growl.
+  snurk: (c, o, t) => {
+    tone(c, o, t, { from: 220, to: 300, dur: 0.35, gain: 0.1 });
+    tone(c, o, t, { from: 300, to: 210, at: 0.4, dur: 0.4, gain: 0.08 });
+  },
+  // The Lavakip-bar: a gentle fizz, a few tiny high ticks, like a warm pot.
+  sis: (c, o, t) => {
+    [980, 880, 1040, 920].forEach((f, i) => tone(c, o, t, { from: f, to: f * 0.85, at: i * 0.12, dur: 0.14, gain: i === 0 ? 0.12 : 0.09 }));
+  },
+  // The Lavakip-bar tune: three notes going up, C E G.
   deuntje: (c, o, t) => {
     [523, 659, 784].forEach((f, i) => tone(c, o, t, { from: f, at: i * 0.3, dur: 0.3, gain: 0.15 }));
   },

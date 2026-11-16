@@ -6,6 +6,9 @@ import { START_SPOT } from '../world/terrain';
 import { World } from '../world/world';
 import { box, buildMoleMap, GY, PEN2 } from '../../tests/fixtures/maps/mole-map';
 import { createKnightBody, stepKnight, stepToward } from './knight-ai';
+import { createMole } from '../monsters/mole';
+import { stepMoleMoed } from '../monsters/mole-moed';
+import type { MonsterContext } from '../monsters/monster-types';
 import { KNIGHT_BOX, SALUTE_GAP_MS, type KnightMode, type KnightState } from './knight-types';
 
 const DT = 1 / 30;
@@ -235,5 +238,58 @@ describe('AC284: the boots and the new mounts', () => {
       for (let i = 0; i < 90; i++) stepKnight(k, { world, rng, player: kid, playerYaw: Math.PI / 2, dt: DT });
       expect(Math.abs(Math.hypot(k.body.x - x0, k.body.z - z0) / 3 - speed)).toBeLessThanOrEqual(speed * 0.2);
     }
+  });
+});
+
+describe('AC337: a knight on Jaag monsters weg', () => {
+  const kid = { x: 5.5, y: GY, z: 5.5 };
+  /** The knight's loop for a mole at `mole`: the Moed step sets his chase, the knight walks. */
+  function fight(k: KnightState, world: World, mole: ReturnType<typeof createMole>, seconds: number) {
+    const rng = createRng(4);
+    const ctx = {
+      world, rng, dt: DT, kid, kidBox: [5.2, GY, 5.2, 5.8, GY + 1.8, 5.8], occupied: () => false, knights: () => [k], touch: () => {},
+      say: () => {}, play: () => {}, animals: () => [], markHintShown: () => {}, hintShown: () => true,
+    } as MonsterContext;
+    let t = 0, full = false;
+    while (t < seconds && !full) {
+      full = stepMoleMoed(mole, ctx);
+      stepKnight(k, { world, rng, player: kid, playerYaw: 0, dt: DT });
+      t += DT;
+    }
+    return { t, full };
+  }
+
+  it('AC337: he reaches a mole 40 blocks away behind a wall 2 high with a gap, pokes, and the bar fills', () => {
+    const world = buildMoleMap();
+    box(world, 88, 88, 0, 127, GY, GY + 1, STONE);
+    box(world, 88, 88, 30, 30, GY, GY + 1, 0);
+    const k = make('chase', 53.5, 10.5, world);
+    const mole = createMole({ x: 93.5, y: GY, z: 10.5 }, { x: 0, z: 0 });
+    const { full, t } = fight(k, world, mole, 120);
+    expect(full).toBe(true);
+    expect(t).toBeLessThan(80);
+    expect(mole.dove).not.toBeNull();
+    expect(Math.hypot(k.body.x - mole.x, k.body.z - mole.z)).toBeLessThan(3);
+  });
+
+  it('AC337: while the mole is away he walks back to his spot and stays within 1 block of it', () => {
+    const world = buildMoleMap();
+    const k = make('chase', 55.5, 10.5, world);
+    const mole = createMole({ x: 65.5, y: GY, z: 10.5 }, { x: 0, z: 0 });
+    fight(k, world, mole, 60);
+    expect(mole.dove).not.toBeNull();
+    const rng = createRng(6);
+    for (let i = 0; i < 40 * 30; i++) stepKnight(k, { world, rng, player: kid, playerYaw: 0, dt: DT });
+    expect(k.chase).toBeNull();
+    expect(k.mode).toBe('chase');
+    expect(Math.hypot(k.body.x - 55.5, k.body.z - 10.5)).toBeLessThanOrEqual(1);
+  });
+
+  it('AC337: with a pen 2 high round the mole he pops next to him after 3 s stuck', () => {
+    const world = buildMoleMap();
+    const k = make('chase', PEN2.x0 + 2.5, PEN2.z0 + 2.5, world);
+    const mole = createMole({ x: PEN2.x0 - 6.5, y: GY, z: PEN2.z0 + 2.5 }, { x: 0, z: 0 });
+    const { full } = fight(k, world, mole, 40);
+    expect(full).toBe(true);
   });
 });

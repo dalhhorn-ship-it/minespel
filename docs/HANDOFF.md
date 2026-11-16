@@ -18,3 +18,10 @@ Founder: "Ok werkt op de iPad, bouw de rest", "Alles mag live", "Doe daarna voll
 * WebKit runs locally in the `minespel` environment (`npx playwright install webkit` once per container). Run the WebKit suite before a pull request: Chromium green was not enough for PR #27.
 * `tests/e2e/exam.spec.ts:254` AC112 is flake TD22. `loginAsParent` taps with force (see docs/FRICTION.md).
 * The e2e hook `knightMeshes` lives in `src/render/actor-render.ts`, not in the hooks file.
+
+<!-- auto-snapshot:start -->
+## Auto snapshot before compaction (2026-11-16 09:30 UTC, auto)
+- Branch: claude/jolly-fermi-z0vak4 @ 49ad4f3
+- Uncommitted: src/app/boot.ts, src/app/knight-flow.test.ts, src/app/shop-flow.ts, src/audio/near-mix.ts, src/audio/near-recipes.ts, src/audio/near-sounds.ts, src/knights/guard-report.test.ts, src/knights/guard-report.ts, src/knights/knight-ai.test.ts, src/knights/knight-system.test.ts …
+- Last commits: 49ad4f3 feat(V22a): seams for v22 to v24: saved moles, backup formats 6 and 7, the chase mode, stubs for the pill, the lavakip bar and near sounds | 10a9565 docs: v22 knight and mole rules (decision 145), plan v22 to v24, 11 tasks (decision 144) | 76db9a8 docs: scope v22 Duidelijke mol en kompas, v23 Lavakip-bar, v24 Geluid dichtbij (decision 143); archive v15 to v21
+<!-- auto-snapshot:end -->

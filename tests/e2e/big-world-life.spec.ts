@@ -2,7 +2,7 @@
 // then villagers, a villager question, a guard knight, a roaming dino, Klodder, Wereld opnieuw beginnen and Alles
 // wissen all work in the moved world. The pure rules have unit tests; this proves them together in a browser.
 import { expect, test, type Page } from '@playwright/test';
-import { countNear } from '../../src/knights/guard-report';
+import { LINE_MORE, countNear } from '../../src/knights/guard-report';
 import { inAnyVillage } from '../../src/monsters/nibble';
 import { AIR, LAVA, OERSTEEN, WATER } from '../../src/world/blocks';
 import { WORLD_HEIGHT, WORLD_SIZE } from '../../src/world/terrain';
@@ -100,9 +100,9 @@ test.describe('life in the moved 0.7.0 world (AC239)', () => {
     expect((await readState<Knight[]>(page, 'knights')).find((k) => k.id === guard.id)!.spot).toEqual(spot);
     const animals = () => readState<Dino[]>(page, 'dinos');
     const line = (a: Dino[]) => {
-      const { dinos, chickens } = countNear(spot, a);
+      const { dinos, chickens, more } = countNear(spot, a);
       const parts = [dinos > 0 ? (dinos === 1 ? '1 dino' : `${dinos} dino's`) : '', chickens > 0 ? (chickens === 1 ? '1 kip' : `${chickens} kippen`) : ''].filter(Boolean);
-      return parts.length ? `Ik pas op ${parts.join(' en ')}. Alles veilig!` : 'Hier zijn nog geen dieren.';
+      return parts.length ? `Ik pas op ${parts.join(' en ')}.${more ? ` ${LINE_MORE}` : ''} Alles veilig!` : 'Hier zijn nog geen dieren.';
     };
     const vp = page.viewportSize()!;
     let attempt = 0;

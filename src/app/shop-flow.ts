@@ -396,7 +396,7 @@ export function createShopFlow(options: ShopFlowOptions): ShopFlow {
   const lavakipEconomy = options.lavakip && options.db ? options.lavakip : null;
   /** Both Lavakip-bar actions share the purchase lock with every other buy. */
   const buyLavakipBar = (): Promise<boolean> =>
-    lavakipEconomy ? lockedBuy(() => lavakipEconomy.buyBar(), 'Hoera! Je Lavakip-bar staat in je wereld!') : Promise.resolve(false);
+    lavakipEconomy ? lockedBuy(() => lavakipEconomy.buyBar(), 'De Lavakip-bar staat bij je huis!') : Promise.resolve(false);
   const placeLavakipBar = (): Promise<boolean> =>
     lavakipEconomy ? lockedBuy(() => lavakipEconomy.placeHere(), 'De Lavakip-bar staat nu hier!') : Promise.resolve(false);
 

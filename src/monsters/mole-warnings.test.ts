@@ -9,10 +9,11 @@ function setup() {
 }
 
 describe('mole warnings (AC244)', () => {
-  it('AC244: y 6 and y 7 toast at most once per 60 000 ms of play time', () => {
+  it('AC293: the warning is a mole channel line. AC244: y 6 and y 7 toast at most once per 60 000 ms of play time', () => {
     const { say, w } = setup();
     w.onMined(6, 3);
     expect(say).toHaveBeenCalledTimes(1);
+    expect(say.mock.calls[0]?.[2]).toBe('mole');
     expect(say.mock.calls[0]?.[0]).toBe(WARN_TEXT);
     w.onMined(7, 3);
     w.onPlayElapsed(59_000);

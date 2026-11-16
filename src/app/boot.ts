@@ -37,7 +37,7 @@ import { createRecords, type Records } from '../storage/records';
 import { createSaveQueue, type SaveQueue } from '../storage/save-queue';
 import { createSessionStore, type SessionStore } from '../storage/session-store';
 import type { CountdownView } from '../ui/countdown';
-import { say } from '../ui/speech';
+import { say, setSpeechClock } from '../ui/speech';
 import { createWaitingCard, type WaitingCard } from '../ui/waiting-card';
 import { createBreakFlow, type BreakFlow } from './break-flow';
 import { loadCatalog } from './content-loader';
@@ -292,6 +292,9 @@ export function createBoot(deps: BootDeps): Boot {
     let knightsRef: KnightSystem | null = null;
     let gearRef: GearEconomy | null = null;
     let feederRef: Feeder | null = null;
+    // v22: the world labels, one pool for everything that floats over an animal, a knight or a mole.
+    const labels = createActorLabels({ container: world.container });
+    let monstersView: MonsterSystem | null = null;
     const knights = createKnightSystem({
       world: world.world,
       player: world.player,
@@ -309,6 +312,9 @@ export function createBoot(deps: BootDeps): Boot {
         feeder: () => feederRef ?? undefined,
       }),
       viewport: () => ({ width: window.innerWidth, height: window.innerHeight }),
+      animals: () => world.dinoStore.dinos(),
+      labels,
+      moleAround: () => monstersView?.moleState().moles.some((m) => m.state !== 'caught') === true,
       persist: (change) => {
         // A refused write (a restore is running) is fine: the page reloads and the saved record wins.
         void updateMonsters(db, (m) => ({ ...m, knights: change(m.knights) })).catch(() => {});
@@ -336,8 +342,6 @@ export function createBoot(deps: BootDeps): Boot {
     let moleCard: MoleCard | null = null;
     let moleTapCard: MoleTapCard | null = null;
     const reducedMotion = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
-    // v22: the world labels, one pool for everything that floats over an animal, a knight or a mole.
-    const labels = createActorLabels({ container: world.container });
     // v23: the Lavakip-bar (record, economy, truck in the world, feeding). Nothing shows until V23a to V23c fill them.
     const lavakip = createLavakipEconomy({ db, world: world.world, pose: () => world.player.pose() });
     lavakip.load(readLavakip(move === 'failed' ? null : await records.get('lavakip')));
@@ -345,7 +349,13 @@ export function createBoot(deps: BootDeps): Boot {
       const card = createLavakipCard({
         carried: () => lavakip.state().carried,
         points: () => knights.points(),
-        onOrder: () => lavakip.order(),
+        onOrder: async () => {
+          const ok = await lavakip.order();
+          // The order paid in the record; the points copy of the knights reads it again (the screen did not change).
+          if (ok) knights.setPoints((await records.get('economy')).points);
+          return ok;
+        },
+        onSizzle: () => sound.play('sis'),
         onClose: () => {
           card.destroy();
           screens.showKidOverlay(null);
@@ -358,6 +368,7 @@ export function createBoot(deps: BootDeps): Boot {
       renderer: world.renderer,
       viewport: () => ({ width: window.innerWidth, height: window.innerHeight }),
       player: world.player,
+      world: world.world,
       openCard: showLavakipCard,
     });
     const feeder = createFeeder({ economy: lavakip });
@@ -410,6 +421,8 @@ export function createBoot(deps: BootDeps): Boot {
       sound,
     });
     monstersRef = monsters;
+    monstersView = monsters;
+    setSpeechClock(() => monsters.moleState().loopMs);
     world.on('mined', (e) => {
       monsters.onMined(e.x, e.y, e.z, e.block);
       stones.onMined(e.x, e.y, e.z, e.block);

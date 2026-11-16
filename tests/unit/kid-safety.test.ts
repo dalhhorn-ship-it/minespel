@@ -8,6 +8,7 @@ import ts from 'typescript';
 import { describe, expect, it } from 'vitest';
 import { findBannedWords } from '../../src/core/kid-words';
 import { GEAR, GEAR_SLOTS, MAX_KRACHT, MIN_FIGHT_SECONDS, kracht, moedRate, type Worn } from '../../src/knights/gear';
+import * as moleLines from '../../src/monsters/mole-lines';
 import { STONES } from '../../src/world/stones';
 import { createSound, SOUND_NAMES, SOUND_SPECS, type SoundName } from '../../src/audio/sound';
 
@@ -186,12 +187,21 @@ describe('the Monstermol (V16e, AC255)', () => {
     expect(bad).toEqual([]);
   });
 
-  it('AC255: every mole line is a text in the monster files, so it shows whatever the sound does', () => {
+  it('AC255: every mole line of mole-lines.ts is a text in the monster files, so it shows whatever the sound does', () => {
     const all = [...readdirSync('src/monsters').filter((f) => f.endsWith('.ts') && !f.endsWith('.test.ts')).map((f) => `src/monsters/${f}`), 'src/ui/mole-card.ts']
       .flatMap((f) => literals(f))
       .join('\n');
-    for (const line of ['Oei... de grond rommelt!', 'Hihi! Waar zijn de dieren?', 'Boe!', 'Hmpf! Ik kan er niet bij.', 'Niemand om mee te spelen...', 'Ik ga slapen', 'Oké, oké, ik ga al!', 'Pas op! Diep onder de grond woont de Monstermol.', 'Niet verder graven! Onder de streep slaapt de Monstermol.'])
+    const lines = (Object.values(moleLines) as unknown[]).filter((v): v is string => typeof v === 'string');
+    expect(lines.length).toBeGreaterThanOrEqual(12);
+    for (const line of lines) {
       expect(all, line).toContain(line);
+      expect(findBannedWords(line), line).toEqual([]);
+    }
+    // The card of AC292 and the lines that other files hold (the tease, the sorry line, the lonely line) stay in the scan.
+    for (const line of ['Boe!', 'Hmpf! Ik kan er niet bij.', 'Niemand om mee te spelen...', 'Ik ga slapen', 'Oké, oké, ik ga al!', 'Onder de gele streep slaapt de Monstermol. Graaf je verder? Dan wordt de Monstermol wakker!'])
+      expect(all, line).toContain(line);
+    // 0.12.0 said "Hihi! Waar zijn de dieren?" as a toast; AC293 retires it for good.
+    expect(all).not.toContain('Hihi! Waar zijn de dieren?');
   });
 
   it('AC255: with reduced motion boot hands the monster system no shake', () => {
@@ -283,5 +293,51 @@ describe('v21 gear strings and caps (AC289)', () => {
       const rate = moedRate([k, k, k], full);
       expect(full / rate, `full ${full}`).toBeGreaterThanOrEqual(MIN_FIGHT_SECONDS);
     }
+  });
+});
+
+// v22 to v24 (decision 144): the new files hold no banned word and no pressure to buy or hurry, and no network call.
+const V22_V24_FILES = [
+  ...['src/lavakip', 'src/audio'].flatMap((dir) =>
+    readdirSync(dir)
+      .filter((f) => f.endsWith('.ts') && !f.endsWith('.test.ts') && (dir !== 'src/audio' || f.startsWith('near-')))
+      .map((f) => `${dir}/${f}`),
+  ),
+  ...readdirSync('src/monsters').filter((f) => /^(mole-.*|bubble-hud)\.ts$/.test(f) && !f.endsWith('.test.ts')).map((f) => `src/monsters/${f}`),
+  'src/knights/guard-set.ts',
+  'src/knights/guard-report.ts',
+  'src/app/bubble-hud-flow.ts',
+  'src/render/lavakip-bar-model.ts',
+  'src/ui/bubble-pill.ts',
+  'src/ui/actor-labels.ts',
+  'src/ui/lavakip-card.ts',
+  'src/ui/mole-tap-card.ts',
+  'src/ui/mole-card.ts',
+  'src/ui/shop-lavakip.ts',
+  'src/ui/speech.ts',
+];
+/** Words that push a kid to buy or hurry (no countdown, no scarcity, no guilt). */
+const PRESSURE = /\b(snel|haast|schiet op|laatste kans|nu of nooit|alleen vandaag|alleen nu|mis het niet|bijna op|beperkt|op is op|anders is het te laat|je moet)\b/i;
+
+describe('Lavakip, the pill, the near sounds and the new mole files (v22 to v24)', () => {
+  it('the scan reads every new file and finds strings in the ones that have text', () => {
+    expect(V22_V24_FILES.length).toBeGreaterThanOrEqual(25);
+    for (const f of V22_V24_FILES) expect(() => literals(f), f).not.toThrow();
+    for (const f of ['src/lavakip/lavakip-types.ts', 'src/ui/lavakip-card.ts', 'src/ui/shop-lavakip.ts', 'src/monsters/mole-lines.ts', 'src/audio/near-mix.ts'])
+      expect(V22_V24_FILES, f).toContain(f);
+  });
+  it('AC255 AC314: no string literal holds a banned word or a word of pressure', () => {
+    const bad: string[] = [];
+    for (const f of V22_V24_FILES)
+      for (const s of literals(f)) {
+        const found = findBannedWords(s);
+        if (found.length) bad.push(`${f}: "${s}" holds ${found.join(', ')}`);
+        if (PRESSURE.test(s)) bad.push(`${f}: "${s}" puts pressure on the kid`);
+      }
+    expect(bad).toEqual([]);
+  });
+  it('AC225: no new file calls the network or holds a web address', () => {
+    const bad = V22_V24_FILES.filter((f) => NETWORK.test(readFileSync(f, 'utf8').replace(/\/\/.*$/gm, '').replace(/\/\*[\s\S]*?\*\//g, '')));
+    expect(bad).toEqual([]);
   });
 });

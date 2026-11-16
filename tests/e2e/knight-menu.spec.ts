@@ -1,4 +1,4 @@
-// The knight menu (V17d, AC203, AC206): a tap on a knight opens it in Hakken and in Bouwen, changes no block,
+// The knight menu (V17d, AC203, AC206, AC337): a tap on a knight opens it in Hakken and in Bouwen, changes no block,
 // keeps the mode after a reload, and is a kid overlay (the play timer stops).
 import { expect, test, type Page } from '@playwright/test';
 import { STEEN } from '../../src/world/blocks';
@@ -102,7 +102,7 @@ test.describe('Knight menu (V17d)', () => {
           return [b.textContent, Math.min(r.width, r.height)] as const;
         }),
       );
-      expect(sizes.map((s) => s[0])).toEqual(['Volg mij', 'Blijf hier', 'Pas op de dieren', 'Uitrusten', 'Sluiten']);
+      expect(sizes.map((s) => s[0])).toEqual(['Volg mij', 'Blijf hier', 'Pas op de dieren', 'Jaag monsters weg', 'Uitrusten', 'Sluiten']);
       for (const [, size] of sizes) expect(size).toBeGreaterThanOrEqual(56);
       expect(await blocksAround(page, k)).toEqual(before);
       await tapSel(page, '.knight-menu-btn-close', 8);
@@ -123,5 +123,76 @@ test.describe('Knight menu (V17d)', () => {
     await page.reload();
     await openApp(page);
     expect((await readState<Knight[]>(page, 'knights'))[0]!.mode).toBe('guard');
+  });
+
+  for (const big of [false, true]) {
+    test(`AC337: four mode buttons fit on screen with no overlap${big ? ' with Groter lettertype' : ''}`, async ({ page }) => {
+      await openApp(page);
+      await flatten(page);
+      if (big) {
+        await page.evaluate(() => {
+          document.documentElement.style.setProperty('--font-scale', '1.25');
+          document.documentElement.setAttribute('data-large-font', 'true');
+        });
+      }
+      const id = (await readState<string | null>(page, 'addKnight', 'stay'))!;
+      await openMenuOn(page, id);
+      const vp = page.viewportSize()!;
+      const rects = await page.evaluate(() =>
+        [...document.querySelectorAll('.knight-menu-btn')].map((b) => {
+          const r = b.getBoundingClientRect();
+          return { text: b.textContent, x: r.x, y: r.y, w: r.width, h: r.height };
+        }),
+      );
+      expect(rects.slice(0, 4).map((r) => r.text)).toEqual(['Volg mij', 'Blijf hier', 'Pas op de dieren', 'Jaag monsters weg']);
+      // The whole menu shows with no scrolling: all four modes, Uitrusten and the way back. (The Lavakip geven option is
+      // drawn by V23c and joins this list then.)
+      const labels = rects.map((r) => r.text);
+      expect(labels).toEqual(expect.arrayContaining(['Volg mij', 'Blijf hier', 'Pas op de dieren', 'Jaag monsters weg', 'Uitrusten', 'Sluiten']));
+      const card = await page.evaluate(() => {
+        const c = document.querySelector('.knight-menu-card') as HTMLElement;
+        const r = c.getBoundingClientRect();
+        return { scrollable: c.scrollHeight > c.clientHeight + 1, top: r.top, bottom: r.bottom };
+      });
+      expect(card.scrollable, 'the card needs no scrolling').toBe(false);
+      expect(card.top).toBeGreaterThanOrEqual(0);
+      expect(card.bottom).toBeLessThanOrEqual(vp.height);
+      for (const r of rects) {
+        // Each button lies inside the card, so it shows without a scroll.
+        expect(r.y).toBeGreaterThanOrEqual(card.top);
+        expect(r.y + r.h).toBeLessThanOrEqual(card.bottom);
+        expect(Math.min(r.w, r.h), `${r.text} is at least 44 x 44`).toBeGreaterThanOrEqual(44);
+      }
+      for (const r of rects.slice(0, 4)) expect(Math.min(r.w, r.h), `${r.text} is at least 56 x 56 (AC203)`).toBeGreaterThanOrEqual(56);
+      for (const r of rects) {
+        expect(Math.min(r.w, r.h)).toBeGreaterThanOrEqual(56);
+        expect(r.x).toBeGreaterThanOrEqual(0);
+        expect(r.y).toBeGreaterThanOrEqual(0);
+        expect(r.x + r.w).toBeLessThanOrEqual(vp.width);
+        expect(r.y + r.h).toBeLessThanOrEqual(vp.height);
+      }
+      for (let i = 0; i < rects.length; i++) {
+        for (let j = i + 1; j < rects.length; j++) {
+          const a = rects[i]!, b = rects[j]!;
+          const apart = a.x + a.w <= b.x + 0.5 || b.x + b.w <= a.x + 0.5 || a.y + a.h <= b.y + 0.5 || b.y + b.h <= a.y + 0.5;
+          expect(apart, `${a.text} and ${b.text} overlap`).toBe(true);
+        }
+      }
+    });
+  }
+
+  test('AC337: Jaag monsters weg is picked, says its status and is kept after a reload', async ({ page }) => {
+    await openApp(page);
+    await flatten(page);
+    const id = (await readState<string | null>(page, 'addKnight', 'follow'))!;
+    await openMenuOn(page, id);
+    await tapSel(page, '.knight-menu-btn[data-mode="chase"]', 10);
+    await expect.poll(async () => (await readState<Knight[]>(page, 'knights'))[0]!.mode).toBe('chase');
+    await expect(page.locator('.knight-menu-status')).toHaveText('Ik jaag monsters weg!');
+    await expect(page.locator('.knight-menu-btn[data-mode="chase"]')).toHaveAttribute('aria-pressed', 'true');
+    await page.waitForTimeout(500);
+    await page.reload();
+    await openApp(page);
+    expect((await readState<Knight[]>(page, 'knights'))[0]!.mode).toBe('chase');
   });
 });

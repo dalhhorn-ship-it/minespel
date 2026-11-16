@@ -1,4 +1,4 @@
-// The knight menu when the kid taps a knight (AC203): Volg mij, Blijf hier, Pas op de dieren, and a way back.
+// The knight menu when the kid taps a knight (AC203): Volg mij, Blijf hier, Pas op de dieren, Jaag monsters weg (v22), and a way back.
 import '../styles/knight-menu.css';
 import type { KnightMode } from '../knights/knight-types';
 import type { LavakipMenuOption } from '../lavakip/lavakip-types';
@@ -49,7 +49,7 @@ export function createKnightMenu(options: KnightMenuOptions): KnightMenu {
       class: 'knight-menu-status',
       text: mode === 'guard' && options.report ? options.report() : MODE_STATUS[mode],
     });
-    const buttons = (['follow', 'stay', 'guard'] as const).map((m) => {
+    const buttons = (['follow', 'stay', 'guard', 'chase'] as const).map((m) => {
       const btn = el('button', {
         class: 'knight-menu-btn',
         text: MODE_LABELS[m],

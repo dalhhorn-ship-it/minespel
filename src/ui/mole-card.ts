@@ -1,11 +1,11 @@
-// The Monstermol warning card (v16, AC244): shows when the kid mines a Waarschuwsteen. Plain text, one big OK button
+// The Monstermol warning card (v16, AC244, the text of AC292): shows when the kid mines a Waarschuwsteen. Plain text, one big OK button
 // (at least 56 x 56 points). Boot shows it through `screens.showKidOverlay`, so the loop and the play timer stop
 // until OK is tapped.
 import '../styles/mole-card.css';
 import { el } from './dom';
 import { onTap } from './tap';
 
-export const MOLE_CARD_TEXT = 'Niet verder graven! Onder de streep slaapt de Monstermol.';
+export const MOLE_CARD_TEXT = 'Onder de gele streep slaapt de Monstermol. Graaf je verder? Dan wordt de Monstermol wakker!';
 
 export interface MoleCard {
   readonly element: HTMLElement;

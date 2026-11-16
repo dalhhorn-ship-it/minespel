@@ -35,12 +35,12 @@ describe('knight flow', () => {
   it('without screens the menu is a safe no op', () => {
     expect(() => createKnightFlow().openMenu({} as KnightState)).not.toThrow();
   });
-  it('AC203: the menu opens as a kid overlay with 3 modes and closes back to the world', () => {
+  it('AC203, AC337: the menu opens as a kid overlay with 4 modes and closes back to the world', () => {
     const s = setup();
     s.flow.openMenu(knight('stay'));
     expect(s.screens.showKidOverlay).toHaveBeenCalledTimes(1);
     const labels = [...s.layer.querySelectorAll('button')].map((b) => b.textContent);
-    expect(labels).toEqual(['Volg mij', 'Blijf hier', 'Pas op de dieren', 'Sluiten']);
+    expect(labels).toEqual(['Volg mij', 'Blijf hier', 'Pas op de dieren', 'Jaag monsters weg', 'Sluiten']);
     expect(s.layer.querySelector('[data-mode="stay"]')!.getAttribute('aria-pressed')).toBe('true');
     expect(s.say).not.toHaveBeenCalled();
   });
@@ -77,7 +77,7 @@ describe('knight flow', () => {
     });
     flow.openMenu(knight('stay'));
     const labels = [...layer.querySelectorAll('button')].map((b) => b.textContent);
-    expect(labels).toEqual(['Volg mij', 'Blijf hier', 'Pas op de dieren', 'Uitrusten', 'Sluiten']);
+    expect(labels).toEqual(['Volg mij', 'Blijf hier', 'Pas op de dieren', 'Jaag monsters weg', 'Uitrusten', 'Sluiten']);
     const tapIt = (n: Element) => {
       n.dispatchEvent(new PointerEvent('pointerdown', { pointerId: 1, bubbles: true, clientX: 1, clientY: 1 }));
       n.dispatchEvent(new PointerEvent('pointerup', { pointerId: 1, bubbles: true, clientX: 1, clientY: 1 }));
@@ -100,7 +100,7 @@ describe('knight flow', () => {
     const flow = createKnightFlow({ screens, say: vi.fn(), feeder: () => ({ menuOption }) });
     flow.openMenu(knight('stay'));
     expect(menuOption).toHaveBeenCalledWith({ kind: 'knight', id: 'a' });
-    expect([...layer.querySelectorAll('button')].map((b) => b.textContent)).toEqual(['Volg mij', 'Blijf hier', 'Pas op de dieren', 'Sluiten']);
+    expect([...layer.querySelectorAll('button')].map((b) => b.textContent)).toEqual(['Volg mij', 'Blijf hier', 'Pas op de dieren', 'Jaag monsters weg', 'Sluiten']);
   });
   it('AC337: a chase knight opens the menu with his own label and status', () => {
     const s = setup();

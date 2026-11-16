@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { createRng } from '../core/rng';
+import { createDino } from '../dinos/dino-ai';
 import { START_SPOT } from '../world/terrain';
 import { World } from '../world/world';
 import type { KnightFlow } from '../app/knight-flow';
@@ -175,7 +176,7 @@ describe('v22 seams (decision 144, AC337)', () => {
     t.system.step(0.1);
     expect(Math.hypot(t.system.knights()[0]!.body.x - (t.kid.x + 6), t.system.knights()[0]!.body.z - t.kid.z)).toBeLessThan(1.5);
   });
-  it('AC337: until V22d a chase knight acts as stay: he stays within 1 block of his spot for 60 s', () => {
+  it('AC337: a chase knight with nothing to chase stays within 1 block of his spot for 60 s', () => {
     const s = setup();
     const spot = { x: s.kid.x + 6, y: s.kid.y, z: s.kid.z };
     s.system.load([rec('c', 'chase', spot)]);
@@ -183,11 +184,31 @@ describe('v22 seams (decision 144, AC337)', () => {
     const b = s.system.knights()[0]!.body;
     expect(Math.hypot(b.x - spot.x, b.z - spot.z)).toBeLessThanOrEqual(1.1);
   });
-  it('AC331: nobody is guarded until V22d: guardedBy is null and guardState is empty', () => {
+  it('AC331: with no animal source nobody is guarded: guardedBy is null and guardState is empty', () => {
     const s = setup();
     s.system.add(rec('g', 'guard'));
     for (let i = 0; i < 30; i++) s.system.step(0.1);
     expect(s.system.guardedBy('any-animal')).toBeNull();
     expect(s.system.guardState()).toEqual([]);
+  });
+  it('AC331: guardState lists the 4 nearest animals of a guard knight and none of a chase knight', () => {
+    const world = new World();
+    const kid = { x: START_SPOT.x, y: START_SPOT.y, z: START_SPOT.z };
+    const player = { player: kid, yaw: 0, pose: () => ({ x: kid.x, y: kid.y + 1.6, z: kid.z, yaw: 0, pitch: 0 }) };
+    const flow: KnightFlow = { onEvent: vi.fn(), openMenu: vi.fn() };
+    const animals = [1, 2, 3, 4, 5, 6].map((d) => ({
+      ...createDino({ kind: 'compy', golden: false, x: kid.x + 10 + d * 0.5, y: kid.y, z: kid.z }, true), id: `d${d}`,
+    }));
+    const system = createKnightSystem({
+      world, player, flow, viewport: () => ({ width: 1024, height: 768 }), rng: createRng(1), animals: () => animals,
+    });
+    const spot = { x: kid.x + 10, y: kid.y, z: kid.z };
+    system.load([rec('g', 'guard', spot), rec('c', 'chase', spot)]);
+    system.step(0.1);
+    const state = system.guardState();
+    expect(state.map((e) => e.animalId).sort()).toEqual(['d1', 'd2', 'd3', 'd4']);
+    expect(state.every((e) => e.knightId === 'g')).toBe(true);
+    expect(system.guardedBy('d1')).toBe('g');
+    expect(system.guardedBy('d5')).toBeNull();
   });
 });

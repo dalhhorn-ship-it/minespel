@@ -8,12 +8,14 @@ import { pickActor, screenPointOf } from '../game/actor-hit';
 import { aimFromScreen } from '../game/build-controller';
 import type { CreatureSystem } from '../game/game';
 import type { Point } from '../dinos/dino-ai';
-import type { ActorView, GameRenderer } from '../render/renderer';
+import type { ActorView, CameraPose, GameRenderer } from '../render/renderer';
+import type { ActorLabels } from '../ui/actor-labels';
 import type { CreatureSwitches } from '../storage/monsters-store';
 import type { Box } from '../world/build';
 import type { World } from '../world/world';
 import type { KnightFlow } from '../app/knight-flow';
 import { lookKey, type Worn } from './gear';
+import { createGuardSet, type GuardAnimal } from './guard-set';
 import { createKnightBody, defaultKnightRng, placeAtSpot, placeNearKid, stepKnight } from './knight-ai';
 import {
   KNIGHT_BOX, KNIGHT_TAP_REACH, MAX_KNIGHTS, SALUTE_GAP_MS, toRecord,
@@ -32,6 +34,12 @@ export interface KnightSystemOptions {
   /** Saves a change of the knight list in the `monsters` record (one transaction, see `updateMonsters`). */
   persist?: (change: (knights: KnightRecord[]) => KnightRecord[]) => void;
   rng?: Rng;
+  /** The live dinos and chickens a guard may watch (v22, AC331). Boot passes `dinoStore.dinos()`; missing: nobody is guarded. */
+  animals?: () => readonly GuardAnimal[];
+  /** The shared label pool for the shield marks (AC333). */
+  labels?: ActorLabels;
+  /** True while a free or away mole exists: the shield marks show. */
+  moleAround?: () => boolean;
 }
 
 export interface KnightSystem extends CreatureSystem {
@@ -53,9 +61,9 @@ export interface KnightSystem extends CreatureSystem {
   /** Points of the kid, re-read every time the screen goes back to the world (V18 reads it for the bubble rule). */
   setPoints(points: number): void;
   points(): number;
-  /** The id of the knight who guards this animal (a dino or chicken id), or null (v22). V22d fills it; nobody is guarded until then. */
+  /** The id of the knight who guards this animal (a dino or chicken id), or null (v22).  */
   guardedBy(animalId: string): string | null;
-  /** Every guarded animal and who guards it, for the e2e hook `guardState` (v22). Empty until V22d. */
+  /** Every guarded animal and who guards it, for the e2e hook `guardState` (v22). */
   guardState(): GuardEntry[];
 }
 
@@ -83,8 +91,15 @@ export function createKnightSystem(options: KnightSystemOptions): KnightSystem {
   let on = true;
   let points = 0;
   let drawn = 0;
-  /** animal id to knight id. V22d recomputes it every 1000 ms of loop time and nowhere else (reused, never per frame). */
-  const guards = new Map<string, string>();
+  /** Who guards whom, recomputed every 1000 ms of loop time and nowhere else (v22, AC331). */
+  const guards = createGuardSet({
+    knights: () => list,
+    animals: options.animals,
+    labels: options.labels,
+    moleAround: options.moleAround,
+    pose: () => options.player.pose() as CameraPose,
+    viewport: options.viewport,
+  });
 
   const stateFrom = (r: KnightRecord): KnightState => ({
     id: r.id, mode: r.mode, spot: r.spot ? { ...r.spot } : null, boughtFor: r.boughtFor,
@@ -194,8 +209,8 @@ export function createKnightSystem(options: KnightSystemOptions): KnightSystem {
       points = p;
     },
     points: () => points,
-    guardedBy: (animalId) => guards.get(animalId) ?? null,
-    guardState: () => [...guards].map(([animalId, knightId]) => ({ animalId, knightId })),
+    guardedBy: (animalId) => guards.guardedBy(animalId),
+    guardState: () => guards.state(),
     step(dt) {
       if (!(dt > 0) || !Number.isFinite(dt)) return;
       for (const k of visible()) {
@@ -203,6 +218,7 @@ export function createKnightSystem(options: KnightSystemOptions): KnightSystem {
         const event = stepKnight(k, { world: options.world, rng, player: kid(), playerYaw: options.player.yaw, dt });
         if (event) options.flow.onEvent(event, k);
       }
+      guards.step(dt);
       sync();
       // The Moed steps (priority 10) set `poking` for this frame; the views above carried it.
       for (const k of list) k.poking = false;
@@ -215,6 +231,7 @@ export function createKnightSystem(options: KnightSystemOptions): KnightSystem {
       const id = pickActor(aim, shown.map((k) => ({ id: k.id, box: bounds(k) })), KNIGHT_TAP_REACH, options.world);
       const hit = id ? find(id) : undefined;
       if (!hit) return false;
+      if (hit.mode === 'guard') guards.tapped(hit.id);
       options.flow.openMenu(hit);
       return true;
     },

@@ -56,7 +56,7 @@ test.describe('Monstermol warnings and wake (V16a)', () => {
       expect(await readState(page, 'mineAt', c.x, 5, c.z)).toBe(true);
       const card = page.locator('[data-testid="mole-card"]');
       await expect(card).toBeVisible();
-      await expect(page.locator('[data-testid="mole-text"]')).toHaveText('Niet verder graven! Onder de streep slaapt de Monstermol.');
+      await expect(page.locator('[data-testid="mole-text"]')).toHaveText('Onder de gele streep slaapt de Monstermol. Graaf je verder? Dan wordt de Monstermol wakker!');
       expect(await readState(page, 'isPlayRunning')).toBe(false);
       const ok = (await page.locator('[data-testid="mole-ok"]').boundingBox()) as Box;
       expect(ok.width).toBeGreaterThanOrEqual(56);

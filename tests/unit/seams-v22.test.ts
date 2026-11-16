@@ -1,6 +1,8 @@
 // @vitest-environment jsdom
-// The contract of every typed stub of V22a (decision 144): each is wired, safe and does nothing visible until its owner
-// fills it (V22b to V24b). When an owner fills a stub, the matching case here changes with the task.
+// The contract of the seams of V22a (decision 144), now filled by V22b to V24b: the shapes are still the ones every
+// consumer relies on (a copy from `state`, one reused state object, one reused target list, no throw before the first tap).
+// What each owner does in detail is asserted in the owner's own test file. Only the pill view (V22e) and the feeder and
+// snack (V23c) are still stubs here.
 import { describe, expect, it, vi } from 'vitest';
 import { createNearSounds } from '../../src/audio/near-sounds';
 import { closeness, panOf } from '../../src/audio/near-mix';
@@ -21,10 +23,10 @@ import { World } from '../../src/world/world';
 
 const pose = { x: 10, y: 20, z: 10, yaw: 0, pitch: 0 };
 
-describe('lavakip stubs (AC310 to AC321)', () => {
+describe('lavakip seams (AC310 to AC321)', () => {
   const economy = () => createLavakipEconomy({ db: {} as IDBDatabase, world: new World(), pose: () => pose });
 
-  it('the economy keeps the loaded record as a copy and refuses every action until V23a', async () => {
+  it('the economy keeps the loaded record as a copy, tells onChange, and a broken store answers false and never throws', async () => {
     const e = economy();
     expect(e.state()).toEqual({ bought: false, spot: null, carried: 0 });
     const onChange = vi.fn();
@@ -34,11 +36,12 @@ describe('lavakip stubs (AC310 to AC321)', () => {
     const s = f.state();
     s.carried = 9;
     expect(f.state().carried).toBe(4);
-    expect(f.shopState(100)).toBeUndefined();
+    // The shop state the shop flow draws from (AC310): the same facts as the record plus the points.
+    expect(f.shopState(100)).toMatchObject({ points: 100, bought: true, placed: true, carried: 4 });
+    // `{}` is no database: every action fails inside the queue, answers false and leaves the record as it was.
     expect(await f.buyBar()).toBe(false);
     expect(await f.order()).toBe(false);
     expect(await f.useOne()).toBe(false);
-    expect(await f.placeHere()).toBe(false);
     await expect(f.moveHome()).resolves.toBeUndefined();
     expect(f.state().carried).toBe(4);
   });
@@ -77,19 +80,21 @@ describe('lavakip stubs (AC310 to AC321)', () => {
     expect(feeder.state()).toEqual({ snacking: [], fed: 0 });
   });
 
-  it('the spot rules find nothing until V23a, and nobody snacks', () => {
+  it('a spot the finders give is a free spot by isFreeSpot, and nobody snacks until V23c', () => {
     const world = new World();
     expect(isFreeSpot(world, { x: 5, y: 5, z: 5 })).toBe(false);
-    expect(findHomeSpot(world, { x: 5, y: 5, z: 5 }, createRng(1))).toBeNull();
-    expect(findSpotInFront(world, pose)).toBeNull();
+    const home = findHomeSpot(world, { x: 5, y: 5, z: 5 }, createRng(1));
+    if (home) expect(isFreeSpot(world, home)).toBe(true);
+    const front = findSpotInFront(world, pose);
+    if (front) expect(isFreeSpot(world, front)).toBe(true);
     expect(snackStep({}, 0.1)).toBe(false);
   });
 
-  it('the shop section and the order card are empty shells that never throw', () => {
+  it('the shop section and the order card keep their test ids and destroy without a throw', () => {
     const section = createLavakipSection({ onBuy: vi.fn(), onPlaceHere: vi.fn(), onChange: vi.fn() });
     const node = section.render({ points: 0, bought: false, placed: false, carried: 0, canPlaceHere: false }, true);
     expect(node.getAttribute('data-testid')).toBe('shop-lavakip');
-    expect(node.childNodes).toHaveLength(0);
+    expect(node.childNodes.length).toBeGreaterThan(0);
     section.destroy();
     const card = createLavakipCard({ carried: () => 0, points: () => 0, onOrder: vi.fn(), onClose: vi.fn() });
     expect(card.element.getAttribute('data-testid')).toBe('lavakip-card');
@@ -97,8 +102,8 @@ describe('lavakip stubs (AC310 to AC321)', () => {
   });
 });
 
-describe('pill stubs (AC301 to AC305)', () => {
-  it('computeBubbleHud hides the pill and reuses the one state object', () => {
+describe('pill seams (AC301 to AC305)', () => {
+  it('computeBubbleHud writes into and returns the one state object it is given', () => {
     const out = createBubbleHudState();
     out.shown = true;
     out.text = 'x';
@@ -110,10 +115,10 @@ describe('pill stubs (AC301 to AC305)', () => {
       moleOn: true,
     };
     expect(computeBubbleHud(input, out)).toBe(out);
-    expect(out).toEqual({ shown: false, kind: 'clock', text: '', angle: 0, distance: 0, vertical: null });
+    expect(out).toEqual({ shown: true, kind: 'clock', text: 'Bubbel over 0:01', angle: 0, distance: 0, vertical: null });
   });
 
-  it('the flow computes every 100 ms of loop time, never calls the view for a hidden state, and hides on a pause', () => {
+  it('the flow computes every 100 ms of loop time, calls the view once for an unchanged state, and hides on a pause', () => {
     const view = { update: vi.fn(), hide: vi.fn(), destroy: vi.fn() };
     const collect = vi.fn();
     const clockView = vi.fn(() => ({ runs: true, held: false, msLeft: 5000 }));
@@ -126,7 +131,7 @@ describe('pill stubs (AC301 to AC305)', () => {
     const state = flow.state();
     for (let i = 0; i < 10; i++) flow.step(0.1);
     expect(collect).toHaveBeenCalledTimes(10);
-    expect(view.update).not.toHaveBeenCalled();
+    expect(view.update).toHaveBeenCalledTimes(1);
     expect(flow.state()).toBe(state);
     flow.step(0.05);
     flow.step(0.04);
@@ -165,22 +170,23 @@ describe('pill stubs (AC301 to AC305)', () => {
   });
 });
 
-describe('near sound stubs (AC322 to AC326)', () => {
+describe('near sound seams (AC322 to AC326)', () => {
   function voices() {
     const mk = () => ({ play: vi.fn(), set: vi.fn(), silence: vi.fn(), level: 0, pan: 0 });
     const pair: [ReturnType<typeof mk>, ReturnType<typeof mk>] = [mk(), mk()];
     return pair;
   }
 
-  it('the pan is half the sine of the angle and the closeness is 0 until V24b', () => {
+  it('the pan is half the sine of the angle and the closeness runs from 1 at the loudest distance to 0 far away', () => {
     expect(panOf(0)).toBeCloseTo(0, 9);
     expect(panOf(180)).toBeCloseTo(0, 9);
     expect(panOf(90)).toBeCloseTo(0.5, 9);
     expect(panOf(-90)).toBeCloseTo(-0.5, 9);
-    expect(closeness('klodder', 2)).toBe(0);
+    expect(closeness('klodder', 2)).toBe(1);
+    expect(closeness('klodder', 25)).toBe(0);
   });
 
-  it('the stub plays nothing, silences both voices on a pause and shows no source', () => {
+  it('one Klodder plays on one voice, both voices are silenced on a pause and the view lists the source', () => {
     const pair = voices();
     const near = createNearSounds({
       sound: { nearVoices: () => pair as never, isEnabled: () => true, getVolume: () => 0.7 },
@@ -189,9 +195,11 @@ describe('near sound stubs (AC322 to AC326)', () => {
       pose: () => ({ x: 0, y: 0, z: 0, yaw: 0 }),
     });
     near.step(0.1);
-    expect(pair[0].play).not.toHaveBeenCalled();
-    expect(pair[0].set).not.toHaveBeenCalled();
-    expect(near.view()).toEqual({ running: true, sources: [] });
+    expect(pair[0].play).toHaveBeenCalledTimes(1);
+    expect(pair[0].set).toHaveBeenCalled();
+    expect(pair[1].play).not.toHaveBeenCalled();
+    expect(near.view().running).toBe(true);
+    expect(near.view().sources).toHaveLength(1);
     near.setRunning(false);
     expect(pair[0].silence).toHaveBeenCalledTimes(1);
     expect(pair[1].silence).toHaveBeenCalledTimes(1);

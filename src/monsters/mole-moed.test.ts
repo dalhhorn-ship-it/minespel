@@ -26,7 +26,8 @@ function ctxFor(knights: KnightState[], said: string[] = []): MonsterContext {
   return {
     world, rng: createRng(1), dt: DT, kid: { x: 5.5, y: GY, z: 5.5 }, kidBox: [5.2, GY, 5.2, 5.8, GY + 1.8, 5.8],
     occupied: () => false, knights: () => knights, touch: () => {},
-    say: (t) => said.push(t), play: () => {}, animals: () => [], markHintShown: () => {}, hintShown: () => true,
+    say: (t) => said.push(t), play: () => {},
+    labels: { show: (_key: string, text: string) => (said.push(text), true) } as unknown as MonsterContext['labels'], animals: () => [], markHintShown: () => {}, hintShown: () => true,
   };
 }
 
@@ -41,7 +42,7 @@ function secondsWith(n: number): number {
     t += DT;
     if (stepMoleMoed(mole, ctx)) {
       expect(said).toContain('Wegwezen!');
-      expect(said).toContain('Oké, oké, ik ga al!');
+      expect(said).toContain('Hmpf!');
       expect(ks.every((k) => k.chase === null)).toBe(true);
       return t;
     }
@@ -184,5 +185,77 @@ describe('AC285: the banners and the mole', () => {
     stepMoleMoed(mole, ctxFor([near, far]));
     expect(near.chase).not.toBeNull();
     expect(far.chase).toBeNull();
+  });
+});
+
+describe('AC329: a full bar chases him off and never removes him', () => {
+  function fight(rngSeed = 1) {
+    const mole = createMole({ x: 30.5, y: GY, z: 30.5 }, { x: 0, z: 0 });
+    mole.id = 1;
+    const k = knight('guard', 31.5, 30.5);
+    const lines: { text: string; kind?: string }[] = [];
+    const ctx = {
+      ...ctxFor([k]),
+      rng: createRng(rngSeed),
+      labels: { show: (_key: string, text: string, style: string) => (lines.push({ text, kind: `label-${style}` }), true) } as unknown as MonsterContext['labels'],
+      say: (text: string, _ms?: number, kind?: string) => { lines.push({ text, kind }); },
+    } as MonsterContext;
+    let full = false;
+    for (let t = 0; t < 30 && !full; t += DT) full = stepMoleMoed(mole, ctx);
+    return { mole, k, lines, full };
+  }
+
+  it('AC329: a full bar sets him away, says the four lines and frees the knight', () => {
+    const { mole, k, lines, full } = fight();
+    expect(full).toBe(true);
+    expect(mole.dove).toEqual({ x: mole.x, z: mole.z });
+    expect(mole.awayMs).toBeGreaterThanOrEqual(60_000);
+    expect(mole.awayMs).toBeLessThanOrEqual(90_000);
+    expect(k.chase).toBeNull();
+    const texts = lines.map((l) => l.text);
+    expect(texts).toEqual(expect.arrayContaining(['Wegwezen!', 'Hmpf!']));
+    // "Hmpf!" comes at the moment he runs, as a label over him, between "Wegwezen!" and the toast.
+    expect(texts.filter((t) => t !== 'Tok!')).toEqual(['Wegwezen!', 'Hmpf!', 'De Monstermol rent weg. Hij komt vast stiekem terug!', 'Bouw een hek van 2 hoog om hem heen.']);
+    expect(lines.find((l) => l.text === 'Hmpf!')?.kind).toBe('label-speech');
+    // The toast and the help line are mole lines: the help line follows the toast within 1 second (speech.ts).
+    expect(lines.filter((l) => l.kind === 'mole').map((l) => l.text)).toEqual(['De Monstermol rent weg. Hij komt vast stiekem terug!', 'Bouw een hek van 2 hoog om hem heen.']);
+  });
+
+  it('AC329: 20 seeded chase offs give away times of 60 to 90 seconds', () => {
+    for (let seed = 1; seed <= 20; seed++) {
+      const { mole } = fight(seed);
+      expect(mole.awayMs).toBeGreaterThanOrEqual(60_000);
+      expect(mole.awayMs).toBeLessThanOrEqual(90_000);
+    }
+  });
+
+  it('AC329: a caught mole is never noticed, poked or chased off', () => {
+    const mole = createMole({ x: 30.5, y: GY, z: 30.5 }, { x: 0, z: 0 });
+    mole.caught = true;
+    const ks = [knight('guard', 31.5, 30.5, 'a'), knight('chase', 32.5, 30.5, 'b'), knight('follow', 31.5, 31.5, 'c')];
+    const ctx = ctxFor(ks);
+    for (let t = 0; t < 40; t += DT) expect(stepMoleMoed(mole, ctx)).toBe(false);
+    expect(ks.every((k) => k.chase === null && !k.poking)).toBe(true);
+    expect(mole.pokers).toBe(0);
+    expect(mole.moed).toBe(0);
+    expect(mole.dove).toBeNull();
+  });
+
+  it('AC337: a knight on Jaag monsters weg notices him 80 blocks away, a Blijf hier knight does not', () => {
+    const mole = createMole({ x: 10.5, y: GY, z: 30.5 }, { x: 0, z: 0 });
+    const chaser = knight('chase', 90.5, 30.5, 'c');
+    const stayer = knight('stay', 90.5, 30.5, 's');
+    stepMoleMoed(mole, ctxFor([chaser, stayer]));
+    expect(chaser.chase).toMatchObject({ x: 10.5, z: 30.5 });
+    expect(stayer.chase).toBeNull();
+  });
+
+  it('AC337: 3 knights on Jaag monsters weg fill the bar in 5 seconds (plus or minus 1)', () => {
+    const mole = createMole({ x: 30.5, y: GY, z: 30.5 }, { x: 0, z: 0 });
+    const ks = [0, 1, 2].map((i) => knight('chase', 31.5, 30.5 + i * 0.1, `k${i}`));
+    const ctx = ctxFor(ks);
+    let t = 0;
+    while (t < 60 && !stepMoleMoed(mole, ctx)) t += DT;
+    expect(Math.abs(t - 5)).toBeLessThanOrEqual(1);
   });
 });
