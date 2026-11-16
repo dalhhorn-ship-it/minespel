@@ -77,6 +77,8 @@ test.describe('Knights in the save (V17a)', () => {
     await readState(page, 'addKnight', 'guard');
     const kid = await readState<{ x: number; y: number; z: number }>(page, 'player');
     // Send both far away in the save, then restart so they stand at their spots.
+    // The save of the second knight is written a moment after the hook answers; wait until both are in the record.
+    await expect.poll(async () => (await kvGet<Saved>(page, 'monsters'))?.knights.length).toBe(2);
     const saved = (await kvGet<Saved>(page, 'monsters'))!;
     await kvPut(page, 'monsters', {
       ...saved,
@@ -84,6 +86,7 @@ test.describe('Knights in the save (V17a)', () => {
     });
     await reopen(page);
     const far = await knights(page);
+    expect(far).toHaveLength(2);
     for (const k of far) expect(near(k, kid)).toBeGreaterThan(8);
     await readState(page, 'resetWorld');
     const now = await knights(page);
