@@ -4,6 +4,39 @@ Written so kids can read it too.
 
 ## Unreleased
 
+## 0.15.0
+
+### Geluid dichtbij
+
+* You can now hear the black bubble, Klodder, the Monstermol and your Lavakip-bar. Each one has its own soft, silly sound.
+* The closer you come, the louder it gets. Far away you hear nothing. Turn around and the sound moves to the left or the right ear.
+* At most 2 of these sounds play at the same time, so it never gets noisy.
+* With "Geluidseffecten" off or the volume at 0 you hear nothing, as before. In the learning break, an exam and the shop it is quiet too.
+* For papa or mama: nothing new is saved and nothing goes over the internet.
+
+## 0.14.0
+
+### Lavakip-bar
+
+* In the Dinowinkel you can buy a food truck for 60 dino points. It stands near your home.
+* Order a lavakip for 3 points. You can carry at most 10.
+* Hold one and tap a dino, a golden dino, a chicken or a knight, then "Lavakip geven". It munches for 3 seconds, does a silly dance and says "Hap! Lekker pittig!". A few hearts and a small orange puff show up. It is a snack, not fire.
+* With "less motion" on, there is no dance and no moving puff. The words still show.
+* Feeding changes nothing else: the animal keeps its name, its mode and its spot.
+* For papa or mama: the backup holds the Lavakip-bar. A backup from 0.13.0 still works. 0.13.0 cannot read a backup from 0.14.0 and says so in a friendly way.
+
+## 0.13.0
+
+### Duidelijke mol en kompas
+
+* The Monstermol now says when he comes: the card and the lines tell you. When he is up, a line says "Bouw een hek van 2 hoog om hem heen."
+* He stays until you build a pen 2 blocks high around him, up to 6 x 6. Then he is caught, calm and asleep. You can keep up to 3 caught moles and 1 free one.
+* A knight can chase him away for 60 to 90 seconds. Then he sneaks back. A knight guards at most 4 animals. A knight is never needed: a pen always works.
+* A knight has a fourth mode: "Jaag monsters weg".
+* The mole teases an animal at most once every 15 seconds. No animal is ever lost.
+* There is a new round lilac bubble under the learning break pill. It counts down to the next black bubble and points at the bubble, Klodder or the free mole. It does nothing when you tap it.
+* For papa or mama: the backup holds the moles now (backup format 6). A backup from 0.12.0 still works. 0.12.0 cannot read a backup from 0.13.0 and says so in a friendly way.
+
 ## 0.12.0
 
 ### Meer uitrusting

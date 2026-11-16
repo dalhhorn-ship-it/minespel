@@ -1,5 +1,21 @@
 # Test report
 
+## v22 to v24 (0.13.0 to 0.15.0), V24c closing task
+
+Full `./scripts/check.sh` on this branch, WebKit: lint, typecheck, 1922 unit tests in 196 files, build, dist check and 487 e2e tests all pass, 0 failed.
+
+* AC336, `mole-safety.spec.ts`: 5 chase offs in 30 minutes of play with 3 animals. No animal lost, every mode kept, the mole never within 1 block of the kid, the kid never moved, teases at least 15 s apart, the help line after the come up and every come back (checked by order, since toasts run on real time), and a pen of 3 catches him after a come back. A second session with moles, a knight and the pill makes no request beyond the app, and the mole lines show as text with Geluidseffecten uit and Volume 0.
+* AC336, `kid-safety.test.ts`: no mole, guard or pill string says "moet", asks for a knight or sounds like a threat. No banned word or pressure word in any v22 to v24 file, no network call.
+* AC322, `kid-safety.test.ts`: the six near sounds and `hap` are under 1.5 s, no louder than the loudest 0.6.0 sound, none named growl, scream or roar.
+* AC327, `near-sounds-safety.spec.ts`: a session that walks to Klodder, a free mole and the bar plays at most 2 near sounds and makes no request beyond the app.
+* AC328: `package.json` and `package-lock.json` say 0.15.0, Instellingen shows "Versie 0.15.0" (`big-world.spec.ts`), CHANGELOG has 0.13.0, 0.14.0 and 0.15.0.
+
+### Open for the founder (iPad, home screen icon, HTTPS test deploy, sound on)
+1. v22, AC308: walk 2 minutes on the v15 world with 3 gevangen moles, 1 free mole, 3 knights, Klodder and 25 shop dinos in view, with the fps counter. Check the card and lines are clear and the pill does not feel like a threat.
+2. v23, AC320: with the bar, 3 knights and 25 shop dinos in view, feed 5 of them with the fps counter. Check the truck and lavakip look friendly and nothing looks like real fire.
+3. v24, AC327: walk to the bubble, Klodder, a free mole, a gevangen mole and the bar and listen. Each sound must be soft and silly, grow when closer, fade far away, and none may sound scary. Turn so it is left and right. Open the Dinowinkel and hear it stop.
+4. Hand the iPad to the kid: does the kid know what the mole does and where he is, come back to the bar, and find Klodder by ear?
+
 ## v21 Meer uitrusting (0.12.0), V21c closing task
 
 Full `./scripts/check.sh` on this branch, WebKit (no Chromium fallback warning): lint, typecheck, 1631 unit tests in 170 files, build, dist check and 376 e2e tests all pass, 0 failed, 0 flaky.

@@ -47,7 +47,7 @@
 
 | File | Lines | Summary |
 |---|---:|---|
-| CHANGELOG.md | 232 | Written so kids can read it too. Sections: Unreleased:5, 0.12.0:7, 0.11.0:19, 0.10.0:29, 0.9.0:41, 0.8.0:55, 0.7.0:67, 0.6.0 (2026-11-15):84, 0.5.0 (2026-10-24):127, 0.4.0 (2026-10-24):140, 0.3.0 (2026-10-22):150, 0.2.0 (2026-10-19):158, 0.1.0 (2026-10-19):180 |
+| CHANGELOG.md | 265 | Written so kids can read it too. Sections: Unreleased:5, 0.15.0:7, 0.14.0:17, 0.13.0:28, 0.12.0:40, 0.11.0:52, 0.10.0:62, 0.9.0:74, 0.8.0:88, 0.7.0:100, 0.6.0 (2026-11-15):117, 0.5.0 (2026-10-24):160, 0.4.0 (2026-10-24):173, 0.3.0 (2026-10-22):183, 0.2.0 (2026-10-19):191, 0.1.0 (2026-10-19):213 |
 | CLAUDE.md | 71 | A free 3D block world with dinos and short learning breaks (Dutch: taal, rekenen,… |
 | README.md | 78 | Dino Blokwereld is a free 3D block world for kids, played in Dutch on an iPad. Walk… |
 | docs/ARCHITECTURE.md | 406 | Written by the architect after PRD signoff (2026-10-17). Source of truth for how Dino… Sections: Stack and why:5, Folder structure:27, Modules and data flow:189, How modules are loaded:243, State and storage:284, Security and kid safety in…:314, How to run:323, How to test:336, How to deploy:369, Conventions for developers:378, Risks:392 |
@@ -55,9 +55,9 @@
 | docs/DECISIONS.md | 67 | Every notable decision. Founder decisions are marked NEEDS FOUNDER until answered, then… |
 | docs/DISCUSSION.md | 164 | Review rounds between agents. Newest at the bottom. Keep it short: who said what, what… Sections: v11 Dorp: architect…:7, MONSTERS_PRD review round 1…:99 |
 | docs/FACTORY.md | 113 | Moved out of CLAUDE.md on 2026-10-26 (decision 104) so it is read only when needed. The… |
-| docs/FRICTION.md | 61 | The operator adds a line whenever something goes wrong or feels slow, so /retro has real… |
+| docs/FRICTION.md | 62 | The operator adds a line whenever something goes wrong or feels slow, so /retro has real… |
 | docs/GAME_LOOP_PRD.md | 349 | Status: Draft, not signed. Each release moves into docs/PRD.md section 12 and is signed… Sections: 1. The game loop:13, 2. v12 Dino-Hoed:53, 3. v13 Dino-Eten:134, 4. v14 Bouw-Opdracht:214, 5. Order and dependencies:332, 6. Not picked yet:338 |
-| docs/HANDOFF.md | 20 | Founder: "Ok werkt op de iPad, bouw de rest", "Alles mag live", "Doe daarna volledige… |
+| docs/HANDOFF.md | 27 | Founder: "Ok werkt op de iPad, bouw de rest", "Alles mag live", "Doe daarna volledige… |
 | docs/IDEA.md | 81 | "Create a 3D minecraft education kind of game but then also with dinosaurs, and every 5… |
 | docs/MONSTERS_PRD.md | 494 | Status: DRAFT, revised after review round 1 (2026-11-15). Not signed. The founder… Sections: 1. How it fits the game today:25, 2. v17 Ridders (ships after…:126, 3. v18 Zwarte bubbel (ships…:201, 4. v16 Monstermol (ships…:278, 5. v19 Ridderuitrusting:340, 6. v20 Diepe edelstenen:401, 7. v21 Meer uitrusting…:447, 8. Founder questions:473 |
 | docs/PLAN.md | 74 | Task graph written by the architect on 2026-10-17 from the signed PRD. The operator… |

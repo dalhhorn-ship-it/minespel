@@ -10,6 +10,7 @@ import { findBannedWords } from '../../src/core/kid-words';
 import { GEAR, GEAR_SLOTS, MAX_KRACHT, MIN_FIGHT_SECONDS, kracht, moedRate, type Worn } from '../../src/knights/gear';
 import * as moleLines from '../../src/monsters/mole-lines';
 import { STONES } from '../../src/world/stones';
+import { NEAR_NAMES, NEAR_SPECS } from '../../src/audio/near-recipes';
 import { createSound, SOUND_NAMES, SOUND_SPECS, type SoundName } from '../../src/audio/sound';
 
 const KNIGHT_FILES = [
@@ -338,6 +339,45 @@ describe('Lavakip, the pill, the near sounds and the new mole files (v22 to v24)
   });
   it('AC225: no new file calls the network or holds a web address', () => {
     const bad = V22_V24_FILES.filter((f) => NETWORK.test(readFileSync(f, 'utf8').replace(/\/\/.*$/gm, '').replace(/\/\*[\s\S]*?\*\//g, '')));
+    expect(bad).toEqual([]);
+  });
+});
+
+describe('the near sounds and the snack sound (V24c, AC322 AC326)', () => {
+  const loudest = Math.max(...SOUNDS_0_6_0.map((n) => SOUND_SPECS[n].peak));
+
+  it('AC322: the six near sounds are under 1.5 s, no louder than the loudest 0.6.0 sound, and none is named growl, scream or roar', () => {
+    expect(NEAR_NAMES).toEqual(['blub', 'giechel', 'snuffel', 'snurk', 'sis', 'deuntje']);
+    for (const n of NEAR_NAMES) {
+      expect(NEAR_SPECS[n].seconds, `${n} seconds`).toBeLessThan(1.5);
+      expect(NEAR_SPECS[n].peak, `${n} peak`).toBeLessThanOrEqual(loudest);
+      expect(n).not.toMatch(/growl|scream|roar/i);
+    }
+  });
+  it('AC322: the snack sound hap is short and soft too', () => {
+    expect(SOUND_NAMES).toContain('hap');
+    expect(SOUND_SPECS.hap.seconds).toBeLessThan(1.5);
+    expect(SOUND_SPECS.hap.peak).toBeLessThanOrEqual(loudest);
+  });
+});
+
+describe('AC336: the mole and knight strings of v22 never say must, never say a knight is needed, never threaten', () => {
+  const FILES = V22_V24_FILES.filter((f) => /src\/(monsters\/mole-|knights\/guard-|app\/bubble-hud|ui\/(mole-|bubble-pill|speech))/.test(f));
+  const THREAT = /\b(straf|pak je|ik krijg je|opeten|dood|bang|gevaar|griezel|eng)\b/i;
+  const NEED_KNIGHT = /(koop|nodig|alleen met|zonder).*ridder|ridder.*(koop|nodig|moet)/i;
+
+  it('AC336: the scan reads the mole, guard and pill files', () => {
+    expect(FILES.length).toBeGreaterThanOrEqual(6);
+    expect(FILES.some((f) => f.endsWith('mole-lines.ts'))).toBe(true);
+  });
+  it('AC336: no string holds "moet", asks for a knight or sounds like a threat', () => {
+    const bad: string[] = [];
+    for (const f of FILES)
+      for (const s of literals(f)) {
+        if (/\bmoet(en)?\b/i.test(s)) bad.push(`${f}: "${s}" says must`);
+        if (NEED_KNIGHT.test(s)) bad.push(`${f}: "${s}" says a knight is needed`);
+        if (THREAT.test(s)) bad.push(`${f}: "${s}" sounds like a threat`);
+      }
     expect(bad).toEqual([]);
   });
 });
