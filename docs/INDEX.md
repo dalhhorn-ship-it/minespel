@@ -25,16 +25,18 @@
 
 | Ids | File | Range (count) |
 |---|---|---|
-| Acceptance criteria | docs/PRD.md | AC1 to AC291 (282) |
+| Acceptance criteria | docs/PRD.md | AC1 to AC328 (319) |
 | Acceptance criteria | docs/SHOP_PRD.md | AC20 to AC150 (5) |
 | Acceptance criteria | docs/TEST_REPORT.md | AC279 to AC290 (2) |
 | Acceptance criteria | docs/releases/v10.md | AC172 to AC177 (6) |
 | Acceptance criteria | docs/releases/v11.md | AC178 to AC191 (14) |
+| Acceptance criteria | docs/releases/v15-v16.md | AC230 to AC257 (28) |
 | Acceptance criteria | docs/releases/v17-v18.md | AC200 to AC229 (30) |
+| Acceptance criteria | docs/releases/v19-v21.md | AC258 to AC291 (34) |
 | Acceptance criteria | docs/releases/v2.md | AC155 to AC165 (11) |
 | Acceptance criteria | docs/releases/v3.md | AC192 to AC199 (8) |
 | Acceptance criteria | docs/releases/v9.md | AC166 to AC171 (6) |
-| Decisions | docs/DECISIONS.md | 87 to 142 (56) |
+| Decisions | docs/DECISIONS.md | 87 to 143 (57) |
 | Decisions | docs/archive/decisions-1-86.md | 1 to 86 (86) |
 | Tasks | docs/DISCUSSION.md | V11a, V11b, V11c, V11d, V11e (5) |
 | Tasks | docs/PLAN.md | T18, T19, T55b, T55a, T53a, T21, T32, T52, T56, T22, T61, T62, … (51) |
@@ -49,8 +51,8 @@
 | CLAUDE.md | 71 | A free 3D block world with dinos and short learning breaks (Dutch: taal, rekenen,… |
 | README.md | 78 | Dino Blokwereld is a free 3D block world for kids, played in Dutch on an iPad. Walk… |
 | docs/ARCHITECTURE.md | 404 | Written by the architect after PRD signoff (2026-10-17). Source of truth for how Dino… Sections: Stack and why:5, Folder structure:27, Modules and data flow:189, How modules are loaded:241, State and storage:282, Security and kid safety in…:312, How to run:321, How to test:334, How to deploy:367, Conventions for developers:376, Risks:390 |
-| docs/BACKLOG.md | 239 | Not signed. Changing this file never closes the PRD gate (decision 80). The signed… Sections: Next steps (founder order):5, Rules:24, Ranked backlog:34, Dropped:195, Later:216 |
-| docs/DECISIONS.md | 64 | Every notable decision. Founder decisions are marked NEEDS FOUNDER until answered, then… |
+| docs/BACKLOG.md | 259 | Not signed. Changing this file never closes the PRD gate (decision 80). The signed… Sections: Next steps (founder order):5, Rules:25, Ranked backlog:35, Dropped:215, Later:236 |
+| docs/DECISIONS.md | 65 | Every notable decision. Founder decisions are marked NEEDS FOUNDER until answered, then… |
 | docs/DISCUSSION.md | 164 | Review rounds between agents. Newest at the bottom. Keep it short: who said what, what… Sections: v11 Dorp: architect…:7, MONSTERS_PRD review round 1…:99 |
 | docs/FACTORY.md | 113 | Moved out of CLAUDE.md on 2026-10-26 (decision 104) so it is read only when needed. The… |
 | docs/FRICTION.md | 61 | The operator adds a line whenever something goes wrong or feels slow, so /retro has real… |
@@ -60,7 +62,7 @@
 | docs/MONSTERS_PRD.md | 494 | Status: DRAFT, revised after review round 1 (2026-11-15). Not signed. The founder… Sections: 1. How it fits the game today:25, 2. v17 Ridders (ships after…:126, 3. v18 Zwarte bubbel (ships…:201, 4. v16 Monstermol (ships…:278, 5. v19 Ridderuitrusting:340, 6. v20 Diepe edelstenen:401, 7. v21 Meer uitrusting…:447, 8. Founder questions:473 |
 | docs/PLAN.md | 163 | Task graph written by the architect on 2026-10-17 from the signed PRD. The operator… Sections: How to read this:6, Milestones:15, Tasks:37, Task notes:93 |
 | docs/PLATFORM.md | 39 | Moved out of CLAUDE.md on 2026-10-26 (decision 104). Read this when a task touches the… |
-| docs/PRD.md | 1289 | Status: APPROVED by Founder (standing approval, decision 136) on 2026-11-16 Sections: 1. Summary:9, 2. Users:14, 3. Goals and success:21, 4. What the app is today (v1…:31, 5. Release backlog:391, 6. User flows:394, 7. Acceptance criteria:483, 8. Look, sound and feel:761, 9. Kid safety and privacy:776, 10. Constraints:793, 11. Risks and decisions:804, 12. Releases:893 |
+| docs/PRD.md | 1179 | Status: APPROVED by Founder (standing approval, decision 136) on 2026-11-16 Sections: 1. Summary:9, 2. Users:14, 3. Goals and success:21, 4. What the app is today (v1…:31, 5. Release backlog:391, 6. User flows:394, 7. Acceptance criteria:483, 8. Look, sound and feel:831, 9. Kid safety and privacy:847, 10. Constraints:865, 11. Risks and decisions:876, 12. Releases:970 |
 | docs/RETRO.md | 25 | Written by /retro. Newest at the bottom. Factory level learnings are also saved in… |
 | docs/SHOP_PRD.md | 108 | Document Status: Approved Addendum (docs/SHOP_PRD.md — companion to docs/PRD.md) |
 | docs/STATUS.md | 55 | Phase: small releases. Live on main: 0.6.0 to 0.9.0 (PR #25, #26, #27): v3 Dino's… |
@@ -77,7 +79,9 @@
 | docs/releases/plan-done.md | 133 | Moved out of docs/PLAN.md on 2026-10-26 (decision 105) so the plan holds only open work.… Sections: Milestones:5, Tasks:18, Task notes:100, Operator notes during the…:129 |
 | docs/releases/v10.md | 47 | Archive, not signed. This is the v10 section as the founder signed it in docs/PRD.md… |
 | docs/releases/v11.md | 70 | Archive, not signed. This is the v11 section as the founder signed it in docs/PRD.md… |
+| docs/releases/v15-v16.md | 158 | Archive, not signed. These are the v15 and v16 sections as the founder signed them in… |
 | docs/releases/v17-v18.md | 143 | Archive, not signed. This is the v17 and v18 section as the founder signed it in… |
+| docs/releases/v19-v21.md | 239 | Archive, not signed. These are the v19, v20 and v21 sections as the founder signed them… |
 | docs/releases/v2.md | 54 | Archive, not signed. This is the v2 section as the founder signed it in docs/PRD.md… |
 | docs/releases/v3.md | 54 | Archive, not signed. This is the v3 section as the founder signed it in docs/PRD.md… |
 | docs/releases/v9.md | 38 | Archive, not signed. This is the v9 section as the founder signed it in docs/PRD.md… |
