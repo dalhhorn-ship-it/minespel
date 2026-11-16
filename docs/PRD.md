@@ -1,10 +1,10 @@
 # PRD: Dino Blokwereld (working title)
 
-Status: APPROVED by Founder (standing approval, decision 136) on 2026-11-15
+Status: APPROVED by Founder (standing approval, decision 136) on 2026-11-16
 
-This signoff archives v3 Dino's veilig (built, goes live as 0.6.0 with the merge) and scopes v17 Ridders and v18 Zwarte bubbel together as one release, 0.7.0 (decisions 130 to 134).
+This signoff archives v17 Ridders and v18 Zwarte bubbel (live as 0.7.0) in `docs/releases/v17-v18.md` and moves their criteria AC200 to AC229 into section 7. The v15 Grote wereld (0.8.0) and v16 Monstermol (0.9.0) sections and AC230 to AC257 stay in section 12 unchanged: they are built and wait for the founder's merge.
 
-It also adds v15 Grote wereld (0.8.0) and v16 Monstermol (0.9.0) to section 12, on the founder's request of 2026-11-15 ("ok kun je de mol en grote wereld ook bouwen"). They are built after 0.7.0 and ship one by one (decisions 124 and 130 to 133). The v17 and v18 text and AC200 to AC229 do not change.
+It adds v19 Ridderuitrusting (0.10.0), v20 Diepe edelstenen (0.11.0) and v21 Meer uitrusting (0.12.0) to section 12, on the founder's request of 2026-11-16 ("Ok werkt op de iPad, bouw de rest"), inside decisions 130 to 133. They are built after v16 and ship one by one. New criteria AC258 to AC291.
 
 ## 1. Summary
 Dino Blokwereld is a small 3D block world on the iPad where a kid explores, mines and builds with Minecraft style blocks. Every few minutes the game pauses for a short learning break in Rekenen or Taal. Right answers earn dino points. In the Dinowinkel the kid buys dino eggs with those points, and the eggs hatch into friendly blocky dinos that walk around in the world. A passed practice exam gives a golden dino.
@@ -31,7 +31,7 @@ The founder will feel it worked when:
 ## 4. What the app is today (v1 0.1.0, v2 0.2.0, v9 0.3.0, v10 0.4.0 and v11 0.5.0)
 
 ### 4.0 What is live (decisions 57 and 80)
-The live build is v1 (0.1.0) plus v2 Gouden ei (0.2.0) plus v9 Eerlijke punten (0.3.0, shipped 2026-10-22) plus v10 Punten voor elke ronde (0.4.0, shipped 2026-10-24) plus v11 Dorp (0.5.0, shipped 2026-10-24), on `main` and on the Cloudflare Worker `minespel`. Refactor round R1 (2026-10-24) changed no rule in this file. The v9 section is archived in `docs/releases/v9.md`, the v10 section in `docs/releases/v10.md` and the v11 section in `docs/releases/v11.md`; their rules are in 4.0, 4.5, 4.7 and 4.17 and their criteria in section 7. The v11 rules (villages, villagers, rare blocks) are the In list of `docs/releases/v11.md`; the subsections below point to it where it changes them. Since 0.5.0, `main` also holds work listed under Unreleased in `CHANGELOG.md` (decisions 111 to 116); it gets its version with 0.6.0. v3 Dino's veilig (decisions 90 and 119) is built and goes live as 0.6.0 when the founder merges it; its section is archived in `docs/releases/v3.md`, its rules are in 4.12, 4.15, 4.17 and section 9, and its criteria are in section 7. The next release, v17 Ridders and v18 Zwarte bubbel (0.7.0, decisions 130 to 134), is scoped in section 12. Decision 57 replaces F1 ("everything ships together"). Features that are not built yet wait in small releases in `docs/BACKLOG.md`. Their text stays below so nothing is lost. Each waiting part is marked "Moved to vN". Parts the founder dropped are marked "Dropped (decision 79)". The shipped v2 section is archived in `docs/releases/v2.md`; its rules are in this section and its criteria in section 7.
+The live build is v1 (0.1.0) plus v2 Gouden ei (0.2.0) plus v9 Eerlijke punten (0.3.0, shipped 2026-10-22) plus v10 Punten voor elke ronde (0.4.0, shipped 2026-10-24) plus v11 Dorp (0.5.0, shipped 2026-10-24), on `main` and on the Cloudflare Worker `minespel`. Refactor round R1 (2026-10-24) changed no rule in this file. The v9 section is archived in `docs/releases/v9.md`, the v10 section in `docs/releases/v10.md` and the v11 section in `docs/releases/v11.md`; their rules are in 4.0, 4.5, 4.7 and 4.17 and their criteria in section 7. The v11 rules (villages, villagers, rare blocks) are the In list of `docs/releases/v11.md`; the subsections below point to it where it changes them. Since 0.5.0, `main` also holds work listed under Unreleased in `CHANGELOG.md` (decisions 111 to 116); it gets its version with 0.6.0. v3 Dino's veilig (0.6.0, decisions 90 and 119) is live; its section is archived in `docs/releases/v3.md`, its rules are in 4.12, 4.15, 4.17 and section 9, and its criteria are in section 7. v17 Ridders and v18 Zwarte bubbel (0.7.0, decisions 130 to 134) are live; their section is archived in `docs/releases/v17-v18.md` (the Ridders section of the Dinowinkel, the knight menu, Klodder and the card "Monsters en ridders"), their safety lines are in sections 8 and 9, and their criteria are in section 7. The next releases, v15, v16, v19, v20 and v21 (0.8.0 to 0.12.0), are scoped in section 12. Decision 57 replaces F1 ("everything ships together"). Features that are not built yet wait in small releases in `docs/BACKLOG.md`. Their text stays below so nothing is lost. Each waiting part is marked "Moved to vN". Parts the founder dropped are marked "Dropped (decision 79)". The shipped v2 section is archived in `docs/releases/v2.md`; its rules are in this section and its criteria in section 7.
 
 **v1 holds:**
 * The block world: fixed seed, 64 x 64 wide and 64 high, 32 free building blocks, the obsidiaan gate with vuur, and lava.
@@ -59,7 +59,7 @@ The live build is v1 (0.1.0) plus v2 Gouden ei (0.2.0) plus v9 Eerlijke punten (
 |---|---|
 | 4.1 The world | live (v1). Villages and 8 rare blocks since v11 (`docs/releases/v11.md`). |
 | 4.2 Moving and building | live (v1) |
-| 4.3 Dinos, points, Dinowinkel | live. The golden dino came with v2. |
+| 4.3 Dinos, points, Dinowinkel | live. The golden dino came with v2. The Ridders section since 0.7.0 (`docs/releases/v17-v18.md`). Uitrusting and Edelstenen come with v19, v20 and v21 (section 12). |
 | 4.4 Timers | live. The exam timer came with v2. |
 | 4.5 Learning break | live (v1) |
 | 4.6 Spaced repetition | live. Exam answers move boxes since v2. Villager answers move boxes since v11 (`docs/releases/v11.md`). |
@@ -73,7 +73,7 @@ The live build is v1 (0.1.0) plus v2 Gouden ei (0.2.0) plus v9 Eerlijke punten (
 | 4.14 Eigen modules | Dropped (decision 79) |
 | 4.15 Import, export, backup | Backup built in v3 (0.6.0). Module import and export dropped (decision 79). |
 | 4.16 Resultaten | Moved to v6 (v1 has the simple break list only) |
-| 4.17 Instellingen | live core, with Punten since v10. Volume, Alles wissen and the app version built in v3 (0.6.0). The card "Monsters en ridders" comes with v17 and v18 (section 12). |
+| 4.17 Instellingen | live core, with Punten since v10. Volume, Alles wissen and the app version built in v3 (0.6.0). The card "Monsters en ridders" is live since 0.7.0 (`docs/releases/v17-v18.md`); the Monstermol row comes with v16 (section 12). |
 | 4.18 Saving | live core. Broken save screen, storage notes and persistent storage moved to v4. |
 | 4.19 App basics | live core. Offline, one window, plain http notes and the first start flow moved to v4. |
 
@@ -704,6 +704,40 @@ These came with v3 (decisions 90 and 119, built for 0.6.0). The release text is 
 * **AC198:** Given the v3 build, then `package.json` has version 0.6.0, Instellingen shows 0.6.0 at the bottom, and `CHANGELOG.md` has a 0.6.0 entry in kid readable words that says papa or mama can keep your world and dinos safe in a backup. The entries that were under Unreleased are part of the 0.6.0 entry.
 * **AC199:** Given a learning break runs (timed, Nu oefenen or started with Pauze nu starten) with a question, lesson or teach moment on screen, then a small grey lock shows in the top right corner, with a tap area of at least 44 x 44 points fully inside the safe area, not over an answer button or the number pad. When it is tapped, then the pin pad of the parent gate opens. When the right pincode is typed, then a parent view shows with only "Pauze nu beëindigen" and "Terug naar de pauze", and no settings, content, results or backup. Given "Pauze nu beëindigen", then the break ends as in AC95 and the kid is in the world with the play timer at the full interval. Given "Terug" on the pin pad or "Terug naar de pauze", then the break shows the same question with the same typed answer. Given the kid does not know the pincode, then the break cannot be ended: 3 wrong codes block the gate for 1 minute with the shared lockout of AC74, and the break stays on the same question. Given the break summary, Extra oefenen or the world, then this lock does not show (the world keeps its own lock, the exam its own, AC155).
 
+### Knights and the black bubble
+Shipped with 0.7.0 (v17 Ridders and v18 Zwarte bubbel). "The table above" and "the rules above" in these criteria mean the parent switch tables and the rules for every monster and knight in `docs/releases/v17-v18.md`, which still hold.
+
+* **AC200:** Given the Dinowinkel with Ridders on, then a section "Ridders" shows a Ridder card with name, picture and price 30, and its Kopen button has a tap area of at least 44 x 44 points. Given the master or Ridders off, then the section does not show. Given 3 knights, then the card says "Je hebt al 3 ridders!" and cannot be bought. Given 25 shop dinos, 10 chickens and 30 points, then a knight can still be bought and the herd and chicken counts do not change.
+* **AC201:** Given 30 points, when the kid taps Kopen on the Ridder and then Ja, then the points are 0, one knight appears within 3 blocks of the kid with "Ridder tot je dienst!", and the ledger has one row `reason: 'knight'` with -30, saved in one transaction with the knight. Given Nee, then nothing changes. Given 60 points and 10 taps on Ja within 1 second, then exactly one knight is bought and 30 points are left. Given 29 points, then no knight can be bought.
+* **AC202:** Given a knight bought for 30, when the kid trades him in and confirms, then the kid gets 15 points, the ledger has one row with +15, the knight leaves the world, and after a restart he is still gone.
+* **AC203:** Given a knight, when the kid taps him in Hakken or Bouwen mode, then the knight menu opens with Volg mij, Blijf hier and Pas op de dieren, each button at least 56 x 56 points, and no block is mined or placed by that tap. Given the kid picks a mode and the app is closed and reopened, then the knight has the same mode.
+* **AC204:** Given a knight on Pas op de dieren, then over 2 minutes he is never more than 9 blocks from his spot and he moves at least once every 10 seconds. Given a knight on Blijf hier, then over 2 minutes he stays within 1 block of his spot. Given a knight on Volg mij, then he walks at 3 blocks per second behind the kid, stays out of the view as decision 112 measures for dinos, and 40 taps on random world spots in view hit him 0 times.
+* **AC205:** Given a knight on Blijf hier or Pas op de dieren, when the kid walks to within 3 blocks, then he salutes and "Hallo!" shows. When the kid walks away and comes back within 1 minute, then there is no second salute. When the kid comes back after more than 1 minute, then he salutes again.
+* **AC206:** Given a knight on Pas op de dieren with 4 dinos and 2 chickens within 8 blocks of his spot and 1 dino at 12 blocks, when the kid taps him, then "Ik pas op 4 dino's en 2 kippen. Alles veilig!" shows. Given no dino or chicken within 8 blocks, then "Hier zijn nog geen dieren." shows.
+* **AC207:** Given 3 knights in all three modes for 2 minutes (automated), then no block is broken or placed and the kid's position is never moved by a knight. Given the Dinofluit or Allemaal blijven, then no knight changes mode or spot.
+* **AC208:** Given Instellingen, then a card "Monsters en ridders" shows the rows Monsters en ridders and Ridders, each with its exact help line from the table above and a tap area of at least 44 x 44 points. Given 2 knights, when the parent switches Ridders or the master off, then back in the world no knight shows and the Ridders section is hidden; when it goes on again, then both knights are back with the same modes. Given the master off, then the Ridders row shows greyed and keeps its value. Given a new install, an existing install and a restored backup from before 0.7.0, then the master and Ridders are Aan.
+* **AC209:** Given a save from 0.6.0, then it loads with no knights and nothing else changed. Given a backup made with 2 knights, when it is restored on an empty iPad, then both knights come back with their modes. Given a backup from 0.6.0, then it restores with no knights. Given "Wereld opnieuw beginnen" with 2 knights, then both stand within 3 blocks of the kid in the new world with their modes.
+* **AC210 (iPad):** Given the founder's oldest iPad from the home screen icon with the fps counter, 3 knights, 25 shop dinos and 10 chickens in view, when the founder walks for 2 minutes, then the AC101 target holds: 95 percent of frames take 33 ms or less and none takes over 200 ms. The result goes in `docs/TEST_REPORT.md`. Given the check fails, then the cap becomes 2 knights, AC200 reads "Je hebt al 2 ridders!", and the check runs again. The founder also looks and listens: the knight looks friendly and the fanfare is soft.
+* **AC211:** Given the bubble on and 1 knight, then a bubble appears after 10 minutes of play time (plus or minus 1 second); time in a learning break, exam, Dinowinkel, dino menu, knight menu, parent area, background or portrait does not count. Given no knight and 29 points, then after 30 minutes of play time no bubble has come and the clock has not moved; when the kid then reaches 30 points, the clock runs on from where it stood. Given a bubble or Klodder out, then the clock does not move and no second bubble comes. Given a bubble or Klodder leaves, then the next bubble comes 10 minutes of play time later.
+* **AC212:** Given the bubble is due and a learning break is due in under 60 seconds, then no bubble comes before the break, and the bubble comes 30 seconds (plus or minus 1) of play time after the break ends.
+* **AC213:** Given a bubble comes, then it took at least 3 seconds to float in, it stands 6 to 10 blocks in front of the kid in an air cell in view, it is at least 80 points wide on screen, and over 30 seconds it stays within 1 block of its spot. Given the kid stands in a tunnel 1 block wide with no valid spot in view, then no bubble shows until a valid spot exists, checked every 5 seconds.
+* **AC214:** Given a bubble, when the kid taps it in Hakken or Bouwen mode, then it pops, Klodder appears where it was with "Hihihi!", and that tap mines or places no block. Given Klodder, then he walks at 1.5 blocks per second. Given a bubble not tapped for 60 seconds of play time, then it floats away, no Klodder comes and no block changes.
+* **AC215:** Given Klodder out for 3 minutes on a seeded world with a kid built hut and a village (automated), then every nibbled cell was a cell the kid never changed, more than 3 blocks from every kid changed cell, outside every village site, not oersteen, water or lava, and not under or next to the kid or an animal. There was at most one nibble per 4 seconds and at most 20 in total, and after 20 he still teases.
+* **AC216:** Given 1 knight on Pas op de dieren with Klodder within 16 blocks, then the knight reaches him, or pops next to him after 3 seconds stuck (also from inside a closed pen), and the Moed bar fills at 1 per second. After 30 seconds (plus or minus 1) "Wegwezen!" shows, Klodder is in a bubble that floats away with "Doei!", and the knight is back in his mode. Given a knight on Volg mij 12 blocks from Klodder, then he does not go to him. Given 3 knights poking, then the bar takes 10 seconds (plus or minus 1). The bar never fills in under 3 seconds.
+* **AC217:** Given Klodder has nibbled 10 blocks, when he leaves for any reason (knight, tired, switch off), then within 3 seconds every block is back, and not all in the same frame. Given the kid or an animal stands in a nibbled cell, then that block comes back within 1 second after the cell is free. Given the kid built a block in a nibbled cell, then the kid's block stays.
+* **AC218:** Given a world record saved before Klodder came out, when Klodder nibbles 10 blocks and the page is hard killed (not a clean reload), then after the next start the world record is byte for byte the same as before, every block is there, and no bubble or Klodder shows. Given a backup made while Klodder is out, then it holds every block of the world. Given "Wereld opnieuw beginnen" while Klodder is out, then Klodder is gone in the new world and the bubble clock keeps its time.
+* **AC219:** Given no knight and Klodder out, then after 5 minutes of play time (plus or minus 1 second) he yawns "Ik ben moe", climbs into his bubble and floats away, and every block comes back as in AC217. Given knights that never reach him (automated), then the same happens at 5 minutes. No setting changes the 5 minutes.
+* **AC220:** Given a seeded map with a pen, a cliff of 4 and a pond, when Klodder teases 50 times (automated), then no animal is removed, loses anything, enters water or lava, drops more than 1 block, ends in a closed cell, leaves the world or changes its mode. 10 seconds after each tease, every Blijf hier animal is within 3 blocks of its spot and every follower is behind the kid. No animal is teased twice in a row. The saved dinos and chickens differ only in their positions.
+* **AC221:** Given a Blijf hier dino walled in on all sides, when it is teased, then it jumps, plays its sound and stays. Given a dino on a Dinofluit call, then Klodder never teases it and it arrives at the kid. Given villagers and knights within reach, then Klodder never teases them.
+* **AC222:** Given no knight and Klodder out for the first time ever, then "Klodder wordt vanzelf moe. Een ridder kan hem sneller wegsturen." shows once. Given any later Klodder, also after a restart or a restored backup made after the hint, then it never shows again. Given the kid owns a knight the first time Klodder comes out, then no hint shows.
+* **AC223:** Given the card "Monsters en ridders", then the Zwarte bubbel row shows its exact help line. Given Ridders off, then the row shows greyed with "Werkt alleen met Ridders aan" and no bubble comes. Given a bubble or Klodder out, when the parent switches the bubble, Ridders or the master off, then back in the world neither is there and every block is back. Given a new install, then the row is Aan. Given an existing install or a restored backup from before 0.7.0, then the row is Uit, no bubble comes, and the bubble clock does not move until a parent switches it on.
+* **AC224:** Given a bubble or Klodder out, then in each pause state (learning break, exam, Dinowinkel, dino menu, knight menu, parent area, background, portrait) nothing moves and the bubble's 60 seconds, Klodder's 5 minutes, his 4 second nibble clock and the Moed bar do not advance; after it, all goes on where it was. Given a knight on Pas op de dieren, then he also stands still in each pause state. Given a clean reload while a bubble or Klodder is out, then neither is there after it and the bubble clock has its saved time (plus or minus 1 second).
+* **AC225:** Given Klodder out for 5 minutes (automated), then his box never overlaps the kid's, the kid's position is never moved by him, and the points, dinos, eggs, chickens, knights and found blocks do not change. No points are given for any monster event. Given a full play session with knights and Klodder (automated), then the app makes no network request beyond its own files.
+* **AC226:** Given a backup made with 0.7.0, then it holds the bubble clock, the hint flag and the three switches, and they come back on restore. Given a backup from before 0.7.0, then it restores with a bubble clock at 0, no hint shown yet, and the switches as in the defaults table. Given a save with knights, then the only new saved data is the `monsters` record and the three switches.
+* **AC227 (iPad):** Given the founder's oldest iPad from the home screen icon with the fps counter, Klodder, 3 knights (or 2, see AC210) and 25 shop dinos in view, when Klodder nibbles and a knight sends him off, then the AC101 target holds. The result goes in `docs/TEST_REPORT.md`. The founder looks and listens: Klodder is silly, not scary, and the sounds are soft.
+* **AC228:** Given every new string of 0.7.0 (automated), then none holds a banned word from the rules above as a whole word. Given every new sound file, then each is under 1.5 seconds, its peak is at or below the loudest sound effect of 0.6.0, and no file name holds growl, scream or roar. Given Geluidseffecten uit or Volume 0, then every knight and Klodder line still shows as text. Given `prefers-reduced-motion`, then the bubble floats with no bounce and nothing shakes.
+* **AC229:** Given the 0.7.0 build, then `package.json` has version 0.7.0, Instellingen shows 0.7.0 at the bottom, and `CHANGELOG.md` has a 0.7.0 entry in kid readable words that says you can buy a knight who guards your animals, and that a little monster in a black bubble may come, your knight sends him off, and every block comes back.
+
 ### Saving, offline and device
 * **AC96:** Given the kid built and mined, when the app is killed at any moment and reopened, then at most the last 5 seconds of changes are lost.
 * **AC97 (v4):** Given the app was opened once online over HTTPS, when the iPad is in flight mode, then the app starts from the home screen and everything works, including both built in modules.
@@ -722,7 +756,7 @@ These came with v3 (decisions 90 and 119, built for 0.6.0). The release text is 
 * **AC143 (iPad) (v1, iPad check in v5):** Given the reference iPad, then the stick, jump button, hotbar, countdown and lock icon sit inside the safe area, and the hotbar sits high enough that using it never triggers the home swipe.
 * **AC144 (v4):** Given a wiped iPad (empty storage), when the app opens, then the first start flow shows, and after "Geef de iPad aan je kind" the world loads with no errors.
 
-**Count:** AC1 to AC199 here, plus AC200 to AC229 for v17 and v18 in section 12. 11 are removed: AC13, AC14, AC15, AC19, AC32, AC33, and with v10 AC120, AC166, AC167, AC168 and AC170 (decision 92). 9 are dropped with v7 and v8 (AC80 to AC86, AC88, AC132; decision 79). 179 active criteria here. 151 are in force in the live build: 105 from v1 (some with a part in a later release, AC34 and AC146 changed by v9, and AC29, AC35, AC52, AC145 and AC146 rewritten by v10), 24 from v2, 2 from v9, 6 from v10 and 14 from v11. 13 are from v3 (5 completed and 8 new) and go live with 0.6.0. 15 belong to a later release: v4 has 8, v5 has 2, v6 has 5. Section 12 adds 30 for v17 and v18. The release after them continues at AC230.
+**Count:** AC1 to AC229 here, plus AC230 to AC291 for v15, v16, v19, v20 and v21 in section 12. 11 are removed: AC13, AC14, AC15, AC19, AC32, AC33, and with v10 AC120, AC166, AC167, AC168 and AC170 (decision 92). 9 are dropped with v7 and v8 (AC80 to AC86, AC88, AC132; decision 79). 209 active criteria here. 194 are in force in the live build: 105 from v1 (some with a part in a later release, AC34 and AC146 changed by v9, and AC29, AC35, AC52, AC145 and AC146 rewritten by v10), 24 from v2, 2 from v9, 6 from v10, 14 from v11, 13 from v3 (0.6.0: 5 completed and 8 new) and 30 from v17 and v18 (0.7.0). 15 belong to a later release: v4 has 8, v5 has 2, v6 has 5. Section 12 adds 62: 14 for v15, 14 for v16, 13 for v19, 10 for v20 and 11 for v21. The release after them continues at AC292.
 
 ## 8. Look, sound and feel
 * **Style:** bright, friendly Minecraft style pixel blocks with 16 x 16 pixel textures. Dinos are chunky and cute with big eyes, made of boxes. Eggs are spotted and wobble. Soft, still fog at the edge (no flicker). No blood, no scary sounds, no angry dinos.
@@ -737,6 +771,7 @@ These came with v3 (decisions 90 and 119, built for 0.6.0). The release text is 
 * **Sounds:** short and soft. A pop when mining, a thunk when placing, a chime for right, a gentle "hmm" for wrong, a coin clink when buying an egg, a crack and a happy chirp when an egg hatches, a fanfare for a passed exam. No music.
 * **Monsters and knights (from 0.7.0, section 12):** silly, not scary. Box made, big googly eyes, bright colours on a dark body. Sounds are giggles, boings, a soft "bloop" and a "Boe!", each under 1.5 seconds and never louder than the loudest effect today. No growl, scream, roar, teeth, blood, death, sudden loud sound or jump scare. A knight never hurts: he pokes, tickles and shouts "Wegwezen!", and the monster leaves with a silly line. Klodder may break only the blocks section 12 describes (never a kid build, a village or a block next to the kid or an animal), and every one comes back.
 * **The bigger world and the mole (from 0.8.0 and 0.9.0, section 12):** the striped layer deep down is a cheerful yellow and black pattern, never a skull or a danger sign. The mole is silly, not scary: purple, big glasses, a pink nose and a slow waddle. Before he shows there is a soft rumble of 3 seconds with a short shake, and no shake with reduced motion. His sounds follow the monster rules above.
+* **Knight gear and deep stones (from 0.10.0 to 0.12.0, section 12):** gear looks friendly and shiny: caps, helmets, shields, capes, armour, boots, banners and a tickle feather, no blood and no harm. Sparkles and soap bubbles flash at most 2 times a second and are off with reduced motion; metal shine is a colour, not an animation. A knight rides a pony, a horse or a triceratops in a seated pose. The 8 deep stones are bright stones with still specks, no animation.
 
 ## 9. Kid safety and privacy
 * **Data stored and where:** only on this iPad, in Safari's storage for this app. Stored: settings, pincode (hashed), answer history, break and exam results, the world changes, the hotbar, dinos and eggs (with names the kid types), dino points, and since v11 which of the 8 rare blocks were found, the villager cooldown and which villager asked last. Villager answers go into the answer history like other answers. No real name, age, photo, location or contact data is asked for or stored. The dino name screen asks for a dino name, not the kid's name.
@@ -747,6 +782,7 @@ These came with v3 (decisions 90 and 119, built for 0.6.0). The release text is 
 * **Villagers (since v11):** villagers are part of the game, not people. They only show fixed text from the app and questions from the switched on modules, as plain text. The kid cannot type to them and they never ask for a name or anything personal. They never chase, trap, push or hurt the kid, and never break or place blocks. Their questions give no points and take none. Houses only go into an existing world where the kid changed nothing, so no kid build is ever changed.
 * **Monsters and knights (from 0.7.0, section 12):** they are part of the game, not people. They only show fixed text from the app; the kid cannot type to them and knights get no names. Knights are bought only with dino points, never real money, and nothing says the kid must have one. No animal is ever hurt, eaten, lost or taken: "plagen" means it jumps, makes its own sound, runs a few blocks and carries on. A monster never touches, pushes, follows or traps the kid and never takes points, animals, knights or found blocks. Klodder only comes out when the kid taps the bubble, always tires after 5 minutes, may break only the blocks section 12 describes, and every block comes back: his breaks are never saved. No points or prizes come from monsters. The parent switches all of it in Instellingen, card "Monsters en ridders", behind the gate. New saved data: one `monsters` record (the knights with their spot and mode, the bubble clock, the hint flag) and the new switches, also in the backup. Nothing live is saved.
 * **The bigger world and the mole (from 0.8.0 and 0.9.0, section 12):** the bigger world moves the kid's own world into the middle and changes no block the kid built. No animal, knight, point or found block is lost, and old backups still restore. The mole comes only after the kid digs past two warnings, comes up away from the kid, and never touches, pushes, follows, traps or blocks the kid. He never breaks or places a block and never takes anything. He teases only animals on Vrij rondlopen, which are never hurt or lost, and he always leaves. The parent switches him off with the row Monstermol in the card "Monsters en ridders". The only new saved data is that switch (and the Kijkafstand setting, only if v15 needs fallback step 2). Nothing live is saved. No network request.
+* **Knight gear and deep stones (from 0.10.0 to 0.12.0, section 12):** gear and stones are bought only with dino points, never real money, and nothing says the kid must have them: a bare knight still sends every monster off, and a found stone stays found. No pressure text, only the price and "Nog X punten nodig". Nothing bought is ever lost: gear goes back to the wapenkast on a trade in, stays through a switch off and "Wereld opnieuw beginnen", and stones stay found and bought. New saved data, in the `monsters` record and the backup: the wapenkast, the items each knight wears, and the found and bought stones. No new personal data, no text the kid types, no network request.
 * **Purchases:** none with real money. The Dinowinkel only uses dino points earned by learning. There is no payment code, no store link and no way to buy points.
 * **External links:** none. Module text is shown as plain text and is never a link.
 * **Parent gate:** a 4 digit pincode protects settings, content choice, backup, results, ending a break and stopping an exam. The lockout survives reloads. PIN vergeten uses a fresh two step grown up question with a 10 minute block after 2 wrong tries, sharing the lockout with the pin pad (F3, F4). The first pincode can only be set after the same kind of grown up question (decision 52). The lock shows only in the world (decision 53) and, since v2, on the exam screen, only to stop the exam (decision 61). From v3 a learning break also shows the lock, only to end the break: behind the gate the parent sees only "Pauze nu beëindigen" and "Terug naar de pauze" (decision 119).
@@ -768,7 +804,7 @@ These came with v3 (decisions 90 and 119, built for 0.6.0). The release text is 
 ## 11. Risks and decisions
 
 ### Decided
-The decisions F1 to F15 are answered. Details are in `docs/DECISIONS.md` (rows 8 to 22). The recut questions D1 to D3 are answered too (rows 59 to 61), and so are decisions 78 to 81, 84, 87, 90 to 92, 94, 95, 119, 124 and 130 to 134. No founder question is open for v17, v18, v15 and v16.
+The decisions F1 to F15 are answered. Details are in `docs/DECISIONS.md` (rows 8 to 22). The recut questions D1 to D3 are answered too (rows 59 to 61), and so are decisions 78 to 81, 84, 87, 90 to 92, 94, 95, 119, 124 and 130 to 134. No founder question is open for v15, v16, v19, v20 and v21.
 
 | # | Question | Founder's answer | Where in this PRD |
 |---|---|---|---|
@@ -806,7 +842,7 @@ The decisions F1 to F15 are answered. Details are in `docs/DECISIONS.md` (rows 8
 | 130 | Monsters, knights and deep stones (founder wish) | Direction approved, drafted in `docs/MONSTERS_PRD.md`. No animal is ever eaten, hurt or lost. Every feature has a parent switch. Questions not asked take the draft's recommendation. | 8, 9, 12 |
 | 131 | Build order | v3 first, then v17 Ridders and v18 Zwarte bubbel on today's world, then v15 Grote wereld, then v16, v19 and v20. | 12, `docs/BACKLOG.md` |
 | 132 | When the black bubble comes | The bubble clock runs only while the kid owns a knight or has 30 points. On existing installs the bubble is off until a parent switches it on. Klodder always tires after 5 minutes and every block comes back. | 9, 12, AC211, AC215, AC217 to AC219, AC223 |
-| 133 | Knight gear width | About 8 items first with a Kracht cap, so a fight always lasts a moment; the rest later (v21). For this release only the 3 second minimum fight counts. | 12, AC216 |
+| 133 | Knight gear width | About 8 items first with a Kracht cap, so a fight always lasts a moment; the rest later (v21). For this release only the 3 second minimum fight counts. | 12, AC216, AC262, AC283 |
 | 134 | One signoff for v17 and v18 (MOQ14 C) | v17 and v18 are built back to back and released together as 0.7.0 on one signoff. | 12 |
 
 Choices made by product inside these answers, which the founder sees when signing: the point values (+2, +1, +3 bonus, and from v10 the minus points of Punten) and egg prices (20, 40, 40, 80); a fourth small dino kind (Compy) so there is a cheap first egg (confirmed by the founder, F15); from v10 the Punten setting holds in every break and in Extra oefenen, never in exams (decision 92); a Punten change applies from the next answer; only the first try counts for spaced repetition; exams give no points; "Wereld opnieuw beginnen" keeps dinos and points. For v11: the names of the 8 rare blocks; a right answer on the retry also gives the dance and the block; a "Laat maar" button lets the kid close a villager card without answering; a village site is also left alone when the player, a dino, an egg or a chicken stands in it; and the fallback if villagers are too slow on the iPad (they stand still at home and only turn to the kid). For v3: the 20 MB limit on a backup file; a restore keeps the pincode of this iPad; the break lock shows on questions, lessons and teach moments but not on the summary; its parent view has only "Pauze nu beëindigen" and "Terug naar de pauze"; and the kept copy of the 0.4.0 world record is deleted in 0.6.0, not put in the backup.
@@ -817,8 +853,10 @@ Choices made by product inside these answers, which the founder sees when signin
 
 **Choices made by product for v15 and v16**, which the founder sees when signing: a world 80 high and the move of 32, 10 and 32, so every old cell fits; the stripes at y 5 and the veins at y 1 to 4; the seam rule of 1 block; the CI budgets of AC240 (5 times the faces, 3.5 times the faces drawn); the order of the speed fallback; the mole's speed of 1 block per second, the 10 second fence rule, 60 seconds alone, 10 minutes tired and Moed 15; only animals on Vrij rondlopen as targets; no mole while a bubble or Klodder is out; the line "Hmm... toch maar niet." when no spawn spot fits; and the Monstermol row on for every install.
 
+**Choices made by product for v19, v20 and v21**, which the founder sees when signing: each item is bought once and moves between knights for free, so 3 knights share one set (draft MO19-3, "one of each costs 210"); gear cards are greyed with "Koop eerst een ridder" while the kid has no knight, so no points go to gear nobody can wear; any item in Hoofd, Schild, Hand or Rug gives the same Kracht +1, so the v21 items there (also the Houten zwaard) add looks, not more Kracht; the Moed bar fills by the Kracht of the poking knights added up, capped at full in 3 seconds; boots add nothing while a knight rides; the Banier and Koningsbanier ranges of 12 and 14 (20 and 22 on guard); soap bubbles that cannot be tapped; the stone tiles with still specks; a "?" card in Edelstenen for a stone not found; a backup file format one up in each of the three releases; and **the 5 v21 items over the 60 point ceiling** (Glanzend harnas 70, Bubbelstaf 75, Gouden helm 80, Strijdpaard 90, Rij-triceratops 120) keep the draft prices. The other option is to cap them at 60.
+
 ### Open founder decisions
-None for v17, v18, v15 and v16. MOQ14 is answered by decision 134. MOQ15 (where v6 goes in the order) is a backlog question for a later `/release` and is not part of this signoff (`docs/MONSTERS_PRD.md` 8.1). With v15 and v16 scoped here, v6 comes after v16 at the earliest. A founder question comes up before 0.8.0 ships only if the v15 speed check still fails after fallback step 2 (section 12, v15).
+None for v15, v16, v19, v20 and v21. MOQ14 is answered by decision 134. MOQ15 (where v6 goes in the order) is a backlog question for a later `/release` and is not part of this signoff (`docs/MONSTERS_PRD.md` 8.1). With v19, v20 and v21 scoped here, its options are now right after v16 (before v19) or after v21. A founder question comes up before 0.8.0 ships only if the v15 speed check still fails after fallback step 2 (section 12, v15).
 
 ### Risks
 | Risk | Effect | What we do |
@@ -848,150 +886,15 @@ None for v17, v18, v15 and v16. MOQ14 is answered by decision 134. MOQ15 (where 
 | The 128 x 128 world is too slow on the oldest iPad | Stutter or a slow start, the game is not fun | A draw budget check in CI (AC240), the iPad check before shipping (AC241), and a fallback in order: near chunks only, then a Kijkafstand switch, then a founder decision (96 x 96 or hold v15). |
 | The move breaks or loses something the kid built | An upset kid | Every kid changed cell and every spot moves by the same step, checked cell by cell on fixtures from 0.4.0 and 0.7.0 (AC235, AC236). A killed move never moves anything twice (AC237). Old backups still restore (AC238). |
 | The mole scares the kid or the animals never get rest | An upset kid | Two warnings and the kid's own dig, a 3 second rumble, a silly look. He comes up away from the kid and teases only animals on Vrij rondlopen. He always leaves: a fence, a knight, 60 seconds alone or 10 minutes. The parent can switch him off (AC244 to AC257). |
+| Gear makes fights too short or knights feel weak without it | No fun in the Moed bar, or the kid feels gear is a must | Kracht is at most 5 and a fight always lasts at least 3 seconds (AC262, AC283). A bare knight still wins. No text says a knight is weak. |
+| Gear on 3 knights makes the iPad stutter | The game is not fun | Gear is merged into at most 6 meshes per knight with one cached geometry per gear set, checked on the founder's oldest iPad (AC269, AC290). |
+| Expensive stones feel out of reach | The kid gives up | A found stone stays found, the cheapest is 80, and nothing is needed to play. Prices are one line of data and easy to change after the kids play. |
 
 ## 12. Releases
 
-Only the next release has its section here, and it is signed with this file. When it ships, its section moves to `docs/releases/vN.md` and its criteria move into section 7. That happens together with scoping the release after it, so it is one signoff. Shipped releases: v2 in `docs/releases/v2.md`, v9 in `docs/releases/v9.md`, v10 in `docs/releases/v10.md`, v11 in `docs/releases/v11.md`, and v3 (built, goes live as 0.6.0 with the merge) in `docs/releases/v3.md`. The ranked backlog is in `docs/BACKLOG.md`.
+Only the next release has its section here, and it is signed with this file. When it ships, its section moves to `docs/releases/vN.md` and its criteria move into section 7. That happens together with scoping the release after it, so it is one signoff. Shipped releases: v2 in `docs/releases/v2.md`, v9 in `docs/releases/v9.md`, v10 in `docs/releases/v10.md`, v11 in `docs/releases/v11.md`, v3 (0.6.0) in `docs/releases/v3.md`, and v17 and v18 (0.7.0) in `docs/releases/v17-v18.md`. The ranked backlog is in `docs/BACKLOG.md`.
 
-### v17 Ridders and v18 Zwarte bubbel (0.7.0)
-
-**Status:** next. Picked by the founder on 2026-11-15 (decisions 130 to 134). One release in two parts, built back to back and shipped together as 0.7.0 on this one signoff (decision 134, MOQ14 C). Part A is v17 Ridders (5 tasks), part B is v18 Zwarte bubbel (5 tasks). Part A is built and checked first and is fun on its own, so if part B slips, shipping part A alone is a founder call. The draft is `docs/MONSTERS_PRD.md` sections 1 to 3, as revised after review round 1 (`docs/DISCUSSION.md`). Where they differ, this section wins.
-
-**Goal:** "I have my own knight. He follows me, stays where I say, or guards my animals and tells me they are all safe. Now and then a black bubble floats by. If I tap it, Klodder jumps out and makes a mess, my knight sends him off, and every block comes back."
-
-**Why:** a founder wish (decision 130): knights who guard the animals and a little monster that only a knight sends off. Knights are a new thing to save up for that is not a dino. Klodder gives the knights a job. Decision 132 keeps it kind: the bubble only comes when the kid has a knight or can pay for one, and it never costs the kid anything for good.
-
-**Words used here.**
-* **Play time:** time the play timer runs (4.4): the world on screen, the app visible, landscape, the parent area closed. Every clock in this section counts play time only.
-* **Kid changed cell:** a cell in the world record the kid mined or built in (the world diff).
-* **Within N blocks of a cell:** at most N blocks away along each of x, y and z.
-* **Village site:** as defined in `docs/releases/v11.md`.
-* **New install:** 0.7.0 starts with no saved world. **Existing install:** there is a saved world from before 0.7.0.
-* **Switches:** the rows "Monsters en ridders" (the master), "Ridders" and "Zwarte bubbel" in the new parent card. "Ridders on" means the master and Ridders are Aan. "The bubble on" means all three are Aan.
-
-**Rules for every monster and knight** (`docs/MONSTERS_PRD.md` 1.3):
-* **No animal is hurt or lost.** No animal is ever eaten, hurt, lost or taken. "Plagen" means the animal jumps, makes its own sound, runs a few blocks away and then carries on as before.
-* **Silly, not scary.** Box made, big googly eyes, bright colours on dark bodies. Giggles, boings, a soft "bloop" and a "Boe!". No growl, scream, roar, blood, teeth, death, sudden loud sound or jump scare.
-* **Banned words.** No new kid, knight, monster or parent string holds one of these as a whole word, in any case: bang, eng, dood, doodgaan, pijn, bloed, boos, gemeen, huilen, verdrietig, au, vechten, aanvallen, vermoorden, opeten, kapot.
-* **Soft sounds.** Every new sound file is under 1.5 seconds, its peak is at or below the loudest sound effect of 0.6.0, and no file name holds growl, scream or roar. All new sounds follow Volume and Geluidseffecten. Teased animals use their own sounds.
-* **Never harms the kid.** A knight or Klodder never touches, pushes, follows, traps or blocks the kid, and never takes points, dinos, eggs, chickens, knights or found blocks.
-* **Knights win kindly.** A knight never hurts. He pokes ("Tok!"), shouts "Wegwezen!", and Klodder leaves with "Doei!". A knight never loses.
-* **A fight always lasts a moment.** The Moed bar never fills in less than 3 seconds (decision 133).
-* **Opt in by the kid.** Klodder only comes out when the kid taps the bubble. A bubble not tapped floats away.
-* **One at a time.** At most one bubble or Klodder in the world. At most 3 knights.
-* **Paused with the world.** Every clock and every live knight, bubble and Klodder stops whenever the play timer stops: learning break, exam, Dinowinkel, dino menu, knight menu, parent area, background, portrait.
-* **Nothing for points.** No points or prizes for anything a monster does or for sending one off.
-* **Sound off and reduced motion.** With sound off every line still shows as text. With reduced motion there is no screen shake and no bounce.
-
-**In, part A: v17 Ridders.**
-1. **A Ridders section** "🛡️ Ridders" in the Dinowinkel, only while Ridders is on. A Ridder card for 30 points, bought like an egg: Kopen, Ja or Nee, the purchase lock, the points and the knight saved in one transaction with a points ledger row `reason: 'knight'`. At most 3 knights. Knights do not count toward the herd of 25 or the 10 chickens.
-2. **Inruilen** a knight for 15 points, half his price, the same way a dino is traded in.
-3. **A knight in the world:** box made, about the kid's height, a silver helmet, a tabard and a wooden sword, at most 6 meshes. He marches in next to the kid with a soft fanfare and "Ridder tot je dienst!". He walks at 3 blocks per second like a dino. He never breaks or places a block and never pushes the kid.
-4. **The knight menu** on a tap on the knight: Volg mij, Blijf hier and Pas op de dieren. Volg mij: he walks behind the kid with the followers and stays out of the view like a following dino (decision 112). Blijf hier: he stays at his spot. Pas op de dieren: he walks slow rounds within 8 blocks of the spot where it was set.
-5. **Salute:** when the kid comes within 3 blocks of a knight on Blijf hier or Pas op de dieren, he salutes and says "Hallo!", at most once a minute per knight.
-6. **Guard report:** a tap on a knight on Pas op de dieren also shows "Ik pas op N dino's en M kippen. Alles veilig!", counting the dinos and chickens within 8 blocks of his spot. With none there: "Hier zijn nog geen dieren."
-7. The Dinofluit and Allemaal blijven do not move knights or change their mode.
-8. **The parent card** "Monsters en ridders" in Instellingen with the master row and the Ridders row (see Parent switches below).
-9. **Save and backup:** the knights with their spot and mode in one new `monsters` record, which the backup holds. "Wereld opnieuw beginnen" keeps every knight and his mode and puts him within 3 blocks of the kid; Blijf hier and guard spots move there too.
-
-**In, part B: v18 Zwarte bubbel.**
-1. **The bubble clock (decision 132).** It counts play time only while all of these hold: the bubble is on, the kid owns a knight or has at least 30 points, and no bubble or Klodder is out. While one is false, the clock keeps its time. At 10 minutes a bubble comes. If a learning break is due in under 60 seconds, the bubble waits until 30 seconds of play time after that break ends. When a bubble or Klodder leaves, the clock starts again at 0. The clock is saved, so a reload does not reset it.
-2. **The bubble:** shiny black with two blinking eyes. It floats in over at least 3 seconds with a soft "bloop" to a spot 6 to 10 blocks in front of the kid at eye height, only where that spot is air and in view; if there is none, it tries again every 5 seconds. It drifts slowly within 1 block of its spot and is at least 80 points wide on screen. A tap pops it ("Plop!") in Hakken or Bouwen mode and never also mines or places a block. Not tapped within 60 seconds of play time, it floats up and away and nothing else happens.
-3. **Klodder:** small, round, black and purple, googly eyes, at most 6 meshes. He jumps out with "Hihihi!" and walks at 1.5 blocks per second. At most every 4 seconds he nibbles one block, and now and then he teases an animal. After 20 nibbled blocks he only teases.
-4. **Which blocks (decision 132).** Only a cell the kid never changed, not within 3 blocks of any kid changed cell, not in a village site, not oersteen, water or lava, and not under or next to the kid or an animal.
-5. **Never saved.** A nibbled block is only hidden for drawing and walking. It is never written to the world record; a save writes that cell as its start block. A backup holds the full world.
-6. **Teasing** of dinos and chickens only, never villagers or knights, and never the same animal twice in a row. The animal jumps, plays its own sound and runs 6 (plus or minus 1) blocks away from Klodder within 3 seconds. Its path never enters water or lava, never drops more than 1 block, never ends in a closed cell and never leaves the world. If no such spot exists, it only jumps and plays its sound. Then it goes back to its mode: a Blijf hier animal walks back to within 3 blocks of its spot, a follower walks back behind the kid. An animal on a Dinofluit call is never teased. Nothing about teasing is saved.
-7. **The Moed bar.** A knight notices Klodder within 8 blocks, or within 16 on Pas op de dieren. He walks straight to him and pops next to him after 3 seconds stuck, like a stuck dino. He pokes with a soft "Tok!". A Moed bar over Klodder fills at 1 per second for each poking knight and is full at 30, so 1 knight takes 30 seconds, 2 take 15 and 3 take 10. It never fills in under 3 seconds. Full: "Wegwezen!", Klodder climbs into a bubble that floats away with "Doei!", and the knight goes back to his mode.
-8. **Klodder always tires (decision 132).** After 5 minutes of play time out, he yawns "Ik ben moe", climbs into his bubble and floats away. Fixed, no setting.
-9. **Every block comes back (decision 132).** When Klodder leaves for any reason, every nibbled block comes back with a soft "plop", spread over about 2 seconds and all within 3 seconds. A cell where the kid or an animal stands waits and tries again each second until it is free. A cell the kid built in since then keeps the kid's block.
-10. **One hint.** The first time ever that Klodder is out and the kid has no knight: "Klodder wordt vanzelf moe. Een ridder kan hem sneller wegsturen." Never again. It names no shop.
-11. **The Zwarte bubbel row** in the parent card (see Parent switches below).
-12. **Save and backup:** the bubble clock and the hint flag in the `monsters` record. Nothing live is saved: a bubble, Klodder and his nibbled blocks are gone after a reload, crash or kill, and the world is whole. "Wereld opnieuw beginnen" keeps the bubble clock and removes a live bubble or Klodder.
-
-**In, both parts.** Version 0.7.0 with one `CHANGELOG.md` entry in kid words. The "Monsters and knights" lines in sections 8 and 9.
-
-**Parent switches.** A new card "Monsters en ridders" in Ouders > Instellingen, behind the pincode. Every row shows its help line under it, word for word:
-
-| Row | Help line | Off means |
-|---|---|---|
-| Monsters en ridders | "Zet alles hieronder in één keer aan of uit." | Everything below acts as off. The rows below show greyed and keep their own value. |
-| Ridders | "Ridders koop je in de Dinowinkel. Ze volgen, wachten of passen op de dieren." | Knights march off with a wave and the Ridders section hides. Every knight stays in the save and comes back with his mode when it is on again. |
-| Zwarte bubbel | "Na 10 minuten spelen komt soms een bubbel. Tikt je kind erop, dan sloopt Klodder een paar blokken tot een ridder hem wegstuurt. Alles komt terug." | No bubble. A live bubble floats away and a live Klodder leaves at once; every block comes back. With Ridders off this row shows greyed with "Werkt alleen met Ridders aan". |
-
-| Row | New install | Existing install | Backup from before 0.7.0 |
-|---|---|---|---|
-| Monsters en ridders | Aan | Aan | Aan |
-| Ridders | Aan | Aan | Aan |
-| Zwarte bubbel | Aan | Uit | Uit |
-
-A backup made with 0.7.0 or later restores its own values.
-
-**Speed caps.** At most 3 knights and 1 bubble or Klodder. Each at most 6 meshes, merged boxes like the dinos. Klodder nibbles at most one block every 4 seconds; restored blocks are redrawn grouped per chunk. If 3 knights miss the AC101 target on the founder's oldest iPad, the cap becomes 2 before shipping (AC210).
-
-**Out:**
-* The Monstermol, the warning stripes and any path search (v16). Knights walk straight and pop when stuck.
-* Gear, the pony and Kracht above 1 (v19, v21). Names for knights. Riding.
-* Deep stones (v20) and the bigger world (v15).
-* More than one bubble or Klodder at a time. Bubbles by clock time or date.
-* Klodder nibbling kid builds, village houses or blocks next to the kid or an animal. Blocks gone for good.
-* Points or prizes for beating Klodder. Stopping Klodder with a fence (founder: only the knight).
-* Knights fighting each other, building, carrying animals, or being teased.
-* v6 and its slot in the order (MOQ15, a later `/release`).
-
-**Kid safety.** Knights cost dino points only, earned by learning: no real money, no ads, no "buy more points", and no text says the kid must have a knight. Nothing comes out of a bubble unless the kid taps it. Klodder never touches the kid, never takes anything, never touches a kid build or a village, tires after 5 minutes, and every block he nibbles comes back, even after a crash, because his breaks are never saved. No animal is hurt or lost. The bubble is off on existing installs until a parent switches it on. All of it can be switched off behind the gate, and switching off loses nothing bought. No new personal data and no new text the kid types. No network request. Sections 8 and 9 hold as updated in this signoff.
-
-**Core text changed with this release.** Signing this file also adds the "Monsters and knights" lines to sections 8 and 9 and the card "Monsters en ridders" to 4.17 (described here until it ships). The Dinowinkel (4.3) gets the Ridders section described here. Section 11 gets decisions 130 to 134 and three risks, and has no open founder question for this release.
-
-**Also in this signoff (not part of v17 and v18):** the v3 section moves to `docs/releases/v3.md`. Its criteria AC192 to AC199 are in section 7 without the "(v3)" tag, and the v3 tags on AC87, AC93, AC94, AC95, AC130, AC131, AC133, AC135 and AC152 are dropped. v3 goes live as 0.6.0 with the founder's merge.
-
-**Plan tasks** (5 per part, from `docs/MONSTERS_PRD.md` 2.9 and 3.8):
-* **V17a** Knight economy: one shared buy helper for the shop, the knight ledger reason, the cap of 3, Inruilen, the `monsters` record, backup and restore checks, unit tests.
-* **V17b** Knight life: modes, guard rounds, follow rules, salute, guard report, Dinofluit and Allemaal blijven skip, Wereld opnieuw beginnen, unit tests.
-* **V17c** Shop section and parent card: the Ridders section, the card with the master and Ridders rows, greyed rows with a help line, defaults.
-* **V17d** Knight menu, tap hit test and model: the menu, the mesh, march in, fanfare, e2e.
-* **V17e** Safety and speed: the banned word and sound check helpers (reused by part B), the PRD core lines, the speed check.
-* **V18a** Bubble clock and bubble: the clock rules and its save, the spot, float, tap with the shared hit test, float away, unit tests.
-* **V18b** Klodder life: walk, the block rules with a kid cell index, the never saved overlay, cap 20, tired rule, restores, unit tests.
-* **V18c** Teasing: pick a target, the safe flee step, back to mode, skip called animals, a seeded test map, unit tests.
-* **V18d** Knight against Klodder: notice, walk, pop when stuck, the Moed bar, the 3 second minimum, the hint, e2e.
-* **V18e** Model, sounds, switch, save: meshes, sounds, the bubble row and defaults, backup and restore checks, the pause test, version 0.7.0 and CHANGELOG, the speed check.
-
-**How timing is tested.** Test hooks (not in the production build) move play time forward, read the bubble clock, set the next break time, set the random seed and read the monster state and the Moed bar. Timed rules have a tolerance of plus or minus 1 second, speeds of 20 percent over 5 seconds, distances of plus or minus 1 block.
-
-**Acceptance criteria.** All criteria in section 7 still hold. New for v17 and v18:
-
-* **AC200 (v17):** Given the Dinowinkel with Ridders on, then a section "Ridders" shows a Ridder card with name, picture and price 30, and its Kopen button has a tap area of at least 44 x 44 points. Given the master or Ridders off, then the section does not show. Given 3 knights, then the card says "Je hebt al 3 ridders!" and cannot be bought. Given 25 shop dinos, 10 chickens and 30 points, then a knight can still be bought and the herd and chicken counts do not change.
-* **AC201 (v17):** Given 30 points, when the kid taps Kopen on the Ridder and then Ja, then the points are 0, one knight appears within 3 blocks of the kid with "Ridder tot je dienst!", and the ledger has one row `reason: 'knight'` with -30, saved in one transaction with the knight. Given Nee, then nothing changes. Given 60 points and 10 taps on Ja within 1 second, then exactly one knight is bought and 30 points are left. Given 29 points, then no knight can be bought.
-* **AC202 (v17):** Given a knight bought for 30, when the kid trades him in and confirms, then the kid gets 15 points, the ledger has one row with +15, the knight leaves the world, and after a restart he is still gone.
-* **AC203 (v17):** Given a knight, when the kid taps him in Hakken or Bouwen mode, then the knight menu opens with Volg mij, Blijf hier and Pas op de dieren, each button at least 56 x 56 points, and no block is mined or placed by that tap. Given the kid picks a mode and the app is closed and reopened, then the knight has the same mode.
-* **AC204 (v17):** Given a knight on Pas op de dieren, then over 2 minutes he is never more than 9 blocks from his spot and he moves at least once every 10 seconds. Given a knight on Blijf hier, then over 2 minutes he stays within 1 block of his spot. Given a knight on Volg mij, then he walks at 3 blocks per second behind the kid, stays out of the view as decision 112 measures for dinos, and 40 taps on random world spots in view hit him 0 times.
-* **AC205 (v17):** Given a knight on Blijf hier or Pas op de dieren, when the kid walks to within 3 blocks, then he salutes and "Hallo!" shows. When the kid walks away and comes back within 1 minute, then there is no second salute. When the kid comes back after more than 1 minute, then he salutes again.
-* **AC206 (v17):** Given a knight on Pas op de dieren with 4 dinos and 2 chickens within 8 blocks of his spot and 1 dino at 12 blocks, when the kid taps him, then "Ik pas op 4 dino's en 2 kippen. Alles veilig!" shows. Given no dino or chicken within 8 blocks, then "Hier zijn nog geen dieren." shows.
-* **AC207 (v17):** Given 3 knights in all three modes for 2 minutes (automated), then no block is broken or placed and the kid's position is never moved by a knight. Given the Dinofluit or Allemaal blijven, then no knight changes mode or spot.
-* **AC208 (v17):** Given Instellingen, then a card "Monsters en ridders" shows the rows Monsters en ridders and Ridders, each with its exact help line from the table above and a tap area of at least 44 x 44 points. Given 2 knights, when the parent switches Ridders or the master off, then back in the world no knight shows and the Ridders section is hidden; when it goes on again, then both knights are back with the same modes. Given the master off, then the Ridders row shows greyed and keeps its value. Given a new install, an existing install and a restored backup from before 0.7.0, then the master and Ridders are Aan.
-* **AC209 (v17):** Given a save from 0.6.0, then it loads with no knights and nothing else changed. Given a backup made with 2 knights, when it is restored on an empty iPad, then both knights come back with their modes. Given a backup from 0.6.0, then it restores with no knights. Given "Wereld opnieuw beginnen" with 2 knights, then both stand within 3 blocks of the kid in the new world with their modes.
-* **AC210 (iPad) (v17):** Given the founder's oldest iPad from the home screen icon with the fps counter, 3 knights, 25 shop dinos and 10 chickens in view, when the founder walks for 2 minutes, then the AC101 target holds: 95 percent of frames take 33 ms or less and none takes over 200 ms. The result goes in `docs/TEST_REPORT.md`. Given the check fails, then the cap becomes 2 knights, AC200 reads "Je hebt al 2 ridders!", and the check runs again. The founder also looks and listens: the knight looks friendly and the fanfare is soft.
-* **AC211 (v18):** Given the bubble on and 1 knight, then a bubble appears after 10 minutes of play time (plus or minus 1 second); time in a learning break, exam, Dinowinkel, dino menu, knight menu, parent area, background or portrait does not count. Given no knight and 29 points, then after 30 minutes of play time no bubble has come and the clock has not moved; when the kid then reaches 30 points, the clock runs on from where it stood. Given a bubble or Klodder out, then the clock does not move and no second bubble comes. Given a bubble or Klodder leaves, then the next bubble comes 10 minutes of play time later.
-* **AC212 (v18):** Given the bubble is due and a learning break is due in under 60 seconds, then no bubble comes before the break, and the bubble comes 30 seconds (plus or minus 1) of play time after the break ends.
-* **AC213 (v18):** Given a bubble comes, then it took at least 3 seconds to float in, it stands 6 to 10 blocks in front of the kid in an air cell in view, it is at least 80 points wide on screen, and over 30 seconds it stays within 1 block of its spot. Given the kid stands in a tunnel 1 block wide with no valid spot in view, then no bubble shows until a valid spot exists, checked every 5 seconds.
-* **AC214 (v18):** Given a bubble, when the kid taps it in Hakken or Bouwen mode, then it pops, Klodder appears where it was with "Hihihi!", and that tap mines or places no block. Given Klodder, then he walks at 1.5 blocks per second. Given a bubble not tapped for 60 seconds of play time, then it floats away, no Klodder comes and no block changes.
-* **AC215 (v18):** Given Klodder out for 3 minutes on a seeded world with a kid built hut and a village (automated), then every nibbled cell was a cell the kid never changed, more than 3 blocks from every kid changed cell, outside every village site, not oersteen, water or lava, and not under or next to the kid or an animal. There was at most one nibble per 4 seconds and at most 20 in total, and after 20 he still teases.
-* **AC216 (v18):** Given 1 knight on Pas op de dieren with Klodder within 16 blocks, then the knight reaches him, or pops next to him after 3 seconds stuck (also from inside a closed pen), and the Moed bar fills at 1 per second. After 30 seconds (plus or minus 1) "Wegwezen!" shows, Klodder is in a bubble that floats away with "Doei!", and the knight is back in his mode. Given a knight on Volg mij 12 blocks from Klodder, then he does not go to him. Given 3 knights poking, then the bar takes 10 seconds (plus or minus 1). The bar never fills in under 3 seconds.
-* **AC217 (v18):** Given Klodder has nibbled 10 blocks, when he leaves for any reason (knight, tired, switch off), then within 3 seconds every block is back, and not all in the same frame. Given the kid or an animal stands in a nibbled cell, then that block comes back within 1 second after the cell is free. Given the kid built a block in a nibbled cell, then the kid's block stays.
-* **AC218 (v18):** Given a world record saved before Klodder came out, when Klodder nibbles 10 blocks and the page is hard killed (not a clean reload), then after the next start the world record is byte for byte the same as before, every block is there, and no bubble or Klodder shows. Given a backup made while Klodder is out, then it holds every block of the world. Given "Wereld opnieuw beginnen" while Klodder is out, then Klodder is gone in the new world and the bubble clock keeps its time.
-* **AC219 (v18):** Given no knight and Klodder out, then after 5 minutes of play time (plus or minus 1 second) he yawns "Ik ben moe", climbs into his bubble and floats away, and every block comes back as in AC217. Given knights that never reach him (automated), then the same happens at 5 minutes. No setting changes the 5 minutes.
-* **AC220 (v18):** Given a seeded map with a pen, a cliff of 4 and a pond, when Klodder teases 50 times (automated), then no animal is removed, loses anything, enters water or lava, drops more than 1 block, ends in a closed cell, leaves the world or changes its mode. 10 seconds after each tease, every Blijf hier animal is within 3 blocks of its spot and every follower is behind the kid. No animal is teased twice in a row. The saved dinos and chickens differ only in their positions.
-* **AC221 (v18):** Given a Blijf hier dino walled in on all sides, when it is teased, then it jumps, plays its sound and stays. Given a dino on a Dinofluit call, then Klodder never teases it and it arrives at the kid. Given villagers and knights within reach, then Klodder never teases them.
-* **AC222 (v18):** Given no knight and Klodder out for the first time ever, then "Klodder wordt vanzelf moe. Een ridder kan hem sneller wegsturen." shows once. Given any later Klodder, also after a restart or a restored backup made after the hint, then it never shows again. Given the kid owns a knight the first time Klodder comes out, then no hint shows.
-* **AC223 (v18):** Given the card "Monsters en ridders", then the Zwarte bubbel row shows its exact help line. Given Ridders off, then the row shows greyed with "Werkt alleen met Ridders aan" and no bubble comes. Given a bubble or Klodder out, when the parent switches the bubble, Ridders or the master off, then back in the world neither is there and every block is back. Given a new install, then the row is Aan. Given an existing install or a restored backup from before 0.7.0, then the row is Uit, no bubble comes, and the bubble clock does not move until a parent switches it on.
-* **AC224 (v18):** Given a bubble or Klodder out, then in each pause state (learning break, exam, Dinowinkel, dino menu, knight menu, parent area, background, portrait) nothing moves and the bubble's 60 seconds, Klodder's 5 minutes, his 4 second nibble clock and the Moed bar do not advance; after it, all goes on where it was. Given a knight on Pas op de dieren, then he also stands still in each pause state. Given a clean reload while a bubble or Klodder is out, then neither is there after it and the bubble clock has its saved time (plus or minus 1 second).
-* **AC225 (v18):** Given Klodder out for 5 minutes (automated), then his box never overlaps the kid's, the kid's position is never moved by him, and the points, dinos, eggs, chickens, knights and found blocks do not change. No points are given for any monster event. Given a full play session with knights and Klodder (automated), then the app makes no network request beyond its own files.
-* **AC226 (v18):** Given a backup made with 0.7.0, then it holds the bubble clock, the hint flag and the three switches, and they come back on restore. Given a backup from before 0.7.0, then it restores with a bubble clock at 0, no hint shown yet, and the switches as in the defaults table. Given a save with knights, then the only new saved data is the `monsters` record and the three switches.
-* **AC227 (iPad) (v18):** Given the founder's oldest iPad from the home screen icon with the fps counter, Klodder, 3 knights (or 2, see AC210) and 25 shop dinos in view, when Klodder nibbles and a knight sends him off, then the AC101 target holds. The result goes in `docs/TEST_REPORT.md`. The founder looks and listens: Klodder is silly, not scary, and the sounds are soft.
-* **AC228:** Given every new string of 0.7.0 (automated), then none holds a banned word from the rules above as a whole word. Given every new sound file, then each is under 1.5 seconds, its peak is at or below the loudest sound effect of 0.6.0, and no file name holds growl, scream or roar. Given Geluidseffecten uit or Volume 0, then every knight and Klodder line still shows as text. Given `prefers-reduced-motion`, then the bubble floats with no bounce and nothing shakes.
-* **AC229:** Given the 0.7.0 build, then `package.json` has version 0.7.0, Instellingen shows 0.7.0 at the bottom, and `CHANGELOG.md` has a 0.7.0 entry in kid readable words that says you can buy a knight who guards your animals, and that a little monster in a black bubble may come, your knight sends him off, and every block comes back.
-
-**Check before shipping:** on the founder's iPad, on the HTTPS address (a test deploy is a founder action), from the home screen icon. Buy a knight, try all three modes, walk past him for the salute and tap him on guard for the report. Run AC210 with 3 knights and a herd of 25. On a fresh Safari tab (new install), play until the bubble comes (a test build may shorten the clock), tap it, watch Klodder nibble and tease, let the knight send him off and see every block come back. Kill the app while Klodder is out and see the world whole. Check that the updated home screen app (existing install) has Zwarte bubbel Uit. Run AC227. Hand the iPad to the kid and watch: scared or upset means the founder decides before shipping.
+This time section 12 holds five releases, each shipped on its own in this order: v15 Grote wereld (0.8.0) and v16 Monstermol (0.9.0), signed on 2026-11-15 and built, waiting for the founder's merge; then v19 Ridderuitrusting (0.10.0), v20 Diepe edelstenen (0.11.0) and v21 Meer uitrusting (0.12.0), scoped in this signoff on the founder's request of 2026-11-16 ("Ok werkt op de iPad, bouw de rest"). Where a section here says "the v17 and v18 section", that text is now in `docs/releases/v17-v18.md` and still holds.
 
 ### v15 Grote wereld (0.8.0)
 
@@ -1147,3 +1050,240 @@ The row works with Ridders on or off, because a fence also stops him. With the m
 * **AC257 (v16):** Given the 0.9.0 build, then `package.json` has version 0.9.0, Instellingen shows 0.9.0 at the bottom, and `CHANGELOG.md` has a 0.9.0 entry in kid readable words that says if you dig past the striped layer a silly mole comes up and teases your animals, and a wall around them or your knight stops him.
 
 **Check before shipping:** on the founder's iPad, on the HTTPS address (a test deploy is a founder action), from the home screen icon. Dig a shaft and see the toast and the card. Dig past the stripes and see the rumble and the mole come up near the animals, away from you. Watch a tease. Build a wall 2 high around animals on Vrij rondlopen and see him give up. Wake him again and let a knight send him off. Switch Monstermol off and dig again: nothing comes. Run AC256. Hand the iPad to the kid and watch: scared or upset means the founder decides before shipping.
+
+### v19 Ridderuitrusting (0.10.0)
+
+**Status:** next after v16. The founder asked for it on 2026-11-16 ("Ok werkt op de iPad, bouw de rest"), inside decisions 130 to 133. Signed on this signoff with v20 and v21, built after v16 and shipped on its own as 0.10.0. The draft is `docs/MONSTERS_PRD.md` section 5 with the shared rules of section 1. Where they differ, this section wins. The words, the rules for every monster and knight and the way timing is tested of the v17 and v18 section (`docs/releases/v17-v18.md`) hold here too.
+
+**Goal:** "My knights get cool gear: helmets, shields, a tickle feather, a sword that sparkles, a cape and a pony. They look great and send the monsters off faster."
+
+**Why:** a founder wish (decision 130): sell knights "with a wide range of gear that makes them stronger". Decision 133 starts with about 8 items and a Kracht cap, so a fight always lasts a moment; the rest comes in v21.
+
+**Facts checked in the code on 2026-11-16.**
+* `src/storage/schema.ts`: `KnightRecord` holds `id`, `mode`, `spot` and `boughtFor`. `MonstersRecord` holds `knights`, `bubbleClockMs` and `hintShown`. There is no gear yet.
+* `src/monsters/moed.ts`: Klodder's Moed bar is full at 30 and fills at 1 per second for each poking knight (at most 3), never faster than `MOED_MAX_RATE` 10 per second. `src/monsters/mole-moed.ts`: the mole's bar is full at 15 and fills the same way. So every knight has Kracht 1 today.
+* `src/knights/knight-ai.ts`: knights walk at `DINO_SPEED`, 3 blocks per second. The kid walks at 4.3.
+* `src/ui/knight-menu.ts`: the menu has Volg mij, Blijf hier, Pas op de dieren and Sluiten. `src/ui/shop-knights.ts` calls the knights "Ridder 1" to "Ridder 3".
+* `src/app/buy.ts`: `buyInOneTransaction` writes the points, the bought thing and one ledger row in one transaction. `LedgerReason` (`src/storage/log-store.ts`) has no `gear` yet.
+* `src/storage/backup.ts`: `BACKUP_FORMAT` is 2 (since v15). `validMonsters` in `src/storage/backup-check.ts` checks the knights, the bubble clock and the hint flag.
+
+**Words used here.** As in the v17 and v18 section, plus:
+* **Item:** one piece of gear. **Slot:** the place on a knight where an item goes: Hoofd, Schild, Hand, Rug or Rijdier.
+* **Wapenkast:** every item the kid bought. Each item is one thing: it lies in the wapenkast or one knight wears it.
+* **Kracht:** how fast a knight fills the Moed bar.
+
+**In:**
+1. **The catalog (decision 133).** 8 items in 5 slots, all inside the 60 point ceiling of `docs/GAME_LOOP_PRD.md` 1.3. One of each costs 210 points. In shop order, cheapest first, and at the same price in this table's order:
+
+| Item | Slot | Points | Does |
+|---|---|---|---|
+| Leren kap | Hoofd | 10 | Kracht +1 |
+| Houten schild | Schild | 10 | Kracht +1 |
+| Riddercape | Rug | 15 | Kracht +1 |
+| Kietelveer | Hand | 20 | Kracht +1, the monster giggles |
+| IJzeren helm | Hoofd | 25 | Kracht +1, shines |
+| IJzeren schild | Schild | 30 | Kracht +1, shines |
+| Glimzwaard | Hand | 50 | Kracht +1, sparkles |
+| Pony | Rijdier | 50 | walks 1.5 blocks per second faster |
+
+2. **One of each, one knight at a time.** The kid buys each item once. A bought item lies in the wapenkast or is worn by one knight, and moving it to another knight costs nothing. A knight wears at most one item per slot.
+3. **Kracht (decision 133).** A knight has Kracht 1, plus 1 for each worn item in Hoofd, Schild, Hand and Rug, so at most 5. The Rijdier adds no Kracht. A better item in a slot looks better but adds no more Kracht. The Moed bar fills each second by the Kracht of all poking knights added up, but never faster than full in 3 seconds: Klodder's bar (full at 30) at most 10 per second, the mole's bar (full at 15) at most 5 per second. So:
+
+| Poking knights | Klodder | Mole |
+|---|---|---|
+| 1 bare knight (Kracht 1) | 30 seconds, as AC216 | 15 seconds, as AC251 |
+| 1 knight with Kracht 3 | 10 seconds | 5 seconds |
+| 1 knight with Kracht 5 | 6 seconds | 3 seconds |
+| 2 or 3 knights with Kracht 5 | 3 seconds | 3 seconds |
+
+4. **Speed.** A knight with the Pony walks at 4.5 blocks per second in every mode and when he walks to a monster. Without it he walks at 3.
+5. **The shop row** "⚔️ Uitrusting" in the Dinowinkel, under the Ridders section, only while Ridders is on. 8 cards with name, picture, slot and price. Bought like a knight: Kopen, Ja or Nee, the purchase lock, the points, the item and one ledger row `reason: 'gear'` in one transaction with the shared buy helper. Too few points: the card is greyed with "Nog X punten nodig" ("Nog 1 punt nodig" for 1). Bought: "In je wapenkast" and no Kopen. With no knight: every card is greyed with "Koop eerst een ridder".
+6. **Uitrusten.** The knight menu gets a button "Uitrusten". It opens a screen with a flat picture of this knight wearing his items (drawn in the page, never a second 3D view, architect A7), and under it the wapenkast, grouped by slot. A tap on an item puts it on; an item he wore in that slot goes back in the wapenkast. A tap on an item he wears takes it off. An item another knight wears shows "Bij Ridder 2" (his number), and a tap moves it to this knight. "Terug" goes back to the knight menu. The play timer stays stopped, as in the knight menu.
+7. **Gear in the world.** The Hoofd item takes the place of the silver helmet and the Hand item the place of the wooden sword. The shield sits on his arm, the cape on his back, and on the Pony he sits in a seated pose. Every worn item is merged into the knight's meshes: at most 6 meshes, one cached geometry per gear set.
+8. **Effects.** Kietelveer: every "Tok!" of that knight also plays a soft giggle of the monster. Glimzwaard: small sparkles at the sword while he pokes, never flashing more than 2 times a second, and none with reduced motion. IJzeren helm and IJzeren schild: a bright metal colour, no animation.
+9. **Nothing bought is ever lost.** Inruilen a knight still gives 15 points, and his items go back in the wapenkast; the confirm adds "Zijn uitrusting gaat terug in de wapenkast." With Ridders or the master off, the Uitrusting row hides, the knights march off with their gear, and everything comes back as it was when it is on again. "Wereld opnieuw beginnen" keeps every item where it is. Gear never wears out and is never sold back.
+10. **Save and backup.** The wapenkast and the items each knight wears go in the `monsters` record. The backup holds them. Its file format goes one up (3), so 0.9.0 refuses a 0.10.0 backup as a newer file (4.15) and no gear is ever dropped without a word. A backup check refuses an unknown item, an item twice, an item worn by two knights or in the wrong slot, with the friendly message of AC195. A save or backup from before 0.10.0 loads with an empty wapenkast and bare knights.
+11. **Version 0.10.0** and a `CHANGELOG.md` entry in kid words.
+
+**Speed caps.** At most 3 knights, each at most 6 meshes with all his gear, one cached merged geometry per gear set. The iPad check runs with 3 knights in full gear.
+
+**Out:**
+* The other 13 items, the slots Lijf, Voeten and Vlag, the Strijdpaard and the Rij-triceratops (v21).
+* Gear for dinos (v12). Two of the same item. Selling gear back. Gear that wears out or breaks. Picking colours.
+* Kracht above 5 or a fight under 3 seconds. A Kracht number or bar on screen. Names for knights. Knights fighting each other.
+* Points or prizes for sending a monster off.
+* v6 and its slot in the order (MOQ15).
+
+**Kid safety.** Gear costs dino points only, earned by learning. Nothing is needed to play: a bare knight still sends every monster off. No text says a knight is weak or needs gear. The feather tickles and the sword sparkles: no blood, no harm. Bought gear is never lost by a trade in, a switch, "Wereld opnieuw beginnen" or a backup. No new personal data, no new text the kid types, no network request. Sections 8 and 9 hold as updated in this signoff.
+
+**Core text changed with this release.** The Dinowinkel (4.3) gets the Uitrusting row and the knight menu gets Uitrusten, described here until it ships. Sections 8 and 9 get the gear lines. Section 11 gets one risk and the choices made by product.
+
+**Plan tasks** (4, from `docs/MONSTERS_PRD.md` 5.6):
+* **V19a** Gear economy: the catalog data, the `gear` ledger reason, buying with the shared helper, one of each, the wapenkast and worn items in the `monsters` record, Kracht with the cap and the rate limit in `moed.ts` and `mole-moed.ts`, the Pony speed, trade in, switches, backup format 3 and its checks, unit tests.
+* **V19b** Shop row and Uitrusten: the cards and their greyed states, the knight menu button, the screen with the flat picture, e2e.
+* **V19c** Gear in the world: attach points, the seated pose on the Pony, mesh merge and cache, the mesh hook, the speed check.
+* **V19d** Effects and ship: giggle, sparkles, metal look, the banned word and sound checks, version 0.10.0 and the CHANGELOG, the iPad check.
+
+**How it is tested.** Existing hooks: `knights`, `addKnight`, `knightScreenPoint`, `openShop`, `buyKnightInShop`, `setPoints`, `points`, `ledgerLog`, `spawnKlodder`, `monsterState`, `moleState`, `mineAt`, `advancePlayMs`, `setCreatureSeed`, `resetWorld`, `flushSave`. New hooks (not in the production build): `gearState` (the wapenkast, the items each knight wears, and each knight's Kracht and walk speed), `buyGearInShop(item)`, `wearGear(knight, item or none, slot)` and `knightMeshes(knight)` (the mesh count and the cached geometry key). Tolerances as in the v17 and v18 section.
+
+**Acceptance criteria.** All criteria in section 7 and AC230 to AC257 still hold. New for v19:
+
+* **AC258 (v19):** Given Ridders on and a knight, then the Dinowinkel shows a row "Uitrusting" under Ridders with 8 cards in this order: Leren kap 10, Houten schild 10, Riddercape 15, Kietelveer 20, IJzeren helm 25, IJzeren schild 30, Glimzwaard 50, Pony 50. Each card shows the name, a picture, the slot and the price, each card is at least 56 x 56 points and its Kopen button has a tap area of at least 44 x 44 points. Given the master or Ridders off, then the row does not show.
+* **AC259 (v19):** Given 50 points and a knight, when the kid taps Kopen on the Pony and then Ja, then the points are 0, `gearState` shows one Pony in the wapenkast, and `ledgerLog` has one row `reason: 'gear'` with -50, written in one transaction with the item. Given Nee, then nothing changes. Given 100 points and 10 taps on Ja within 1 second, then exactly one Pony is bought and 50 points are left. Given 49 points, then the card is greyed with "Nog 1 punt nodig" and cannot be bought.
+* **AC260 (v19):** Given the Pony in the wapenkast, then its card shows "In je wapenkast" and cannot be bought again. Given no knight and 100 points, then every Uitrusting card is greyed with "Koop eerst een ridder" and nothing can be bought. Given the kid trades in every knight, then the wapenkast keeps every item.
+* **AC261 (v19):** Given a knight, when the kid taps him, then the knight menu shows "Uitrusten" at least 56 x 56 points, and a tap on it opens a screen with a picture of this knight and the wapenkast grouped by slot, with no second 3D canvas on the page. When the kid taps the IJzeren helm, then the knight wears it and the picture shows it. When the kid then taps the Leren kap, then he wears the Leren kap and the IJzeren helm is back in the wapenkast. When the kid taps the worn item again, then it is off and back in the wapenkast. Given the Glimzwaard worn by Ridder 1, then on the Uitrusten screen of Ridder 2 it shows "Bij Ridder 1", and a tap on it puts it on Ridder 2 and off Ridder 1, at no cost. Given one item of each kind and 3 knights, after any set of taps, then `gearState` still counts one of each, no item is worn by two knights and no knight wears two items in one slot. Given the app is closed and reopened, then every knight wears the same items. No tap on the screen mines or places a block, and the play timer does not run while it is open.
+* **AC262 (v19):** Given one knight with the IJzeren helm and the Houten schild (Kracht 3) poking (`spawnKlodder`, `advancePlayMs`), then Klodder's Moed bar is full after 10 seconds and the mole's after 5 seconds (plus or minus 1). Given a knight with an item in each of Hoofd, Schild, Hand and Rug, then `gearState` gives Kracht 5, and Klodder takes 6 seconds and the mole 3 seconds. Given the Pony as well, then his Kracht is still 5. Given a bare knight, then Klodder still takes 30 seconds and the mole 15, as AC216 and AC251. Given 2 or 3 knights with Kracht 5 poking (automated), then neither bar is full before 3 seconds of poking.
+* **AC263 (v19):** Given a knight with the Pony on Pas op de dieren and Klodder 16 blocks away on flat ground, then over the first 3 seconds he walks to him at 4.5 blocks per second (plus or minus 20 percent). Given the same with the Pony taken off, then he walks at 3. Given the Pony on Volg mij, when the kid walks away, then he keeps up behind the kid as AC204 says.
+* **AC264 (v19):** Given a knight wearing an item in all 5 slots (automated), then `knightMeshes` gives at most 6 meshes, the Hoofd item replaces the silver helmet, the Hand item replaces the wooden sword, and he sits on the Pony. Given two knights with the same gear set, then they share one cached geometry. Given the founder's iPad, then the founder sees each item on the knight and the knight on his Pony.
+* **AC265 (v19):** Given a knight with the Kietelveer poking a monster (unit test on the effect step), then each of his "Tok!" lines also plays the giggle. Given the Glimzwaard, then sparkles show at his sword while he pokes and none when he stops, they flash at most 2 times a second, and with `prefers-reduced-motion` no sparkles show. Given the IJzeren helm or IJzeren schild, then it has the bright metal colour and no animation.
+* **AC266 (v19):** Given a knight wearing 3 items, when the kid trades him in, then the confirm shows "Zijn uitrusting gaat terug in de wapenkast.", the kid gets 15 points, and the 3 items are in the wapenkast, worn by no one. Given 2 knights in gear, when the parent switches Ridders or the master off, then the Uitrusting row is hidden and no knight shows; when it goes on again, then both knights are back wearing the same items. Given "Wereld opnieuw beginnen", then every knight wears the same items and the wapenkast is the same.
+* **AC267 (v19):** Given a save from 0.9.0 with 2 knights, then 0.10.0 loads it with an empty wapenkast, bare knights and nothing else changed. Given a backup made with 0.10.0 holding 5 items, 3 of them worn, when it is restored on an empty iPad, then the wapenkast and who wears what come back. Given a backup from 0.9.0, then it restores with an empty wapenkast. Given a 0.10.0 backup, then its file format is 3. Given a backup with an unknown item, the same item twice, an item worn by two knights or an item in the wrong slot, then it is refused with the friendly message of AC195 and nothing changes.
+* **AC268 (v19):** Given every new string and sound file of 0.10.0 (automated), then the rules of AC228 hold: no banned word, every sound under 1.5 seconds and no louder than the loudest effect of 0.6.0, and no file name with growl, scream or roar. No new string says a knight is weak or must have gear. Given Geluidseffecten uit or Volume 0, then every line still shows as text. Given a full play session with gear (automated), then the app makes no network request beyond its own files.
+* **AC269 (iPad) (v19):** Given the founder's oldest iPad from the home screen icon with the fps counter, on the v15 world, with 3 knights (or 2, see AC210) in full gear, one on the Pony, Klodder out and 25 shop dinos in view, when a knight sends Klodder off, then the AC101 target holds. The result goes in `docs/TEST_REPORT.md`.
+* **AC270 (v19):** Given the 0.10.0 build, then `package.json` has version 0.10.0, Instellingen shows 0.10.0 at the bottom, and `CHANGELOG.md` has a 0.10.0 entry in kid readable words that says you can buy gear and a pony for your knights in the Dinowinkel, and that knights with gear send monsters off faster.
+
+**Check before shipping:** on the founder's iPad, on the HTTPS address (a test deploy is a founder action), from the home screen icon. Buy a Leren kap and the Pony, dress a knight in Uitrusten, see him in the world on his Pony, move the kap to a second knight. Let a dressed knight send Klodder off and see it go faster. Trade in a dressed knight and find his gear in the wapenkast. Run AC269. Hand the iPad to the kid and watch: does the kid like dressing the knights?
+
+### v20 Diepe edelstenen (0.11.0)
+
+**Status:** next after v19. The founder asked for it on 2026-11-16 ("Ok werkt op de iPad, bouw de rest"), inside decisions 130 and 131. Signed on this signoff with v19 and v21, built after v19 and shipped on its own as 0.11.0. The draft is `docs/MONSTERS_PRD.md` section 6. Where they differ, this section wins.
+
+**Goal:** "Deep under the warning stripes there are 8 new shiny stones. When I find one, I save up and buy it once, and then I build with it as much as I like."
+
+**Why:** a founder wish (decision 130): "more rare stones, and make them expensive". Today every block is free, so "expensive" needs a new step: find the stone deep down, then buy it once (MOQ10 B).
+
+**Facts checked in the code on 2026-11-16.**
+* `src/world/blocks.ts`: `VEIN_BLOCKS` are ids 43 to 50, named "ader 1" to "ader 8": solid, minable, not placeable, drawn with the steen tile. `src/world/terrain-v3.ts` puts them at y 1 to 4 below the stripes, each id in at least 2 veins of 3 to 6 touching cells (AC232). So v20 needs no terrain version.
+* `src/ui/block-grid.ts`: Alle blokken has tabs. The Dorp tab shows the 8 rare blocks of v11, with a "?" tile for each one not found, from `village.found`.
+* `src/app/buy.ts`: the shared buy helper. `LedgerReason` has no `stone` yet.
+* The backup file format is 3 after v19.
+
+**The stones**, in shop order. All 8 cost 1550 points.
+
+| Id | Stone | Points |
+|---|---|---|
+| 43 | Maansteen | 80 |
+| 44 | Zonnesteen | 100 |
+| 45 | Jade | 120 |
+| 46 | Opaal | 150 |
+| 47 | Topaas | 180 |
+| 48 | Parelsteen | 220 |
+| 49 | Drakensteen | 300 |
+| 50 | Mollengoud | 400 |
+
+**In:**
+1. **The veins show.** Each vein id gets its stone name and its own tile: a stone with a few bright specks in its colour, still, with no animation. From 0.11.0 the veins in the ground look like this. The start world and the world record do not change, and the terrain version stays 3.
+2. **Found.** Mining a vein block in Hakken mode makes it air like any mined block and marks that stone found. The first time only, a toast "Je hebt Maansteen ontdekt!" (with the name of the stone). It works with every monster switch off. Mining below the stripes still wakes the mole as v16 says.
+3. **The Edelstenen section** "💎 Edelstenen" in the Dinowinkel, always shown (no switch, MOQ12 A), with 8 cards in price order. A stone not found: a "?" card with "Ergens diep onder de grond" and no Kopen. A found stone: name, picture, price and Kopen, bought like a knight: Ja or Nee, the purchase lock, the points, the stone and one ledger row `reason: 'stone'` in one transaction with the shared buy helper. Too few points: greyed with "Nog X punten nodig". Bought: "Gekocht!" and no Kopen.
+4. **Buy once, build for ever.** A bought stone is placeable, free and unlimited, like the building blocks. Mining a placed stone gives nothing and takes nothing.
+5. **The Diep tab** in Alle blokken, after Dorp, with the 8 stones in price order and "N van de 8 gekocht". Not found: a "?" tile with "Ergens diep onder de grond". Found but not bought: the picture with a lock and "Koop in de Dinowinkel"; a tap does nothing. Bought: a tap picks it for the hotbar like any block.
+6. **A stone not bought cannot be placed.** A hotbar slot holding a stone that is not bought (for example from a restored backup) shows empty.
+7. **Kept.** "Wereld opnieuw beginnen" keeps every found and bought stone; the new world has its veins again. Alles wissen deletes them with everything else.
+8. **Save and backup.** The found and bought stones go in the `monsters` record (`docs/MONSTERS_PRD.md` 1.5). The backup holds them. Its file format goes one up (4). A backup check refuses a stone id outside 43 to 50, or a stone bought but not found, with the friendly message of AC195. A save or backup from before 0.11.0 loads with no stone found.
+9. **Version 0.11.0** and a `CHANGELOG.md` entry in kid words.
+
+**Points.** 80 to 400 is past the 60 point ceiling on purpose (decision 130): the founder asked for expensive stones. 400 is about 40 to 50 breaks, a long goal like the Regenboogsaurus (300). Nothing is needed to play.
+
+**Out:**
+* Stones bought per piece with a count (that needs a block inventory). Selling stones. A switch for stones.
+* More veins, other depths or a new terrain version. A stone finder or veins seen through the ground. Stones from villagers.
+* v6 and its slot in the order (MOQ15).
+
+**Kid safety.** Stones cost dino points only. Nothing is needed to play, and a found stone stays found, so there is no hurry. The cards say only the price and "Nog X punten nodig", never a pressure line. Digging below the stripes may wake the mole, which is the fun of it, and with the mole off the stones are still there. No new personal data, no new text the kid types, no network request. Sections 8 and 9 hold as updated in this signoff.
+
+**Core text changed with this release.** The Dinowinkel (4.3) gets the Edelstenen section and Alle blokken (4.2) the Diep tab, described here until it ships. Section 9 gets the stone line.
+
+**Plan tasks** (3, from `docs/MONSTERS_PRD.md` 6.7):
+* **V20a** Stones and the found list: names and tiles for ids 43 to 50, the found rule and its toast, the found list, unit tests.
+* **V20b** Shop section and Diep tab: the cards with the shared buy helper and the `stone` reason, buy once, placeable once bought, the hotbar rule, e2e.
+* **V20c** Save and ship: the `monsters` record fields, backup format 4 and its checks, "Wereld opnieuw beginnen", the banned word check, version 0.11.0 and the CHANGELOG, the iPad look.
+
+**How it is tested.** Existing hooks: `mineAt`, `blockAt`, `setBlock`, `placePlayer`, `buildState`, `setBuildState`, `openShop`, `setPoints`, `points`, `ledgerLog`, `creatureSwitches`, `resetWorld`, `flushSave`. New hooks (not in the production build): `stonesState` (the found and bought ids), `veinCells(id)` (the start world cells of that vein id, so a test can mine one) and `buyStoneInShop(id)`.
+
+**Acceptance criteria.** All criteria in section 7 and AC230 to AC270 still hold. New for v20:
+
+* **AC271 (v20):** Given the terrain version 3 start world in 0.11.0 (automated), then every vein cell shows the tile of its stone, not the steen tile, the 8 tiles differ from each other and from steen, and no tile animates. Given a 0.10.0 save, then 0.11.0 loads it with the same world record byte for byte and `terrainVersion` 3.
+* **AC272 (v20):** Given the kid mines a Maansteen cell (`veinCells`, `mineAt`) for the first time, then the cell is air, "Je hebt Maansteen ontdekt!" shows, and `stonesState` lists 43 as found. Given a second Maansteen, then no toast shows. Given every monster switch off, then mining a vein cell finds the stone in the same way.
+* **AC273 (v20):** Given the Dinowinkel, then a section "Edelstenen" shows 8 cards in the order of the stone table, also with the master, Ridders and Monstermol off. Given a stone not found, then its card is a "?" with "Ergens diep onder de grond" and no Kopen. Given Maansteen found and 79 points, then its card shows the name, picture and 80, greyed with "Nog 1 punt nodig", and it cannot be bought. Every card is at least 56 x 56 points and every Kopen button has a tap area of at least 44 x 44 points.
+* **AC274 (v20):** Given Maansteen found and 80 points, when the kid taps Kopen and then Ja, then the points are 0, `ledgerLog` has one row `reason: 'stone'` with -80 written in one transaction with the stone, and the card shows "Gekocht!" with no Kopen. Given Nee, then nothing changes. Given 160 points and 10 taps on Ja within 1 second, then Maansteen is bought once and 80 points are left.
+* **AC275 (v20):** Given Maansteen bought, when the kid picks it in the Diep tab and places it 100 times (automated), then 100 Maansteen blocks stand in the world and the points do not change. When the kid mines one, then it is air and Maansteen is still bought. Given Zonnesteen found but not bought, then it cannot be placed in any way, and given a hotbar slot holding it (`setBuildState`), then that slot shows empty.
+* **AC276 (v20):** Given Alle blokken, then a tab "Diep" shows after Dorp with 8 tiles in price order and "1 van de 8 gekocht" when one is bought. A stone not found shows "?" and "Ergens diep onder de grond"; a found stone not bought shows its picture with a lock and "Koop in de Dinowinkel", and a tap on either does nothing. A bought stone goes in the hotbar with one tap. Every tile has a tap area of at least 44 x 44 points.
+* **AC277 (v20):** Given 2 stones bought and 3 found, when the parent does "Wereld opnieuw beginnen", then the same stones are bought and found, and the new world has every vein of the start world again. Given Alles wissen, then no stone is found or bought.
+* **AC278 (v20):** Given a save or backup from 0.10.0, then it loads with no stone found or bought and nothing else changed. Given a backup made with 0.11.0 with 3 found and 2 bought, when it is restored on an empty iPad, then the same stones are found and bought, and its file format is 4. Given a backup with a stone id outside 43 to 50, or a stone bought but not found, then it is refused with the friendly message of AC195 and nothing changes. Given a restored hotbar holding a stone that is not bought, then that slot is empty.
+* **AC279 (v20):** Given every new string of 0.11.0 (automated), then none holds a banned word of AC228. Given a full play session with mining and buying stones (automated), then the app makes no network request beyond its own files. Given the founder's iPad, then the founder sees the 8 stones shine in the ground and in a build, and the walk below the stripes still meets the AC101 target.
+* **AC280 (v20):** Given the 0.11.0 build, then `package.json` has version 0.11.0, Instellingen shows 0.11.0 at the bottom, and `CHANGELOG.md` has a 0.11.0 entry in kid readable words that says deep under the striped layer there are 8 shiny stones to find, and once you buy one in the Dinowinkel you can build with it as much as you like.
+
+**Check before shipping:** on the founder's iPad, on the HTTPS address (a test deploy is a founder action), from the home screen icon. Dig below the stripes until a vein shows, mine it and see the toast. Find the card in Edelstenen and the lock in the Diep tab. Buy it, build a tower with it. Do "Wereld opnieuw beginnen" and see it still bought. Hand the iPad to the kid and watch: does the kid want to dig for the next stone?
+
+### v21 Meer uitrusting (0.12.0)
+
+**Status:** next after v20. The founder asked for it on 2026-11-16 ("Ok werkt op de iPad, bouw de rest"), inside decisions 130 and 133 ("the rest later"). Signed on this signoff with v19 and v20, built after v20 and shipped on its own as 0.12.0. The draft is `docs/MONSTERS_PRD.md` section 7. Where they differ, this section wins. Everything of the v19 section holds here, read with 21 items and 8 slots.
+
+**Goal:** "Even more gear: a plumed helmet, a golden helmet, a dragon shield, armour, fast boots, banners, a war horse and a riding triceratops."
+
+**Why:** the founder asked for "a wide range of gear" (decision 130). Decision 133 put 8 items in v19 and the rest here, with the same Kracht cap.
+
+**In:**
+1. **13 more items and 3 new slots** (Lijf, Voeten, Vlag), so 21 items in 8 slots. One of each of the 13 costs 720 points; all 21 cost 930. The rule of v19 stays: any item in Hoofd, Schild, Hand or Rug gives Kracht +1, the same as a cheaper item in that slot.
+
+| Item | Slot | Points | Does |
+|---|---|---|---|
+| Houten zwaard | Hand | 10 | Kracht +1, a spare sword for a second knight |
+| Snelle laarzen | Voeten | 20 | walks 1 block per second faster on foot |
+| Banier | Vlag | 25 | notices monsters 4 blocks further |
+| Maliënkolder | Lijf | 30 | looks only |
+| Koningscape | Rug | 40 | Kracht +1, looks |
+| Pluimhelm | Hoofd | 45 | Kracht +1, looks |
+| Koningsbanier | Vlag | 55 | notices monsters 6 blocks further |
+| Drakenschild | Schild | 60 | Kracht +1, looks |
+| Glanzend harnas | Lijf | 70 | looks, shines |
+| Bubbelstaf | Hand | 75 | Kracht +1, blows soap bubbles |
+| Gouden helm | Hoofd | 80 | Kracht +1, shines |
+| Strijdpaard | Rijdier | 90 | walks 2.5 blocks per second faster |
+| Rij-triceratops | Rijdier | 120 | walks 2 blocks per second faster, his own seated pose |
+
+2. **Kracht stays capped.** Lijf, Voeten, Vlag and Rijdier add no Kracht. Kracht is at most 5 and a fight never ends in under 3 seconds (v19 In 3).
+3. **Speed.** On foot a knight walks at 3, with the Snelle laarzen at 4. On the Pony at 4.5, the Strijdpaard at 5.5 and the Rij-triceratops at 5. While he rides, the boots add nothing.
+4. **Notice range.** A knight notices a monster within 8 blocks, or 16 on Pas op de dieren. With the Banier that is 12 or 20, with the Koningsbanier 14 or 22. It counts for Klodder and the mole. The path search of v16 (24 blocks along x and z) still covers it.
+5. **Soap bubbles.** With the Bubbelstaf, while he pokes, small clear rainbow soap bubbles float up and pop by themselves within 2 seconds. They are never black, cannot be tapped and never bring Klodder. None with reduced motion.
+6. **Shop and Uitrusten.** The Uitrusting row shows all 21 cards, cheapest first, and at the same price v19 items first and then in the table order. Uitrusten shows the 8 slots. Every rule of v19 In 2, 5, 6 and 9 holds.
+7. **Gear in the world.** The Lijf item takes the place of the tabard, the boots go on his feet, the banner stands on a short pole on his back. The Strijdpaard and the Rij-triceratops carry him like the Pony. Still at most 6 meshes per knight and one cached geometry per gear set. A mount is part of the knight: not a dino, not in the herd of 25, never teased and with no menu of its own.
+8. **Save and backup.** The same records as v19. The backup file format goes one up (5), so 0.11.0 refuses a 0.12.0 backup as a newer file. An old save or backup loads with the v19 gear as it was.
+9. **Version 0.12.0** and a `CHANGELOG.md` entry in kid words.
+
+**Prices over the 60 point ceiling (a choice the founder sees).** 5 items cost more than the 60 point ceiling of `docs/GAME_LOOP_PRD.md` 1.3: Glanzend harnas 70, Bubbelstaf 75, Gouden helm 80, Strijdpaard 90 and Rij-triceratops 120. Product keeps the draft prices: the founder asked for a wide range, these items add looks, speed and soap bubbles but never a faster fight, and longer goals already exist (Regenboogsaurus 300, the stones up to 400). The other option is to cap all 5 at 60. A price is one line of data, so it is easy to change after the kids play.
+
+**Out:**
+* More slots or items than these 21. Gear for dinos (v12). Two of the same item. Selling gear. Picking colours.
+* Kracht above 5 or a fight under 3 seconds.
+* The kid riding a mount. Mounts as animals of their own.
+* v6 and its slot in the order (MOQ15).
+
+**Kid safety.** As v19. Nothing is needed to play and no item is needed to win. The soap bubbles cannot be tapped and never look like the black bubble. No new personal data, no new text the kid types, no network request. Sections 8 and 9 hold as updated in this signoff.
+
+**Core text changed with this release.** None beyond the v19 lines of sections 8, 9 and 11, read with 21 items.
+
+**Plan tasks** (4):
+* **V21a** Catalog and rules: the 13 items and 3 slots, the speed and notice rules, the save and backup checks with format 5, unit tests.
+* **V21b** Shop and Uitrusten for 21 items and 8 slots, e2e.
+* **V21c** Models: the 13 parts, the horse and the triceratops with its seated pose, mesh merge and cache, the speed check.
+* **V21d** Effects and ship: soap bubbles, shine, the banned word and sound checks, version 0.12.0 and the CHANGELOG, the iPad check.
+
+**How it is tested.** As in the v19 section, with `gearState`, `buyGearInShop`, `wearGear` and `knightMeshes`.
+
+**Acceptance criteria.** All criteria in section 7 and AC230 to AC280 still hold. New for v21:
+
+* **AC281 (v21):** Given Ridders on and a knight, then the Uitrusting row shows 21 cards in price order (Leren kap, Houten schild and Houten zwaard at 10 first, Rij-triceratops 120 last), each with name, picture, slot and price, at least 56 x 56 points.
+* **AC282 (v21):** Given 120 points, when the kid buys the Rij-triceratops with Ja, then the points are 0 and `ledgerLog` has one row `reason: 'gear'` with -120 in one transaction. Given one item of each of the 13, when the kid puts each on in Uitrusten, then the screen shows 8 slots, each knight wears at most one item per slot, and `gearState` still counts one of each.
+* **AC283 (v21):** Given a knight wearing the Pluimhelm, the Drakenschild, the Bubbelstaf and the Koningscape, then his Kracht is 5, the same as with the 4 cheapest items of those slots. Given the Maliënkolder, the Snelle laarzen, the Koningsbanier and the Strijdpaard as well, then his Kracht is still 5. Given 3 knights in all 8 slots poking (automated), then neither Moed bar is full in under 3 seconds.
+* **AC284 (v21):** Given a knight on foot with the Snelle laarzen, then he walks at 4 blocks per second. Given the Strijdpaard, then 5.5; given the Rij-triceratops, then 5; given the boots and the Strijdpaard, then 5.5. All measured as in AC263, plus or minus 20 percent.
+* **AC285 (v21):** Given a still Klodder or mole along one axis (automated), and a knight on Volg mij with the Banier and Klodder 11 blocks away, then he goes to him; at 13 blocks he does not. Given the Koningsbanier, then he goes at 13 and not at 15. Given a knight on Pas op de dieren with the Koningsbanier, then he goes to the mole at 21 blocks and not at 23. Without a banner, AC216 and AC251 hold.
+* **AC286 (v21):** Given a knight with the Bubbelstaf poking, then soap bubbles show while he pokes, each gone within 2 seconds, none is black, a tap on one does nothing (no Klodder, no block mined or placed), and with `prefers-reduced-motion` none show.
+* **AC287 (v21):** Given a knight wearing an item in all 8 slots (automated), then `knightMeshes` gives at most 6 meshes and one part per worn slot, and two knights with the same set share one cached geometry. Given the Strijdpaard or the Rij-triceratops, then he sits on it, the triceratops with its own pose, and the herd count, the dino list and the teasing targets do not change. Given the founder's iPad, then the founder sees each item and both mounts.
+* **AC288 (v21):** Given a knight wearing 4 new items, when the kid trades him in, then the 4 items are in the wapenkast. Given a backup made with 0.12.0 with new items worn, when it is restored on an empty iPad, then everything comes back, and its file format is 5. Given a save or backup from 0.11.0, then it loads with its v19 gear as it was. Given a backup with an unknown item or an item in the wrong slot, then it is refused with the friendly message of AC195.
+* **AC289 (v21):** Given every new string and sound file of 0.12.0 (automated), then the rules of AC228 hold, and no new string says a knight is weak or must have gear. Given a full play session with the new gear (automated), then the app makes no network request beyond its own files.
+* **AC290 (iPad) (v21):** Given the founder's oldest iPad from the home screen icon with the fps counter, on the v15 world, with 3 knights (or 2, see AC210) in all 8 slots, on the Pony, the Strijdpaard and the Rij-triceratops, Klodder out, soap bubbles blowing and 25 shop dinos in view, then the AC101 target holds. The result goes in `docs/TEST_REPORT.md`.
+* **AC291 (v21):** Given the 0.12.0 build, then `package.json` has version 0.12.0, Instellingen shows 0.12.0 at the bottom, and `CHANGELOG.md` has a 0.12.0 entry in kid readable words that says there is much more gear for your knights, with armour, boots, banners, a war horse and a riding triceratops.
+
+**Check before shipping:** on the founder's iPad, on the HTTPS address (a test deploy is a founder action), from the home screen icon. Buy the Banier and the Rij-triceratops, dress a knight in all 8 slots, see him ride and notice Klodder from further away. Watch the soap bubbles. Run AC290. Hand the iPad to the kid and watch: does the kid like the new gear?
+
