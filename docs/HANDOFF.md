@@ -1,23 +1,20 @@
-# Handoff, 2026-11-16, 0.10.0 to 0.12.0 built on the branch
+# Handoff, 2026-11-16 06:45, the monster feature set is live
 
 ## Task
-Founder, 2026-11-16: "Ok werkt op de iPad, bouw de rest". v19 Ridderuitrusting, v20 Diepe edelstenen and v21 Meer uitrusting are built (V19a to V21c, decisions 140 to 142).
+Founder: "Ok werkt op de iPad, bouw de rest", "Alles mag live", "Doe daarna volledige tests en push to main", "merge zodra CI groen is". Done.
 
 ## State
-* **Live on main:** 0.6.0 to 0.9.0 (PR #25, #26, #27).
-* **On branch claude/jolly-fermi-z0vak4, not live:** 0.10.0, 0.11.0, 0.12.0. Package version is 0.12.0. Not pushed, no open PR.
-* Test numbers and open iPad checks: `docs/TEST_REPORT.md`, v21 section.
+* **Live on main:** 0.6.0 to 0.12.0 (PR #25, #26, #27, #28, all with green WebKit CI). The last one, PR #28: v19 Ridderuitrusting, v20 Diepe edelstenen, v21 Meer uitrusting.
+* Branch claude/jolly-fermi-z0vak4 equals main plus this note. No open PR. PRD section 12 still holds v15, v16, v19, v20, v21 (all shipped); the next /release moves them to `docs/releases/`.
+* Rules changed this session: standing approval for PRD scope the founder asked for (decision 136).
 
 ## Next steps
-1. Operator verifies V21c with `./scripts/verify.sh task V21c`, then commits.
-2. One pull request for 0.10.0 to 0.12.0. Wait for green WebKit CI.
-3. Merge (the founder said so on 2026-11-16).
-4. Only v6 is left in the backlog (open founder question MOQ15: where v6 goes).
-
-## Open for the founder
-* iPad: AC290 (speed with three fully dressed knights, both mounts, bubbles) and AC279 (stones), on a test deploy.
+1. Founder iPad checks, listed in `docs/STATUS.md` and `docs/TEST_REPORT.md`.
+2. /release for the next thing. Backlog: v6 Wat heb ik geleerd (open founder question MOQ15), v12 to v14, v4, v5.
+3. /retro is due (4 releases shipped): send decision 136 and the friction lines of 2026-11-15 and 16 to the factory.
 
 ## Watch out
-* A second session works in this repo. Fetch main before a decision number and before pushing.
-* WebKit runs locally now, in the `minespel` environment. `check.sh` uses it.
-* `tests/e2e/exam.spec.ts:254` AC112 is flake TD22. Do not skip it.
+* A second session works in this repo. Fetch main before a decision number (next free: 143) and before pushing.
+* WebKit runs locally in the `minespel` environment (`npx playwright install webkit` once per container). Run the WebKit suite before a pull request: Chromium green was not enough for PR #27.
+* `tests/e2e/exam.spec.ts:254` AC112 is flake TD22. `loginAsParent` taps with force (see docs/FRICTION.md).
+* The e2e hook `knightMeshes` lives in `src/render/actor-render.ts`, not in the hooks file.

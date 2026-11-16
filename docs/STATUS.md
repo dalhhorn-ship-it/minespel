@@ -1,8 +1,8 @@
 # Status
 
 **Phase:** small releases. Live on `main`: 0.6.0 to 0.9.0 (PR #25, #26, #27): v3 Dino's veilig, v17 Ridders, v18 Zwarte bubbel, v15 Grote wereld and v16 Monstermol.
-**Built on this branch, not live:** 0.10.0 Ridderuitrusting, 0.11.0 Diepe edelstenen and 0.12.0 Meer uitrusting on `claude/jolly-fermi-z0vak4` (V19a to V21c, decisions 140 to 142). All tasks are done; the last full check is in `docs/TEST_REPORT.md` (v21 section).
-**Next step:** one pull request for 0.10.0 to 0.12.0, green WebKit CI, merge (the founder said so on 2026-11-16). The iPad checks (AC279, AC290, the "Check before shipping" lists) stay open for the founder on a test deploy.
+**Live on `main` since 2026-11-16 (PR #28, green WebKit CI):** 0.10.0 Ridderuitrusting, 0.11.0 Diepe edelstenen and 0.12.0 Meer uitrusting (V19a to V21c, decisions 140 to 142). With PR #25, #26 and #27 everything from 0.6.0 to 0.12.0 is live. Nothing is waiting on the branch.
+**Next step:** the founder checks on the iPad what could not be tested here (AC210, AC227, AC241, AC256, AC269, AC279, AC290: speed with knights, Klodder, the mole and full gear in the big world; Kijkafstand on Dichtbij is the reserve). The monster feature set is complete. Next in the backlog: v6 (open founder question MOQ15), then /release.
 **After that:** only v6 is left in the backlog (open founder question MOQ15: where v6 goes). Draft: `docs/MONSTERS_PRD.md`.
 **Known flake:** `exam.spec.ts:254` AC112 is flake TD22.
 **Rule change:** PRD changes for scope the founder asked for are stamped by the operator (standing approval, decision 136).
