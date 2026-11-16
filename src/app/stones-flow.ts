@@ -3,16 +3,18 @@
 // rule. Stones live in `monsters.stones` (optional, left out of the defaults), read only through `readStones`.
 import { registerHook } from '../dev/e2e-hooks';
 import type { Game } from '../game/game';
+import { updateMonsters } from '../storage/monsters-store';
 import type { MonstersRecord } from '../storage/schema';
+import { WORLD_SIZE } from '../world/terrain';
+import { STONE_IDS, stoneById } from '../world/stones';
 
 export interface StonesState {
   found: number[];
   bought: number[];
 }
 
-/** The vein block ids of the stones (decision 142: 43 to 50). V20a's `stones.ts` holds the table. */
-const FIRST_STONE = 43;
-const LAST_STONE = 50;
+const FIRST_STONE = STONE_IDS[0]!;
+const LAST_STONE = STONE_IDS[STONE_IDS.length - 1]!;
 
 /** The stones of a `monsters` record. Empty for a missing field; drops anything that is not a stone id, and a bought stone that was not found. */
 export function readStones(m: { stones?: unknown }): StonesState {
@@ -32,7 +34,7 @@ export interface StonesFlowOptions {
   db: IDBDatabase;
   say: (text: string) => void;
   game: Pick<Game, 'setStones'>;
-  /** The block of the untouched start world at a cell, for `veinCells` (V20b). */
+  /** The block of the untouched start world at a cell, for the hook `veinCells`. */
   startBlock: (x: number, y: number, z: number) => number;
 }
 
@@ -43,7 +45,7 @@ export interface StonesFlow {
   isBought(id: number): boolean;
   /** The economy calls it after the commit: the stone is bought now. */
   markBought(id: number): void;
-  /** The kid mined a block (`world.on('mined')`). V20b: the first mine of a stone vein marks it found. */
+  /** The kid mined a block (`world.on('mined')`). The first mine of a stone vein marks it found, says so and saves it. */
   onMined(x: number, y: number, z: number, block: number): void;
 }
 
@@ -66,10 +68,31 @@ export function createStonesFlow(options: StonesFlowOptions): StonesFlow {
       };
       tell();
     },
-    onMined() {},
+    onMined(_x, _y, _z, block) {
+      // Never looks at a monster switch (AC272): finding a stone is part of Hakken.
+      if (!STONE_IDS.includes(block) || current.found.includes(block)) return;
+      current = { found: [...current.found, block].sort((a, b) => a - b), bought: current.bought };
+      tell();
+      options.say(`Je hebt ${stoneById(block)?.name ?? 'een steen'} ontdekt!`);
+      void updateMonsters(options.db, (m) => {
+        const stored = readStones(m);
+        const found = [...new Set([...stored.found, block])].sort((a, b) => a - b);
+        return { ...m, stones: { found, bought: stored.bought } };
+      }).catch(() => {});
+    },
   };
 
-  if (__E2E__) registerHook('stonesState', () => flow.state());
+  if (__E2E__) {
+    registerHook('stonesState', () => flow.state());
+    // The cells of one stone in the start world (y 1 to 4, under the stripes), as [x, y, z].
+    registerHook('veinCells', (id: number) => {
+      const cells: Array<[number, number, number]> = [];
+      for (let y = 1; y <= 4; y++)
+        for (let z = 0; z < WORLD_SIZE; z++)
+          for (let x = 0; x < WORLD_SIZE; x++) if (options.startBlock(x, y, z) === id) cells.push([x, y, z]);
+      return cells;
+    });
+  }
 
   return flow;
 }

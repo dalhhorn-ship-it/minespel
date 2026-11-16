@@ -20,6 +20,8 @@ export interface KnightMenuOptions {
   mode: KnightMode;
   onModeChange: (mode: KnightMode) => void;
   onClose: () => void;
+  /** The Uitrusten button (v19): shown only when this is given. */
+  onGear?: () => void;
   /** The guard report line, asked again whenever the mode is guard. */
   report?: () => string;
   now?: () => number;
@@ -61,6 +63,14 @@ export function createKnightMenu(options: KnightMenuOptions): KnightMenu {
       );
       return btn;
     });
+    const gearBtn = options.onGear
+      ? el('button', {
+          class: 'knight-menu-btn knight-menu-btn-gear',
+          text: 'Uitrusten',
+          attrs: { type: 'button', 'data-action': 'gear' },
+        })
+      : null;
+    if (gearBtn) cleanups.push(onTap(gearBtn, () => options.onGear?.(), { now: options.now }));
     const closeBtn = el('button', {
       class: 'knight-menu-btn knight-menu-btn-close',
       text: 'Sluiten',
@@ -73,7 +83,7 @@ export function createKnightMenu(options: KnightMenuOptions): KnightMenu {
       [
         el('h2', { class: 'knight-menu-title', text: 'Ridder' }),
         status,
-        el('div', { class: 'knight-menu-grid' }, buttons),
+        el('div', { class: 'knight-menu-grid' }, gearBtn ? [...buttons, gearBtn] : buttons),
         closeBtn,
       ],
     );

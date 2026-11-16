@@ -19,7 +19,7 @@ describe('blocks', () => {
     expect(RARE_BLOCKS).not.toContain(MAX_BLOCK_ID);
   });
 
-  it('AC233 AC271: Waarschuwsteen 42 and the vein blocks 43 to 50 (named after the stones) are solid, minable, not placeable, not in the lists', () => {
+  it('AC233 AC271 AC275: Waarschuwsteen 42 is not placeable; the vein blocks 43 to 50 (named after the stones) are solid, minable, placeable by the block rules, not in the lists', () => {
     expect(WAARSCHUWSTEEN).toBe(42);
     expect(VEIN_BLOCKS).toEqual([43, 44, 45, 46, 47, 48, 49, 50]);
     expect(MAX_BLOCK_ID).toBe(50);
@@ -31,7 +31,7 @@ describe('blocks', () => {
       expect(isSolid(id)).toBe(true);
       expect(isMinable(id)).toBe(true);
       expect(isCutout(id)).toBe(false);
-      expect(isPlaceable(id)).toBe(false);
+      expect(isPlaceable(id)).toBe(id >= 43);
       expect(PLACEABLE_BLOCKS).not.toContain(id);
     }
   });

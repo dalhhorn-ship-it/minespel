@@ -228,6 +228,20 @@ describe('game', () => {
     expect(changed).toHaveBeenCalledWith({ kind: 'build' });
   });
 
+  it('AC275 AC276: setStones fills the Diep tab, unlocks bought stones and empties the slot of a locked one', () => {
+    const s = setup();
+    s.game.setBuildState({ hotbar: [43, 44, 3, 4, 6, 9, 10, 12], selected: 0 });
+    const slot = (i: number) => s.container.querySelectorAll('.hotbar-slot')[i]!;
+    expect(slot(0).classList.contains('hotbar-slot-empty')).toBe(true);
+    s.game.setStones([43, 44], [43]);
+    expect(slot(0).classList.contains('hotbar-slot-empty')).toBe(false);
+    expect(slot(1).classList.contains('hotbar-slot-empty')).toBe(true);
+    expect(s.container.textContent).toContain('1 van de 8 gekocht');
+    expect(s.game.getBuildState().hotbar[1]).toBe(44);
+    s.game.giveToHotbar(44);
+    expect(s.game.getBuildState().hotbar[0]).toBe(43);
+  });
+
   it('AC187: setFoundBlocks lets the Dorp tab count the found blocks', () => {
     const s = setup();
     s.game.setFoundBlocks([35, 39, 41]);

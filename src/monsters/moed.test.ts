@@ -158,3 +158,22 @@ describe('AC262: Kracht in the Klodder bar', () => {
     expect(far.poking).toBeUndefined();
   });
 });
+
+describe('AC265: the Kietelveer giggle in the Klodder bar', () => {
+  const poker = (gear: KnightState['gear']): KnightState => ({ ...knight('stay', sx + 1, sz), gear });
+  it('AC265: each "Tok!" of a poker with the Kietelveer also plays hihihi', () => {
+    const s = setup([poker({ hand: 'kietelveer' })]);
+    s.run(9);
+    const toks = s.play.mock.calls.filter((c) => c[0] === 'tok').length;
+    expect(toks).toBeGreaterThanOrEqual(2);
+    expect(s.play.mock.calls.filter((c) => c[0] === 'hihihi')).toHaveLength(toks);
+  });
+  it('AC265: a bare poker and a poker with another Hand item do not giggle', () => {
+    for (const gear of [undefined, { hand: 'glimzwaard' }] as const) {
+      const s = setup([poker(gear)]);
+      s.run(9);
+      expect(s.play).toHaveBeenCalledWith('tok');
+      expect(s.play).not.toHaveBeenCalledWith('hihihi');
+    }
+  });
+});

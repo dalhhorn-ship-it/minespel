@@ -17,13 +17,13 @@ describe('stones in the world', () => {
     expect(new Uint8Array(loaded.diff().buffer)).toEqual(new Uint8Array(saved.buffer));
   });
 
-  it('AC271: the start world still holds every stone id and none is placeable yet', () => {
+  it('AC271: the start world still holds every stone id, and each is a placeable block (V20b; a stone not bought stays locked in the build controller)', () => {
     const w = new World();
     const found = new Set<number>();
     for (let x = 0; x < WORLD_SIZE; x++) for (let z = 0; z < WORLD_SIZE; z++) for (let y = 1; y <= 4; y++) found.add(w.get(x, y, z));
     for (const id of STONE_IDS) {
       expect(found.has(id)).toBe(true);
-      expect(isPlaceable(id)).toBe(false);
+      expect(isPlaceable(id)).toBe(true);
     }
   });
 });

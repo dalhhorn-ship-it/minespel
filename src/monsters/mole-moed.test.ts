@@ -146,3 +146,24 @@ describe('AC262: Kracht in the mole bar', () => {
     expect(secondsDressed([KRACHT5, KRACHT5, KRACHT5])).toBeGreaterThanOrEqual(3 - 1e-6); // float sum of 60 steps
   });
 });
+
+describe('AC265: the Kietelveer giggle in the mole bar', () => {
+  const plays = (gear: KnightState['gear']): string[] => {
+    const mole = createMole({ x: 30.5, y: GY, z: 30.5 }, { x: 0, z: 0 });
+    const played: string[] = [];
+    const ctx = { ...ctxFor([{ ...knight('stay', 31.5, 30.5), gear }]), play: (n: string) => { played.push(n); } } as MonsterContext;
+    for (let t = 0; t < 9; t += DT) stepMoleMoed(mole, ctx);
+    return played;
+  };
+  it('AC265: each "Tok!" of a poker with the Kietelveer also plays hihihi', () => {
+    const played = plays({ hand: 'kietelveer' });
+    const toks = played.filter((n) => n === 'tok').length;
+    expect(toks).toBeGreaterThanOrEqual(2);
+    expect(played.filter((n) => n === 'hihihi')).toHaveLength(toks);
+  });
+  it('AC265: a bare poker does not giggle', () => {
+    const played = plays(undefined);
+    expect(played).toContain('tok');
+    expect(played).not.toContain('hihihi');
+  });
+});

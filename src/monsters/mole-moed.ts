@@ -36,6 +36,7 @@ export function freeMoleChasers(ctx: MonsterContext): void {
 export function stepMoleMoed(mole: MoleState, ctx: MonsterContext): boolean {
   let pokers = 0;
   const krachts: number[] = [];
+  let giggle = false;
   for (const kn of ctx.knights()) {
     const mine = given.get(kn);
     const isMine = mine !== undefined && kn.chase === mine;
@@ -60,6 +61,7 @@ export function stepMoleMoed(mole: MoleState, ctx: MonsterContext): boolean {
     if (near(b, mole, POKE_REACH) && Math.abs(b.y - mole.y) <= 2) {
       pokers++;
       kn.poking = true;
+      if (kn.gear?.hand === 'kietelveer') giggle = true;
       if (krachts.length < MOLE_MAX_POKERS) krachts.push(kracht(kn.gear));
     }
   }
@@ -72,6 +74,7 @@ export function stepMoleMoed(mole: MoleState, ctx: MonsterContext): boolean {
   if (since >= TOK_GAP_MS) {
     ctx.say('Tok!', 1000);
     ctx.play('tok');
+    if (giggle) ctx.play('hihihi'); // the Kietelveer tickles (AC265)
     tokClock.set(mole, 0);
   } else {
     tokClock.set(mole, since);

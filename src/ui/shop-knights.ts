@@ -5,6 +5,7 @@ import { KNIGHT_PRICE, KNIGHT_TRADEIN, MAX_KNIGHTS } from '../knights/knight-typ
 import { el } from './dom';
 import { onTap } from './tap';
 
+export const MSG_GEAR_BACK = 'Zijn uitrusting gaat terug in de wapenkast.';
 export const MSG_KNIGHTS_FULL = `Je hebt al ${MAX_KNIGHTS} ridders!`;
 
 export interface KnightShopState {
@@ -132,14 +133,14 @@ export function createKnightsSection(options: KnightsSectionOptions): KnightsSec
     );
   }
 
-  function ownedLine(id: string, index: number): HTMLElement {
+  function ownedLine(id: string, index: number, gearCount: number): HTMLElement {
     const label = `Ridder ${index + 1}`;
     const text = el('span', { class: 'shop-collection-label', text: `\u{1F6E1}\u{FE0F} ${label}` });
     if (confirmTrade === id) {
       return el('div', { class: 'shop-collection-item shop-collection-item-trading', attrs: { 'data-testid': `shop-knight-trade-confirm-${id}` } }, [
         confirmBox(
           `shop-knight-trade-box-${id}`,
-          `Wil je ${label} inruilen? Je krijgt ${KNIGHT_TRADEIN} punten terug.`,
+          `Wil je ${label} inruilen? Je krijgt ${KNIGHT_TRADEIN} punten terug.${gearCount > 0 ? ` ${MSG_GEAR_BACK}` : ''}`,
           `shop-knight-trade-yes-${id}`,
           `shop-knight-trade-no-${id}`,
           () => run(() => options.onTradeIn(id)),
@@ -168,7 +169,7 @@ export function createKnightsSection(options: KnightsSectionOptions): KnightsSec
         card(state, loaded),
       ];
       if (loaded && state.knights.length > 0) {
-        children.push(el('div', { class: 'shop-collection-list shop-knight-list' }, state.knights.map((k, i) => ownedLine(k.id, i))));
+        children.push(el('div', { class: 'shop-collection-list shop-knight-list' }, state.knights.map((k, i) => ownedLine(k.id, i, k.gearCount ?? 0))));
       }
       return el('section', { class: 'shop-knights', attrs: { 'aria-label': 'Ridders', 'data-testid': 'shop-knights' } }, children);
     },

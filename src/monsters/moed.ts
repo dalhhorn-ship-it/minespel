@@ -53,6 +53,7 @@ export function stepMoed(k: KlodderState, ctx: MonsterContext): boolean {
   }
   let pokers = 0;
   const krachts: number[] = [];
+  let giggle = false;
   for (const kn of ctx.knights()) {
     if (!kn.visible) {
       kn.chase = null;
@@ -64,6 +65,7 @@ export function stepMoed(k: KlodderState, ctx: MonsterContext): boolean {
       if (pokes(kn, k)) {
         pokers++;
         kn.poking = true;
+      if (kn.gear?.hand === 'kietelveer') giggle = true;
         if (krachts.length < MOED_MAX_POKERS) krachts.push(kracht(kn.gear));
       }
     } else {
@@ -82,6 +84,7 @@ export function stepMoed(k: KlodderState, ctx: MonsterContext): boolean {
   if (since >= TOK_GAP_MS) {
     ctx.say('Tok!', 1000);
     ctx.play('tok');
+    if (giggle) ctx.play('hihihi'); // the Kietelveer tickles (AC265)
     tokClock.set(k, 0);
   } else {
     tokClock.set(k, since);

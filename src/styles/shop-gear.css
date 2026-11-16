@@ -1,0 +1,46 @@
+/* The Uitrusting row of the Dinowinkel (v19). */
+.shop-gear {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.shop-gear-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 10px;
+}
+.shop-gear-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 56px;
+  min-height: 56px;
+}
+.shop-gear-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.shop-gear-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  min-width: 0;
+}
+.gear-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+  background: linear-gradient(180deg, #eceff1 0%, #b0bec5 100%);
+  font-size: 30px;
+  line-height: 1;
+}
+.shop-gear-card .shop-buy-btn {
+  min-width: 44px;
+  min-height: 44px;
+}

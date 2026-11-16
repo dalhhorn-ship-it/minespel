@@ -1,0 +1,34 @@
+/* The Edelstenen section of the Dinowinkel (v20). Cards reuse the shop card look. */
+.shop-stones {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.shop-stone {
+  min-height: 56px;
+}
+
+.shop-stone-art {
+  background: linear-gradient(180deg, #eceff1 0%, #b0bec5 100%);
+}
+
+.shop-stone-art-hidden {
+  font-size: 32px;
+  font-weight: 800;
+  color: #4a5568;
+}
+
+.shop-stone-gem {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  border: 3px solid #1f2d3d;
+  background: var(--stone, #cccccc);
+  transform: rotate(45deg);
+}
+
+.shop-stone-bought {
+  color: #1b5e20;
+}

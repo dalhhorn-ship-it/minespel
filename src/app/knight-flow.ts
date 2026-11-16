@@ -7,6 +7,7 @@ import type { GearEconomy } from '../knights/gear-economy';
 import type { KnightEvent, KnightMode, KnightState } from '../knights/knight-types';
 import { say } from '../ui/speech';
 import { createKnightMenu, type KnightMenu } from '../ui/knight-menu';
+import { createGearScreen, type GearScreen } from '../ui/gear-screen';
 import type { ScreenManager } from './screens';
 
 export const LINE_ARRIVED = 'Ridder tot je dienst!';
@@ -36,10 +37,13 @@ export interface KnightFlowDeps {
 export function createKnightFlow(deps: KnightFlowDeps = {}): KnightFlow {
   const speak = deps.say ?? ((text: string) => say(text));
   let menu: KnightMenu | null = null;
+  let gearScreen: GearScreen | null = null;
 
   function closeMenu() {
     menu?.destroy();
     menu = null;
+    gearScreen?.destroy();
+    gearScreen = null;
   }
 
   function report(k: KnightState): string {
@@ -54,23 +58,45 @@ export function createKnightFlow(deps: KnightFlowDeps = {}): KnightFlow {
     },
     openMenu(knight) {
       if (!deps.screens) return;
-      const screens = deps.screens;
-      closeMenu();
-      if (knight.mode === 'guard') speak(report(knight));
-      const mine = createKnightMenu({
-        mode: knight.mode,
-        report: () => report(knight),
-        onModeChange: (mode) => {
-          deps.setMode?.(knight.id, mode);
-          deps.sound?.play('ridder');
-        },
-        onClose: () => {
-          closeMenu();
-          screens.showWorld();
-        },
-      });
-      menu = mine;
-      screens.showKidOverlay(mine.element);
+      showMenu(knight);
     },
   };
+
+  function showGear(knight: KnightState) {
+    const screens = deps.screens;
+    const gear = deps.gear;
+    if (!screens || !gear) return;
+    closeMenu();
+    const mine = createGearScreen({
+      knightId: knight.id,
+      state: () => gear.state(),
+      knightIds: () => (deps.knightList?.() ?? []).map((k) => k.id),
+      wear: (itemId, slot) => gear.wear(knight.id, itemId, slot),
+      onBack: () => showMenu(knight, false),
+    });
+    gearScreen = mine;
+    screens.showKidOverlay(mine.element);
+  }
+
+  function showMenu(knight: KnightState, announce = true) {
+    const screens = deps.screens;
+    if (!screens) return;
+    closeMenu();
+    if (announce && knight.mode === 'guard') speak(report(knight));
+    const mine = createKnightMenu({
+      mode: knight.mode,
+      report: () => report(knight),
+      onGear: deps.gear ? () => showGear(knight) : undefined,
+      onModeChange: (mode) => {
+        deps.setMode?.(knight.id, mode);
+        deps.sound?.play('ridder');
+      },
+      onClose: () => {
+        closeMenu();
+        screens.showWorld();
+      },
+    });
+    menu = mine;
+    screens.showKidOverlay(mine.element);
+  }
 }

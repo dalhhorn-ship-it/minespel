@@ -5,7 +5,9 @@ import type { Sound } from '../audio/sound';
 import {
   AIR, GLAS, GRAS, LAVA, OBSIDIAAN, PLANKEN, STEEN, VUUR, WOL_ROOD, isMinable, isPlaceable,
 } from '../world/blocks';
-import { mineBlock, placeBlock, type Aim, type IsOccupied } from '../world/build';
+import { mineBlock, placeBlock, type Aim, type Box, type IsOccupied } from '../world/build';
+import { playerBox } from '../world/physics';
+import { STONE_IDS } from '../world/stones';
 import type { CameraPose } from '../render/renderer';
 import type { World } from '../world/world';
 import type { PlayerController } from './player-controller';
@@ -140,14 +142,25 @@ export interface BuildController {
   setState(state: Partial<BuildState>): void;
   setMode(mode: BuildMode): void;
   select(slot: number): void;
-  /** Puts a block in a slot and selects it. */
+  /** Puts a block in a slot and selects it. A stone that is not bought is refused. */
   setSlotBlock(slot: number, block: number): void;
+  /** The stones the kid bought (v20). Only these can be placed. */
+  setUnlocked(ids: readonly number[]): void;
+  /** True for a vein stone that is not bought: it is never placed and its hotbar slot shows empty. */
+  isLocked(block: number): boolean;
+  /**
+   * Puts the selected hotbar block in one cell like a tap does (same lock and rules: air only, inside the world,
+   * no dino, no player; pop, sound, gate lighting). No aim and no reach. For tests and tools. True when placed.
+   */
+  placeCell(x: number, y: number, z: number): boolean;
 }
 
 export function createBuildController(options: BuildControllerOptions): BuildController {
   let mode: BuildMode = 'hakken';
   let hotbar = [...DEFAULT_HOTBAR];
   let selected = 0;
+  let unlocked = new Set<number>();
+  const isLocked = (block: number) => STONE_IDS.includes(block) && !unlocked.has(block);
   const validSlot = (n: number) => Number.isInteger(n) && n >= 0 && n < HOTBAR_SIZE;
 
   return {
@@ -165,6 +178,7 @@ export function createBuildController(options: BuildControllerOptions): BuildCon
         return;
       }
       const block = hotbar[selected]!;
+      if (isLocked(block)) return;
       const p = options.player.player;
       const r = placeBlock(options.world, aim, block, p, options.isOccupied);
       if (!r.ok) return;
@@ -192,6 +206,33 @@ export function createBuildController(options: BuildControllerOptions): BuildCon
       options.onMined?.(x, y, z, block);
       return true;
     },
+    placeCell(x, y, z) {
+      if (options.canAct && !options.canAct()) return false;
+      const { world } = options;
+      const block = hotbar[selected]!;
+      if (isLocked(block) || !isPlaceable(block)) return false;
+      if (!Number.isInteger(x) || !Number.isInteger(y) || !Number.isInteger(z) || !world.inBounds(x, y, z)) return false;
+      if (world.get(x, y, z) !== AIR) return false;
+      const box: Box = [x, y, z, x + 1, y + 1, z + 1];
+      if (options.isOccupied?.(box)) return false;
+      const p = options.player.player;
+      const pb = playerBox(p);
+      const hitsPlayer =
+        box[0] < pb[3] - 1e-3 && box[3] > pb[0] + 1e-3 && box[1] < pb[4] - 1e-3 && box[4] > pb[1] + 1e-3 &&
+        box[2] < pb[5] - 1e-3 && box[5] > pb[2] + 1e-3;
+      if (hitsPlayer) return false;
+      world.set(x, y, z, block);
+      options.onBlockChanged(x, z);
+      if (block === VUUR || block === OBSIDIAAN) tryLightObsidianGate(world, x, y, z, options.onBlockChanged);
+      const { width, height } = options.viewport();
+      options.effects.pop(width / 2, height / 2, block);
+      options.sound.play('thunk');
+      return true;
+    },
+    setUnlocked(ids) {
+      unlocked = new Set(ids);
+    },
+    isLocked,
     getState: () => ({ mode, hotbar: [...hotbar], selected }),
     setState(state) {
       if (state.mode === 'hakken' || state.mode === 'bouwen') mode = state.mode;
@@ -208,7 +249,7 @@ export function createBuildController(options: BuildControllerOptions): BuildCon
       if (validSlot(slot)) selected = slot;
     },
     setSlotBlock(slot, block) {
-      if (!validSlot(slot) || !isPlaceable(block)) return;
+      if (!validSlot(slot) || !isPlaceable(block) || isLocked(block)) return;
       hotbar[slot] = block;
       selected = slot;
     },

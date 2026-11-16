@@ -11,10 +11,11 @@ import {
   ZANDSTEEN, RARE_BLOCKS, AMETHIST, KRISTAL, LICHTSTEEN, REGENBOOGSTEEN, ROBIJN, SAFFIER, SMARAGD,
   STERRENSTEEN, blockInfo,
 } from '../world/blocks';
+import { STONES, stoneById } from '../world/stones';
 import { el } from './dom';
 import { onTap } from './tap';
 
-export type BlockCategoryId = 'all' | 'fire-gate' | 'stones' | 'nature' | 'wool' | 'dorp';
+export type BlockCategoryId = 'all' | 'fire-gate' | 'stones' | 'nature' | 'wool' | 'dorp' | 'diep';
 
 interface BlockCategory {
   id: BlockCategoryId;
@@ -45,6 +46,7 @@ export const BLOCK_CATEGORIES: readonly BlockCategory[] = [
     blocks: [WOL_WIT, WOL_ROOD, WOL_ORANJE, WOL_GEEL, WOL_GROEN, WOL_BLAUW, WOL_PAARS],
   },
   { id: 'dorp', label: 'Dorp', blocks: RARE_BLOCKS },
+  { id: 'diep', label: 'Diep', blocks: STONES.map((s) => s.id) },
 ];
 
 /** Tile colours for the rare blocks (the picture in the grid). */
@@ -59,6 +61,15 @@ const RARE_COLORS: Readonly<Record<number, string>> = {
   [STERRENSTEEN]: 'radial-gradient(#fff 8%, #ffee78 14%, #18144a 40%, #18144a 100%)',
 };
 
+/** The picture of a stone: grey steen with bright specks in the stone colour. Empty for any other block. */
+export function stoneBackground(id: number): string | undefined {
+  const stone = stoneById(id);
+  if (!stone) return undefined;
+  const c = `rgb(${stone.colour.join(' ')})`;
+  const speck = (x: number, y: number) => `radial-gradient(circle at ${x}% ${y}%, ${c} 0 9%, transparent 11%)`;
+  return `${speck(22, 25)}, ${speck(68, 18)}, ${speck(45, 52)}, ${speck(80, 70)}, ${speck(25, 78)}, #8a8f98`;
+}
+
 export interface BlockGridOptions {
   router: PointerRouter;
   onPick: (block: number) => void;
@@ -68,6 +79,8 @@ export interface BlockGridOptions {
   /** Rare block ids the kid has found (default none). */
   found?: readonly number[];
   onSelectSlot?: (slot: number) => void;
+  /** True for a stone that is not bought: its hotbar slot shows empty (v20). */
+  isLocked?: (block: number) => boolean;
 }
 
 export interface BlockGrid {
@@ -78,6 +91,8 @@ export interface BlockGrid {
   setHotbar?(blocks: readonly number[], selected: number): void;
   /** Tells the Dorp tab which rare blocks are found. */
   setFound(ids: readonly number[]): void;
+  /** Tells the Diep tab which stones are found and bought (v20). */
+  setStones(found: readonly number[], bought: readonly number[]): void;
   destroy(): void;
 }
 
@@ -87,6 +102,8 @@ export function createBlockGrid(options: BlockGridOptions): BlockGrid {
   let currentSelected = options.selectedSlot ?? 0;
   let activeCategory: BlockCategoryId = 'all';
   let foundSet = new Set<number>(options.found ?? []);
+  let stonesFound = new Set<number>();
+  let stonesBought = new Set<number>();
 
   // 8-slot lower-bar selector row inside the modal so the kid can pick which lower-bar slot to customize (CR1)
   const slotButtons = Array.from({ length: 8 }, (_, idx) => {
@@ -121,10 +138,12 @@ export function createBlockGrid(options: BlockGridOptions): BlockGrid {
     slotButtons.forEach(({ btn, swatch, nameEl }, idx) => {
       const blockId = currentHotbar[idx] ?? PLACEABLE_BLOCKS[0]!;
       const info = blockInfo(blockId);
-      swatch.style.background = RARE_COLORS[blockId] ?? blockColor(blockId);
-      nameEl.textContent = info.name;
+      const empty = options.isLocked?.(blockId) === true;
+      const name = empty ? 'leeg' : info.name;
+      swatch.style.background = empty ? '' : RARE_COLORS[blockId] ?? stoneBackground(blockId) ?? blockColor(blockId);
+      nameEl.textContent = name;
       btn.setAttribute('aria-pressed', String(idx === currentSelected));
-      btn.setAttribute('aria-label', `Vakje ${idx + 1}: ${info.name}`);
+      btn.setAttribute('aria-label', `Vakje ${idx + 1}: ${name}`);
     });
   }
 
@@ -175,6 +194,40 @@ export function createBlockGrid(options: BlockGridOptions): BlockGrid {
   });
   const counter = el('div', { class: 'grid-rare-count', attrs: { 'data-testid': 'grid-rare-count' } });
 
+  // Diep tab: the 8 stones in price order. Not found is "?", found but not bought has a lock; both do nothing.
+  const stoneEntries = STONES.map(({ id, name: stoneName }) => {
+    const swatch = el('span', { class: 'grid-swatch' });
+    const name = el('span', { class: 'grid-name' });
+    const b = el('button', { class: 'grid-stone', attrs: { type: 'button', 'data-block-id': String(id) } }, [swatch, name]);
+    cleanups.push(onTap(b, () => {
+      if (!stonesBought.has(id)) return;
+      options.onPick(id);
+      close();
+    }));
+    return { id, stoneName, b, swatch, name };
+  });
+  const stoneCounter = el('div', { class: 'grid-rare-count', attrs: { 'data-testid': 'grid-stone-count' } });
+
+  function syncStones() {
+    let n = 0;
+    for (const { id, stoneName, b, swatch, name } of stoneEntries) {
+      const isFound = stonesFound.has(id);
+      const isBought = stonesBought.has(id);
+      if (isBought) n++;
+      b.classList.toggle('grid-rare-locked', !isFound);
+      b.classList.toggle('grid-stone-buy', isFound && !isBought);
+      b.setAttribute('aria-disabled', String(!isBought));
+      swatch.textContent = !isFound ? '?' : isBought ? '' : '\u{1F512}';
+      swatch.style.background = isFound ? stoneBackground(id) ?? '' : '';
+      name.textContent = !isFound ? 'Ergens diep onder de grond' : isBought ? stoneName : 'Koop in de Dinowinkel';
+      b.setAttribute(
+        'aria-label',
+        !isFound ? 'Nog niet gevonden. Ergens diep onder de grond' : isBought ? stoneName : `${stoneName}. Koop in de Dinowinkel`,
+      );
+    }
+    stoneCounter.textContent = `${n} van de ${STONES.length} gekocht`;
+  }
+
   function syncRare() {
     let n = 0;
     for (const { id, b, swatch, name } of rareEntries) {
@@ -202,10 +255,14 @@ export function createBlockGrid(options: BlockGridOptions): BlockGrid {
     const dorp = activeCategory === 'dorp';
     for (const r of rareEntries) r.b.hidden = !dorp;
     counter.hidden = !dorp;
+    const diep = activeCategory === 'diep';
+    for (const r of stoneEntries) r.b.hidden = !diep;
+    stoneCounter.hidden = !diep;
   }
 
   syncHotbarRow();
   syncRare();
+  syncStones();
   syncCategoryFilter();
 
   const closeBtn = el('button', { class: 'grid-close', text: 'Klaar', attrs: { type: 'button' } });
@@ -223,7 +280,8 @@ export function createBlockGrid(options: BlockGridOptions): BlockGrid {
     slotBar,
     catBar,
     counter,
-    el('div', { class: 'grid-cells' }, [...cellEntries.map((e) => e.b), ...rareEntries.map((e) => e.b)]),
+    stoneCounter,
+    el('div', { class: 'grid-cells' }, [...cellEntries.map((e) => e.b), ...rareEntries.map((e) => e.b), ...stoneEntries.map((e) => e.b)]),
   ]);
   const root = el('div', { class: 'block-grid', attrs: { role: 'dialog', 'aria-label': 'Alle blokken' } }, [panel]);
   root.hidden = true;
@@ -260,6 +318,11 @@ export function createBlockGrid(options: BlockGridOptions): BlockGrid {
     setFound(ids) {
       foundSet = new Set(ids);
       syncRare();
+    },
+    setStones(found, bought) {
+      stonesFound = new Set(found);
+      stonesBought = new Set(bought);
+      syncStones();
     },
     destroy() {
       for (const c of cleanups) c();

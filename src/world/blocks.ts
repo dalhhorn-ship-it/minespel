@@ -48,7 +48,10 @@ export const STERRENSTEEN = 41;
 // Deep ground (v15). Never renumber.
 /** The striped warning layer at y 5. Solid, minable, not placeable. */
 export const WAARSCHUWSTEEN = 42;
-/** Hidden vein blocks 'ader 1' to 'ader 8' in the deep ground: ids 43 to 50. They look like steen. */
+/**
+ * Hidden vein blocks 'ader 1' to 'ader 8' in the deep ground: ids 43 to 50, the 8 stones of v20. They look like steen.
+ * They are placeable by the block rules, but not in `PLACEABLE_BLOCKS`, and the build controller refuses one that is not bought.
+ */
 export const VEIN_BLOCKS: readonly number[] = [43, 44, 45, 46, 47, 48, 49, 50];
 
 /** The rare blocks in villager order. */
@@ -66,8 +69,8 @@ export interface BlockInfo {
   placeable: boolean;
 }
 
-function deepBlock(id: number, name: string): BlockInfo {
-  return { id, name, solid: true, cutout: false, minable: true, placeable: false };
+function deepBlock(id: number, name: string, placeable = false): BlockInfo {
+  return { id, name, solid: true, cutout: false, minable: true, placeable };
 }
 
 function block(id: number, name: string, cutout = false): BlockInfo {
@@ -118,7 +121,7 @@ export const BLOCKS: readonly BlockInfo[] = [
   block(REGENBOOGSTEEN, 'regenboogsteen'),
   block(STERRENSTEEN, 'sterrensteen'),
   deepBlock(WAARSCHUWSTEEN, 'waarschuwsteen'),
-  ...VEIN_BLOCKS.map((id) => deepBlock(id, (STONES.find((s) => s.id === id)?.name ?? 'ader').toLowerCase())),
+  ...VEIN_BLOCKS.map((id) => deepBlock(id, (STONES.find((s) => s.id === id)?.name ?? 'ader').toLowerCase(), true)),
 ];
 
 /** The 32 building blocks a kid can place from the start, in grid order. Rare blocks are placeable too, but only once found, so they are not in this list. */

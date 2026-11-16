@@ -1,0 +1,76 @@
+/* Uitrusten screen (v19, AC261). Every button is at least 56 x 56 points. */
+.gear-screen-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  background: rgba(15, 24, 36, 0.72);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+.gear-screen-card {
+  width: min(760px, 96vw);
+  max-height: 94vh;
+  overflow-y: auto;
+  background: #fffdf7;
+  border: 4px solid #1f2d3d;
+  border-radius: 28px;
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  color: #1f2d3d;
+  font-family: var(--font-stack);
+  font-size: calc(var(--font-body, 20px) * var(--kid-scale, 1));
+}
+.gear-screen-title { margin: 0; font-size: calc(26px * var(--kid-scale, 1)); font-weight: 800; }
+.gear-screen-body { display: flex; gap: 18px; align-items: flex-start; }
+.gear-screen-picture {
+  flex: 0 0 160px;
+  background: #eef6ff;
+  border: 3px solid #90caf9;
+  border-radius: 18px;
+  padding: 8px;
+}
+.knight-picture { display: block; width: 100%; height: auto; }
+.gear-screen-list { flex: 1; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.gear-screen-slot { margin: 0 0 4px; font-size: 1em; font-weight: 800; }
+.gear-screen-items { display: flex; flex-wrap: wrap; gap: 8px; }
+.gear-screen-item {
+  min-width: 120px;
+  min-height: 64px;
+  padding: 8px 12px;
+  border-radius: 16px;
+  border: 3px solid #1f2d3d;
+  background: #f4efe3;
+  color: #1f2d3d;
+  font: inherit;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  touch-action: none;
+  cursor: pointer;
+}
+.gear-screen-item[aria-pressed='true'] { background: #2e7d32; border-color: #1b5e20; color: #fff; }
+.gear-screen-name { flex: 1; text-align: left; }
+.gear-screen-status { font-size: 0.8em; font-weight: 800; }
+.gear-screen-empty { margin: 0; padding: 10px 14px; border-radius: 14px; background: #eef6ff; border: 2px solid #90caf9; }
+.gear-screen-btn {
+  min-width: 56px;
+  min-height: 60px;
+  padding: 12px 18px;
+  border-radius: 16px;
+  border: 3px solid #1f2d3d;
+  background: #1f2d3d;
+  color: #fff;
+  font: inherit;
+  font-weight: 800;
+  touch-action: none;
+  cursor: pointer;
+}
