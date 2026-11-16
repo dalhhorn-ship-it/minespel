@@ -50,7 +50,7 @@ Versions follow shipping order: v10 shipped as 0.4.0 and v11 as 0.5.0; v3 is 0.6
 | | **v19 Ridderuitrusting** | 8 pieces of gear and a pony for my knights, 10 to 50 coins. They look great and win faster, but a fight always lasts a moment. | M | Medium to high. A coin sink inside the 60 coin ceiling. | 4 (V19a to V19d) | shipped (0.10.0), see `docs/releases/v19-v21.md` |
 | | **v20 Diepe edelstenen** | 8 new shiny stones deep below the stripes. I find one, save up (80 to 400 coins) and buy it, then build with it as much as I like. | S to M | Medium. A long coin goal that makes digging deep worth it. | 3 (V20a to V20c) | shipped (0.11.0), see `docs/releases/v19-v21.md` |
 | | **v21 Meer uitrusting** | 13 more pieces of gear: helmets, armour, boots, banners, a war horse and a riding triceratops. | M | Medium. More looks and goals for knight fans. | 4 (V21a to V21d) | shipped (0.12.0), see `docs/releases/v19-v21.md` |
-| 1 | **v22 Duidelijke mol en kompas** | The mole tells me when he comes and where, and stays until I wall him in or my knight sends him off. A small clock shows when the next black bubble comes and an arrow shows where the bubble, Klodder or the mole is. | M | High. A kid bug report and founder wishes. | 5 (V22a to V22e) | next, 0.13.0, scoped in `docs/PRD.md` section 12 (AC292 to AC309) |
+| 1 | **v22 Duidelijke mol en kompas** | The mole tells me when he comes and where, and stays until I wall him in. My knight chases him off for a bit and guards 4 animals. A small clock shows when the next black bubble comes and an arrow shows where the bubble, Klodder or the mole is. | M | High. A kid bug report and founder wishes. | 5 (V22a to V22e) | next, 0.13.0, scoped in `docs/PRD.md` section 12 (AC292 to AC309, AC329 to AC337) |
 | 2 | **v23 Lavakip-bar** | I buy a food truck for 60 coins, order a lavakip for 3 and give it to a dino, chicken or knight: it munches, dances and puffs a little flame. | S to M | Medium to high. A founder wish and a small happy coin sink. | 3 (V23a to V23c) | next, 0.14.0, scoped in `docs/PRD.md` section 12 (AC310 to AC321). The first slice of v13 |
 | 3 | **v24 Geluid dichtbij** | I hear the bubble, Klodder, the mole and my Lavakip-bar, louder as I come closer. | S | Medium. A founder wish; helps find things with the arrow. | 3 (V24a to V24c) | next, 0.15.0, scoped in `docs/PRD.md` section 12 (AC322 to AC328) |
 | 6 | **v6 Wat heb ik geleerd** | A parent learning dashboard: is my kid really learning? Right on the first try per topic over time, topics that got better or got stuck, the hardest questions, exam results, and learning time against play time. All worked out on the iPad, behind the gate. | M, may grow to L | High for the parent (decision 91). Through the parent, who can then switch on what is hard. | T21, T56, T61, plus dashboard tasks the architect cuts | later, after v16 at the earliest (decisions 91, 94, 119, 124 and 131); its slot is founder question MOQ15 (right after v16, or after v21) |
@@ -130,7 +130,7 @@ Open plan tasks: v15 to v21 are done. v22, v23 and v24 add 5 (V22a to V22e), 3 (
 * Its speed test runs with 3 knights and Klodder on screen (architect A9).
 
 ### v16 Monstermol
-* **Status:** shipped as 0.9.0. The signed text is archived in `docs/releases/v15-v16.md`; its criteria AC244 to AC257 are in `docs/PRD.md` section 7. From 0.13.0, v22 changes the mole: he stays until a wall or a knight stops him.
+* **Status:** shipped as 0.9.0. The signed text is archived in `docs/releases/v15-v16.md`; its criteria AC244 to AC257 are in `docs/PRD.md` section 7. From 0.13.0, v22 changes the mole: he stays until a wall catches him; a knight only chases him off for a while.
 * **Goal:** deep down there are warning stripes; dig past them and a silly monster mole comes up and teases the animals, until the kid fences them in or a knight sends him off.
 * **In:** two warnings, the wake rule, a spawn spot away from the kid and near the animals, a path search (also used by knights from then on), give up after 10 seconds with no path, tired after 10 minutes, the Monstermol row.
 * **Kid safety:** no animal is ever eaten, hurt or lost. Silly, not scary. Only after the kid's own dig past two warnings.
@@ -158,9 +158,9 @@ Open plan tasks: v15 to v21 are done. v22, v23 and v24 add 5 (V22a to V22e), 3 (
 * **Size:** M, 4 tasks (V21a to V21d).
 
 ### v22 Duidelijke mol en kompas
-* **Status:** next, ships as 0.13.0, first of the three (a kid bug report goes first). Scoped on 2026-11-16 in `docs/PRD.md` section 12, criteria AC292 to AC309. The PRD text wins.
-* **Goal:** the kid knows when the mole comes and where he is; he stays until a wall 2 high catches him or a knight sends him off; a calm clock and an arrow for the black bubble, Klodder and the mole.
-* **In:** clear card and lines on time, a line for every way out, gevangen moles (at most 3 plus 1 free), moles saved and in the backup (format 6), the bubble pill with "Bubbel over 3:20" and the arrow.
+* **Status:** next, ships as 0.13.0, first of the three (a kid bug report goes first). Scoped on 2026-11-16 in `docs/PRD.md` section 12, criteria AC292 to AC309 and AC329 to AC337. The PRD text wins.
+* **Goal:** the kid knows when the mole comes and where he is; he stays until a wall 2 high catches him; a knight chases him off for a while and guards 4 animals, but he sneaks back; a calm clock and an arrow for the black bubble, Klodder and the mole.
+* **In:** clear card and lines on time, a line for every way out, gevangen moles (at most 3 plus 1 free), chase off and come back, guard groups of 4 with shield marks, the knight mode Jaag monsters weg, moles saved and in the backup (format 6), the bubble pill with "Bubbel over 3:20" and the arrow.
 * **Size:** M, 5 tasks (V22a to V22e).
 
 ### v23 Lavakip-bar
