@@ -269,11 +269,21 @@ describe('village flow: the card and the answers (V11d)', () => {
     expect(document.body.textContent).toContain('Zo zit het:');
     expect(byId('village-answer')?.textContent).toBe(choiceItem.options[rightIndex]);
     expect(byId('village-explain')?.textContent).toBe(choiceItem.explain);
+    // v25 (AC349): Verder asks the same question again, up to 3 times, then returns to the world.
+    for (let n = 1; n <= 3; n++) {
+      tap(byId('village-verder')!);
+      expect(s.screens.current()).not.toBe('world');
+      tap(option(wrongIndex));
+    }
     tap(byId('village-verder')!);
     expect(s.screens.current()).toBe('world');
     await s.flow.flush();
     expect((await s.records.get('village')).found).toEqual([]);
     expect(s.setFoundBlocks).not.toHaveBeenCalledWith([RARE_BLOCKS[0]]);
+    const rows = await s.logStore.listAnswers();
+    expect(rows.filter((r) => r.repeat).map((r) => r.repeat)).toEqual([1, 2, 3]);
+    expect(rows.filter((r) => !r.repeat).map((r) => r.try)).toEqual([1, 2]);
+    expect((await s.progressStore.get(TAAL_MODULE_ID, choiceItem.id))?.box).toBe(1);
   });
 
   it('AC184: Laat maar closes without a block, and the first try already given still counts for the box', async () => {

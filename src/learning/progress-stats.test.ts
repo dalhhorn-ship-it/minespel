@@ -30,6 +30,22 @@ describe('progress stats (decision 115)', () => {
     expect(weekStart('2026-11-02')).toBe('2026-11-02');
   });
 
+  it('AC347: repeat rows change no number: questions, percent right and learning time stay as without them', () => {
+    const rows = [
+      answer('2026-10-26', true),
+      answer('2026-10-27', false),
+      answer('2026-10-27', false, { try: 2 }),
+    ];
+    const rep = [
+      answer('2026-10-27', true, { repeat: 1, context: 'practice' }),
+      answer('2026-10-27', false, { repeat: 2, context: 'dorp' }),
+      answer('2026-10-28', false, { repeat: 3 }),
+    ];
+    const a = computeProgress(input({ answers: rows }));
+    const b = computeProgress(input({ answers: [...rows, ...rep] }));
+    expect(b).toEqual(a);
+  });
+
   it('counts this week and last week apart, with first tries only', () => {
     const s = computeProgress(
       input({

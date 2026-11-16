@@ -3,6 +3,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { BACKUP_KV_NAMES, backupFileName, backupText, buildBackup, decodeValue, encodeValue, markBackupMade, replaceAll } from './backup';
 import { checkBackup } from './backup-check';
 import { getAll, haltWrites, openDb, put, get } from './db';
+import { createLogStore } from './log-store';
 import { createRecords } from './records';
 import { prepareMonsters } from './monsters-store';
 import { SCHEMA_VERSION, STORE_NAMES, defaultKv, type KvName } from './schema';
@@ -211,6 +212,36 @@ describe('backup file', () => {
     haltWrites(false);
     expect(viewDistanceOf(await createRecords(db).get('settings'))).toBe('ver');
     db.close();
+  });
+
+  it('AC347: repeat rows in the answer history come back after a restore on an empty iPad, a 0.15.0 file (format 7) still restores', async () => {
+    const db = await fresh();
+    await seed(db);
+    const base = {
+      ts: 5, day: '2026-11-16', context: 'break' as const, sessionId: 's', moduleId: 'taal', topic: 't', skill: 's',
+      level: 'M6', itemId: 'i1', try: 1, correct: false, given: 'x', ms: 900,
+    };
+    const store = createLogStore(db);
+    await store.appendAnswer(base);
+    await store.appendAnswer({ ...base, repeat: 1, correct: true });
+    await store.appendAnswer({ ...base, repeat: 2, context: 'practice' });
+    const built = await buildBackup(db);
+    expect(built.format).toBe(7); // the log rows need no check change, so the format stays
+    const checked = checkBackup(backupText(built));
+    expect(checked.ok).toBe(true);
+    if (!checked.ok) return;
+    const empty = await fresh();
+    await replaceAll(empty, checked.data);
+    haltWrites(false);
+    const rows = await createLogStore(empty).listAnswers();
+    const mine = rows.filter((r) => r.ts === 5);
+    expect(mine.map((r) => r.repeat)).toEqual([undefined, 1, 2]);
+    expect(mine[2]?.context).toBe('practice');
+    // a file made with 0.15.0 has no repeat field and restores
+    const old = checkBackup(fixture('v0140-lavakip.json'));
+    expect(old.ok).toBe(true);
+    db.close();
+    empty.close();
   });
 
   it('AC209 AC226: a backup made with 2 knights round trips through build and check', async () => {

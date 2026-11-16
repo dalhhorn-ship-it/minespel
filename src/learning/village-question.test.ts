@@ -143,9 +143,36 @@ describe('village card state (V11d)', () => {
     const w2 = reduceVillage(reduceVillage(s0, answer(wrong)).state, answer(wrong));
     expect(w2.state.phase).toBe('wrong');
     expect(types(w2.effects)).toEqual(['answer']);
-    const done = reduceVillage(w2.state, { type: 'verder' });
-    expect(done.state.phase).toBe('closed');
-    expect(done.effects).toEqual([]);
+    // v25 (AC349): Verder after the teach moment asks the question again; the card closes after repeat 3.
+    let st = reduceVillage(w2.state, { type: 'verder' }).state;
+    for (let n = 1; n <= 3; n++) {
+      expect(st).toMatchObject({ phase: 'question', repeat: n - 1 });
+      st = reduceVillage(st, answer(wrong)).state;
+      expect(st).toMatchObject({ phase: 'wrong', repeat: n });
+      st = reduceVillage(st, { type: 'verder' }).state;
+    }
+    expect(st.phase).toBe('closed');
+  });
+
+  it('AC349: a right repeat gives no block, no dance, no box and leaves on Verder; each repeat is logged with its mark', () => {
+    const s0 = startVillageCard(question, 36, []);
+    const w2 = reduceVillage(reduceVillage(s0, answer(wrong)).state, answer(wrong));
+    const rep = reduceVillage(w2.state, { type: 'verder' }).state;
+    const r = reduceVillage(rep, answer(right, 0.1));
+    expect(r.state).toMatchObject({ phase: 'right', celebration: null, repeat: 1 });
+    expect(r.effects).toEqual([expect.objectContaining({ type: 'answer', try: 1, repeat: 1, correct: true })]);
+    expect(reduceVillage(r.state, { type: 'hotbar' }).effects).toEqual([]);
+    expect(reduceVillage(r.state, { type: 'verder' }).state.phase).toBe('closed');
+    expect(reduceVillage(r.state, answer(right)).effects).toEqual([]);
+  });
+
+  it('AC349: Laat maar closes a repeat at once, a double tap on Verder acts once', () => {
+    const s0 = startVillageCard(question, 36, []);
+    const w2 = reduceVillage(reduceVillage(s0, answer(wrong)).state, answer(wrong));
+    const rep = reduceVillage(w2.state, { type: 'verder' }).state;
+    expect(reduceVillage(rep, { type: 'laatMaar' }).state.phase).toBe('closed');
+    const again = reduceVillage(w2.state, { type: 'verder' });
+    expect(reduceVillage(again.state, { type: 'verder' }).state).toBe(again.state);
   });
 
   it('AC184: a block found before gives no found effect and no hotbar button action', () => {

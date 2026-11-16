@@ -16,6 +16,7 @@ import {
   EMPTY_BREAK_MS,
   reduce,
   startSession,
+  withRepeatView,
   type SessionEffect,
   type SessionEntry,
   type SessionEvent,
@@ -146,7 +147,7 @@ export function createBreakFlow(options: BreakFlowOptions): BreakFlow {
         const entry = state.entries.find((e) => e.item.id === ef.itemId);
         const item = entry?.item ?? catalog.getItem(moduleId, ef.itemId);
         const topic = catalog.topicOfItem(moduleId, ef.itemId) ?? '';
-        if (ef.try === 1) {
+        if (ef.try === 1 && !ef.repeat) {
           persisted.firstAnswerMs.push(ef.ms);
         }
         await options.logStore.appendAnswer({
@@ -160,6 +161,7 @@ export function createBreakFlow(options: BreakFlowOptions): BreakFlow {
           level: item?.level ?? 'M6',
           itemId: ef.itemId,
           try: ef.try,
+          ...(ef.repeat ? { repeat: ef.repeat } : {}),
           correct: ef.correct,
           given: item ? formatGivenResponse(item, ef.response) : '',
           ms: ef.ms,
@@ -461,7 +463,10 @@ export function createBreakFlow(options: BreakFlowOptions): BreakFlow {
     registerHook('startEarlyBreak', () => flow.startBreak({ early: true }));
     registerHook('endBreakByParent', () => flow.endBreakByParent());
     registerHook('isBreakActive', () => flow.isActive());
-    registerHook('breakState', () => flow.currentState());
+    registerHook('breakState', () => {
+      const st = flow.currentState();
+      return st ? withRepeatView(st) : null;
+    });
     registerHook('tickEmptyBreak', () => flow.tickEmptyBreak());
   }
 

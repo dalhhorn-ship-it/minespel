@@ -73,6 +73,9 @@ export function pickVillageQuestion(options: PickVillageQuestionOptions): Villag
 
 // ---- the card ----
 
+/** The most repeats one villager question gets (AC349). */
+export const MAX_VILLAGE_REPEATS = 3;
+
 export type VillagePhase = 'question' | 'right' | 'wrong' | 'closed';
 export type Celebration = 'dance' | 'respect';
 
@@ -88,6 +91,11 @@ export interface VillageCardState {
   alreadyFound: boolean;
   /** Set on a right answer: the villager dances, or shouts "Respect bruuuuu!". */
   celebration: Celebration | null;
+  /**
+   * v25: set while the card is in its repeat part, after the teach moment. The number of repeats answered so far
+   * (0 while the first repeat is on screen). Missing in the first part. A repeat gives no block, no dance, no box.
+   */
+  repeat?: number;
 }
 
 export type VillageEvent =
@@ -100,7 +108,7 @@ export type VillageEvent =
   | { type: 'hotbar' };
 
 export type VillageEffect =
-  | { type: 'answer'; try: 1 | 2; correct: boolean; response: Response; ms: number; at: number }
+  | { type: 'answer'; try: 1 | 2; repeat?: 1 | 2 | 3; correct: boolean; response: Response; ms: number; at: number }
   /** Only from the first try: right moves the box up, wrong puts it in box 1 (PRD 4.6). */
   | { type: 'box'; firstTryRight: boolean }
   | { type: 'found'; block: number }
@@ -132,6 +140,14 @@ export function reduceVillage(
       if (state.phase !== 'question') return none;
       const entry = state.question.entry;
       const correct = checkAnswer(entry.item, event.response, entry.numeric === true);
+      if (state.repeat !== undefined) {
+        // v25: one try, no box, no block, no dance (AC349).
+        const n = state.repeat + 1;
+        const eff: VillageEffect = {
+          type: 'answer', try: 1, repeat: n as 1 | 2 | 3, correct, response: event.response, ms: event.ms, at: event.at,
+        };
+        return { state: { ...state, phase: correct ? 'right' : 'wrong', repeat: n, celebration: null }, effects: [eff] };
+      }
       const effects: VillageEffect[] = [
         { type: 'answer', try: state.try, correct, response: event.response, ms: event.ms, at: event.at },
       ];
@@ -147,7 +163,7 @@ export function reduceVillage(
       return { state: { ...state, phase: 'wrong', firstTryRight }, effects };
     }
     case 'hotbar': {
-      if (state.phase !== 'right' || state.alreadyFound) return none;
+      if (state.phase !== 'right' || state.alreadyFound || state.repeat !== undefined) return none;
       return {
         state: { ...state, phase: 'closed' },
         effects: [{ type: 'hotbar', block: state.gives }],
@@ -155,6 +171,13 @@ export function reduceVillage(
     }
     case 'verder': {
       if (state.phase !== 'right' && state.phase !== 'wrong') return none;
+      if (state.phase === 'wrong') {
+        // v25: after the teach moment the same question comes back, at most 3 times (AC349).
+        const done = state.repeat ?? 0;
+        if (done < MAX_VILLAGE_REPEATS) {
+          return { state: { ...state, phase: 'question', try: 1, repeat: done, celebration: null }, effects: [] };
+        }
+      }
       return { state: { ...state, phase: 'closed' }, effects: [] };
     }
     case 'laatMaar':

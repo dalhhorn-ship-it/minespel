@@ -46,9 +46,26 @@ export interface SessionSummary {
   earned: number;
   /** Point total at the end. */
   pointsTotal: number;
+  /** v25: questions right on a repeat ("En N alsnog goed!"). Missing in older saves, read as 0. */
+  repeatRight?: number;
   /** AC116: nothing right, show "Dit was lastig". */
   hard: boolean;
 }
+
+/** v25 (AC338 to AC348): the repeat line. Items are indexes into `entries`. */
+export interface RepeatState {
+  /** True from the first repeat on (the repeat part). */
+  on: boolean;
+  /** Teach moment questions waiting for a repeat, in order. While a repeat is on screen its question is first. */
+  line: number[];
+  /** Per entry: repeats answered so far. */
+  counts: number[];
+  /** Questions right on a repeat. */
+  right: number;
+}
+
+/** The most repeats one question gets (AC341). */
+export const MAX_REPEATS = 3;
 
 export interface SessionState {
   mode: SessionMode;
@@ -78,6 +95,8 @@ export interface SessionState {
   lastApplied?: number;
   summary: SessionSummary | null;
   endReason: EndReason | null;
+  /** v25: the repeat line. Missing in older saves and in preview. */
+  repeat?: RepeatState;
 }
 
 export type SessionEvent =
@@ -100,6 +119,8 @@ export type SessionEffect =
       type: 'answer';
       itemId: string;
       try: 1 | 2;
+      /** v25: 1 to 3 for a repeat. Such a row is no first try, no retry and no teach moment. */
+      repeat?: 1 | 2 | 3;
       correct: boolean;
       response: Response;
       /** Time on screen for this try, ms, never negative. */
@@ -213,12 +234,35 @@ function toSummary(state: SessionState, effects: SessionEffect[]): SessionState 
     earned: s.earned,
     pointsTotal: s.economy.points,
     hard: right === 0,
+    ...(state.repeat && state.repeat.right > 0 ? { repeatRight: state.repeat.right } : {}),
   };
   return { ...s, phase: 'summary', summary };
 }
 
+/** True while the repeat part is on (AC338). */
+export function inRepeatPart(state: SessionState): boolean {
+  return state.repeat?.on === true;
+}
+
+/** How many questions wait in the repeat line, the one on screen included while it is still in the line ("Nog N te gaan", AC342). */
+export function repeatsLeft(state: SessionState): number {
+  return state.repeat?.on ? state.repeat.line.length : 0;
+}
+
 function advance(state: SessionState, at: number, effects: SessionEffect[]): SessionState {
-  if (state.index + 1 >= state.entries.length) return toSummary(state, effects);
+  const r = state.repeat;
+  if (r?.on) {
+    const next = r.line[0];
+    if (next === undefined) return toSummary(state, effects);
+    return { ...state, phase: 'question', index: next, try: 1, shownAt: at };
+  }
+  if (state.index + 1 >= state.entries.length) {
+    const first = r?.line[0];
+    if (r && first !== undefined) {
+      return { ...state, repeat: { ...r, on: true }, phase: 'question', index: first, try: 1, shownAt: at };
+    }
+    return toSummary(state, effects);
+  }
   return { ...state, phase: 'question', index: state.index + 1, try: 1, shownAt: at };
 }
 
@@ -229,6 +273,7 @@ function onAnswer(state: SessionState, ev: Extract<SessionEvent, { type: 'answer
   const effects: SessionEffect[] = [];
   const correct = checkAnswer(entry.item, ev.response, entry.numeric === true);
   const tries = state.try;
+  if (state.repeat?.on) return onRepeatAnswer(state, ev, entry, correct);
   const pm = state.pointsMode ?? 'normaal';
   if (state.mode !== 'preview') {
     effects.push({
@@ -258,8 +303,43 @@ function onAnswer(state: SessionState, ev: Extract<SessionEvent, { type: 'answer
     return { state: retry, effects };
   }
   let s: SessionState = { ...state, phase: 'teach', results: setResult(state.results, state.index, 'teach') };
+  if (state.mode !== 'preview') {
+    // v25: a teach moment question gets its repeats after the last normal question (AC338).
+    const r = state.repeat ?? { on: false, line: [], counts: state.entries.map(() => 0), right: 0 };
+    s = { ...s, repeat: { ...r, line: [...r.line, state.index] } };
+  }
   s = applyDelta(s, answerPoints('teach', pm), 'answer', effects);
   return { state: s, effects };
+}
+
+/** One try, no points, no box (AC339, AC340). Right leaves the line, wrong goes to the back, at most 3 repeats. */
+function onRepeatAnswer(
+  state: SessionState,
+  ev: Extract<SessionEvent, { type: 'answer' }>,
+  entry: SessionEntry,
+  correct: boolean,
+): StepResult {
+  const r = state.repeat as RepeatState;
+  const i = state.index;
+  const n = (r.counts[i] ?? 0) + 1;
+  const counts = [...r.counts];
+  counts[i] = n;
+  const rest = r.line.filter((x) => x !== i);
+  const line = correct || n >= MAX_REPEATS ? rest : [...rest, i];
+  const effects: SessionEffect[] = [
+    {
+      type: 'answer',
+      itemId: entry.item.id,
+      try: 1,
+      repeat: n as 1 | 2 | 3,
+      correct,
+      response: ev.response,
+      ms: Math.max(0, ev.at - state.shownAt),
+      at: ev.at,
+    },
+  ];
+  const repeat: RepeatState = { ...r, line, counts, right: r.right + (correct ? 1 : 0) };
+  return { state: { ...state, phase: correct ? 'feedback' : 'teach', repeat }, effects };
 }
 
 function onParentEnd(state: SessionState, at: number): StepResult {
@@ -311,4 +391,24 @@ export function reduce(state: SessionState, ev: SessionEvent): StepResult {
     case 'parentEnd':
       return onParentEnd(state, ev.at);
   }
+}
+
+/** For the e2e hooks (v25): the state plus the repeat part, the repeat line as item ids and the repeats per item id. */
+export function withRepeatView(state: SessionState): SessionState & {
+  repeatPart: boolean;
+  repeatLine: string[];
+  repeatCounts: Record<string, number>;
+} {
+  const r = state.repeat;
+  const counts: Record<string, number> = {};
+  state.entries.forEach((e, i) => {
+    const n = r?.counts[i] ?? 0;
+    if (n > 0) counts[e.item.id] = n;
+  });
+  return {
+    ...state,
+    repeatPart: r?.on === true,
+    repeatLine: (r?.line ?? []).map((i) => state.entries[i]?.item.id ?? ''),
+    repeatCounts: counts,
+  };
 }
