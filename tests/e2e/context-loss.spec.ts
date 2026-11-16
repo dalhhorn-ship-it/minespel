@@ -1,6 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
 import { AARDE } from '../../src/world/blocks';
-import { openApp, readState } from './helpers/app';
+import { fromLegacy, openApp, readState } from './helpers/app';
 
 // AC109: after the WebGL context is lost the world shows again within 3 seconds, with the same state.
 // Needs real WebGL. Without it the unit tests in src/render/renderer.test.ts cover the lifecycle,
@@ -36,8 +36,10 @@ test.beforeEach(async ({ page }) => {
 });
 
 test('the world comes back after the context is restored by the browser', async ({ page }) => {
-  await readState(page, 'placePlayer', 40, 30, 40, 1);
-  await readState(page, 'setBlock', 40, 20, 42, AARDE);
+  const spot = fromLegacy(40, 30, 40);
+  const cellA = fromLegacy(40, 20, 42);
+  await readState(page, 'placePlayer', spot.x, spot.y, spot.z, 1);
+  await readState(page, 'setBlock', cellA.x, cellA.y, cellA.z, AARDE);
   const before = await readState<Pose>(page, 'player');
   expect(await readState(page, 'loseWebGl')).toBe(true);
   await expect.poll(() => readState<boolean>(page, 'webGlLost'), { timeout: 3000 }).toBe(true); // the browser must see the loss event first
@@ -45,21 +47,22 @@ test('the world comes back after the context is restored by the browser', async 
   await expect.poll(() => readState<boolean>(page, 'webGlLost'), { timeout: 3000 }).toBe(false);
   await expect.poll(() => canvasHasPicture(page), { timeout: 3000 }).toBe(true);
   expect(await readState<number>(page, 'canvasGeneration')).toBe(0);
-  expect(await readState<number>(page, 'blockAt', 40, 20, 42)).toBe(AARDE);
+  expect(await readState<number>(page, 'blockAt', cellA.x, cellA.y, cellA.z)).toBe(AARDE);
   const after = await readState<Pose>(page, 'player');
   expect(Math.abs(after.x - before.x)).toBeLessThan(0.5);
   expect(Math.abs(after.z - before.z)).toBeLessThan(0.5);
 });
 
 test('with no restore a new canvas takes over within 3 seconds', async ({ page }) => {
-  await readState(page, 'setBlock', 41, 20, 41, AARDE);
+  const cellB = fromLegacy(41, 20, 41);
+  await readState(page, 'setBlock', cellB.x, cellB.y, cellB.z, AARDE);
   const before = await readState<Pose>(page, 'player');
   expect(await readState(page, 'loseWebGl')).toBe(true);
   await expect.poll(() => readState<number>(page, 'canvasGeneration'), { timeout: 3000 }).toBe(1);
   await expect.poll(() => readState<boolean>(page, 'webGlLost')).toBe(false);
   await expect.poll(() => canvasHasPicture(page), { timeout: 3000 }).toBe(true);
   expect(await page.locator('canvas.world-canvas').count()).toBe(1);
-  expect(await readState<number>(page, 'blockAt', 41, 20, 41)).toBe(AARDE);
+  expect(await readState<number>(page, 'blockAt', cellB.x, cellB.y, cellB.z)).toBe(AARDE);
   const after = await readState<Pose>(page, 'player');
   expect(Math.abs(after.x - before.x)).toBeLessThan(0.5);
   expect(Math.abs(after.z - before.z)).toBeLessThan(0.5);

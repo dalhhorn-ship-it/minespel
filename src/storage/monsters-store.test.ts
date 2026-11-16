@@ -89,18 +89,23 @@ describe('updateMonsters: one transaction per write', () => {
 
 describe('creatureSwitches', () => {
   it('AC226: missing master and Ridders read as Aan, a missing bubble as Uit', () => {
-    expect(creatureSwitches({})).toEqual({ knights: true, bubble: false });
+    expect(creatureSwitches({})).toEqual({ knights: true, bubble: false, mole: true });
   });
   it('the master off turns everything off', () => {
-    expect(creatureSwitches({ monstersEnabled: false, knightsEnabled: true, bubbleEnabled: true })).toEqual({ knights: false, bubble: false });
+    expect(creatureSwitches({ monstersEnabled: false, knightsEnabled: true, bubbleEnabled: true })).toEqual({ knights: false, bubble: false, mole: false });
   });
   it('Ridders off turns the bubble off too', () => {
-    expect(creatureSwitches({ monstersEnabled: true, knightsEnabled: false, bubbleEnabled: true })).toEqual({ knights: false, bubble: false });
+    expect(creatureSwitches({ monstersEnabled: true, knightsEnabled: false, bubbleEnabled: true })).toEqual({ knights: false, bubble: false, mole: true });
   });
   it('all three on gives knights and bubble', () => {
-    expect(creatureSwitches({ monstersEnabled: true, knightsEnabled: true, bubbleEnabled: true })).toEqual({ knights: true, bubble: true });
+    expect(creatureSwitches({ monstersEnabled: true, knightsEnabled: true, bubbleEnabled: true })).toEqual({ knights: true, bubble: true, mole: true });
   });
   it('bubble off with the others on gives knights only', () => {
-    expect(creatureSwitches({ monstersEnabled: true, knightsEnabled: true, bubbleEnabled: false })).toEqual({ knights: true, bubble: false });
+    expect(creatureSwitches({ monstersEnabled: true, knightsEnabled: true, bubbleEnabled: false })).toEqual({ knights: true, bubble: false, mole: true });
+  });
+  it('AC254: Monstermol missing reads as Aan, an explicit false is Uit, Ridders do not matter, the master does', () => {
+    expect(creatureSwitches({ moleEnabled: false }).mole).toBe(false);
+    expect(creatureSwitches({ moleEnabled: true, knightsEnabled: false }).mole).toBe(true);
+    expect(creatureSwitches({ moleEnabled: true, monstersEnabled: false }).mole).toBe(false);
   });
 });

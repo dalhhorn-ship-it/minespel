@@ -1,7 +1,7 @@
 // AC228 for v17: no banned word in any knight string, and every sound is short and soft.
 // The project has no Node types, so fs comes from the process, like vite.config.ts does.
-type Fs = { readdirSync(p: string): string[]; readFileSync(p: string, enc: string): string };
-const { readdirSync, readFileSync } = (
+type Fs = { readdirSync(p: string): string[]; statSync(p: string): { isDirectory(): boolean }; readFileSync(p: string, enc: string): string };
+const { readdirSync, readFileSync, statSync } = (
   globalThis as unknown as { process: { getBuiltinModule(n: string): unknown } }
 ).process.getBuiltinModule('node:fs') as Fs;
 import ts from 'typescript';
@@ -23,6 +23,10 @@ const KNIGHT_FILES = [
     .map((f) => `src/monsters/${f}`),
   'src/ui/moed-bar.ts',
   'src/render/klodder-model.ts',
+  // v16 Monstermol: the card and the model (src/monsters is read above), V16e.
+  'src/ui/mole-card.ts',
+  'src/render/mole-model.ts',
+  'src/app/boot.ts',
 ];
 
 const NETWORK = /\b(fetch|XMLHttpRequest|WebSocket|EventSource|sendBeacon)\b|https?:\/\//;
@@ -49,7 +53,7 @@ describe('no network in the knights and monsters (AC225)', () => {
 
 describe('knight strings (AC228)', () => {
   it('AC228: the scan reads every knight file and finds strings', () => {
-    expect(KNIGHT_FILES.length).toBeGreaterThanOrEqual(20);
+    expect(KNIGHT_FILES.length).toBeGreaterThanOrEqual(25);
     for (const f of KNIGHT_FILES) expect(literals(f).length, f).toBeGreaterThan(0);
   });
   it('AC228: no string literal holds a banned word as a whole word', () => {
@@ -131,5 +135,50 @@ describe('sound caps (AC228)', () => {
   });
   it('AC228: no sound name holds growl, scream or roar', () => {
     for (const n of SOUND_NAMES) expect(n).not.toMatch(/growl|scream|roar/i);
+  });
+});
+
+describe('the Monstermol (V16e, AC255)', () => {
+  const MOLE_SOUNDS: SoundName[] = ['rommel', 'boe', 'hmpf', 'geeuw'];
+
+  it('AC255: the four mole sounds have a row, are under 1.5 s and no louder than the loudest 0.6.0 sound', () => {
+    const loudest = Math.max(...SOUNDS_0_6_0.map((n) => SOUND_SPECS[n].peak));
+    for (const n of MOLE_SOUNDS) {
+      expect(SOUND_NAMES, n).toContain(n);
+      expect(SOUND_SPECS[n].seconds, `${n} seconds`).toBeLessThan(1.5);
+      expect(SOUND_SPECS[n].peak, `${n} peak`).toBeLessThanOrEqual(loudest);
+    }
+  });
+
+  it('AC255: no file in the project is named growl, scream or roar', () => {
+    const bad: string[] = [];
+    const walk = (dir: string) => {
+      for (const name of readdirSync(dir)) {
+        if (name === 'node_modules' || name === '.git' || name === 'dist' || name === 'test-results') continue;
+        const path = `${dir}/${name}`;
+        if (/growl|scream|roar/i.test(name)) bad.push(path);
+        if (statSync(path).isDirectory()) walk(path);
+      }
+    };
+    for (const dir of ['src', 'public', 'docs/modules']) {
+      try {
+        walk(dir);
+      } catch {
+        /* a folder that does not exist has no files */
+      }
+    }
+    expect(bad).toEqual([]);
+  });
+
+  it('AC255: every mole line is a text in the monster files, so it shows whatever the sound does', () => {
+    const all = [...readdirSync('src/monsters').filter((f) => f.endsWith('.ts') && !f.endsWith('.test.ts')).map((f) => `src/monsters/${f}`), 'src/ui/mole-card.ts']
+      .flatMap((f) => literals(f))
+      .join('\n');
+    for (const line of ['Oei... de grond rommelt!', 'Hihi! Waar zijn de dieren?', 'Boe!', 'Hmpf! Ik kan er niet bij.', 'Niemand om mee te spelen...', 'Ik ga slapen', 'Oké, oké, ik ga al!', 'Pas op! Diep onder de grond woont de Monstermol.', 'Niet verder graven! Onder de streep slaapt de Monstermol.'])
+      expect(all, line).toContain(line);
+  });
+
+  it('AC255: with reduced motion boot hands the monster system no shake', () => {
+    expect(readFileSync('src/app/boot.ts', 'utf8')).toMatch(/shake:\s*reducedMotion\s*\?\s*undefined/);
   });
 });

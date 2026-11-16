@@ -3,7 +3,8 @@ import {
   AARDE, BAKSTEEN, BASALT, BLADEREN, BOOMSTAM, DIAMANT, DIEPSTEEN, GLAS, GOUDSTEEN, GRANIET, GRAS,
   IJS, KEISTEEN, LAVA, MARMER, MOSSTEEN, OBSIDIAAN, OERSTEEN, PLANKEN, SNEEUW, STEEN, VUUR,
   VUURSTEEN, WATER, WOL_BLAUW, WOL_GEEL, WOL_GROEN, WOL_ORANJE, WOL_PAARS, WOL_ROOD, WOL_WIT, ZAND,
-  AMETHIST, KRISTAL, LICHTSTEEN, REGENBOOGSTEEN, ROBIJN, SAFFIER, SMARAGD, STERRENSTEEN, ZANDSTEEN,
+  AMETHIST, KRISTAL, LICHTSTEEN, REGENBOOGSTEEN, ROBIJN, SAFFIER, SMARAGD, STERRENSTEEN, VEIN_BLOCKS,
+  WAARSCHUWSTEEN, ZANDSTEEN,
 } from '../world/blocks';
 
 export const TILE_SIZE = 16;
@@ -207,6 +208,11 @@ export const TILES: readonly TileSpec[] = [
       return x === 0 || y === 0 || x === 15 || y === 15 ? [70, 60, 150, 255] : null;
     },
   },
+  {
+    // Yellow and black diagonal stripes, 4 pixels wide, no symbols (v15).
+    name: 'waarschuwsteen', base: [250, 204, 30], speckle: 6,
+    pattern: (x, y) => (Math.floor((x + y) / 4) % 2 === 0 ? [250, 204, 30, 255] : [28, 28, 32, 255]),
+  },
 ];
 
 const TILE_INDEX = new Map(TILES.map((t, i) => [t.name, i]));
@@ -254,7 +260,8 @@ function tileName(block: number, face: FaceKind): string | null {
     case LICHTSTEEN: return 'lichtsteen';
     case REGENBOOGSTEEN: return 'regenboogsteen';
     case STERRENSTEEN: return 'sterrensteen';
-    default: return null;
+    case WAARSCHUWSTEEN: return 'waarschuwsteen';
+    default: return VEIN_BLOCKS.includes(block) ? 'steen' : null;
   }
 }
 

@@ -1,6 +1,7 @@
 // Which cells Klodder may nibble (v18 V18b, decision 132, AC215). Pure rules on the hidden cell overlay.
 import { AIR, LAVA, OERSTEEN, VUUR, WATER, isSolid } from '../world/blocks';
 import type { Box } from '../world/build';
+import { WORLD_HEIGHT } from '../world/terrain';
 import { inRegion, siteRegion, VILLAGE_SITES } from '../world/village-layout';
 import type { World } from '../world/world';
 import type { KlodderState, MonsterContext } from './monster-types';
@@ -65,7 +66,7 @@ export function pickNibbleCell(k: KlodderState, ctx: MonsterContext): { x: numbe
     const x = Math.floor(k.x + (rng.next() * 2 - 1) * NIBBLE_SEARCH);
     const z = Math.floor(k.z + (rng.next() * 2 - 1) * NIBBLE_SEARCH);
     if (!world.inBounds(x, 0, z)) continue;
-    let y = Math.min(Math.floor(k.y) + 3, 62);
+    let y = Math.min(Math.floor(k.y) + 3, WORLD_HEIGHT - 2);
     const low = Math.max(1, Math.floor(k.y) - 6);
     while (y >= low && world.get(x, y, z) === AIR) y--;
     if (y < low) continue;

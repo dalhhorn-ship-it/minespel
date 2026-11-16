@@ -14,6 +14,11 @@ export interface PointerRouterOptions {
   look: PointerOwner;
   /** X coordinate that splits left from right. Default: half the window width. */
   splitX?: () => number;
+  /**
+   * True when a finger landing here is a tap on something that wants taps (the black bubble). It goes to the look
+   * owner, whichever half it lands in, so the tap never turns into a stick touch. Free look finger only.
+   */
+  claimLook?: (x: number, y: number) => boolean;
 }
 
 export interface PointerRouter {
@@ -42,7 +47,8 @@ export function createPointerRouter(root: HTMLElement, options: PointerRouterOpt
 
   const down = (e: PointerEvent) => {
     if (owned.has(e.pointerId) || inIgnoreZone(e.target)) return;
-    const side = e.clientX < split() ? 'stick' : 'look';
+    let side: 'stick' | 'look' = e.clientX < split() ? 'stick' : 'look';
+    if (side === 'stick' && !sideTaken('look') && options.claimLook?.(e.clientX, e.clientY)) side = 'look';
     if (sideTaken(side)) return; // a second finger on the same side is ignored
     owned.set(e.pointerId, side);
     try {

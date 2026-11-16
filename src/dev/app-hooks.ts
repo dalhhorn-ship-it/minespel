@@ -9,6 +9,7 @@ import type { DinoKindId } from '../dinos/kinds';
 import type { Game } from '../game/game';
 import { openDb } from '../storage/db';
 import { createLogStore } from '../storage/log-store';
+import { WORLD_HEIGHT, WORLD_SIZE } from '../world/terrain';
 import { registerHook } from './e2e-hooks';
 
 /** What the hooks need from main.ts: its small shell state and a few of its functions. */
@@ -96,6 +97,8 @@ export function registerAppHooks(app: Promise<App>, game: Game | null, shell: Ap
     yaw: g.player.yaw,
     pitch: g.player.pitch,
   }));
+  registerHook('worldSize', () => ({ width: WORLD_SIZE, depth: WORLD_SIZE, height: WORLD_HEIGHT }));
+  registerHook('mineAt', (x: number, y: number, z: number) => g.mineAt(x, y, z));
   registerHook('gameRunning', () => g.isRunning());
   registerHook('frameCount', () => g.frameCount());
   registerHook('pauseGame', () => {

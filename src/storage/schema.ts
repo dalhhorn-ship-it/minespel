@@ -3,7 +3,7 @@
 // adds a step in migrate.ts and a fixture of the old shape in tests/fixtures/saves/.
 
 export const DB_NAME = 'dino-blokwereld';
-export const SCHEMA_VERSION = 1;
+export const SCHEMA_VERSION = 2;
 
 export const STORE_NAMES = ['kv', 'progress', 'answers', 'breaks', 'exams', 'ledger', 'ownModules'] as const;
 export type StoreName = (typeof STORE_NAMES)[number];
@@ -74,6 +74,10 @@ export interface SettingsRecord {
   knightsEnabled?: boolean;
   /** "Zwarte bubbel" (v18). Missing reads as Uit; the first start rule sets it (decision 135). */
   bubbleEnabled?: boolean;
+  /** "Monstermol" (v16). Missing reads as Aan, so a new install, an old install and an old backup all give Aan. */
+  moleEnabled?: boolean;
+  /** "Kijkafstand" (v15, AC243). Missing reads as Ver. */
+  viewDistance?: 'ver' | 'dichtbij';
   [key: string]: unknown;
 }
 export interface PlayerRecord {

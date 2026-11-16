@@ -12,19 +12,6 @@ interface MonsterState {
 
 const state = (page: Page) => readState<MonsterState>(page, 'monsterState');
 
-async function tapAt(page: Page, x: number, y: number) {
-  await page.evaluate(
-    ({ x, y }) => {
-      const target = document.querySelector('.world') as HTMLElement;
-      const fire = (type: string) =>
-        target.dispatchEvent(new PointerEvent(type, { pointerId: 7, pointerType: 'touch', clientX: x, clientY: y, bubbles: true }));
-      fire('pointerdown');
-      fire('pointerup');
-    },
-    { x, y },
-  );
-}
-
 /** A long play stretch with no learning break in the way, and a knight so the clock may run. */
 async function prepare(page: Page) {
   await openApp(page);
@@ -78,8 +65,18 @@ test.describe('Zwarte bubbel (V18a)', () => {
       const b = (await state(page)).bubble!;
       expect(Math.hypot(b.x - s.spot.x, b.y - s.spot.y, b.z - s.spot.z)).toBeLessThanOrEqual(1);
     }
-    const at = (await readState<{ x: number; y: number } | null>(page, 'bubbleScreenPoint'))!;
-    await tapAt(page, at.x, at.y);
+    // No pre-unlock any more: the first tap of the page may be this one (V16e, the audio unlock does not delay it).
+    await page.evaluate(() => {
+      const hooks = (window as unknown as { __dino: Record<string, () => unknown> }).__dino;
+      const at = hooks.bubbleScreenPoint!() as { x: number; y: number };
+      const width = hooks.bubbleScreenWidth!() as number;
+      const x = Math.max(at.x + width / 4, window.innerWidth / 2 + 4);
+      const target = document.querySelector('.world') as HTMLElement;
+      const fire = (type: string) =>
+        target.dispatchEvent(new PointerEvent(type, { pointerId: 7, pointerType: 'touch', clientX: x, clientY: at.y, bubbles: true }));
+      fire('pointerdown');
+      fire('pointerup');
+    });
     expect((await state(page)).phase).toBe('klodder');
   });
 
@@ -117,5 +114,76 @@ test.describe('Zwarte bubbel (V18a)', () => {
     );
     await readState(page, 'fastForward', 6000);
     expect((await state(page)).phase).toBe('bubble');
+  });
+});
+
+type Part = 'left' | 'middle' | 'right';
+
+/**
+ * Turns the kid so the bubble sits where the part under test is on the right side of the line between the stick half
+ * and the look half, then taps that part in the same step (the bubble drifts), with one finger down and up.
+ */
+async function tapPart(page: Page, part: Part) {
+  return page.evaluate((part) => {
+    const hooks = (window as unknown as { __dino: Record<string, (...a: number[]) => unknown> }).__dino;
+    const split = window.innerWidth / 2;
+    const pose = hooks.player!() as { x: number; y: number; z: number; yaw: number };
+    for (let i = 0; i <= 120; i++) {
+      const yaw = pose.yaw + (i % 2 ? 1 : -1) * Math.ceil(i / 2) * 0.01;
+      hooks.placePlayer!(pose.x, pose.y, pose.z, yaw);
+      const at = hooks.bubbleScreenPoint!() as { x: number; y: number } | null;
+      const w = hooks.bubbleScreenWidth!() as number | null;
+      if (!at || !w) continue;
+      const x = at.x + (part === 'left' ? -0.4 : part === 'right' ? 0.4 : 0) * w;
+      const ok = part === 'left' ? x < split - 4 : part === 'right' ? x > split + 4 : Math.abs(at.x - split) < 0.1 * w;
+      if (!ok) continue;
+      const target = document.querySelector('.world') as HTMLElement;
+      const fire = (type: string) =>
+        target.dispatchEvent(new PointerEvent(type, { pointerId: 7, pointerType: 'touch', clientX: x, clientY: at.y, bubbles: true }));
+      fire('pointerdown');
+      fire('pointerup');
+      return { x, split };
+    }
+    return null;
+  }, part);
+}
+
+test.describe('The tap area of the black bubble (V16e)', () => {
+  for (const part of ['left', 'middle', 'right'] as const) {
+    test(`AC213: a tap on the ${part} part of the bubble pops it, whichever half of the screen it floats in`, async ({ page }) => {
+      await prepare(page);
+      expect(await readState(page, 'spawnBubble')).toBe(true);
+      await readState(page, 'fastForward', 4000);
+      expect((await state(page)).bubble!.stage).toBe('drift');
+      const tapped = await tapPart(page, part);
+      expect(tapped).not.toBeNull();
+      if (part === 'left') expect(tapped!.x).toBeLessThan(tapped!.split);
+      if (part === 'right') expect(tapped!.x).toBeGreaterThan(tapped!.split);
+      expect((await state(page)).phase).toBe('klodder');
+    });
+  }
+
+  test('V16e: the first tap after boot pops the bubble even when the audio unlock takes 400 ms', async ({ page }) => {
+    // The unlock builds the AudioContext inside the first pointerup. Make that slow, like a busy iPad.
+    await page.addInitScript(() => {
+      const w = window as unknown as Record<string, new (...a: unknown[]) => unknown>;
+      const Real = (w.AudioContext ?? w.webkitAudioContext) as new (...a: unknown[]) => unknown;
+      class Slow extends (Real as new (...a: unknown[]) => object) {
+        constructor(...args: unknown[]) {
+          const until = performance.now() + 400;
+          while (performance.now() < until) { /* busy */ }
+          super(...args);
+        }
+      }
+      w.AudioContext = Slow as never;
+      w.webkitAudioContext = Slow as never;
+    });
+    await prepare(page);
+    expect(await readState<boolean>(page, 'audioUnlocked')).toBe(false);
+    expect(await readState(page, 'spawnBubble')).toBe(true);
+    await readState(page, 'fastForward', 4000);
+    expect(await tapPart(page, 'right')).not.toBeNull();
+    expect((await state(page)).phase).toBe('klodder');
+    expect(await readState<boolean>(page, 'audioUnlocked')).toBe(true);
   });
 });

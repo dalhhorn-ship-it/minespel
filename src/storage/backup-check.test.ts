@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { backupV060, backupV070 } from '../../tests/fixtures/move/old-saves';
 import { MSG_BAD_VALUES, MSG_NEWER, MSG_NOT_JSON, MSG_TOO_BIG, MSG_WRONG_APP, checkBackup } from './backup-check';
 
 const FIXTURES = import.meta.glob('../../tests/fixtures/backups/*', { eager: true, query: '?raw', import: 'default' }) as Record<string, string>;
@@ -153,11 +154,134 @@ describe('checkBackup', () => {
     it('two knights with one id are refused', () => {
       expect(checkBackup(monsters({ knights: [knight('a'), knight('a')] }))).toEqual(refused);
     });
-    it('the three switches must be booleans when present', () => {
-      for (const key of ['monstersEnabled', 'knightsEnabled', 'bubbleEnabled']) {
+    it('AC254: the four switches must be booleans when present (moleEnabled is optional)', () => {
+      expect(checkBackup(withKv('settings', { ...base.kv.settings })).ok).toBe(true);
+      for (const key of ['monstersEnabled', 'knightsEnabled', 'bubbleEnabled', 'moleEnabled']) {
         expect(checkBackup(withKv('settings', { ...base.kv.settings, [key]: 'aan' }))).toEqual(refused);
         expect(checkBackup(withKv('settings', { ...base.kv.settings, [key]: false })).ok).toBe(true);
       }
+    });
+  });
+
+  describe('AC243: Kijkafstand in the backup', () => {
+    const base = JSON.parse(load('v070-monsters.json')) as { kv: Record<string, Record<string, unknown>> };
+    const withKv = (name: string, value: unknown): string => JSON.stringify({ ...base, kv: { ...base.kv, [name]: value } });
+    it('AC243: viewDistance is optional, ver and dichtbij pass, anything else is refused', () => {
+      expect(checkBackup(withKv('settings', { ...base.kv.settings, viewDistance: 'dichtbij' })).ok).toBe(true);
+      expect(checkBackup(withKv('settings', { ...base.kv.settings, viewDistance: 'ver' })).ok).toBe(true);
+      expect(checkBackup(withKv('settings', { ...base.kv.settings, viewDistance: 'kort' })).ok).toBe(false);
+      const without = { ...base.kv.settings } as Record<string, unknown>;
+      delete without.viewDistance;
+      expect(checkBackup(withKv('settings', without)).ok).toBe(true);
+  });
+  });
+
+  describe('AC238: bounds and terrain version per backup format', () => {
+    const refused = { ok: false, message: MSG_BAD_VALUES };
+    type Spot = { x: number; y: number; z: number };
+    type File = { format: number; schemaVersion: number; kv: Record<string, Record<string, unknown>> };
+    const u32 = (n: number): { $u32: string } => {
+      const b = new Uint8Array(4);
+      new DataView(b.buffer).setUint32(0, n, true);
+      return { $u32: btoa(String.fromCharCode(...b)) };
+    };
+    /** A format 2 file inside the big world, made from the 0.7.0 fixture. */
+    const v080 = (): File => {
+      const f = JSON.parse(load('v070-monsters.json')) as File;
+      f.format = 2;
+      f.schemaVersion = 2;
+      f.kv.world = { diff: u32((70 * 128 + 60) * 256 + 1), terrainVersion: 3 };
+      f.kv.player = { ...f.kv.player, x: 72.5, y: 12, z: 100.5 };
+      f.kv.monsters = { ...f.kv.monsters, knights: [{ id: 'k', mode: 'guard', spot: { x: 127, y: 79, z: 128 }, boughtFor: 30 }] };
+      return f;
+    };
+    const check = (f: unknown) => checkBackup(JSON.stringify(f));
+    const v070 = (): File => JSON.parse(backupV070()) as File;
+
+    it('format 1 files made by 0.6.0 and 0.7.0 (builders) pass', () => {
+      expect(checkBackup(backupV060()).ok).toBe(true);
+      expect(checkBackup(backupV070()).ok).toBe(true);
+    });
+    it('a format 2 file inside 128 x 128 x 80 passes, its limits are exact', () => {
+      expect(check(v080()).ok).toBe(true);
+      const f = v080();
+      f.kv.dinos = { dinos: [{ kind: 'rex', x: 128, y: 80, z: 0, stayX: 0, stayZ: 128 }], eggs: [{ x: 0, y: 0, z: 0 }] };
+      expect(check(f).ok).toBe(true);
+    });
+    it('a format 1 file with a cell outside 64 x 64 x 64 is refused, the same file inside passes', () => {
+      const f = v070();
+      f.kv.world = { diff: u32(262_143 * 256 + 1), terrainVersion: 2 };
+      expect(check(f).ok).toBe(true);
+      f.kv.world = { diff: u32(262_144 * 256 + 1), terrainVersion: 2 };
+      expect(check(f)).toEqual(refused);
+      expect(checkBackup(load('bad-v070-cell-outside.json'))).toEqual(refused);
+    });
+    it('a format 2 file with a cell outside 128 x 128 x 80 is refused', () => {
+      const f = v080();
+      f.kv.world = { diff: u32(1_310_719 * 256 + 1), terrainVersion: 3 };
+      expect(check(f).ok).toBe(true);
+      f.kv.world = { diff: u32(1_310_720 * 256 + 1), terrainVersion: 3 };
+      expect(check(f)).toEqual(refused);
+      expect(checkBackup(load('bad-v080-cell-outside.json'))).toEqual(refused);
+    });
+    it('a format 1 file with a spot outside 64 (player, dino, chicken, egg, stay spot, knight) is refused, inside passes', () => {
+      const edits: [string, (f: File) => void][] = [
+        ['player x', (f) => { f.kv.player!.x = 64.5; }],
+        ['player y', (f) => { f.kv.player!.y = 65; }],
+        ['player z', (f) => { f.kv.player!.z = -1; }],
+        ['dino x', (f) => { (f.kv.dinos!.dinos as Spot[])[0]!.x = 70; }],
+        ['chicken z', (f) => { (f.kv.dinos!.dinos as Spot[])[5]!.z = 90; }],
+        ['stay x', (f) => { (f.kv.dinos!.dinos as Record<string, number>[])[2]!.stayX = 64.5; }],
+        ['stay z', (f) => { (f.kv.dinos!.dinos as Record<string, number>[])[2]!.stayZ = 100; }],
+        ['egg y', (f) => { (f.kv.dinos!.eggs as Spot[])[0]!.y = 65; }],
+        ['knight spot', (f) => { (f.kv.monsters!.knights as { spot: Spot }[])[1]!.spot.x = 64.5; }],
+      ];
+      expect(check(v070()).ok).toBe(true);
+      for (const [name, edit] of edits) {
+        const f = v070();
+        edit(f);
+        expect([name, check(f)]).toEqual([name, refused]);
+      }
+      expect(checkBackup(load('bad-v070-spot-outside.json'))).toEqual(refused);
+    });
+    it('the same spots at 64 to 127 pass in format 2 and a spot outside 128 x 128 x 80 is refused', () => {
+      const edits: [string, (f: File) => void][] = [
+        ['player x', (f) => { f.kv.player!.x = 128.5; }],
+        ['player y', (f) => { f.kv.player!.y = 81; }],
+        ['dino z', (f) => { f.kv.dinos = { dinos: [{ kind: 'rex', z: 129 }], eggs: [] }; }],
+        ['stay x', (f) => { f.kv.dinos = { dinos: [{ kind: 'rex', stayX: 128.5 }], eggs: [] }; }],
+        ['egg x', (f) => { f.kv.dinos = { dinos: [], eggs: [{ x: 130 }] }; }],
+        ['knight spot', (f) => { (f.kv.monsters!.knights as { spot: Spot }[])[0]!.spot.y = 81; }],
+      ];
+      for (const [name, edit] of edits) {
+        const f = v080();
+        edit(f);
+        expect([name, check(f)]).toEqual([name, refused]);
+      }
+      expect(checkBackup(load('bad-v080-spot-outside.json'))).toEqual(refused);
+    });
+    it('format 2 with terrain version 1, 2 or none, or with no world, is refused', () => {
+      for (const terrainVersion of [1, 2, undefined]) {
+        const f = v080();
+        f.kv.world = { diff: u32(0), terrainVersion };
+        expect(check(f)).toEqual(refused);
+      }
+      const f = v080();
+      delete f.kv.world;
+      expect(check(f)).toEqual(refused);
+      expect(checkBackup(load('bad-v080-no-world.json'))).toEqual(refused);
+    });
+    it('format 1 with terrain version 3 is refused, 1, 2 and none pass', () => {
+      for (const [terrainVersion, ok] of [[1, true], [2, true], [undefined, true], [3, false]] as const) {
+        const f = v070();
+        f.kv.world = { diff: u32(0), terrainVersion };
+        expect(check(f).ok).toBe(ok);
+      }
+    });
+    it('format 3 says "nieuwere versie", format 0 or a text is refused', () => {
+      expect(checkBackup(load('bad-newer-format.json'))).toEqual({ ok: false, message: MSG_NEWER });
+      expect(check({ ...v080(), format: 0 })).toEqual(refused);
+      expect(check({ ...v080(), format: '2' })).toEqual(refused);
     });
   });
 });

@@ -8,6 +8,7 @@ import { cleanName } from '../render/name-tag';
 import type { Records } from '../storage/records';
 import type { SaveQueue } from '../storage/save-queue';
 import type { DinosRecord } from '../storage/schema';
+import { START_SPOT } from '../world/terrain';
 import type { World } from '../world/world';
 import {
   boxCollides,
@@ -91,9 +92,9 @@ export function deserializeDino(raw: Record<string, unknown>, idx: number): Worl
   if (!raw || typeof raw !== 'object') return null;
   const kind = raw.kind;
   if (!isDinoKindId(kind)) return null;
-  const x = num(raw.x, 32.5);
-  const y = num(raw.y, 10);
-  const z = num(raw.z, 32.5);
+  const x = num(raw.x, START_SPOT.x);
+  const y = num(raw.y, START_SPOT.y);
+  const z = num(raw.z, START_SPOT.z);
   const golden = Boolean(raw.golden);
   const base = createDino({ kind, golden, x, y, z }, true);
   base.mode = raw.mode === 'follow' ? 'follow' : 'stay';
@@ -122,9 +123,9 @@ export function deserializeEgg(raw: Record<string, unknown>, idx: number): World
   if (!raw || typeof raw !== 'object') return null;
   const kind = raw.kind;
   if (!isDinoKindId(kind)) return null;
-  const x = num(raw.x, 32.5);
-  const y = num(raw.y, 10);
-  const z = num(raw.z, 32.5);
+  const x = num(raw.x, START_SPOT.x);
+  const y = num(raw.y, START_SPOT.y);
+  const z = num(raw.z, START_SPOT.z);
   const golden = Boolean(raw.golden);
   const playSeconds = num(raw.playSeconds, 0);
   const base = createEgg(kind, golden, x, y, z, playSeconds);

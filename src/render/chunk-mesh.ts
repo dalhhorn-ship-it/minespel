@@ -126,3 +126,51 @@ export function chunksTouchedBy(x: number, z: number): [number, number][] {
   if (lz === CHUNK_SIZE - 1) out.push([cx, cz + 1]);
   return out.filter(([a, b]) => a >= 0 && b >= 0 && a < CHUNKS_PER_SIDE && b < CHUNKS_PER_SIDE);
 }
+
+/** Near mode (speed fallback step 1, V15d): chunks within this many chunks of the player's chunk get a mesh. */
+export const NEAR_BUILD_RADIUS = 4;
+/** Near mode: a mesh farther than this many chunks from the player's chunk is disposed. */
+export const NEAR_KEEP_RADIUS = 6;
+/** Near mode: at most this many new meshes per frame, nearest first. */
+export const NEAR_BUILDS_PER_FRAME = 2;
+
+/** Chunk key used by the renderer and the near planner. */
+export function chunkKey(cx: number, cz: number): string {
+  return `${cx},${cz}`;
+}
+
+/** The chunk a world coordinate is in, clamped to the world. */
+export function chunkOf(v: number): number {
+  return Math.max(0, Math.min(CHUNKS_PER_SIDE - 1, Math.floor(v / CHUNK_SIZE)));
+}
+
+export interface NearPlan {
+  /** Chunks to mesh now, nearest first. */
+  build: [number, number][];
+  /** Keys of chunks to dispose. */
+  drop: string[];
+}
+
+/**
+ * Near mode: which chunks to mesh and which to dispose this frame. `done` holds the keys of chunks that were meshed
+ * (an empty chunk counts, so it is not tried again). Distance is in chunks, the larger of the x and z steps.
+ */
+export function planNearChunks(
+  playerCx: number, playerCz: number, done: Iterable<string>, maxBuilds: number = NEAR_BUILDS_PER_FRAME,
+): NearPlan {
+  const have = new Set(done);
+  const drop: string[] = [];
+  for (const key of have) {
+    const [a = 0, b = 0] = key.split(',').map(Number);
+    if (Math.max(Math.abs(a - playerCx), Math.abs(b - playerCz)) > NEAR_KEEP_RADIUS) drop.push(key);
+  }
+  const wanted: { cx: number; cz: number; d: number }[] = [];
+  for (let cx = Math.max(0, playerCx - NEAR_BUILD_RADIUS); cx <= Math.min(CHUNKS_PER_SIDE - 1, playerCx + NEAR_BUILD_RADIUS); cx++) {
+    for (let cz = Math.max(0, playerCz - NEAR_BUILD_RADIUS); cz <= Math.min(CHUNKS_PER_SIDE - 1, playerCz + NEAR_BUILD_RADIUS); cz++) {
+      if (have.has(chunkKey(cx, cz))) continue;
+      wanted.push({ cx, cz, d: (cx - playerCx) ** 2 + (cz - playerCz) ** 2 });
+    }
+  }
+  wanted.sort((p, q) => p.d - q.d);
+  return { build: wanted.slice(0, maxBuilds).map((w) => [w.cx, w.cz] as [number, number]), drop };
+}

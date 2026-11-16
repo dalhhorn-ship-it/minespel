@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { AIR, BLADEREN, BLOCKS, GLAS, GRAS, MAX_BLOCK_ID, STEEN } from '../world/blocks';
+import { AIR, BLADEREN, BLOCKS, GLAS, GRAS, MAX_BLOCK_ID, STEEN, VEIN_BLOCKS, WAARSCHUWSTEEN } from '../world/blocks';
 import {
   ATLAS_COLUMNS, ATLAS_HEIGHT, ATLAS_WIDTH, TILES, TILE_SIZE, paintAtlas, paintTile, tileFor, tileUv,
 } from './atlas';
@@ -15,7 +15,36 @@ describe('atlas', () => {
       }
     }
     expect(tileFor(AIR, 'top')).toBe(-1);
-    expect(MAX_BLOCK_ID).toBe(41);
+    expect(MAX_BLOCK_ID).toBe(50);
+  });
+
+  it('AC233: the stripe tile is solid yellow and black, 4 pixels wide diagonals', () => {
+    const t = tileFor(WAARSCHUWSTEEN, 'side');
+    expect(t).toBeGreaterThanOrEqual(0);
+    expect(tileFor(WAARSCHUWSTEEN, 'top')).toBe(t);
+    expect(tileFor(WAARSCHUWSTEEN, 'bottom')).toBe(t);
+    expect(t).not.toBe(tileFor(STEEN, 'side'));
+    const d = paintTile(t).data;
+    const px = (x: number, y: number) => {
+      const o = (y * TILE_SIZE + x) * 4;
+      return [d[o], d[o + 1], d[o + 2], d[o + 3]] as number[];
+    };
+    for (let i = 3; i < d.length; i += 4) expect(d[i]).toBe(255);
+    const yellow = px(0, 0);
+    const black = px(4, 0);
+    expect(yellow[0]).toBeGreaterThan(200);
+    expect(yellow[2]).toBeLessThan(80);
+    expect(Math.max(black[0] as number, black[1] as number, black[2] as number)).toBeLessThan(60);
+    // Same stripe along the diagonal, the next stripe 4 pixels over.
+    expect(Math.abs((px(2, 1)[0] as number) - (yellow[0] as number))).toBeLessThan(20);
+    expect(Math.abs((px(1, 2)[0] as number) - (yellow[0] as number))).toBeLessThan(20);
+    expect(Math.abs((px(8, 0)[0] as number) - (yellow[0] as number))).toBeLessThan(20);
+  });
+
+  it('AC233: the vein blocks use the steen tile on every face', () => {
+    for (const id of VEIN_BLOCKS) {
+      for (const face of ['top', 'bottom', 'side'] as const) expect(tileFor(id, face)).toBe(tileFor(STEEN, face));
+    }
   });
 
   it('AC187: paints 8 solid rare tiles that all differ from each other', () => {

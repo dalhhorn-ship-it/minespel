@@ -43,6 +43,11 @@ export const KRISTAL = 38;
 export const LICHTSTEEN = 39;
 export const REGENBOOGSTEEN = 40;
 export const STERRENSTEEN = 41;
+// Deep ground (v15). Never renumber.
+/** The striped warning layer at y 5. Solid, minable, not placeable. */
+export const WAARSCHUWSTEEN = 42;
+/** Hidden vein blocks 'ader 1' to 'ader 8' in the deep ground: ids 43 to 50. They look like steen. */
+export const VEIN_BLOCKS: readonly number[] = [43, 44, 45, 46, 47, 48, 49, 50];
 
 /** The rare blocks in villager order. */
 export const RARE_BLOCKS: readonly number[] = [
@@ -57,6 +62,10 @@ export interface BlockInfo {
   cutout: boolean;
   minable: boolean;
   placeable: boolean;
+}
+
+function deepBlock(id: number, name: string): BlockInfo {
+  return { id, name, solid: true, cutout: false, minable: true, placeable: false };
 }
 
 function block(id: number, name: string, cutout = false): BlockInfo {
@@ -106,13 +115,15 @@ export const BLOCKS: readonly BlockInfo[] = [
   block(LICHTSTEEN, 'lichtsteen'),
   block(REGENBOOGSTEEN, 'regenboogsteen'),
   block(STERRENSTEEN, 'sterrensteen'),
+  deepBlock(WAARSCHUWSTEEN, 'waarschuwsteen'),
+  ...VEIN_BLOCKS.map((id, i) => deepBlock(id, `ader ${i + 1}`)),
 ];
 
 /** The 32 building blocks a kid can place from the start, in grid order. Rare blocks are placeable too, but only once found, so they are not in this list. */
 export const PLACEABLE_BLOCKS: readonly number[] = BLOCKS.filter((b) => b.placeable && b.id <= WOL_ORANJE).map((b) => b.id);
 
 /** Highest block id, used to size atlas tables. */
-export const MAX_BLOCK_ID = STERRENSTEEN;
+export const MAX_BLOCK_ID = 50;
 
 export function blockInfo(id: number): BlockInfo {
   const info = BLOCKS[id];

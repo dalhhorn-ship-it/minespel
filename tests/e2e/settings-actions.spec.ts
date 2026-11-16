@@ -1,8 +1,11 @@
 // Instellingen actions (T55a): Volume, version, Wereld opnieuw beginnen, Alles wissen.
 import { expect, test, type Page } from '@playwright/test';
 import pkg from '../../package.json' with { type: 'json' };
-import { openApp, readState } from './helpers/app';
+import { fromLegacy, openApp, readState } from './helpers/app';
 import { loginAsParent, setupPin } from './helpers/gate';
+
+// The 0.7.0 cell (7, 25, 7) at the same place in the big world.
+const CELL = fromLegacy(7, 25, 7);
 
 const VERSION = pkg.version;
 
@@ -64,16 +67,16 @@ test.describe('Instellingen actions (T55a)', () => {
   test('AC94 AC152: Wereld opnieuw beginnen resets blocks, keeps points and dinos', async ({ page }) => {
     await openApp(page);
     await setupPin(page);
-    await readState(page, 'setBlock', 7, 25, 7, 3);
+    await readState(page, 'setBlock', CELL.x, CELL.y, CELL.z, 3);
     await readState(page, 'setPoints', 42);
     await readState(page, 'addEgg', 'compy', false);
     const eggs = await readState<unknown[]>(page, 'eggs');
     const dinos = await readState<unknown[]>(page, 'dinos');
-    expect(await readState<number>(page, 'blockAt', 7, 25, 7)).toBe(3);
+    expect(await readState<number>(page, 'blockAt', CELL.x, CELL.y, CELL.z)).toBe(3);
     await openSettings(page);
     await tapButton(page, 'Wereld opnieuw beginnen');
     await tapButton(page, /Ja, maak een nieuwe wereld/);
-    await expect.poll(() => readState<number>(page, 'blockAt', 7, 25, 7)).toBe(0);
+    await expect.poll(() => readState<number>(page, 'blockAt', CELL.x, CELL.y, CELL.z)).toBe(0);
     expect(await readState<number>(page, 'points')).toBe(42);
     expect(await readState<unknown[]>(page, 'eggs')).toHaveLength(eggs.length);
     expect(await readState<unknown[]>(page, 'dinos')).toHaveLength(dinos.length);
@@ -97,7 +100,7 @@ test.describe('Instellingen actions (T55a)', () => {
     await openApp(page);
     await setupPin(page);
     await readState(page, 'setPoints', 42);
-    await readState(page, 'setBlock', 7, 25, 7, 3);
+    await readState(page, 'setBlock', CELL.x, CELL.y, CELL.z, 3);
     await readState(page, 'flushSave');
     await openSettings(page);
     await tapButton(page, 'Alles wissen');
@@ -106,7 +109,7 @@ test.describe('Instellingen actions (T55a)', () => {
     await page.waitForFunction(() => (window as unknown as { __dino?: Record<string, () => unknown> }).__dino?.ready?.() === true);
     await expect(page.locator('[data-testid="parent-shell"]')).toBeHidden();
     expect(await readState<number>(page, 'points')).toBe(0);
-    expect(await readState<number>(page, 'blockAt', 7, 25, 7)).toBe(0);
+    expect(await readState<number>(page, 'blockAt', CELL.x, CELL.y, CELL.z)).toBe(0);
     // No pincode any more: the lock asks the grown up question first (decision 52).
     await readState(page, 'openParentControls');
     await expect(page.locator('.parent-gate-card p').first()).toContainText(/tel|trek|Tel/);

@@ -1,7 +1,7 @@
 // Backup in the parent area (T53a): AC87 end to end, AC194, AC195, AC197, AC198, AC152 (restore part).
 import { expect, test, type Page } from '@playwright/test';
 import pkg from '../../package.json' with { type: 'json' };
-import { openApp, readState } from './helpers/app';
+import { fromLegacy, openApp, readState } from './helpers/app';
 import { loginAsParent, setupPin } from './helpers/gate';
 
 declare global {
@@ -48,8 +48,8 @@ const ready = (page: Page) =>
   page.waitForFunction(() => (window as unknown as { __dino?: Record<string, () => unknown> }).__dino?.ready?.() === true);
 
 test.describe('Backup (T53a)', () => {
-  test('AC194 AC198: one file with today\'s name, no pincode, a date saved, no outside request, version 0.7.0', async ({ page }) => {
-    expect(pkg.version).toBe('0.7.0');
+  test('AC194 AC198: one file with today\'s name, no pincode, a date saved, no outside request, version 0.9.0', async ({ page }) => {
+    expect(pkg.version).toBe('0.9.0');
     const outside: string[] = [];
     await stubShare(page);
     await openApp(page);
@@ -78,7 +78,8 @@ test.describe('Backup (T53a)', () => {
     await openApp(page);
     await setupPin(page, '1234');
     await readState(page, 'setPoints', 42);
-    await readState(page, 'setBlock', 7, 25, 7, 3);
+    const cell = fromLegacy(7, 25, 7);
+    await readState(page, 'setBlock', cell.x, cell.y, cell.z, 3);
     await readState(page, 'markWorldDirty');
     await readState(page, 'flushSave');
     await openExport(page);
@@ -92,10 +93,14 @@ test.describe('Backup (T53a)', () => {
     };
     await tapSettings('Alles wissen');
     await tapSettings('Ja, ga verder');
+    // A mark on this page: it is gone once the page has really reloaded (WebKit can answer from the old page for a moment).
+    await page.evaluate(() => ((window as unknown as { __oldPage?: boolean }).__oldPage = true));
     await tapSettings('Ja, wis alles echt');
-    // The page reloads: read through the reload until the new game answers.
-    await expect.poll(() => readState<number>(page, 'points').catch(() => -1)).toBe(0);
+    await expect
+      .poll(() => page.evaluate(() => (window as unknown as { __oldPage?: boolean }).__oldPage === true).catch(() => true), { timeout: 20_000 })
+      .toBe(false);
     await ready(page);
+    expect(await readState<number>(page, 'points')).toBe(0);
     // A new pincode, then restore.
     await setupPin(page, '4321');
     await openExport(page, '4321');
@@ -107,7 +112,7 @@ test.describe('Backup (T53a)', () => {
     await pickRestore(page, file.name, file.text);
     await page.locator('[data-testid="restore-yes"]').tap();
     await expect.poll(() => readState<number>(page, 'points').catch(() => -1)).toBe(42);
-    await expect.poll(() => readState<number>(page, 'blockAt', 7, 25, 7).catch(() => -1)).toBe(3);
+    await expect.poll(() => readState<number>(page, 'blockAt', cell.x, cell.y, cell.z).catch(() => -1)).toBe(3);
     // This iPad's own (new) pincode is kept, the old one is not.
     await loginAsParent(page, '4321');
   });

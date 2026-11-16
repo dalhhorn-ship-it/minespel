@@ -15,8 +15,22 @@ export async function getRecord<K extends KvName>(db: IDBDatabase, name: K): Pro
   return withDefaults(name, await dbGet<unknown>(db, 'kv', name));
 }
 
+/** Record writes that were started and not yet committed. Callers often fire a write and move on. */
+const inflight = new Set<Promise<unknown>>();
+
+/** Resolves when every record write started so far (and any started meanwhile) has committed or failed. */
+export async function recordsSettled(): Promise<void> {
+  while (inflight.size > 0) await Promise.allSettled([...inflight]);
+}
+
 export async function putRecord<K extends KvName>(db: IDBDatabase, name: K, value: KvRecords[K]): Promise<void> {
-  await dbPut(db, 'kv', value, name);
+  const write = dbPut(db, 'kv', value, name);
+  inflight.add(write);
+  try {
+    await write;
+  } finally {
+    inflight.delete(write);
+  }
 }
 
 export interface Records {

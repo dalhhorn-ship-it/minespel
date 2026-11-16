@@ -7,13 +7,15 @@ import { defaultKv, type MonstersRecord, type SettingsRecord } from './schema';
 export interface CreatureSwitches {
   knights: boolean;
   bubble: boolean;
+  /** "Monstermol" (v16). Needs the master only; Ridders does not matter. */
+  mole: boolean;
 }
 
-/** What may exist in the world. A missing master or Ridders reads as Aan, a missing bubble as Uit. */
-export function creatureSwitches(settings: Pick<SettingsRecord, 'monstersEnabled' | 'knightsEnabled' | 'bubbleEnabled'>): CreatureSwitches {
+/** What may exist in the world. A missing master, Ridders or Monstermol reads as Aan, a missing bubble as Uit. */
+export function creatureSwitches(settings: Pick<SettingsRecord, 'monstersEnabled' | 'knightsEnabled' | 'bubbleEnabled' | 'moleEnabled'>): CreatureSwitches {
   const master = settings.monstersEnabled !== false;
   const knights = master && settings.knightsEnabled !== false;
-  return { knights, bubble: knights && settings.bubbleEnabled === true };
+  return { knights, bubble: knights && settings.bubbleEnabled === true, mole: master && settings.moleEnabled !== false };
 }
 
 function readable(raw: unknown): MonstersRecord {

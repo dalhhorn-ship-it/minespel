@@ -4,6 +4,32 @@ Written so kids can read it too.
 
 ## Unreleased
 
+## 0.9.0
+
+### Monstermol
+
+* If you dig past the striped layer, a silly Monstermol wakes up. First the ground rumbles for a moment. Then he comes up out of the grass, a little way from you, near your animals.
+* He is purple, with big glasses and a pink nose. He walks to an animal that walks around free, says "Boe!" and teases it. The animal jumps and runs a few steps. He never takes a block and never gives or takes points.
+* Two warnings come first. Dig deep and a message says someone lives down there. Mine a striped warning block and a card says "Niet verder graven!". You have to tap OK.
+* A wall 2 blocks high round your animals stops him. He says "Hmpf! Ik kan er niet bij." and goes back into the ground. If nobody is there to play with, or after 10 minutes, he goes to sleep.
+* Your knights chase him away too. When enough knights poke him, he says "Oké, oké, ik ga al!" and leaves. The knights also find their way round walls now, and Klodder too.
+* Everything stands still when you are in a break, the shop, a menu or the parent area. Nothing of the mole is saved: after you close the game he is gone.
+* For papa or mama: a row "Monstermol" in the card "Monsters en ridders" in Instellingen. It is on for everybody. Switch it off and he never comes.
+* Tapping the black bubble now works on any part of it, also the left part. The first tap after the game starts is no longer read as a drag.
+* For the builders: the test of the Dinofluit waited on a moment that did not always come. It now waits for a real condition.
+
+## 0.8.0
+
+### Grote wereld
+
+* The world is now much bigger: 128 x 128 blocks and 80 high. You can walk far in every direction, and an invisible wall keeps you inside at the edge.
+* You can dig much deeper now, about 20 blocks down. Everything you built is still there in the middle of the big world, with new land with grass and trees all around it.
+* Deep down there is a striped layer. Under it you find hidden shiny blocks. At the very bottom the ground is too hard to dig.
+* Everything you own moves along: your spot, your animals, your knights and your villages. The move happens once when the game starts. If the iPad switches off halfway, the old save stays whole and the move runs again. An old backup still works too.
+* The game only draws what the camera can see, and the view ends where the fog ends. `?near=1` in the address is a spare switch that builds only the chunks near you.
+* New for papa or mama: a row "Kijkafstand" in Instellingen, with Ver (as before) and Dichtbij. Dichtbij makes the game faster on an older iPad, because you then look less far. It is saved with the settings and in the backup.
+* For the builders: two flaky browser tests are now steady (they waited on a clock instead of on what they needed).
+
 ## 0.7.0
 
 ### Ridders

@@ -3,7 +3,7 @@ import type { Effects } from '../render/effects';
 import type { BuildMode } from '../ui/hud';
 import type { Sound } from '../audio/sound';
 import {
-  AIR, GLAS, GRAS, LAVA, OBSIDIAAN, PLANKEN, STEEN, VUUR, WOL_ROOD, isPlaceable,
+  AIR, GLAS, GRAS, LAVA, OBSIDIAAN, PLANKEN, STEEN, VUUR, WOL_ROOD, isMinable, isPlaceable,
 } from '../world/blocks';
 import { mineBlock, placeBlock, type Aim, type IsOccupied } from '../world/build';
 import type { CameraPose } from '../render/renderer';
@@ -122,12 +122,19 @@ export interface BuildControllerOptions {
   viewport: () => { width: number; height: number };
   /** Asks if a dino or egg is in a box. Dinos come later. */
   isOccupied?: IsOccupied;
+  /** After a block was mined by a tap or by `mineCell`, with its cell and the block that was there (v16 listens). */
+  onMined?: (x: number, y: number, z: number, block: number) => void;
   /** False while the world is stopped: taps then do nothing. */
   canAct?: () => boolean;
 }
 
 export interface BuildController {
   tap(x: number, y: number): void;
+  /**
+   * Mines one cell like a tap does (same minable rule, `onBlockChanged`, pop, sound, `onMined`), with no aim and no
+   * reach. For tests and tools. Returns true when the cell was mined.
+   */
+  mineCell(x: number, y: number, z: number): boolean;
   getState(): BuildState;
   /** Bad data is fixed up: wrong blocks fall back to the start hotbar. */
   setState(state: Partial<BuildState>): void;
@@ -154,6 +161,7 @@ export function createBuildController(options: BuildControllerOptions): BuildCon
         options.onBlockChanged(r.x, r.z);
         options.effects.pop(x, y, r.block);
         options.sound.play('pop');
+        options.onMined?.(r.x, r.y, r.z, r.block);
         return;
       }
       const block = hotbar[selected]!;
@@ -170,6 +178,19 @@ export function createBuildController(options: BuildControllerOptions): BuildCon
       }
       options.effects.pop(x, y, r.block);
       options.sound.play('thunk');
+    },
+    mineCell(x, y, z) {
+      const { world } = options;
+      if (!Number.isInteger(x) || !Number.isInteger(y) || !Number.isInteger(z) || !world.inBounds(x, y, z)) return false;
+      const block = world.get(x, y, z);
+      if (block === AIR || !isMinable(block)) return false;
+      world.set(x, y, z, AIR);
+      options.onBlockChanged(x, z);
+      const { width, height } = options.viewport();
+      options.effects.pop(width / 2, height / 2, block);
+      options.sound.play('pop');
+      options.onMined?.(x, y, z, block);
+      return true;
     },
     getState: () => ({ mode, hotbar: [...hotbar], selected }),
     setState(state) {

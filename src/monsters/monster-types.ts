@@ -115,3 +115,78 @@ export interface MonsterStateView {
   bubbleClockMs: number;
   hintShown: boolean;
 }
+
+// ---- v16 Monstermol (decision 138). The mole is a second slot next to the bubble and Klodder slot. ----
+
+export type MolePhase = 'none' | 'rumble' | 'out' | 'leaving';
+
+/** A block cell. */
+export interface Cell {
+  x: number;
+  y: number;
+  z: number;
+}
+
+/** The mole. `x`, `y`, `z` are the feet centre. Nothing of it is saved. */
+export interface MoleState {
+  phase: MolePhase;
+  x: number;
+  y: number;
+  z: number;
+  heading: number;
+  /** Loop ms in the current phase (the system counts it in `rumble` and `leaving`). */
+  phaseMs: number;
+  /** Loop ms since he came up (stops counting in `leaving`). */
+  outMs: number;
+  /** Loop ms the search found no path to a target (V16b). */
+  noPathMs: number;
+  /** Loop ms with no target animal in the world (V16b). */
+  lonelyMs: number;
+  /** Loop ms until the next path search (V16b). */
+  searchMs: number;
+  /** Which animal he walks to, as a stable id (V16b), or null. */
+  target: string | null;
+  lastTeased: string | null;
+  /** The cells he walks now, start to goal, or null (V16b). */
+  path: Cell[] | null;
+  /** Moed bar 0 to MOLE_MOED_FULL and the knights poking now (V16d). */
+  moed: number;
+  pokers: number;
+  /** The column the kid dug in when the rumble began. */
+  digColumn: { x: number; z: number };
+  /** Pose name for the renderer: rise, walk, boe, sink. */
+  pose?: string;
+}
+
+/** His body box: 0.8 wide, 0.9 high. */
+export const MOLE_BOX = { side: 0.8, height: 0.9 } as const;
+export const RUMBLE_MS = 3000;
+/** Blocks per second. */
+export const MOLE_SPEED = 1;
+export const SEARCH_EVERY_MS = 2000;
+export const FENCE_MS = 10_000;
+export const LONELY_MS = 60_000;
+export const MOLE_TIRED_MS = 600_000;
+export const LEAVE_MS = 1500;
+/** Play time between two "Pas op!" toasts. */
+export const TOAST_GAP_MS = 60_000;
+export const MOLE_MOED_FULL = 15;
+export const SEARCH_SIDE = 49;
+export const SEARCH_LAYERS = 17;
+
+/** What `moleState()` shows to tests. The `began` times are the loop ms (since the system was built) each phase began. */
+export interface MoleStateView {
+  phase: MolePhase;
+  x: number;
+  y: number;
+  z: number;
+  heading: number;
+  target: string | null;
+  noPathMs: number;
+  outMs: number;
+  moed: number;
+  pokers: number;
+  /** Loop ms now. */
+  loopMs: number;
+  began: { rumble: number | null; out: number | null; leaving: number | null };
+}

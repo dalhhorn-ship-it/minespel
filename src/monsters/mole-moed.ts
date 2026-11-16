@@ -1,0 +1,85 @@
+// The mole's Moed bar (v16, decision 138), the pattern of moed.ts: knights notice him within 8 along x and z (16 on
+// guard) and chase him by the path search (knight-ai.ts), poke him within 1.5, the bar fills at the number of pokers
+// per second (at most 3) and is full at MOLE_MOED_FULL. Then "Wegwezen!" and he leaves. He never hurts anyone.
+import type { KnightState } from '../knights/knight-types';
+import { NOTICE_GUARD, NOTICE_NEAR, POKE_REACH } from './moed';
+import { MOLE_MOED_FULL, type MoleState, type MonsterContext } from './monster-types';
+
+/** Pokers that count for the fill: 3 pokers take 5 s, never under 3 s. */
+export const MOLE_MAX_POKERS = 3;
+/** Loop ms between two "Tok!" lines of one fight. */
+const TOK_GAP_MS = 4000;
+
+const tokClock = new WeakMap<MoleState, number>();
+/** The chase object this file gave each knight: a knight whose `chase` is another object follows Klodder. */
+const given = new WeakMap<KnightState, NonNullable<KnightState['chase']>>();
+
+function near(a: { x: number; z: number }, b: { x: number; z: number }, d: number): boolean {
+  return Math.abs(a.x - b.x) <= d && Math.abs(a.z - b.z) <= d;
+}
+
+/** Sets every `chase` that points at the mole to null (he left or is sent off). */
+export function freeMoleChasers(ctx: MonsterContext): void {
+  for (const kn of ctx.knights()) {
+    const mine = given.get(kn);
+    if (mine && kn.chase === mine) kn.chase = null;
+    given.delete(kn);
+  }
+}
+
+/**
+ * One step of loop time while the mole is out. Returns true when the bar is full and he must leave: it says
+ * "Wegwezen!" and "Oké, oké, ik ga al!" and sets every `chase` on him to null. The system then starts `leaving`.
+ * It runs after Klodder's step, so a knight whose `chase` points to Klodder switches only when the mole is nearer.
+ */
+export function stepMoleMoed(mole: MoleState, ctx: MonsterContext): boolean {
+  let pokers = 0;
+  for (const kn of ctx.knights()) {
+    const mine = given.get(kn);
+    const isMine = mine !== undefined && kn.chase === mine;
+    if (!kn.visible) {
+      if (isMine) kn.chase = null;
+      given.delete(kn);
+      continue;
+    }
+    const b = kn.body;
+    const reach = kn.mode === 'guard' ? NOTICE_GUARD : NOTICE_NEAR;
+    if (!near(b, mole, reach)) {
+      if (isMine) kn.chase = null;
+      given.delete(kn);
+      continue;
+    }
+    const other = kn.chase && !isMine ? kn.chase : null;
+    if (!other || Math.hypot(mole.x - b.x, mole.z - b.z) < Math.hypot(other.x - b.x, other.z - b.z)) {
+      const chase = { x: mole.x, z: mole.z, y: mole.y };
+      kn.chase = chase;
+      given.set(kn, chase);
+    }
+    if (near(b, mole, POKE_REACH) && Math.abs(b.y - mole.y) <= 2) pokers++;
+  }
+  mole.pokers = pokers;
+  if (pokers === 0) {
+    tokClock.delete(mole);
+    return false;
+  }
+  const since = (tokClock.get(mole) ?? TOK_GAP_MS) + ctx.dt * 1000;
+  if (since >= TOK_GAP_MS) {
+    ctx.say('Tok!', 1000);
+    ctx.play('tok');
+    tokClock.set(mole, 0);
+  } else {
+    tokClock.set(mole, since);
+  }
+  mole.moed = Math.min(MOLE_MOED_FULL, mole.moed + Math.min(pokers, MOLE_MAX_POKERS) * ctx.dt);
+  if (mole.moed < MOLE_MOED_FULL) return false;
+  freeMoleChasers(ctx);
+  mole.pokers = 0;
+  ctx.say('Wegwezen!', 1500);
+  ctx.say('Oké, oké, ik ga al!', 1500);
+  return true;
+}
+
+/** Bar fraction 0 to 1 for the Moed bar. */
+export function moleMoedFraction(mole: MoleState): number {
+  return Math.min(1, Math.max(0, mole.moed / MOLE_MOED_FULL));
+}

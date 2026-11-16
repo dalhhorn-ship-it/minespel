@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { get, openDb, put } from './db';
-import { runMigrations, type MigrationStep } from './migrate';
+import { MIGRATIONS, runMigrations, type MigrationStep } from './migrate';
+import { SCHEMA_VERSION } from './schema';
 
 let n = 0;
 const name = () => `migrate-db-${n++}`;
@@ -13,6 +14,30 @@ function rawOpen(dbName: string, version: number, upgrade: (db: IDBDatabase) => 
     req.onerror = () => reject(req.error);
   });
 }
+
+describe('the rollback guard of 0.8.0 (V15b, decision 138)', () => {
+  it('AC237: SCHEMA_VERSION is 2 and the step to 2 changes no store', async () => {
+    expect(SCHEMA_VERSION).toBe(2);
+    expect(MIGRATIONS.map((m) => m.to)).toEqual([1, 2]);
+    // Opened at version 1 first (what 0.7.0 wrote), then opened by 0.8.0: the data is still there.
+    const dbName = name();
+    const old = await openDb({ name: dbName, version: 1 });
+    await put(old, 'kv', { points: 7 }, 'economy');
+    const stores = [...old.objectStoreNames].sort();
+    old.close();
+    const db = await openDb({ name: dbName });
+    expect(db.version).toBe(2);
+    expect([...db.objectStoreNames].sort()).toEqual(stores);
+    expect(await get(db, 'kv', 'economy')).toEqual({ points: 7 });
+    db.close();
+  });
+
+  it('AC237: a 0.7.0 build (version 1) cannot open a database that 0.8.0 moved to version 2', async () => {
+    const dbName = name();
+    (await openDb({ name: dbName })).close();
+    await expect(openDb({ name: dbName, version: 1 })).rejects.toThrow();
+  });
+});
 
 describe('migrations', () => {
   it('upgrades a fake v0 save and keeps its data', async () => {

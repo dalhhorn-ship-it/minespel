@@ -99,3 +99,11 @@ export async function answerGateQuestion(page: Page, wrong = false): Promise<voi
   await page.locator('.parent-input').fill(String(answer));
   await page.locator('.parent-gate-footer .parent-btn-primary').click();
 }
+
+/**
+ * A spot of the 0.7.0 world (64 x 64 x 64) as the same spot of the big world (v15): moved 32 blocks in x and z and
+ * 10 up. Specs written with absolute spots use it, so they stand on the same ground as before.
+ */
+export function fromLegacy(x: number, y: number, z: number): { x: number; y: number; z: number } {
+  return { x: x + 32, y: y + 10, z: z + 32 };
+}

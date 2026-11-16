@@ -167,6 +167,6 @@ describe('player controller', () => {
     expect(s.c.player.y).toBeCloseTo(y0, 1);
     expect(s.c.player.onGround).toBe(true);
     expect(s.c.isFloating()).toBe(false);
-    expect(WORLD_HEIGHT).toBe(64);
+    expect(WORLD_HEIGHT).toBe(80);
   });
 });

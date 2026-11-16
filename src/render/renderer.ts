@@ -2,7 +2,7 @@
 // Game state never lives in three.js objects: the renderer is told what to draw.
 
 import {
-  BoxGeometry, Color, Fog, Group, Mesh, MeshBasicMaterial, PerspectiveCamera, Scene, WebGLRenderer,
+  BoxGeometry, Color, Fog, Frustum, Group, Matrix4, Mesh, MeshBasicMaterial, PerspectiveCamera, Scene, Vector3, WebGLRenderer,
   type BufferGeometry,
 } from 'three';
 import { registerHook } from '../dev/e2e-hooks';
@@ -11,7 +11,9 @@ import type { WorldDino, WorldEgg } from '../dinos/dino-store';
 import type { VillagerState } from '../villagers/villager';
 import { CHUNK_SIZE } from '../world/terrain';
 import { createAtlasTexture } from './atlas';
-import { CHUNKS_PER_SIDE, buildChunkGeometry, chunksTouchedBy, type WorldView } from './chunk-mesh';
+import {
+  CHUNKS_PER_SIDE, buildChunkGeometry, chunkKey, chunkOf, chunksTouchedBy, planNearChunks, type WorldView,
+} from './chunk-mesh';
 import { createActorSceneSync, type ActorGroup, type ActorView } from './actor-render';
 import { createDinoSceneSync } from './dino-render';
 import { createVillagerSceneSync } from './villager-render';
@@ -50,6 +52,8 @@ export interface GameRenderer {
   syncVillagers?(villagers: readonly VillagerState[]): void;
   /** Syncs one group of creature actors (knights, monsters) into the 3D scene (v17, decision 135). */
   syncActors?(group: ActorGroup, actors: readonly ActorView[]): void;
+  /** A small camera shake that fades out within `ms` (at most 1000), v16. V16c writes it; boot calls it (not with reduced motion). */
+  shake?(ms: number): void;
   render(): void;
   dispose(): void;
 }
@@ -63,8 +67,52 @@ export type RendererFactory = (options: RendererOptions) => GameRenderer;
 
 const SKY = 0x9ad7ff;
 
-function chunkKey(cx: number, cz: number): string {
-  return `${cx},${cz}`;
+/** The shake is never longer than this (v16, AC245). */
+export const MAX_SHAKE_MS = 1000;
+const SHAKE_SIZE = 0.05;
+
+/** The offset of the shake `elapsed` ms in, in blocks: small, fades out linearly, exactly 0 at `ms`. */
+export function shakeOffset(elapsed: number, ms: number): { x: number; y: number } {
+  if (ms <= 0 || elapsed < 0 || elapsed >= ms) return { x: 0, y: 0 };
+  const fade = 1 - elapsed / ms;
+  return { x: Math.sin(elapsed * 0.05) * SHAKE_SIZE * fade, y: Math.cos(elapsed * 0.07) * SHAKE_SIZE * fade };
+}
+
+/** Moves the camera by the shake and returns a function that puts it back exactly. */
+export function applyShake(camera: { position: { x: number; y: number } }, elapsed: number, ms: number): () => void {
+  const o = shakeOffset(elapsed, ms);
+  if (o.x === 0 && o.y === 0) return () => {};
+  const { x, y } = camera.position;
+  camera.position.x = x + o.x;
+  camera.position.y = y + o.y;
+  return () => {
+    camera.position.x = x;
+    camera.position.y = y;
+  };
+}
+
+/** The camera sees this far past the fog end. Beyond the fog end everything is sky colour, so nothing visible changes. */
+export const FAR_PAST_FOG = 4;
+
+/** Near mode: how many chunks around the player get a mesh at once when the world is set (no hole at the start). */
+const NEAR_FIRST_FILL = 25;
+
+/** What the chunk meshes did in the last frame (v15, e2e hook `chunkStats`). */
+export interface ChunkStats {
+  /** Chunks that have a mesh. */
+  meshed: number;
+  /** Chunks drawn in the last frame. */
+  drawn: number;
+  /** Faces of the drawn chunks. */
+  facesDrawn: number;
+  /** Camera far plane. */
+  far: number;
+  /** The largest depth (along the view direction) at which a drawn chunk starts. Never above `far`. */
+  deepestDrawnStart: number;
+  /** The largest distance in chunks between a drawn chunk and the player's chunk. */
+  farthestDrawnChunks: number;
+  /** The largest distance in chunks between a meshed chunk and the player's chunk. */
+  farthestMeshedChunks: number;
 }
 
 /** One WebGL renderer on one canvas, with no recovery. `createWebGlRenderer` wraps it. */
@@ -74,14 +122,44 @@ const createPlainWebGlRenderer: RendererFactory = ({ canvas, quality = DEFAULT_Q
   const scene = new Scene();
   scene.background = new Color(SKY);
   scene.fog = new Fog(SKY, q.fogNear, q.fogFar);
-  const camera = new PerspectiveCamera(70, 1, 0.1, q.fogFar + 20);
+  const camera = new PerspectiveCamera(70, 1, 0.1, q.fogFar + FAR_PAST_FOG);
   camera.rotation.order = 'YXZ';
 
   const material = new MeshBasicMaterial({ map: createAtlasTexture(), vertexColors: true, alphaTest: 0.5 });
   const chunkGroup = new Group();
   scene.add(chunkGroup);
   const chunks = new Map<string, Mesh>();
+  /** Keys of chunks that were tried in near mode (an empty chunk counts, so it is not tried again). */
+  const tried = new Set<string>();
   let world: WorldView | null = null;
+  let firstFill = false;
+  const frustum = new Frustum();
+  const viewProjection = new Matrix4();
+  let frame = { drawn: 0, faces: 0, deepest: 0, farthest: 0 };
+  let lastFrame = { ...frame };
+
+  /** Depth along the view direction at which a chunk box starts. Only for the e2e hook. */
+  function startDepth(mesh: Mesh): number {
+    const box = mesh.geometry.boundingBox;
+    if (!box) return 0;
+    let min = Infinity;
+    const v = new Vector3();
+    for (const x of [box.min.x, box.max.x]) {
+      for (const y of [box.min.y, box.max.y]) {
+        for (const z of [box.min.z, box.max.z]) min = Math.min(min, -v.set(x, y, z).applyMatrix4(camera.matrixWorldInverse).z);
+      }
+    }
+    return min;
+  }
+
+  function playerChunk(): [number, number] {
+    return [chunkOf(camera.position.x), chunkOf(camera.position.z)];
+  }
+
+  function chunkDistance(cx: number, cz: number): number {
+    const [pcx, pcz] = playerChunk();
+    return Math.max(Math.abs(cx - pcx), Math.abs(cz - pcz));
+  }
 
   const dinoSync = createDinoSceneSync(canvas.ownerDocument);
   scene.add(dinoSync.group);
@@ -97,9 +175,20 @@ const createPlainWebGlRenderer: RendererFactory = ({ canvas, quality = DEFAULT_Q
   let spikeDinos: readonly SpikeDino[] = [];
   let spikeGroups: Group[] = [];
 
+  function dropChunk(key: string): void {
+    const old = chunks.get(key);
+    if (old) {
+      chunkGroup.remove(old);
+      old.geometry.dispose();
+      chunks.delete(key);
+    }
+    tried.delete(key);
+  }
+
   function rebuildChunk(cx: number, cz: number): void {
     if (!world) return;
     const key = chunkKey(cx, cz);
+    tried.add(key);
     const old = chunks.get(key);
     if (old) {
       chunkGroup.remove(old);
@@ -111,8 +200,34 @@ const createPlainWebGlRenderer: RendererFactory = ({ canvas, quality = DEFAULT_Q
     const mesh = new Mesh(geometry, material);
     mesh.matrixAutoUpdate = false;
     mesh.updateMatrix();
+    mesh.frustumCulled = false; // `render` culls by the box of the chunk, which is tighter than three's sphere
+    mesh.userData = { faceCount: (geometry.getIndex()?.count ?? 0) / 6, cx, cz };
+    mesh.onBeforeRender = () => {
+      frame.drawn++;
+      frame.faces += mesh.userData.faceCount as number;
+      if (__E2E__) {
+        frame.deepest = Math.max(frame.deepest, startDepth(mesh));
+        frame.farthest = Math.max(frame.farthest, chunkDistance(cx, cz));
+      }
+    };
     chunkGroup.add(mesh);
     chunks.set(key, mesh);
+  }
+
+  if (__E2E__) {
+    registerHook('chunkStats', (): ChunkStats => {
+      let farthestMeshed = 0;
+      for (const m of chunks.values()) farthestMeshed = Math.max(farthestMeshed, chunkDistance(m.userData.cx as number, m.userData.cz as number));
+      return {
+        meshed: chunks.size,
+        drawn: lastFrame.drawn,
+        facesDrawn: lastFrame.faces,
+        far: camera.far,
+        deepestDrawnStart: lastFrame.deepest,
+        farthestDrawnChunks: lastFrame.farthest,
+        farthestMeshedChunks: farthestMeshed,
+      };
+    });
   }
 
   function clearSpike(): void {
@@ -121,16 +236,32 @@ const createPlainWebGlRenderer: RendererFactory = ({ canvas, quality = DEFAULT_Q
     spikeDinos = [];
   }
 
+  let shakeStart = 0;
+  let shakeMs = 0;
+
   return {
     canvas,
+    shake(ms) {
+      shakeMs = Math.min(MAX_SHAKE_MS, Math.max(0, ms));
+      shakeStart = performance.now();
+    },
     setWorld(w) {
       world = w;
+      if (q.near) {
+        for (const key of [...chunks.keys()]) dropChunk(key);
+        tried.clear();
+        firstFill = true;
+        return;
+      }
       for (let cx = 0; cx < CHUNKS_PER_SIDE; cx++) {
         for (let cz = 0; cz < CHUNKS_PER_SIDE; cz++) rebuildChunk(cx, cz);
       }
     },
     blockChanged(x, z) {
-      for (const [cx, cz] of chunksTouchedBy(x, z)) rebuildChunk(cx, cz);
+      for (const [cx, cz] of chunksTouchedBy(x, z)) {
+        // Near mode: a chunk without a mesh is meshed later with the current blocks.
+        if (!q.near || tried.has(chunkKey(cx, cz))) rebuildChunk(cx, cz);
+      }
     },
     setCamera(p) {
       camera.position.set(p.x, p.y, p.z);
@@ -144,11 +275,17 @@ const createPlainWebGlRenderer: RendererFactory = ({ canvas, quality = DEFAULT_Q
       camera.updateProjectionMatrix();
     },
     setQuality(next) {
+      const wasNear = q.near;
       q = next;
+      if (wasNear && !q.near && world) {
+        for (let cx = 0; cx < CHUNKS_PER_SIDE; cx++) {
+          for (let cz = 0; cz < CHUNKS_PER_SIDE; cz++) if (!tried.has(chunkKey(cx, cz))) rebuildChunk(cx, cz);
+        }
+      }
       const fog = scene.fog as Fog;
       fog.near = q.fogNear;
       fog.far = q.fogFar;
-      camera.far = q.fogFar + 20;
+      camera.far = q.fogFar + FAR_PAST_FOG;
       camera.updateProjectionMatrix();
       gl.setPixelRatio(pixelRatioFor(window.devicePixelRatio, q));
       gl.setSize(canvas.clientWidth || canvas.width, canvas.clientHeight || canvas.height, false);
@@ -190,7 +327,27 @@ const createPlainWebGlRenderer: RendererFactory = ({ canvas, quality = DEFAULT_Q
         g.position.set(d.x, d.y, d.z);
         g.rotation.y = d.yaw;
       });
+      if (q.near && world) {
+        const [pcx, pcz] = playerChunk();
+        const plan = planNearChunks(pcx, pcz, tried, firstFill ? NEAR_FIRST_FILL : undefined);
+        firstFill = false;
+        for (const key of plan.drop) dropChunk(key);
+        for (const [cx, cz] of plan.build) rebuildChunk(cx, cz);
+      }
+      // Cull the chunks by their box against the view, then three draws what is left.
+      const unshake = applyShake(camera, performance.now() - shakeStart, shakeMs);
+      camera.updateMatrixWorld();
+      viewProjection.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse);
+      frustum.setFromProjectionMatrix(viewProjection);
+      for (const m of chunks.values()) {
+        const box = m.geometry.boundingBox;
+        const inRadius = q.drawRadius === null || chunkDistance(m.userData.cx as number, m.userData.cz as number) <= q.drawRadius;
+        m.visible = inRadius && (!box || frustum.intersectsBox(box));
+      }
+      frame = { drawn: 0, faces: 0, deepest: 0, farthest: 0 };
       gl.render(scene, camera);
+      unshake();
+      lastFrame = frame;
     },
     dispose() {
       for (const m of chunks.values()) m.geometry.dispose();
@@ -380,6 +537,10 @@ export function withContextRecovery(inner: RendererFactory): RendererFactory {
       syncActors(group, list) {
         actors.set(group, list);
         if (!lost) core.syncActors?.(group, list);
+      },
+      shake(ms) {
+        // The wrapper the app uses passes it on (V16c writes the shake inside the core renderer).
+        if (!lost) core.shake?.(ms);
       },
       render() {
         if (!lost) core.render();

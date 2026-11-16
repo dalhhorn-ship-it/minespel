@@ -1,7 +1,7 @@
 // Klodder (V18b, AC214, AC217, AC218, AC219): out of the bubble, nibbles that never reach the save, tired at 5 minutes.
 import { expect, test, type Page } from '@playwright/test';
 import { STEEN } from '../../src/world/blocks';
-import { killApp, openApp, readState } from './helpers/app';
+import { fromLegacy, killApp, openApp, readState } from './helpers/app';
 
 interface MonsterState {
   phase: 'idle' | 'bubble' | 'klodder';
@@ -46,7 +46,8 @@ test.describe('Klodder (V18b)', () => {
 
   test('AC218: a hard kill with 10 nibbled cells leaves the stored world record byte for byte the same', async ({ page }) => {
     await prepare(page);
-    await readState(page, 'setBlock', 30, 11, 30, STEEN);
+    const cell = fromLegacy(30, 11, 30);
+    await readState(page, 'setBlock', cell.x, cell.y, cell.z, STEEN);
     await readState(page, 'markWorldDirty');
     await readState(page, 'flushSave');
     const before = await worldRecord(page);

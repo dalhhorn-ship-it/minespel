@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { get, openDb, put } from './db';
-import { createRecords, getRecord, putRecord } from './records';
+import { createRecords, getRecord, putRecord, recordsSettled } from './records';
 import { KV_NAMES, defaultKv, type KvName, type KvRecords } from './schema';
 
 let n = 0;
@@ -154,5 +154,19 @@ describe('records', () => {
     expect((await records.get('economy')).points).toBe(10);
     expect(await get(db, 'kv', 'economy')).toMatchObject({ points: 10 });
     db.close();
+  });
+});
+
+describe('recordsSettled', () => {
+  it('AC172: waits for a fire and forget record write, so a flush means the setting is saved', async () => {
+    const db = await fresh();
+    let done = false;
+    void putRecord(db, 'settings', { ...defaultKv('settings'), pointsMode: 'moeilijk' }).then(() => {
+      done = true;
+    });
+    expect(done).toBe(false);
+    await recordsSettled();
+    expect(done).toBe(true);
+    expect((await getRecord(db, 'settings')).pointsMode).toBe('moeilijk');
   });
 });

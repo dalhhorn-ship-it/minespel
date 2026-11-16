@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createVillagers } from '../villagers/villager';
 import { World } from '../world/world';
 import {
-  CONTEXT_RESTORE_WAIT_MS, createNullRenderer, createRenderer, withContextRecovery, type GameRenderer, type RendererFactory,
+  CONTEXT_RESTORE_WAIT_MS, applyShake, createNullRenderer, createRenderer, MAX_SHAKE_MS, shakeOffset, withContextRecovery, type GameRenderer, type RendererFactory,
 } from './renderer';
 import { DEFAULT_QUALITY } from './quality';
 
@@ -140,5 +140,30 @@ describe('withContextRecovery', () => {
     vi.advanceTimersByTime(5000);
     expect(made).toHaveLength(1);
     expect(host.querySelector('canvas')).toBeNull();
+  });
+});
+
+describe('shake (v16)', () => {
+  it('AC245: shake(800) moves the camera and ends at the same pose before 1000 ms', () => {
+    const cam = { position: { x: 1.5, y: 20.25 } };
+    let moved = false;
+    for (let t = 0; t < 800; t += 16) {
+      const undo = applyShake(cam, t, 800);
+      if (cam.position.x !== 1.5 || cam.position.y !== 20.25) moved = true;
+      undo();
+      expect(cam.position).toEqual({ x: 1.5, y: 20.25 });
+    }
+    expect(moved).toBe(true);
+    expect(shakeOffset(800, 800)).toEqual({ x: 0, y: 0 });
+    expect(shakeOffset(999, 800)).toEqual({ x: 0, y: 0 });
+  });
+  it('AC245: the shake is small and fades out', () => {
+    expect(MAX_SHAKE_MS).toBeLessThanOrEqual(1000);
+    for (let t = 0; t < 800; t++) {
+      const o = shakeOffset(t, 800);
+      expect(Math.abs(o.x)).toBeLessThanOrEqual(0.06);
+      expect(Math.abs(o.y)).toBeLessThanOrEqual(0.06);
+    }
+    expect(Math.hypot(shakeOffset(790, 800).x, shakeOffset(790, 800).y)).toBeLessThan(0.01);
   });
 });

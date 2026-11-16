@@ -62,6 +62,21 @@ afterEach(() => {
 });
 
 describe('game', () => {
+  it('AC234: mineAt mines a cell, says one mined event with the old block and refuses oersteen', () => {
+    const { game } = setup();
+    const seen: unknown[] = [];
+    game.on('mined', (e) => seen.push(e));
+    const { x, z } = START_SPOT;
+    const cx = Math.floor(x), cz = Math.floor(z), y = Math.floor(START_SPOT.y) - 1;
+    const block = game.world.get(cx, y, cz);
+    expect(block).not.toBe(0);
+    expect(game.mineAt(cx, y, cz)).toBe(true);
+    expect(game.world.get(cx, y, cz)).toBe(0);
+    expect(seen).toEqual([{ x: cx, y, z: cz, block }]);
+    expect(game.mineAt(cx, 0, cz)).toBe(false);
+    expect(seen).toHaveLength(1);
+  });
+
   it('mounts a sized canvas, the hud and the stick, and draws frames', () => {
     const s = setup();
     expect(s.container.querySelector('canvas')?.style.width).toBe('100%');

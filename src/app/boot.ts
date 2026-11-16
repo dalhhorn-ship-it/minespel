@@ -17,7 +17,10 @@ import { MONSTER_PRIORITY, createMonsterSystem, type MonsterSystem } from '../mo
 import { openDb } from '../storage/db';
 import { createLogStore } from '../storage/log-store';
 import { createMoedBar } from '../ui/moed-bar';
+import { createMoleCard, type MoleCard } from '../ui/mole-card';
+import { viewDistanceOf } from '../render/quality';
 import { creatureSwitches, prepareMonsters, updateMonsters } from '../storage/monsters-store';
+import { moveOldSave } from '../storage/world-move-store';
 import { createProgressStore } from '../storage/progress-store';
 import { createRecords, type Records } from '../storage/records';
 import { createSaveQueue, type SaveQueue } from '../storage/save-queue';
@@ -187,7 +190,7 @@ export function createBoot(deps: BootDeps): Boot {
   });
   app.catch(() => {});
 
-  async function build(world: Game): Promise<{ app: App; sessionStore: SessionStore }> {
+  async function build(world: Game): Promise<{ app: App; sessionStore: SessionStore; moved: boolean }> {
     const db = await openDb();
     const queue = createSaveQueue({ db });
     const records = createRecords(db);
@@ -199,6 +202,9 @@ export function createBoot(deps: BootDeps): Boot {
     const getCatalog = () => catalog;
     // First 0.7.0 start rule (decision 135): before settings are read, so the bubble default is in place.
     const prepared = await prepareMonsters(db);
+    // v15: an old save moves into the big world in one transaction. After prepareMonsters: its first start rule
+    // counts the `world` record to tell a new install. A failed move plays the start world without saving.
+    const move = await moveOldSave(db);
     const [settings, timers] = await Promise.all([prepared ?? records.get('settings'), records.get('timers')]);
 
     // The monsters (v18) are built below; the timer and the break flow reach them through this reference.
@@ -239,7 +245,13 @@ export function createBoot(deps: BootDeps): Boot {
         void breakFlow.startBreak();
       },
     });
-    applySettingsToRuntime(settings, { sound, timerDriver });
+    // Kijkafstand (AC243): Ver is the quality the renderer was made with, so only Dichtbij has anything to apply at boot.
+    applySettingsToRuntime(settings, {
+      sound,
+      timerDriver,
+      renderer: viewDistanceOf(settings) === 'dichtbij' ? world.renderer : undefined,
+      search: window.location.search,
+    });
 
     // The Dinofluit button shows once the kid owns the fluit (decision 114).
     const economy = await records.get('economy');
@@ -265,10 +277,12 @@ export function createBoot(deps: BootDeps): Boot {
       },
     });
     knightsRef = knights;
-    knights.load((await records.get('monsters')).knights);
+    knights.load(move === 'failed' ? [] : (await records.get('monsters')).knights);
     knights.applySwitches(creatureSwitches(settings));
     knights.setPoints(economy.points);
     world.addCreatures(knights, KNIGHT_PRIORITY);
+    let moleCard: MoleCard | null = null;
+    const reducedMotion = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
     // The bubble and Klodder (v18). The clock counts play time only, and only with the bubble switch on.
     const monsters = createMonsterSystem({
       world: world.world,
@@ -284,9 +298,24 @@ export function createBoot(deps: BootDeps): Boot {
       animals: () => world.dinoStore.dinos(),
       moedBar: createMoedBar(),
       say: (text, ms) => say(text, ms),
+      showMoleCard: () => {
+        // The card goes in the kid overlay, so the loop and the play timer stop until OK (AC244).
+        if (moleCard?.element.isConnected) return;
+        const card = createMoleCard({
+          onOk: () => {
+            card.destroy();
+            moleCard = null;
+            screens.showKidOverlay(null);
+          },
+        });
+        moleCard = card;
+        screens.showKidOverlay(card.element);
+      },
+      shake: reducedMotion ? undefined : (ms) => world.renderer.shake?.(ms),
       sound,
     });
     monstersRef = monsters;
+    world.on('mined', (e) => monsters.onMined(e.x, e.y, e.z, e.block));
     monsters.load(await records.get('monsters'));
     monsters.applySwitches(creatureSwitches(settings));
     world.addCreatures(monsters, MONSTER_PRIORITY);
@@ -378,6 +407,8 @@ export function createBoot(deps: BootDeps): Boot {
         stop: () => examFlow.stop(),
       },
       sound,
+      renderer: world.renderer,
+      search: window.location.search,
       db,
       onResetWorld: () => {
         world.resetWorld();
@@ -402,6 +433,7 @@ export function createBoot(deps: BootDeps): Boot {
         practiceFlow, examFlow, villageFlow, knights, monsters,
       },
       sessionStore,
+      moved: move !== 'failed',
     };
   }
 
@@ -417,7 +449,7 @@ export function createBoot(deps: BootDeps): Boot {
     async create() {
       try {
         if (!game) throw new Error('no game');
-        const { app: made, sessionStore } = await build(game);
+        const { app: made, sessionStore, moved } = await build(game);
         built = made;
         resolveApp(made);
         // Every flow exists: buttons that waited can run now.
@@ -429,7 +461,7 @@ export function createBoot(deps: BootDeps): Boot {
           breakFlow: made.breakFlow,
           examFlow: made.examFlow,
         });
-        return createWorldSave({ game, queue: made.queue, records: made.records });
+        return createWorldSave({ game, queue: made.queue, records: made.records, moved });
       } catch (e) {
         gate.markFailed();
         rejectApp(e);

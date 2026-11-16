@@ -5,6 +5,7 @@ import type { PointerOwner } from './pointer-router';
 export interface LookOptions {
   /** Called once for a tap, with screen coordinates. */
   onTap: (x: number, y: number) => void;
+  /** Test clock. Without it the time of each event itself is used (`event.timeStamp`), see `stamp`. */
   now?: () => number;
 }
 
@@ -14,7 +15,13 @@ export interface Look extends PointerOwner {
 }
 
 export function createLook(options: LookOptions): Look {
-  const now = options.now ?? (() => performance.now());
+  // The tap is measured from the time the browser made the events, not from when a handler runs. The first pointerup
+  // of a page first runs the audio unlock (a capture listener), which can take over 300 ms on a busy iPad. Reading the
+  // clock in our own handler would then read that delay as a long press or a drag.
+  const stamp = (e: PointerEvent): number => {
+    if (options.now) return options.now();
+    return Number.isFinite(e.timeStamp) && e.timeStamp > 0 ? e.timeStamp : performance.now();
+  };
   let id: number | null = null;
   let startX = 0;
   let startY = 0;
@@ -35,7 +42,7 @@ export function createLook(options: LookOptions): Look {
       id = e.pointerId;
       startX = lastX = e.clientX;
       startY = lastY = e.clientY;
-      startT = now();
+      startT = stamp(e);
     },
     move(e) {
       if (e.pointerId !== id) return;
@@ -47,7 +54,7 @@ export function createLook(options: LookOptions): Look {
     up(e) {
       if (e.pointerId !== id) return;
       id = null;
-      const kind = classifyTouch(e.clientX - startX, e.clientY - startY, now() - startT);
+      const kind = classifyTouch(e.clientX - startX, e.clientY - startY, stamp(e) - startT);
       if (kind === 'tap') options.onTap(e.clientX, e.clientY);
     },
     cancel(e) {

@@ -1,8 +1,10 @@
 // A knight sends Klodder off (V18d, AC216): the Moed bar fills, Klodder leaves, the knight is back in his mode.
 import { expect, test } from '@playwright/test';
+import { STEEN } from '../../src/world/blocks';
 import { openApp, readState } from './helpers/app';
 
 interface Knight { id: string; mode: string; x: number; y: number; z: number }
+interface Kl { x: number; z: number }
 interface Monster { phase: string; klodder: { moed: number; pokers: number } | null; hiddenCount: number }
 
 test.describe('Knight against Klodder (V18d)', () => {
@@ -52,5 +54,38 @@ test.describe('Knight against Klodder (V18d)', () => {
     }
     expect((await readState<Monster>(page, 'monsterState')).phase).toBe('idle');
     await expect(bar).toBeHidden();
+  });
+
+  test('AC251: a knight walks to Klodder through the gap in a wall 2 high, he is not popped over it', async ({ page }) => {
+    await openApp(page);
+    await readState(page, 'setCreatureSeed', 4);
+    await readState(page, 'setPlayRemainingMs', 3_600_000);
+    await readState(page, 'addKnight', 'guard');
+    const start = (await readState<Knight[]>(page, 'knights'))[0]!;
+    const wallZ = Math.floor(start.z) + 2;
+    // A wall 2 high between the knight and Klodder, with a gap 2 high near its east end.
+    const y = Math.floor(start.y);
+    const x0 = Math.floor(start.x) - 12;
+    const x1 = Math.floor(start.x) + 12;
+    for (let x = x0; x <= x1; x++) {
+      if (x === x1) continue;
+      for (const dy of [0, 1]) await readState(page, 'setBlock', x, y + dy, wallZ, STEEN, 1);
+    }
+    expect(await readState(page, 'spawnKlodder')).toBeTruthy();
+    const kl = (await readState<{ klodder: Kl }>(page, 'monsterState')).klodder;
+    expect(kl.z).toBeGreaterThan(wallZ);
+    let last = start;
+    let maxJump = 0;
+    let poked = false;
+    for (let i = 0; i < 400 && !poked; i++) {
+      await readState(page, 'fastForward', 100);
+      const k = (await readState<Knight[]>(page, 'knights'))[0]!;
+      maxJump = Math.max(maxJump, Math.hypot(k.x - last.x, k.z - last.z));
+      last = k;
+      poked = ((await readState<{ klodder: { pokers: number } | null }>(page, 'monsterState')).klodder?.pokers ?? 0) > 0;
+    }
+    expect(poked).toBe(true);
+    expect(last.z).toBeGreaterThan(wallZ);
+    expect(maxJump).toBeLessThan(1);
   });
 });
