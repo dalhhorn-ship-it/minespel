@@ -13,6 +13,7 @@ import type { CreatureSwitches } from '../storage/monsters-store';
 import type { Box } from '../world/build';
 import type { World } from '../world/world';
 import type { KnightFlow } from '../app/knight-flow';
+import { lookKey, type Worn } from './gear';
 import { createKnightBody, defaultKnightRng, placeAtSpot, placeNearKid, stepKnight } from './knight-ai';
 import {
   KNIGHT_BOX, KNIGHT_TAP_REACH, MAX_KNIGHTS, SALUTE_GAP_MS, toRecord,
@@ -46,6 +47,8 @@ export interface KnightSystem extends CreatureSystem {
   setMode(id: string, mode: KnightMode): boolean;
   /** The switches from settings. Knights off: they hide. On again: back with their modes. */
   applySwitches(switches: CreatureSwitches): void;
+  /** What a knight wears now (v19), set after every gear write and on load. Missing or empty: bare. False for an unknown id. */
+  setGear(id: string, worn: Worn | undefined): boolean;
   setSeed(seed: number): void;
   /** Points of the kid, re-read every time the screen goes back to the world (V18 reads it for the bubble rule). */
   setPoints(points: number): void;
@@ -112,6 +115,7 @@ export function createKnightSystem(options: KnightSystemOptions): KnightSystem {
     if (shown.length === 0 && drawn === 0) return;
     const views: ActorView[] = shown.map((k) => ({
       id: k.id, model: 'knight', x: k.body.x, y: k.body.y, z: k.body.z, heading: k.body.heading,
+      look: lookKey(k.gear), pose: k.poking ? 'poke' : undefined,
     }));
     drawn = views.length;
     options.renderer?.syncActors?.('knights', views);
@@ -164,6 +168,13 @@ export function createKnightSystem(options: KnightSystemOptions): KnightSystem {
       if (!on) for (const k of list) k.visible = false;
       sync();
     },
+    setGear(id, worn) {
+      const k = find(id);
+      if (!k) return false;
+      k.gear = worn ? { ...worn } : undefined;
+      sync();
+      return true;
+    },
     setSeed(seed) {
       rng = createRng(seed);
     },
@@ -179,6 +190,8 @@ export function createKnightSystem(options: KnightSystemOptions): KnightSystem {
         if (event) options.flow.onEvent(event, k);
       }
       sync();
+      // The Moed steps (priority 10) set `poking` for this frame; the views above carried it.
+      for (const k of list) k.poking = false;
     },
     handleTap(x, y) {
       const shown = visible();

@@ -131,3 +131,30 @@ describe('moed (v18d)', () => {
     expect(HINT_TEXT.toLowerCase()).not.toMatch(/koop|winkel|punten/);
   });
 });
+
+describe('AC262: Kracht in the Klodder bar', () => {
+  const dressed = (worn: KnightState['gear'], z = sz): KnightState => ({ ...knight('stay', sx + 1, z), gear: worn });
+  const KRACHT3 = { hoofd: 'ijzeren-helm', schild: 'houten-schild' } as const;
+  const KRACHT5 = { hoofd: 'leren-kap', schild: 'houten-schild', hand: 'glimzwaard', rug: 'riddercape' } as const;
+
+  it('AC262: Kracht 3 takes 10 seconds, Kracht 5 takes 6, with the Pony still 6, bare 30 (plus or minus 1)', () => {
+    for (const [worn, secs] of [[KRACHT3, 10], [KRACHT5, 6], [{ ...KRACHT5, rijdier: 'pony' }, 6], [undefined, 30]] as const) {
+      const s = setup([dressed(worn)]);
+      expect(Math.abs(s.run(60) - secs)).toBeLessThanOrEqual(1);
+    }
+  });
+  it('AC262: 3 knights with Kracht 5 never fill the bar under 3 seconds', () => {
+    const s = setup([dressed(KRACHT5, sz), dressed(KRACHT5, sz + 0.1), dressed(KRACHT5, sz + 0.2)]);
+    const t = s.run(60);
+    expect(t).toBeGreaterThanOrEqual(3);
+    expect(t).toBeLessThanOrEqual(4);
+  });
+  it('AC262: a poking knight gets poking = true for the frame, a knight out of reach does not', () => {
+    const near = dressed(KRACHT3);
+    const far = { ...knight('stay', sx + 6, sz), gear: undefined };
+    const s = setup([near, far]);
+    stepMoed(s.k, s.ctx(0.1));
+    expect(near.poking).toBe(true);
+    expect(far.poking).toBeUndefined();
+  });
+});

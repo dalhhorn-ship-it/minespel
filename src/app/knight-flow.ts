@@ -3,6 +3,7 @@
 // play timer stop while it is open (AC224). A tap on a guard knight also says the guard report (AC206).
 import type { Sound } from '../audio/sound';
 import { guardReport, type GuardAnimal } from '../knights/guard-report';
+import type { GearEconomy } from '../knights/gear-economy';
 import type { KnightEvent, KnightMode, KnightState } from '../knights/knight-types';
 import { say } from '../ui/speech';
 import { createKnightMenu, type KnightMenu } from '../ui/knight-menu';
@@ -26,6 +27,10 @@ export interface KnightFlowDeps {
   /** Dinos and chickens in the world, for the guard report. */
   animals?: () => readonly GuardAnimal[];
   sound?: Pick<Sound, 'play'>;
+  /** The gear economy (v19): V19c's Uitrusten screen reads `state()` and calls `wear(knightId, itemId | null, slot)`. */
+  gear?: Pick<GearEconomy, 'state' | 'wear'>;
+  /** The knights in the order of the knight list, for "Bij Ridder N" (his number is his place plus 1). */
+  knightList?: () => readonly { id: string }[];
 }
 
 export function createKnightFlow(deps: KnightFlowDeps = {}): KnightFlow {

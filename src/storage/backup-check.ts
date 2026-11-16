@@ -2,6 +2,7 @@
 // The save rules are reused from the code that enforces them, not copied.
 import { MAX_CHICKENS, MAX_SHOP_DINOS, chickenCount, shopDinoCount } from '../core/economy';
 import { cleanDiff } from '../game/world-save';
+import { checkGear } from '../knights/gear';
 import { MAX_KNIGHTS } from '../knights/knight-types';
 import { filterDinoNameDraft } from '../ui/name-screen';
 import {
@@ -69,10 +70,15 @@ interface Bounds {
   cells: number;
   terrainVersions: readonly (number | undefined)[];
   needsWorld: boolean;
+  /** The `monsters` record may hold `gear` (format 3, v19) or `stones` (format 4, v20). */
+  gear: boolean;
+  stones: boolean;
 }
 const BOUNDS: Record<number, Bounds> = {
-  1: { size: LEGACY_SIZE, height: LEGACY_HEIGHT, cells: LEGACY_CELL_COUNT, terrainVersions: [undefined, 1, 2], needsWorld: false },
-  2: { size: WORLD_SIZE, height: WORLD_HEIGHT, cells: WORLD_SIZE * WORLD_HEIGHT * WORLD_SIZE, terrainVersions: [3], needsWorld: true },
+  1: { size: LEGACY_SIZE, height: LEGACY_HEIGHT, cells: LEGACY_CELL_COUNT, terrainVersions: [undefined, 1, 2], needsWorld: false, gear: false, stones: false },
+  2: { size: WORLD_SIZE, height: WORLD_HEIGHT, cells: WORLD_SIZE * WORLD_HEIGHT * WORLD_SIZE, terrainVersions: [3], needsWorld: true, gear: false, stones: false },
+  // Format 3 (0.10.0, AC267): the bounds of format 2, plus the gear of the knights. V20d adds format 4 for stones.
+  3: { size: WORLD_SIZE, height: WORLD_HEIGHT, cells: WORLD_SIZE * WORLD_HEIGHT * WORLD_SIZE, terrainVersions: [3], needsWorld: true, gear: true, stones: false },
 };
 
 function validWorld(w: Record<string, unknown>, b: Bounds): boolean {
@@ -104,7 +110,10 @@ function validMonsters(v: Record<string, unknown>, b: Bounds): boolean {
   return optional(v.knights, (x) => Array.isArray(x) && x.length <= MAX_KNIGHTS && x.every((k) => validKnight(k, b)) &&
       new Set(x.map((k) => (k as { id: string }).id)).size === x.length) &&
     optional(v.bubbleClockMs, (x) => isNum(x) && x >= 0 && x <= 600_000) &&
-    optional(v.hintShown, (x) => typeof x === 'boolean');
+    optional(v.hintShown, (x) => typeof x === 'boolean') &&
+    // An older format never held gear or stones, so a file that says it did is not trusted (AC267).
+    (b.gear ? checkGear(v.gear) : v.gear === undefined) &&
+    (b.stones ? true : v.stones === undefined);
 }
 
 function validKv(name: BackupKvName, v: Record<string, unknown>, b: Bounds): boolean {

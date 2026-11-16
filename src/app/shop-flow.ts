@@ -21,6 +21,10 @@ import {
 } from '../ui/shop';
 import { creatureSwitches } from '../storage/monsters-store';
 import { createKnightEconomy, type KnightEconomy } from '../knights/knight-economy';
+import { gearById, gearCount } from '../knights/gear';
+import type { GearEconomy } from '../knights/gear-economy';
+import type { StonesEconomy } from './stones-economy';
+import type { StonesFlow } from './stones-flow';
 import { KNIGHT_TRADEIN } from '../knights/knight-types';
 import type { KnightSystem } from '../knights/knight-system';
 import type { ScreenManager } from './screens';
@@ -44,6 +48,11 @@ export interface ShopFlowOptions {
   onFluitBought?: () => void;
   /** The knight system (v17). Without it, or without `db`, the shop shows no Ridders section. */
   knights?: Pick<KnightSystem, 'add' | 'remove' | 'knights'>;
+  /** The gear economy (v19). With it, and with Ridders on, the shop shows the Uitrusting row. */
+  gear?: GearEconomy;
+  /** The stones flow and economy (v20). With them the shop shows the Edelstenen section. */
+  stonesFlow?: Pick<StonesFlow, 'state'>;
+  stones?: Pick<StonesEconomy, 'buy'>;
 }
 
 export interface ShopFlow {
@@ -56,6 +65,10 @@ export interface ShopFlow {
   buyFluit(): Promise<boolean>;
   /** Buys a knight for 30 points (AC201). */
   buyKnight(): Promise<boolean>;
+  /** Buys a gear item once (AC259). False when owned, unknown, points are short or there is no knight. */
+  buyGear(id: string): Promise<boolean>;
+  /** Buys a found stone once (AC273). False until V20c. */
+  buyStone(id: number): Promise<boolean>;
   /** Trades a knight in for 15 points (AC202). */
   tradeInKnight(id: string): Promise<boolean>;
   destroy(): void;
@@ -94,7 +107,10 @@ export function createShopFlow(options: ShopFlowOptions): ShopFlow {
     let knightList: ShopViewState['knights'];
     if (options.knights && options.db && options.records) {
       const sw = creatureSwitches(await options.records.get('settings'));
-      if (sw.knights) knightList = options.knights.knights().map((k) => ({ id: k.id }));
+      if (sw.knights) {
+        const worn = options.gear?.state();
+        knightList = options.knights.knights().map((k) => ({ id: k.id, gearCount: worn ? gearCount(worn, k.id) : 0 }));
+      }
     }
 
     return {
@@ -103,6 +119,8 @@ export function createShopFlow(options: ShopFlowOptions): ShopFlow {
       eggs,
       fluit,
       knights: knightList,
+      gearOwned: options.gear ? [...options.gear.state().owned] : undefined,
+      stones: options.stones && options.stonesFlow ? options.stonesFlow.state() : undefined,
       toastMessage: lastToast,
     };
   }
@@ -334,15 +352,13 @@ export function createShopFlow(options: ShopFlowOptions): ShopFlow {
   }
 
   const knightEconomy: KnightEconomy | null =
-    options.knights && options.db ? createKnightEconomy({ db: options.db, knights: options.knights, clock }) : null;
+    options.knights && options.db ? createKnightEconomy({ db: options.db, knights: options.knights, gear: options.gear, clock }) : null;
 
-  /** Knight buys and trade ins share the purchase lock with the other buys. */
-  function lockedKnight(run: (e: KnightEconomy) => Promise<boolean>, toast: string): Promise<boolean> {
-    const economy = knightEconomy;
-    if (!economy) return Promise.resolve(false);
+  /** Knight, gear and stone buys and the trade ins share the purchase lock with the other buys. */
+  function lockedBuy(run: () => Promise<boolean>, toast: string): Promise<boolean> {
     const next = buyLock
       .then(async () => {
-        const ok = await run(economy);
+        const ok = await run();
         if (ok) {
           options.sound?.play('clink');
           lastToast = toast;
@@ -354,8 +370,20 @@ export function createShopFlow(options: ShopFlowOptions): ShopFlow {
     buyLock = next;
     return next;
   }
+  function lockedKnight(run: (e: KnightEconomy) => Promise<boolean>, toast: string): Promise<boolean> {
+    const economy = knightEconomy;
+    return economy ? lockedBuy(() => run(economy), toast) : Promise.resolve(false);
+  }
   const buyKnight = () => lockedKnight((e) => e.buy(), 'Hoera! Je ridder staat naast je in de wereld!');
   const tradeInKnight = (id: string) => lockedKnight((e) => e.tradeIn(id), `Dag ridder! Je kreeg ${KNIGHT_TRADEIN} punten terug.`);
+  const gearEconomy = options.gear && options.db ? options.gear : null;
+  const buyGear = (id: string): Promise<boolean> =>
+    gearEconomy
+      ? lockedBuy(() => gearEconomy.buy(id), `Hoera! Je hebt ${gearById(id)?.name ?? 'nieuwe uitrusting'}! Het ligt in je wapenkast.`)
+      : Promise.resolve(false);
+  const stonesEconomy = options.stones && options.db ? options.stones : null;
+  const buyStone = (id: number): Promise<boolean> =>
+    stonesEconomy ? lockedBuy(() => stonesEconomy.buy(id), 'Hoera! Je hebt een nieuwe edelsteen!') : Promise.resolve(false);
 
   function clear() {
     if (activeView) {
@@ -383,6 +411,8 @@ export function createShopFlow(options: ShopFlowOptions): ShopFlow {
         },
         onBuyKnight: knightEconomy ? async () => { await buyKnight(); } : undefined,
         onTradeInKnight: knightEconomy ? async (id) => { await tradeInKnight(id); } : undefined,
+        onBuyGear: gearEconomy ? async (id) => { await buyGear(id); } : undefined,
+        onBuyStone: stonesEconomy ? async (id) => { await buyStone(id); } : undefined,
         onEarnCoins: options.onEarnCoins
           ? () => {
               clear();
@@ -409,6 +439,8 @@ export function createShopFlow(options: ShopFlowOptions): ShopFlow {
     buyFluit,
     buyKnight,
     tradeInKnight,
+    buyGear,
+    buyStone,
     destroy() {
       clear();
     },
@@ -421,6 +453,8 @@ export function createShopFlow(options: ShopFlowOptions): ShopFlow {
     registerHook('tradeInInShop', (dinoId: string) => flow.tradeIn(dinoId));
     registerHook('buyFluitInShop', () => flow.buyFluit());
     registerHook('buyKnightInShop', () => flow.buyKnight());
+    registerHook('buyGearInShop', (id: string) => flow.buyGear(id));
+    registerHook('buyStoneInShop', (id: number) => flow.buyStone(id));
   }
 
   return flow;

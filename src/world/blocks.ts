@@ -1,5 +1,7 @@
 // Block ids, Dutch names and flags. Id 0 is air. Ids are stored in saves: never renumber.
 
+import { STONES } from './stones';
+
 export const AIR = 0;
 export const GRAS = 1;
 export const AARDE = 2;
@@ -116,7 +118,7 @@ export const BLOCKS: readonly BlockInfo[] = [
   block(REGENBOOGSTEEN, 'regenboogsteen'),
   block(STERRENSTEEN, 'sterrensteen'),
   deepBlock(WAARSCHUWSTEEN, 'waarschuwsteen'),
-  ...VEIN_BLOCKS.map((id, i) => deepBlock(id, `ader ${i + 1}`)),
+  ...VEIN_BLOCKS.map((id) => deepBlock(id, (STONES.find((s) => s.id === id)?.name ?? 'ader').toLowerCase())),
 ];
 
 /** The 32 building blocks a kid can place from the start, in grid order. Rare blocks are placeable too, but only once found, so they are not in this list. */

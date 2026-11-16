@@ -9,8 +9,8 @@ export const MSG_KNIGHTS_FULL = `Je hebt al ${MAX_KNIGHTS} ridders!`;
 
 export interface KnightShopState {
   points: number;
-  /** The knights the kid owns now, in the order he bought them. */
-  knights: readonly { id: string }[];
+  /** The knights the kid owns now, in the order he bought them. `gearCount` is how many items he wears (v19). */
+  knights: readonly { id: string; gearCount?: number }[];
 }
 
 export interface KnightsSectionOptions {

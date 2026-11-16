@@ -120,3 +120,29 @@ describe('the mole Moed bar (v16, AC251)', () => {
     expect(mole.moed).toBeGreaterThan(1);
   });
 });
+
+describe('AC262: Kracht in the mole bar', () => {
+  const secondsDressed = (gears: KnightState['gear'][]): number => {
+    const mole = createMole({ x: 30.5, y: GY, z: 30.5 }, { x: 0, z: 0 });
+    const ks = gears.map((g, i) => ({ ...knight('stay', 31.5, 30.5 + i * 0.1, `k${i}`), gear: g }));
+    const ctx = ctxFor(ks);
+    let t = 0;
+    while (t < 60) {
+      t += DT;
+      if (stepMoleMoed(mole, ctx)) return t;
+    }
+    return Infinity;
+  };
+  const KRACHT3 = { hoofd: 'ijzeren-helm', schild: 'houten-schild' } as const;
+  const KRACHT5 = { hoofd: 'leren-kap', schild: 'houten-schild', hand: 'glimzwaard', rug: 'riddercape' } as const;
+
+  it('AC262: Kracht 3 takes 5 seconds, Kracht 5 takes 3, bare 15 (plus or minus 1)', () => {
+    expect(Math.abs(secondsDressed([KRACHT3]) - 5)).toBeLessThanOrEqual(1);
+    expect(Math.abs(secondsDressed([KRACHT5]) - 3)).toBeLessThanOrEqual(1);
+    expect(Math.abs(secondsDressed([{ ...KRACHT5, rijdier: 'pony' }]) - 3)).toBeLessThanOrEqual(1);
+    expect(Math.abs(secondsDressed([undefined]) - 15)).toBeLessThanOrEqual(1);
+  });
+  it('AC262: 3 knights with Kracht 5 never fill the bar under 3 seconds', () => {
+    expect(secondsDressed([KRACHT5, KRACHT5, KRACHT5])).toBeGreaterThanOrEqual(3 - 1e-6); // float sum of 60 steps
+  });
+});

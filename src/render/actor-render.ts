@@ -20,6 +20,8 @@ export interface ActorView {
   scale?: number;
   /** A name the model file understands, for example 'march' or 'wave'. */
   pose?: string;
+  /** The gear set of a knight: the sorted worn ids joined by `+`, empty or missing for a bare knight (v19). */
+  look?: string;
 }
 
 /** A built model: a root to place and turn, and a way to set its pose. */

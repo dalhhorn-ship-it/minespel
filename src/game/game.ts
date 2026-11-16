@@ -83,6 +83,8 @@ export interface Game {
   setFoundBlocks(ids: readonly number[]): void;
   /** Puts a block in the selected hotbar slot and saves it (V11d "In mijn hotbar", AC184). */
   giveToHotbar(block: number): void;
+  /** Tells the game which vein stones are found and bought (v20). A no-op until V20b fills it in. */
+  setStones(found: readonly number[], bought: readonly number[]): void;
   /** Shows or hides the Dinofluit button (decision 114). */
   setFluitOwned(owned: boolean): void;
   /** Plays the Dinofluit: every dino and chicken walks slowly to the kid. Returns how many were called. */
@@ -401,6 +403,7 @@ export function createGame(options: GameOptions): Game {
       refreshHotbar();
       emitChanged('build');
     },
+    setStones() {},
     setFluitOwned(owned) {
       fluitOwned = owned;
       hud.setFluit(owned);

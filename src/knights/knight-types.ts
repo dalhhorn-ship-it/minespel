@@ -1,6 +1,7 @@
 // Types and caps of the knights (v17 Ridders, decision 135). No logic here, so every knight file can import it.
 import type { DinoState } from '../dinos/dino-ai';
 import type { Cell } from '../monsters/monster-types';
+import type { Worn } from './gear';
 import { KNIGHT_MODES, type KnightMode, type KnightRecord } from '../storage/schema';
 
 export { KNIGHT_MODES };
@@ -40,6 +41,10 @@ export interface KnightState {
   saluteClockMs: number;
   /** False while knights are switched off: he waves and hides. */
   visible: boolean;
+  /** What he wears (v19), set by `knightSystem.setGear`. Never saved here: it lives in `monsters.gear`. Missing: bare. */
+  gear?: Worn;
+  /** True for the frame in which he pokes Klodder or the mole; the Moed steps set it. Never saved. */
+  poking?: boolean;
 }
 
 export function toRecord(k: Pick<KnightState, 'id' | 'mode' | 'spot' | 'boughtFor'>): KnightRecord {

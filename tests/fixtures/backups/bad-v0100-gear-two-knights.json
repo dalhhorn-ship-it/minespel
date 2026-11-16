@@ -1,0 +1,145 @@
+{
+ "app": "dino-blokwereld",
+ "format": 3,
+ "createdAt": "2026-11-30T09:15:00.000Z",
+ "appVersion": "0.10.0",
+ "schemaVersion": 2,
+ "kv": {
+  "settings": {
+   "breakEveryMinutes": 5,
+   "questionsPerBreak": 5,
+   "volume": 0.7,
+   "largeFont": false,
+   "newLessonsEnabled": true,
+   "breakWarningEnabled": true,
+   "soundEffectsEnabled": true,
+   "pointsMode": "normaal",
+   "monstersEnabled": true,
+   "knightsEnabled": true,
+   "bubbleEnabled": true
+  },
+  "player": {
+   "x": 72.5,
+   "y": 12,
+   "z": 100.5,
+   "yaw": 0,
+   "pitch": 0,
+   "hotbar": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9
+   ],
+   "selectedSlot": 0,
+   "mode": "mine"
+  },
+  "world": {
+   "diff": {
+    "$u32": "ATwjAA=="
+   },
+   "terrainVersion": 3
+  },
+  "dinos": {
+   "dinos": [
+    {
+     "kind": "kip",
+     "name": "Kip"
+    }
+   ],
+   "eggs": []
+  },
+  "economy": {
+   "points": 12,
+   "practicePointsToday": 0,
+   "practiceDay": "2026-10-30"
+  },
+  "meta": {
+   "schemaVersion": 1,
+   "appVersion": "0.7.0",
+   "lastBackup": null,
+   "createdAt": "2026-10-01T10:00:00.000Z"
+  },
+  "village": {
+   "found": [
+    34
+   ],
+   "cooldownMs": 0,
+   "lastVillager": null
+  },
+  "monsters": {
+   "knights": [
+    {
+     "id": "ridder-1",
+     "mode": "follow",
+     "spot": null,
+     "boughtFor": 30
+    },
+    {
+     "id": "ridder-2",
+     "mode": "guard",
+     "spot": {
+      "x": 41.5,
+      "y": 12,
+      "z": 39.5
+     },
+     "boughtFor": 30
+    }
+   ],
+   "bubbleClockMs": 120000,
+   "hintShown": true,
+   "gear": {
+    "owned": [
+     "pony"
+    ],
+    "worn": {
+     "ridder-1": {
+      "rijdier": "pony"
+     },
+     "ridder-2": {
+      "rijdier": "pony"
+     }
+    }
+   }
+  }
+ },
+ "stores": {
+  "progress": [
+   [
+    "mod|a1",
+    {
+     "moduleId": "mod",
+     "itemId": "a1",
+     "box": 1,
+     "due": "2026-10-31",
+     "level": 1,
+     "topic": "t",
+     "skill": "s",
+     "seen": 2
+    }
+   ]
+  ],
+  "ownModules": [],
+  "answers": [],
+  "breaks": [],
+  "exams": [],
+  "ledger": [
+   {
+    "id": 1,
+    "ts": 1,
+    "kind": "malus",
+    "delta": -1
+   },
+   {
+    "id": 2,
+    "ts": 2,
+    "kind": "break",
+    "delta": 2
+   }
+  ]
+ }
+}

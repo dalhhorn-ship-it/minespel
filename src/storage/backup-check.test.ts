@@ -284,4 +284,34 @@ describe('checkBackup', () => {
       expect(check({ ...v080(), format: '2' })).toEqual(refused);
     });
   });
+  describe('AC267: the gear checks of format 3', () => {
+    const refused = { ok: false, message: MSG_BAD_VALUES };
+    it('AC267: a 0.10.0 file with 5 items, 3 worn, passes', () => {
+      expect(checkBackup(load('v0100-gear.json')).ok).toBe(true);
+    });
+    for (const name of [
+      'bad-v0100-gear-unknown.json', 'bad-v0100-gear-twice.json', 'bad-v0100-gear-two-knights.json', 'bad-v0100-gear-wrong-slot.json',
+    ]) {
+      it(`AC195 AC267: ${name} gets the friendly message`, () => {
+        expect(checkBackup(load(name))).toEqual(refused);
+      });
+    }
+    it('AC267: a gear entry for a missing knight is allowed (read as the wapenkast)', () => {
+      const f = JSON.parse(load('v0100-gear.json'));
+      f.kv.monsters.gear.worn['ridder-9'] = { hoofd: 'leren-kap' };
+      f.kv.monsters.gear.worn['ridder-1'] = { rijdier: 'pony' };
+      expect(checkBackup(JSON.stringify(f)).ok).toBe(true);
+    });
+    it('AC267: a format 2 file that holds gear is not trusted, and format 99 is a newer file', () => {
+      const f = JSON.parse(load('v0100-gear.json'));
+      f.format = 2;
+      expect(checkBackup(JSON.stringify(f))).toEqual(refused);
+      expect(checkBackup(load('bad-newer-format.json'))).toEqual({ ok: false, message: MSG_NEWER });
+    });
+    it('AC267: a format 4 file is a newer file for 0.10.0', () => {
+      const f = JSON.parse(load('v0100-gear.json'));
+      f.format = 4;
+      expect(checkBackup(JSON.stringify(f))).toEqual({ ok: false, message: MSG_NEWER });
+    });
+  });
 });

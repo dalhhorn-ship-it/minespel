@@ -1,12 +1,14 @@
 // The Moed bar: a knight sends Klodder off (v18, AC216, AC222). Knights that notice him get `chase`; knights
-// within 1.5 blocks poke him. The bar fills at min(pokers, 3) per second, so a fight lasts 10 s at the very least.
+// within 1.5 blocks poke him. The bar fills by the summed Kracht of the pokers per second (gear.ts), never faster
+// than full in 3 s, so a fight lasts 3 s at the very least.
+import { kracht, moedRate, noticeBonus } from '../knights/gear';
 import type { KnightState } from '../knights/knight-types';
 import { KLODDER_TIRED_MS, type KlodderState, type MonsterContext } from './monster-types';
 
 /** The bar is full at this value (30 s with one poker). */
 export const MOED_FULL = 30;
-/** Fill per second is capped (AC216: never full in under 3 s; with 3 pokers it is 3 per second). */
-export const MOED_MAX_RATE = 10;
+/** Fill per second is capped: full in 3 s at the very least (AC216, AC262). */
+export const MOED_MAX_RATE = MOED_FULL / 3;
 /** Pokers that count for the fill. */
 export const MOED_MAX_POKERS = 3;
 /** Follow and stay knights notice Klodder within this many blocks along each axis; guards within the second. */
@@ -50,15 +52,20 @@ export function stepMoed(k: KlodderState, ctx: MonsterContext): boolean {
     return false;
   }
   let pokers = 0;
+  const krachts: number[] = [];
   for (const kn of ctx.knights()) {
     if (!kn.visible) {
       kn.chase = null;
       continue;
     }
-    const reach = kn.mode === 'guard' ? NOTICE_GUARD : NOTICE_NEAR;
+    const reach = (kn.mode === 'guard' ? NOTICE_GUARD : NOTICE_NEAR) + noticeBonus(kn.gear);
     if (near(kn.body, k, reach)) {
       kn.chase = { x: k.x, z: k.z };
-      if (pokes(kn, k)) pokers++;
+      if (pokes(kn, k)) {
+        pokers++;
+        kn.poking = true;
+        if (krachts.length < MOED_MAX_POKERS) krachts.push(kracht(kn.gear));
+      }
     } else {
       kn.chase = null;
     }
@@ -79,7 +86,7 @@ export function stepMoed(k: KlodderState, ctx: MonsterContext): boolean {
   } else {
     tokClock.set(k, since);
   }
-  k.moed = Math.min(MOED_FULL, k.moed + Math.min(Math.min(pokers, MOED_MAX_POKERS), MOED_MAX_RATE) * ctx.dt);
+  k.moed = Math.min(MOED_FULL, k.moed + moedRate(krachts, MOED_FULL) * ctx.dt);
   if (k.moed < MOED_FULL) return false;
   freeAll(ctx);
   k.pokers = 0;

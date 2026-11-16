@@ -123,6 +123,8 @@ export interface StepOptions {
   radius?: number;
   /** The player's view yaw. With it, followers stay behind the player (decision 112). */
   playerYaw?: number;
+  /** Walking speed in blocks per second when he is not roaming; default `DINO_SPEED` (knights with gear, v19). */
+  speed?: number;
 }
 
 /** The unit vector the player looks along on the ground, for a view yaw (the renderer's convention). */
@@ -609,12 +611,13 @@ function stepOnce(world: World, d: DinoState, player: Point, rng: Rng, dt: numbe
     if (len > 0.05) { dirX = gx / len; dirZ = gz / len; }
   }
   const lavaOut = { lava: false };
-  const moved = physics(world, d, dirX, dirZ, dt, opts.box, roam ? ROAM_SPEED : DINO_SPEED, false, lavaOut);
+  const pace = roam ? ROAM_SPEED : (opts.speed ?? DINO_SPEED);
+  const moved = physics(world, d, dirX, dirZ, dt, opts.box, pace, false, lavaOut);
   if (lavaOut.lava && !d.chasing) { d.goal = null; d.idleLeft = 0.5 + rng.next(); }
   if (dirX !== 0 || dirZ !== 0) {
     d.heading = Math.atan2(dirX, dirZ);
-    if (d.onGround && moved < (roam ? ROAM_SPEED : DINO_SPEED) * dt * 0.25) d.stuckTime += dt;
-    else if (moved >= (roam ? ROAM_SPEED : DINO_SPEED) * dt * 0.25) d.stuckTime = 0;
+    if (d.onGround && moved < pace * dt * 0.25) d.stuckTime += dt;
+    else if (moved >= pace * dt * 0.25) d.stuckTime = 0;
   } else {
     d.stuckTime = 0;
   }

@@ -23,6 +23,8 @@ import { DINO_KINDS, SHOP_KINDS, SPECIAL_KINDS, type DinoKind, type DinoKindId }
 import { el } from './dom';
 import { onTap } from './tap';
 import { createKnightsSection, type KnightShopState } from './shop-knights';
+import { createGearSection } from './shop-gear';
+import { createStonesSection } from './shop-stones';
 
 export interface ShopDinoSummary {
   id?: string;
@@ -46,7 +48,11 @@ export interface ShopViewState {
   /** True when the kid owns the Dinofluit (decision 114). */
   fluit?: boolean;
   /** Set when Ridders are on: the knights the kid owns. Missing: the Ridders section does not show (AC200). */
-  knights?: readonly { id: string }[];
+  knights?: readonly { id: string; gearCount?: number }[];
+  /** The ids of the wapenkast (v19). The Uitrusting row shows under Ridders when `knights` is set. */
+  gearOwned?: readonly string[];
+  /** The found and bought stones (v20). The Edelstenen section shows when this is set, whatever the switches say. */
+  stones?: { found: readonly number[]; bought: readonly number[] };
   toastMessage?: string | null;
 }
 
@@ -61,6 +67,10 @@ export interface ShopViewOptions {
   /** Buys a knight and trades one in by id (v17). Without them the shop shows no Ridders section. */
   onBuyKnight?: () => Promise<unknown> | unknown;
   onTradeInKnight?: (id: string) => Promise<unknown> | unknown;
+  /** Buys a gear item by id (v19). Without it the shop shows no Uitrusting row. */
+  onBuyGear?: (id: string) => Promise<unknown> | unknown;
+  /** Buys a stone by vein id (v20). Without it the shop shows no Edelstenen section. */
+  onBuyStone?: (id: number) => Promise<unknown> | unknown;
   onClose: () => void;
   /** Optional shortcut to override the countdown and earn coins immediately. */
   onEarnCoins?: () => void;
@@ -153,6 +163,17 @@ export function createShopView(options: ShopViewOptions): ShopView {
   const knightsSection = createKnightsSection({
     onBuy: () => options.onBuyKnight?.(),
     onTradeIn: (id) => options.onTradeInKnight?.(id),
+    onChange: () => renderView(),
+    now: options.now,
+  });
+
+  const gearSection = createGearSection({
+    onBuy: (id) => options.onBuyGear?.(id),
+    onChange: () => renderView(),
+    now: options.now,
+  });
+  const stonesSection = createStonesSection({
+    onBuy: (id) => options.onBuyStone?.(id),
     onChange: () => renderView(),
     now: options.now,
   });
@@ -642,6 +663,12 @@ export function createShopView(options: ShopViewOptions): ShopView {
     if (options.onBuyKnight && state.knights) {
       const ks: KnightShopState = { points: state.points, knights: state.knights };
       modal.append(knightsSection.render(ks, loaded));
+      if (options.onBuyGear) {
+        modal.append(gearSection.render({ points: state.points, knightCount: state.knights.length, owned: state.gearOwned ?? [] }, loaded));
+      }
+    }
+    if (options.onBuyStone && state.stones) {
+      modal.append(stonesSection.render({ points: state.points, found: state.stones.found, bought: state.stones.bought }, loaded));
     }
 
     // Live "Mijn Dino-verzameling" showcase
@@ -694,6 +721,8 @@ export function createShopView(options: ShopViewOptions): ShopView {
     destroy() {
       clearCleanups();
       knightsSection.destroy();
+      gearSection.destroy();
+      stonesSection.destroy();
       root.remove();
     },
   };

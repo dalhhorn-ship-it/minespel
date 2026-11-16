@@ -41,10 +41,47 @@ describe('atlas', () => {
     expect(Math.abs((px(8, 0)[0] as number) - (yellow[0] as number))).toBeLessThan(20);
   });
 
-  it('AC233: the vein blocks use the steen tile on every face', () => {
+  it('AC271: every vein id has its own solid still tile, different from steen and from each other', () => {
+    const seen = new Set<string>([Array.from(paintTile(tileFor(STEEN, 'side')).data).join(',')]);
+    const tiles = new Set<number>();
     for (const id of VEIN_BLOCKS) {
-      for (const face of ['top', 'bottom', 'side'] as const) expect(tileFor(id, face)).toBe(tileFor(STEEN, face));
+      const t = tileFor(id, 'side');
+      expect(t).toBeGreaterThanOrEqual(0);
+      expect(t).not.toBe(tileFor(STEEN, 'side'));
+      for (const face of ['top', 'bottom'] as const) expect(tileFor(id, face)).toBe(t);
+      tiles.add(t);
+      const d = paintTile(t).data;
+      for (let i = 3; i < d.length; i += 4) expect(d[i]).toBe(255);
+      seen.add(Array.from(d).join(','));
     }
+    expect(tiles.size).toBe(8);
+    expect(seen.size).toBe(9);
+  });
+
+  it('AC271: the stones differ in shape, not only in colour (grey scale pictures differ)', () => {
+    const shapes = new Set<string>();
+    for (const id of VEIN_BLOCKS) {
+      const d = paintTile(tileFor(id, 'side')).data;
+      const bits: string[] = [];
+      for (let i = 0; i < d.length; i += 4) {
+        const r = d[i] as number;
+        const g = d[i + 1] as number;
+        const b = d[i + 2] as number;
+        bits.push(Math.max(r, g, b) - Math.min(r, g, b) > 30 || Math.min(r, g, b) > 200 ? '1' : '0');
+      }
+      shapes.add(bits.join(''));
+    }
+    expect(shapes.size).toBe(8);
+  });
+
+  it('AC271: no vein tile is animated', () => {
+    const animated = ['water', 'lava', 'vuur'];
+    for (const id of VEIN_BLOCKS) {
+      const spec = TILES[tileFor(id, 'side')];
+      expect(animated).not.toContain(spec?.name);
+      expect(spec?.name).toBe(`ader-${id}`);
+    }
+    expect(Object.keys(TILES[tileFor(43, 'side')] ?? {}).sort()).toEqual(['base', 'name', 'pattern', 'speckle']);
   });
 
   it('AC187: paints 8 solid rare tiles that all differ from each other', () => {

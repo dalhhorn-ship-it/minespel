@@ -132,3 +132,29 @@ describe('knight system skeleton', () => {
     expect(s.system.points()).toBe(29);
   });
 });
+
+describe('v19 gear seams (AC264, AC265)', () => {
+  const lastViews = (s: ReturnType<typeof setup>) => s.syncActors.mock.calls.at(-1)![1] as { id: string; look?: string; pose?: string }[];
+  it('AC264: setGear sends the look key to the renderer, a bare knight sends an empty look', () => {
+    const s = setup();
+    s.system.add(rec('a'));
+    expect(lastViews(s)[0]).toMatchObject({ look: '', pose: undefined });
+    expect(s.system.setGear('a', { rijdier: 'pony', hoofd: 'leren-kap' })).toBe(true);
+    expect(lastViews(s)[0]!.look).toBe('leren-kap+pony');
+    expect(s.system.setGear('a', undefined)).toBe(true);
+    expect(lastViews(s)[0]!.look).toBe('');
+    expect(s.system.setGear('nope', {})).toBe(false);
+  });
+  it('AC265: a knight that pokes is sent with the pose poke for that frame only, and it is never saved', () => {
+    const s = setup();
+    s.system.add(rec('a'));
+    s.system.knights()[0]!.poking = true;
+    s.system.step(1 / 30);
+    expect(lastViews(s)[0]!.pose).toBe('poke');
+    s.system.step(1 / 30);
+    expect(lastViews(s)[0]!.pose).toBeUndefined();
+    s.system.setMode('a', 'stay');
+    expect(JSON.stringify(s.saved())).not.toContain('poke');
+    expect(JSON.stringify(s.saved())).not.toContain('gear');
+  });
+});
