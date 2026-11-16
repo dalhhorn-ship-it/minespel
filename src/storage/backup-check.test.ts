@@ -308,10 +308,27 @@ describe('checkBackup', () => {
       expect(checkBackup(JSON.stringify(f))).toEqual(refused);
       expect(checkBackup(load('bad-newer-format.json'))).toEqual({ ok: false, message: MSG_NEWER });
     });
-    it('AC267: a format 4 file is a newer file for 0.10.0', () => {
+    it('AC267: a format 5 file is a newer file for 0.11.0 (format 4 is its own)', () => {
       const f = JSON.parse(load('v0100-gear.json'));
-      f.format = 4;
+      f.format = 5;
       expect(checkBackup(JSON.stringify(f))).toEqual({ ok: false, message: MSG_NEWER });
+    });
+  });
+  describe('AC278: the stone checks of format 4', () => {
+    const refused = { ok: false, message: MSG_BAD_VALUES };
+    it('AC278: a 0.11.0 file with 3 found and 2 bought passes', () => {
+      expect(checkBackup(load('v0110-stones.json')).ok).toBe(true);
+    });
+    for (const name of ['bad-v0110-stone-id.json', 'bad-v0110-bought-not-found.json']) {
+      it(`AC195 AC278: ${name} gets the friendly message`, () => {
+        expect(checkBackup(load(name))).toEqual(refused);
+      });
+    }
+    it('AC278: a 0.10.0 file (format 3) still passes, and one that holds stones is not trusted', () => {
+      expect(checkBackup(load('v0100-gear.json')).ok).toBe(true);
+      const f = JSON.parse(load('v0110-stones.json'));
+      f.format = 3;
+      expect(checkBackup(JSON.stringify(f))).toEqual(refused);
     });
   });
 });

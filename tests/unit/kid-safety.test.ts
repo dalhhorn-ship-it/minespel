@@ -7,6 +7,7 @@ const { readdirSync, readFileSync, statSync } = (
 import ts from 'typescript';
 import { describe, expect, it } from 'vitest';
 import { findBannedWords } from '../../src/core/kid-words';
+import { STONES } from '../../src/world/stones';
 import { createSound, SOUND_NAMES, SOUND_SPECS, type SoundName } from '../../src/audio/sound';
 
 const KNIGHT_FILES = [
@@ -27,6 +28,18 @@ const KNIGHT_FILES = [
   'src/ui/mole-card.ts',
   'src/render/mole-model.ts',
   'src/app/boot.ts',
+  // v19 Ridderuitrusting: the gear table, its economy, the shop row, the Uitrusten screen and the pictures (AC268).
+  'src/knights/gear.ts',
+  'src/knights/gear-economy.ts',
+  'src/ui/shop-gear.ts',
+  'src/ui/gear-screen.ts',
+  'src/ui/knight-picture.ts',
+  'src/ui/gear-icon.ts',
+  // v20 Diepe edelstenen: the stone table, the flow, the economy and the shop row (AC279).
+  'src/world/stones.ts',
+  'src/app/stones-flow.ts',
+  'src/app/stones-economy.ts',
+  'src/ui/shop-stones.ts',
 ];
 
 const NETWORK = /\b(fetch|XMLHttpRequest|WebSocket|EventSource|sendBeacon)\b|https?:\/\//;
@@ -180,5 +193,50 @@ describe('the Monstermol (V16e, AC255)', () => {
 
   it('AC255: with reduced motion boot hands the monster system no shake', () => {
     expect(readFileSync('src/app/boot.ts', 'utf8')).toMatch(/shake:\s*reducedMotion\s*\?\s*undefined/);
+  });
+});
+
+describe('knight gear strings (AC268)', () => {
+  const GEAR_FILES = ['src/knights/gear.ts', 'src/knights/gear-economy.ts', 'src/ui/shop-gear.ts', 'src/ui/gear-screen.ts', 'src/ui/knight-picture.ts', 'src/ui/gear-icon.ts'];
+
+  it('AC268: the gear files are scanned and hold strings', () => {
+    for (const f of GEAR_FILES) expect(KNIGHT_FILES, f).toContain(f);
+  });
+
+  it('AC268: no gear string says a knight is weak or must have gear', () => {
+    const bad: string[] = [];
+    for (const f of GEAR_FILES)
+      for (const s of literals(f)) {
+        const t = s.toLowerCase();
+        if (/\bzwak\b|\bmoet\b|nodig om/.test(t) && /ridder/.test(t)) bad.push(`${f}: "${s}"`);
+        if (/\bzwak\b/.test(t)) bad.push(`${f}: "${s}"`);
+      }
+    expect(bad).toEqual([]);
+  });
+
+  it('AC268: no new sound for gear, and the Kietelveer reuses the soft hihihi', () => {
+    expect(SOUND_SPECS.hihihi.peak).toBeLessThanOrEqual(Math.max(...SOUNDS_0_6_0.map((n) => SOUND_SPECS[n].peak)));
+    expect(readFileSync('src/monsters/moed.ts', 'utf8')).toContain("ctx.play('hihihi')");
+  });
+});
+
+describe('stone strings (AC279)', () => {
+  const STONE_FILES = ['src/world/stones.ts', 'src/app/stones-flow.ts', 'src/app/stones-economy.ts', 'src/ui/shop-stones.ts'];
+
+  it('AC279: the stone files are scanned, hold strings and hold no banned word', () => {
+    const bad: string[] = [];
+    for (const f of STONE_FILES) {
+      expect(KNIGHT_FILES, f).toContain(f);
+      expect(literals(f).length, f).toBeGreaterThan(0);
+      for (const s of literals(f)) {
+        const found = findBannedWords(s);
+        if (found.length) bad.push(`${f}: "${s}" holds ${found.join(', ')}`);
+      }
+    }
+    expect(bad).toEqual([]);
+  });
+
+  it('AC279: every stone name is free of banned words', () => {
+    expect(findBannedWords(STONES.map((s) => s.name).join(' '))).toEqual([]);
   });
 });

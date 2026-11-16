@@ -1,5 +1,32 @@
 # Test report
 
+## v20 Diepe edelstenen (0.11.0), V20d closing task
+
+Automated part: see the totals in the v19 section (one full run for both tasks). AC279 (the 8 stones shine on the founder's iPad and the walk below the stripes meets AC101) is OPEN: it cannot run here.
+
+* AC277, `stones-save.spec.ts`: Wereld opnieuw beginnen keeps found and bought and a mined vein cell is stone again; Alles wissen empties both.
+* AC278, `backup.test.ts`, `backup-check.test.ts`, `import-export-screen.test.ts`, `stones.test.ts` (`checkStones`) and `stones-save.spec.ts`: format 4; a stone id outside 43 to 50 or a stone bought but not found is refused with the AC195 message; a 0.10.0 file restores with no stone; the 0.11.0 file keeps 3 found and 2 bought; a restored hotbar with a stone not bought shows that slot empty.
+* AC279, `kid-safety.test.ts` and `stones-save.spec.ts`: no banned word in the stone files, no request beyond the app in a session with mining and buying.
+* AC280: `package.json` 0.11.0, Instellingen shows "Versie 0.11.0" (`big-world.spec.ts`), CHANGELOG entry.
+
+### Open for the founder
+
+* **AC279 iPad part**: see the 8 stones shine in the ground and in a build, and walk below the stripes at the AC101 target. Not run yet.
+* The "Check before shipping" list of PRD section 12 on a test deploy.
+
+## v19 Ridderuitrusting (0.10.0), V19e closing task
+
+Automated part PASS (totals below). AC269 (speed on the founder's oldest iPad with 3 knights in full gear, one on the Pony, Klodder out and 25 shop dinos) is OPEN: it cannot run here.
+
+* AC268, `kid-safety.test.ts`: the gear files (`gear.ts`, `gear-economy.ts`, `shop-gear.ts`, `gear-screen.ts`, `knight-picture.ts`, `gear-icon.ts`) hold no banned word and no network call, no gear string says a knight is zwak or moet gear hebben, and the Kietelveer reuses the soft `hihihi`.
+* AC268, `gear-safety.spec.ts`: a session with buying, wearing and a fight makes no request beyond the app; with Geluidseffecten uit and with Volume 0 the gear lines show as text and no sound node is made (a control run does make sound).
+* AC270: `package.json` 0.10.0 at that step, Instellingen shows the version (`big-world.spec.ts`), CHANGELOG entry.
+
+### Open for the founder
+
+* **AC269**: on the oldest iPad from the home screen icon with the fps counter, on the v15 world; a knight in gear sends Klodder off. Target: AC101. Not run yet.
+* The "Check before shipping" list of PRD section 12 on a test deploy, then hand the iPad to the kid.
+
 ## v16 Monstermol (0.9.0), V16e closing task
 
 Automated part PASS. AC256 (speed on the founder's oldest iPad) and AC241 (v15, the big world) are OPEN: they cannot run here.

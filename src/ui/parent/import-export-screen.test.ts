@@ -112,4 +112,27 @@ describe('Import & Export screen (T53a)', () => {
     await flush();
     expect(q(root, 'backup-message')?.textContent).toContain('niets veranderd');
   });
+
+  for (const name of ['bad-v0110-stone-id.json', 'bad-v0110-bought-not-found.json']) {
+    it(`AC195 AC278: ${name} shows the friendly message and restores nothing`, async () => {
+      const onRestore = vi.fn();
+      const pick = vi.fn(async () => ({ ok: true as const, name: 'x.json', text: fixture(name) }));
+      const { root } = make({ onRestore, pick });
+      await flush();
+      tap(q(root, 'backup-restore'));
+      await flush();
+      expect(q(root, 'backup-message')?.textContent).toMatch(/niets veranderd|niet klopt/);
+      expect(q(root, 'restore-confirm')).toBeNull();
+      expect(onRestore).not.toHaveBeenCalled();
+    });
+  }
+
+  it('AC278: the 0.11.0 stones file asks to confirm', async () => {
+    const pick = vi.fn(async () => ({ ok: true as const, name: 'x.json', text: fixture('v0110-stones.json') }));
+    const { root } = make({ pick });
+    await flush();
+    tap(q(root, 'backup-restore'));
+    await flush();
+    expect(q(root, 'restore-confirm')).not.toBeNull();
+  });
 });

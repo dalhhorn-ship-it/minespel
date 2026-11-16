@@ -28,3 +28,18 @@ export const STONE_IDS: readonly number[] = STONES.map((s) => s.id);
 export function stoneById(id: number): StoneInfo | undefined {
   return STONES.find((s) => s.id === id);
 }
+
+/**
+ * Backup check (format 4, AC278): `monsters.stones` is missing, or an object whose `found` and `bought` are lists of
+ * stone ids 43 to 50, each at most once, with every bought stone also found. Anything else is refused.
+ */
+export function checkStones(raw: unknown): boolean {
+  if (raw === undefined) return true;
+  if (typeof raw !== 'object' || raw === null || Array.isArray(raw)) return false;
+  const { found, bought } = raw as { found?: unknown; bought?: unknown };
+  const list = (v: unknown): number[] | null =>
+    v === undefined ? [] : Array.isArray(v) && v.length <= STONE_IDS.length && v.every((n) => typeof n === 'number' && STONE_IDS.includes(n)) && new Set(v).size === v.length ? (v as number[]) : null;
+  const f = list(found);
+  const b = list(bought);
+  return f !== null && b !== null && b.every((id) => f.includes(id));
+}

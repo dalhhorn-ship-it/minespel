@@ -3,6 +3,7 @@
 import { MAX_CHICKENS, MAX_SHOP_DINOS, chickenCount, shopDinoCount } from '../core/economy';
 import { cleanDiff } from '../game/world-save';
 import { checkGear } from '../knights/gear';
+import { checkStones } from '../world/stones';
 import { MAX_KNIGHTS } from '../knights/knight-types';
 import { filterDinoNameDraft } from '../ui/name-screen';
 import {
@@ -77,8 +78,10 @@ interface Bounds {
 const BOUNDS: Record<number, Bounds> = {
   1: { size: LEGACY_SIZE, height: LEGACY_HEIGHT, cells: LEGACY_CELL_COUNT, terrainVersions: [undefined, 1, 2], needsWorld: false, gear: false, stones: false },
   2: { size: WORLD_SIZE, height: WORLD_HEIGHT, cells: WORLD_SIZE * WORLD_HEIGHT * WORLD_SIZE, terrainVersions: [3], needsWorld: true, gear: false, stones: false },
-  // Format 3 (0.10.0, AC267): the bounds of format 2, plus the gear of the knights. V20d adds format 4 for stones.
+  // Format 3 (0.10.0, AC267): the bounds of format 2, plus the gear of the knights.
   3: { size: WORLD_SIZE, height: WORLD_HEIGHT, cells: WORLD_SIZE * WORLD_HEIGHT * WORLD_SIZE, terrainVersions: [3], needsWorld: true, gear: true, stones: false },
+  // Format 4 (0.11.0, AC278): the same, plus the stones the kid found and bought.
+  4: { size: WORLD_SIZE, height: WORLD_HEIGHT, cells: WORLD_SIZE * WORLD_HEIGHT * WORLD_SIZE, terrainVersions: [3], needsWorld: true, gear: true, stones: true },
 };
 
 function validWorld(w: Record<string, unknown>, b: Bounds): boolean {
@@ -113,7 +116,7 @@ function validMonsters(v: Record<string, unknown>, b: Bounds): boolean {
     optional(v.hintShown, (x) => typeof x === 'boolean') &&
     // An older format never held gear or stones, so a file that says it did is not trusted (AC267).
     (b.gear ? checkGear(v.gear) : v.gear === undefined) &&
-    (b.stones ? true : v.stones === undefined);
+    (b.stones ? checkStones(v.stones) : v.stones === undefined);
 }
 
 function validKv(name: BackupKvName, v: Record<string, unknown>, b: Bounds): boolean {

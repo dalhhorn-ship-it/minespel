@@ -5,7 +5,7 @@ import { createRecords } from './records';
 import { SCHEMA_VERSION, STORE_NAMES, type KvName, type StoreName } from './schema';
 
 export const BACKUP_APP = 'dino-blokwereld';
-export const BACKUP_FORMAT = 3;
+export const BACKUP_FORMAT = 4;
 /** A file over this size is refused before it is read (AC195). */
 export const MAX_BACKUP_BYTES = 20 * 1024 * 1024;
 
