@@ -4,7 +4,7 @@
   {"id": "CLAUDE.md", "title": "Dino Blokwereld (minespel)", "lines": 71, "ids": {}},
   {"id": "README.md", "title": "Dino Blokwereld", "lines": 78, "ids": {}},
   {"id": "docs/ARCHITECTURE.md", "title": "Architecture", "lines": 408, "ids": {}},
-  {"id": "docs/BACKLOG.md", "title": "Release backlog: Dino Blokwereld", "lines": 268, "ids": {}},
+  {"id": "docs/BACKLOG.md", "title": "Release backlog: Dino Blokwereld", "lines": 273, "ids": {}},
   {"id": "docs/DECISIONS.md", "title": "Decisions", "lines": 69, "ids": {"Decisions": "87 to 147 (61)"}},
   {"id": "docs/DISCUSSION.md", "title": "Agent discussion", "lines": 164, "ids": {"Tasks": "V11a, V11b, V11c, V11d, V11e (5)"}},
   {"id": "docs/FACTORY.md", "title": "App Factory: how the agents work", "lines": 113, "ids": {}},
