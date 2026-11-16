@@ -234,6 +234,8 @@ test.describe('De mollen worden bewaard (V22c)', () => {
     await expect(toggle).toHaveText('Uit');
     await page.locator('.parent-close-btn').tap();
     await expect.poll(() => readState<string>(page, 'currentScreen')).toBe('world');
+    // Back on the world screen the game reads the switches again, a moment later. Wait for that, then play on.
+    await expect.poll(async () => (await moles(page)).length).toBe(0);
     await readState(page, 'fastForward', 3000);
     expect(await moles(page)).toEqual([]);
     await readState(page, 'flushSave');
