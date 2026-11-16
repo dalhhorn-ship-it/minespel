@@ -76,6 +76,10 @@ jobs:
         if: steps.scope.outputs.scope == 'full'
         run: npx playwright test --shard=${{ matrix.shard }}/4
       # A red test leaves its error context (and screenshots) here, so a failure that does not come back locally can be read.
+      - name: Show the failure context
+        if: failure()
+        run: |
+          for f in test-results/*/error-context.md; do [ -f "$f" ] && { echo "=== $f"; cat "$f"; }; done || true
       - name: Keep the failure files
         if: failure()
         uses: actions/upload-artifact@v4
