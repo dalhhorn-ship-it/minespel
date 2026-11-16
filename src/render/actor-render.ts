@@ -1,7 +1,8 @@
 // Draws creature actors (knights, Klodder, the bubble and the mole) into one Group per group name.
 // Game state never lives here: the game hands over `ActorView`s every frame, meshes are cached per id and built
 // by the model file of each kind (decision 135). 
-import { Group } from 'three';
+import { Group, type Mesh } from 'three';
+import { registerHook } from '../dev/e2e-hooks';
 import { createKnightModel } from './knight-model';
 import { createBubbleModel, createKlodderModel } from './klodder-model';
 import { createMoleModel } from './mole-model';
@@ -20,6 +21,8 @@ export interface ActorView {
   scale?: number;
   /** A name the model file understands, for example 'march' or 'wave'. */
   pose?: string;
+  /** The gear set of a knight: the sorted worn ids joined by `+`, empty or missing for a bare knight (v19). */
+  look?: string;
 }
 
 /** A built model: a root to place and turn, and a way to set its pose. */
@@ -29,7 +32,7 @@ export interface ActorModel {
   dispose(): void;
 }
 
-const BUILDERS: Partial<Record<ActorView['model'], () => ActorModel>> = {
+const BUILDERS: Partial<Record<ActorView['model'], (look?: string) => ActorModel>> = {
   knight: createKnightModel,
   klodder: createKlodderModel,
   bubble: createBubbleModel,
@@ -44,7 +47,7 @@ export interface ActorSceneSync {
 
 export function createActorSceneSync(): ActorSceneSync {
   const root = new Group();
-  const parts = new Map<ActorGroup, { group: Group; models: Map<string, { kind: ActorView['model']; model: ActorModel }> }>();
+  const parts = new Map<ActorGroup, { group: Group; models: Map<string, { kind: ActorView['model']; look: string; model: ActorModel }> }>();
   let time = 0;
 
   function part(name: ActorGroup) {
@@ -57,6 +60,26 @@ export function createActorSceneSync(): ActorSceneSync {
     return p;
   }
 
+  if (__E2E__) {
+    // Test hook: the meshes of each knight (count, gear set and geometry ids) to check the cap and the sharing.
+    registerHook('knightMeshes', () => {
+      const out: { id: string; look: string; meshes: number; geometries: string[]; names: string[] }[] = [];
+      for (const [id, entry] of parts.get('knights')?.models ?? []) {
+        const geometries: string[] = [];
+        const names: string[] = [];
+        entry.model.root.traverse((o) => {
+          const m = o as Mesh;
+          if (m.isMesh) {
+            geometries.push(m.geometry.uuid);
+            names.push(m.name);
+          }
+        });
+        out.push({ id, look: entry.look, meshes: geometries.length, geometries, names });
+      }
+      return out;
+    });
+  }
+
   return {
     group: root,
     sync(name, actors) {
@@ -65,7 +88,7 @@ export function createActorSceneSync(): ActorSceneSync {
       const seen = new Set<string>();
       for (const a of actors) {
         let entry = p.models.get(a.id);
-        if (entry && entry.kind !== a.model) {
+        if (entry && (entry.kind !== a.model || entry.look !== (a.look ?? ''))) {
           p.group.remove(entry.model.root);
           entry.model.dispose();
           p.models.delete(a.id);
@@ -74,7 +97,7 @@ export function createActorSceneSync(): ActorSceneSync {
         if (!entry) {
           const build = BUILDERS[a.model];
           if (!build) continue;
-          entry = { kind: a.model, model: build() };
+          entry = { kind: a.model, look: a.look ?? '', model: build(a.look ?? '') };
           p.group.add(entry.model.root);
           p.models.set(a.id, entry);
         }

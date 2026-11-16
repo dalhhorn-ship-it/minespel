@@ -133,4 +133,25 @@ describe('Dinowinkel buy with and without a dino store (AC150, R2d)', () => {
     expect(addEgg).toHaveBeenCalledWith('compy', false);
     expect(records.put).toHaveBeenCalledTimes(1);
   });
+
+  it('AC259: the gear buy goes through the economy once per tap, the stone buy stays closed until V20c', async () => {
+    const { screens } = fakeScreens();
+    const records = econRecords();
+    let calls = 0;
+    const gear = { buy: vi.fn(async () => { calls++; return calls === 1; }), state: () => ({ owned: [], worn: {} }), wear: vi.fn(), afterTradeIn: vi.fn(), load: vi.fn() };
+    const stones = { buy: vi.fn(async () => false) };
+    const flow = createShopFlow({ screens, records, db: {} as IDBDatabase, gear: gear as never, stones, stonesFlow: { state: () => ({ found: [], bought: [] }) } });
+    await flow.open();
+    const results = await Promise.all([flow.buyGear('pony'), flow.buyGear('pony')]);
+    expect(results).toEqual([true, false]);
+    expect(gear.buy).toHaveBeenCalledWith('pony');
+    expect(await flow.buyStone(43)).toBe(false);
+  });
+
+  it('AC259: without a gear economy nothing can be bought', async () => {
+    const { screens } = fakeScreens();
+    const flow = createShopFlow({ screens, records: econRecords() });
+    expect(await flow.buyGear('pony')).toBe(false);
+    expect(await flow.buyStone(43)).toBe(false);
+  });
 });

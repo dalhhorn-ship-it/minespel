@@ -1,9 +1,10 @@
 // Knight behaviour (V17b): the three modes on `stepDino` with `KNIGHT_BOX`, `stepToward`, the salute, and placement.
 import { createRng, type Rng } from '../core/rng';
-import { createDino, DINO_SPEED, popNextTo, stepDino, walkToward, type DinoState, type Point } from '../dinos/dino-ai';
+import { createDino, popNextTo, stepDino, walkToward, type DinoState, type Point } from '../dinos/dino-ai';
 import { SEARCH_EVERY_MS, type Cell } from '../monsters/monster-types';
 import { findMolePath, isStandCell } from '../monsters/mole-path';
 import type { World } from '../world/world';
+import { walkSpeed } from './gear';
 import { KNIGHT_BOX, KNIGHT_NEAR, SALUTE_GAP_MS, type KnightEvent, type KnightState } from './knight-types';
 
 export interface KnightAiContext {
@@ -103,6 +104,7 @@ function chaseGoals(world: World, body: DinoState, chase: NonNullable<KnightStat
  */
 function stepChase(knight: KnightState, world: World, rng: Rng, dt: number): StepTowardResult {
   const body = knight.body;
+  const speed = walkSpeed(knight.gear);
   const chase = knight.chase as NonNullable<KnightState['chase']>;
   const target = { x: chase.x, y: body.y, z: chase.z };
   knight.searchMs = (knight.searchMs ?? 0) - dt * 1000;
@@ -114,11 +116,11 @@ function stepChase(knight: KnightState, world: World, rng: Rng, dt: number): Ste
   const path = knight.chasePath;
   // Close enough, or no path (or its end reached): the straight walk of before, with its own 3 s stuck pop.
   if (!path || path.length === 0 || Math.hypot(target.x - body.x, target.z - body.z) <= 1.2) {
-    return stepToward(world, body, target, rng, dt, { speed: DINO_SPEED, stuckSeconds: 3, arrive: 1.2, box: KNIGHT_BOX });
+    return stepToward(world, body, target, rng, dt, { speed, stuckSeconds: 3, arrive: 1.2, box: KNIGHT_BOX });
   }
   const next = path[0] as Cell;
   const r = stepToward(world, body, { x: next.x + 0.5, y: body.y, z: next.z + 0.5 }, rng, dt,
-    { speed: DINO_SPEED, stuckSeconds: Infinity, arrive: 0.3, box: KNIGHT_BOX });
+    { speed, stuckSeconds: Infinity, arrive: 0.3, box: KNIGHT_BOX });
   if (r === 'arrived') path.shift();
   if (body.stuckTime >= 3) {
     body.stuckTime = 0;
@@ -138,6 +140,7 @@ export function stepKnight(knight: KnightState, ctx: KnightAiContext): KnightEve
   const { world, rng, player, playerYaw, dt } = ctx;
   if (!(dt > 0) || !Number.isFinite(dt)) return null;
   const body = knight.body;
+  const speed = walkSpeed(knight.gear);
   knight.saluteClockMs += dt * 1000;
   if (!knight.chase && knight.chasePath !== undefined) {
     knight.chasePath = undefined;
@@ -149,14 +152,14 @@ export function stepKnight(knight: KnightState, ctx: KnightAiContext): KnightEve
   } else {
     if (knight.mode === 'follow') {
       body.mode = 'follow';
-      stepDino(world, body, player, rng, dt, { box: KNIGHT_BOX, playerYaw });
+      stepDino(world, body, player, rng, dt, { box: KNIGHT_BOX, playerYaw, speed });
     } else {
       body.mode = 'stay';
       if (knight.spot) {
         body.stayX = knight.spot.x;
         body.stayZ = knight.spot.z;
       }
-      stepDino(world, body, player, rng, dt, { box: KNIGHT_BOX, radius: knight.mode === 'guard' ? GUARD_RADIUS : STAY_RADIUS });
+      stepDino(world, body, player, rng, dt, { box: KNIGHT_BOX, radius: knight.mode === 'guard' ? GUARD_RADIUS : STAY_RADIUS, speed });
     }
   }
   if (knight.mode !== 'follow' && knight.saluteClockMs >= SALUTE_GAP_MS

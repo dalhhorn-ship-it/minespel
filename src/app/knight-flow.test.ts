@@ -63,4 +63,31 @@ describe('knight flow', () => {
     s.flow.openMenu(knight('guard'));
     expect(s.say).toHaveBeenCalledWith('Hier zijn nog geen dieren.');
   });
+
+  it('AC261: Uitrusten opens the gear screen, Terug reopens the menu', () => {
+    const layer = document.createElement('div');
+    const screens = {
+      showKidOverlay: vi.fn((n: HTMLElement | null) => layer.replaceChildren(...(n ? [n] : []))),
+      showWorld: vi.fn(() => layer.replaceChildren()),
+    };
+    const flow = createKnightFlow({
+      screens,
+      gear: { state: () => ({ owned: ['pony'], worn: {} }), wear: async () => true },
+      knightList: () => [{ id: 'a' }],
+    });
+    flow.openMenu(knight('stay'));
+    const labels = [...layer.querySelectorAll('button')].map((b) => b.textContent);
+    expect(labels).toEqual(['Volg mij', 'Blijf hier', 'Pas op de dieren', 'Uitrusten', 'Sluiten']);
+    const tapIt = (n: Element) => {
+      n.dispatchEvent(new PointerEvent('pointerdown', { pointerId: 1, bubbles: true, clientX: 1, clientY: 1 }));
+      n.dispatchEvent(new PointerEvent('pointerup', { pointerId: 1, bubbles: true, clientX: 1, clientY: 1 }));
+    };
+    tapIt(layer.querySelector('[data-action="gear"]')!);
+    expect(layer.querySelector('.gear-screen-card')).not.toBeNull();
+    expect(layer.querySelector('.knight-menu-card')).toBeNull();
+    expect(screens.showWorld).not.toHaveBeenCalled();
+    tapIt(layer.querySelector('[data-action="back"]')!);
+    expect(layer.querySelector('.knight-menu-card')).not.toBeNull();
+    expect(layer.querySelector('.gear-screen-card')).toBeNull();
+  });
 });

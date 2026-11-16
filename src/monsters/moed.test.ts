@@ -131,3 +131,68 @@ describe('moed (v18d)', () => {
     expect(HINT_TEXT.toLowerCase()).not.toMatch(/koop|winkel|punten/);
   });
 });
+
+describe('AC262: Kracht in the Klodder bar', () => {
+  const dressed = (worn: KnightState['gear'], z = sz): KnightState => ({ ...knight('stay', sx + 1, z), gear: worn });
+  const KRACHT3 = { hoofd: 'ijzeren-helm', schild: 'houten-schild' } as const;
+  const KRACHT5 = { hoofd: 'leren-kap', schild: 'houten-schild', hand: 'glimzwaard', rug: 'riddercape' } as const;
+
+  it('AC262: Kracht 3 takes 10 seconds, Kracht 5 takes 6, with the Pony still 6, bare 30 (plus or minus 1)', () => {
+    for (const [worn, secs] of [[KRACHT3, 10], [KRACHT5, 6], [{ ...KRACHT5, rijdier: 'pony' }, 6], [undefined, 30]] as const) {
+      const s = setup([dressed(worn)]);
+      expect(Math.abs(s.run(60) - secs)).toBeLessThanOrEqual(1);
+    }
+  });
+  it('AC262: 3 knights with Kracht 5 never fill the bar under 3 seconds', () => {
+    const s = setup([dressed(KRACHT5, sz), dressed(KRACHT5, sz + 0.1), dressed(KRACHT5, sz + 0.2)]);
+    const t = s.run(60);
+    expect(t).toBeGreaterThanOrEqual(3);
+    expect(t).toBeLessThanOrEqual(4);
+  });
+  it('AC262: a poking knight gets poking = true for the frame, a knight out of reach does not', () => {
+    const near = dressed(KRACHT3);
+    const far = { ...knight('stay', sx + 6, sz), gear: undefined };
+    const s = setup([near, far]);
+    stepMoed(s.k, s.ctx(0.1));
+    expect(near.poking).toBe(true);
+    expect(far.poking).toBeUndefined();
+  });
+});
+
+describe('AC265: the Kietelveer giggle in the Klodder bar', () => {
+  const poker = (gear: KnightState['gear']): KnightState => ({ ...knight('stay', sx + 1, sz), gear });
+  it('AC265: each "Tok!" of a poker with the Kietelveer also plays hihihi', () => {
+    const s = setup([poker({ hand: 'kietelveer' })]);
+    s.run(9);
+    const toks = s.play.mock.calls.filter((c) => c[0] === 'tok').length;
+    expect(toks).toBeGreaterThanOrEqual(2);
+    expect(s.play.mock.calls.filter((c) => c[0] === 'hihihi')).toHaveLength(toks);
+  });
+  it('AC265: a bare poker and a poker with another Hand item do not giggle', () => {
+    for (const gear of [undefined, { hand: 'glimzwaard' }] as const) {
+      const s = setup([poker(gear)]);
+      s.run(9);
+      expect(s.play).toHaveBeenCalledWith('tok');
+      expect(s.play).not.toHaveBeenCalledWith('hihihi');
+    }
+  });
+});
+
+describe('AC285: the banners and Klodder', () => {
+  it('AC285: Volg mij with the Banier goes at 11 blocks and not at 13, the Koningsbanier at 13 and not at 15', () => {
+    for (const [vlag, goes, stays] of [['banier', 11, 13], ['koningsbanier', 13, 15]] as const) {
+      const a = { ...knight('follow', sx + goes, sz), gear: { vlag } };
+      const b = { ...knight('follow', sx + stays, sz), gear: { vlag } };
+      const s = setup([a, b]);
+      stepMoed(s.k, s.ctx(0.1));
+      expect(a.chase).not.toBeNull();
+      expect(b.chase).toBeNull();
+    }
+  });
+  it('AC285: without a banner a follower at 9 blocks does not go (AC216 holds)', () => {
+    const a = knight('follow', sx + 9, sz);
+    const s = setup([a]);
+    stepMoed(s.k, s.ctx(0.1));
+    expect(a.chase).toBeNull();
+  });
+});

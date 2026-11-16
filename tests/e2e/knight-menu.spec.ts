@@ -102,7 +102,7 @@ test.describe('Knight menu (V17d)', () => {
           return [b.textContent, Math.min(r.width, r.height)] as const;
         }),
       );
-      expect(sizes.map((s) => s[0])).toEqual(['Volg mij', 'Blijf hier', 'Pas op de dieren', 'Sluiten']);
+      expect(sizes.map((s) => s[0])).toEqual(['Volg mij', 'Blijf hier', 'Pas op de dieren', 'Uitrusten', 'Sluiten']);
       for (const [, size] of sizes) expect(size).toBeGreaterThanOrEqual(56);
       expect(await blocksAround(page, k)).toEqual(before);
       await tapSel(page, '.knight-menu-btn-close', 8);

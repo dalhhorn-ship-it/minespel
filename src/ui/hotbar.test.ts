@@ -93,3 +93,20 @@ describe('block grid', () => {
     again.grid.destroy();
   });
 });
+
+describe('hotbar stones', () => {
+  it('AC275: a locked id draws an empty slot, a bought one draws the stone', () => {
+    const slots = Array.from({ length: 8 }, () => document.createElement('div'));
+    const bar = createHotbar({
+      slots, allBlocksSlot: document.createElement('div'), blocks: [43, 44, 3, 4, 6, 9, 10, 12], selected: 0,
+      isLocked: (id) => id === 44, onSelect: vi.fn(), onAllBlocks: vi.fn(),
+    });
+    const b = (i: number) => slots[i]!.querySelector('button')!;
+    expect(b(0).classList.contains('hotbar-slot-empty')).toBe(false);
+    expect(b(0).getAttribute('aria-label')).toBe('maansteen');
+    expect(b(1).classList.contains('hotbar-slot-empty')).toBe(true);
+    expect(b(1).getAttribute('aria-label')).toBe('Leeg vakje');
+    expect(b(1).querySelector<HTMLElement>('.hotbar-swatch')!.style.background).toBe('');
+    bar.destroy();
+  });
+});

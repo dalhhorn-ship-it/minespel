@@ -154,7 +154,7 @@ function weekNumbers(input: ProgressInput, start: string, learn: Map<string, num
     learnMs,
     playMs,
     pointsEarned: ledger.filter((l) => l.delta > 0 && l.reason !== 'tradein').reduce((s, l) => s + l.delta, 0),
-    pointsSpent: -ledger.filter((l) => l.delta < 0 && (l.reason === 'shop' || l.reason === 'knight')).reduce((s, l) => s + l.delta, 0),
+    pointsSpent: -ledger.filter((l) => l.delta < 0 && (l.reason === 'shop' || l.reason === 'knight' || l.reason === 'gear' || l.reason === 'stone')).reduce((s, l) => s + l.delta, 0),
     daysActive: active.size,
   };
 }

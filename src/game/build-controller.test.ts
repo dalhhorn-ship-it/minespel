@@ -261,3 +261,57 @@ describe('build controller', () => {
     expect(changed).toContainEqual([12, 20]);
   });
 });
+
+describe('v20 stones in the build controller', () => {
+  const MAANSTEEN = 43;
+  const withStone = (unlock: boolean) => {
+    const s = setup(0, 0, 5);
+    s.c.setState({ mode: 'bouwen', hotbar: [MAANSTEEN, 2, 3, 4, 6, 9, 10, 12], selected: 0 });
+    if (unlock) s.c.setUnlocked([MAANSTEEN]);
+    return s;
+  };
+
+  it('AC275: a stone that is not bought is locked: the tap and placeCell refuse it, no sound, no world change', () => {
+    const { c, world, play, pop, onBlockChanged } = withStone(false);
+    expect(c.isLocked(MAANSTEEN)).toBe(true);
+    expect(c.placeCell(30, 5, 30)).toBe(false);
+    expect(world.get(30, 5, 30)).toBe(AIR);
+    c.tap(500, 350);
+    expect(play).not.toHaveBeenCalled();
+    expect(pop).not.toHaveBeenCalled();
+    expect(onBlockChanged).not.toHaveBeenCalled();
+    c.setSlotBlock(1, MAANSTEEN);
+    expect(c.getState().hotbar[1]).toBe(2);
+  });
+
+  it('AC275: a locked stone in a saved hotbar is kept (still placeable by the rules), only that slot is empty', () => {
+    const { c } = withStone(false);
+    expect(c.getState().hotbar[0]).toBe(MAANSTEEN);
+  });
+
+  it('AC275: once bought, 100 places work and the points are never touched', () => {
+    const { c, world } = withStone(true);
+    expect(c.isLocked(MAANSTEEN)).toBe(false);
+    let placed = 0;
+    for (let i = 0; i < 100; i++) if (c.placeCell(i % 10, 5 + Math.floor(i / 10), 0)) placed++;
+    expect(placed).toBe(100);
+    expect(world.get(3, 5, 0)).toBe(MAANSTEEN);
+    expect(c.placeCell(3, 5, 0)).toBe(false);
+  });
+
+  it('AC275: placeCell keeps the rules: not in the player, not in a taken cell, not outside, not when occupied', () => {
+    const { c, p } = withStone(true);
+    expect(c.placeCell(Math.floor(p.x), 5, Math.floor(p.z))).toBe(false);
+    expect(c.placeCell(5, 2, 5)).toBe(false);
+    expect(c.placeCell(-1, 5, 5)).toBe(false);
+    expect(c.placeCell(1.5, 5, 5)).toBe(false);
+  });
+
+  it('AC275: mining a placed stone leaves air, and the stone stays unlocked', () => {
+    const { c, world } = withStone(true);
+    expect(c.placeCell(2, 5, 2)).toBe(true);
+    expect(c.mineCell(2, 5, 2)).toBe(true);
+    expect(world.get(2, 5, 2)).toBe(AIR);
+    expect(c.isLocked(MAANSTEEN)).toBe(false);
+  });
+});

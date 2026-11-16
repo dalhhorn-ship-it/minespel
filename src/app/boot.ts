@@ -31,6 +31,11 @@ import { createWaitingCard, type WaitingCard } from '../ui/waiting-card';
 import { createBreakFlow, type BreakFlow } from './break-flow';
 import { loadCatalog } from './content-loader';
 import { createKnightFlow } from './knight-flow';
+import { createGearEconomy, type GearEconomy } from '../knights/gear-economy';
+import { createStonesEconomy } from './stones-economy';
+import { createStonesFlow, type StonesFlow } from './stones-flow';
+import { cellIndex, WORLD_SEED } from '../world/terrain';
+import { startWorld } from '../world/terrain-v3';
 import { createExamFlow, type ExamFlow } from './exam-flow';
 import { createParentFlow, type ParentFlow } from './parent-flow';
 import { createPracticeFlow, type PracticeFlow } from './practice-flow';
@@ -150,6 +155,10 @@ export interface App {
   knights: KnightSystem;
   /** The bubble clock, the bubble and Klodder (v18). */
   monsters: MonsterSystem;
+  /** The wapenkast and the gear each knight wears (v19). */
+  gear: GearEconomy;
+  /** The found and bought vein stones (v20). */
+  stones: StonesFlow;
 }
 
 export interface BootDeps {
@@ -260,6 +269,7 @@ export function createBoot(deps: BootDeps): Boot {
     // The knights (v17). Every switch and points change happens on another screen, so settings and points are
     // read again each time the screen goes back to the world.
     let knightsRef: KnightSystem | null = null;
+    let gearRef: GearEconomy | null = null;
     const knights = createKnightSystem({
       world: world.world,
       player: world.player,
@@ -269,6 +279,11 @@ export function createBoot(deps: BootDeps): Boot {
         sound,
         setMode: (id, mode) => knightsRef?.setMode(id, mode),
         animals: () => world.dinoStore.dinos(),
+        gear: {
+          state: () => gearRef?.state() ?? { owned: [], worn: {} },
+          wear: (knightId, itemId, slot) => gearRef?.wear(knightId, itemId, slot) ?? Promise.resolve(false),
+        },
+        knightList: () => knightsRef?.knights().map((k) => ({ id: k.id })) ?? [],
       }),
       viewport: () => ({ width: window.innerWidth, height: window.innerHeight }),
       persist: (change) => {
@@ -277,7 +292,21 @@ export function createBoot(deps: BootDeps): Boot {
       },
     });
     knightsRef = knights;
-    knights.load(move === 'failed' ? [] : (await records.get('monsters')).knights);
+    const savedMonsters = move === 'failed' ? null : await records.get('monsters');
+    knights.load(savedMonsters ? savedMonsters.knights : []);
+    // v19: the wapenkast and who wears what; v20: the stones. A save from before 0.10.0 gives empty values.
+    const gear = createGearEconomy({ db, knights });
+    gearRef = gear;
+    if (savedMonsters) gear.load(savedMonsters);
+    let startCells: Uint8Array | null = null;
+    const stones = createStonesFlow({
+      db,
+      say: (text) => say(text),
+      game: world,
+      startBlock: (x, y, z) => (startCells ??= startWorld(WORLD_SEED))[cellIndex(x, y, z)] ?? 0,
+    });
+    if (savedMonsters) stones.load(savedMonsters);
+    const stonesEconomy = createStonesEconomy({ db, flow: stones, clock: systemClock });
     knights.applySwitches(creatureSwitches(settings));
     knights.setPoints(economy.points);
     world.addCreatures(knights, KNIGHT_PRIORITY);
@@ -315,7 +344,10 @@ export function createBoot(deps: BootDeps): Boot {
       sound,
     });
     monstersRef = monsters;
-    world.on('mined', (e) => monsters.onMined(e.x, e.y, e.z, e.block));
+    world.on('mined', (e) => {
+      monsters.onMined(e.x, e.y, e.z, e.block);
+      stones.onMined(e.x, e.y, e.z, e.block);
+    });
     monsters.load(await records.get('monsters'));
     monsters.applySwitches(creatureSwitches(settings));
     world.addCreatures(monsters, MONSTER_PRIORITY);
@@ -332,6 +364,9 @@ export function createBoot(deps: BootDeps): Boot {
       },
       onFluitBought: () => world.setFluitOwned(true),
       knights,
+      gear,
+      stonesFlow: stones,
+      stones: stonesEconomy,
     });
     screens.subscribe((kind) => {
       if (kind !== 'world') return;
@@ -430,7 +465,7 @@ export function createBoot(deps: BootDeps): Boot {
     return {
       app: {
         queue, records, catalog: getCatalog, timerDriver, breakFlow, parentFlow, shopFlow,
-        practiceFlow, examFlow, villageFlow, knights, monsters,
+        practiceFlow, examFlow, villageFlow, knights, monsters, gear, stones,
       },
       sessionStore,
       moved: move !== 'failed',

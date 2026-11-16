@@ -1,6 +1,7 @@
 // The mole's Moed bar (v16, decision 138), the pattern of moed.ts: knights notice him within 8 along x and z (16 on
-// guard) and chase him by the path search (knight-ai.ts), poke him within 1.5, the bar fills at the number of pokers
-// per second (at most 3) and is full at MOLE_MOED_FULL. Then "Wegwezen!" and he leaves. He never hurts anyone.
+// guard, plus the notice bonus of his gear) and chase him by the path search (knight-ai.ts), poke him within 1.5, the
+// bar fills by the summed Kracht of the pokers per second (at most full in 3 s) and is full at MOLE_MOED_FULL. Then "Wegwezen!" and he leaves. He never hurts anyone.
+import { kracht, moedRate, noticeBonus } from '../knights/gear';
 import type { KnightState } from '../knights/knight-types';
 import { NOTICE_GUARD, NOTICE_NEAR, POKE_REACH } from './moed';
 import { MOLE_MOED_FULL, type MoleState, type MonsterContext } from './monster-types';
@@ -34,6 +35,8 @@ export function freeMoleChasers(ctx: MonsterContext): void {
  */
 export function stepMoleMoed(mole: MoleState, ctx: MonsterContext): boolean {
   let pokers = 0;
+  const krachts: number[] = [];
+  let giggle = false;
   for (const kn of ctx.knights()) {
     const mine = given.get(kn);
     const isMine = mine !== undefined && kn.chase === mine;
@@ -43,7 +46,7 @@ export function stepMoleMoed(mole: MoleState, ctx: MonsterContext): boolean {
       continue;
     }
     const b = kn.body;
-    const reach = kn.mode === 'guard' ? NOTICE_GUARD : NOTICE_NEAR;
+    const reach = (kn.mode === 'guard' ? NOTICE_GUARD : NOTICE_NEAR) + noticeBonus(kn.gear);
     if (!near(b, mole, reach)) {
       if (isMine) kn.chase = null;
       given.delete(kn);
@@ -55,7 +58,12 @@ export function stepMoleMoed(mole: MoleState, ctx: MonsterContext): boolean {
       kn.chase = chase;
       given.set(kn, chase);
     }
-    if (near(b, mole, POKE_REACH) && Math.abs(b.y - mole.y) <= 2) pokers++;
+    if (near(b, mole, POKE_REACH) && Math.abs(b.y - mole.y) <= 2) {
+      pokers++;
+      kn.poking = true;
+      if (kn.gear?.hand === 'kietelveer') giggle = true;
+      if (krachts.length < MOLE_MAX_POKERS) krachts.push(kracht(kn.gear));
+    }
   }
   mole.pokers = pokers;
   if (pokers === 0) {
@@ -66,11 +74,12 @@ export function stepMoleMoed(mole: MoleState, ctx: MonsterContext): boolean {
   if (since >= TOK_GAP_MS) {
     ctx.say('Tok!', 1000);
     ctx.play('tok');
+    if (giggle) ctx.play('hihihi'); // the Kietelveer tickles (AC265)
     tokClock.set(mole, 0);
   } else {
     tokClock.set(mole, since);
   }
-  mole.moed = Math.min(MOLE_MOED_FULL, mole.moed + Math.min(pokers, MOLE_MAX_POKERS) * ctx.dt);
+  mole.moed = Math.min(MOLE_MOED_FULL, mole.moed + moedRate(krachts, MOLE_MOED_FULL) * ctx.dt);
   if (mole.moed < MOLE_MOED_FULL) return false;
   freeMoleChasers(ctx);
   mole.pokers = 0;

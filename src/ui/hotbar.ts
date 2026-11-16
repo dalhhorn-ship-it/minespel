@@ -4,6 +4,7 @@ import '../styles/hotbar.css';
 import { blockColor } from '../render/effects';
 import { blockInfo } from '../world/blocks';
 import { el } from './dom';
+import { stoneBackground } from './block-grid';
 import { onTap } from './tap';
 
 export interface HotbarOptions {
@@ -11,6 +12,8 @@ export interface HotbarOptions {
   allBlocksSlot: HTMLElement;
   blocks: readonly number[];
   selected: number;
+  /** True for a stone that is not bought: its slot is drawn empty (v20). */
+  isLocked?: (block: number) => boolean;
   onSelect: (slot: number) => void;
   onAllBlocks: () => void;
 }
@@ -38,8 +41,10 @@ export function createHotbar(options: HotbarOptions): Hotbar {
     buttons.forEach(({ b, swatch }, i) => {
       const id = blocks[i];
       if (id === undefined) return;
-      swatch.style.background = blockColor(id);
-      b.setAttribute('aria-label', blockInfo(id).name);
+      const locked = options.isLocked?.(id) === true;
+      b.classList.toggle('hotbar-slot-empty', locked);
+      swatch.style.background = locked ? '' : stoneBackground(id) ?? blockColor(id);
+      b.setAttribute('aria-label', locked ? 'Leeg vakje' : blockInfo(id).name);
     });
   }
   function setSelected(slot: number) {

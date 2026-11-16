@@ -1,5 +1,5 @@
 // Backups for the big world (V15c, AC238): old format 1 files restore and the boot move does the rest,
-// a file made by 0.8.0 (format 2, terrain version 3) restores byte for byte.
+// a file made by 0.8.0 (format 3, terrain version 3) restores byte for byte.
 import { expect, test, type Page } from '@playwright/test';
 import v050 from '../fixtures/backups/v050-old-shapes.json' with { type: 'json' };
 import { backupV060, backupV070, save070 } from '../fixtures/move/old-saves';
@@ -135,7 +135,7 @@ test.describe('Old backups restore into the big world (AC238)', () => {
 });
 
 test.describe('A backup made by 0.8.0 (AC238)', () => {
-  test('AC238: format 2 with terrain version 3, Alles wissen, restore: the world record is byte for byte the same', async ({ page }) => {
+  test('AC238: format 3 with terrain version 3, Alles wissen, restore: the world record is byte for byte the same', async ({ page }) => {
     await stubShare(page);
     await openApp(page);
     await setupPin(page, '1234');
@@ -152,7 +152,7 @@ test.describe('A backup made by 0.8.0 (AC238)', () => {
     await page.waitForFunction(() => window.__shared!.length > 0);
     const file = (await page.evaluate(() => window.__shared!))[0]!;
     const json = JSON.parse(file.text) as { format: number; kv: { world: { terrainVersion: number } } };
-    expect(json.format).toBe(2);
+    expect(json.format).toBe(5);
     expect(json.kv.world.terrainVersion).toBe(3);
 
     await page.locator('.parent-nav-btn[data-section="instellingen"]').tap();

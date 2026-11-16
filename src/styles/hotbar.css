@@ -7,6 +7,7 @@
 }
 .hotbar-slot[aria-pressed='true'] { outline: 5px solid var(--grass); outline-offset: -5px; background: var(--sand); }
 .hotbar-swatch { display: block; width: 34px; height: 34px; border: 2px solid var(--ink); border-radius: 6px; }
+.hotbar-slot-empty .hotbar-swatch { background: transparent; border-style: dashed; opacity: 0.6; }
 .hotbar-all {
   min-width: 96px; width: 100%; height: 100%; min-height: var(--touch-min);
   padding: 0 var(--gap); border: 0; background: var(--paper); color: var(--ink);
@@ -68,19 +69,21 @@
 /* Dorp tab: rare blocks. A block not found yet is a dark tile with a big "?". */
 .grid-rare-count { text-align: center; font-size: var(--font-large); font-weight: 800; }
 .grid-rare-count[hidden] { display: none; }
-.grid-rare {
+.grid-rare, .grid-stone {
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
   min-width: 106px; min-height: 96px; padding: 4px; border: 3px solid var(--ink);
   border-radius: 12px; background: var(--sand); color: var(--ink);
   font: inherit; font-size: 17px; font-weight: 700; touch-action: none; overflow-wrap: anywhere;
 }
-.grid-rare[hidden] { display: none; }
-.grid-rare .grid-swatch {
+.grid-rare[hidden], .grid-stone[hidden] { display: none; }
+.grid-rare .grid-swatch, .grid-stone .grid-swatch {
   display: flex; align-items: center; justify-content: center; width: 48px; height: 48px;
   font-size: 34px; font-weight: 900; line-height: 1;
 }
 .grid-rare-locked { background: #2b2f3a; color: #fff; border-color: #14161c; }
 .grid-rare-locked .grid-swatch { background: #14161c; border-color: #4a4f60; color: #ffe26e; }
+.grid-stone-buy { background: #4a4f60; color: #fff; border-color: #14161c; }
+.grid-stone-buy .grid-swatch { border-color: #fff; font-size: 28px; }
 .grid-close {
   min-width: 110px; min-height: var(--touch-min); border: 3px solid var(--ink);
   border-radius: var(--radius); background: var(--grass); color: var(--on-grass);

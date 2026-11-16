@@ -4,6 +4,40 @@ Written so kids can read it too.
 
 ## Unreleased
 
+## 0.12.0
+
+### Meer uitrusting
+
+* There is much more gear for your knights: 13 new things. You can now dress a knight in 8 places: head, shield, hand, back, body, feet, flag and mount.
+* New armour: a Maliënkolder, a Glanzend harnas that shines, a Koningscape and a Drakenschild. New helmets: a Pluimhelm and a Gouden helm that shines. New boots: Snelle laarzen.
+* A Houten zwaard, a Banier and a Koningsbanier. A knight with a banner sees monsters and animals from further away.
+* A Strijdpaard, a war horse, and a Rij-triceratops, a triceratops to ride on. Your knight sits on top and walks faster.
+* The Bubbelstaf blows soap bubbles while your knight pokes. They pop away by themselves. With "less motion" on, there are no bubbles.
+* In the Dinowinkel the row "Uitrusting" now has 21 things. A knight can still do everything without gear. Gear only makes it a little faster, never too fast.
+* For papa or mama: the backup holds the new gear. A backup from 0.11.0 still works. 0.11.0 cannot read a backup from 0.12.0 and says so in a friendly way.
+
+## 0.11.0
+
+### Diepe edelstenen
+
+* Deep under the striped layer there are 8 shiny stones to find: Maansteen, Zonnesteen, Jade, Opaal, Topaas, Parelsteen, Drakensteen and Mollengoud. Mine one and you find it. A message tells you its name.
+* In the Dinowinkel there is a new row "Edelstenen". Once you have found a stone, you can buy it with dino points. You buy each stone once.
+* A stone you bought is yours. Build with it as much as you like from the Diep tab, it costs nothing more. Mining a stone block you built never loses the stone.
+* If you start a new world, you keep the stones you found and bought, and all stones are in the ground again.
+* For papa or mama: the backup now holds the stones. A backup from 0.10.0 or older still works, with no stones. 0.10.0 cannot read a backup from 0.11.0 and says so in a friendly way.
+
+## 0.10.0
+
+### Uitrusting voor je ridders
+
+* In the Dinowinkel there is a new row "Uitrusting". You can buy 8 things for your knights with your dino points: a Leren kap, a Houten schild, a Riddercape, a Kietelveer, an IJzeren helm, an IJzeren schild, a Glimzwaard and a Pony. You buy each one once.
+* Tap a knight and then "Uitrusten". You see your knight in a picture. Tap a thing to put it on. Tap it again to take it off. Things you do not use wait in your wapenkast, and you can move them to another knight.
+* A knight with gear sends monsters off faster. The Pony makes him walk faster too. A knight without gear can still do it, only a little slower.
+* You see the gear on your knight in the world.
+* Nothing you bought is ever lost. If you trade in a knight, his gear goes back in the wapenkast. If you start a new world, you keep your gear.
+* The Kietelveer tickles with a soft "hihihi".
+* For papa or mama: the backup now holds the gear. A backup from 0.9.0 still works. 0.9.0 cannot read a backup from 0.10.0 and says so in a friendly way.
+
 ## 0.9.0
 
 ### Monstermol

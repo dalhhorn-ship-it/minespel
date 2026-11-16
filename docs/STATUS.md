@@ -1,13 +1,13 @@
 # Status
 
-**Phase:** small releases. Live on `main`: 0.6.0 v3 Dino's veilig (PR #25) and **0.7.0 v17 Ridders and v18 Zwarte bubbel** (PR #26), both merged 2026-11-15 with green WebKit CI.
-**Built, not live:** **0.8.0 v15 Grote wereld** and **0.9.0 v16 Monstermol** on branch `claude/jolly-fermi-z0vak4` (V15a to V15e, V16a to V16e, decisions 136 to 139). No pull request yet.
-**Next step:** the founder tests on the oldest iPad, on a test deploy (a founder action): AC210 and AC227 (speed with knights and Klodder, already live), AC241 (the big world: speed and cold start; set Kijkafstand to Dichtbij in Ouders > Instellingen if it stutters) and AC256 (the mole). The list is in `docs/TEST_REPORT.md` and PRD section 12, "Check before shipping". Then open one pull request for 0.8.0 and 0.9.0, CI on WebKit, and the founder says when it merges.
-**Fixed on the branch, still wrong in live 0.7.0:** a tap on the left part of the black bubble may not pop it; the first tap after boot can be read as a drag; a parent setting can be lost when the app is closed within a few milliseconds of the tap (older than 0.7.0, now waited for by the flush).
-**Last full check (local Chromium, 2026-11-16, on aa155f2):** `./scripts/check.sh` green: 1477 unit tests and 328 e2e tests pass, 0 failed. WebKit runs only in CI, so the pull request run is the truth. `exam.spec.ts:254` AC112 is still flake TD22 (it passed in this run).
-**After that:** v19 Ridderuitrusting (8 items), v20 Diepe edelstenen, v21 Meer uitrusting, v6 (open founder question MOQ15: where v6 goes). Draft: `docs/MONSTERS_PRD.md`.
+**Phase:** small releases. Live on `main`: 0.6.0 to 0.9.0 (PR #25, #26, #27): v3 Dino's veilig, v17 Ridders, v18 Zwarte bubbel, v15 Grote wereld and v16 Monstermol.
+**Built on this branch, not live:** 0.10.0 Ridderuitrusting, 0.11.0 Diepe edelstenen and 0.12.0 Meer uitrusting on `claude/jolly-fermi-z0vak4` (V19a to V21c, decisions 140 to 142). All tasks are done; the last full check is in `docs/TEST_REPORT.md` (v21 section).
+**Next step:** one pull request for 0.10.0 to 0.12.0, green WebKit CI, merge (the founder said so on 2026-11-16). The iPad checks (AC279, AC290, the "Check before shipping" lists) stay open for the founder on a test deploy.
+**After that:** only v6 is left in the backlog (open founder question MOQ15: where v6 goes). Draft: `docs/MONSTERS_PRD.md`.
+**Known flake:** `exam.spec.ts:254` AC112 is flake TD22.
 **Rule change:** PRD changes for scope the founder asked for are stamped by the operator (standing approval, decision 136).
 **Blockers:** none. This cloud session cannot push to main directly, so main is updated through a pull request. A second session also works in this repo: fetch main before a decision number.
+
 
 ## Done
 * **2026-10-18: Gemini's build is the truth** (decision 50). `main` holds the Gemini2 code, live on Cloudflare Worker `minespel`. Claude's G0 to G6 branch is set aside (commit `4067f07` in history).

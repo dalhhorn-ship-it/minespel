@@ -6,6 +6,7 @@ import {
   AMETHIST, KRISTAL, LICHTSTEEN, REGENBOOGSTEEN, ROBIJN, SAFFIER, SMARAGD, STERRENSTEEN, VEIN_BLOCKS,
   WAARSCHUWSTEEN, ZANDSTEEN,
 } from '../world/blocks';
+import { STONES } from '../world/stones';
 
 export const TILE_SIZE = 16;
 export const ATLAS_COLUMNS = 8;
@@ -43,6 +44,46 @@ const gem = (name: string, rock: Rgb, glow: Rgb, shine: Rgb): TileSpec => ({
     return (x * 7 + y * 5) % 13 === 0 ? [glow[0], glow[1], glow[2], 255] : null;
   },
 });
+
+/** Five fixed spots (top left corner of a 3 x 3 box) for the specks of a stone, a different layout per stone. */
+const STONE_SPOTS: readonly (readonly (readonly [number, number])[])[] = [
+  [[1, 1], [10, 2], [5, 6], [12, 10], [2, 12]],
+  [[2, 2], [11, 1], [6, 7], [1, 11], [11, 11]],
+  [[4, 1], [11, 4], [1, 6], [7, 10], [12, 12]],
+  [[1, 3], [8, 1], [12, 7], [4, 9], [9, 12]],
+  [[6, 1], [1, 7], [10, 6], [5, 12], [12, 12]],
+  [[2, 1], [9, 3], [5, 7], [12, 9], [1, 12]],
+  [[3, 3], [10, 1], [1, 9], [8, 8], [12, 13]],
+  [[1, 1], [7, 3], [12, 5], [3, 10], [10, 11]],
+];
+
+/** The speck shape of each stone, 3 x 3 cells (x, y): a different shape per stone, so it reads without colour. */
+const STONE_SHAPES: readonly (readonly (readonly [number, number])[])[] = [
+  [[1, 0], [0, 1], [1, 1], [2, 1], [1, 2]], // plus
+  [[0, 0], [2, 0], [1, 1], [0, 2], [2, 2]], // cross
+  [[0, 0], [1, 0], [2, 0], [0, 1], [0, 2]], // corner top left
+  [[0, 1], [1, 1], [2, 1]], // bar
+  [[1, 0], [1, 1], [1, 2]], // upright bar
+  [[0, 0], [1, 0], [0, 1], [1, 1]], // block
+  [[1, 0], [0, 1], [2, 1], [1, 2]], // ring
+  [[0, 2], [1, 1], [2, 0], [1, 2], [2, 1], [2, 2]], // triangle
+];
+
+/** A deep stone: the steen look with five bright specks in the stone colour, one shape per stone. Still. */
+const stoneTile = (index: number): TileSpec => {
+  const stone = STONES[index];
+  const colour = stone?.colour ?? [255, 255, 255];
+  const shape = STONE_SHAPES[index] ?? [];
+  const lit = new Map<number, readonly [number, number, number, number]>();
+  (STONE_SPOTS[index] ?? []).forEach(([sx, sy], n) => {
+    shape.forEach(([dx, dy]) => {
+      const key = (sy + dy) * TILE_SIZE + sx + dx;
+      const centre = dx === 1 && dy === 1 && n % 2 === 0;
+      lit.set(key, centre ? [255, 255, 255, 255] : [colour[0], colour[1], colour[2], 255]);
+    });
+  });
+  return { name: `ader-${stone?.id ?? index}`, base: [140, 140, 146], speckle: 12, pattern: (x, y) => lit.get(y * TILE_SIZE + x) ?? null };
+};
 
 export const TILES: readonly TileSpec[] = [
   { name: 'gras-top', base: [92, 178, 70], speckle: 22 },
@@ -213,6 +254,7 @@ export const TILES: readonly TileSpec[] = [
     name: 'waarschuwsteen', base: [250, 204, 30], speckle: 6,
     pattern: (x, y) => (Math.floor((x + y) / 4) % 2 === 0 ? [250, 204, 30, 255] : [28, 28, 32, 255]),
   },
+  ...STONES.map((_, i) => stoneTile(i)),
 ];
 
 const TILE_INDEX = new Map(TILES.map((t, i) => [t.name, i]));
@@ -261,7 +303,7 @@ function tileName(block: number, face: FaceKind): string | null {
     case REGENBOOGSTEEN: return 'regenboogsteen';
     case STERRENSTEEN: return 'sterrensteen';
     case WAARSCHUWSTEEN: return 'waarschuwsteen';
-    default: return VEIN_BLOCKS.includes(block) ? 'steen' : null;
+    default: return VEIN_BLOCKS.includes(block) ? `ader-${block}` : null;
   }
 }
 

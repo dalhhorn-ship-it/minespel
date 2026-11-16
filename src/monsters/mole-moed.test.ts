@@ -120,3 +120,69 @@ describe('the mole Moed bar (v16, AC251)', () => {
     expect(mole.moed).toBeGreaterThan(1);
   });
 });
+
+describe('AC262: Kracht in the mole bar', () => {
+  const secondsDressed = (gears: KnightState['gear'][]): number => {
+    const mole = createMole({ x: 30.5, y: GY, z: 30.5 }, { x: 0, z: 0 });
+    const ks = gears.map((g, i) => ({ ...knight('stay', 31.5, 30.5 + i * 0.1, `k${i}`), gear: g }));
+    const ctx = ctxFor(ks);
+    let t = 0;
+    while (t < 60) {
+      t += DT;
+      if (stepMoleMoed(mole, ctx)) return t;
+    }
+    return Infinity;
+  };
+  const KRACHT3 = { hoofd: 'ijzeren-helm', schild: 'houten-schild' } as const;
+  const KRACHT5 = { hoofd: 'leren-kap', schild: 'houten-schild', hand: 'glimzwaard', rug: 'riddercape' } as const;
+
+  it('AC262: Kracht 3 takes 5 seconds, Kracht 5 takes 3, bare 15 (plus or minus 1)', () => {
+    expect(Math.abs(secondsDressed([KRACHT3]) - 5)).toBeLessThanOrEqual(1);
+    expect(Math.abs(secondsDressed([KRACHT5]) - 3)).toBeLessThanOrEqual(1);
+    expect(Math.abs(secondsDressed([{ ...KRACHT5, rijdier: 'pony' }]) - 3)).toBeLessThanOrEqual(1);
+    expect(Math.abs(secondsDressed([undefined]) - 15)).toBeLessThanOrEqual(1);
+  });
+  it('AC262: 3 knights with Kracht 5 never fill the bar under 3 seconds', () => {
+    expect(secondsDressed([KRACHT5, KRACHT5, KRACHT5])).toBeGreaterThanOrEqual(3 - 1e-6); // float sum of 60 steps
+  });
+});
+
+describe('AC265: the Kietelveer giggle in the mole bar', () => {
+  const plays = (gear: KnightState['gear']): string[] => {
+    const mole = createMole({ x: 30.5, y: GY, z: 30.5 }, { x: 0, z: 0 });
+    const played: string[] = [];
+    const ctx = { ...ctxFor([{ ...knight('stay', 31.5, 30.5), gear }]), play: (n: string) => { played.push(n); } } as MonsterContext;
+    for (let t = 0; t < 9; t += DT) stepMoleMoed(mole, ctx);
+    return played;
+  };
+  it('AC265: each "Tok!" of a poker with the Kietelveer also plays hihihi', () => {
+    const played = plays({ hand: 'kietelveer' });
+    const toks = played.filter((n) => n === 'tok').length;
+    expect(toks).toBeGreaterThanOrEqual(2);
+    expect(played.filter((n) => n === 'hihihi')).toHaveLength(toks);
+  });
+  it('AC265: a bare poker does not giggle', () => {
+    const played = plays(undefined);
+    expect(played).toContain('tok');
+    expect(played).not.toContain('hihihi');
+  });
+});
+
+describe('AC285: the banners and the mole', () => {
+  it('AC285: a guard with the Koningsbanier goes to the mole at 21 blocks and not at 23', () => {
+    const mole = createMole({ x: 10.5, y: GY, z: 30.5 }, { x: 0, z: 0 });
+    const near = { ...knight('guard', 31.5, 30.5, 'n'), gear: { vlag: 'koningsbanier' } };
+    const far = { ...knight('guard', 33.5, 30.5, 'f'), gear: { vlag: 'koningsbanier' } };
+    stepMoleMoed(mole, ctxFor([near, far]));
+    expect(near.chase).not.toBeNull();
+    expect(far.chase).toBeNull();
+  });
+  it('AC285: a follower with the Banier goes at 11 blocks and not at 13', () => {
+    const mole = createMole({ x: 10.5, y: GY, z: 30.5 }, { x: 0, z: 0 });
+    const near = { ...knight('follow', 21.5, 30.5, 'n'), gear: { vlag: 'banier' } };
+    const far = { ...knight('follow', 23.5, 30.5, 'f'), gear: { vlag: 'banier' } };
+    stepMoleMoed(mole, ctxFor([near, far]));
+    expect(near.chase).not.toBeNull();
+    expect(far.chase).toBeNull();
+  });
+});

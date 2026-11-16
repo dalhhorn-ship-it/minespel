@@ -99,6 +99,7 @@ export function registerAppHooks(app: Promise<App>, game: Game | null, shell: Ap
   }));
   registerHook('worldSize', () => ({ width: WORLD_SIZE, depth: WORLD_SIZE, height: WORLD_HEIGHT }));
   registerHook('mineAt', (x: number, y: number, z: number) => g.mineAt(x, y, z));
+  registerHook('placeAt', (x: number, y: number, z: number) => g.placeAt(x, y, z));
   registerHook('gameRunning', () => g.isRunning());
   registerHook('frameCount', () => g.frameCount());
   registerHook('pauseGame', () => {

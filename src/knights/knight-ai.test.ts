@@ -172,3 +172,68 @@ describe('knight ai', () => {
     expect(Math.hypot(k.body.x - tx, k.body.z - tz)).toBeLessThan(3);
   });
 });
+
+describe('AC263: the Pony speed', () => {
+  const world = buildMoleMap();
+  const kid = { x: 40.5, y: GY, z: 5.5 };
+  const rider = (mode: KnightMode, pony: boolean): KnightState => {
+    const k = make(mode, 5.5, 5.5, world);
+    k.body.y = GY;
+    if (pony) k.gear = { rijdier: 'pony' };
+    return k;
+  };
+  const rng = createRng(3);
+  const walked = (k: KnightState, seconds: number): number => {
+    const x0 = k.body.x, z0 = k.body.z;
+    for (let i = 0; i < seconds * 30; i++) stepKnight(k, { world, rng, player: kid, playerYaw: Math.PI / 2, dt: DT });
+    return Math.hypot(k.body.x - x0, k.body.z - z0);
+  };
+
+  it('AC263: in the chase over 3 seconds he walks 4.5 blocks per second with the Pony and 3 without (20 percent)', () => {
+    for (const [pony, speed] of [[true, 4.5], [false, 3]] as const) {
+      const k = rider('guard', pony);
+      k.chase = { x: 21.5, z: 5.5 };
+      const d = walked(k, 3);
+      expect(Math.abs(d / 3 - speed)).toBeLessThanOrEqual(speed * 0.2);
+    }
+  });
+
+  it('AC263: a follower far behind the kid keeps up at 4.5 with the Pony and 3 without', () => {
+    for (const [pony, speed] of [[true, 4.5], [false, 3]] as const) {
+      const k = rider('follow', pony);
+      const d = walked(k, 3);
+      expect(Math.abs(d / 3 - speed)).toBeLessThanOrEqual(speed * 0.2);
+    }
+  });
+
+  it('AC263: a guard on his way to a goal walks 4.5 with the Pony and 3 without', () => {
+    for (const [pony, speed] of [[true, 4.5], [false, 3]] as const) {
+      const k = rider('guard', pony);
+      k.body.goal = { x: 11.5, z: 5.5 };
+      k.body.goalLeft = 10;
+      k.body.idleLeft = 5;
+      const d = walked(k, 1);
+      expect(Math.abs(d - speed)).toBeLessThanOrEqual(speed * 0.2);
+    }
+  });
+});
+
+describe('AC284: the boots and the new mounts', () => {
+  const world = buildMoleMap();
+  const kid = { x: 40.5, y: GY, z: 5.5 };
+  it('AC284: a follower far behind walks 4 with the boots, 5.5 on the Strijdpaard, 5 on the Rij-triceratops (20 percent)', () => {
+    const cases: [KnightState['gear'], number][] = [
+      [{ voeten: 'snelle-laarzen' }, 4], [{ rijdier: 'strijdpaard' }, 5.5], [{ rijdier: 'rij-triceratops' }, 5],
+      [{ voeten: 'snelle-laarzen', rijdier: 'strijdpaard' }, 5.5],
+    ];
+    for (const [gear, speed] of cases) {
+      const k = make('follow', 5.5, 5.5, world);
+      k.body.y = GY;
+      k.gear = gear;
+      const rng = createRng(3);
+      const x0 = k.body.x, z0 = k.body.z;
+      for (let i = 0; i < 90; i++) stepKnight(k, { world, rng, player: kid, playerYaw: Math.PI / 2, dt: DT });
+      expect(Math.abs(Math.hypot(k.body.x - x0, k.body.z - z0) / 3 - speed)).toBeLessThanOrEqual(speed * 0.2);
+    }
+  });
+});

@@ -5,6 +5,8 @@ import type { Clock } from '../core/clock';
 import { systemClock } from '../core/clock';
 import { defaultKv, type MonstersRecord } from '../storage/schema';
 import { request } from '../storage/db';
+import { dropKnight, readGear, toGearRecord } from './gear';
+import type { GearEconomy } from './gear-economy';
 import type { KnightSystem } from './knight-system';
 import { KNIGHT_PRICE, KNIGHT_TRADEIN, MAX_KNIGHTS, type KnightRecord } from './knight-types';
 
@@ -18,6 +20,8 @@ export interface KnightEconomy {
 export interface KnightEconomyOptions {
   db: IDBDatabase;
   knights: Pick<KnightSystem, 'add' | 'remove' | 'knights'>;
+  /** The gear economy (v19): after a trade in its copy follows. Without it nothing wears gear. */
+  gear?: Pick<GearEconomy, 'afterTradeIn'>;
   clock?: Clock;
 }
 
@@ -76,11 +80,17 @@ export function createKnightEconomy(options: KnightEconomyOptions): KnightEconom
           apply: async (kv) => {
             const m = await readMonsters(kv);
             if (!m.knights.some((k) => k.id === id)) return false;
-            await request(kv.put({ ...m, knights: m.knights.filter((k) => k.id !== id) }, 'monsters'));
+            const next: MonstersRecord = { ...m, knights: m.knights.filter((k) => k.id !== id) };
+            // His gear goes back to the wapenkast in this same transaction (AC266). No gear field: nothing is added.
+            if (m.gear) next.gear = toGearRecord(dropKnight(readGear(m), id));
+            await request(kv.put(next, 'monsters'));
             return true;
           },
         });
-        if (done) options.knights.remove(id);
+        if (done) {
+          options.knights.remove(id);
+          options.gear?.afterTradeIn(id);
+        }
         return done;
       }),
   };

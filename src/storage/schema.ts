@@ -170,6 +170,13 @@ export interface MonstersRecord {
   /** Play milliseconds since the last bubble, 0 to 600 000. */
   bubbleClockMs: number;
   hintShown: boolean;
+  /**
+   * v19 gear: every id the kid bought (`owned`) and what each knight wears per slot (`worn`). Optional and not in the
+   * defaults, so a 0.9.0 record stays as it was until the first buy. Read it with `readGear` (gear.ts).
+   */
+  gear?: { owned: string[]; worn: Record<string, Partial<Record<string, string>>> };
+  /** v20 stones: vein ids the kid found and bought. Optional too. Read it with `readStones` (stones-flow.ts). */
+  stones?: { found: number[]; bought: number[] };
 }
 
 export interface KvRecords {

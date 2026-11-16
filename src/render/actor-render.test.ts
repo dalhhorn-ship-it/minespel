@@ -38,4 +38,16 @@ describe('actor scene sync', () => {
     sync.dispose();
     expect(sync.group.children).toHaveLength(0);
   });
+  it('AC264: a knight is built again when his look changes, and not when it stays', () => {
+    const sync = createActorSceneSync();
+    sync.sync('knights', [{ ...knight('a'), look: 'pony' }]);
+    const first = sync.group.children[0]!.children[0]!;
+    sync.sync('knights', [{ ...knight('a'), look: 'pony' }]);
+    expect(sync.group.children[0]!.children[0]).toBe(first);
+    sync.sync('knights', [{ ...knight('a'), look: 'pony+riddercape' }]);
+    expect(sync.group.children[0]!.children).toHaveLength(1);
+    expect(sync.group.children[0]!.children[0]).not.toBe(first);
+    sync.sync('knights', [{ ...knight('a'), look: '' }]);
+    expect(sync.group.children[0]!.children).toHaveLength(1);
+  });
 });
