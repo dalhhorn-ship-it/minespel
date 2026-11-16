@@ -11,6 +11,12 @@ interface Toast { text: string }
 interface Pose { x: number; y: number; z: number }
 const moles = async (page: Page) => (await readState<{ moles: Entry[]; loopMs: number }>(page, 'moleState')).moles;
 const loopMs = async (page: Page) => (await readState<{ loopMs: number }>(page, 'moleState')).loopMs;
+/** The animals and the loop time in one call, so no real frame runs between the two reads. */
+const dinosAt = (page: Page) =>
+  page.evaluate(() => {
+    const h = (window as unknown as { __dino: Record<string, () => unknown> }).__dino;
+    return { dinos: h.dinos!() as DinoView[], now: (h.moleState!() as { loopMs: number }).loopMs };
+  });
 const HELP = 'Bouw een hek van 2 hoog om hem heen.';
 const UP = 'De Monstermol is boven! Hij zoekt je dieren.';
 const BACK = 'Hihi! De Monstermol is terug.';
@@ -50,6 +56,8 @@ test.describe('Mole safety (V22e)', () => {
   test('AC336: 5 chase offs in 30 minutes keep every rule, teases are 15 s apart and the help line follows every come up and come back', async ({ page }) => {
     test.setTimeout(540_000);
     const start = await moleUp(page, 3);
+    // The kid may still be landing after the dig; the spot he must keep is the one he stands on.
+    await expect.poll(async () => (await readState<{ onGround: boolean }>(page, 'player')).onGround).toBe(true);
     const kid = await readState<Pose>(page, 'player');
     const fleeing = new Set<string>();
     const teases: number[] = [];
@@ -61,14 +69,15 @@ test.describe('Mole safety (V22e)', () => {
       for (let t = 0; t < ms; t += 500) {
         await readState(page, 'fastForward', 500);
         step++;
-        const dinos = await readState<DinoView[]>(page, 'dinos');
+        const { dinos, now } = await dinosAt(page);
         expect(dinos.length).toBe(start.length);
-        const now = await loopMs(page);
         for (const d of dinos) {
           expect(d.mode).toBe('stay');
           if (d.flee !== undefined && !fleeing.has(d.id)) {
             fleeing.add(d.id);
-            teases.push(now);
+            // The tease began `age` seconds of loop time ago. Real frames run between the test's calls on a slow runner,
+            // so the time the test saw it is not the time it happened (it can be late by more than a step).
+            teases.push(now - ((d.flee as { age?: number }).age ?? 0) * 1000);
           }
           if (d.flee === undefined) fleeing.delete(d.id);
         }
@@ -108,11 +117,16 @@ test.describe('Mole safety (V22e)', () => {
     // After a come back a closed wall 2 high catches him within 3 s. The kid steps away first, so the ring never holds him.
     const [free] = await moles(page);
     expect(free?.state).toBe('free');
-    const mx = Math.floor(free!.x);
-    const mz = Math.floor(free!.z);
-    const ky = (await topOf(page, mx + 12, mz)) + 1;
-    await readState(page, 'placePlayer', mx + 12.5, ky, mz + 0.5, 0);
-    await fence(page, mx, mz, 3);
+    const ky = (await topOf(page, Math.floor(free!.x) + 12, Math.floor(free!.z))) + 1;
+    await readState(page, 'placePlayer', Math.floor(free!.x) + 12.5, ky, Math.floor(free!.z) + 0.5, 0);
+    // He keeps walking while the test talks to the page. So his spot is read again right before the wall goes up,
+    // and he must stand inside it; a slow runner once built the wall where he had been.
+    const [now] = await moles(page);
+    const mx = Math.floor(now!.x);
+    const mz = Math.floor(now!.z);
+    await fence(page, mx, mz, 3, now!.y);
+    const [inside] = await moles(page);
+    expect(Math.max(Math.abs(Math.floor(inside!.x) - mx), Math.abs(Math.floor(inside!.z) - mz))).toBeLessThan(3);
     await readState(page, 'fastForward', 3000);
     expect((await moles(page))[0]?.state).toBe('caught');
   });
