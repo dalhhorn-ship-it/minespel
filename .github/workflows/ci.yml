@@ -75,3 +75,12 @@ jobs:
       - name: WebKit e2e, shard ${{ matrix.shard }} of 4
         if: steps.scope.outputs.scope == 'full'
         run: npx playwright test --shard=${{ matrix.shard }}/4
+      # A red test leaves its error context (and screenshots) here, so a failure that does not come back locally can be read.
+      - name: Keep the failure files
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-failures-${{ matrix.shard }}
+          path: test-results/
+          retention-days: 7
+          if-no-files-found: ignore
