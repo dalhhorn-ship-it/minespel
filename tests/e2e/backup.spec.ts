@@ -48,8 +48,8 @@ const ready = (page: Page) =>
   page.waitForFunction(() => (window as unknown as { __dino?: Record<string, () => unknown> }).__dino?.ready?.() === true);
 
 test.describe('Backup (T53a)', () => {
-  test('AC194 AC198: one file with today\'s name, no pincode, a date saved, no outside request, version 0.11.0', async ({ page }) => {
-    expect(pkg.version).toBe('0.11.0');
+  test('AC194 AC198: one file with today\'s name, no pincode, a date saved, no outside request, version 0.12.0', async ({ page }) => {
+    expect(pkg.version).toBe('0.12.0');
     const outside: string[] = [];
     await stubShare(page);
     await openApp(page);

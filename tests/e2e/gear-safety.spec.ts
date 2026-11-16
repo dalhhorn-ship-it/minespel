@@ -133,4 +133,53 @@ test.describe('Gear safety (V19e, AC268)', () => {
     await gearLines(page, /^In je wapenkast$/);
     expect(await nodes(page)).toBe(0);
   });
+
+  test('AC289: a v21 session with all 8 slots, the Bubbelstaf and a fight makes no request beyond the app and stays within the caps', async ({ page, baseURL }) => {
+    const origin = new URL(baseURL!).origin;
+    const outside: string[] = [];
+    page.on('request', (r) => {
+      const u = r.url();
+      if (u.startsWith('data:') || u.startsWith('blob:') || u.startsWith('about:')) return;
+      if (new URL(u).origin !== origin) outside.push(u);
+    });
+    await openApp(page);
+    await readState(page, 'setCreatureSeed', 4);
+    await readState(page, 'setPlayRemainingMs', 3_600_000);
+    const a = (await readState<string>(page, 'addKnight', 'guard'))!;
+    await readState(page, 'setPoints', 5000);
+    const items = ['pluimhelm', 'drakenschild', 'bubbelstaf', 'koningscape', 'glanzend-harnas', 'snelle-laarzen', 'koningsbanier', 'strijdpaard'];
+    for (const id of items) {
+      expect(await readState<boolean>(page, 'buyGearInShop', id)).toBe(true);
+      expect(await readState<boolean>(page, 'wearGear', a, id)).toBe(true);
+    }
+    const g = await readState<GearState>(page, 'gearState');
+    expect(Object.keys(g.knights.find((k) => k.id === a)!.worn)).toHaveLength(8);
+    expect(await readState(page, 'spawnKlodder')).toBeTruthy();
+    let seconds = 0;
+    for (let i = 0; i < 80; i++) {
+      await readState(page, 'fastForward', 1000);
+      seconds++;
+      if ((await readState<Monster>(page, 'monsterState')).phase === 'idle') break;
+    }
+    expect((await readState<Monster>(page, 'monsterState')).phase).toBe('idle');
+    expect(seconds).toBeGreaterThanOrEqual(3);
+    const meshes = await readState<{ look: string; meshes: number }[]>(page, 'knightMeshes');
+    for (const k of meshes) expect(k.meshes).toBeLessThanOrEqual(6);
+    expect(outside).toEqual([]);
+  });
+
+  test('AC289: with reduced motion a knight in all 8 slots still stands in at most 6 meshes', async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await openApp(page);
+    const a = (await readState<string>(page, 'addKnight', 'guard'))!;
+    await readState(page, 'setPoints', 5000);
+    for (const id of ['pluimhelm', 'drakenschild', 'bubbelstaf', 'koningscape', 'glanzend-harnas', 'snelle-laarzen', 'koningsbanier', 'rij-triceratops']) {
+      expect(await readState<boolean>(page, 'buyGearInShop', id)).toBe(true);
+      expect(await readState<boolean>(page, 'wearGear', a, id)).toBe(true);
+    }
+    await expect
+      .poll(async () => (await readState<{ look: string; meshes: number }[]>(page, 'knightMeshes')).filter((k) => k.look.split('+').length === 8).length)
+      .toBe(1);
+    for (const k of await readState<{ meshes: number }[]>(page, 'knightMeshes')) expect(k.meshes).toBeLessThanOrEqual(6);
+  });
 });

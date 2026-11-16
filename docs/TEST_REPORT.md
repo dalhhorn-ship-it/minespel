@@ -1,5 +1,19 @@
 # Test report
 
+## v21 Meer uitrusting (0.12.0), V21c closing task
+
+Full `./scripts/check.sh` on this branch, WebKit (no Chromium fallback warning): lint, typecheck, 1631 unit tests in 170 files, build, dist check and 376 e2e tests all pass, 0 failed, 0 flaky.
+
+* AC289, `kid-safety.test.ts`: the 21 gear names and the v21 files (gear table, shop row, Uitrusten, pictures, knight model) hold no banned word and no string says a knight is weak or must have gear; no new sound; with all 8 slots Kracht is 5 and three knights need at least 3 seconds to fill a Moed bar.
+* AC289, `gear-safety.spec.ts`: a session with 8 slots, the Bubbelstaf and a fight makes no request beyond the app, lasts 3 seconds or more and keeps every knight at 6 meshes or fewer; with reduced motion a knight in all 8 slots on the Rij-triceratops still has 6 meshes or fewer. No sparkles and no bubbles with reduced motion: `knight-model.test.ts` (AC265, AC286).
+* AC291: `package.json` and `package-lock.json` say 0.12.0, Instellingen shows "Versie 0.12.0" (`big-world.spec.ts`), CHANGELOG entry. `backup.spec.ts` checks the version too.
+* The e2e hook `knightMeshes` stays in `src/render/actor-render.ts` (V21c does not own the hooks file).
+
+### Open for the founder
+
+* **AC290 iPad part**: the oldest iPad from the home screen icon with the fps counter, on the v15 world, 3 knights (or 2) fully dressed, on the Pony, the Strijdpaard and the Rij-triceratops, Klodder out, bubbles blowing and 25 shop dinos in view. The AC101 target must hold. Not run yet.
+* The "Check before shipping" list of PRD section 12 on a test deploy.
+
 ## v20 Diepe edelstenen (0.11.0), V20d closing task
 
 Automated part: see the totals in the v19 section (one full run for both tasks). AC279 (the 8 stones shine on the founder's iPad and the walk below the stripes meets AC101) is OPEN: it cannot run here.

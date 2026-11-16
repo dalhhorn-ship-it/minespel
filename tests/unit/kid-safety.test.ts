@@ -7,6 +7,7 @@ const { readdirSync, readFileSync, statSync } = (
 import ts from 'typescript';
 import { describe, expect, it } from 'vitest';
 import { findBannedWords } from '../../src/core/kid-words';
+import { GEAR, GEAR_SLOTS, MAX_KRACHT, MIN_FIGHT_SECONDS, kracht, moedRate, type Worn } from '../../src/knights/gear';
 import { STONES } from '../../src/world/stones';
 import { createSound, SOUND_NAMES, SOUND_SPECS, type SoundName } from '../../src/audio/sound';
 
@@ -40,6 +41,8 @@ const KNIGHT_FILES = [
   'src/app/stones-flow.ts',
   'src/app/stones-economy.ts',
   'src/ui/shop-stones.ts',
+  // v21 Meer uitrusting: the knight model with the bubbles and the mounts (AC289).
+  'src/render/knight-model.ts',
 ];
 
 const NETWORK = /\b(fetch|XMLHttpRequest|WebSocket|EventSource|sendBeacon)\b|https?:\/\//;
@@ -238,5 +241,47 @@ describe('stone strings (AC279)', () => {
 
   it('AC279: every stone name is free of banned words', () => {
     expect(findBannedWords(STONES.map((s) => s.name).join(' '))).toEqual([]);
+  });
+});
+
+describe('v21 gear strings and caps (AC289)', () => {
+  const V21_FILES = ['src/knights/gear.ts', 'src/ui/shop-gear.ts', 'src/ui/gear-screen.ts', 'src/ui/gear-icon.ts', 'src/ui/knight-picture.ts', 'src/render/knight-model.ts'];
+  const ALL_EIGHT: Worn = {};
+  for (const slot of GEAR_SLOTS) ALL_EIGHT[slot] = GEAR.filter((g) => g.slot === slot).sort((a, b) => b.price - a.price)[0]!.id;
+
+  it('AC289: the 21 items fill 8 slots and every name is free of banned words', () => {
+    expect(GEAR).toHaveLength(21);
+    expect(new Set(GEAR.map((g) => g.slot)).size).toBe(8);
+    expect(findBannedWords(GEAR.map((g) => g.name).join(' '))).toEqual([]);
+  });
+
+  it('AC289: the v21 files are scanned, hold no banned word and no string says a knight is weak or must have gear', () => {
+    const bad: string[] = [];
+    for (const f of V21_FILES) {
+      expect(KNIGHT_FILES, f).toContain(f);
+      for (const s of literals(f)) {
+        const found = findBannedWords(s);
+        if (found.length) bad.push(`${f}: "${s}" holds ${found.join(', ')}`);
+        const t = s.toLowerCase();
+        if (/\bzwak\b/.test(t) || (/\bmoet\b|nodig om/.test(t) && /ridder/.test(t))) bad.push(`${f}: "${s}"`);
+      }
+    }
+    expect(bad).toEqual([]);
+  });
+
+  it('AC289: the new gear adds no sound and no network call', () => {
+    expect(SOUND_NAMES).toHaveLength(Object.keys(SOUND_SPECS).length);
+    for (const n of SOUND_NAMES) expect(SOUND_SPECS[n].seconds).toBeLessThan(1.5);
+    expect(readFileSync('src/render/knight-model.ts', 'utf8')).not.toMatch(/createOscillator|AudioContext|\.play\(/);
+  });
+
+  it('AC289: with all 8 slots filled Kracht is at most 5 and three knights never fill a Moed bar in under 3 seconds', () => {
+    const k = kracht(ALL_EIGHT);
+    expect(k).toBeLessThanOrEqual(MAX_KRACHT);
+    expect(k).toBe(5);
+    for (const full of [15, 30, 60]) {
+      const rate = moedRate([k, k, k], full);
+      expect(full / rate, `full ${full}`).toBeGreaterThanOrEqual(MIN_FIGHT_SECONDS);
+    }
   });
 });

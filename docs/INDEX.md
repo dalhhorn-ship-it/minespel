@@ -27,6 +27,7 @@
 |---|---|---|
 | Acceptance criteria | docs/PRD.md | AC1 to AC291 (282) |
 | Acceptance criteria | docs/SHOP_PRD.md | AC20 to AC150 (5) |
+| Acceptance criteria | docs/TEST_REPORT.md | AC279 to AC279 (1) |
 | Acceptance criteria | docs/releases/v10.md | AC172 to AC177 (6) |
 | Acceptance criteria | docs/releases/v11.md | AC178 to AC191 (14) |
 | Acceptance criteria | docs/releases/v17-v18.md | AC200 to AC229 (30) |
@@ -44,7 +45,7 @@
 
 | File | Lines | Summary |
 |---|---:|---|
-| CHANGELOG.md | 198 | Written so kids can read it too. Sections: Unreleased:5, 0.9.0:7, 0.8.0:21, 0.7.0:33, 0.6.0 (2026-11-15):50, 0.5.0 (2026-10-24):93, 0.4.0 (2026-10-24):106, 0.3.0 (2026-10-22):116, 0.2.0 (2026-10-19):124, 0.1.0 (2026-10-19):146 |
+| CHANGELOG.md | 232 | Written so kids can read it too. Sections: Unreleased:5, 0.12.0:7, 0.11.0:19, 0.10.0:29, 0.9.0:41, 0.8.0:55, 0.7.0:67, 0.6.0 (2026-11-15):84, 0.5.0 (2026-10-24):127, 0.4.0 (2026-10-24):140, 0.3.0 (2026-10-22):150, 0.2.0 (2026-10-19):158, 0.1.0 (2026-10-19):180 |
 | CLAUDE.md | 71 | A free 3D block world with dinos and short learning breaks (Dutch: taal, rekenen,… |
 | README.md | 78 | Dino Blokwereld is a free 3D block world for kids, played in Dutch on an iPad. Walk… |
 | docs/ARCHITECTURE.md | 404 | Written by the architect after PRD signoff (2026-10-17). Source of truth for how Dino… Sections: Stack and why:5, Folder structure:27, Modules and data flow:189, How modules are loaded:241, State and storage:282, Security and kid safety in…:312, How to run:321, How to test:334, How to deploy:367, Conventions for developers:376, Risks:390 |
@@ -52,7 +53,7 @@
 | docs/DECISIONS.md | 64 | Every notable decision. Founder decisions are marked NEEDS FOUNDER until answered, then… |
 | docs/DISCUSSION.md | 164 | Review rounds between agents. Newest at the bottom. Keep it short: who said what, what… Sections: v11 Dorp: architect…:7, MONSTERS_PRD review round 1…:99 |
 | docs/FACTORY.md | 113 | Moved out of CLAUDE.md on 2026-10-26 (decision 104) so it is read only when needed. The… |
-| docs/FRICTION.md | 60 | The operator adds a line whenever something goes wrong or feels slow, so /retro has real… |
+| docs/FRICTION.md | 61 | The operator adds a line whenever something goes wrong or feels slow, so /retro has real… |
 | docs/GAME_LOOP_PRD.md | 349 | Status: Draft, not signed. Each release moves into docs/PRD.md section 12 and is signed… Sections: 1. The game loop:13, 2. v12 Dino-Hoed:53, 3. v13 Dino-Eten:134, 4. v14 Bouw-Opdracht:214, 5. Order and dependencies:332, 6. Not picked yet:338 |
 | docs/HANDOFF.md | 25 | Founder (asleep, looks again tomorrow): "ok kun je de mol en grote wereld ook bouwen",… |
 | docs/IDEA.md | 81 | "Create a 3D minecraft education kind of game but then also with dinosaurs, and every 5… |
@@ -64,7 +65,7 @@
 | docs/SHOP_PRD.md | 108 | Document Status: Approved Addendum (docs/SHOP_PRD.md — companion to docs/PRD.md) |
 | docs/STATUS.md | 55 | Phase: small releases. Live on main: 0.6.0 v3 Dino's veilig (PR #25) and 0.7.0 v17… |
 | docs/TECH-DEBT.md | 34 | Known tech debt in one table. Major means it can cost the kids their builds or points.… |
-| docs/TEST_REPORT.md | 294 | Automated part PASS. AC256 (speed on the founder's oldest iPad) and AC241 (v15, the big… Sections: v16 Monstermol (0.9.0), V16e…:3, v15 Grote wereld (0.8.0),…:27, v18 Zwarte bubbel (0.7.0,…:52, v17 Ridders (0.7.0, part A),…:69, v11 Dorp (0.5.0):82, R1 Boot safety (R1d):166, v9 Eerlijke punten (0.3.0):184, v2 Gouden ei (0.2.0):209, Summary:281, Acceptance criteria coverage:284, Bugs:288, Kid safety and accessibility:292, Screenshots:294 |
+| docs/TEST_REPORT.md | 321 | Automated part: see the totals in the v19 section (one full run for both tasks). AC279… Sections: v20 Diepe edelstenen…:3, v19 Ridderuitrusting…:17, v16 Monstermol (0.9.0), V16e…:30, v15 Grote wereld (0.8.0),…:54, v18 Zwarte bubbel (0.7.0,…:79, v17 Ridders (0.7.0, part A),…:96, v11 Dorp (0.5.0):109, R1 Boot safety (R1d):193, v9 Eerlijke punten (0.3.0):211, v2 Gouden ei (0.2.0):236, Summary:308, Acceptance criteria coverage:311, Bugs:315, Kid safety and accessibility:319, Screenshots:321 |
 | docs/UI_REVIEW.md | 159 | Screenshots are not in git (44 MB). Run npm run test:e2e:ui-review to regenerate them in… Sections: How this was done:10, Why the founder sees buttons…:21, Screen map:30, Findings:58, Way back, in the same place?:135, What is good and should stay:142, Questions for the founder:153 |
 | docs/archive/CONTENT_CHECK.md | 215 | Date: 2026-10-22. By: QA. F1 to F7 and F10 are fixed (see the "Fixed" line under each).… Sections: How this was done:5, Overall result:40, Findings:48, What checked out (no finding):159, Top 5 to fix:170, 20 items for the founder or…:178, Lookup list for…:207, For the founder:211 |
 | docs/archive/DISCUSSION-to-v10.md | 309 | Moved out of docs/DISCUSSION.md on 2026-10-26 (decision 105). Unchanged. Sections: PRD review round 1:5, Architecture review:159, Architecture review (qa view):187, M1 milestone review:264 |

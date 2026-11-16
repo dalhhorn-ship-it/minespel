@@ -4,6 +4,18 @@ Written so kids can read it too.
 
 ## Unreleased
 
+## 0.12.0
+
+### Meer uitrusting
+
+* There is much more gear for your knights: 13 new things. You can now dress a knight in 8 places: head, shield, hand, back, body, feet, flag and mount.
+* New armour: a Maliënkolder, a Glanzend harnas that shines, a Koningscape and a Drakenschild. New helmets: a Pluimhelm and a Gouden helm that shines. New boots: Snelle laarzen.
+* A Houten zwaard, a Banier and a Koningsbanier. A knight with a banner sees monsters and animals from further away.
+* A Strijdpaard, a war horse, and a Rij-triceratops, a triceratops to ride on. Your knight sits on top and walks faster.
+* The Bubbelstaf blows soap bubbles while your knight pokes. They pop away by themselves. With "less motion" on, there are no bubbles.
+* In the Dinowinkel the row "Uitrusting" now has 21 things. A knight can still do everything without gear. Gear only makes it a little faster, never too fast.
+* For papa or mama: the backup holds the new gear. A backup from 0.11.0 still works. 0.11.0 cannot read a backup from 0.12.0 and says so in a friendly way.
+
 ## 0.11.0
 
 ### Diepe edelstenen
