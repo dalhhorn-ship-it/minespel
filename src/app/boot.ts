@@ -362,6 +362,15 @@ export function createBoot(deps: BootDeps): Boot {
         },
       });
       screens.showKidOverlay(card.element);
+      // The points copy can be a moment old (points earned just now are read again in the background).
+      // So the card reads the record itself when it opens, and Bestel is never grey by mistake.
+      void records
+        .get('economy')
+        .then((e) => {
+          knights.setPoints(e.points);
+          card.refresh();
+        })
+        .catch(() => {});
     };
     const bar = createLavakipBar({
       economy: lavakip,

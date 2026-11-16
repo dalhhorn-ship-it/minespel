@@ -21,6 +21,8 @@ export interface LavakipCardOptions {
 
 export interface LavakipCard {
   readonly element: HTMLElement;
+  /** Reads the points and the carried count again (the points may have changed since the card was made). */
+  refresh(): void;
   destroy(): void;
 }
 
@@ -105,6 +107,9 @@ export function createLavakipCard(options: LavakipCardOptions): LavakipCard {
   const stopDone = onTap(done, () => options.onClose(), { now: options.now });
   return {
     element: root,
+    refresh() {
+      if (!gone && !busy) render(false);
+    },
     destroy() {
       gone = true;
       stopOrder();

@@ -85,6 +85,19 @@ describe('Lavakip card (v23)', () => {
     expect(q(card, 'lavakip-note').textContent).toBe('');
     expect(onSizzle).not.toHaveBeenCalled();
   });
+  it('AC314: refresh reads the points again, so a card opened on old points is not grey by mistake', () => {
+    const state = { points: 0, carried: 0 };
+    const { card } = make(state);
+    const order = card.element.querySelector('[data-testid="lavakip-order"]') as HTMLElement;
+    const note = card.element.querySelector('[data-testid="lavakip-note"]') as HTMLElement;
+    expect(order.getAttribute('aria-disabled')).toBe('true');
+    expect(note.textContent).toBe('Nog 3 punten nodig');
+    state.points = 7;
+    card.refresh();
+    expect(order.getAttribute('aria-disabled')).toBe('false');
+    expect(note.textContent).toBe('');
+  });
+
   it('AC313: Klaar closes the card', () => {
     const { card, onClose } = make({ points: 3, carried: 0 });
     tap(q(card, 'lavakip-done'));
