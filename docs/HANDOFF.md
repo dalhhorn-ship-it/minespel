@@ -9,7 +9,7 @@ Founder (asleep, looks again tomorrow): "ok kun je de mol en grote wereld ook bo
 * Branch claude/jolly-fermi-z0vak4. No open PR.
 
 ## Next steps
-1. Run `./scripts/check.sh` once more (the last fix came after the last full run).
+1. The full check is green on aa155f2 (1477 unit, 328 e2e, local Chromium).
 2. Wait for the founder's iPad test (AC241, AC256, AC210, AC227). Do not merge v15 or v16 before it.
 3. On the founder's word: one pull request for 0.8.0 and 0.9.0, green CI, merge.
 4. Then /release for v19 Ridderuitrusting (standing approval, decision 136).
