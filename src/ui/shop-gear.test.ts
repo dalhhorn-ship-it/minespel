@@ -20,16 +20,20 @@ function make(state: { points: number; knightCount: number; owned: string[] }, o
 }
 
 describe('Uitrusting row', () => {
-  it('AC258: 8 cards in price order with name, slot, price and picture', () => {
+  it('AC258 AC281: 21 cards in price order with name, slot, price and picture', () => {
     const { host } = make({ points: 100, knightCount: 1, owned: [] });
     const cards = [...host.querySelectorAll('.shop-gear-card')];
     expect(cards.map((c) => c.querySelector('.shop-card-name')?.textContent)).toEqual([
-      'Leren kap', 'Houten schild', 'Riddercape', 'Kietelveer', 'IJzeren helm', 'IJzeren schild', 'Glimzwaard', 'Pony',
+      'Leren kap', 'Houten schild', 'Houten zwaard', 'Riddercape', 'Kietelveer', 'Snelle laarzen', 'IJzeren helm', 'Banier',
+      'IJzeren schild', 'Maliënkolder', 'Koningscape', 'Pluimhelm', 'Glimzwaard', 'Pony', 'Koningsbanier', 'Drakenschild',
+      'Glanzend harnas', 'Bubbelstaf', 'Gouden helm', 'Strijdpaard', 'Rij-triceratops',
     ]);
     expect(cards.map((c) => c.querySelector('.shop-card-price')?.textContent)).toEqual([
-      '10 punten', '10 punten', '15 punten', '20 punten', '25 punten', '30 punten', '50 punten', '50 punten',
+      '10 punten', '10 punten', '10 punten', '15 punten', '20 punten', '20 punten', '25 punten', '25 punten',
+      '30 punten', '30 punten', '40 punten', '45 punten', '50 punten', '50 punten', '55 punten', '60 punten',
+      '70 punten', '75 punten', '80 punten', '90 punten', '120 punten',
     ]);
-    expect(cards[7]!.textContent).toContain('Rijdier');
+    expect(cards[20]!.textContent).toContain('Rijdier');
     expect(cards.every((c) => c.querySelector('.gear-icon'))).toBe(true);
   });
 
@@ -59,7 +63,7 @@ describe('Uitrusting row', () => {
     expect(q(a.host, 'shop-buy-gear-pony')).toBeNull();
     const b = make({ points: 100, knightCount: 0, owned: [] });
     for (const btn of b.host.querySelectorAll('.shop-buy-btn')) expect((btn as HTMLButtonElement).disabled).toBe(true);
-    expect(b.host.querySelectorAll('.shop-card-note')).toHaveLength(8);
+    expect(b.host.querySelectorAll('.shop-card-note')).toHaveLength(21);
     expect(q(b.host, 'shop-note-gear-pony')!.textContent).toBe('Koop eerst een ridder');
   });
 });

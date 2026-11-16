@@ -217,3 +217,23 @@ describe('AC263: the Pony speed', () => {
     }
   });
 });
+
+describe('AC284: the boots and the new mounts', () => {
+  const world = buildMoleMap();
+  const kid = { x: 40.5, y: GY, z: 5.5 };
+  it('AC284: a follower far behind walks 4 with the boots, 5.5 on the Strijdpaard, 5 on the Rij-triceratops (20 percent)', () => {
+    const cases: [KnightState['gear'], number][] = [
+      [{ voeten: 'snelle-laarzen' }, 4], [{ rijdier: 'strijdpaard' }, 5.5], [{ rijdier: 'rij-triceratops' }, 5],
+      [{ voeten: 'snelle-laarzen', rijdier: 'strijdpaard' }, 5.5],
+    ];
+    for (const [gear, speed] of cases) {
+      const k = make('follow', 5.5, 5.5, world);
+      k.body.y = GY;
+      k.gear = gear;
+      const rng = createRng(3);
+      const x0 = k.body.x, z0 = k.body.z;
+      for (let i = 0; i < 90; i++) stepKnight(k, { world, rng, player: kid, playerYaw: Math.PI / 2, dt: DT });
+      expect(Math.abs(Math.hypot(k.body.x - x0, k.body.z - z0) / 3 - speed)).toBeLessThanOrEqual(speed * 0.2);
+    }
+  });
+});

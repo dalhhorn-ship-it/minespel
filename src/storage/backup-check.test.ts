@@ -308,9 +308,9 @@ describe('checkBackup', () => {
       expect(checkBackup(JSON.stringify(f))).toEqual(refused);
       expect(checkBackup(load('bad-newer-format.json'))).toEqual({ ok: false, message: MSG_NEWER });
     });
-    it('AC267: a format 5 file is a newer file for 0.11.0 (format 4 is its own)', () => {
+    it('AC267: a format 6 file is a newer file for 0.12.0 (format 5 is its own)', () => {
       const f = JSON.parse(load('v0100-gear.json'));
-      f.format = 5;
+      f.format = 6;
       expect(checkBackup(JSON.stringify(f))).toEqual({ ok: false, message: MSG_NEWER });
     });
   });
@@ -329,6 +329,19 @@ describe('checkBackup', () => {
       const f = JSON.parse(load('v0110-stones.json'));
       f.format = 3;
       expect(checkBackup(JSON.stringify(f))).toEqual(refused);
+    });
+  });
+  describe('AC288: the gear of format 5', () => {
+    it('AC288: a 0.12.0 file with new items worn in all 8 slots passes', () => {
+      expect(checkBackup(load('v0120-gear.json')).ok).toBe(true);
+    });
+    it('AC195 AC288: a new item in the wrong slot gets the friendly message', () => {
+      expect(checkBackup(load('bad-v0120-gear-wrong-slot.json'))).toEqual({ ok: false, message: MSG_BAD_VALUES });
+    });
+    it('AC288: a 0.11.0 file (format 4) with its v19 gear still passes', () => {
+      const f = JSON.parse(load('v0100-gear.json'));
+      f.format = 4;
+      expect(checkBackup(JSON.stringify(f)).ok).toBe(true);
     });
   });
 });

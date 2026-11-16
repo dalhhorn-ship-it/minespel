@@ -13,9 +13,17 @@ interface Ledger { delta: number; reason: string }
 const gear = (page: Page) => readState<GearState>(page, 'gearState');
 const ledger = (page: Page) => readState<Ledger[]>(page, 'ledgerLog');
 const toggle = (page: Page, id: string) => page.locator(`[data-testid="${id}-toggle"]`);
-const ORDER = ['leren-kap', 'houten-schild', 'riddercape', 'kietelveer', 'ijzeren-helm', 'ijzeren-schild', 'glimzwaard', 'pony'];
-const NAMES = ['Leren kap', 'Houten schild', 'Riddercape', 'Kietelveer', 'IJzeren helm', 'IJzeren schild', 'Glimzwaard', 'Pony'];
-const PRICES = [10, 10, 15, 20, 25, 30, 50, 50];
+const ORDER = [
+  'leren-kap', 'houten-schild', 'houten-zwaard', 'riddercape', 'kietelveer', 'snelle-laarzen', 'ijzeren-helm', 'banier',
+  'ijzeren-schild', 'malienkolder', 'koningscape', 'pluimhelm', 'glimzwaard', 'pony', 'koningsbanier', 'drakenschild',
+  'glanzend-harnas', 'bubbelstaf', 'gouden-helm', 'strijdpaard', 'rij-triceratops',
+];
+const NAMES = [
+  'Leren kap', 'Houten schild', 'Houten zwaard', 'Riddercape', 'Kietelveer', 'Snelle laarzen', 'IJzeren helm', 'Banier',
+  'IJzeren schild', 'Maliënkolder', 'Koningscape', 'Pluimhelm', 'Glimzwaard', 'Pony', 'Koningsbanier', 'Drakenschild',
+  'Glanzend harnas', 'Bubbelstaf', 'Gouden helm', 'Strijdpaard', 'Rij-triceratops',
+];
+const PRICES = [10, 10, 10, 15, 20, 20, 25, 25, 30, 30, 40, 45, 50, 50, 55, 60, 70, 75, 80, 90, 120];
 
 async function openShop(page: Page, points: number) {
   await readState(page, 'setPoints', points);
@@ -33,14 +41,14 @@ async function setSwitch(page: Page, id: string) {
 }
 
 test.describe('Uitrusting shop (V19b)', () => {
-  test('AC258: 8 cards in order with name, picture, slot and price, sizes of at least 56 and 44', async ({ page }) => {
+  test('AC258 AC281: 21 cards in order with name, picture, slot and price, sizes of at least 56 and 44', async ({ page }) => {
     await openApp(page);
     await readState(page, 'addKnight', 'follow');
     await openShop(page, 100);
     await expect(page.locator('[data-testid="shop-gear"]')).toContainText('Uitrusting');
     const cards = page.locator('.shop-gear-card');
-    await expect(cards).toHaveCount(8);
-    for (let i = 0; i < 8; i++) {
+    await expect(cards).toHaveCount(21);
+    for (let i = 0; i < 21; i++) {
       const card = page.locator(`[data-testid="shop-gear-${ORDER[i]}"]`);
       await expect(card.locator('.shop-card-name')).toHaveText(NAMES[i]!);
       await expect(card.locator('.shop-card-price')).toHaveText(`${PRICES[i]} punten`);
@@ -91,6 +99,21 @@ test.describe('Uitrusting shop (V19b)', () => {
     const rows = await ledger(page);
     expect(rows).toHaveLength(1);
     expect(rows[0]).toMatchObject({ reason: 'gear', delta: -50 });
+  });
+
+  test('AC282: 120 points and Ja buys the Rij-triceratops, points 0 and one ledger row of -120', async ({ page }) => {
+    await openApp(page);
+    await readState(page, 'addKnight', 'follow');
+    await openShop(page, 120);
+    await page.locator('[data-testid="shop-buy-gear-rij-triceratops"]').scrollIntoViewIfNeeded();
+    await page.locator('[data-testid="shop-buy-gear-rij-triceratops"]').tap();
+    await page.locator('[data-testid="shop-confirm-yes-gear-rij-triceratops"]').tap();
+    await expect(page.locator('[data-testid="shop-note-gear-rij-triceratops"]')).toHaveText('In je wapenkast');
+    expect(await readState<number>(page, 'points')).toBe(0);
+    expect((await gear(page)).owned).toEqual(['rij-triceratops']);
+    const rows = await ledger(page);
+    expect(rows).toHaveLength(1);
+    expect(rows[0]).toMatchObject({ reason: 'gear', delta: -120 });
   });
 
   test('AC259: 100 points and 10 fast Ja taps buy exactly one Pony', async ({ page }) => {

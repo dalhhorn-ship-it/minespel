@@ -37,4 +37,15 @@ describe('knight picture', () => {
       expect(html(w)).not.toBe(bare);
     }
   });
+  it('AC287: the new parts show in the flat picture and every new item changes it', () => {
+    const html = (w: object) => [...createKnightPicture(w).querySelectorAll('[data-part]')].map((n) => `${n.getAttribute('data-part')}:${n.getAttribute('fill')}`).join(',');
+    const bare = html({});
+    const worn = [{ hoofd: 'pluimhelm' }, { hoofd: 'gouden-helm' }, { schild: 'drakenschild' }, { hand: 'houten-zwaard' }, { hand: 'bubbelstaf' }, { rug: 'koningscape' },
+      { lijf: 'malienkolder' }, { lijf: 'glanzend-harnas' }, { voeten: 'snelle-laarzen' }, { vlag: 'banier' }, { vlag: 'koningsbanier' }, { rijdier: 'strijdpaard' }, { rijdier: 'rij-triceratops' }];
+    for (const w of worn) expect(html(w), JSON.stringify(w)).not.toBe(bare);
+    const p = parts(createKnightPicture({ lijf: 'glanzend-harnas', voeten: 'snelle-laarzen', vlag: 'banier', rijdier: 'rij-triceratops', hand: 'bubbelstaf' }));
+    expect(p).toEqual(expect.arrayContaining(['armour', 'boots', 'banner', 'triceratops-frill', 'staff', 'staff-bubble']));
+    expect(p).not.toContain('body');
+    expect(html({ rijdier: 'rij-triceratops' })).not.toBe(html({ rijdier: 'strijdpaard' }));
+  });
 });

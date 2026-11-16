@@ -167,3 +167,22 @@ describe('AC265: the Kietelveer giggle in the mole bar', () => {
     expect(played).not.toContain('hihihi');
   });
 });
+
+describe('AC285: the banners and the mole', () => {
+  it('AC285: a guard with the Koningsbanier goes to the mole at 21 blocks and not at 23', () => {
+    const mole = createMole({ x: 10.5, y: GY, z: 30.5 }, { x: 0, z: 0 });
+    const near = { ...knight('guard', 31.5, 30.5, 'n'), gear: { vlag: 'koningsbanier' } };
+    const far = { ...knight('guard', 33.5, 30.5, 'f'), gear: { vlag: 'koningsbanier' } };
+    stepMoleMoed(mole, ctxFor([near, far]));
+    expect(near.chase).not.toBeNull();
+    expect(far.chase).toBeNull();
+  });
+  it('AC285: a follower with the Banier goes at 11 blocks and not at 13', () => {
+    const mole = createMole({ x: 10.5, y: GY, z: 30.5 }, { x: 0, z: 0 });
+    const near = { ...knight('follow', 21.5, 30.5, 'n'), gear: { vlag: 'banier' } };
+    const far = { ...knight('follow', 23.5, 30.5, 'f'), gear: { vlag: 'banier' } };
+    stepMoleMoed(mole, ctxFor([near, far]));
+    expect(near.chase).not.toBeNull();
+    expect(far.chase).toBeNull();
+  });
+});

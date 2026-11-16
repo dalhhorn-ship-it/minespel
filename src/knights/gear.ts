@@ -3,20 +3,21 @@
 // (`gear.owned` and `gear.worn`), never on `KnightRecord`, so a knight rewrite or a rolled back 0.9.0 keeps it.
 import type { MonstersRecord } from '../storage/schema';
 
-export type GearSlot = 'hoofd' | 'schild' | 'hand' | 'rug' | 'rijdier';
+export type GearSlot = 'hoofd' | 'schild' | 'hand' | 'rug' | 'lijf' | 'voeten' | 'vlag' | 'rijdier';
 
 /** The Uitrusten order of the slots. */
-export const GEAR_SLOTS: readonly GearSlot[] = ['hoofd', 'schild', 'hand', 'rug', 'rijdier'];
+export const GEAR_SLOTS: readonly GearSlot[] = ['hoofd', 'schild', 'hand', 'rug', 'lijf', 'voeten', 'vlag', 'rijdier'];
 export const SLOT_LABELS: Record<GearSlot, string> = {
-  hoofd: 'Hoofd', schild: 'Schild', hand: 'Hand', rug: 'Rug', rijdier: 'Rijdier',
+  hoofd: 'Hoofd', schild: 'Schild', hand: 'Hand', rug: 'Rug', lijf: 'Lijf', voeten: 'Voeten', vlag: 'Vlag', rijdier: 'Rijdier',
 };
 /** One emoji per slot, for `gearIcon`. */
 export const SLOT_ICON: Record<GearSlot, string> = {
-  hoofd: '\u{1FA96}', schild: '\u{1F6E1}\u{FE0F}', hand: '\u{1F5E1}\u{FE0F}', rug: '\u{1F9E3}', rijdier: '\u{1F434}',
+  hoofd: '\u{1FA96}', schild: '\u{1F6E1}\u{FE0F}', hand: '\u{1F5E1}\u{FE0F}', rug: '\u{1F9E3}', lijf: '\u{1F455}', voeten: '\u{1F462}', vlag: '\u{1F6A9}', rijdier: '\u{1F434}',
 };
 
 export interface GearLook {
-  /** A name the knight model understands: kap, houten-schild, cape, veer, helm, ijzeren-schild, glimzwaard, pony. */
+  /** A name the knight model understands: kap, houten-schild, cape, veer, helm, ijzeren-schild, glimzwaard, pony, sword, boots, banner, mail,
+   *  plume-helm, dragon-shield, armour, staff, horse, triceratops. */
   shape: string;
   /** Main colour, 0xRRGGBB. */
   color: number;
@@ -49,6 +50,20 @@ export const GEAR: readonly GearItem[] = [
   { id: 'ijzeren-schild', name: 'IJzeren schild', slot: 'schild', price: 30, kracht: 1, speed: 0, sight: 0, look: { shape: 'ijzeren-schild', color: 0x9aa5b1, shine: 0xe3e9ef } },
   { id: 'glimzwaard', name: 'Glimzwaard', slot: 'hand', price: 50, kracht: 1, speed: 0, sight: 0, look: { shape: 'glimzwaard', color: 0xf5d04a, effect: 'sparkle' } },
   { id: 'pony', name: 'Pony', slot: 'rijdier', price: 50, kracht: 0, speed: 1.5, sight: 0, look: { shape: 'pony', color: 0xb07840 } },
+  // v21 (decision 142): appended after the v19 rows, so the stable shop sort gives the PRD order.
+  { id: 'houten-zwaard', name: 'Houten zwaard', slot: 'hand', price: 10, kracht: 1, speed: 0, sight: 0, look: { shape: 'sword', color: 0xb8864b } },
+  { id: 'snelle-laarzen', name: 'Snelle laarzen', slot: 'voeten', price: 20, kracht: 0, speed: 1, sight: 0, look: { shape: 'boots', color: 0x3d85c6 } },
+  { id: 'banier', name: 'Banier', slot: 'vlag', price: 25, kracht: 0, speed: 0, sight: 4, look: { shape: 'banner', color: 0x2e9e5b } },
+  { id: 'malienkolder', name: 'Maliënkolder', slot: 'lijf', price: 30, kracht: 0, speed: 0, sight: 0, look: { shape: 'mail', color: 0x8a949e, shine: 0xc9d1d8 } },
+  { id: 'koningscape', name: 'Koningscape', slot: 'rug', price: 40, kracht: 1, speed: 0, sight: 0, look: { shape: 'cape', color: 0x6a2c91, shine: 0xf5d04a } },
+  { id: 'pluimhelm', name: 'Pluimhelm', slot: 'hoofd', price: 45, kracht: 1, speed: 0, sight: 0, look: { shape: 'plume-helm', color: 0x9aa5b1, shine: 0xe3e9ef } },
+  { id: 'koningsbanier', name: 'Koningsbanier', slot: 'vlag', price: 55, kracht: 0, speed: 0, sight: 6, look: { shape: 'banner', color: 0xc0392b, shine: 0xf5d04a } },
+  { id: 'drakenschild', name: 'Drakenschild', slot: 'schild', price: 60, kracht: 1, speed: 0, sight: 0, look: { shape: 'dragon-shield', color: 0x2e8b57, shine: 0xf5d04a } },
+  { id: 'glanzend-harnas', name: 'Glanzend harnas', slot: 'lijf', price: 70, kracht: 0, speed: 0, sight: 0, look: { shape: 'armour', color: 0xb8c2cc, shine: 0xf4f7fa } },
+  { id: 'bubbelstaf', name: 'Bubbelstaf', slot: 'hand', price: 75, kracht: 1, speed: 0, sight: 0, look: { shape: 'staff', color: 0x7ec8e3, effect: 'bubbles' } },
+  { id: 'gouden-helm', name: 'Gouden helm', slot: 'hoofd', price: 80, kracht: 1, speed: 0, sight: 0, look: { shape: 'helm', color: 0xf5c518, shine: 0xfff2a8 } },
+  { id: 'strijdpaard', name: 'Strijdpaard', slot: 'rijdier', price: 90, kracht: 0, speed: 2.5, sight: 0, look: { shape: 'horse', color: 0x5b3a29 } },
+  { id: 'rij-triceratops', name: 'Rij-triceratops', slot: 'rijdier', price: 120, kracht: 0, speed: 2, sight: 0, look: { shape: 'triceratops', color: 0x6aa84f } },
 ];
 
 export const GEAR_IDS: readonly string[] = GEAR.map((g) => g.id);
@@ -95,7 +110,7 @@ export const kracht = (worn: Worn | undefined): number =>
 export function walkSpeed(worn: Worn | undefined): number {
   const items = wornItems(worn);
   const mount = items.find((g) => g.slot === 'rijdier');
-  const feet = items.find((g) => (g.slot as string) === 'voeten');
+  const feet = items.find((g) => g.slot === 'voeten');
   return BASE_WALK_SPEED + (mount ? mount.speed : feet ? feet.speed : 0);
 }
 

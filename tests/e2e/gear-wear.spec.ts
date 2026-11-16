@@ -202,6 +202,33 @@ test.describe('Uitrusten (V19c)', () => {
     expect(after.worn[me.id]).toEqual({ hand: 'glimzwaard', schild: 'houten-schild' });
     expect(after.owned.length).toBe(3);
   });
+
+  test('AC282: one of each of the 13 new items, 8 slots on the screen, one item per slot, one of each owned', async ({ page }) => {
+    await openApp(page);
+    await flatten(page);
+    const id = (await readState<string | null>(page, 'addKnight', 'stay'))!;
+    const NEW = [
+      'houten-zwaard', 'snelle-laarzen', 'banier', 'malienkolder', 'koningscape', 'pluimhelm', 'koningsbanier', 'drakenschild',
+      'glanzend-harnas', 'bubbelstaf', 'gouden-helm', 'strijdpaard', 'rij-triceratops',
+    ];
+    await readState(page, 'setPoints', 1000);
+    for (const n of NEW) expect(await readState<boolean>(page, 'buyGearInShop', n)).toBe(true);
+    await openGear(page, id, 1);
+    await expect(page.locator('.gear-screen-slot')).toHaveText(['Hoofd', 'Schild', 'Hand', 'Rug', 'Lijf', 'Voeten', 'Vlag', 'Rijdier']);
+    for (const n of NEW) {
+      await tapSel(page, item(n));
+      await expect(page.locator(`${item(n)}[aria-pressed="true"]`)).toHaveCount(1);
+      await page.waitForTimeout(150);
+    }
+    const g = await gear(page);
+    expect(g.owned.slice().sort()).toEqual(NEW.slice().sort());
+    expect(g.knights[0]!.worn).toEqual({
+      hoofd: 'gouden-helm', schild: 'drakenschild', hand: 'bubbelstaf', rug: 'koningscape', lijf: 'glanzend-harnas',
+      voeten: 'snelle-laarzen', vlag: 'koningsbanier', rijdier: 'rij-triceratops',
+    });
+    noDoubles(g);
+    expect(await page.locator('.gear-screen-item').count()).toBe(13);
+  });
 });
 
 /** A tap in the middle of the screen, outside the card, that must not reach the world. */

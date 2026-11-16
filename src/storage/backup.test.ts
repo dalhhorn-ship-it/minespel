@@ -65,7 +65,7 @@ describe('backup file', () => {
   it('AC131: the header holds the app name, the format version and the date', async () => {
     const db = await fresh();
     const f = await buildBackup(db, { now: new Date('2026-11-06T10:00:00Z'), appVersion: '0.6.0' });
-    expect(f).toMatchObject({ app: 'dino-blokwereld', format: 4, createdAt: '2026-11-06T10:00:00.000Z', appVersion: '0.6.0', schemaVersion: SCHEMA_VERSION });
+    expect(f).toMatchObject({ app: 'dino-blokwereld', format: 5, createdAt: '2026-11-06T10:00:00.000Z', appVersion: '0.6.0', schemaVersion: SCHEMA_VERSION });
     db.close();
   });
 
@@ -227,7 +227,7 @@ describe('backup file', () => {
     const db = await fresh();
     await seed(db);
     const file = await buildBackup(db);
-    expect(file.format).toBe(4);
+    expect(file.format).toBe(5);
     expect((JSON.parse(backupText(file)) as { kv: { world: { terrainVersion: number } } }).kv.world.terrainVersion).toBe(3);
     const before = await get(db, 'kv', 'world');
     const checked = checkBackup(backupText(file));
@@ -347,7 +347,7 @@ describe('backup file', () => {
       expect(stored.gear.owned).toHaveLength(5);
       expect(stored.gear.worn).toEqual({ 'ridder-1': { hoofd: 'leren-kap', rijdier: 'pony' }, 'ridder-2': { schild: 'ijzeren-schild' } });
       const again = await buildBackup(db);
-      expect(again.format).toBe(4);
+      expect(again.format).toBe(5);
       const second = checkBackup(backupText(again));
       expect(second.ok).toBe(true);
       expect((second.ok && (second.data.kv.monsters as { gear: unknown }).gear)).toEqual(stored.gear);
@@ -382,7 +382,7 @@ describe('backup file', () => {
       expect(stored.stones.found).toHaveLength(3);
       expect(stored.stones.bought).toHaveLength(2);
       const again = await buildBackup(db);
-      expect(again.format).toBe(4);
+      expect(again.format).toBe(5);
       const second = checkBackup(backupText(again));
       expect(second.ok && (second.data.kv.monsters as { stones: unknown }).stones).toEqual(stored.stones);
       db.close();
@@ -398,6 +398,24 @@ describe('backup file', () => {
       const stored = (await get(db, 'kv', 'monsters')) as { gear: { owned: string[] }; stones?: unknown };
       expect(stored.stones).toBeUndefined();
       expect(stored.gear.owned).toHaveLength(5);
+      db.close();
+    });
+  });
+  describe('AC288: new gear in the backup (format 5)', () => {
+    it('AC288: a 0.12.0 backup is format 5 and a round trip keeps the 8 worn new items', async () => {
+      const r = checkBackup(fixture('v0120-gear.json'));
+      expect(r.ok).toBe(true);
+      if (!r.ok) return;
+      const db = await fresh();
+      await replaceAll(db, r.data);
+      haltWrites(false);
+      const stored = (await get(db, 'kv', 'monsters')) as { gear: { owned: string[]; worn: Record<string, Record<string, string>> } };
+      expect(stored.gear.owned).toHaveLength(9);
+      expect(Object.keys(stored.gear.worn['ridder-1']!)).toHaveLength(8);
+      const again = await buildBackup(db);
+      expect(again.format).toBe(5);
+      const second = checkBackup(backupText(again));
+      expect(second.ok && (second.data.kv.monsters as { gear: unknown }).gear).toEqual(stored.gear);
       db.close();
     });
   });

@@ -1,26 +1,86 @@
 import { describe, expect, it } from 'vitest';
 import {
-  GEAR, GEAR_SLOTS, checkGear, dropKnight, kracht, lookKey, moedRate, noticeBonus, readGear, shopOrder, takeOff, toGearRecord,
+  GEAR, GEAR_SLOTS, checkGear, gearById, dropKnight, kracht, lookKey, moedRate, noticeBonus, readGear, shopOrder, takeOff, toGearRecord,
   walkSpeed, wear, type GearData, type GearSlot,
 } from './gear';
 
 const ids = (...a: string[]) => a;
 const data = (owned: string[], worn: GearData['worn'] = {}): GearData => ({ owned, worn });
 
-describe('AC258: the gear table', () => {
-  it('AC258: the 8 rows of the PRD table in order with their prices', () => {
+describe('AC258 AC281: the gear table', () => {
+  it('AC281: the 21 rows, the v19 rows first and the 13 of v21 after them, with their prices', () => {
     expect(GEAR.map((g) => [g.name, g.slot, g.price])).toEqual([
       ['Leren kap', 'hoofd', 10], ['Houten schild', 'schild', 10], ['Riddercape', 'rug', 15], ['Kietelveer', 'hand', 20],
       ['IJzeren helm', 'hoofd', 25], ['IJzeren schild', 'schild', 30], ['Glimzwaard', 'hand', 50], ['Pony', 'rijdier', 50],
+      ['Houten zwaard', 'hand', 10], ['Snelle laarzen', 'voeten', 20], ['Banier', 'vlag', 25], ['Maliënkolder', 'lijf', 30],
+      ['Koningscape', 'rug', 40], ['Pluimhelm', 'hoofd', 45], ['Koningsbanier', 'vlag', 55], ['Drakenschild', 'schild', 60],
+      ['Glanzend harnas', 'lijf', 70], ['Bubbelstaf', 'hand', 75], ['Gouden helm', 'hoofd', 80], ['Strijdpaard', 'rijdier', 90],
+      ['Rij-triceratops', 'rijdier', 120],
     ]);
-    expect(GEAR.reduce((n, g) => n + g.price, 0)).toBe(210);
-    expect(GEAR_SLOTS).toEqual(['hoofd', 'schild', 'hand', 'rug', 'rijdier']);
+    expect(GEAR.reduce((n, g) => n + g.price, 0)).toBe(930);
+    expect(GEAR.slice(8).reduce((n, g) => n + g.price, 0)).toBe(720);
+    expect(GEAR_SLOTS).toEqual(['hoofd', 'schild', 'hand', 'rug', 'lijf', 'voeten', 'vlag', 'rijdier']);
   });
 
-  it('AC258: the shop order is cheapest first and the table order at the same price', () => {
-    expect(shopOrder().map((g) => g.id)).toEqual([
-      'leren-kap', 'houten-schild', 'riddercape', 'kietelveer', 'ijzeren-helm', 'ijzeren-schild', 'glimzwaard', 'pony',
-    ]);
+  it('AC281: the shop order has Houten zwaard third and the Rij-triceratops last', () => {
+    const order = shopOrder().map((g) => g.id);
+    expect(order).toHaveLength(21);
+    expect(order.slice(0, 3)).toEqual(['leren-kap', 'houten-schild', 'houten-zwaard']);
+    expect(order[20]).toBe('rij-triceratops');
+  });
+
+  it('AC287: every item has a look with a shape and a colour, the Bubbelstaf blows bubbles', () => {
+    for (const g of GEAR) {
+      expect(g.look.shape.length).toBeGreaterThan(0);
+      expect(g.look.color).toBeGreaterThan(0);
+    }
+    expect(gearById('bubbelstaf')!.look.effect).toBe('bubbles');
+    expect(gearById('rij-triceratops')!.look.shape).toBe('triceratops');
+  });
+});
+
+describe('AC283 AC284 AC285: the rules of v21', () => {
+  it('AC283: Kracht 5 with the four dear items and still 5 with all 8 slots', () => {
+    const dear = { hoofd: 'pluimhelm', schild: 'drakenschild', hand: 'bubbelstaf', rug: 'koningscape' } as const;
+    expect(kracht(dear)).toBe(5);
+    expect(kracht(dear)).toBe(kracht({ hoofd: 'leren-kap', schild: 'houten-schild', hand: 'houten-zwaard', rug: 'riddercape' }));
+    const all = { ...dear, lijf: 'malienkolder', voeten: 'snelle-laarzen', vlag: 'koningsbanier', rijdier: 'strijdpaard' } as const;
+    expect(kracht(all)).toBe(5);
+    expect(kracht({ lijf: 'glanzend-harnas', voeten: 'snelle-laarzen', vlag: 'banier', rijdier: 'rij-triceratops' })).toBe(1);
+    expect(kracht({ hoofd: 'gouden-helm' })).toBe(2);
+  });
+
+  it('AC283: three knights in all 8 slots never fill a bar under 3 seconds', () => {
+    const all = { hoofd: 'gouden-helm', schild: 'drakenschild', hand: 'bubbelstaf', rug: 'koningscape', lijf: 'glanzend-harnas',
+      voeten: 'snelle-laarzen', vlag: 'banier', rijdier: 'rij-triceratops' } as const;
+    const full = 15;
+    const rate = moedRate([kracht(all), kracht(all), kracht(all)], full);
+    expect(full / rate).toBeGreaterThanOrEqual(3);
+  });
+
+  it('AC284: walks 3 bare, 4 with the boots, 5.5 on the Strijdpaard, 5 on the Rij-triceratops, boots add nothing on a mount', () => {
+    expect(walkSpeed({ voeten: 'snelle-laarzen' })).toBe(4);
+    expect(walkSpeed({ rijdier: 'strijdpaard' })).toBe(5.5);
+    expect(walkSpeed({ rijdier: 'rij-triceratops' })).toBe(5);
+    expect(walkSpeed({ voeten: 'snelle-laarzen', rijdier: 'strijdpaard' })).toBe(5.5);
+    expect(walkSpeed({ voeten: 'snelle-laarzen', rijdier: 'pony' })).toBe(4.5);
+  });
+
+  it('AC285: the notice bonus is 4 with the Banier and 6 with the Koningsbanier, 0 otherwise', () => {
+    expect(noticeBonus({ vlag: 'banier' })).toBe(4);
+    expect(noticeBonus({ vlag: 'koningsbanier' })).toBe(6);
+    expect(noticeBonus({ vlag: 'koningsbanier', hoofd: 'gouden-helm' })).toBe(6);
+    expect(noticeBonus({ lijf: 'malienkolder', rijdier: 'strijdpaard' })).toBe(0);
+  });
+
+  it('AC282 AC283: one of each of the 13, wear all, one per slot and one of each owned', () => {
+    let d = data(GEAR.slice(8).map((g) => g.id));
+    for (const g of GEAR.slice(8)) d = wear(d, 'a', g.id, g.slot);
+    expect(Object.keys(d.worn.a!)).toHaveLength(8);
+    expect(d.owned).toHaveLength(13);
+    expect(readGear({ knights: [{ id: 'a' }] as never, gear: toGearRecord(d) }).worn.a).toEqual(d.worn.a);
+    expect(checkGear(toGearRecord(d))).toBe(true);
+    expect(checkGear({ owned: ['banier'], worn: { a: { rug: 'banier' } } })).toBe(false);
   });
 });
 

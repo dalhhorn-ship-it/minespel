@@ -82,6 +82,8 @@ const BOUNDS: Record<number, Bounds> = {
   3: { size: WORLD_SIZE, height: WORLD_HEIGHT, cells: WORLD_SIZE * WORLD_HEIGHT * WORLD_SIZE, terrainVersions: [3], needsWorld: true, gear: true, stones: false },
   // Format 4 (0.11.0, AC278): the same, plus the stones the kid found and bought.
   4: { size: WORLD_SIZE, height: WORLD_HEIGHT, cells: WORLD_SIZE * WORLD_HEIGHT * WORLD_SIZE, terrainVersions: [3], needsWorld: true, gear: true, stones: true },
+  // Format 5 (0.12.0, AC288): the same records, with the 13 new gear ids allowed.
+  5: { size: WORLD_SIZE, height: WORLD_HEIGHT, cells: WORLD_SIZE * WORLD_HEIGHT * WORLD_SIZE, terrainVersions: [3], needsWorld: true, gear: true, stones: true },
 };
 
 function validWorld(w: Record<string, unknown>, b: Bounds): boolean {

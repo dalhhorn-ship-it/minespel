@@ -177,3 +177,22 @@ describe('AC265: the Kietelveer giggle in the Klodder bar', () => {
     }
   });
 });
+
+describe('AC285: the banners and Klodder', () => {
+  it('AC285: Volg mij with the Banier goes at 11 blocks and not at 13, the Koningsbanier at 13 and not at 15', () => {
+    for (const [vlag, goes, stays] of [['banier', 11, 13], ['koningsbanier', 13, 15]] as const) {
+      const a = { ...knight('follow', sx + goes, sz), gear: { vlag } };
+      const b = { ...knight('follow', sx + stays, sz), gear: { vlag } };
+      const s = setup([a, b]);
+      stepMoed(s.k, s.ctx(0.1));
+      expect(a.chase).not.toBeNull();
+      expect(b.chase).toBeNull();
+    }
+  });
+  it('AC285: without a banner a follower at 9 blocks does not go (AC216 holds)', () => {
+    const a = knight('follow', sx + 9, sz);
+    const s = setup([a]);
+    stepMoed(s.k, s.ctx(0.1));
+    expect(a.chase).toBeNull();
+  });
+});
