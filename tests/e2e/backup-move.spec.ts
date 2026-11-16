@@ -159,9 +159,13 @@ test.describe('A backup made by 0.8.0 (AC238)', () => {
     for (const name of ['Alles wissen', 'Ja, ga verder', 'Ja, wis alles echt']) {
       const b = page.locator('.parent-settings button', { hasText: name }).first();
       await b.scrollIntoViewIfNeeded();
+      // A mark on this page: gone once the page has really reloaded (WebKit can answer from the old page for a moment).
+      if (name === 'Ja, wis alles echt') await page.evaluate(() => ((window as unknown as { __oldPage?: boolean }).__oldPage = true));
       await b.tap();
     }
-    await expect.poll(() => readState<number>(page, 'points').catch(() => -1)).toBe(0);
+    await expect
+      .poll(() => page.evaluate(() => (window as unknown as { __oldPage?: boolean }).__oldPage === true).catch(() => true), { timeout: 20_000 })
+      .toBe(false);
     await page.waitForFunction(() => (window as unknown as { __dino?: { ready?: () => boolean } }).__dino?.ready?.() === true);
     await setupPin(page, '4321');
     await openExport(page, '4321');

@@ -3,7 +3,7 @@
 import { expect, test, type Page } from '@playwright/test';
 import { openApp, readState } from './helpers/app';
 
-interface Knight { id: string; mode: string; x: number; y: number; z: number }
+interface Knight { id: string; mode: string; x: number; y: number; z: number; spot: { x: number; z: number } | null }
 interface Pose { x: number; y: number; z: number; yaw: number }
 
 const knights = (page: Page) => readState<Knight[]>(page, 'knights');
@@ -79,10 +79,12 @@ test.describe('Knight safety (V17e)', () => {
     await expect(stay).toBeHidden();
     const after = await knights(page);
     expect(modes(after)).toEqual(modes(before));
-    // The stay knight keeps his spot exactly (he does not walk).
+    // The stay knight keeps his spot exactly. He strolls a little around it (STAY_RADIUS), so his own x and z are
+    // not the spot; the spot is what Allemaal vrij must leave alone.
     const stayBefore = before.find((k) => k.mode === 'stay')!;
     const stayAfter = after.find((k) => k.id === stayBefore.id)!;
-    expect(stayAfter.x).toBeCloseTo(stayBefore.x, 5);
-    expect(stayAfter.z).toBeCloseTo(stayBefore.z, 5);
+    expect(stayBefore.spot).not.toBeNull();
+    expect(stayAfter.spot!.x).toBeCloseTo(stayBefore.spot!.x, 5);
+    expect(stayAfter.spot!.z).toBeCloseTo(stayBefore.spot!.z, 5);
   });
 });

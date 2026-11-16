@@ -27,7 +27,9 @@ export async function setupPin(page: Page, pin = '1234'): Promise<void> {
 
 /** Taps the world lock and types the PIN. Leaves the parent shell open. */
 export async function loginAsParent(page: Page, pin = '1234'): Promise<void> {
-  await page.locator('[data-testid="parent-controls-btn"]').first().tap();
+  // force: a spec that runs with page.clock.install() fakes requestAnimationFrame, and on a loaded WebKit machine the
+  // "stable" actionability wait for this plain, still button never ends. If something did cover it, the gate wait below fails.
+  await page.locator('[data-testid="parent-controls-btn"]').first().tap({ force: true });
   await page.locator('.parent-gate-key[data-key="1"]').waitFor();
   await typePin(page, pin);
   await page.locator('[data-testid="parent-shell"]').waitFor();

@@ -93,10 +93,14 @@ test.describe('Backup (T53a)', () => {
     };
     await tapSettings('Alles wissen');
     await tapSettings('Ja, ga verder');
+    // A mark on this page: it is gone once the page has really reloaded (WebKit can answer from the old page for a moment).
+    await page.evaluate(() => ((window as unknown as { __oldPage?: boolean }).__oldPage = true));
     await tapSettings('Ja, wis alles echt');
-    // The page reloads: read through the reload until the new game answers.
-    await expect.poll(() => readState<number>(page, 'points').catch(() => -1)).toBe(0);
+    await expect
+      .poll(() => page.evaluate(() => (window as unknown as { __oldPage?: boolean }).__oldPage === true).catch(() => true), { timeout: 20_000 })
+      .toBe(false);
     await ready(page);
+    expect(await readState<number>(page, 'points')).toBe(0);
     // A new pincode, then restore.
     await setupPin(page, '4321');
     await openExport(page, '4321');

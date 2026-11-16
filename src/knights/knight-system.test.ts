@@ -82,6 +82,8 @@ describe('knight system skeleton', () => {
     const box: [number, number, number, number, number, number] = [k.body.x - 0.2, k.body.y, k.body.z - 0.2, k.body.x + 0.2, k.body.y + 1, k.body.z + 0.2];
     expect(s.system.isOccupied?.(box)).toBe(true);
     s.system.applySwitches({ knights: false, bubble: false, mole: false });
+    // Klodder and the mole skip a knight that is not visible, so a switched off knight must not count as one.
+    expect(k.visible).toBe(false);
     expect(s.syncActors).toHaveBeenLastCalledWith('knights', []);
     expect(s.system.isOccupied?.(box)).toBe(false);
     expect(s.system.handleTap?.(512, 384)).toBe(false);
@@ -89,6 +91,13 @@ describe('knight system skeleton', () => {
     s.system.step(1 / 30);
     expect(s.syncActors).toHaveBeenLastCalledWith('knights', [expect.objectContaining({ id: 'a', model: 'knight' })]);
     expect(k.mode).toBe('stay');
+  });
+  it('knights off from the start (loaded while on, switch applied off) are not visible either', () => {
+    const s = setup();
+    s.system.load([rec('a', 'stay', { x: s.kid.x + 8, y: s.kid.y, z: s.kid.z })]);
+    expect(s.system.knights()[0]!.visible).toBe(true);
+    s.system.applySwitches({ knights: false, bubble: false, mole: false });
+    expect(s.system.knights()[0]!.visible).toBe(false);
   });
   it('step tells the renderer every frame, and tells it nothing when there never was a knight', () => {
     const s = setup();

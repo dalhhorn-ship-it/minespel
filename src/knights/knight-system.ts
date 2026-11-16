@@ -160,6 +160,8 @@ export function createKnightSystem(options: KnightSystemOptions): KnightSystem {
           placed.delete(k.id);
         }
       }
+      // Off: no knight is in the world, so none may poke Klodder or the mole either (they read `visible`).
+      if (!on) for (const k of list) k.visible = false;
       sync();
     },
     setSeed(seed) {

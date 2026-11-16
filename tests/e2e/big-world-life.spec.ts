@@ -136,6 +136,9 @@ test.describe('life in the moved 0.7.0 world (AC239)', () => {
     const save = save070();
     await openMoved(page, save);
     await readState(page, 'pauseGame');
+    // The first game step hatches the two ready eggs and rescues animals the move put inside a block. In WebKit no frame
+    // has run yet when the page is ready, so take that step first and only then look at where the animals are.
+    await readState(page, 'stepDinos', 0.1);
     // An animal more than 15 blocks from the kid is brought to him at the start by a rule 0.7.0 already had (it then walks
     // home), so only animals that started within 12 blocks of their stay spot are held to the roam radius from the start.
     const stays = (await readState<Dino[]>(page, 'dinos')).filter(
@@ -199,6 +202,8 @@ test.describe('life in the moved 0.7.0 world (AC239)', () => {
     const hut = save.changes.find((c) => c[3] !== AIR)!;
     const cell = { x: hut[0] + MOVE.x, y: hut[1] + MOVE.y, z: hut[2] + MOVE.z };
     expect(await readState<number>(page, 'blockAt', cell.x, cell.y, cell.z)).toBe(hut[3]);
+    // Both eggs of the old save are ready: wait until the game has hatched them, then count (WebKit starts its first frame later).
+    await expect.poll(async () => (await readState<unknown[]>(page, 'eggs')).length).toBe(0);
     const dinos = (await readState<Dino[]>(page, 'dinos')).length;
     const knights = (await readState<Knight[]>(page, 'knights')).length;
     const openSettings = async () => {
