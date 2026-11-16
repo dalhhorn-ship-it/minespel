@@ -1,9 +1,11 @@
-// A knight sends the Monstermol off (V16d, AC251): the Moed bar fills, the lines show, the mole is gone, the knight is
-// back in his mode.
+// A knight sends the Monstermol off (V16d, AC251, v22 AC329): the Moed bar fills, the lines show, the mole runs off
+// (away, never removed), the knight is back in his mode.
 import { expect, test, type Page } from '@playwright/test';
 import { openApp, readState } from './helpers/app';
 
-interface Mole { phase: string; moed: number; pokers: number }
+interface MoleEntry { id: number; state: string; awayMsLeft: number }
+interface Mole { phase: string; moed: number; pokers: number; moles: MoleEntry[] }
+interface Toast { text: string; playMs: number }
 interface Knight { id: string; mode: string }
 
 async function wake(page: Page) {
@@ -41,12 +43,22 @@ test.describe('Knight against the Monstermol (V16d)', () => {
       m = await readState<Mole>(page, 'moleState');
     }
     await expect(line).toHaveText('Wegwezen!');
-    await expect(line).toHaveText('Oké, oké, ik ga al!', { timeout: 5000 });
-    for (let i = 0; i < 20 && m.phase !== 'none'; i++) {
+    for (let i = 0; i < 40 && m.phase !== 'away'; i++) {
       await readState(page, 'fastForward', 250);
       m = await readState<Mole>(page, 'moleState');
     }
-    expect((await readState<Mole>(page, 'moleState')).phase).toBe('none');
+    expect(m.phase).toBe('away');
+    // He is never removed: one mole, away, with 60 to 90 seconds (less the 1.5 s he sank).
+    expect(m.moles).toHaveLength(1);
+    expect(m.moles[0]!.state).toBe('away');
+    expect(m.moles[0]!.awayMsLeft).toBeGreaterThan(55_000);
+    expect(m.moles[0]!.awayMsLeft).toBeLessThanOrEqual(90_000);
+    const RUNS = 'De Monstermol rent weg. Hij komt vast stiekem terug!';
+    const HELP = 'Bouw een hek van 2 hoog om hem heen.';
+    await expect.poll(async () => {
+      const log = (await readState<Toast[]>(page, 'toastLog')).map((t) => t.text);
+      return log.indexOf(RUNS) >= 0 && log.lastIndexOf(HELP) > log.indexOf(RUNS);
+    }, { timeout: 15_000 }).toBe(true);
     const knights = await readState<Knight[]>(page, 'knights');
     expect(knights[0]!.mode).toBe('guard');
   });

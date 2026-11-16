@@ -5,6 +5,7 @@ import '../styles/dino-menu.css';
 import type { DinoMode } from '../dinos/dino-ai';
 import type { WorldDino } from '../dinos/dino-store';
 import { DINO_KINDS } from '../dinos/kinds';
+import type { LavakipMenuOption } from '../lavakip/lavakip-types';
 import { el } from './dom';
 import { createNameScreen, type NameScreen } from './name-screen';
 import { onTap } from './tap';
@@ -15,6 +16,8 @@ export interface DinoMenuOptions {
   onNameSave: (name: string) => void;
   onKnuffel: () => void;
   onClose: () => void;
+  /** "Lavakip geven" (v23): null or missing means no entry. a button with its text when given. */
+  lavakip?: LavakipMenuOption | null;
   now?: () => number;
 }
 
@@ -113,6 +116,14 @@ export function createDinoMenu(options: DinoMenuOptions): DinoMenu {
       text: '\u{2764}\u{FE0F} Knuffel',
       attrs: { type: 'button' },
     });
+    const lavakip = options.lavakip ?? null;
+    const lavakipBtn = lavakip
+      ? el('button', {
+          class: 'dino-menu-btn dino-menu-btn-lavakip',
+          text: lavakip.text,
+          attrs: { type: 'button', 'data-action': 'lavakip' },
+        })
+      : null;
     const closeBtn = el('button', {
       class: 'dino-menu-btn dino-menu-btn-close',
       text: 'Sluiten',
@@ -152,12 +163,26 @@ export function createDinoMenu(options: DinoMenuOptions): DinoMenu {
       ),
       onTap(closeBtn, () => options.onClose(), { now: options.now }),
     );
+    if (lavakip && lavakipBtn) {
+      // The menu closes first, then the snack starts (AC315).
+      cleanups.push(
+        onTap(
+          lavakipBtn,
+          () => {
+            options.onClose();
+            lavakip.give();
+          },
+          { now: options.now },
+        ),
+      );
+    }
 
     const grid = el('div', { class: 'dino-menu-grid' }, [
       followBtn,
       stayBtn,
       nameBtn,
       knuffelBtn,
+      ...(lavakipBtn ? [lavakipBtn] : []),
     ]);
 
     const card = el(

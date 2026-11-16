@@ -121,3 +121,19 @@ describe('world HUD Allemaal vrij button (decision 122)', () => {
     hud.destroy();
   });
 });
+
+describe('decision 144: the bubble pill slot', () => {
+  it('has one empty hud-bubble-slot under the top bar, and it is an ignore zone', () => {
+    const zones: Element[] = [];
+    const r = { addIgnoreZone: (z: Element) => (zones.push(z), () => undefined) } as unknown as PointerRouter;
+    const hud = createHud({ router: r, onJump: vi.fn(), onMode: vi.fn(), onPause: vi.fn() });
+    const slots = hud.root.querySelectorAll('[data-testid="hud-bubble-slot"]');
+    expect(slots).toHaveLength(1);
+    expect(slots[0]).toBe(hud.bubbleSlot);
+    expect(hud.bubbleSlot.classList.contains('hud-bubble-slot')).toBe(true);
+    expect(hud.bubbleSlot.childNodes).toHaveLength(0);
+    expect(zones).toContain(hud.bubbleSlot);
+    expect(hud.root.firstElementChild?.nextElementSibling).toBe(hud.bubbleSlot);
+    hud.destroy();
+  });
+});

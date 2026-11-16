@@ -109,3 +109,20 @@ describe('creatureSwitches', () => {
     expect(creatureSwitches({ moleEnabled: true, monstersEnabled: false }).mole).toBe(false);
   });
 });
+
+describe('decision 144: the moles field', () => {
+  it('AC299: updateMonsters keeps a saved mole list and the default record has none', async () => {
+    const db = await fresh();
+    const moles = [{ x: 3, y: 9, z: 4, state: 'caught' as const }, { x: 9, y: 9, z: 4, state: 'away' as const, awayMs: 70_000 }];
+    await updateMonsters(db, (m) => ({ ...m, moles }));
+    await updateMonsters(db, (m) => ({ ...m, knights: [knight('k1')] }));
+    expect(await get(db, 'kv', 'monsters')).toEqual({ knights: [knight('k1')], bubbleClockMs: 0, hintShown: false, moles });
+    db.close();
+  });
+  it('AC337: a chase knight is saved and read back like the other modes', async () => {
+    const db = await fresh();
+    await updateMonsters(db, (m) => ({ ...m, knights: [{ ...knight('k1'), mode: 'chase', spot: { x: 1, y: 2, z: 3 } }] }));
+    expect((await createRecords(db).get('monsters')).knights[0]?.mode).toBe('chase');
+    db.close();
+  });
+});

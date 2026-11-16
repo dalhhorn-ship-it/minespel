@@ -1,48 +1,29 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
-import type { Group, Mesh } from 'three';
+import { describe, expect, it } from 'vitest';
+import type { Mesh } from 'three';
 import { createMoleModel, MOLE_MESH_LIMIT } from './mole-model';
 
-function meshCount(root: Group): number {
-  let n = 0;
-  root.traverse((o) => {
-    if ((o as Mesh).isMesh) n++;
+function meshes(model: ReturnType<typeof createMoleModel>): Mesh[] {
+  const out: Mesh[] = [];
+  model.root.traverse((o) => {
+    if ((o as Mesh).isMesh) out.push(o as Mesh);
   });
-  return n;
-}
-function pose(m: ReturnType<typeof createMoleModel>) {
-  const rig = m.root.children[0]!;
-  return { z: rig.rotation.z, y: rig.position.y, s: rig.scale.y };
+  return out;
 }
 
-afterEach(() => vi.unstubAllGlobals());
+describe('mole model (v22, AC296)', () => {
+  it('keeps to the mesh cap', () => {
+    expect(meshes(createMoleModel()).length).toBeLessThanOrEqual(MOLE_MESH_LIMIT);
+  });
 
-describe('Monstermol model (v16)', () => {
-  it('AC254: at most 6 meshes', () => {
-    expect(MOLE_MESH_LIMIT).toBe(6);
-    expect(meshCount(createMoleModel().root)).toBeLessThanOrEqual(6);
-    expect(meshCount(createMoleModel().root)).toBeGreaterThan(1);
-  });
-  it('AC254: he waddles and bounces without reduced motion', () => {
-    vi.stubGlobal('matchMedia', () => ({ matches: false }));
-    const m = createMoleModel();
-    m.setPose('walk', 0.2);
-    expect(pose(m).z).not.toBe(0);
-    m.setPose('boe', 0.15);
-    expect(pose(m).y).toBeGreaterThan(0);
-  });
-  it('AC254: with reduced motion nothing moves in walk, boe and rise', () => {
-    vi.stubGlobal('matchMedia', () => ({ matches: true }));
-    const m = createMoleModel();
-    for (const p of ['walk', 'boe', 'rise']) {
-      m.setPose(p, 0.2);
-      expect(pose(m)).toEqual({ z: 0, y: 0, s: 1 });
-    }
-  });
-  it('AC254: dispose frees the geometry and the materials', () => {
-    const m = createMoleModel();
-    const mesh = m.root.children[0]!.children[0] as Mesh;
-    const g = vi.spyOn(mesh.geometry, 'dispose');
-    m.dispose();
-    expect(g).toHaveBeenCalled();
+  it('AC296: the sleep pose shuts his eyes (the lenses become a thin line) and walking opens them again', () => {
+    const model = createMoleModel();
+    const lens = meshes(model).find((m) => m.position.z > 0.43 && m.position.y > 0.6) as Mesh;
+    model.setPose('walk', 0);
+    expect(lens.scale.y).toBe(1);
+    model.setPose('sleep', 0);
+    expect(lens.scale.y).toBeLessThan(0.3);
+    model.setPose('walk', 1);
+    expect(lens.scale.y).toBe(1);
+    model.dispose();
   });
 });

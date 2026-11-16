@@ -6,8 +6,8 @@ import { createRng } from '../core/rng';
 import { callDino, createDino, type DinoState } from '../dinos/dino-ai';
 import type { KnightState } from '../knights/knight-types';
 import type { World } from '../world/world';
-import { canTeaseFrom, createMole, moleBox, stepMole } from './mole';
-import { FENCE_MS, LEAVE_MS, LONELY_MS, MOLE_TIRED_MS, type Cell, type MoleState, type MonsterContext } from './monster-types';
+import { canTeaseFrom, createMole, HOME_RADIUS, LINE_ALL_GUARDED, moleBox, stepMole, TEASE_GAP_MS } from './mole';
+import { FENCE_MS, LEAVE_MS, LONELY_MS, type Cell, type MoleState, type MonsterContext } from './monster-types';
 
 let world: World;
 beforeAll(() => {
@@ -37,7 +37,18 @@ interface Run {
 }
 
 /** Runs the mole like the monster system does: it adds dt to the clocks first, and an animal that fled comes back. */
-function start(w: World, at: { x: number; z: number }, animals: DinoState[], kid = { x: 5.5, y: GY, z: 5.5 }, seed = 1): Run {
+interface Extras {
+  /** Animals a guard knight watches. */
+  guarded?: readonly DinoState[];
+  knights?: readonly KnightState[];
+}
+
+/** A guard knight at a spot, for the distance rule. */
+function guard(x: number, z: number): KnightState {
+  return { mode: 'guard', visible: true, body: { x, y: GY, z } } as unknown as KnightState;
+}
+
+function start(w: World, at: { x: number; z: number }, animals: DinoState[], kid = { x: 5.5, y: GY, z: 5.5 }, seed = 1, extras: Extras = {}): Run {
   const rng = createRng(seed);
   const mole = createMole({ x: at.x, y: GY, z: at.z }, { x: 0, z: 0 });
   const said: Run['said'] = [];
@@ -52,7 +63,8 @@ function start(w: World, at: { x: number; z: number }, animals: DinoState[], kid
         if (mole.phase === 'out') mole.outMs += ms;
         const ctx: MonsterContext = {
           world: w, rng, dt: DT, kid, kidBox: [kid.x - 0.3, kid.y, kid.z - 0.3, kid.x + 0.3, kid.y + 1.8, kid.z + 0.3],
-          occupied: () => false, knights: () => [] as readonly KnightState[], touch: () => {},
+          occupied: () => false, knights: () => extras.knights ?? ([] as readonly KnightState[]), touch: () => {},
+          isGuarded: (a) => extras.guarded?.includes(a) === true,
           say: (text) => said.push({ text, at: run.now }),
           play: (name) => { played.push(name); },
           animals: () => animals, markHintShown: () => {}, hintShown: () => false,
@@ -124,32 +136,46 @@ describe('the mole walks to an animal and teases it (v16, AC247)', () => {
   });
 });
 
-describe('the fence rule (v16, AC249)', () => {
-  it('AC249: an animal in a pen 2 high: Hmpf after 10 s plus at most 2 s, gone within 3 s', () => {
+describe('the fence rule: he waits and never leaves (v22, AC249, AC295)', () => {
+  const HMPF = 'Hmpf! Ik kan er niet bij.';
+
+  it('AC295: an animal in a pen 2 high: Hmpf after 10 s plus at most 2 s, and he stays out', () => {
     const inside = animal(PEN2.x0 + 2.5, PEN2.z0 + 2.5);
     const r = start(world, { x: PEN2.x0 - 7.5, z: PEN2.z0 + 2.5 }, [inside]);
-    r.until(() => sayTimes(r, 'Hmpf! Ik kan er niet bij.').length > 0, 20_000);
-    const [at] = sayTimes(r, 'Hmpf! Ik kan er niet bij.');
+    r.until(() => sayTimes(r, HMPF).length > 0, 20_000);
+    const [at] = sayTimes(r, HMPF);
     expect(at).toBeGreaterThanOrEqual(FENCE_MS);
     expect(at).toBeLessThanOrEqual(FENCE_MS + 2000);
-    expect(r.mole.phase).toBe('leaving');
+    expect(r.mole.phase).toBe('out');
     expect(r.played).toContain('hmpf');
     expect(r.teased).toHaveLength(0);
-    // Leaving: he sinks within LEAVE_MS (the system removes him then).
-    const y0 = r.mole.y;
     r.step(LEAVE_MS / (DT * 1000));
-    expect(r.mole.y).toBeLessThan(y0 - 0.5);
-    expect(r.mole.pose).toBe('sink');
+    expect(r.mole.phase).toBe('out');
+    expect(r.mole.pose).not.toBe('sink');
   });
 
-  it('AC249: walls 2 high around the mole are the same as a pen', () => {
+  it('AC295: a pen around every animal: 30 minutes later he is still out and Hmpf showed at most once per minute', () => {
+    const w = buildMoleMap();
+    const a = animal(PEN2.x0 + 1.5, PEN2.z0 + 1.5);
+    const b = animal(PEN2.x0 + 4.5, PEN2.z0 + 4.5);
+    const r = start(w, { x: PEN2.x0 - 7.5, z: PEN2.z0 + 2.5 }, [a, b]);
+    r.step(30 * 60_000 / (DT * 1000));
+    expect(r.mole.phase).toBe('out');
+    const times = sayTimes(r, HMPF);
+    expect(times.length).toBeGreaterThanOrEqual(25);
+    for (let i = 1; i < times.length; i++) expect((times[i] as number) - (times[i - 1] as number)).toBeGreaterThanOrEqual(60_000 - DT * 1000);
+    expect(r.teased).toHaveLength(0);
+    // 36 000 steps: about 3 seconds here, more on a busy CI runner, so this case gets its own time limit.
+  }, 30_000);
+
+  it('AC295: walls 2 high around the mole are the same as a pen: he waits and says Hmpf once', () => {
     const w = buildMoleMap();
     ring(w, { x0: 60, x1: 62, z0: 100, z1: 102 }, 2);
     const dino = animal(66.5, 101.5);
     const r = start(w, { x: 61.5, z: 101.5 }, [dino]);
-    r.until(() => r.mole.phase === 'leaving', 20_000);
-    expect(sayTimes(r, 'Hmpf! Ik kan er niet bij.')).toHaveLength(1);
-    expect(r.now).toBeLessThanOrEqual(FENCE_MS + 2000);
+    r.step(50_000 / (DT * 1000));
+    expect(sayTimes(r, HMPF)).toHaveLength(1);
+    expect(r.mole.phase).toBe('out');
     expect(r.teased).toHaveLength(0);
   });
 
@@ -158,7 +184,7 @@ describe('the fence rule (v16, AC249)', () => {
     const r = start(world, { x: PEN1.x0 - 6.5, z: PEN1.z0 + 2.5 }, [inside]);
     r.until(() => r.teased.length > 0, 30_000);
     expect(r.teased[0]).toBe(inside);
-    expect(sayTimes(r, 'Hmpf! Ik kan er niet bij.')).toHaveLength(0);
+    expect(sayTimes(r, HMPF)).toHaveLength(0);
     expect(r.mole.phase).toBe('out');
   });
 
@@ -201,7 +227,7 @@ describe('no tease across a wall (v16, AC249)', () => {
     const w = cornerlessPen(2);
     const inside = animal(CORNERS.x0 + 0.5, CORNERS.z0 + 0.5);
     const r = start(w, { x: CORNERS.x0 - 7.5, z: CORNERS.z0 - 7.5 }, [inside]);
-    r.until(() => r.mole.phase === 'leaving', 20_000);
+    r.until(() => sayTimes(r, 'Hmpf! Ik kan er niet bij.').length > 0, 20_000);
     expect(sayTimes(r, 'Hmpf! Ik kan er niet bij.')).toHaveLength(1);
     expect(r.teased).toHaveLength(0);
     expect(sayTimes(r, 'Boe!')).toHaveLength(0);
@@ -216,30 +242,85 @@ describe('no tease across a wall (v16, AC249)', () => {
   });
 });
 
-describe('no one to tease and tired (v16, AC250)', () => {
-  it('AC250: no animal at all: "Niemand om mee te spelen..." at 60 s plus or minus 1', () => {
+describe('he stays: nobody to play with, tease gap, guards (v22, AC295, AC332)', () => {
+  const dist = (r: Run): number => Math.hypot(r.mole.x - r.mole.home.x, r.mole.z - r.mole.home.z);
+
+  it('AC295: no animal at all: 30 minutes later he is out, within 6 of home, and the lonely line showed exactly once at 60 s', () => {
     const r = start(world, { x: 10.5, z: 10.5 }, []);
-    r.until(() => r.mole.phase === 'leaving', 90_000);
-    const at = sayTimes(r, 'Niemand om mee te spelen...')[0] ?? -1;
-    expect(at).toBeGreaterThanOrEqual(LONELY_MS - 1000);
-    expect(at).toBeLessThanOrEqual(LONELY_MS + 1000);
-    expect(r.played).toContain('hmpf');
+    let far = 0;
+    for (let i = 0; i < 30 * 60_000 / (DT * 1000); i++) {
+      r.step(1);
+      far = Math.max(far, dist(r));
+    }
+    expect(r.mole.phase).toBe('out');
+    expect(far).toBeLessThanOrEqual(HOME_RADIUS);
+    const times = sayTimes(r, 'Niemand om mee te spelen...');
+    expect(times).toHaveLength(1);
+    expect(Math.abs((times[0] as number) - LONELY_MS)).toBeLessThanOrEqual(1000);
+    expect(r.mole.outMs).toBeGreaterThan(1_790_000);
+    // He did waddle about.
+    expect(far).toBeGreaterThan(1);
   });
 
-  it('AC250: all animals on Volg mij: the same', () => {
+  it('AC295: all animals on Volg mij: the same, once', () => {
     const r = start(world, { x: 10.5, z: 10.5 }, [animal(14.5, 10.5, 'follow'), animal(8.5, 12.5, 'follow')]);
-    r.until(() => r.mole.phase === 'leaving', 90_000);
-    const at = sayTimes(r, 'Niemand om mee te spelen...')[0] ?? -1;
-    expect(Math.abs(at - LONELY_MS)).toBeLessThanOrEqual(1000);
+    r.step(5 * 60_000 / (DT * 1000));
+    const times = sayTimes(r, 'Niemand om mee te spelen...');
+    expect(times).toHaveLength(1);
+    expect(Math.abs((times[0] as number) - LONELY_MS)).toBeLessThanOrEqual(1000);
+    expect(r.mole.phase).toBe('out');
   });
 
-  it('AC250: after 10 minutes he yawns "Ik ga slapen" and goes', () => {
-    const r = start(world, { x: 10.5, z: 14.5 }, [animal(12.5, 12.5), animal(8.5, 18.5)]);
-    r.until(() => r.mole.phase === 'leaving', MOLE_TIRED_MS + 5000);
-    const at = sayTimes(r, 'Ik ga slapen')[0] ?? -1;
-    expect(Math.abs(at - MOLE_TIRED_MS)).toBeLessThanOrEqual(1000);
-    expect(r.played).toContain('geeuw');
-    expect(r.mole.phase).toBe('leaving');
+  it('AC295: 5 minutes with 3 animals: no two teases are less than 15 000 ms apart', () => {
+    const r = start(world, { x: 10.5, z: 14.5 }, [animal(12.5, 12.5), animal(8.5, 18.5), animal(14.5, 20.5)]);
+    r.step(5 * 60_000 / (DT * 1000));
+    const times = sayTimes(r, 'Boe!');
+    expect(times.length).toBeGreaterThanOrEqual(10);
+    for (let i = 1; i < times.length; i++) expect((times[i] as number) - (times[i - 1] as number)).toBeGreaterThanOrEqual(TEASE_GAP_MS - 1);
+    expect(r.mole.phase).toBe('out');
+  });
+
+  it('AC332: 10 minutes with 4 guarded and 3 unguarded animals: only the unguarded ones are teased', () => {
+    const guarded = [animal(12.5, 12.5), animal(14.5, 14.5), animal(16.5, 12.5), animal(14.5, 10.5)];
+    const free = [animal(8.5, 18.5), animal(12.5, 22.5), animal(18.5, 20.5)];
+    const r = start(world, { x: 10.5, z: 16.5 }, [...guarded, ...free], undefined, 3, { guarded });
+    r.step(10 * 60_000 / (DT * 1000));
+    expect(r.teased.length).toBeGreaterThan(5);
+    for (const t of r.teased) expect(guarded).not.toContain(t);
+    expect(new Set(r.teased).size).toBeGreaterThan(1);
+  });
+
+  it('AC332: every animal guarded: nobody is teased for 5 minutes, he keeps more than 16 from the knight and says the line once a minute at most', () => {
+    const animals = [animal(12.5, 12.5), animal(14.5, 14.5)];
+    const knight = guard(13.5, 13.5);
+    const r = start(world, { x: 18.5, z: 18.5 }, animals, { x: 3.5, y: GY, z: 3.5 }, 4, { guarded: animals, knights: [knight] });
+    let nearest = Infinity;
+    for (let i = 0; i < 5 * 60_000 / (DT * 1000); i++) {
+      r.step(1);
+      if (i * DT * 1000 > 40_000) nearest = Math.min(nearest, Math.max(Math.abs(r.mole.x - 13.5), Math.abs(r.mole.z - 13.5)));
+    }
+    expect(r.teased).toHaveLength(0);
+    expect(sayTimes(r, 'Boe!')).toHaveLength(0);
+    expect(nearest).toBeGreaterThan(16);
+    const times = sayTimes(r, LINE_ALL_GUARDED);
+    expect(times.length).toBeGreaterThanOrEqual(1);
+    expect(times.length).toBeLessThanOrEqual(5);
+    for (let i = 1; i < times.length; i++) expect((times[i] as number) - (times[i - 1] as number)).toBeGreaterThanOrEqual(60_000 - DT * 1000);
+    expect(r.mole.phase).toBe('out');
+  });
+
+  it('AC332: when the knight stops guarding, he heads to the animal within 3 s', () => {
+    const a = animal(12.5, 12.5);
+    const guarded = [a];
+    const knights = [guard(13.5, 13.5)];
+    const r = start(world, { x: 12.5, z: 20.5 }, [a], { x: 3.5, y: GY, z: 3.5 }, 4, { guarded, knights });
+    r.step(40_000 / (DT * 1000));
+    expect(r.teased).toHaveLength(0);
+    expect(r.mole.target).toBeNull();
+    guarded.length = 0;
+    knights.length = 0;
+    r.until(() => r.mole.target !== null || r.teased.length > 0, 3000);
+    expect(r.mole.target !== null || r.teased.length > 0).toBe(true);
   });
 });
 

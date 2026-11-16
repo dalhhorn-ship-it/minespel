@@ -6,6 +6,7 @@ import { GRAVITY, MAX_FALL_SPEED, MAX_FRAME_TIME } from '../world/physics';
 import { WORLD_SIZE } from '../world/terrain';
 import type { World } from '../world/world';
 import { GROW_SECONDS, growthScale, type HatchSpot } from './egg';
+import { snackStep, type Snack } from '../lavakip/snack';
 import { DINO_KINDS, type DinoKindId } from './kinds';
 
 export type DinoMode = 'follow' | 'stay';
@@ -103,6 +104,8 @@ export interface DinoState {
    * counting down to -FLEE_BACK_GIVEUP. Never saved.
    */
   flee?: FleeState;
+  /** A lavakip snack in progress (v23): loop ms left and the heading to turn back to. Read first by `stepDino`. Never saved. */
+  snack?: Snack;
 }
 
 export interface FleeState {
@@ -516,6 +519,8 @@ function rescue(world: World, d: DinoState, player: Point, rng: Rng, opts: StepO
  */
 export function stepDino(world: World, d: DinoState, player: Point, rng: Rng, dt: number, opts: StepOptions = {}): DinoEvent {
   if (!(dt > 0) || !Number.isFinite(dt)) return null;
+  // A snack (v23) stands him still and uses no rng, so a seeded run only differs by the seconds he stood.
+  if (snackStep(d, dt)) return null;
   const total = Math.min(dt, MAX_FRAME_TIME);
   d.growth = Math.min(GROW_SECONDS, d.growth + total);
 

@@ -50,4 +50,17 @@ describe('actor scene sync', () => {
     sync.sync('knights', [{ ...knight('a'), look: '' }]);
     expect(sync.group.children[0]!.children).toHaveLength(1);
   });
+  it('decision 144: the props group draws the lavakip-bar model and removes it when gone', () => {
+    const sync = createActorSceneSync();
+    sync.sync('props', [{ id: 'bar', model: 'lavakip-bar', x: 5, y: 6, z: 7, heading: 0 }]);
+    const group = sync.group.children[0]!;
+    expect(group.children).toHaveLength(1);
+    const meshes: unknown[] = [];
+    group.children[0]!.traverse((o) => { if ((o as { isMesh?: boolean }).isMesh) meshes.push(o); });
+    expect(meshes.length).toBeGreaterThanOrEqual(1);
+    expect(meshes.length).toBeLessThanOrEqual(4);
+    expect(group.children[0]!.position.x).toBe(5);
+    sync.sync('props', []);
+    expect(group.children).toHaveLength(0);
+  });
 });

@@ -1,6 +1,7 @@
-// The knight menu when the kid taps a knight (AC203): Volg mij, Blijf hier, Pas op de dieren, and a way back.
+// The knight menu when the kid taps a knight (AC203): Volg mij, Blijf hier, Pas op de dieren, Jaag monsters weg (v22), and a way back.
 import '../styles/knight-menu.css';
 import type { KnightMode } from '../knights/knight-types';
+import type { LavakipMenuOption } from '../lavakip/lavakip-types';
 import { el } from './dom';
 import { onTap } from './tap';
 
@@ -8,12 +9,14 @@ export const MODE_LABELS: Record<KnightMode, string> = {
   follow: 'Volg mij',
   stay: 'Blijf hier',
   guard: 'Pas op de dieren',
+  chase: 'Jaag monsters weg',
 };
 
 const MODE_STATUS: Record<KnightMode, string> = {
   follow: 'Ik loop met je mee!',
   stay: 'Ik blijf hier staan.',
   guard: 'Ik hou de wacht bij deze plek.',
+  chase: 'Ik jaag monsters weg!',
 };
 
 export interface KnightMenuOptions {
@@ -22,6 +25,8 @@ export interface KnightMenuOptions {
   onClose: () => void;
   /** The Uitrusten button (v19): shown only when this is given. */
   onGear?: () => void;
+  /** "Lavakip geven" (v23, a button with its text when given): null or missing means no entry. */
+  lavakip?: LavakipMenuOption | null;
   /** The guard report line, asked again whenever the mode is guard. */
   report?: () => string;
   now?: () => number;
@@ -44,7 +49,7 @@ export function createKnightMenu(options: KnightMenuOptions): KnightMenu {
       class: 'knight-menu-status',
       text: mode === 'guard' && options.report ? options.report() : MODE_STATUS[mode],
     });
-    const buttons = (['follow', 'stay', 'guard'] as const).map((m) => {
+    const buttons = (['follow', 'stay', 'guard', 'chase'] as const).map((m) => {
       const btn = el('button', {
         class: 'knight-menu-btn',
         text: MODE_LABELS[m],
@@ -71,6 +76,27 @@ export function createKnightMenu(options: KnightMenuOptions): KnightMenu {
         })
       : null;
     if (gearBtn) cleanups.push(onTap(gearBtn, () => options.onGear?.(), { now: options.now }));
+    const lavakip = options.lavakip ?? null;
+    const lavakipBtn = lavakip
+      ? el('button', {
+          class: 'knight-menu-btn knight-menu-btn-lavakip',
+          text: lavakip.text,
+          attrs: { type: 'button', 'data-action': 'lavakip' },
+        })
+      : null;
+    if (lavakip && lavakipBtn) {
+      // The menu closes first, then the snack starts (AC316).
+      cleanups.push(
+        onTap(
+          lavakipBtn,
+          () => {
+            options.onClose();
+            lavakip.give();
+          },
+          { now: options.now },
+        ),
+      );
+    }
     const closeBtn = el('button', {
       class: 'knight-menu-btn knight-menu-btn-close',
       text: 'Sluiten',
@@ -83,7 +109,7 @@ export function createKnightMenu(options: KnightMenuOptions): KnightMenu {
       [
         el('h2', { class: 'knight-menu-title', text: 'Ridder' }),
         status,
-        el('div', { class: 'knight-menu-grid' }, gearBtn ? [...buttons, gearBtn] : buttons),
+        el('div', { class: 'knight-menu-grid' }, [...buttons, ...(gearBtn ? [gearBtn] : []), ...(lavakipBtn ? [lavakipBtn] : [])]),
         closeBtn,
       ],
     );

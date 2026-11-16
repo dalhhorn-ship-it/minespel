@@ -6,14 +6,17 @@ import { shuffle } from '../core/rng';
 import { AIR, BLADEREN, BOOMSTAM, LAVA, WATER } from '../world/blocks';
 import { WORLD_HEIGHT, WORLD_SIZE } from '../world/terrain';
 import type { World } from '../world/world';
+import { LINE_COME_UP, LINE_HELP, LINE_HIHI, LINE_NO_FIT } from './mole-lines';
+import type { MoleState, MonsterContext } from './monster-types';
 
 /** A spot must be within this many blocks of a target animal along x and z. */
 export const SPAWN_NEAR_ANIMAL = 16;
 /** Not within this many blocks of the kid. */
 export const SPAWN_KID_MIN = 5;
-/** With no target animal: 6 to 10 blocks from the kid along the larger axis. */
-export const SPAWN_RING_MIN = 6;
-export const SPAWN_RING_MAX = 10;
+/** With no target animal (v22, AC294): 4 to 6 blocks from the dig column along x and z, not within 3 of the kid. */
+export const SPAWN_RING_MIN = 4;
+export const SPAWN_RING_MAX = 6;
+export const SPAWN_RING_KID_MIN = 3;
 /** Every cell within this many blocks of the spot along each axis must be unchanged. */
 export const SPAWN_CLEAN = 3;
 
@@ -35,8 +38,8 @@ function cleanAround(world: World, x: number, y: number, z: number): boolean {
 
 /**
  * The feet centre where the mole comes up, or null when no spot fits. Candidates are the columns within 16 blocks of
- * a target animal (with none: the ring 6 to 10 blocks from the kid); a spot sits on the highest solid block with sky
- * above it, never on water, lava, leaves or a trunk, more than 5 from the kid and more than 1 from the dig column.
+ * a target animal (with none: the ring 4 to 6 blocks from the dig column, not within 3 of the kid); a spot sits on the highest solid block with sky
+ * above it, never on water, lava, leaves or a trunk, more than 5 from the kid and more than 1 from the dig column (the ring case has its own rule).
  * One fitting column is picked with the seeded `rng`.
  */
 export function findMoleSpawn(
@@ -57,9 +60,10 @@ export function findMoleSpawn(
     const cx = x + 0.5;
     const cz = z + 0.5;
     const away = Math.max(Math.abs(cx - kid.x), Math.abs(cz - kid.z));
-    if (away <= SPAWN_KID_MIN) return;
-    if (Math.max(Math.abs(x - digColumn.x), Math.abs(z - digColumn.z)) <= 1) return;
-    if (targets.length === 0 && (away < SPAWN_RING_MIN || away > SPAWN_RING_MAX)) return;
+    const fromDig = Math.max(Math.abs(x - digColumn.x), Math.abs(z - digColumn.z));
+    if (targets.length === 0) {
+      if (away <= SPAWN_RING_KID_MIN || fromDig < SPAWN_RING_MIN || fromDig > SPAWN_RING_MAX) return;
+    } else if (away <= SPAWN_KID_MIN || fromDig <= 1) return;
     cols.push({ x, z });
   };
   if (targets.length > 0) {
@@ -71,10 +75,8 @@ export function findMoleSpawn(
       }
     }
   } else {
-    const kx = Math.floor(kid.x);
-    const kz = Math.floor(kid.z);
-    for (let x = kx - SPAWN_RING_MAX - 1; x <= kx + SPAWN_RING_MAX + 1; x++) {
-      for (let z = kz - SPAWN_RING_MAX - 1; z <= kz + SPAWN_RING_MAX + 1; z++) add(x, z);
+    for (let x = digColumn.x - SPAWN_RING_MAX; x <= digColumn.x + SPAWN_RING_MAX; x++) {
+      for (let z = digColumn.z - SPAWN_RING_MAX; z <= digColumn.z + SPAWN_RING_MAX; z++) add(x, z);
     }
   }
   // Random order, then the first column that fits: the same as a uniform pick among the fitting ones.
@@ -89,4 +91,22 @@ export function findMoleSpawn(
     return { x: c.x + 0.5, y, z: c.z + 0.5 };
   }
   return null;
+}
+
+/**
+ * The rumble is over (AC245, AC246): the spot where the mole comes up, or null with the no fit line said. `ctx` holds
+ * the world, the kid, the animals and the seeded rng; `digColumn` is where the kid dug.
+ */
+export function finishRumble(ctx: MonsterContext, digColumn: { x: number; z: number }): Point | null {
+  const spot = findMoleSpawn(ctx.world, ctx.kid, digColumn, ctx.animals?.() ?? [], ctx.rng);
+  if (!spot) ctx.say(LINE_NO_FIT, 3500, 'mole');
+  return spot;
+}
+
+/** He came up (AC293): the toast, the help line, the "Hihi!" label over his head and the sound. */
+export function announceMole(mole: MoleState, ctx: MonsterContext): void {
+  ctx.say(LINE_COME_UP, 3000, 'mole');
+  ctx.say(LINE_HELP, 4000, 'mole');
+  ctx.labels?.show(`mole-${mole.id}`, LINE_HIHI, 'speech', 2000);
+  ctx.play('hihihi');
 }

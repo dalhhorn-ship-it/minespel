@@ -1,10 +1,13 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { createRng } from '../core/rng';
 import { createDino, type DinoState } from '../dinos/dino-ai';
 import { AIR, LAVA, STEEN, WATER } from '../world/blocks';
 import { START_SPOT, WORLD_HEIGHT } from '../world/terrain';
 import { World } from '../world/world';
-import { findMoleSpawn, isMoleTarget } from './mole-wake';
+import { announceMole, finishRumble, findMoleSpawn, isMoleTarget } from './mole-wake';
+import { LINE_COME_UP, LINE_HELP, LINE_HIHI, LINE_NO_FIT } from './mole-lines';
+import { createMole } from './mole';
+import type { MonsterContext } from './monster-types';
 
 const kid = { x: START_SPOT.x, y: START_SPOT.y, z: START_SPOT.z };
 const dig = { x: Math.floor(kid.x), z: Math.floor(kid.z) };
@@ -48,15 +51,39 @@ describe('findMoleSpawn (AC246)', () => {
       expect(Math.max(Math.abs(c.x - (col.x + 3)), Math.abs(c.z - (col.z - 3)), Math.abs(s.y - (base.y + 2)))).toBeGreaterThan(3);
     }
   });
-  it('AC246: with no target animal the spot is 6 to 10 blocks from the kid', () => {
+  it('AC294: 20 seeded wakes from the bottom of a 20 deep shaft with no target animal come up 4 to 6 from the dig column', () => {
     const world = new World();
+    const bottom = { ...kid, y: kid.y - 20 };
     for (let seed = 1; seed <= 20; seed++) {
-      const s = findMoleSpawn(world, kid, dig, [], createRng(seed))!;
+      const s = findMoleSpawn(world, bottom, dig, [], createRng(seed))!;
       expect(s).not.toBeNull();
-      const d = cheb(s, kid);
-      expect(d).toBeGreaterThanOrEqual(6);
-      expect(d).toBeLessThanOrEqual(10);
+      const col = { x: Math.floor(s.x), z: Math.floor(s.z) };
+      expect(Math.abs(col.x - dig.x)).toBeLessThanOrEqual(6);
+      expect(Math.abs(col.z - dig.z)).toBeLessThanOrEqual(6);
+      expect(cheb(col, dig)).toBeGreaterThanOrEqual(4);
+      expect(cheb(s, bottom)).toBeGreaterThan(3);
+      // The shaft stays open: the dig column itself is not touched.
+      expect(world.isUnchanged(dig.x, kid.y, dig.z)).toBe(true);
     }
+  });
+  it('AC294: the kid standing off the dig column is still not within 3 of the spot', () => {
+    const world = new World();
+    const off = { ...kid, x: kid.x + 4, z: kid.z + 1 };
+    for (let seed = 1; seed <= 20; seed++) {
+      const s = findMoleSpawn(world, off, dig, [], createRng(seed))!;
+      expect(cheb(s, off)).toBeGreaterThan(3);
+      expect(cheb({ x: Math.floor(s.x), z: Math.floor(s.z) }, dig)).toBeGreaterThanOrEqual(4);
+    }
+  });
+  it('AC294: a map where no ring spot fits gives null', () => {
+    const world = new World();
+    for (let x = dig.x - 8; x <= dig.x + 8; x++) {
+      for (let z = dig.z - 8; z <= dig.z + 8; z++) {
+        const y = topOf(world, x, z);
+        if (y >= 0) world.set(x, y + 1, z, STEEN);
+      }
+    }
+    expect(findMoleSpawn(world, kid, dig, [], createRng(1))).toBeNull();
   });
   it('AC246: animals on Volg mij, called or running are no target', () => {
     const follow = dino(8, 0);
@@ -87,5 +114,43 @@ describe('findMoleSpawn (AC246)', () => {
       expect(cheb(s, kid)).toBeGreaterThan(5);
       expect(cheb({ x: Math.floor(s.x), z: Math.floor(s.z) }, dig)).toBeGreaterThan(1);
     }
+  });
+});
+
+describe('the lines (AC293, AC294)', () => {
+  const ctxOf = (world: World, extra: Partial<MonsterContext> = {}): MonsterContext =>
+    ({ world, kid, rng: createRng(1), say: vi.fn(), play: vi.fn(), animals: () => [], ...extra }) as unknown as MonsterContext;
+
+  it('AC294: the no fit map says the new line on the mole channel', () => {
+    const world = new World();
+    for (let x = dig.x - 8; x <= dig.x + 8; x++) {
+      for (let z = dig.z - 8; z <= dig.z + 8; z++) {
+        const y = topOf(world, x, z);
+        if (y >= 0) world.set(x, y + 1, z, STEEN);
+      }
+    }
+    const ctx = ctxOf(world);
+    expect(finishRumble(ctx, dig)).toBeNull();
+    expect(LINE_NO_FIT).toBe('Hmm... toch maar niet. De Monstermol slaapt verder.');
+    expect(ctx.say).toHaveBeenCalledWith(LINE_NO_FIT, expect.any(Number), 'mole');
+  });
+  it('AC293: he comes up with the two toasts, "Hihi!" as a label and the sound, never "Hihi!" as a toast', () => {
+    const show = vi.fn();
+    const ctx = ctxOf(new World(), { labels: { show } as never });
+    const mole = createMole({ x: 5.5, y: 20, z: 5.5 }, dig);
+    mole.id = 2;
+    announceMole(mole, ctx);
+    const said = (ctx.say as ReturnType<typeof vi.fn>).mock.calls.map((c) => [c[0], c[2]]);
+    expect(said).toEqual([[LINE_COME_UP, 'mole'], [LINE_HELP, 'mole']]);
+    expect(LINE_COME_UP).toBe('De Monstermol is boven! Hij zoekt je dieren.');
+    expect(LINE_HELP).toBe('Bouw een hek van 2 hoog om hem heen.');
+    expect(said.some(([t]) => String(t).includes('Hihi'))).toBe(false);
+    expect(show).toHaveBeenCalledWith('mole-2', LINE_HIHI, 'speech', 2000);
+    expect(ctx.play).toHaveBeenCalledWith('hihihi');
+  });
+  it('AC293: without labels he still comes up', () => {
+    const ctx = ctxOf(new World());
+    const mole = createMole({ x: 5.5, y: 20, z: 5.5 }, dig);
+    expect(() => announceMole(mole, ctx)).not.toThrow();
   });
 });

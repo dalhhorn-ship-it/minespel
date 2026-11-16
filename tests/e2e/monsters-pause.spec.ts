@@ -45,9 +45,9 @@ async function flatten(page: Page) {
   await expect.poll(async () => (await readState<{ onGround: boolean }>(page, 'player')).onGround).toBe(true);
 }
 
-type Subject = 'bubble' | 'klodder' | 'guard knight' | 'clock' | 'rumble' | 'mole alone' | 'mole poked' | 'mole fenced';
-const SUBJECTS: Subject[] = ['bubble', 'klodder', 'guard knight', 'clock', 'rumble', 'mole alone', 'mole poked', 'mole fenced'];
-const MOLES: Subject[] = ['rumble', 'mole alone', 'mole poked', 'mole fenced'];
+type Subject = 'bubble' | 'klodder' | 'guard knight' | 'clock' | 'rumble' | 'mole alone' | 'mole poked' | 'mole fenced' | 'mole away';
+const SUBJECTS: Subject[] = ['bubble', 'klodder', 'guard knight', 'clock', 'rumble', 'mole alone', 'mole poked', 'mole fenced', 'mole away'];
+const MOLES: Subject[] = ['rumble', 'mole alone', 'mole poked', 'mole fenced', 'mole away'];
 
 async function arrange(page: Page, subject: Subject) {
   await readState(page, 'setCreatureSeed', 6);
@@ -69,6 +69,9 @@ async function arrange(page: Page, subject: Subject) {
   }
   await readState(page, 'fastForward', 4000);
 }
+
+const awayLeft = async (page: Page): Promise<number> =>
+  (await readState<{ moles: Array<{ awayMsLeft: number }> }>(page, 'moleState')).moles[0]?.awayMsLeft ?? 0;
 
 /** The mole subjects, each with its clock running: the rumble, out and lonely, the Moed bar, the fence clock. */
 async function arrangeMole(page: Page, subject: Subject) {
@@ -92,6 +95,11 @@ async function arrangeMole(page: Page, subject: Subject) {
     const m = await until(page, (v) => v.moed > 0.5 || v.phase !== 'out', 60_000);
     expect(m.phase).toBe('out');
     expect(m.moed).toBeGreaterThan(0.5);
+  } else if (subject === 'mole away') {
+    // V22c, AC330: he is under the ground for 80 s of play time; the time left stands still in every pause.
+    expect(await readState(page, 'sendMoleAway', 80_000)).toBe(true);
+    await readState(page, 'fastForward', 2000);
+    expect(await awayLeft(page)).toBeGreaterThan(70_000);
   } else if (subject === 'mole fenced') {
     const m = await until(page, (v) => v.noPathMs > 1000 || v.phase !== 'out', 20_000);
     expect(m.phase).toBe('out');
@@ -265,10 +273,14 @@ test.describe('Monsters stand still in every pause state (V18e, AC224)', () => {
         await readState(page, 'fastForward', 3000);
         const after = await snap(page);
         if (MOLES.includes(subject)) {
-          // The mole clocks go on from where they stood. A fenced or poked mole may have left by now, which is a go on too.
+          // The mole clocks go on from where they stood. A poked mole may have been sent off by now, which is a go on too; a fenced mole waits and stays out (V22c).
           expect(after.mole.loopMs).toBeGreaterThan(before.mole.loopMs);
           if (subject === 'rumble') expect(after.mole.phase).toBe('out');
           else if (subject === 'mole alone') expect(after.mole.outMs).toBeGreaterThan(before.mole.outMs);
+          else if (subject === 'mole away') {
+            const left = (v: MoleView) => (v as MoleView & { moles: Array<{ awayMsLeft: number }> }).moles[0]?.awayMsLeft ?? 0;
+            expect(left(after.mole)).toBeLessThan(left(before.mole));
+          }
           else if (subject === 'mole poked') expect(after.mole.moed > before.mole.moed || after.mole.phase !== 'out').toBe(true);
           else expect(after.mole.noPathMs > before.mole.noPathMs || after.mole.phase !== 'out').toBe(true);
         } else if (subject === 'bubble') expect(after.monster.bubble?.ageMs ?? 1e9).toBeGreaterThan(before.monster.bubble!.ageMs);
@@ -359,7 +371,8 @@ test.describe('Safety of the Monstermol (V16e, AC255)', () => {
     await dig(page);
     await expect(page.locator('.speech-line')).toHaveText('Oei... de grond rommelt!');
     await readState(page, 'fastForward', 3500);
-    await expect(page.locator('.speech-line')).toHaveText('Hihi! Waar zijn de dieren?', { timeout: 8000 });
+    // The help line follows the come up line and replaces it while it waits (V22b, AC293).
+    await expect(page.locator('.speech-line')).toHaveText('Bouw een hek van 2 hoog om hem heen.', { timeout: 8000 });
     expect((await moleOf(page)).phase).toBe('out');
   }
 

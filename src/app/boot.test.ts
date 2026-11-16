@@ -160,6 +160,13 @@ describe('createBoot (R2a)', () => {
     ] as const) {
       expect(app[key], key).toBeTruthy();
     }
+    // v22 to v24 (decision 144): the labels, the pill flow, the near sounds, the lavakip economy, the bar and the feeder.
+    for (const key of ['labels', 'bubbleHud', 'nearSounds', 'lavakip', 'bar', 'feeder'] as const) {
+      expect(app[key], key).toBeTruthy();
+    }
+    expect(app.feeder.menuOption({ kind: 'dino', id: 'x' })).toBeNull();
+    expect(app.lavakip.state()).toEqual({ bought: false, spot: null, carried: 0 });
+    expect(app.bar.keepOut(1, 2, 3)).toBe(false);
     expect(typeof app.catalog().modules).not.toBe('undefined');
     const action = vi.fn();
     boot.whenApp(action);

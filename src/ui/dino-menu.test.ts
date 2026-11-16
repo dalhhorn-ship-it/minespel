@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { createDino, type DinoMode } from '../dinos/dino-ai';
 import type { WorldDino } from '../dinos/dino-store';
 import { createDinoMenu } from './dino-menu';
@@ -85,5 +85,25 @@ describe('dino-menu and name-screen (T45)', () => {
     tap(opslaan);
     expect(saved).toBe('Rex');
     screen.destroy();
+  });
+
+  it('AC315: Lavakip geven shows only with an option, closes the menu, then gives', () => {
+    const dino: WorldDino = { ...createDino({ kind: 'stegosaurus', golden: false, x: 1, y: 5, z: 1 }, true), id: 'd', name: '' };
+    const base = { dino, onModeChange: () => {}, onNameSave: () => {}, onKnuffel: () => {} };
+    const none = createDinoMenu({ ...base, onClose: () => {}, lavakip: null });
+    expect(none.element.querySelector('[data-action="lavakip"]')).toBeNull();
+    none.destroy();
+    const order: string[] = [];
+    const give = vi.fn(() => order.push('give'));
+    const menu = createDinoMenu({
+      ...base,
+      onClose: () => order.push('close'),
+      lavakip: { text: 'Lavakip geven', give },
+    });
+    const btn = menu.element.querySelector('[data-action="lavakip"]');
+    expect(btn?.textContent).toBe('Lavakip geven');
+    tap(btn);
+    expect(order).toEqual(['close', 'give']);
+    menu.destroy();
   });
 });

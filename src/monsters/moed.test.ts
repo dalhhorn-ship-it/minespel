@@ -80,6 +80,14 @@ describe('moed (v18d)', () => {
     expect(g.chase).not.toBeNull();
     expect(s.k.pokers).toBe(0);
   });
+  it('AC337: a chase knight at 12 blocks goes to Klodder like a guard, at 20 he does not', () => {
+    const c = knight('chase', sx + 12, sz);
+    const far = knight('chase', sx + 20, sz + 1);
+    const s = setup([c, far]);
+    s.run(1);
+    expect(c.chase).not.toBeNull();
+    expect(far.chase).toBeNull();
+  });
   it('AC216: Klodder stands still while poked', () => {
     const s = setup([knight('stay', sx + 1, sz)]);
     s.k.target = { x: 1, y: 1, z: 1 };

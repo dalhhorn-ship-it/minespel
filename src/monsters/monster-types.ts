@@ -1,5 +1,7 @@
 // Types and numbers of the monsters (v18 Zwarte bubbel, decision 135). No logic, so every monster file can import it.
 import type { SoundName } from '../audio/sound';
+import type { ActorLabels } from '../ui/actor-labels';
+import type { SpeechKind } from '../ui/speech';
 import type { Rng } from '../core/rng';
 import type { DinoState, Point } from '../dinos/dino-ai';
 import type { KnightState } from '../knights/knight-types';
@@ -96,7 +98,8 @@ export interface MonsterContext {
   knights(): readonly KnightState[];
   /** Tells the renderer a cell changed (once per touched chunk per frame). */
   touch(x: number, z: number): void;
-  say(text: string, ms?: number): void;
+  /** `kind` is `mole` for the mole's own lines (v22): they use their own toast channel. */
+  say(text: string, ms?: number, kind?: SpeechKind): void;
   play(name: SoundName): void;
   /** The live dinos and chickens Klodder may tease (boot passes `dinoStore.dinos()`). */
   animals?(): readonly DinoState[];
@@ -104,6 +107,18 @@ export interface MonsterContext {
   markHintShown(): void;
   /** Hint flag as saved. */
   hintShown(): boolean;
+  // The fields below are set by the monster system every step (v22, decision 144). They are optional in the type only so
+  // that a hand built context in an older test still types; code that uses one reads it with `?.` and a default.
+  /** World labels over animals and moles (Hihi!, Zzz, Gevangen!). */
+  labels?: ActorLabels;
+  /** True while at least one knight is in the world and on (a mole line that says "ridders" needs it). */
+  hasKnightHelp?(): boolean;
+  /** True for a cell no monster may take or stand on: the Lavakip-bar footprint and one block around it. */
+  keepOut?(x: number, y: number, z: number): boolean;
+  /** True when a guard knight watches this animal (the 4 nearest within 7 of his spot). Always false until V22d. */
+  isGuarded?(animal: DinoState): boolean;
+  /** Loop ms since the monster system was built (the clock of every mole timer). */
+  loopMs?: number;
 }
 
 /** What `monsterState()` shows to tests. */
@@ -116,9 +131,20 @@ export interface MonsterStateView {
   hintShown: boolean;
 }
 
+/** What `clockView()` shows the pill (V22b): does the clock run, is the bubble due but waiting, and the play ms left. */
+export interface ClockView {
+  /** The clock counts now (bubble switch on, a knight or 30 points, nothing out). */
+  runs: boolean;
+  /** The bubble is due and waits for a break, the 30 s after it, or a spot. */
+  held: boolean;
+  /** Play ms until the bubble is due: 0 when due, at most 600 000. */
+  msLeft: number;
+}
+
 // ---- v16 Monstermol (decision 138). The mole is a second slot next to the bubble and Klodder slot. ----
 
-export type MolePhase = 'none' | 'rumble' | 'out' | 'leaving';
+/** `away` (v22): he dove under and is out of the world for his away time. */
+export type MolePhase = 'none' | 'rumble' | 'out' | 'leaving' | 'away';
 
 /** A block cell. */
 export interface Cell {
@@ -129,6 +155,28 @@ export interface Cell {
 
 /** The mole. `x`, `y`, `z` are the feet centre. Nothing of it is saved. */
 export interface MoleState {
+  /** Which mole, from 1: the key of his labels, his target id and his saved row. */
+  id: number;
+  /** True once a pen holds him: he sleeps in it (V22c). */
+  caught: boolean;
+  /** Where he came up: the free mole waddles within 6 of it (V22c). */
+  home: { x: number; z: number };
+  /** Where he went under when a knight chased him off, or null (V22c, V22d). */
+  dove: { x: number; z: number } | null;
+  /** Loop ms of away time left (V22c). 0 when he is not away. */
+  awayMs: number;
+  /** Loop ms until he may tease again, 15 000 after each tease (V22c). */
+  teaseWaitMs: number;
+  /** Loop ms until he may say "Hmpf! Ik kan er niet bij." again (V22c). */
+  hmpfWaitMs: number;
+  /** True once "Niemand om mee te spelen..." was said for this mole (V22c). */
+  lonelySaid: boolean;
+  /** The column box of the pen check, kept so a block change near it is seen at once (V22c), or null. */
+  reach: { minX: number; maxX: number; minZ: number; maxZ: number } | null;
+  /** A block changed inside `reach` plus 1: the next step checks the pen again (V22c). */
+  dirty: boolean;
+  /** Loop ms since his spot was saved while he moved (V22c). */
+  saveMs: number;
   phase: MolePhase;
   x: number;
   y: number;
@@ -189,4 +237,16 @@ export interface MoleStateView {
   /** Loop ms now. */
   loopMs: number;
   began: { rumble: number | null; out: number | null; leaving: number | null };
+  /** Every mole in the world or away (v22), in the order he came. The fields above describe the free mole or the rumble. */
+  moles: MoleListEntry[];
+}
+
+/** One row of `moleState().moles`. `awayMsLeft` is 0 unless he is away. */
+export interface MoleListEntry {
+  id: number;
+  x: number;
+  y: number;
+  z: number;
+  state: 'free' | 'away' | 'caught';
+  awayMsLeft: number;
 }

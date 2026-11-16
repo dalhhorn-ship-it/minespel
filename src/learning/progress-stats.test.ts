@@ -66,6 +66,11 @@ describe('progress stats (decision 115)', () => {
     expect(s.totalQuestions).toBe(4);
   });
 
+  it('decision 144: a lavakip ledger row counts as spent points', () => {
+    const s = computeProgress(input({ ledger: [ledger('2026-10-27', -60, 'lavakip'), ledger('2026-10-27', -3, 'lavakip'), ledger('2026-10-27', -40, 'shop')] }));
+    expect(s.report.thisWeek.pointsSpent).toBe(103);
+  });
+
   it('counts Extra oefenen answer time and whole exams as learning time', () => {
     const exam: ExamRecord = {
       id: 1, start: 0, end: 10 * 60_000, day: '2026-10-27', moduleId: 'taal', examId: 'e', questions: [], score: 8,

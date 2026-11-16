@@ -3,6 +3,8 @@
 import { MAX_CHICKENS, MAX_SHOP_DINOS, chickenCount, shopDinoCount } from '../core/economy';
 import { cleanDiff } from '../game/world-save';
 import { checkGear } from '../knights/gear';
+import { checkLavakip } from '../lavakip/lavakip-types';
+import { checkMoles } from '../monsters/mole-save';
 import { checkStones } from '../world/stones';
 import { MAX_KNIGHTS } from '../knights/knight-types';
 import { filterDinoNameDraft } from '../ui/name-screen';
@@ -74,16 +76,24 @@ interface Bounds {
   /** The `monsters` record may hold `gear` (format 3, v19) or `stones` (format 4, v20). */
   gear: boolean;
   stones: boolean;
+  /** Format 6 (v22): `monsters.moles` and the `chase` knight mode. */
+  moles: boolean;
+  /** Format 7 (v23): the `lavakip` record. */
+  lavakip: boolean;
 }
 const BOUNDS: Record<number, Bounds> = {
-  1: { size: LEGACY_SIZE, height: LEGACY_HEIGHT, cells: LEGACY_CELL_COUNT, terrainVersions: [undefined, 1, 2], needsWorld: false, gear: false, stones: false },
-  2: { size: WORLD_SIZE, height: WORLD_HEIGHT, cells: WORLD_SIZE * WORLD_HEIGHT * WORLD_SIZE, terrainVersions: [3], needsWorld: true, gear: false, stones: false },
+  1: { size: LEGACY_SIZE, height: LEGACY_HEIGHT, cells: LEGACY_CELL_COUNT, terrainVersions: [undefined, 1, 2], needsWorld: false, gear: false, stones: false, moles: false, lavakip: false },
+  2: { size: WORLD_SIZE, height: WORLD_HEIGHT, cells: WORLD_SIZE * WORLD_HEIGHT * WORLD_SIZE, terrainVersions: [3], needsWorld: true, gear: false, stones: false, moles: false, lavakip: false },
   // Format 3 (0.10.0, AC267): the bounds of format 2, plus the gear of the knights.
-  3: { size: WORLD_SIZE, height: WORLD_HEIGHT, cells: WORLD_SIZE * WORLD_HEIGHT * WORLD_SIZE, terrainVersions: [3], needsWorld: true, gear: true, stones: false },
+  3: { size: WORLD_SIZE, height: WORLD_HEIGHT, cells: WORLD_SIZE * WORLD_HEIGHT * WORLD_SIZE, terrainVersions: [3], needsWorld: true, gear: true, stones: false, moles: false, lavakip: false },
   // Format 4 (0.11.0, AC278): the same, plus the stones the kid found and bought.
-  4: { size: WORLD_SIZE, height: WORLD_HEIGHT, cells: WORLD_SIZE * WORLD_HEIGHT * WORLD_SIZE, terrainVersions: [3], needsWorld: true, gear: true, stones: true },
+  4: { size: WORLD_SIZE, height: WORLD_HEIGHT, cells: WORLD_SIZE * WORLD_HEIGHT * WORLD_SIZE, terrainVersions: [3], needsWorld: true, gear: true, stones: true, moles: false, lavakip: false },
   // Format 5 (0.12.0, AC288): the same records, with the 13 new gear ids allowed.
-  5: { size: WORLD_SIZE, height: WORLD_HEIGHT, cells: WORLD_SIZE * WORLD_HEIGHT * WORLD_SIZE, terrainVersions: [3], needsWorld: true, gear: true, stones: true },
+  5: { size: WORLD_SIZE, height: WORLD_HEIGHT, cells: WORLD_SIZE * WORLD_HEIGHT * WORLD_SIZE, terrainVersions: [3], needsWorld: true, gear: true, stones: true, moles: false, lavakip: false },
+  // Format 6 (0.13.0, AC299): format 5 plus the moles and the `chase` knight mode.
+  6: { size: WORLD_SIZE, height: WORLD_HEIGHT, cells: WORLD_SIZE * WORLD_HEIGHT * WORLD_SIZE, terrainVersions: [3], needsWorld: true, gear: true, stones: true, moles: true, lavakip: false },
+  // Format 7 (0.14.0, AC318): format 6 plus the `lavakip` record.
+  7: { size: WORLD_SIZE, height: WORLD_HEIGHT, cells: WORLD_SIZE * WORLD_HEIGHT * WORLD_SIZE, terrainVersions: [3], needsWorld: true, gear: true, stones: true, moles: true, lavakip: true },
 };
 
 function validWorld(w: Record<string, unknown>, b: Bounds): boolean {
@@ -107,8 +117,9 @@ function validCreatureSpots(list: Record<string, unknown>[], b: Bounds): boolean
 }
 
 function validKnight(k: unknown, b: Bounds): boolean {
+  // The mode `chase` came with format 6, so an older file that says it is not trusted (AC337). Any other mode is refused.
   return isObj(k) && typeof k.id === 'string' && k.id.length >= 1 && k.id.length <= 40 &&
-    KNIGHT_MODES.includes(k.mode as never) && validSpot(k.spot, b) && isWhole(k.boughtFor);
+    KNIGHT_MODES.includes(k.mode as never) && (b.moles || k.mode !== 'chase') && validSpot(k.spot, b) && isWhole(k.boughtFor);
 }
 
 function validMonsters(v: Record<string, unknown>, b: Bounds): boolean {
@@ -118,7 +129,8 @@ function validMonsters(v: Record<string, unknown>, b: Bounds): boolean {
     optional(v.hintShown, (x) => typeof x === 'boolean') &&
     // An older format never held gear or stones, so a file that says it did is not trusted (AC267).
     (b.gear ? checkGear(v.gear) : v.gear === undefined) &&
-    (b.stones ? checkStones(v.stones) : v.stones === undefined);
+    (b.stones ? checkStones(v.stones) : v.stones === undefined) &&
+    (b.moles ? checkMoles(v.moles, b.size, b.height) : v.moles === undefined);
 }
 
 function validKv(name: BackupKvName, v: Record<string, unknown>, b: Bounds): boolean {
@@ -129,6 +141,7 @@ function validKv(name: BackupKvName, v: Record<string, unknown>, b: Bounds): boo
     case 'economy':
       return optional(v.points, (x) => isWhole(x)) && optional(v.practicePointsToday, (x) => isWhole(x)) && optional(v.fluit, (x) => typeof x === 'boolean');
     case 'monsters': return validMonsters(v, b);
+    case 'lavakip': return b.lavakip && checkLavakip(v, b.size, b.height);
     case 'village':
       return optional(v.found, (x) => Array.isArray(x) && x.every((b) => isWhole(b, 34) && b <= 41)) &&
         optional(v.cooldownMs, (x) => isNum(x) && x >= 0) &&

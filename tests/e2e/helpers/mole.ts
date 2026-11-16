@@ -49,10 +49,14 @@ export function topOf(page: Page, x: number, z: number): Promise<number> {
   );
 }
 
-/** A closed ring of stone round (cx, cz) at `r`, at least 2 above the ground on both sides. Returns the changed cell count. */
-export async function fence(page: Page, cx: number, cz: number, r: number): Promise<number> {
+/**
+ * A closed ring of stone round (cx, cz) at `r`, at least 2 above the ground on both sides. Returns the changed cell count.
+ * `floorY` is the level the mole walks on: the wall then stands from 3 below it (the most he drops) to 2 above the
+ * highest block near, so a tree canopy (a roof over a walkable gap) cannot leave a gap under the wall.
+ */
+export async function fence(page: Page, cx: number, cz: number, r: number, floorY?: number): Promise<number> {
   const n = await page.evaluate(
-    ({ cx, cz, r, stone, height }) => {
+    ({ cx, cz, r, stone, height, floorY }) => {
       const h = (window as unknown as { __dino: Record<string, (...a: number[]) => number | void> }).__dino;
       const top = (x: number, z: number) => {
         for (let y = height - 1; y >= 0; y--) if (h.blockAt!(x, y, z) !== 0) return y;
@@ -66,7 +70,7 @@ export async function fence(page: Page, cx: number, cz: number, r: number): Prom
           const z = cz + dz;
           let hi = 0;
           for (let a = -1; a <= 1; a++) for (let b = -1; b <= 1; b++) hi = Math.max(hi, top(x + a, z + b));
-          for (let y = top(x, z) + 1; y <= hi + 2; y++) {
+          for (let y = floorY === undefined ? top(x, z) + 1 : Math.round(floorY) - 3; y <= hi + 2; y++) {
             h.setBlock!(x, y, z, stone, 1);
             changed++;
           }
@@ -74,7 +78,7 @@ export async function fence(page: Page, cx: number, cz: number, r: number): Prom
       h.rebuildWorld!();
       return changed;
     },
-    { cx, cz, r, stone: STEEN, height: WORLD_HEIGHT },
+    { cx, cz, r, stone: STEEN, height: WORLD_HEIGHT, floorY },
   );
   return n as number;
 }

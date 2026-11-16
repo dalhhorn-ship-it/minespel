@@ -186,8 +186,16 @@ export async function typeNumber(page: Page, n: number): Promise<void> {
 export async function openCardAt(page: Page, id: string): Promise<VillagerInfo> {
   const v = await standNear(page, id);
   await waitBubble(page, true);
-  await fingerTap(page, '[data-testid="village-bubble"]');
-  await expect.poll(() => cardState(page).then((c) => c.open)).toBe(true);
+  // A whole card can go by faster here than the double tap guard of the bubble (REPEAT_MS in src/ui/tap.ts),
+  // and that guard drops the tap. So tap again, like a kid would, until the card is open.
+  await expect(async () => {
+    if (!(await cardState(page)).open) {
+      const bubbleButton = page.locator('[data-testid="village-bubble"]');
+      const box = (await bubbleButton.isVisible()) ? await bubbleButton.boundingBox() : null;
+      if (box) await page.touchscreen.tap(box.x + box.width / 2, box.y + box.height / 2);
+    }
+    expect((await cardState(page)).open).toBe(true);
+  }).toPass({ intervals: [100, 200, 400] });
   await page.locator('[data-testid="village-card"] .q-view').waitFor();
   return v;
 }

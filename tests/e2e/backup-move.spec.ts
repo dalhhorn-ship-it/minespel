@@ -152,7 +152,7 @@ test.describe('A backup made by 0.8.0 (AC238)', () => {
     await page.waitForFunction(() => window.__shared!.length > 0);
     const file = (await page.evaluate(() => window.__shared!))[0]!;
     const json = JSON.parse(file.text) as { format: number; kv: { world: { terrainVersion: number } } };
-    expect(json.format).toBe(5);
+    expect(json.format).toBe(7);
     expect(json.kv.world.terrainVersion).toBe(3);
 
     await page.locator('.parent-nav-btn[data-section="instellingen"]').tap();

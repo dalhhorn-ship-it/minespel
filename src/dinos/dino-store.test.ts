@@ -59,3 +59,16 @@ describe('dino-store (T42)', () => {
     db.close();
   });
 });
+
+describe('v23 seam (decision 144)', () => {
+  it('a snack on an animal is never saved: the record holds the same fields as before', async () => {
+    const { serializeDino } = await import('./dino-store');
+    const store = createDinoStore({ world: new World(), getPlayerSpot: () => ({ x: START_SPOT.x, y: START_SPOT.y, z: START_SPOT.z }) });
+    const egg = await store.addEgg('compy', false);
+    const d = store.hatchEgg(egg.id)!;
+    const before = JSON.stringify(serializeDino(d));
+    d.snack = { ms: 3000, heading: 1 };
+    expect(JSON.stringify(serializeDino(d))).toBe(before);
+    expect(JSON.stringify(store.toRecord())).not.toContain('snack');
+  });
+});

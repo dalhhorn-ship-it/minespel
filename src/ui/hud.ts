@@ -40,6 +40,8 @@ export interface Hud {
   readonly allBlocksSlot: HTMLElement;
   /** Holder for the countdown text. */
   readonly countdownSlot: HTMLElement;
+  /** Holder for the lilac bubble pill under the top bar (v22, V22e fills and places it). Empty and an ignore zone: a tap on it reaches nothing. */
+  readonly bubbleSlot: HTMLElement;
   setMode(mode: BuildMode): void;
   /** Shows the Dinofluit button once the kid owns the fluit (decision 114). */
   setFluit(owned: boolean): void;
@@ -124,7 +126,8 @@ export function createHud(options: HudOptions): Hud {
       : el('div', { class: 'hud-top-right' }, topRightChildren),
   ]);
 
-  const rootChildren: HTMLElement[] = [topBar, modes, jump];
+  const bubbleSlot = zone(el('div', { class: 'hud-bubble-slot', attrs: { 'data-testid': 'hud-bubble-slot' } }));
+  const rootChildren: HTMLElement[] = [topBar, bubbleSlot, modes, jump];
 
   if (options.onAscend) {
     const ascendBtn = zone(
@@ -264,6 +267,7 @@ export function createHud(options: HudOptions): Hud {
     slots,
     allBlocksSlot,
     countdownSlot,
+    bubbleSlot,
     setMode,
     setFluit(owned) {
       if (fluit) fluit.hidden = !owned;

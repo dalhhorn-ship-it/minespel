@@ -2,6 +2,7 @@
 // Rules: nothing plays before the first tap (AC100). Sound off, a broken or missing
 // AudioContext, or the iPad mute switch never throws (AC99). Game code can call play() freely.
 import type { AudioUnlock } from '../platform/audio-unlock';
+import { NEAR_NAMES, NEAR_RECIPES, NEAR_SPECS, type NearName } from './near-recipes';
 
 export type SoundName =
   | 'pop'
@@ -25,7 +26,10 @@ export type SoundName =
   | 'rommel'
   | 'boe'
   | 'hmpf'
-  | 'geeuw';
+  | 'geeuw'
+  // v23 and v24 (decision 144): `hap` is the lavakip munch, the rest are the near sounds (near-recipes.ts).
+  | 'hap'
+  | NearName;
 
 export const SOUND_NAMES: readonly SoundName[] = [
   'pop',
@@ -50,6 +54,8 @@ export const SOUND_NAMES: readonly SoundName[] = [
   'boe',
   'hmpf',
   'geeuw',
+  'hap',
+  ...NEAR_NAMES,
 ];
 
 /**
@@ -81,6 +87,9 @@ export const SOUND_SPECS: Record<SoundName, { seconds: number; peak: number }> =
   boe: { seconds: 0.25, peak: 0.25 },
   hmpf: { seconds: 0.3, peak: 0.2 },
   geeuw: { seconds: 0.9, peak: 0.2 },
+  // v23: the lavakip munch (two chomps and a squeak). The near sounds come from near-recipes.ts (rows by V24a).
+  hap: { seconds: 0.3, peak: 0.2 },
+  ...NEAR_SPECS,
 };
 
 export interface SoundOptions {
@@ -92,8 +101,27 @@ export interface SoundOptions {
   volume?: number;
 }
 
+/** One of the two near sound voices. */
+export interface NearVoice {
+  /** Plays the recipe into this voice. Does nothing with sound off, Volume 0 or a broken context. */
+  play(name: NearName): void;
+  /** Moves the voice gain to `level` (0 to 1, the closeness) with a 50 ms smoothing, and the pan (-1 to 1) at once. */
+  set(level: number, pan: number): void;
+  /** Cancels what is scheduled and sets the gain to 0 at once. */
+  silence(): void;
+  /** The gain asked for last (0 after `silence`) and the pan really applied (always 0 with no panner). */
+  readonly level: number;
+  readonly pan: number;
+}
+
 export interface Sound {
   play(name: SoundName): void;
+  /**
+   * The two voices of the near sounds (v24): null before the first tap or with no audio. Each voice is one gain into
+   * one stereo panner (or straight to the master when there is none) into the master gain that holds Volume. Made
+   * on the first call and kept, never again.
+   */
+  nearVoices(): [NearVoice, NearVoice] | null;
   setEnabled(on: boolean): void;
   isEnabled(): boolean;
   setVolume(v: number): void;
@@ -247,6 +275,13 @@ const RECIPES: Record<SoundName, (c: Ctx, out: AudioNode, t: number) => void> = 
     tone(c, o, t, { type: 'triangle', from: 400, to: 600, dur: 0.4, gain: 0.2 });
     tone(c, o, t, { type: 'triangle', from: 600, to: 250, at: 0.4, dur: 0.5, gain: 0.2 });
   },
+  // v23: the lavakip munch, "hap-hap": two soft chomps and a happy squeak, 0.3 s.
+  hap: (c, o, t) => {
+    tone(c, o, t, { type: 'triangle', from: 350, to: 200, dur: 0.1, gain: 0.2 });
+    tone(c, o, t, { type: 'triangle', from: 350, to: 200, at: 0.1, dur: 0.1, gain: 0.2 });
+    tone(c, o, t, { type: 'triangle', from: 500, to: 700, at: 0.2, dur: 0.1, gain: 0.15 });
+  },
+  ...NEAR_RECIPES,
 };
 
 export function createSound(options: SoundOptions): Sound {
@@ -257,6 +292,60 @@ export function createSound(options: SoundOptions): Sound {
   let ctx: Ctx | null = null;
   let master: GainNode | null = null;
   let failed = false;
+  let voices: [NearVoice, NearVoice] | null = null;
+
+  function makeVoice(c: Ctx, out: AudioNode): NearVoice {
+    const gain = c.createGain();
+    gain.gain.value = 0;
+    let panner: StereoPannerNode | null = null;
+    try {
+      panner = typeof c.createStereoPanner === 'function' ? c.createStereoPanner() : null;
+    } catch {
+      panner = null;
+    }
+    if (panner) {
+      gain.connect(panner);
+      panner.connect(out);
+    } else gain.connect(out);
+    const voice = {
+      level: 0,
+      pan: 0,
+      play(name: NearName) {
+        try {
+          if (!enabled || volume <= 0) return;
+          NEAR_RECIPES[name]?.(c, gain, c.currentTime);
+        } catch {
+          /* sound must never break the game (AC99) */
+        }
+      },
+      set(level: number, pan: number) {
+        try {
+          const l = clamp01(level);
+          const p = Number.isFinite(pan) ? Math.min(1, Math.max(-1, pan)) : 0;
+          const now = c.currentTime;
+          if (typeof gain.gain.setTargetAtTime === 'function') gain.gain.setTargetAtTime(l, now, 0.05);
+          else gain.gain.value = l;
+          voice.level = l;
+          if (panner) {
+            panner.pan.value = p;
+            voice.pan = p;
+          }
+        } catch {
+          /* ignore */
+        }
+      },
+      silence() {
+        try {
+          gain.gain.cancelScheduledValues?.(c.currentTime);
+          gain.gain.value = 0;
+        } catch {
+          /* ignore */
+        }
+        voice.level = 0;
+      },
+    };
+    return voice;
+  }
 
   // Made inside the first tap (so iOS lets it run), never before (AC100). Also a fallback in play().
   function ensure(): boolean {
@@ -292,6 +381,16 @@ export function createSound(options: SoundOptions): Sound {
         recipe(ctx, master, ctx.currentTime);
       } catch {
         /* sound must never break the game (AC99) */
+      }
+    },
+    nearVoices() {
+      if (voices) return voices;
+      try {
+        if (!unlock.isUnlocked() || !ensure() || !ctx || !master) return null;
+        voices = [makeVoice(ctx, master), makeVoice(ctx, master)];
+        return voices;
+      } catch {
+        return null;
       }
     },
     setEnabled(on) {

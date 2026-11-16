@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { defaultKv } from './schema';
+import { BACKUP_KV_NAMES } from './backup';
+import { KNIGHT_MODES, KV_NAMES, defaultKv } from './schema';
 
 // Pins the settings defaults to PRD 4.17 (settings table), AC22 and AC28.
 describe('settings defaults match the PRD', () => {
@@ -50,5 +51,18 @@ describe('v11 village record', () => {
     const d = defaultKv('settings');
     expect([d.monstersEnabled, d.knightsEnabled, d.bubbleEnabled]).toEqual([true, true, false]);
     expect(defaultKv('monsters')).toEqual({ knights: [], bubbleClockMs: 0, hintShown: false });
+  });
+});
+
+describe('v22 to v24 records (decision 144)', () => {
+  it('KV_DEFAULTS.lavakip is not bought, has no spot and carries none, as fresh copies', () => {
+    expect(defaultKv('lavakip')).toEqual({ bought: false, spot: null, carried: 0 });
+    expect(defaultKv('lavakip')).not.toBe(defaultKv('lavakip'));
+    expect(KV_NAMES).toContain('lavakip');
+    expect(BACKUP_KV_NAMES).toContain('lavakip');
+  });
+  it('AC337: the knight modes are the four, and the monsters default has no moles', () => {
+    expect([...KNIGHT_MODES]).toEqual(['follow', 'stay', 'guard', 'chase']);
+    expect(defaultKv('monsters').moles).toBeUndefined();
   });
 });

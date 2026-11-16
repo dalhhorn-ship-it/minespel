@@ -23,6 +23,7 @@ import { creatureSwitches } from '../storage/monsters-store';
 import { createKnightEconomy, type KnightEconomy } from '../knights/knight-economy';
 import { gearById, gearCount } from '../knights/gear';
 import type { GearEconomy } from '../knights/gear-economy';
+import type { LavakipEconomy } from '../lavakip/lavakip-economy';
 import type { StonesEconomy } from './stones-economy';
 import type { StonesFlow } from './stones-flow';
 import { KNIGHT_TRADEIN } from '../knights/knight-types';
@@ -53,6 +54,8 @@ export interface ShopFlowOptions {
   /** The stones flow and economy (v20). With them the shop shows the Edelstenen section. */
   stonesFlow?: Pick<StonesFlow, 'state'>;
   stones?: Pick<StonesEconomy, 'buy'>;
+  /** The Lavakip economy (v23). With it the shop can show the Lavakip-bar section once `shopState` gives a state (V23a). */
+  lavakip?: Pick<LavakipEconomy, 'shopState' | 'buyBar' | 'placeHere'>;
 }
 
 export interface ShopFlow {
@@ -69,6 +72,10 @@ export interface ShopFlow {
   buyGear(id: string): Promise<boolean>;
   /** Buys a found stone once (AC273). False until V20c. */
   buyStone(id: number): Promise<boolean>;
+  /** Buys the Lavakip-bar once for 60 points (AC310). False until V23a. */
+  buyLavakipBar(): Promise<boolean>;
+  /** "Zet hier neer": puts the bar in front of the kid (AC311). False until V23a. */
+  placeLavakipBar(): Promise<boolean>;
   /** Trades a knight in for 15 points (AC202). */
   tradeInKnight(id: string): Promise<boolean>;
   destroy(): void;
@@ -121,6 +128,7 @@ export function createShopFlow(options: ShopFlowOptions): ShopFlow {
       knights: knightList,
       gearOwned: options.gear ? [...options.gear.state().owned] : undefined,
       stones: options.stones && options.stonesFlow ? options.stonesFlow.state() : undefined,
+      lavakip: options.lavakip?.shopState(points),
       toastMessage: lastToast,
     };
   }
@@ -385,6 +393,13 @@ export function createShopFlow(options: ShopFlowOptions): ShopFlow {
   const buyStone = (id: number): Promise<boolean> =>
     stonesEconomy ? lockedBuy(() => stonesEconomy.buy(id), 'Hoera! Je hebt een nieuwe edelsteen!') : Promise.resolve(false);
 
+  const lavakipEconomy = options.lavakip && options.db ? options.lavakip : null;
+  /** Both Lavakip-bar actions share the purchase lock with every other buy. */
+  const buyLavakipBar = (): Promise<boolean> =>
+    lavakipEconomy ? lockedBuy(() => lavakipEconomy.buyBar(), 'De Lavakip-bar staat bij je huis!') : Promise.resolve(false);
+  const placeLavakipBar = (): Promise<boolean> =>
+    lavakipEconomy ? lockedBuy(() => lavakipEconomy.placeHere(), 'De Lavakip-bar staat nu hier!') : Promise.resolve(false);
+
   function clear() {
     if (activeView) {
       activeView.destroy();
@@ -413,6 +428,8 @@ export function createShopFlow(options: ShopFlowOptions): ShopFlow {
         onTradeInKnight: knightEconomy ? async (id) => { await tradeInKnight(id); } : undefined,
         onBuyGear: gearEconomy ? async (id) => { await buyGear(id); } : undefined,
         onBuyStone: stonesEconomy ? async (id) => { await buyStone(id); } : undefined,
+        onBuyLavakipBar: lavakipEconomy ? async () => { await buyLavakipBar(); } : undefined,
+        onPlaceLavakipBar: lavakipEconomy ? async () => { await placeLavakipBar(); } : undefined,
         onEarnCoins: options.onEarnCoins
           ? () => {
               clear();
@@ -441,6 +458,8 @@ export function createShopFlow(options: ShopFlowOptions): ShopFlow {
     tradeInKnight,
     buyGear,
     buyStone,
+    buyLavakipBar,
+    placeLavakipBar,
     destroy() {
       clear();
     },
@@ -455,6 +474,7 @@ export function createShopFlow(options: ShopFlowOptions): ShopFlow {
     registerHook('buyKnightInShop', () => flow.buyKnight());
     registerHook('buyGearInShop', (id: string) => flow.buyGear(id));
     registerHook('buyStoneInShop', (id: number) => flow.buyStone(id));
+    registerHook('buyLavakipBarInShop', () => flow.buyLavakipBar());
   }
 
   return flow;
