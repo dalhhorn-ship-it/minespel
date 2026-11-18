@@ -49,6 +49,12 @@ function run(state: SessionState, events: SessionEvent[]): { state: SessionState
   }
   return { state: s, effects };
 }
+/** v25: events that get a teach moment question through its 3 repeats, all wrong (AC341). */
+const threeWrongRepeats = (at = 500): SessionEvent[] => [
+  ans(at, wrong), { type: 'understood', at: at + 1 },
+  ans(at + 2, wrong), { type: 'understood', at: at + 3 },
+  ans(at + 4, wrong), { type: 'understood', at: at + 5 },
+];
 const ans = (at: number, response: SessionEvent extends never ? never : typeof right | typeof wrong): SessionEvent => ({
   type: 'answer',
   at,
@@ -141,14 +147,14 @@ describe('break-session', () => {
 
   it('AC34: K right counts first try and retry, no bonus when a retry was needed', () => {
     const { state } = startSession(config(2));
-    const r = run(state, [ans(1, wrong), ans(2, right), { type: 'next', at: 3 }, ans(4, wrong), ans(5, wrong), { type: 'understood', at: 6 }]);
+    const r = run(state, [ans(1, wrong), ans(2, right), { type: 'next', at: 3 }, ans(4, wrong), ans(5, wrong), { type: 'understood', at: 6 }, ...threeWrongRepeats()]);
     expect(r.state.phase).toBe('summary');
     expect(r.state.summary).toMatchObject({ total: 2, right: 1, bonus: 0, earned: 0, pointsTotal: 10, hard: false });
   });
 
   it('AC116: zero right gives hard summary, no plus points, no bonus', () => {
     const { state } = startSession(config(1));
-    const r = run(state, [ans(1, wrong), ans(2, wrong), { type: 'understood', at: 3 }]);
+    const r = run(state, [ans(1, wrong), ans(2, wrong), { type: 'understood', at: 3 }, ...threeWrongRepeats()]);
     expect(r.state.summary).toMatchObject({ right: 0, hard: true, bonus: 0 });
     expect(r.effects.some((e) => e.type === 'points' && e.delta > 0)).toBe(false);
   });
@@ -313,7 +319,7 @@ describe('Punten setting and no day limit (v10)', () => {
       const { state } = startSession(config(5, { pointsMode: mode, economy: eco(0) }));
       const events: SessionEvent[] = [];
       for (let i = 0; i < 4; i++) events.push(ans(10 + i * 2, right), { type: 'next', at: 11 + i * 2 });
-      events.push(ans(100, wrong), ans(101, wrong), { type: 'understood', at: 102 });
+      events.push(ans(100, wrong), ans(101, wrong), { type: 'understood', at: 102 }, ...threeWrongRepeats());
       const r = run(state, events);
       expect(r.state.phase).toBe('summary');
       expect(r.state.summary?.earned).toBe(expected);
@@ -359,6 +365,7 @@ describe('Punten setting and no day limit (v10)', () => {
       ans(3, wrong), ans(4, right), { type: 'next', at: 5 }, // -1 then +1
       ans(6, wrong), ans(7, wrong), { type: 'understood', at: 8 }, // -1 and -1
       ans(9, wrong), ans(10, right), { type: 'next', at: 11 }, // -1 then +1
+      ...threeWrongRepeats(), // no points
     ]);
     expect(r.state.summary?.earned).toBe(r.state.economy.points - 10);
     expect(r.state.summary?.earned).toBe(0);
@@ -368,7 +375,7 @@ describe('Punten setting and no day limit (v10)', () => {
 
   it('AC176: a round of only mistakes shows a negative sum equal to the change', () => {
     const { state } = startSession(config(1, { pointsMode: 'moeilijk', economy: eco(10) }));
-    const r = run(state, [ans(1, wrong), ans(2, wrong), { type: 'understood', at: 3 }]);
+    const r = run(state, [ans(1, wrong), ans(2, wrong), { type: 'understood', at: 3 }, ...threeWrongRepeats()]);
     expect(r.state.summary).toMatchObject({ earned: -2, pointsTotal: 8, hard: true });
   });
 
@@ -376,5 +383,167 @@ describe('Punten setting and no day limit (v10)', () => {
     const r = one('moeilijk', [ans(1, wrong)]);
     const back = JSON.parse(JSON.stringify(r.state)) as SessionState;
     expect(back).toEqual(r.state);
+  });
+});
+
+describe('v25 Nog een keer: the repeat line', () => {
+  const next = (at: number): SessionEvent => ({ type: 'next', at });
+  const und = (at: number): SessionEvent => ({ type: 'understood', at });
+  const teach = (at: number): SessionEvent[] => [ans(at, wrong), ans(at + 1, wrong), und(at + 2)];
+  const first = (at: number): SessionEvent[] => [ans(at, right), next(at + 1)];
+  const retry = (at: number): SessionEvent[] => [ans(at, wrong), ans(at + 1, right), next(at + 2)];
+  /** 5 questions: 2 and 4 (index 1 and 3) end in a teach moment, 3 is right on the retry. */
+  const five = (opts: Partial<SessionConfig> = {}) => {
+    const s = startSession(config(5, opts)).state;
+    return run(s, [...first(10), ...teach(20), ...retry(30), ...teach(40), ...first(50).slice(0, 1), next(60)]);
+  };
+  const answers = (effects: SessionEffect[]) =>
+    effects.filter((e): e is Extract<SessionEffect, { type: 'answer' }> => e.type === 'answer');
+
+  it('AC338: after the last question the first teach moment question comes back, no lesson, then the next', () => {
+    const r = five();
+    expect(r.state.phase).toBe('question');
+    expect(r.state.index).toBe(1);
+    expect(r.state.try).toBe(1);
+    expect(r.state.repeat).toMatchObject({ on: true, line: [1, 3] });
+    const a = run(r.state, [ans(100, right), next(101)]);
+    expect(a.state.index).toBe(3);
+    expect(a.state.phase).toBe('question');
+  });
+
+  it('AC338: without a teach moment the summary shows right after the last question', () => {
+    const s = startSession(config(2)).state;
+    const r = run(s, [...first(1), ...retry(10)]);
+    expect(r.state.phase).toBe('summary');
+    expect(r.state.repeat).toBeUndefined();
+    expect(r.state.summary?.repeatRight).toBeUndefined();
+  });
+
+  it('AC338: Probeer preview and Extra oefenen both work as the break; preview never repeats', () => {
+    const p = run(startSession(config(1, { mode: 'practice' })).state, teach(1));
+    expect(p.state.repeat?.on).toBe(true);
+    const v = run(startSession(config(1, { mode: 'preview' })).state, teach(1));
+    expect(v.state.phase).toBe('summary');
+  });
+
+  it('AC339: a right repeat gives no points, no ledger effect, no box, and leaves the line (all Punten settings)', () => {
+    for (const pointsMode of ['makkelijk', 'normaal', 'moeilijk'] as const) {
+      const r = five({ pointsMode });
+      const before = r.state.economy.points;
+      const a = reduce(r.state, ans(100, right));
+      expect(a.state.phase).toBe('feedback');
+      expect(a.state.economy.points).toBe(before);
+      expect(a.state.repeat?.line).toEqual([3]);
+      expect(a.effects).toEqual([
+        { type: 'answer', itemId: 't1', try: 1, repeat: 1, correct: true, response: right, ms: 100 - r.state.shownAt, at: 100 },
+      ]);
+    }
+  });
+
+  it('AC340: a wrong repeat shows the teach card, no points, and goes to the back of the line', () => {
+    const r = five();
+    const before = r.state.economy.points;
+    const a = reduce(r.state, ans(100, wrong));
+    expect(a.state.phase).toBe('teach');
+    expect(a.state.economy.points).toBe(before);
+    expect(a.state.repeat?.line).toEqual([3, 1]);
+    expect(a.state.repeat?.counts[1]).toBe(1);
+    expect(a.effects).toHaveLength(1);
+    expect(a.effects[0]).toMatchObject({ type: 'answer', repeat: 1, correct: false });
+  });
+
+  it('AC341: both always wrong gives 2, 4, 2, 4, 2, 4 and then the summary', () => {
+    let s = five().state;
+    const order: number[] = [];
+    while (s.phase === 'question') {
+      order.push(s.index);
+      s = run(s, [ans(200, wrong), und(201)]).state;
+    }
+    expect(order).toEqual([1, 3, 1, 3, 1, 3]);
+    expect(s.phase).toBe('summary');
+  });
+
+  it('AC341: question 2 right on its second repeat and 4 always wrong gives 2, 4, 2, 4, 4', () => {
+    let s = five().state;
+    const order: number[] = [];
+    let n2 = 0;
+    while (s.phase === 'question') {
+      order.push(s.index);
+      if (s.index === 1) {
+        n2++;
+        s = run(s, n2 === 2 ? [ans(200, right), next(201)] : [ans(200, wrong), und(201)]).state;
+      } else s = run(s, [ans(200, wrong), und(201)]).state;
+    }
+    expect(order).toEqual([1, 3, 1, 3, 3]);
+    expect(s.phase).toBe('summary');
+  });
+
+  it('AC343: the summary counts the right repeats and keeps the score and points as without repeats', () => {
+    const base = five();
+    const withRepeats = run(base.state, [ans(1, right), next(2), ...threeWrongRepeats(3)]);
+    expect(withRepeats.state.summary).toMatchObject({ total: 5, right: 3, repeatRight: 1, pointsTotal: base.state.economy.points + withRepeats.state.summary!.bonus });
+    // the same break with every repeat skipped by the parent is not comparable; compare with all repeats wrong
+    const none = run(base.state, [...threeWrongRepeats(1), ...threeWrongRepeats(10)]);
+    expect(none.state.summary?.repeatRight).toBeUndefined();
+    expect(none.state.summary?.earned).toBe(withRepeats.state.summary?.earned);
+    expect(none.state.summary?.right).toBe(withRepeats.state.summary?.right);
+  });
+
+  it('AC343: nothing right on the first try and the retry but a right repeat is still "hard"', () => {
+    const r = run(startSession(config(1)).state, [...teach(1), ans(5, right), next(6)]);
+    expect(r.state.summary).toMatchObject({ right: 0, hard: true, repeatRight: 1 });
+  });
+
+  it('AC344: a repeat never makes a box effect, only the first try does', () => {
+    const r = run(startSession(config(1, { entries: [{ item: item(0), box: 3 }] })).state, [...teach(1), ans(5, right), next(6)]);
+    const boxes = r.effects.filter((e) => e.type === 'box');
+    expect(boxes).toHaveLength(1);
+    expect(boxes[0]).toMatchObject({ itemId: 't0', box: 1 });
+  });
+
+  it('AC345: a tick of 30 minutes changes nothing in the repeat part; parent end drops open repeats without any row', () => {
+    const r = five();
+    const t = reduce(r.state, { type: 'tick', at: r.state.shownAt + 30 * 60_000 });
+    expect(t.state).toBe(r.state);
+    const e = reduce(r.state, { type: 'parentEnd', at: 5000 });
+    expect(e.state).toMatchObject({ phase: 'done', endReason: 'parent' });
+    expect(e.effects).toEqual([{ type: 'end', reason: 'parent', at: 5000 }]);
+  });
+
+  it('AC346: the repeat state survives a JSON round trip and resumes with the same line and counts', () => {
+    const r = run(five().state, [ans(100, wrong), und(101), ans(102, wrong), und(103)]);
+    const back = JSON.parse(JSON.stringify(r.state)) as SessionState;
+    expect(back).toEqual(r.state);
+    expect(back.index).toBe(1);
+    expect(back.repeat).toMatchObject({ on: true, line: [1, 3], counts: [0, 1, 0, 1, 0] });
+    // question 4 is wrong twice more: it leaves the line after its third repeat in total
+    const s = run(back, [ans(200, wrong), und(201), ans(202, wrong), und(203), ans(204, wrong), und(205), ans(206, wrong), und(207)]).state;
+    expect(s.repeat?.counts[3]).toBe(3);
+    expect(s.repeat?.line).not.toContain(3);
+  });
+
+  it('AC346: an old saved session without the repeat part still loads and plays', () => {
+    const { state } = startSession(config(2));
+    const old = JSON.parse(JSON.stringify(state)) as SessionState;
+    expect('repeat' in old).toBe(false);
+    const r = run(old, [...first(1), ...first(5)]);
+    expect(r.state.phase).toBe('summary');
+  });
+
+  it('AC348: a double tap on an answer or on Verder in the repeat part acts once', () => {
+    const r = five();
+    const d = run(r.state, [ans(100, wrong), ans(100, wrong), ans(100, right)]);
+    expect(answers(d.effects)).toHaveLength(1);
+    expect(d.state.repeat?.counts[1]).toBe(1);
+    const n = run(d.state, [und(101), und(101), next(101)]);
+    expect(n.state.index).toBe(3);
+    expect(n.state.phase).toBe('question');
+  });
+
+  it('AC344: a repeat of the right answer never writes a summary change to earned', () => {
+    const r = five();
+    const done = run(r.state, [ans(1, right), next(2), ans(3, right), next(4)]);
+    expect(done.state.summary?.repeatRight).toBe(2);
+    expect(done.state.summary?.earned).toBe(r.state.earned + done.state.summary!.bonus);
   });
 });

@@ -54,6 +54,17 @@ const exam = (over: Partial<ExamInput> = {}): ExamInput => ({
   ...over,
 });
 
+describe('repeat rows (v25)', () => {
+  it('AC347: the repeat mark is stored and read back, and a row without it stays as it is', async () => {
+    const store = createLogStore(await fresh());
+    await store.appendAnswer(answer());
+    await store.appendAnswer(answer({ repeat: 3, correct: false }));
+    const rows = await store.listAnswers();
+    expect(rows[0]).not.toHaveProperty('repeat');
+    expect(rows[1]?.repeat).toBe(3);
+  });
+});
+
 describe('isSnelGeklikt (AC92)', () => {
   it('is true when every first answer is under 2 seconds', () => {
     expect(isSnelGeklikt([100, 1999, 1500])).toBe(true);

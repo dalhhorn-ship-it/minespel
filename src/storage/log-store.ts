@@ -19,6 +19,11 @@ export interface AnswerInput {
   itemId: string;
   /** 1 or 2. */
   try: number;
+  /**
+   * v25: 1 to 3 on a repeat answer (after the last normal question). Such a row has `try` 1 but is no first
+   * try, no retry and no teach moment: stats, the break list and "snel geklikt" skip it (AC347).
+   */
+  repeat?: number;
   correct: boolean;
   /** What the kid gave, as text. */
   given: string;

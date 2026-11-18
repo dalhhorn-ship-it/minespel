@@ -8,7 +8,7 @@ import type { Sound } from '../../audio/sound';
 import type { Item, Lesson } from '../../content/format';
 import { workedExampleOf } from '../../content/rekenen/generator';
 import type { Response } from '../../learning/answer-check';
-import { currentEntry, type SessionState } from '../../learning/break-session';
+import { currentEntry, inRepeatPart, repeatsLeft, type SessionState } from '../../learning/break-session';
 import { el } from '../dom';
 import { createLockIcon } from '../lock-icon';
 import { onTap } from '../tap';
@@ -18,6 +18,12 @@ import { createQuestionHost, formatRightAnswer } from './question-host';
 import { applyMcBackground } from './mc-background';
 import { createSummaryView } from './summary';
 import { createTeachMoment, minusText, pickLessonPage, type Teaching } from './teach-moment';
+
+export const REPEAT_LINE = 'Deze proberen we nog een keer!';
+export const REPEAT_RIGHT = 'Goed zo! Nu weet je het.';
+export const REPEAT_AGAIN = 'Die komt straks nog een keer.';
+export const REPEAT_LAST = 'Goed geoefend! Deze komt een andere keer terug.';
+export const repeatLeftText = (n: number): string => `Nog ${n} te gaan`;
 
 export type BreakScreenAction =
   | { type: 'lessonDone' }
@@ -109,9 +115,15 @@ export function createBreakScreen(options: BreakScreenOptions): BreakScreen {
     lock.element.classList.add('break-lock');
     lock.element.hidden = true;
   }
+  const repeatLabel = el('span', {
+    class: 'break-repeat-left',
+    attrs: { 'data-testid': 'repeat-left', 'aria-live': 'polite' },
+  });
+  repeatLabel.hidden = true;
   const header = el('header', { class: 'break-header' }, [
     juf.element,
     dotsWrap,
+    repeatLabel,
     ...(stopBtn ? [stopBtn] : []),
     ...(lock ? [lock.element] : []),
   ]);
@@ -158,6 +170,10 @@ export function createBreakScreen(options: BreakScreenOptions): BreakScreen {
   function render(state: SessionState) {
     clearChild();
     renderDots(state);
+    // v25: "Nog N te gaan" next to the dots, in the repeat part while the line is not empty (AC342).
+    const left = repeatsLeft(state);
+    repeatLabel.hidden = !(left > 0 && state.phase !== 'summary');
+    repeatLabel.textContent = left > 0 ? repeatLeftText(left) : '';
     // The summary has its own finish button, so Stoppen is only for the steps before it.
     if (stopBtn) stopBtn.hidden = state.phase === 'summary';
     // The lock shows on the lesson, the question and the teach moment only (AC199).
@@ -199,7 +215,13 @@ export function createBreakScreen(options: BreakScreenOptions): BreakScreen {
       const entry = currentEntry(state);
       if (!entry) return;
 
-      if (state.try === 2) {
+      if (inRepeatPart(state)) {
+        // v25 (AC338): the same question again, one try, no retry banner, no lesson page.
+        juf.say(REPEAT_LINE);
+        body.append(
+          el('p', { class: 'break-repeat-line', text: REPEAT_LINE, attrs: { 'data-testid': 'repeat-line' } }),
+        );
+      } else if (state.try === 2) {
         // AC30: soft orange cross and retry message, no right answer shown, input cleared.
         const taken = state.lastApplied !== undefined && state.lastApplied < 0 ? -state.lastApplied : 0;
         playOnce(`q-${state.index}-retry`, 'hmm');
@@ -232,7 +254,8 @@ export function createBreakScreen(options: BreakScreenOptions): BreakScreen {
       playOnce(`q-${state.index}-feedback`, 'chime');
 
       // AC29 (+2 punten on first try) and AC145 ("Goed zo! +1 punt" on retry).
-      const feedbackText = rightBannerText(outcome, state.lastApplied);
+      const repeating = inRepeatPart(state);
+      const feedbackText = repeating ? REPEAT_RIGHT : rightBannerText(outcome, state.lastApplied);
       juf.say(feedbackText);
 
       const banner = el(
@@ -245,7 +268,7 @@ export function createBreakScreen(options: BreakScreenOptions): BreakScreen {
       );
 
       const cardChildren: Node[] = [banner];
-      if (entry?.item.type === 'find-error' && entry.item.correction) {
+      if (!repeating && entry?.item.type === 'find-error' && entry.item.correction) {
         cardChildren.push(
           el('p', {
             class: 'break-correction',
@@ -253,7 +276,7 @@ export function createBreakScreen(options: BreakScreenOptions): BreakScreen {
           }),
         );
       }
-      if (entry?.item.explain) {
+      if (!repeating && entry?.item.explain) {
         cardChildren.push(el('p', { class: 'break-explain', text: entry.item.explain }));
       }
 
@@ -287,11 +310,18 @@ export function createBreakScreen(options: BreakScreenOptions): BreakScreen {
       juf.say('Kijk even mee, zo zit het.');
 
       const qIndex = state.index;
+      // v25: a wrong repeat has no lesson page, no worked example and no minus (AC340).
+      const repeating = inRepeatPart(state);
+      const lastRepeat = repeating && state.repeat?.line.includes(state.index) === false;
       const teach = createTeachMoment({
         answer: formatRightAnswer(entry.item),
         explain: entry.item.explain,
-        teaching: buildTeaching(entry.item, entry.numeric, options.lessonForItem),
-        taken: state.lastApplied !== undefined && state.lastApplied < 0 ? -state.lastApplied : 0,
+        ...(repeating
+          ? { note: lastRepeat ? REPEAT_LAST : REPEAT_AGAIN, buttonLabel: 'Verder' }
+          : {
+              teaching: buildTeaching(entry.item, entry.numeric, options.lessonForItem),
+              taken: state.lastApplied !== undefined && state.lastApplied < 0 ? -state.lastApplied : 0,
+            }),
         onDone: () => options.onAction({ type: 'understood', q: qIndex }),
         now: options.now,
       });

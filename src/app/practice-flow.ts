@@ -3,6 +3,7 @@
 // or override the countdown timer to start a full learning break immediately.
 
 import '../styles/lesboek.css';
+import { registerHook } from '../dev/e2e-hooks';
 import type { Sound } from '../audio/sound';
 import { isGeneratedModule, subjectLabel, type Catalog } from '../content/catalog';
 import type { Item } from '../content/format';
@@ -23,6 +24,7 @@ import { createRng, type Rng } from '../core/rng';
 import {
   reduce,
   startSession,
+  withRepeatView,
   type SessionEffect,
   type SessionEntry,
   type SessionEvent,
@@ -213,6 +215,7 @@ export function createPracticeFlow(options: PracticeFlowOptions): PracticeFlow {
           level: item?.level ?? 'M6',
           itemId: ef.itemId,
           try: ef.try,
+          ...(ef.repeat ? { repeat: ef.repeat } : {}),
           correct: ef.correct,
           given: item ? formatGivenResponse(item, ef.response) : '',
           ms: ef.ms,
@@ -489,6 +492,10 @@ export function createPracticeFlow(options: PracticeFlowOptions): PracticeFlow {
     );
     const backdrop = el('div', { class: 'lesboek-backdrop pause-backdrop' }, [card]);
     options.screens.showKidOverlay(backdrop);
+  }
+
+  if (__E2E__) {
+    registerHook('practiceState', () => (activeState ? withRepeatView(activeState) : null));
   }
 
   return {

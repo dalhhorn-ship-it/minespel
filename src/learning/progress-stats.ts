@@ -108,7 +108,7 @@ export function pct(right: number, total: number): number | null {
 }
 
 const inRange = (day: string, from: string, to: string) => day >= from && day <= to;
-const firstTries = (answers: readonly AnswerRecord[]) => answers.filter((a) => a.try === 1);
+const firstTries = (answers: readonly AnswerRecord[]) => answers.filter((a) => a.try === 1 && !a.repeat);
 const topicKey = (a: Pick<AnswerRecord, 'moduleId' | 'topic'>) => `${a.moduleId}\u0000${a.topic}`;
 
 /** Learning time per day: whole breaks and exams, plus the answer time of Extra oefenen and the village. */
@@ -120,6 +120,7 @@ function learnMsPerDay(input: ProgressInput): Map<string, number> {
   for (const b of input.breaks) add(b.day, b.end - b.start);
   for (const e of input.exams) add(e.day, e.end - e.start);
   for (const a of input.answers) {
+    if (a.repeat) continue; // v25: a repeat row changes no number (AC347)
     if (a.context === 'practice' || a.context === 'dorp') add(a.day, Math.min(a.ms, 120_000));
   }
   return out;

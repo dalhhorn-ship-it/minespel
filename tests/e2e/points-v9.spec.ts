@@ -106,6 +106,14 @@ async function playQuestion(page: Page, how: How): Promise<string> {
 async function playRound(page: Page, plan: How[]): Promise<string[]> {
   const banners: string[] = [];
   for (const how of plan) banners.push(await playQuestion(page, how));
+  // v25 (amends AC173, AC176): a teach moment question comes back after the last question. Answer every repeat
+  // wrong until it leaves the line, so the round is what it was without repeats (a repeat costs and gives nothing).
+  for (let guard = 0; guard < 30; guard++) {
+    await page.locator('.break-summary, [data-testid="repeat-line"]').first().waitFor();
+    if ((await page.locator('.break-summary').count()) > 0) break;
+    await answerOnce(page, false);
+    await page.locator('.teach-done').tap();
+  }
   await page.locator('.break-summary').waitFor();
   return banners;
 }

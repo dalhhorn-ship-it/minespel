@@ -4,6 +4,17 @@ Written so kids can read it too.
 
 ## Unreleased
 
+## 0.16.0
+
+### Nog een keer
+
+* Did you get a question wrong twice? Then you see the answer, and at the end of the pauze it comes back so you can try it again.
+* The same happens in Extra oefenen. And when a villager asks you something and you get it wrong twice, the villager asks it once more.
+* You get one try each time. Right? You see a green check. Wrong? You see the answer again and it comes back a bit later. Every question comes back at most 3 times.
+* It costs no points. Not one. Not even on Moeilijk.
+* "Nog 2 te gaan" shows how many are left. On the summary you can read "En 1 alsnog goed!".
+* With a villager, "Laat maar" is always there, and a repeat never gives a block.
+* For papa or mama: exams stay as they were. There is no new setting. The repeat answers are saved on the iPad in the answer history and in the backup, and they change no numbers in Voortgang.
 ## 0.15.0
 
 ### Geluid dichtbij

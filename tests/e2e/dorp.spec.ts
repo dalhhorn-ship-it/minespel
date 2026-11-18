@@ -559,6 +559,13 @@ test.describe('the villager card', () => {
     await expect(page.locator('[data-testid="village-answer"]')).toContainText('56');
     await expect(page.locator('[data-testid="village-card"]')).not.toContainText(/[+−-]\s*\d+\s*punt/i);
     expect(await points(page)).toBe(10);
+    // v25 (AC349, amends AC184): Verder asks the question again, up to 3 repeats, then the card closes.
+    for (let n = 1; n <= 3; n++) {
+      await fingerTap(page, '[data-testid="village-verder"]');
+      await expect.poll(() => cardState(page).then((c) => c.phase)).toBe('question');
+      await answerWrong(page);
+      await expect.poll(() => cardState(page).then((c) => c.phase)).toBe('wrong');
+    }
     await fingerTap(page, '[data-testid="village-verder"]');
     await expect.poll(() => cardState(page).then((c) => c.open)).toBe(false);
     // A first try wrong puts the box at 1.
@@ -855,7 +862,8 @@ test.describe('safety', () => {
     await openCardAt(page, v.id);
     await answerWrong(page);
     await answerWrong(page);
-    await fingerTap(page, '[data-testid="village-verder"]');
+    await fingerTap(page, '[data-testid="village-verder"]'); // v25: the repeat comes, Laat maar closes it
+    await fingerTap(page, '[data-testid="village-laat-maar"]');
     await expect.poll(() => cardState(page).then((c) => c.open)).toBe(false);
     await readState(page, 'setVillageState', { cooldownMs: 0, lastVillager: null });
     await openCardAt(page, (await villagers(page))[4]!.id);

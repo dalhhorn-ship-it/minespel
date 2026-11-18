@@ -121,15 +121,15 @@ test.describe('the big world (V15e)', () => {
   });
 });
 
-test.describe('version 0.15.0 (AC242 became AC257 in v16, AC270 in v19, AC280 in v20, AC291 in v21, AC328 in v24)', () => {
-  test('AC257 AC270 AC280 AC291 AC328: package.json says 0.15.0 and Instellingen shows it at the bottom', async ({ page }) => {
-    expect(pkg.version).toBe('0.15.0');
+test.describe('version 0.16.0 (AC242 became AC257 in v16, AC270 in v19, AC280 in v20, AC291 in v21, AC328 in v24, AC352 in v25)', () => {
+  test('AC257 AC270 AC280 AC291 AC328 AC352: package.json says 0.16.0 and Instellingen shows it at the bottom', async ({ page }) => {
+    expect(pkg.version).toBe('0.16.0');
     await openApp(page);
     await readState(page, 'openParentControls');
     await page.locator('.parent-gate').waitFor();
     await setupPinFromGate(page);
     await page.locator('.parent-nav-btn[data-section="instellingen"]').tap();
-    await expect(page.locator('.parent-settings')).toContainText('Versie 0.15.0');
+    await expect(page.locator('.parent-settings')).toContainText('Versie 0.16.0');
   });
 });
 

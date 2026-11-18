@@ -14,13 +14,14 @@ Not signed. Changing this file never closes the PRD gate (decision 80). The sign
 8. **v15 Grote wereld (0.8.0), shipped** (decisions 124 and 131). Its section is archived in `docs/releases/v15-v16.md`; AC230 to AC243 are in `docs/PRD.md` section 7. Scoped on 2026-11-15 in `docs/PRD.md` section 12 (AC230 to AC243) and signed together with v17 and v18 on one signoff, at the founder's request ("ok kun je de mol en grote wereld ook bouwen"). Built after 0.7.0 and shipped on its own. The world goes from 64 x 64 to 128 x 128 and 80 high, and the kid can dig about 19 layers instead of 9. The kid's current world stays as the middle, with new land around it and deeper ground under it. Its terrain version also holds the stripe layer and the vein spots of v16 and v20 (architect A1). An automated draw budget runs in CI, the speed check on the founder's oldest iPad runs before shipping, and a fallback is written down. 4 tasks (V15a to V15d).
 9. **v16 Monstermol (0.9.0), shipped** (decisions 130 to 133). Its section is archived in `docs/releases/v15-v16.md`; AC244 to AC257 are in `docs/PRD.md` section 7. 4 tasks (V16a to V16d).
 10. **v19 Ridderuitrusting (0.10.0), v20 Diepe edelstenen (0.11.0) and v21 Meer uitrusting (0.12.0), shipped** (decisions 130 to 133). Their sections are archived in `docs/releases/v19-v21.md`; AC258 to AC291 are in `docs/PRD.md` section 7.
-10a. **v22 Duidelijke mol en kompas (0.13.0), v23 Lavakip-bar (0.14.0) and v24 Geluid dichtbij (0.15.0), next.** The founder asked on 2026-11-16 for a bubble countdown and an arrow, a Lavakip-bar, sounds that grow louder closer by, a clearer mole (a kid bug: "we hebben door het geel heen gegraven") and a mole that stays until a knight or a wall stops him. Scoped together in `docs/PRD.md` section 12 on one signoff (AC292 to AC328), built in this order and shipped one by one. 5, 3 and 3 tasks.
+10a. **v22 Duidelijke mol en kompas (0.13.0), v23 Lavakip-bar (0.14.0) and v24 Geluid dichtbij (0.15.0), shipped** (PR #29). The founder asked on 2026-11-16 for a bubble countdown and an arrow, a Lavakip-bar, sounds that grow louder closer by, a clearer mole (a kid bug: "we hebben door het geel heen gegraven") and a mole that stays until a wall catches him. Their sections are archived in `docs/releases/v22-v24.md`; AC292 to AC337 are in `docs/PRD.md` section 7.
+10b. **v25 Nog een keer (0.16.0), next** (decision 147). The founder asked on 2026-11-16: "Als een kind een vraag verkeerd beantwoord, herhaal deze vraag dan aan het einde max 3 keer tot het goed is". A question that ended in a teach moment comes back at the end of the round, at most 3 times, with no points, in breaks, Extra oefenen and the villager question, not in exams. Scoped in `docs/PRD.md` section 12 (AC338 to AC352). 3 tasks (V25a to V25c), fast lane.
 11. **v6 Wat heb ik geleerd**, with its own signoff (decisions 91, 115 and 119). It grows into a parent learning dashboard. Its slot in the new order is founder question MOQ15 (`docs/MONSTERS_PRD.md` 8.1). With v19, v20 and v21 scoped next, the options are now right after v16 (before v19), or after v21. v4 and v5 come after it.
 12. **Taal spelling check (T65)** runs beside the next release (decision 81). It is the human content check from AC124: QA reads 5 items per Taal topic against woordenlijst.org, and the founder or a teacher reads 20 items. It is mostly reading and needs no code.
 
 On hold: the save on refresh fix (decision 72).
 
-Versions follow shipping order: v10 shipped as 0.4.0 and v11 as 0.5.0; v3 is 0.6.0, then v17 and v18 together as 0.7.0 (decision 134), v15 as 0.8.0, v16 as 0.9.0, v19 as 0.10.0, v20 as 0.11.0, v21 as 0.12.0, then v22 as 0.13.0, v23 as 0.14.0 and v24 as 0.15.0. v9 and v10 got their ids because v7 and v8 are never reused.
+Versions follow shipping order: v10 shipped as 0.4.0 and v11 as 0.5.0; v3 is 0.6.0, then v17 and v18 together as 0.7.0 (decision 134), v15 as 0.8.0, v16 as 0.9.0, v19 as 0.10.0, v20 as 0.11.0, v21 as 0.12.0, then v22 as 0.13.0, v23 as 0.14.0 and v24 as 0.15.0, and v25 as 0.16.0. v9 and v10 got their ids because v7 and v8 are never reused.
 
 ## Rules
 
@@ -50,9 +51,10 @@ Versions follow shipping order: v10 shipped as 0.4.0 and v11 as 0.5.0; v3 is 0.6
 | | **v19 Ridderuitrusting** | 8 pieces of gear and a pony for my knights, 10 to 50 coins. They look great and win faster, but a fight always lasts a moment. | M | Medium to high. A coin sink inside the 60 coin ceiling. | 4 (V19a to V19d) | shipped (0.10.0), see `docs/releases/v19-v21.md` |
 | | **v20 Diepe edelstenen** | 8 new shiny stones deep below the stripes. I find one, save up (80 to 400 coins) and buy it, then build with it as much as I like. | S to M | Medium. A long coin goal that makes digging deep worth it. | 3 (V20a to V20c) | shipped (0.11.0), see `docs/releases/v19-v21.md` |
 | | **v21 Meer uitrusting** | 13 more pieces of gear: helmets, armour, boots, banners, a war horse and a riding triceratops. | M | Medium. More looks and goals for knight fans. | 4 (V21a to V21d) | shipped (0.12.0), see `docs/releases/v19-v21.md` |
-| 1 | **v22 Duidelijke mol en kompas** | The mole tells me when he comes and where, and stays until I wall him in. My knight chases him off for a bit and guards 4 animals. A small clock shows when the next black bubble comes and an arrow shows where the bubble, Klodder or the mole is. | M | High. A kid bug report and founder wishes. | 5 (V22a to V22e) | next, 0.13.0, scoped in `docs/PRD.md` section 12 (AC292 to AC309, AC329 to AC337) |
-| 2 | **v23 Lavakip-bar** | I buy a food truck for 60 coins, order a lavakip for 3 and give it to a dino, chicken or knight: it munches, dances and puffs a little flame. | S to M | Medium to high. A founder wish and a small happy coin sink. | 3 (V23a to V23c) | next, 0.14.0, scoped in `docs/PRD.md` section 12 (AC310 to AC321). The first slice of v13 |
-| 3 | **v24 Geluid dichtbij** | I hear the bubble, Klodder, the mole and my Lavakip-bar, louder as I come closer. | S | Medium. A founder wish; helps find things with the arrow. | 3 (V24a to V24c) | next, 0.15.0, scoped in `docs/PRD.md` section 12 (AC322 to AC328) |
+| | **v22 Duidelijke mol en kompas** | The mole tells me when he comes and where, and stays until I wall him in. My knight chases him off for a bit and guards 4 animals. A small clock shows when the next black bubble comes and an arrow shows where the bubble, Klodder or the mole is. | M | High. A kid bug report and founder wishes. | 5 (V22a to V22e) | shipped (0.13.0), see `docs/releases/v22-v24.md` |
+| | **v23 Lavakip-bar** | I buy a food truck for 60 coins, order a lavakip for 3 and give it to a dino, chicken or knight: it munches, dances and puffs a little flame. | S to M | Medium to high. A founder wish and a small happy coin sink. | 3 (V23a to V23c) | shipped (0.14.0), see `docs/releases/v22-v24.md`. The first slice of v13 |
+| | **v24 Geluid dichtbij** | I hear the bubble, Klodder, the mole and my Lavakip-bar, louder as I come closer. | S | Medium. A founder wish; helps find things with the arrow. | 3 (V24a to V24c) | shipped (0.15.0), see `docs/releases/v22-v24.md` |
+| 1 | **v25 Nog een keer** | A question I got wrong twice comes back at the end of the pauze, Extra oefenen or the villager card, up to 3 times, until I get it right. It costs no points. | S | High. A founder wish about learning, small and felt in every break. | 3 (V25a to V25c) | next, 0.16.0, scoped in `docs/PRD.md` section 12 (AC338 to AC352) |
 | 6 | **v6 Wat heb ik geleerd** | A parent learning dashboard: is my kid really learning? Right on the first try per topic over time, topics that got better or got stuck, the hardest questions, exam results, and learning time against play time. All worked out on the iPad, behind the gate. | M, may grow to L | High for the parent (decision 91). Through the parent, who can then switch on what is hard. | T21, T56, T61, plus dashboard tasks the architect cuts | later, after v16 at the earliest (decisions 91, 94, 119, 124 and 131); its slot is founder question MOQ15 (right after v16, or after v21) |
 | 7 | **v12 Dino-Hoed** | Hats, bows, capes and sunglasses for my dinos, from 5 to 60 coins. Each dino looks different. | S to M | High. A cheap, happy coin sink that keeps kids earning after they own every dino. | about 3, cut at `/release` | candidate, after v6 (founder pick 2026-11-06) |
 | 8 | **v13 Dino-Eten** | More food at the Lavakip-bar: each dino likes its own food, I drag it on and it skips with hearts. Sums on the price board. | S to M | Medium. A small coin sink with Rekenen. No dino can starve. | about 3, cut at `/release` | later, after v23, its first slice (founder pick 2026-11-06) |
@@ -62,7 +64,7 @@ Versions follow shipping order: v10 shipped as 0.4.0 and v11 as 0.5.0; v3 is 0.6
 | | **v7 Eigen woorden** | | | | T40, T54, T57, T59 | dropped (decision 79) |
 | | **v8 Modules delen** | | | | T53b, T20, T58, T60 | dropped (decision 79) |
 
-Open plan tasks: v15 to v21 are done. v22, v23 and v24 add 5 (V22a to V22e), 3 (V23a to V23c) and 3 (V24a to V24c); the architect puts them in `docs/PLAN.md`. Older count: 13 in v3 to v6, 4 of them in v3 (v6 may get more for the dashboard, decision 91), plus the new first start task in v4 (decision 60), plus T65 beside the next release. The 8 tasks of v7 and v8 are dropped; the architect marks them in `docs/PLAN.md`.
+Open plan tasks: v15 to v24 are done. v25 adds 3 (V25a to V25c); the architect puts them in `docs/PLAN.md`. Older count: 13 in v3 to v6, 4 of them in v3 (v6 may get more for the dashboard, decision 91), plus the new first start task in v4 (decision 60), plus T65 beside the next release. The 8 tasks of v7 and v8 are dropped; the architect marks them in `docs/PLAN.md`.
 
 ### v11 Dorp
 * **Status:** shipped as 0.5.0 on 2026-10-24 (decisions 94 and 95). The signed text is archived in `docs/releases/v11.md`; its criteria AC178 to AC191 are in `docs/PRD.md` section 7.
@@ -158,20 +160,27 @@ Open plan tasks: v15 to v21 are done. v22, v23 and v24 add 5 (V22a to V22e), 3 (
 * **Size:** M, 4 tasks (V21a to V21d).
 
 ### v22 Duidelijke mol en kompas
-* **Status:** next, ships as 0.13.0, first of the three (a kid bug report goes first). Scoped on 2026-11-16 in `docs/PRD.md` section 12, criteria AC292 to AC309 and AC329 to AC337. The PRD text wins.
+* **Status:** shipped as 0.13.0 (PR #29). The signed text is archived in `docs/releases/v22-v24.md`; its criteria AC292 to AC309 and AC329 to AC337 are in `docs/PRD.md` section 7.
 * **Goal:** the kid knows when the mole comes and where he is; he stays until a wall 2 high catches him; a knight chases him off for a while and guards 4 animals, but he sneaks back; a calm clock and an arrow for the black bubble, Klodder and the mole.
 * **In:** clear card and lines on time, a line for every way out, gevangen moles (at most 3 plus 1 free), chase off and come back, guard groups of 4 with shield marks, the knight mode Jaag monsters weg, moles saved and in the backup (format 6), the bubble pill with "Bubbel over 3:20" and the arrow.
 * **Size:** M, 5 tasks (V22a to V22e).
 
 ### v23 Lavakip-bar
-* **Status:** next, ships as 0.14.0 after v22. Scoped on 2026-11-16 in `docs/PRD.md` section 12, criteria AC310 to AC321. The first slice of v13 Dino-Eten.
+* **Status:** shipped as 0.14.0 (PR #29). The signed text is archived in `docs/releases/v22-v24.md`; its criteria AC310 to AC321 are in `docs/PRD.md` section 7. The first slice of v13 Dino-Eten.
 * **Goal:** a food truck bought once for 60, near home; order a lavakip for 3 (at most 10 carried) and feed it to a dino, chicken or knight for a munch, a dance, hearts and a flame puff. Only fun.
 * **Size:** S to M, 3 tasks (V23a to V23c).
 
 ### v24 Geluid dichtbij
-* **Status:** next, ships as 0.15.0 after v23. Scoped on 2026-11-16 in `docs/PRD.md` section 12, criteria AC322 to AC328.
+* **Status:** shipped as 0.15.0 (PR #29). The signed text is archived in `docs/releases/v22-v24.md`; its criteria AC322 to AC328 are in `docs/PRD.md` section 7.
 * **Goal:** the bubble, Klodder, the mole and the Lavakip-bar each have a soft silly sound that gets louder closer by, at most 2 at once, panned left or right like the v22 arrow.
 * **Size:** S, 3 tasks (V24a to V24c).
+
+### v25 Nog een keer
+* **Status:** next, ships as 0.16.0 (decision 147). Scoped on 2026-11-16 in `docs/PRD.md` section 12, criteria AC338 to AC352. The PRD text wins.
+* **Goal:** a question that ended in a teach moment comes back at the end of the round, one try each time, at most 3 times, until it is right. No points, on any Punten setting.
+* **In:** the repeat part in timed, Nu oefenen and Pauze nu starten breaks and in Extra oefenen, the same on the villager card (no block or dance for a right repeat, "Laat maar" always), kind lines, "Nog N te gaan", "En N alsnog goed!" on the summary, no box change, resume, parent end, repeat rows in the answer history.
+* **Out:** exams, the immediate retry, any new setting, any points change, showing repeats to the parent (v6 may add it).
+* **Size:** S, 3 tasks (V25a to V25c), fast lane.
 
 ### v12 Dino-Hoed
 * **Status:** candidate, after v6. From the game loop brainstorm, picked by the founder on 2026-11-06.
@@ -257,3 +266,8 @@ Not planned in any release. Each would need the founder to pick it first.
 * Renaming the app from inside the app (the kid may pick the final name later, see F12).
 * Custom domain for the hosted app.
 * Sync between devices, sharing modules online, any account or server.
+
+## Wishes of 2026-11-16 (not scoped yet)
+
+* **v26 Ridders, stop! (founder, kid wish).** Founder: "het kind vind het monster schattig en wil niet dat de ridders hem wegjagen. Geef me ridder controls waarmee ridders in een keer kunnen stoppen met wegjagen. Dit moet werken ook als een ridder al begonnen is." One control that makes every knight stop chasing at once, also in the middle of a chase. Scope after v25 is built, because a PRD edit closes the build gate. Open: which monsters it covers and whether it stays on.
+* **More monster kinds (founder).** Founder: "Kun je meer monstervarianten bedenken". Ideas given in chat on 2026-11-16. The founder and the kid pick; then it joins `docs/MONSTERS_PRD.md`.

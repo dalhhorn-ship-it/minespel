@@ -4,7 +4,7 @@
 import '../styles/mc-menu.css';
 import '../styles/village.css';
 import type { Response } from '../learning/answer-check';
-import type { VillageCardState } from '../learning/village-question';
+import { MAX_VILLAGE_REPEATS, type VillageCardState } from '../learning/village-question';
 import { blockColor } from '../render/effects';
 import type { VillagerLook } from '../villagers/villager';
 import { blockInfo } from '../world/blocks';
@@ -17,6 +17,10 @@ export const RESPECT_TEXT = 'Respect bruuuuu!';
 export const DANCE_TEXT = 'Kijk, een dansje!';
 export const WRONG_TWICE_HEAD = 'Zo zit het:';
 export const WRONG_TWICE_LINE = 'Volgende keer lukt het vast!';
+export const REPEAT_ASK = 'Nog een keer! Weet je het nu?';
+export const REPEAT_RIGHT = 'Goed zo! Nu weet je het.';
+export const REPEAT_AGAIN_NOTE = 'Kijk even mee, zo zit het.';
+export const REPEAT_LAST_NOTE = 'Goed geoefend! Deze komt een andere keer terug.';
 export const ALREADY_TEXT = 'Die had je al!';
 
 export type VillageCardAction =
@@ -102,8 +106,14 @@ export function createVillageCard(options: VillageCardOptions): VillageCard {
     root.dataset.phase = currentPhase;
     const entry = state.question.entry;
 
+    const repeating = state.repeat !== undefined;
+    face.classList.remove('village-face-wave');
+
     if (state.phase === 'question') {
-      if (state.try === 2) {
+      if (repeating) {
+        // v25 (AC349): the same question again, one try, input cleared.
+        say.textContent = REPEAT_ASK;
+      } else if (state.try === 2) {
         say.textContent = RETRY_TEXT;
         body.append(
           el('div', { class: 'village-banner village-banner-wrong', attrs: { role: 'status' } }, [
@@ -123,6 +133,23 @@ export function createVillageCard(options: VillageCardOptions): VillageCard {
       body.append(host.element);
       cleanups.push(() => host.destroy());
       footer.append(button('Laat maar', 'village-laat-maar', { type: 'laatMaar' }, false));
+      return;
+    }
+
+    if (state.phase === 'right' && repeating) {
+      // v25: the villager waves, no dance, no "Respect bruuuuu!", no block.
+      face.classList.remove('village-face-dance');
+      face.classList.add('village-face-wave');
+      say.textContent = REPEAT_RIGHT;
+      body.append(
+        el('div', { class: 'village-feedback' }, [
+          el('div', { class: 'village-banner village-banner-right', attrs: { role: 'status' } }, [
+            el('span', { text: '✓', attrs: { 'aria-hidden': 'true' } }, [], doc),
+            el('span', { text: REPEAT_RIGHT }, [], doc),
+          ], doc),
+        ], doc),
+      );
+      footer.append(button('Verder', 'village-verder', { type: 'verder' }));
       return;
     }
 
@@ -159,14 +186,22 @@ export function createVillageCard(options: VillageCardOptions): VillageCard {
     }
 
     if (state.phase === 'wrong') {
-      say.textContent = WRONG_TWICE_LINE;
+      const lastRepeat = repeating && (state.repeat ?? 0) >= MAX_VILLAGE_REPEATS;
+      say.textContent = lastRepeat ? REPEAT_LAST_NOTE : repeating ? REPEAT_AGAIN_NOTE : WRONG_TWICE_LINE;
       const kids: Node[] = [
+        ...(repeating
+          ? [el('div', { class: 'village-banner village-banner-wrong', attrs: { role: 'status' } }, [
+              el('span', { text: '✗', attrs: { 'aria-hidden': 'true' } }, [], doc),
+              el('span', { text: 'Net niet.' }, [], doc),
+            ], doc)]
+          : []),
         el('p', { class: 'village-zo', text: WRONG_TWICE_HEAD }, [], doc),
         el('p', { class: 'village-answer', text: formatRightAnswer(entry.item), attrs: { 'data-testid': 'village-answer' } }, [], doc),
       ];
       if (entry.item.explain) {
         kids.push(el('p', { class: 'village-explain', text: entry.item.explain, attrs: { 'data-testid': 'village-explain' } }, [], doc));
       }
+      if (lastRepeat) kids.push(el('p', { class: 'village-reward-text', text: REPEAT_LAST_NOTE }, [], doc));
       body.append(el('div', { class: 'village-feedback' }, kids, doc));
       footer.append(button('Verder', 'village-verder', { type: 'verder' }));
     }

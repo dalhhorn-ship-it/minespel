@@ -269,6 +269,7 @@ export function createVillageFlow(options: VillageFlowOptions): VillageFlow {
               level: item.level,
               itemId: item.id,
               try: ef.try,
+              ...(ef.repeat ? { repeat: ef.repeat } : {}),
               correct: ef.correct,
               given: formatGiven(item, ef.response),
               ms: Math.max(0, ef.ms),
@@ -375,7 +376,11 @@ export function createVillageFlow(options: VillageFlowOptions): VillageFlow {
       saveVillage();
     });
     registerHook('villageBubble', () => game.villageBubble.state());
-    registerHook('villageCard', () => ({ open: open !== null, phase: open ? open.card.phase() : null }));
+    registerHook('villageCard', () => ({
+      open: open !== null,
+      phase: open ? open.card.phase() : null,
+      repeat: open ? (open.state.repeat ?? 0) : 0,
+    }));
     registerHook('tickVillage', () => tick());
   }
 
