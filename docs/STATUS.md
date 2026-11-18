@@ -1,17 +1,17 @@
 # Status
 
 **Phase:** small releases. Live on `main`: 0.6.0 to 0.9.0 (PR #25, #26, #27): v3 Dino's veilig, v17 Ridders, v18 Zwarte bubbel, v15 Grote wereld and v16 Monstermol.
-**Live on `main`:** 0.6.0 to 0.15.0 (PR #25 to #29). The last one, PR #29 (merge 266836a), is 0.13.0 to 0.15.0 (v22 to v24, decisions 143 to 146).
-**Ready on branch `claude/jolly-fermi-z0vak4`, not yet on main:** 0.16.0 Nog een keer (v25, decision 147, AC338 to AC352). A question that ended in a teach moment comes back at the end of a break, an Extra oefenen round or a villager question, at most 3 times, no points. V25a to V25c are done. Full check in WebKit: 501 e2e passed, 4 failed; 2 were version tests still on 0.15.0 (fixed) and 2 were flakes (`lavakip-bar.spec.ts:213` AC314 and `mole-save.spec.ts:125` AC299, 3 of 3 green on a rerun). 1947 unit tests pass.
-**Next step:** the founder says if 0.16.0 goes live (a pull request to main deploys). Then scope v26 Ridders, stop! (one control that stops every knight chasing, see `docs/BACKLOG.md`; two founder questions open) and pick monster kinds.
+**Live on `main`:** 0.6.0 to 0.16.0 (PR #25 to #30). The last one, PR #30 (merge 83e32e2), is 0.16.0 Nog een keer (v25, decisions 147 and 148): a question that ended in a teach moment comes back at the end of a break, an Extra oefenen round or a villager question, at most 3 times, no points. CI was green in WebKit on 6e8ab13.
+**Branch `claude/jolly-fermi-z0vak4`:** equals main plus docs notes. No open pull request.
+**Next step:** the founder iPad check of v25 (PRD section 12, "Check before shipping"). Then scope v26 Ridders, stop! (one control that stops every knight chasing, also in a chase; two founder questions open: which monsters, and does it stay on) and pick monster kinds (`docs/BACKLOG.md`, wishes of 2026-11-16). `/retro` is due.
 **Product guesses in v25 the founder may change:** one try per repeat; no rare block for a right repeat in the village; the villager card says "Net niet." and "Kijk even mee, zo zit het." on a wrong repeat (developer wording, not in the PRD).
 **Founder iPad checks (v22 to v24):** the list is in the top section of `docs/TEST_REPORT.md`. In short: AC308 (v22, 2 minutes with 3 caught moles, 1 free mole, 3 knights, Klodder and 25 shop dinos), AC320 (v23, the bar and 5 feeds, the truck and lavakip look friendly), AC327 (v24, listen to the near sounds with the iPad sound on and turn left and right), and a hand-over test with the kid. The founder also still has to listen to the new sounds.
 **Older founder checks still open:** AC210, AC227, AC241, AC256, AC269, AC279 and AC290 (speed with knights, Klodder, the mole and full gear in the big world; Kijkafstand on Dichtbij is the reserve). See `docs/TEST_REPORT.md`.
 **Product guesses the founder may change:** a pen up to 6 x 6 counts as caught; a caught mole snores and walks free if the pen opens; at most 3 caught plus 1 free; "Jaag monsters weg" also chases Klodder; a knight guards 4 animals within 8 blocks; the bar costs 60 points, a lavakip 3, and at most 10 are carried; pill pictures are emoji.
-**After the merge:** PRD section 12 still holds v22 to v24. The next `/release` moves them to `docs/releases/`. Open: MOQ15 (where v6 Wat heb ik geleerd goes). Draft of the monster set: `docs/MONSTERS_PRD.md`. `/retro` is due (decision 136 and the friction lines).
-**Known flake:** `exam.spec.ts:254` AC112 is flake TD22.
+**After the merge:** PRD section 12 still holds v25 (shipped). The next `/release` moves it to `docs/releases/`. Open: MOQ15 (where v6 Wat heb ik geleerd goes). Draft of the monster set: `docs/MONSTERS_PRD.md`.
+**Known flakes:** `exam.spec.ts:254` AC112 (TD22). `lavakip-bar.spec.ts:213` AC314 and `mole-save.spec.ts:125` AC299 failed once in a local full run and pass alone; not looked into yet.
 **Rule change:** PRD changes for scope the founder asked for are stamped by the operator (standing approval, decision 136).
-**Blockers:** none. This cloud session cannot push to main directly, so main is updated through a pull request. A second session also works in this repo: fetch main before a decision number (next free: 147).
+**Blockers:** none. This cloud session cannot push to main directly, so main is updated through a pull request. A second session also works in this repo: fetch main before a decision number (next free: 149).
 
 
 ## Done
